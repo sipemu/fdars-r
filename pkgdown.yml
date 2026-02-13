@@ -1,0 +1,23 @@
+pandoc: 3.1.11
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  basis-representation: basis-representation.html
+  clustering: clustering.html
+  covariance-functions: covariance-functions.html
+  custom-plotting: custom-plotting.html
+  depth-functions: depth-functions.html
+  distance-metrics: distance-metrics.html
+  fpca: fpca.html
+  intro-to-smoothing: intro-to-smoothing.html
+  introduction: introduction.html
+  irregular-sampling: irregular-sampling.html
+  outlier-detection: outlier-detection.html
+  regression: regression.html
+  seasonal-analysis: seasonal-analysis.html
+  simulation-toolbox: simulation-toolbox.html
+  working-with-derivatives: working-with-derivatives.html
+last_built: 2026-02-13T10:34Z
+urls:
+  reference: https://sipemu.github.io/fdars-r/reference
+  article: https://sipemu.github.io/fdars-r/articles
