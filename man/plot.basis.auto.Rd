@@ -23,6 +23,9 @@
 
 \item{...}{Additional arguments passed to ggplot.}
 }
+\value{
+A \code{ggplot} object (invisibly).
+}
 \description{
 Plot method for basis.auto objects
 }

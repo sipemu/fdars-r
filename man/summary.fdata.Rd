@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (ignored).}
 }
+\value{
+Invisibly returns a summary list with descriptive statistics.
+}
 \description{
 Summary method for fdata objects
 }

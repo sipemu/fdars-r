@@ -697,6 +697,7 @@ scale_minmax.fdata <- function(fdataobj, min = 0, max = 1) {
 #' @param x An object of class 'fdata'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.fdata <- function(x, ...) {
   cat("Functional data object\n")
@@ -725,6 +726,7 @@ print.fdata <- function(x, ...) {
 #' @param object An object of class 'fdata'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns a summary list with descriptive statistics.
 #' @export
 summary.fdata <- function(object, ...) {
   cat("Functional data summary\n")
@@ -1244,6 +1246,7 @@ boxplot.fdata <- function(x, prob = 0.5, factor = 1.5,
 #' @param x An object of class 'fbplot'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.fbplot <- function(x, ...) {
   cat("Functional Boxplot\n")
@@ -1359,6 +1362,7 @@ register.fd <- function(fdataobj, target = NULL, max.shift = 0.2) {
 #' @param x An object of class 'register.fd'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.register.fd <- function(x, ...) {
   cat("Curve Registration\n")
@@ -1655,6 +1659,7 @@ deriv <- function(fdataobj, nderiv = 1, method = "diff",
 #' @param j Column indices (which time points to keep).
 #' @param drop Logical. If TRUE and only one curve selected, return vector.
 #'
+#' @return An \code{fdata} object containing the selected subset.
 #' @export
 `[.fdata` <- function(x, i, j, drop = FALSE) {
   # Check for 2D fdata - handle NULL or missing fdata2d (e.g., from fda.usc objects)
@@ -1940,6 +1945,7 @@ fdata.bootstrap.ci <- function(fdataobj, statistic, n.boot = 200,
 #' Print method for bootstrap CI
 #' @param x A fdata.bootstrap.ci object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.fdata.bootstrap.ci <- function(x, ...) {
   cat("Bootstrap Confidence Intervals\n")
@@ -2274,6 +2280,7 @@ plot.fdata2pc <- function(x, type = c("components", "variance", "scores"),
 #' @param x An object of class 'fdata2pc'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.fdata2pc <- function(x, ...) {
   cat("Functional Principal Component Analysis\n")
@@ -2414,7 +2421,7 @@ fdata2basis.fdata <- function(x, nbasis = 10, type = c("bspline", "fourier"), ..
 #'
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' t <- seq(0, 1, length.out = 50)
 #' X <- matrix(0, 20, 50)
 #' for (i in 1:20) X[i, ] <- sin(2*pi*t) + rnorm(50, sd = 0.1)
@@ -2636,6 +2643,7 @@ group.distance <- function(fdataobj, groups,
 #' @param x A group.distance object.
 #' @param digits Number of digits for printing (default 3).
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.group.distance <- function(x, digits = 3, ...) {
   cat("Group Distance Analysis\n")
@@ -2788,7 +2796,7 @@ plot.group.distance <- function(x, type = c("heatmap", "dendrogram"),
 #'
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' set.seed(42)
 #' n <- 30
 #' m <- 50
@@ -2887,6 +2895,7 @@ group.test <- function(fdataobj, groups, n.perm = 1000,
 #' Print method for group.test
 #' @param x A group.test object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.group.test <- function(x, ...) {
   cat("Permutation Test for Group Differences\n")

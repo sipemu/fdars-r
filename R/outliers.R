@@ -202,6 +202,7 @@ outliers.depth.trim <- function(fdataobj, trim = 0.1, dfunc = depth.mode, ...) {
 #' Print method for outliers.fdata objects
 #' @param x An outliers.fdata object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.outliers.fdata <- function(x, ...) {
   cat("Functional data outlier detection\n")
@@ -719,6 +720,7 @@ magnitudeshape <- function(fdataobj, depth.func = depth.MBD,
 #' @param x An object of class 'magnitudeshape'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.magnitudeshape <- function(x, ...) {
   cat("Magnitude-Shape Outlier Detection\n")
@@ -934,6 +936,7 @@ outliergram <- function(fdataobj, factor = 1.5, mei_threshold = 0.25, ...) {
 #' @param label_all Logical. If TRUE, label all points, not just outliers. Default FALSE.
 #' @param ... Additional arguments passed to plotting functions.
 #'
+#' @return A \code{ggplot} object (invisibly).
 #' @export
 plot.outliergram <- function(x, col_normal = "gray60", col_outlier = "red",
                               color_by_type = FALSE,
@@ -1062,6 +1065,7 @@ plot.outliergram <- function(x, col_normal = "gray60", col_outlier = "red",
 #' @param x An object of class 'outliergram'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.outliergram <- function(x, ...) {
   cat("Outliergram\n")

@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed to plot.fdata.}
 }
+\value{
+A \code{ggplot} object (invisibly).
+}
 \description{
 Plot method for pspline objects
 }

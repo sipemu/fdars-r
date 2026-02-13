@@ -42,6 +42,9 @@ magnitude_high, magnitude_low, mixed). Default is FALSE.}
 
 \item{...}{Additional arguments passed to plotting functions.}
 }
+\value{
+A \code{ggplot} object (invisibly).
+}
 \description{
 Creates a scatter plot of MEI vs MBD with the parabolic boundary and
 identified outliers highlighted.

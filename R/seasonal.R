@@ -210,6 +210,10 @@ estimate.period <- function(fdataobj, method = c("fft", "acf"),
   result
 }
 
+#' Print method for period_estimate objects
+#' @param x A period_estimate object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.period_estimate <- function(x, ...) {
   cat("Period Estimate\n")
@@ -304,6 +308,10 @@ cfd.autoperiod <- function(fdataobj, cluster_tolerance = 0.1,
   result
 }
 
+#' Print method for cfd_autoperiod_result objects
+#' @param x A cfd_autoperiod_result object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.cfd_autoperiod_result <- function(x, ...) {
   cat("CFDAutoperiod Detection\n")
@@ -428,6 +436,10 @@ autoperiod <- function(fdataobj, n_candidates = 5, gradient_steps = 10,
   result
 }
 
+#' Print method for autoperiod_result objects
+#' @param x An autoperiod_result object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.autoperiod_result <- function(x, ...) {
   cat("Autoperiod Detection\n")
@@ -536,6 +548,10 @@ sazed <- function(fdataobj, tolerance = 0.1,
   result
 }
 
+#' Print method for sazed_result objects
+#' @param x A sazed_result object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.sazed_result <- function(x, ...) {
   cat("SAZED Period Detection\n")
@@ -640,6 +656,10 @@ lomb.scargle <- function(fdataobj, oversampling = 4, nyquist_factor = 1) {
   result
 }
 
+#' Print method for lomb_scargle_result objects
+#' @param x A lomb_scargle_result object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.lomb_scargle_result <- function(x, ...) {
   cat("Lomb-Scargle Periodogram\n")
@@ -656,6 +676,10 @@ print.lomb_scargle_result <- function(x, ...) {
   invisible(x)
 }
 
+#' Plot method for lomb_scargle_result objects
+#' @param x A lomb_scargle_result object.
+#' @param ... Additional arguments passed to \code{plot}.
+#' @return Invisibly returns \code{NULL}.
 #' @export
 plot.lomb_scargle_result <- function(x, ...) {
   plot(x$frequencies, x$power, type = "l",
@@ -756,6 +780,10 @@ matrix.profile <- function(fdataobj, subsequence_length = NULL, exclusion_zone =
   result
 }
 
+#' Print method for matrix_profile_result objects
+#' @param x A matrix_profile_result object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.matrix_profile_result <- function(x, ...) {
   cat("Matrix Profile (STOMP)\n")
@@ -775,6 +803,11 @@ print.matrix_profile_result <- function(x, ...) {
   invisible(x)
 }
 
+#' Plot method for matrix_profile_result objects
+#' @param x A matrix_profile_result object.
+#' @param type Plot type: "profile", "arcs", or "both".
+#' @param ... Additional arguments passed to \code{plot}.
+#' @return Invisibly returns \code{NULL}.
 #' @export
 plot.matrix_profile_result <- function(x, type = c("profile", "arcs", "both"), ...) {
   type <- match.arg(type)
@@ -928,6 +961,10 @@ stl.fd <- function(fdataobj, period, s.window = NULL, t.window = NULL, robust = 
   out
 }
 
+#' Print method for stl_result objects
+#' @param x An stl_result object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.stl_result <- function(x, ...) {
   cat("STL Decomposition\n")
@@ -955,6 +992,11 @@ print.stl_result <- function(x, ...) {
   invisible(x)
 }
 
+#' Plot method for stl_result objects
+#' @param x An stl_result object.
+#' @param curves Indices of curves to plot.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns \code{NULL}.
 #' @export
 plot.stl_result <- function(x, curves = 1, ...) {
   n_curves <- min(length(curves), nrow(x$trend$data))
@@ -1102,6 +1144,10 @@ ssa.fd <- function(fdataobj, window.length = NULL, n.components = 10) {
   out
 }
 
+#' Print method for ssa_result objects
+#' @param x An ssa_result object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.ssa_result <- function(x, ...) {
   cat("Singular Spectrum Analysis (SSA)\n")
@@ -1138,6 +1184,12 @@ print.ssa_result <- function(x, ...) {
   invisible(x)
 }
 
+#' Plot method for ssa_result objects
+#' @param x An ssa_result object.
+#' @param type Plot type: "decomposition" or "spectrum".
+#' @param curves Indices of curves to plot.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns \code{NULL}.
 #' @export
 plot.ssa_result <- function(x, type = c("decomposition", "spectrum"), curves = 1, ...) {
   type <- match.arg(type)
@@ -1331,6 +1383,10 @@ detect.periods <- function(fdataobj, max_periods = 3,
   result
 }
 
+#' Print method for multiple_periods objects
+#' @param x A multiple_periods object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.multiple_periods <- function(x, ...) {
   cat("Multiple Period Detection\n")
@@ -1452,6 +1508,10 @@ detect.peaks <- function(fdataobj, min_distance = NULL, min_prominence = NULL,
   result
 }
 
+#' Print method for peak_detection objects
+#' @param x A peak_detection object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.peak_detection <- function(x, ...) {
   n_curves <- length(x$peaks)
@@ -1701,6 +1761,10 @@ detect.seasonality.changes <- function(fdataobj, period, threshold = 0.3,
   result
 }
 
+#' Print method for seasonality_changes objects
+#' @param x A seasonality_changes object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.seasonality_changes <- function(x, ...) {
   cat("Seasonality Change Detection\n")
@@ -1842,6 +1906,10 @@ analyze.peak.timing <- function(fdataobj, period, smooth_nbasis = NULL) {
   result
 }
 
+#' Print method for peak_timing objects
+#' @param x A peak_timing object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.peak_timing <- function(x, ...) {
   cat("Peak Timing Variability Analysis\n")
@@ -1929,6 +1997,10 @@ classify.seasonality <- function(fdataobj, period,
   result
 }
 
+#' Print method for seasonality_classification objects
+#' @param x A seasonality_classification object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.seasonality_classification <- function(x, ...) {
   cat("Seasonality Classification\n")
@@ -2052,6 +2124,10 @@ detect.seasonality.changes.auto <- function(fdataobj, period,
   result
 }
 
+#' Print method for seasonality_changes_auto objects
+#' @param x A seasonality_changes_auto object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.seasonality_changes_auto <- function(x, ...) {
   cat("Seasonality Change Detection (Auto Threshold)\n")
@@ -2275,6 +2351,10 @@ decompose <- function(fdataobj,
   )
 }
 
+#' Print method for decomposition objects
+#' @param x A decomposition object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.decomposition <- function(x, ...) {
   cat("Seasonal Decomposition\n")
@@ -2407,6 +2487,10 @@ detect_amplitude_modulation <- function(fdataobj, period,
   result
 }
 
+#' Print method for amplitude_modulation objects
+#' @param x An amplitude_modulation object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.amplitude_modulation <- function(x, ...) {
   cat("Amplitude Modulation Detection\n")
@@ -2420,6 +2504,10 @@ print.amplitude_modulation <- function(x, ...) {
   invisible(x)
 }
 
+#' Plot method for amplitude_modulation objects
+#' @param x An amplitude_modulation object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 plot.amplitude_modulation <- function(x, ...) {
   if (is.null(x$amplitude_curve)) {

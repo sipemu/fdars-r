@@ -4,6 +4,7 @@
 #' structure of Gaussian processes. These can be used with \code{make_gaussian_process}
 #' to generate synthetic functional data.
 #'
+#' @return No return value. This page documents the family of kernel functions.
 #' @name kernels
 NULL
 
@@ -570,6 +571,7 @@ kernel.periodic <- function(variance = 1, length_scale = 1, period = 1) {
 #' @param x A covariance function object.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.kernel <- function(x, ...) {
   kernel_type <- class(x)[1]

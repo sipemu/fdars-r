@@ -146,6 +146,10 @@ is.irregular <- function(x) {
 # Print and Summary Methods
 # =============================================================================
 
+#' Print method for irregFdata objects
+#' @param x An irregFdata object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.irregFdata <- function(x, ...) {
   cat("Irregular Functional Data Object\n")
@@ -167,6 +171,10 @@ print.irregFdata <- function(x, ...) {
   invisible(x)
 }
 
+#' Summary method for irregFdata objects
+#' @param object An irregFdata object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object.
 #' @export
 summary.irregFdata <- function(object, ...) {
   obs_lengths <- sapply(object$X, length)
@@ -193,6 +201,11 @@ summary.irregFdata <- function(object, ...) {
 # Subsetting
 # =============================================================================
 
+#' Subset method for irregFdata objects
+#' @param x An irregFdata object.
+#' @param i Indices of observations to select.
+#' @param ... Additional arguments (ignored).
+#' @return An \code{irregFdata} object containing the selected subset.
 #' @export
 `[.irregFdata` <- function(x, i, ...) {
   if (missing(i)) {
@@ -298,6 +311,7 @@ as.fdata <- function(x, ...) {
   UseMethod("as.fdata")
 }
 
+#' @rdname as.fdata.irregFdata
 #' @export
 as.fdata.fdata <- function(x, ...) {
   x
@@ -605,6 +619,18 @@ scale_minmax.irregFdata <- function(fdataobj, min = 0, max = 1) {
 # Plotting
 # =============================================================================
 
+#' Plot method for irregFdata objects
+#' @param x An irregFdata object.
+#' @param ... Additional arguments passed to \code{plot}.
+#' @param col Colors for curves.
+#' @param lty Line type.
+#' @param lwd Line width.
+#' @param main Plot title.
+#' @param xlab X-axis label.
+#' @param ylab Y-axis label.
+#' @param add Logical. If TRUE, add to existing plot.
+#' @param alpha Transparency for many curves.
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 plot.irregFdata <- function(x, ..., col = NULL, lty = 1, lwd = 1,
                              main = NULL, xlab = NULL, ylab = NULL,
@@ -643,6 +669,11 @@ plot.irregFdata <- function(x, ..., col = NULL, lty = 1, lwd = 1,
   invisible(x)
 }
 
+#' Autoplot method for irregFdata objects
+#' @param object An irregFdata object.
+#' @param ... Additional arguments (ignored).
+#' @param alpha Transparency for lines.
+#' @return A \code{ggplot} object.
 #' @export
 autoplot.irregFdata <- function(object, ..., alpha = 0.7) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {

@@ -11,9 +11,9 @@ Functional data analysis tools with a high-performance Rust backend. Provides me
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://sipemu.github.io/fdars/}
-  \item \url{https://github.com/sipemu/fdars}
-  \item Report bugs at \url{https://github.com/sipemu/fdars/issues}
+  \item \url{https://sipemu.github.io/fdars-r/}
+  \item \url{https://github.com/sipemu/fdars-r}
+  \item Report bugs at \url{https://github.com/sipemu/fdars-r/issues}
 }
 
 }

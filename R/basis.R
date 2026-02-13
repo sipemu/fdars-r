@@ -337,6 +337,7 @@ fdata2basis_cv <- function(fdataobj, nbasis.range = 4:20,
 #' Print method for basis.cv objects
 #' @param x A basis.cv object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.basis.cv <- function(x, ...) {
   cat("Basis Cross-Validation Results\n")
@@ -351,6 +352,7 @@ print.basis.cv <- function(x, ...) {
 #' Plot method for basis.cv objects
 #' @param x A basis.cv object.
 #' @param ... Additional arguments (ignored).
+#' @return A \code{ggplot} object (invisibly).
 #' @export
 plot.basis.cv <- function(x, ...) {
   df <- data.frame(
@@ -506,6 +508,7 @@ pspline <- function(fdataobj, nbasis = 20, lambda = 1, order = 2,
 #' Print method for pspline objects
 #' @param x A pspline object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.pspline <- function(x, ...) {
   cat("P-spline Smoothing Results\n")
@@ -522,6 +525,7 @@ print.pspline <- function(x, ...) {
 #' Plot method for pspline objects
 #' @param x A pspline object.
 #' @param ... Additional arguments passed to plot.fdata.
+#' @return A \code{ggplot} object (invisibly).
 #' @export
 plot.pspline <- function(x, ...) {
   plot(x$fdata, ...)
@@ -739,6 +743,7 @@ pspline.2d <- function(fdataobj, nbasis.s = 10, nbasis.t = 10,
 #' Print method for pspline.2d objects
 #' @param x A pspline.2d object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.pspline.2d <- function(x, ...) {
   cat("2D P-spline Smoothing Results\n")
@@ -756,6 +761,7 @@ print.pspline.2d <- function(x, ...) {
 #' Plot method for pspline.2d objects
 #' @param x A pspline.2d object.
 #' @param ... Additional arguments passed to plot.fdata.
+#' @return A \code{ggplot} object (invisibly).
 #' @export
 plot.pspline.2d <- function(x, ...) {
   plot(x$fdata, ...)
@@ -919,6 +925,7 @@ select.basis.auto <- function(fdataobj,
 #' Print method for basis.auto objects
 #' @param x A basis.auto object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.basis.auto <- function(x, ...) {
   n <- length(x$basis.type)
@@ -949,6 +956,7 @@ print.basis.auto <- function(x, ...) {
 #' Summary method for basis.auto objects
 #' @param object A basis.auto object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns a data frame with per-curve basis selection details.
 #' @export
 summary.basis.auto <- function(object, ...) {
   n <- length(object$basis.type)
@@ -1009,6 +1017,7 @@ summary.basis.auto <- function(object, ...) {
 #' @param show.original Logical. If TRUE (default), overlay original data.
 #' @param max.curves Maximum number of curves to plot (default 20).
 #' @param ... Additional arguments passed to ggplot.
+#' @return A \code{ggplot} object (invisibly).
 #' @export
 plot.basis.auto <- function(x, which = c("all", "fourier", "pspline"),
                             show.original = TRUE, max.curves = 20, ...) {

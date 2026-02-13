@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (ignored).}
 }
+\value{
+A \code{ggplot} object (invisibly).
+}
 \description{
 Plot method for basis.cv objects
 }

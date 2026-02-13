@@ -3,6 +3,9 @@
 \name{kernels}
 \alias{kernels}
 \title{Covariance Kernel Functions for Gaussian Processes}
+\value{
+No return value. This page documents the family of kernel functions.
+}
 \description{
 Parametric covariance functions (kernels) used to define the covariance
 structure of Gaussian processes. These can be used with \code{make_gaussian_process}

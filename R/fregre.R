@@ -370,6 +370,7 @@ fregre.np <- function(fdataobj, y, h = NULL, knn = NULL,
 #' Print method for fregre objects
 #' @param x A fregre.fd object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.fregre.fd <- function(x, ...) {
   cat("Functional regression model\n")
@@ -381,6 +382,7 @@ print.fregre.fd <- function(x, ...) {
 #' Print method for fregre.np objects
 #' @param x A fregre.np object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.fregre.np <- function(x, ...) {
   cat("Nonparametric functional regression model\n")
@@ -1190,6 +1192,7 @@ fregre.np.multi <- function(fdataobj.list, y, weights = NULL,
 #' Print method for fregre.np.multi
 #' @param x A fregre.np.multi object.
 #' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.fregre.np.multi <- function(x, ...) {
   cat("Nonparametric functional regression with multiple predictors\n")

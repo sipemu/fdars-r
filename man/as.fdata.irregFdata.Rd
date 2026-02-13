@@ -3,11 +3,14 @@
 \name{as.fdata.irregFdata}
 \alias{as.fdata.irregFdata}
 \alias{as.fdata}
+\alias{as.fdata.fdata}
 \title{Convert Irregular Functional Data to Regular Grid}
 \usage{
 \method{as.fdata}{irregFdata}(x, argvals = NULL, method = c("na", "linear", "nearest"), ...)
 
 as.fdata(x, ...)
+
+\method{as.fdata}{fdata}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{irregFdata}.}

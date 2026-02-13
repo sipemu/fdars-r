@@ -64,7 +64,7 @@ A small p-value (e.g., < 0.05) indicates evidence against H0, suggesting
 that the groups are significantly different.
 }
 \examples{
-\dontrun{
+\donttest{
 set.seed(42)
 n <- 30
 m <- 50

@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (ignored).}
 }
+\value{
+Invisibly returns a data frame with per-curve basis selection details.
+}
 \description{
 Summary method for basis.auto objects
 }

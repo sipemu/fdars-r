@@ -439,6 +439,7 @@ cluster.optim <- function(fdataobj, ncl.range = 2:10,
 #' @param x An object of class 'cluster.optim'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.cluster.optim <- function(x, ...) {
   cat("Optimal K-Means Clustering\n")
@@ -501,6 +502,7 @@ plot.cluster.optim <- function(x, ...) {
 #' @param x An object of class 'cluster.kmeans'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.cluster.kmeans <- function(x, ...) {
   cat("Functional K-Means Clustering\n")
@@ -687,6 +689,7 @@ cluster.fcm <- function(fdataobj, ncl, m = 2, max.iter = 100, tol = 1e-6, seed =
 #' @param x An object of class 'cluster.fcm'.
 #' @param ... Additional arguments (ignored).
 #'
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.cluster.fcm <- function(x, ...) {
   cat("Fuzzy C-Means Clustering\n")

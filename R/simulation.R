@@ -381,6 +381,10 @@ addError <- function(fdataobj, sd = 0.1, type = c("pointwise", "curve"),
 # Print/Summary Methods
 # =============================================================================
 
+#' Print method for multiFunData objects
+#' @param x A multiFunData object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
 #' @export
 print.multiFunData <- function(x, ...) {
   cat("Multivariate Functional Data Object\n")

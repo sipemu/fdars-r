@@ -15,6 +15,9 @@
 
 \item{drop}{Logical. If TRUE and only one curve selected, return vector.}
 }
+\value{
+An \code{fdata} object containing the selected subset.
+}
 \description{
 Subset method for fdata objects
 }
