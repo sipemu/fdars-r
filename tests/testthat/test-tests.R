@@ -107,3 +107,81 @@ test_that("flm.test validates input", {
   # Wrong length for y
   expect_error(flm.test(fd, 1:10))
 })
+
+# =============================================================================
+# Additional Hypothesis Testing Tests
+# =============================================================================
+
+test_that("flm.test p-value in [0, 1]", {
+  skip_if_not(exists("fregre.pc", mode = "function"))
+
+  set.seed(42)
+  t <- seq(0, 1, length.out = 30)
+  X <- matrix(0, 30, 30)
+  y <- numeric(30)
+  for (i in 1:30) {
+    coef <- rnorm(1)
+    X[i, ] <- coef * sin(2 * pi * t) + rnorm(30, sd = 0.1)
+    y[i] <- coef + rnorm(1, sd = 0.1)
+  }
+  fd <- fdata(X, argvals = t)
+
+  result <- flm.test(fd, y, B = 30)
+
+  expect_true(result$p.value >= 0)
+  expect_true(result$p.value <= 1)
+})
+
+test_that("flm.test boot.stats has length B", {
+  skip_if_not(exists("fregre.pc", mode = "function"))
+
+  set.seed(42)
+  t <- seq(0, 1, length.out = 30)
+  X <- matrix(rnorm(30 * 30), 30, 30)
+  y <- rnorm(30)
+  fd <- fdata(X, argvals = t)
+
+  B_val <- 25
+  result <- flm.test(fd, y, B = B_val)
+
+  expect_length(result$boot.stats, B_val)
+})
+
+test_that("flm.test statistic is finite", {
+  skip_if_not(exists("fregre.pc", mode = "function"))
+
+  set.seed(42)
+  t <- seq(0, 1, length.out = 30)
+  X <- matrix(rnorm(30 * 30), 30, 30)
+  y <- rnorm(30)
+  fd <- fdata(X, argvals = t)
+
+  result <- flm.test(fd, y, B = 30)
+
+  expect_true(is.finite(result$statistic))
+})
+
+test_that("fmean.test.fdata boot.stats has length B", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 30)
+  X <- matrix(rnorm(20 * 30), 20, 30)
+  fd <- fdata(X, argvals = t)
+
+  B_val <- 75
+  result <- fmean.test.fdata(fd, B = B_val)
+
+  expect_length(result$boot.stats, B_val)
+})
+
+test_that("fmean.test.fdata with custom mu0 matching data mean gives high p-value", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 30)
+  X <- matrix(rnorm(50 * 30, mean = 5, sd = 0.5), 50, 30)
+  fd <- fdata(X, argvals = t)
+
+  # Test against actual sample mean - should fail to reject
+  sample_mean <- colMeans(X)
+  result <- fmean.test.fdata(fd, mu0 = sample_mean, B = 100)
+
+  expect_true(result$p.value > 0.05)
+})

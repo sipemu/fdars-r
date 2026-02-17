@@ -394,3 +394,198 @@ test_that("optim.np finds reasonable bandwidth", {
   expect_true(result$h.opt > 0)
   expect_true(result$h.opt < 1)
 })
+
+# =============================================================================
+# Additional Smoothing Edge Cases
+# =============================================================================
+
+test_that("S.NW warns on custom kernel function", {
+  tt <- seq(0, 1, length.out = 20)
+  expect_warning(S.NW(tt, h = 0.1, Ker = function(u) dnorm(u)), "Custom kernel")
+})
+
+test_that("S.NW with explicit weights", {
+  tt <- seq(0, 1, length.out = 20)
+  w <- rep(1, 20)
+  w[1:5] <- 2  # higher weight for first 5 points
+  S <- S.NW(tt, h = 0.1, w = w)
+
+  expect_equal(dim(S), c(20, 20))
+  expect_true(all(S >= 0))
+})
+
+test_that("S.NW with different kernel types", {
+  tt <- seq(0, 1, length.out = 20)
+  for (ker in c("norm", "epa", "tri", "quar", "cos", "unif")) {
+    S <- S.NW(tt, h = 0.15, Ker = ker)
+    expect_equal(dim(S), c(20, 20))
+    row_sums <- rowSums(S)
+    expect_equal(row_sums, rep(1, 20), tolerance = 1e-8)
+  }
+})
+
+test_that("S.LPR with p=2 produces valid smoother", {
+  tt <- seq(0, 1, length.out = 20)
+  S <- S.LPR(tt, h = 0.2, p = 2)
+
+  expect_equal(dim(S), c(20, 20))
+  row_sums <- rowSums(S)
+  expect_equal(row_sums, rep(1, 20), tolerance = 1e-6)
+})
+
+test_that("S.KNN with varying knn values", {
+  tt <- seq(0, 1, length.out = 30)
+
+  S5 <- S.KNN(tt, knn = 5)
+  S15 <- S.KNN(tt, knn = 15)
+
+  expect_equal(dim(S5), c(30, 30))
+  expect_equal(dim(S15), c(30, 30))
+
+  # Larger knn should produce smoother matrix (more non-zero entries per row)
+  expect_true(sum(S15 > 1e-10) >= sum(S5 > 1e-10))
+})
+
+test_that("h.default works with fdata input", {
+  t <- seq(0, 1, length.out = 50)
+  X <- matrix(rnorm(50), 1, 50)
+  fd <- fdata(X, argvals = t)
+
+  h <- h.default(fd)
+  expect_true(h > 0)
+  expect_true(h < 1)
+})
+
+test_that("optim.np with criterion='CV'", {
+  set.seed(123)
+  t <- seq(0, 1, length.out = 50)
+  y <- sin(2 * pi * t) + rnorm(50, sd = 0.1)
+  fd <- fdata(matrix(y, nrow = 1), argvals = t)
+
+  result <- optim.np(fd, S.NW, criterion = "CV")
+  expect_true(result$h.opt > 0)
+  expect_equal(result$criterion, "CV")
+})
+
+test_that("optim.np validates input", {
+  expect_error(optim.np(matrix(1:10, 2, 5), S.NW), "fdata")
+})
+
+test_that("GCV.S returns Inf for degenerate case", {
+  # Very small h relative to grid spacing should make trace(S) ~ n
+  tt <- seq(0, 1, length.out = 10)
+  y <- rnorm(10)
+  gcv <- GCV.S(S.NW, tt, h = 1e-8, y = y)
+  expect_true(is.infinite(gcv) || gcv > 1e10)
+})
+
+# =============================================================================
+# Additional Kernel Edge Cases
+# =============================================================================
+
+test_that("Kernel.integrate matches individual IKer functions", {
+  u <- c(-1.5, -0.5, 0, 0.5, 1.5)
+
+  expect_equal(Kernel.integrate(u, "norm"), IKer.norm(u))
+  expect_equal(Kernel.integrate(u, "epa"), IKer.epa(u))
+  expect_equal(Kernel.integrate(u, "tri"), IKer.tri(u))
+  expect_equal(Kernel.integrate(u, "quar"), IKer.quar(u))
+  expect_equal(Kernel.integrate(u, "cos"), IKer.cos(u))
+  expect_equal(Kernel.integrate(u, "unif"), IKer.unif(u))
+})
+
+test_that("Kernel rejects invalid type", {
+  expect_error(Kernel(0, type.Ker = "invalid"))
+})
+
+test_that("Kernel.asymmetric rejects invalid type", {
+  expect_error(Kernel.asymmetric(0, type.Ker = "invalid"))
+})
+
+test_that("Kernel.integrate rejects invalid type", {
+  expect_error(Kernel.integrate(0, Ker = "invalid"))
+})
+
+test_that("Asymmetric kernels integrate to approximately 1 on [0,1]", {
+  u <- seq(0, 1, length.out = 1000)
+  du <- 1 / (length(u) - 1)
+
+  for (ker_fn in list(AKer.epa, AKer.tri, AKer.quar, AKer.cos, AKer.unif)) {
+    integral <- sum(ker_fn(u)) * du
+    expect_true(abs(integral - 1) < 0.05)
+  }
+})
+
+test_that("Symmetric kernels are symmetric: K(u) == K(-u)", {
+  u <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+
+  for (ker_fn in list(Ker.norm, Ker.epa, Ker.tri, Ker.quar, Ker.cos, Ker.unif)) {
+    expect_equal(ker_fn(u), ker_fn(-u))
+  }
+})
+
+# =============================================================================
+# Additional Utility Edge Cases
+# =============================================================================
+
+test_that("inprod.fdata self inner product with NULL fdata2", {
+  t <- seq(0, 2 * pi, length.out = 100)
+  X <- matrix(sin(t), nrow = 1)
+  fd1 <- fdata(X, argvals = t)
+
+  ip <- inprod.fdata(fd1, NULL)
+  expect_equal(dim(ip), c(1, 1))
+  expect_equal(ip[1, 1], pi, tolerance = 0.1)
+})
+
+test_that("inprod.fdata errors on non-fdata", {
+  expect_error(inprod.fdata(matrix(1:10, 2, 5)), "fdata")
+})
+
+test_that("inprod.fdata errors on incompatible argvals", {
+  fd1 <- fdata(matrix(1:10, 1, 10), argvals = 1:10)
+  fd2 <- fdata(matrix(1:5, 1, 5), argvals = 1:5)
+  expect_error(inprod.fdata(fd1, fd2), "same number")
+})
+
+test_that("int.simpson errors on 2D fdata", {
+  X <- array(rnorm(2 * 3 * 4), dim = c(2, 3, 4))
+  fd2d <- fdata(X, argvals = list(1:3, 1:4), fdata2d = TRUE)
+  expect_error(int.simpson(fd2d), "2D")
+})
+
+test_that("r.ou is reproducible with seed", {
+  t <- seq(0, 1, length.out = 50)
+  fd1 <- r.ou(n = 5, t = t, seed = 42)
+  fd2 <- r.ou(n = 5, t = t, seed = 42)
+  expect_equal(fd1$data, fd2$data)
+})
+
+test_that("r.ou with custom parameters", {
+  t <- seq(0, 1, length.out = 50)
+  fd <- r.ou(n = 10, t = t, mu = 5, theta = 3, sigma = 0.5, x0 = 1, seed = 42)
+
+  expect_s3_class(fd, "fdata")
+  expect_equal(fd$data[, 1], rep(1, 10))  # starts at x0
+})
+
+test_that("r.brownian starts at custom x0", {
+  t <- seq(0, 1, length.out = 50)
+  fd <- r.brownian(n = 5, t = t, x0 = 3, seed = 42)
+
+  expect_equal(fd$data[, 1], rep(3, 5))
+})
+
+test_that("r.bridge is reproducible with seed", {
+  t <- seq(0, 1, length.out = 50)
+  fd1 <- r.bridge(n = 5, t = t, seed = 42)
+  fd2 <- r.bridge(n = 5, t = t, seed = 42)
+  expect_equal(fd1$data, fd2$data)
+})
+
+test_that("pred.RMSE equals sqrt(pred.MSE)", {
+  y_true <- c(1, 2, 3, 4, 5)
+  y_pred <- c(1.1, 2.3, 2.8, 4.2, 5.1)
+
+  expect_equal(pred.RMSE(y_true, y_pred), sqrt(pred.MSE(y_true, y_pred)))
+})

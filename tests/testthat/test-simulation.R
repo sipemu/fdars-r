@@ -151,3 +151,108 @@ test_that("addError curve noise is constant per curve", {
     expect_true(sd(row_noise) < 0.01)  # Should be near-constant
   }
 })
+
+# =============================================================================
+# Additional Simulation Tests
+# =============================================================================
+
+test_that("simMultiFunData produces valid structure", {
+  t1 <- seq(0, 1, length.out = 50)
+  t2 <- seq(0, 0.5, length.out = 30)
+
+  mfd <- simMultiFunData(n = 10, argvals = list(t1, t2), M = 3, seed = 42)
+
+  expect_s3_class(mfd, "multiFunData")
+  expect_equal(mfd$n, 10)
+  expect_equal(mfd$p, 2)
+  expect_equal(ncol(mfd$components[[1]]$data), 50)
+  expect_equal(ncol(mfd$components[[2]]$data), 30)
+})
+
+test_that("simMultiFunData with scalar M expands to all components", {
+  t1 <- seq(0, 1, length.out = 50)
+  t2 <- seq(0, 0.5, length.out = 30)
+
+  mfd <- simMultiFunData(n = 5, argvals = list(t1, t2), M = 4, seed = 42)
+
+  expect_equal(mfd$p, 2)
+  expect_equal(nrow(mfd$components[[1]]$data), 5)
+  expect_equal(nrow(mfd$components[[2]]$data), 5)
+})
+
+test_that("simMultiFunData print method works", {
+  t1 <- seq(0, 1, length.out = 50)
+  t2 <- seq(0, 0.5, length.out = 30)
+
+  mfd <- simMultiFunData(n = 5, argvals = list(t1, t2), M = 3, seed = 42)
+  expect_output(print(mfd), "Multivariate Functional Data")
+})
+
+test_that("eFun with PolyHigh type", {
+  t <- seq(0, 1, length.out = 100)
+  phi <- eFun(t, M = 3, type = "PolyHigh")
+
+  expect_equal(dim(phi), c(100, 3))
+  # Should be finite
+  expect_true(all(is.finite(phi)))
+})
+
+test_that("eFun with M=1 (single eigenfunction)", {
+  t <- seq(0, 1, length.out = 100)
+  phi <- eFun(t, M = 1, type = "Fourier")
+
+  expect_equal(dim(phi), c(100, 1))
+})
+
+test_that("eVal wiener values match theoretical formula", {
+  lambda <- eVal(5, "wiener")
+
+  for (k in 1:5) {
+    expected <- 1 / ((k - 0.5) * pi)^2
+    expect_equal(lambda[k], expected, tolerance = 1e-10)
+  }
+})
+
+test_that("addError is reproducible with seed", {
+  t <- seq(0, 1, length.out = 50)
+  fd <- simFunData(n = 5, argvals = t, M = 3, seed = 42)
+
+  fd_noisy1 <- addError(fd, sd = 0.1, seed = 123)
+  fd_noisy2 <- addError(fd, sd = 0.1, seed = 123)
+
+  expect_equal(fd_noisy1$data, fd_noisy2$data)
+})
+
+test_that("simFunData with numeric mean vector", {
+  t <- seq(0, 1, length.out = 50)
+  mean_vec <- rep(10, 50)
+
+  fd <- simFunData(n = 20, argvals = t, M = 3, mean = mean_vec, seed = 42)
+
+  # Empirical mean should be close to 10
+  emp_mean <- colMeans(fd$data)
+  expect_true(mean(abs(emp_mean - 10)) < 1)
+})
+
+test_that("simFunData with different eFun/eVal combinations", {
+  t <- seq(0, 1, length.out = 50)
+
+  for (ef in c("Fourier", "Poly", "PolyHigh", "Wiener")) {
+    for (ev in c("linear", "exponential", "wiener")) {
+      fd <- simFunData(n = 5, argvals = t, M = 3,
+                       eFun.type = ef, eVal.type = ev, seed = 42)
+      expect_s3_class(fd, "fdata")
+      expect_equal(nrow(fd$data), 5)
+    }
+  }
+})
+
+test_that("simFunData mean length mismatch errors", {
+  t <- seq(0, 1, length.out = 50)
+  expect_error(simFunData(n = 5, argvals = t, M = 3, mean = rep(0, 10)),
+               "same length")
+})
+
+test_that("addError validates input", {
+  expect_error(addError(matrix(1:10, 2, 5)), "fdata")
+})

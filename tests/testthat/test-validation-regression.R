@@ -539,3 +539,125 @@ test_that("fregre.np.multi rejects wrong y length", {
 
   expect_error(fdars::fregre.np.multi(list(fd1, fd2), y), "Length of y")
 })
+
+# =============================================================================
+# Print Method Tests
+# =============================================================================
+
+test_that("print.fregre.fd produces output", {
+  set.seed(42)
+  n <- 30
+  m <- 20
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(rnorm(n * m), n, m)
+  y <- rnorm(n)
+  fd <- fdars::fdata(X, argvals = t_grid)
+
+  fit <- fdars::fregre.pc(fd, y, ncomp = 3)
+  expect_output(print(fit), "Functional regression")
+  expect_output(print(fit), "R-squared")
+})
+
+test_that("print.fregre.np produces output", {
+  set.seed(42)
+  n <- 30
+  m <- 20
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(rnorm(n * m), n, m)
+  y <- rnorm(n)
+  fd <- fdars::fdata(X, argvals = t_grid)
+
+  fit <- fdars::fregre.np(fd, y)
+  expect_output(print(fit), "Nonparametric")
+  expect_output(print(fit), "R-squared")
+})
+
+# =============================================================================
+# Edge Cases
+# =============================================================================
+
+test_that("fregre.pc with ncomp=NULL auto-selects components", {
+  set.seed(42)
+  n <- 50
+  m <- 30
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(0, n, m)
+  for (i in 1:n) {
+    X[i, ] <- sin(2 * pi * t_grid) * i/n + rnorm(m, sd = 0.1)
+  }
+  y <- rowMeans(X) + rnorm(n, sd = 0.1)
+
+  fd <- fdars::fdata(X, argvals = t_grid)
+  model <- fdars::fregre.pc(fd, y)  # ncomp = NULL
+
+  expect_s3_class(model, "fregre.fd")
+  expect_true(model$ncomp >= 1)
+  expect_length(model$fitted.values, n)
+})
+
+test_that("fregre.basis with lambda > 0 vs lambda = 0", {
+  set.seed(42)
+  n <- 50
+  m <- 20
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(rnorm(n * m), n, m)
+  y <- rnorm(n)
+  fd <- fdars::fdata(X, argvals = t_grid)
+
+  fit_no_reg <- fdars::fregre.basis(fd, y, lambda = 0)
+  fit_reg <- fdars::fregre.basis(fd, y, lambda = 10)
+
+  # Regularization should shrink coefficients
+  expect_true(sum(fit_reg$coefficients^2) < sum(fit_no_reg$coefficients^2))
+})
+
+test_that("fregre.basis with mismatched y length errors", {
+  n <- 30
+  m <- 20
+  X <- matrix(rnorm(n * m), n, m)
+  fd <- fdars::fdata(X)
+
+  expect_error(fdars::fregre.basis(fd, rnorm(n + 5)), "Length of y")
+})
+
+test_that("fregre.pc with mismatched y length errors", {
+  n <- 30
+  m <- 20
+  X <- matrix(rnorm(n * m), n, m)
+  fd <- fdars::fdata(X)
+
+  expect_error(fdars::fregre.pc(fd, rnorm(n + 5)), "Length of y")
+})
+
+test_that("print.fregre.np shows bandwidth for NW model", {
+  set.seed(42)
+  n <- 30
+  m <- 20
+  X <- matrix(rnorm(n * m), n, m)
+  y <- rnorm(n)
+  fd <- fdars::fdata(X)
+
+  fit <- fdars::fregre.np(fd, y, h = 0.5)
+  expect_output(print(fit), "Bandwidth")
+})
+
+test_that("print.fregre.np shows k info for kNN models", {
+  set.seed(42)
+  n <- 30
+  m <- 20
+  X <- matrix(rnorm(n * m), n, m)
+  y <- rnorm(n)
+  fd <- fdars::fdata(X)
+
+  # Global CV - single k
+  fit_gcv <- fdars::fregre.np(fd, y, type.S = "kNN.gCV", knn = 15)
+  expect_output(print(fit_gcv), "Optimal k")
+
+  # Local CV - local k (should print min/max/median)
+  fit_lcv <- fdars::fregre.np(fd, y, type.S = "kNN.lCV", knn = 15)
+  expect_output(print(fit_lcv), "local")
+})
