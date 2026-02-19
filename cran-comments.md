@@ -2,7 +2,7 @@
 
 ## R CMD check results
 
-0 errors | 1 warning | 5 notes
+0 errors | 1 warning | 4 notes
 
 ### WARNING
 
@@ -14,21 +14,12 @@
 
 1. **New submission**
    - This is a new submission to CRAN.
-   - Package size (~40MB) is due to vendored Rust crate sources.
+   - Package size is due to vendored Rust crate sources.
 
-2. **Hidden files in vendor directory**
-   - Only `.cargo-checksum.json` files remain. These are **required** by Cargo
-     for vendored builds - without them, the offline build fails with checksum
-     verification errors.
-   - This follows CRAN's Rust vendoring recommendations at
-     https://cran.r-project.org/web/packages/using_rust.html
-   - Other accepted CRAN packages with Rust (gifski, string2path) have the
-     same `.cargo-checksum.json` files.
-
-3. **Non-portable compilation flags**
+2. **Non-portable compilation flags**
    - These flags come from the system R configuration, not from the package.
 
-4. **Compiled code contains exit/abort**
+3. **Compiled code contains exit/abort**
    - These symbols come from the Rust standard library's panic handling
      infrastructure and are present in all Rust-based packages on CRAN.
    - They are unreachable in normal operation:
@@ -37,19 +28,17 @@
      - The extendr framework converts Rust panics to R errors safely
    - This is standard for Rust packages and does not affect package safety.
 
-5. **HTML tidy not available**
+4. **HTML tidy not available**
    - System tool availability issue, not a package issue.
 
 ## Changes Since Last Submission
 
-- Updated extendr-api from 0.7 to 0.8.1
-  - **Fixes non-API R calls** (BODY, CLOENV, DATAPTR, ENCLOS, FORMALS)
-  - Uses new extendr-ffi crate instead of libR-sys
-- **Removed all test/bench directories from vendored crates**
-  - Fixes non-portable file path issues (paths >100 bytes)
-  - Reduces package size from 46MB to 40MB
-- Removed all non-essential hidden files (.github, .vim, etc.)
-- Updated vendored dependencies to use versioned directory names
+- Upgraded fdars-core (Rust backend) from v0.3.1 to v0.4.0
+  - New `FdMatrix` type for safer matrix handling (internal API change)
+  - New streaming depth module (internal)
+- Removed test/bench/example directories from vendored crates
+- Removed all hidden files from vendored crates (`.cargo_vcs_info.json`, etc.)
+  - Cargo checksum files renamed to avoid hidden file NOTE; restored by configure script
 
 ## Package Description
 
