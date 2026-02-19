@@ -42,5 +42,13 @@ if [ "$RUST_MAJOR" -lt 1 ] || ([ "$RUST_MAJOR" -eq 1 ] && [ "$RUST_MINOR" -lt 81
     exit 1
 fi
 
+# Restore .cargo-checksum.json files for vendored builds
+# These are shipped without the dot prefix to avoid R CMD check hidden files NOTE
+for f in src/rust/vendor/*/cargo-checksum.json; do
+    if [ -f "$f" ]; then
+        mv "$f" "$(dirname "$f")/.cargo-checksum.json"
+    fi
+done
+
 echo "Rust toolchain OK"
 exit 0

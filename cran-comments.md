@@ -31,6 +31,15 @@
 4. **HTML tidy not available**
    - System tool availability issue, not a package issue.
 
+## Resubmission
+
+Fixes from v0.3.0 submission feedback:
+
+- Fixed Windows installation failure: added configure.win/cleanup.win to
+  restore cargo checksum files (renamed to avoid hidden files NOTE)
+- Wrapped slow bootstrap examples (`outliers.depth.pond`) in `\donttest{}`
+- Deployed pkgdown site (fixes 404 URL NOTE)
+
 ## Changes Since Last Submission
 
 - Upgraded fdars-core (Rust backend) from v0.3.1 to v0.4.0
