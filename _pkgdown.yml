@@ -267,7 +267,13 @@ reference:
   - is.irregular
   - sparsify
   - as.fdata
+  - as.fdata.irregFdata
   - mean.irregFdata
+  - summary.irregFdata
+  - print.irregFdata
+  - autoplot.irregFdata
+  - plot.irregFdata
+  - "`[.irregFdata`"
 
 - title: Random Processes
   contents:
@@ -298,6 +304,11 @@ reference:
   - plot.pspline.2d
   - plot.register.fd
   - plot.magnitudeshape
+  - plot.amplitude_modulation
+  - plot.lomb_scargle_result
+  - plot.matrix_profile_result
+  - plot.ssa_result
+  - plot.stl_result
 
 - title: Prediction
   contents:
@@ -330,6 +341,23 @@ reference:
   - print.register.fd
   - summary.basis.auto
   - summary.fdata
+  - print.amplitude_modulation
+  - print.autoperiod_result
+  - print.cfd_autoperiod_result
+  - print.decomposition
+  - print.lomb_scargle_result
+  - print.matrix_profile_result
+  - print.multiFunData
+  - print.multiple_periods
+  - print.peak_detection
+  - print.peak_timing
+  - print.period_estimate
+  - print.sazed_result
+  - print.seasonality_changes
+  - print.seasonality_changes_auto
+  - print.seasonality_classification
+  - print.ssa_result
+  - print.stl_result
 
 - title: Other
   contents:
