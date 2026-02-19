@@ -26,3 +26,7 @@ x[i, j, drop = FALSE]
 - drop:
 
   Logical. If TRUE and only one curve selected, return vector.
+
+## Value
+
+An `fdata` object containing the selected subset.

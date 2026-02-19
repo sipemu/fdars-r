@@ -30,11 +30,11 @@ An object of class 'fd' from the fda package.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 t <- seq(0, 1, length.out = 50)
 X <- matrix(0, 20, 50)
 for (i in 1:20) X[i, ] <- sin(2*pi*t) + rnorm(50, sd = 0.1)
 fd <- fdata(X, argvals = t)
 fd_obj <- fdata2fd(fd, nbasis = 10)
-} # }
+# }
 ```

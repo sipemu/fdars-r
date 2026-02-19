@@ -90,7 +90,7 @@ suggesting that the groups are significantly different.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 set.seed(42)
 n <- 30
 m <- 50
@@ -104,5 +104,11 @@ groups <- factor(rep(c("A", "B"), each = 15))
 # Test for significant difference
 gt <- group.test(fd, groups, n.perm = 500)
 print(gt)
-} # }
+#> Permutation Test for Group Differences
+#> ======================================
+#> Test statistic type: centroid 
+#> Observed statistic: 1.0025 
+#> Number of permutations: 500 
+#> P-value: <2e-16 ***
+# }
 ```

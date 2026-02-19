@@ -10,6 +10,9 @@ interpolating or placing `NA` at unobserved points.
 as.fdata(x, argvals = NULL, method = c("na", "linear", "nearest"), ...)
 
 as.fdata(x, ...)
+
+# S3 method for class 'fdata'
+as.fdata(x, ...)
 ```
 
 ## Arguments

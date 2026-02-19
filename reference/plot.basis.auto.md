@@ -36,3 +36,7 @@ plot(
 - ...:
 
   Additional arguments passed to ggplot.
+
+## Value
+
+A `ggplot` object (invisibly).

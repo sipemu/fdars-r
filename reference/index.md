@@ -345,6 +345,16 @@
   : Convert Irregular Functional Data to Regular Grid
 - [`mean(`*`<irregFdata>`*`)`](https://sipemu.github.io/fdars-r/reference/mean.irregFdata.md)
   : Estimate Mean Function for Irregular Data
+- [`summary(`*`<irregFdata>`*`)`](https://sipemu.github.io/fdars-r/reference/summary.irregFdata.md)
+  : Summary method for irregFdata objects
+- [`print(`*`<irregFdata>`*`)`](https://sipemu.github.io/fdars-r/reference/print.irregFdata.md)
+  : Print method for irregFdata objects
+- [`autoplot(`*`<irregFdata>`*`)`](https://sipemu.github.io/fdars-r/reference/autoplot.irregFdata.md)
+  : Autoplot method for irregFdata objects
+- [`plot(`*`<irregFdata>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.irregFdata.md)
+  : Plot method for irregFdata objects
+- [`` `[`( ``*`<irregFdata>`*`)`](https://sipemu.github.io/fdars-r/reference/sub-.irregFdata.md)
+  : Subset method for irregFdata objects
 
 ## Random Processes
 
@@ -396,6 +406,16 @@
   : Plot Method for register.fd Objects
 - [`plot(`*`<magnitudeshape>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.magnitudeshape.md)
   : Plot Method for magnitudeshape Objects
+- [`plot(`*`<amplitude_modulation>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.amplitude_modulation.md)
+  : Plot method for amplitude_modulation objects
+- [`plot(`*`<lomb_scargle_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.lomb_scargle_result.md)
+  : Plot method for lomb_scargle_result objects
+- [`plot(`*`<matrix_profile_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.matrix_profile_result.md)
+  : Plot method for matrix_profile_result objects
+- [`plot(`*`<ssa_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.ssa_result.md)
+  : Plot method for ssa_result objects
+- [`plot(`*`<stl_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.stl_result.md)
+  : Plot method for stl_result objects
 
 ## Prediction
 
@@ -454,6 +474,40 @@
   : Summary method for basis.auto objects
 - [`summary(`*`<fdata>`*`)`](https://sipemu.github.io/fdars-r/reference/summary.fdata.md)
   : Summary method for fdata objects
+- [`print(`*`<amplitude_modulation>`*`)`](https://sipemu.github.io/fdars-r/reference/print.amplitude_modulation.md)
+  : Print method for amplitude_modulation objects
+- [`print(`*`<autoperiod_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.autoperiod_result.md)
+  : Print method for autoperiod_result objects
+- [`print(`*`<cfd_autoperiod_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.cfd_autoperiod_result.md)
+  : Print method for cfd_autoperiod_result objects
+- [`print(`*`<decomposition>`*`)`](https://sipemu.github.io/fdars-r/reference/print.decomposition.md)
+  : Print method for decomposition objects
+- [`print(`*`<lomb_scargle_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.lomb_scargle_result.md)
+  : Print method for lomb_scargle_result objects
+- [`print(`*`<matrix_profile_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.matrix_profile_result.md)
+  : Print method for matrix_profile_result objects
+- [`print(`*`<multiFunData>`*`)`](https://sipemu.github.io/fdars-r/reference/print.multiFunData.md)
+  : Print method for multiFunData objects
+- [`print(`*`<multiple_periods>`*`)`](https://sipemu.github.io/fdars-r/reference/print.multiple_periods.md)
+  : Print method for multiple_periods objects
+- [`print(`*`<peak_detection>`*`)`](https://sipemu.github.io/fdars-r/reference/print.peak_detection.md)
+  : Print method for peak_detection objects
+- [`print(`*`<peak_timing>`*`)`](https://sipemu.github.io/fdars-r/reference/print.peak_timing.md)
+  : Print method for peak_timing objects
+- [`print(`*`<period_estimate>`*`)`](https://sipemu.github.io/fdars-r/reference/print.period_estimate.md)
+  : Print method for period_estimate objects
+- [`print(`*`<sazed_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.sazed_result.md)
+  : Print method for sazed_result objects
+- [`print(`*`<seasonality_changes>`*`)`](https://sipemu.github.io/fdars-r/reference/print.seasonality_changes.md)
+  : Print method for seasonality_changes objects
+- [`print(`*`<seasonality_changes_auto>`*`)`](https://sipemu.github.io/fdars-r/reference/print.seasonality_changes_auto.md)
+  : Print method for seasonality_changes_auto objects
+- [`print(`*`<seasonality_classification>`*`)`](https://sipemu.github.io/fdars-r/reference/print.seasonality_classification.md)
+  : Print method for seasonality_classification objects
+- [`print(`*`<ssa_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.ssa_result.md)
+  : Print method for ssa_result objects
+- [`print(`*`<stl_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.stl_result.md)
+  : Print method for stl_result objects
 
 ## Other
 

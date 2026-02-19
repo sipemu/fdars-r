@@ -18,3 +18,7 @@ plot(x, ...)
 - ...:
 
   Additional arguments passed to plot.fdata.
+
+## Value
+
+A `ggplot` object (invisibly).

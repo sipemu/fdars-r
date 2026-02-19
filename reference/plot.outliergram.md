@@ -65,3 +65,7 @@ plot(
 - ...:
 
   Additional arguments passed to plotting functions.
+
+## Value
+
+A `ggplot` object (invisibly).

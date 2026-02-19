@@ -18,3 +18,7 @@ plot(x, ...)
 - ...:
 
   Additional arguments (ignored).
+
+## Value
+
+A `ggplot` object (invisibly).

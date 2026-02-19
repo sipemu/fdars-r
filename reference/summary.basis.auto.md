@@ -18,3 +18,7 @@ summary(object, ...)
 - ...:
 
   Additional arguments (ignored).
+
+## Value
+
+Invisibly returns a data frame with per-curve basis selection details.

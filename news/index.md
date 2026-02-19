@@ -1,5 +1,15 @@
 # Changelog
 
+## fdars 0.3.0
+
+### Internal
+
+- Upgraded Rust backend (fdars-core) to v0.4.0
+- New `FdMatrix` type for safer matrix handling (internal)
+- New streaming depth module in core (internal)
+- Reduced package size by removing non-essential vendored files
+- No user-facing API changes
+
 ## fdars 0.2.0
 
 ### Test Coverage & Quality

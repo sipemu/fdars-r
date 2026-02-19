@@ -18,3 +18,7 @@ summary(object, ...)
 - ...:
 
   Additional arguments (ignored).
+
+## Value
+
+Invisibly returns a summary list with descriptive statistics.
