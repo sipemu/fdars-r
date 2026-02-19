@@ -129,6 +129,7 @@ X[29, ] <- sin(2*pi*t) + 3  # outlier
 X[30, ] <- -sin(2*pi*t)     # outlier
 fd <- fdata(X, argvals = t)
 
+# \donttest{
 # Default: quantile method with 95th percentile (bottom 5%)
 out1 <- outliers.depth.pond(fd, nb = 50)
 
@@ -140,4 +141,5 @@ out2 <- outliers.depth.pond(fd, nb = 50, threshold_method = "mad", k = 2.5)
 
 # IQR method (boxplot-like)
 out3 <- outliers.depth.pond(fd, nb = 50, threshold_method = "iqr", k = 1.5)
+# }
 ```

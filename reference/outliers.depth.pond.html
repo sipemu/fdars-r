@@ -9,7 +9,7 @@ Outlier Detection using Weighted Depth"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fdars</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -174,6 +174,7 @@ outlier detection. With k = 1.5, corresponds to the standard boxplot fence.</p><
 <span class="r-in"><span><span class="va">X</span><span class="op">[</span><span class="fl">30</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">pi</span><span class="op">*</span><span class="va">t</span><span class="op">)</span>     <span class="co"># outlier</span></span></span>
 <span class="r-in"><span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Default: quantile method with 95th percentile (bottom 5%)</span></span></span>
 <span class="r-in"><span><span class="va">out1</span> <span class="op">&lt;-</span> <span class="fu">outliers.depth.pond</span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -185,6 +186,7 @@ outlier detection. With k = 1.5, corresponds to the standard boxplot fence.</p><
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># IQR method (boxplot-like)</span></span></span>
 <span class="r-in"><span><span class="va">out3</span> <span class="op">&lt;-</span> <span class="fu">outliers.depth.pond</span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">50</span>, threshold_method <span class="op">=</span> <span class="st">"iqr"</span>, k <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

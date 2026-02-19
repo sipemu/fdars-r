@@ -1,5 +1,12 @@
 # Changelog
 
+## fdars 0.3.1
+
+### Bug Fixes
+
+- Fixed Windows installation failure (missing cargo checksum files)
+- Wrapped slow bootstrap examples in `\donttest{}`
+
 ## fdars 0.3.0
 
 ### Internal
