@@ -484,7 +484,7 @@ dependencies = [
 
 [[package]]
 name = "fdars-core"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "anofox-regression",
  "criterion",
@@ -496,6 +496,8 @@ dependencies = [
  "rand_distr 0.4.3",
  "rayon",
  "rustfft",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

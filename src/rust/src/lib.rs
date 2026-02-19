@@ -16,7 +16,7 @@ use rustfft::{num_complex::Complex, FftPlanner};
 use std::f64::consts::PI;
 
 // Import shared utilities from fdars-core
-use fdars_core::hilbert_transform;
+use fdars_core::{hilbert_transform, FdMatrix};
 
 // =============================================================================
 // Helper functions
@@ -4343,11 +4343,10 @@ fn select_basis_auto(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let result = fdars_core::basis::select_basis_auto_1d(
-        data_slice,
-        n,
-        m,
+        &fd,
         &argvals,
         criterion,
         nbasis_min as usize,
@@ -6361,6 +6360,7 @@ fn seasonal_detect_peaks(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let min_dist: Option<f64> = if min_distance.is_null() {
         None
@@ -6383,9 +6383,7 @@ fn seasonal_detect_peaks(
 
     // Use the Rust core detect_peaks function with Fourier basis smoothing
     let result = fdars_core::seasonal::detect_peaks(
-        data_slice,
-        n,
-        m,
+        &fd,
         &argvals,
         min_dist,
         min_prom,
@@ -6583,8 +6581,9 @@ fn seasonal_strength_wavelet(data: RMatrix<f64>, argvals: Vec<f64>, period: f64)
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
-    fdars_core::seasonal::seasonal_strength_wavelet(data_slice, n, m, &argvals, period)
+    fdars_core::seasonal::seasonal_strength_wavelet(&fd, &argvals, period)
 }
 
 /// Time-varying seasonal strength using sliding windows
@@ -6992,6 +6991,7 @@ fn seasonal_analyze_peak_timing(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let nbasis: Option<usize> = if smooth_nbasis.is_null() {
         None
@@ -7000,7 +7000,7 @@ fn seasonal_analyze_peak_timing(
     };
 
     let result =
-        fdars_core::seasonal::analyze_peak_timing(data_slice, n, m, &argvals, period, nbasis);
+        fdars_core::seasonal::analyze_peak_timing(&fd, &argvals, period, nbasis);
 
     let cycle_indices: Vec<i32> = result.cycle_indices.iter().map(|&i| i as i32).collect();
 
@@ -7045,6 +7045,7 @@ fn seasonal_classify_seasonality(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let str_thresh: Option<f64> = if strength_threshold.is_null() {
         None
@@ -7059,7 +7060,7 @@ fn seasonal_classify_seasonality(
     };
 
     let result = fdars_core::seasonal::classify_seasonality(
-        data_slice, n, m, &argvals, period, str_thresh, tim_thresh,
+        &fd, &argvals, period, str_thresh, tim_thresh,
     );
 
     let weak_seasons: Vec<i32> = result.weak_seasons.iter().map(|&i| i as i32).collect();
@@ -7130,6 +7131,7 @@ fn seasonal_detect_changes_auto(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let method = match threshold_method {
         "fixed" => {
@@ -7144,9 +7146,7 @@ fn seasonal_detect_changes_auto(
     };
 
     let result = fdars_core::seasonal::detect_seasonality_changes_auto(
-        data_slice,
-        n,
-        m,
+        &fd,
         &argvals,
         period,
         method,
@@ -7309,11 +7309,10 @@ fn seasonal_detect_amplitude_modulation(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let result = fdars_core::seasonal::detect_amplitude_modulation(
-        data_slice,
-        n,
-        m,
+        &fd,
         &argvals,
         period,
         modulation_threshold,
@@ -7378,11 +7377,10 @@ fn seasonal_detect_amplitude_modulation_wavelet(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let result = fdars_core::seasonal::detect_amplitude_modulation_wavelet(
-        data_slice,
-        n,
-        m,
+        &fd,
         &argvals,
         period,
         modulation_threshold,
@@ -7436,6 +7434,7 @@ fn seasonal_cfd_autoperiod(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
     let tol = if cluster_tolerance > 0.0 {
         Some(cluster_tolerance)
     } else {
@@ -7447,7 +7446,7 @@ fn seasonal_cfd_autoperiod(
         None
     };
 
-    let result = fdars_core::cfd_autoperiod_fdata(data_slice, n, m, &argvals, tol, min_size);
+    let result = fdars_core::cfd_autoperiod_fdata(&fd, &argvals, tol, min_size);
 
     list!(
         period = result.period,
@@ -7485,6 +7484,7 @@ fn seasonal_autoperiod(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
     let n_cand = if n_candidates > 0 {
         Some(n_candidates as usize)
     } else {
@@ -7496,7 +7496,7 @@ fn seasonal_autoperiod(
         None
     };
 
-    let result = fdars_core::autoperiod_fdata(data_slice, n, m, &argvals, n_cand, steps);
+    let result = fdars_core::autoperiod_fdata(&fd, &argvals, n_cand, steps);
 
     // Convert candidates to R list
     let candidate_periods: Vec<f64> = result.candidates.iter().map(|c| c.period).collect();
@@ -7546,13 +7546,14 @@ fn seasonal_sazed(data: RMatrix<f64>, argvals: Vec<f64>, tolerance: f64) -> Robj
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
     let tol = if tolerance > 0.0 {
         Some(tolerance)
     } else {
         None
     };
 
-    let result = fdars_core::sazed_fdata(data_slice, n, m, &argvals, tol);
+    let result = fdars_core::sazed_fdata(&fd, &argvals, tol);
 
     list!(
         period = result.period,
@@ -7600,6 +7601,7 @@ fn seasonal_lomb_scargle(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let oversample = if oversampling > 0.0 {
         Some(oversampling)
@@ -7613,7 +7615,7 @@ fn seasonal_lomb_scargle(
     };
 
     let result =
-        fdars_core::seasonal::lomb_scargle_fdata(data_slice, n, m, &argvals, oversample, nyquist);
+        fdars_core::seasonal::lomb_scargle_fdata(&fd, &argvals, oversample, nyquist);
 
     list!(
         frequencies = result.frequencies,
@@ -7657,6 +7659,7 @@ fn seasonal_matrix_profile(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let subseq_len = if subsequence_length > 0 {
         Some(subsequence_length as usize)
@@ -7670,7 +7673,7 @@ fn seasonal_matrix_profile(
         None
     };
 
-    let result = fdars_core::seasonal::matrix_profile_fdata(data_slice, n, m, subseq_len, exc_zone);
+    let result = fdars_core::seasonal::matrix_profile_fdata(&fd, subseq_len, exc_zone);
 
     // Convert profile_index to i32 (R uses 1-based indexing)
     let profile_index_r: Vec<i32> = result
@@ -7721,6 +7724,7 @@ fn seasonal_ssa(data: RMatrix<f64>, window_length: i32, n_components: i32) -> Ro
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let win_len = if window_length > 0 {
         Some(window_length as usize)
@@ -7733,7 +7737,7 @@ fn seasonal_ssa(data: RMatrix<f64>, window_length: i32, n_components: i32) -> Ro
         None
     };
 
-    let result = fdars_core::seasonal::ssa_fdata(data_slice, n, m, win_len, n_comp);
+    let result = fdars_core::seasonal::ssa_fdata(&fd, win_len, n_comp);
 
     // Convert trend, seasonal, noise to R matrices
     let trend_mat = RMatrix::new_matrix(n, m, |_r, c| result.trend.get(c).copied().unwrap_or(0.0));
@@ -7788,6 +7792,7 @@ fn seasonal_stl(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let s_win = if s_window > 0 {
         Some(s_window as usize)
@@ -7801,9 +7806,7 @@ fn seasonal_stl(
     };
 
     let result = fdars_core::detrend::stl_decompose(
-        data_slice,
-        n,
-        m,
+        &fd,
         period as usize,
         s_win,
         t_win,
@@ -7814,10 +7817,14 @@ fn seasonal_stl(
     );
 
     // Convert to R matrices
-    let trend_mat = RMatrix::new_matrix(n, m, |r, c| result.trend[r + c * n]);
-    let seasonal_mat = RMatrix::new_matrix(n, m, |r, c| result.seasonal[r + c * n]);
-    let remainder_mat = RMatrix::new_matrix(n, m, |r, c| result.remainder[r + c * n]);
-    let weights_mat = RMatrix::new_matrix(n, m, |r, c| result.weights[r + c * n]);
+    let trend_s = result.trend.as_slice();
+    let seasonal_s = result.seasonal.as_slice();
+    let remainder_s = result.remainder.as_slice();
+    let weights_s = result.weights.as_slice();
+    let trend_mat = RMatrix::new_matrix(n, m, |r, c| trend_s[r + c * n]);
+    let seasonal_mat = RMatrix::new_matrix(n, m, |r, c| seasonal_s[r + c * n]);
+    let remainder_mat = RMatrix::new_matrix(n, m, |r, c| remainder_s[r + c * n]);
+    let weights_mat = RMatrix::new_matrix(n, m, |r, c| weights_s[r + c * n]);
 
     list!(
         trend = trend_mat,
@@ -7862,20 +7869,23 @@ fn seasonal_detrend(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let result = match method {
-        "linear" => fdars_core::detrend::detrend_linear(data_slice, n, m, &argvals),
+        "linear" => fdars_core::detrend::detrend_linear(&fd, &argvals),
         "polynomial" => {
-            fdars_core::detrend::detrend_polynomial(data_slice, n, m, &argvals, degree as usize)
+            fdars_core::detrend::detrend_polynomial(&fd, &argvals, degree as usize)
         }
-        "diff1" => fdars_core::detrend::detrend_diff(data_slice, n, m, 1),
-        "diff2" => fdars_core::detrend::detrend_diff(data_slice, n, m, 2),
-        "loess" => fdars_core::detrend::detrend_loess(data_slice, n, m, &argvals, bandwidth, 1),
-        "auto" => fdars_core::detrend::auto_detrend(data_slice, n, m, &argvals),
-        _ => fdars_core::detrend::detrend_linear(data_slice, n, m, &argvals),
+        "diff1" => fdars_core::detrend::detrend_diff(&fd, 1),
+        "diff2" => fdars_core::detrend::detrend_diff(&fd, 2),
+        "loess" => fdars_core::detrend::detrend_loess(&fd, &argvals, bandwidth, 1),
+        "auto" => fdars_core::detrend::auto_detrend(&fd, &argvals),
+        _ => fdars_core::detrend::detrend_linear(&fd, &argvals),
     };
 
     // Determine output dimensions based on method
+    // v0.4.0 returns full n x m matrices for diff methods (zero-padded),
+    // but R wrapper expects truncated n x (m - order) matrices
     let out_m = if method == "diff1" {
         m - 1
     } else if method == "diff2" {
@@ -7884,9 +7894,11 @@ fn seasonal_detrend(
         m
     };
 
-    // Convert to R matrices
-    let trend_mat = RMatrix::new_matrix(n, out_m, |r, c| result.trend[r + c * n]);
-    let detrended_mat = RMatrix::new_matrix(n, out_m, |r, c| result.detrended[r + c * n]);
+    // Convert to R matrices (only first out_m columns for diff methods)
+    let trend_s = result.trend.as_slice();
+    let detrended_s = result.detrended.as_slice();
+    let trend_mat = RMatrix::new_matrix(n, out_m, |r, c| trend_s[r + c * n]);
+    let detrended_mat = RMatrix::new_matrix(n, out_m, |r, c| detrended_s[r + c * n]);
 
     list!(
         trend = trend_mat,
@@ -7924,12 +7936,11 @@ fn seasonal_decompose(
     }
 
     let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
 
     let result = match method {
         "multiplicative" => fdars_core::detrend::decompose_multiplicative(
-            data_slice,
-            n,
-            m,
+            &fd,
             &argvals,
             period,
             trend_method,
@@ -7937,9 +7948,7 @@ fn seasonal_decompose(
             n_harmonics as usize,
         ),
         "additive" | _ => fdars_core::detrend::decompose_additive(
-            data_slice,
-            n,
-            m,
+            &fd,
             &argvals,
             period,
             trend_method,
@@ -7949,9 +7958,12 @@ fn seasonal_decompose(
     };
 
     // Convert to R matrices
-    let trend_mat = RMatrix::new_matrix(n, m, |r, c| result.trend[r + c * n]);
-    let seasonal_mat = RMatrix::new_matrix(n, m, |r, c| result.seasonal[r + c * n]);
-    let remainder_mat = RMatrix::new_matrix(n, m, |r, c| result.remainder[r + c * n]);
+    let trend_s = result.trend.as_slice();
+    let seasonal_s = result.seasonal.as_slice();
+    let remainder_s = result.remainder.as_slice();
+    let trend_mat = RMatrix::new_matrix(n, m, |r, c| trend_s[r + c * n]);
+    let seasonal_mat = RMatrix::new_matrix(n, m, |r, c| seasonal_s[r + c * n]);
+    let remainder_mat = RMatrix::new_matrix(n, m, |r, c| remainder_s[r + c * n]);
 
     list!(
         trend = trend_mat,
@@ -7980,10 +7992,12 @@ fn eigenfunctions_1d(argvals: Vec<f64>, m: i32, efun_type: i32) -> Robj {
     };
 
     let phi = fdars_core::simulation::eigenfunctions(&argvals, m, efun);
-    let n = argvals.len();
+    let n = phi.nrows();
+    let mc = phi.ncols();
+    let s = phi.as_slice();
 
     // Return as n x m matrix (column-major)
-    let result = RMatrix::new_matrix(n, m, |i, j| phi[i + j * n]);
+    let result = RMatrix::new_matrix(n, mc, |i, j| s[i + j * n]);
     Robj::from(result)
 }
 
@@ -8017,10 +8031,12 @@ fn sim_kl_1d(n: i32, phi: RMatrix<f64>, lambda: Vec<f64>, seed: Robj) -> Robj {
         seed.as_integer().map(|s| s as u64)
     };
 
-    let data = fdars_core::simulation::sim_kl(n_samples, phi_slice, m, big_m, &lambda, seed_val);
+    let phi_mat = FdMatrix::from_slice(phi_slice, m, big_m).expect("Invalid phi matrix dimensions");
+    let data = fdars_core::simulation::sim_kl(n_samples, &phi_mat, big_m, &lambda, seed_val);
+    let s = data.as_slice();
 
     // Return as n x m matrix (column-major)
-    let result = RMatrix::new_matrix(n_samples, m, |i, j| data[i + j * n_samples]);
+    let result = RMatrix::new_matrix(data.nrows(), data.ncols(), |i, j| s[i + j * data.nrows()]);
     Robj::from(result)
 }
 
@@ -8037,9 +8053,11 @@ fn add_error_pointwise_1d(data: RMatrix<f64>, sd: f64, seed: Robj) -> Robj {
         seed.as_integer().map(|s| s as u64)
     };
 
-    let noisy = fdars_core::simulation::add_error_pointwise(data_slice, nrow, ncol, sd, seed_val);
+    let fd = FdMatrix::from_slice(data_slice, nrow, ncol).expect("Invalid matrix dimensions");
+    let noisy = fdars_core::simulation::add_error_pointwise(&fd, sd, seed_val);
+    let s = noisy.as_slice();
 
-    let result = RMatrix::new_matrix(nrow, ncol, |i, j| noisy[i + j * nrow]);
+    let result = RMatrix::new_matrix(noisy.nrows(), noisy.ncols(), |i, j| s[i + j * noisy.nrows()]);
     Robj::from(result)
 }
 
@@ -8056,9 +8074,11 @@ fn add_error_curve_1d(data: RMatrix<f64>, sd: f64, seed: Robj) -> Robj {
         seed.as_integer().map(|s| s as u64)
     };
 
-    let noisy = fdars_core::simulation::add_error_curve(data_slice, nrow, ncol, sd, seed_val);
+    let fd = FdMatrix::from_slice(data_slice, nrow, ncol).expect("Invalid matrix dimensions");
+    let noisy = fdars_core::simulation::add_error_curve(&fd, sd, seed_val);
+    let s = noisy.as_slice();
 
-    let result = RMatrix::new_matrix(nrow, ncol, |i, j| noisy[i + j * nrow]);
+    let result = RMatrix::new_matrix(noisy.nrows(), noisy.ncols(), |i, j| s[i + j * noisy.nrows()]);
     Robj::from(result)
 }
 

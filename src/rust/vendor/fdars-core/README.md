@@ -1,32 +1,19 @@
-# fdars-core
+# Functional Data Analysis (FDA)
 
 [![Rust CI](https://github.com/sipemu/fdars/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/sipemu/fdars/actions/workflows/rust-ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/fdars-core.svg)](https://crates.io/crates/fdars-core)
 [![Documentation](https://docs.rs/fdars-core/badge.svg)](https://docs.rs/fdars-core)
-[![codecov](https://codecov.io/gh/sipemu/fdars/branch/main/graph/badge.svg)](https://codecov.io/gh/sipemu/fdars)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![codecov](https://codecov.io/gh/sipemu/fdars/graph/badge.svg)](https://codecov.io/gh/sipemu/fdars)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Pure Rust algorithms for Functional Data Analysis (FDA).
+High-performance Functional Data Analysis tools implemented in Rust with R bindings.
 
-## Overview
+## Packages
 
-`fdars-core` provides high-performance implementations of various FDA methods, designed to be used as a library in Rust projects or as the backend for R/Python bindings.
-
-## Installation
-
-Add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-fdars-core = "0.3"
-```
-
-Or install from the repository:
-
-```toml
-[dependencies]
-fdars-core = { git = "https://github.com/sipemu/fdars" }
-```
+| Package | Language | Registry | Folder | Status |
+|---------|----------|----------|--------|--------|
+| fdars | R | CRAN | [sipemu/fdars-r](https://github.com/sipemu/fdars-r) | [![CRAN status](https://www.r-pkg.org/badges/version/fdars)](https://CRAN.R-project.org/package=fdars) |
+| fdars-core | Rust | crates.io | `fdars-core/` | [![Crates.io](https://img.shields.io/crates/v/fdars-core.svg)](https://crates.io/crates/fdars-core) |
 
 ## Features
 
@@ -40,17 +27,45 @@ fdars-core = { git = "https://github.com/sipemu/fdars" }
 - **Outlier Detection**: LRT-based outlier detection with bootstrap thresholding
 - **Seasonal Analysis**: FFT, ACF, Autoperiod, CFDAutoperiod, SAZED period detection; seasonal strength metrics; amplitude modulation detection
 
+## Installation
+
+### R (fdars)
+
+```r
+# From GitHub (requires Rust toolchain)
+devtools::install_github("sipemu/fdars-r")
+
+# From binary release (no Rust required)
+# Download from GitHub Releases, then:
+install.packages("path/to/fdars_x.y.z.tgz", repos = NULL, type = "mac.binary")  # macOS
+install.packages("path/to/fdars_x.y.z.zip", repos = NULL, type = "win.binary")  # Windows
+```
+
+### Rust (fdars-core)
+
+```toml
+[dependencies]
+fdars-core = "0.3"
+```
+
+Or install from the repository:
+
+```toml
+[dependencies]
+fdars-core = { git = "https://github.com/sipemu/fdars" }
+```
+
 ## Feature Flags
 
 - `parallel` (default): Enable rayon-based parallel processing
-- `linalg` (default): Enable linear algebra features (faer, ridge regression)
+- `linalg`: Enable linear algebra features (faer, ridge regression) — requires Rust 1.84+
 - `js`: Enable WASM support with JS random number generation
 
 For WASM builds, disable default features:
 
 ```toml
 [dependencies]
-fdars-core = { version = "0.2", default-features = false }
+fdars-core = { version = "0.3", default-features = false }
 ```
 
 ## Data Layout
@@ -59,7 +74,7 @@ Functional data is represented as column-major matrices stored in flat `Vec<f64>
 - For n observations with m evaluation points: `data[i + j * n]` gives observation i at point j
 - 2D surfaces (n observations, m1 x m2 grid): stored as n x (m1*m2) matrices
 
-## Example
+## Quick Start
 
 ```rust
 use fdars_core::{fdata, depth, helpers};
@@ -77,9 +92,35 @@ let mean = fdata::mean_1d(&data, n, m);
 let depths = depth::fraiman_muniz_1d(&data, &data, n, n, m, true);
 ```
 
+## Examples
+
+The [`fdars-core/examples/`](fdars-core/examples/) directory contains 14 runnable examples progressing from basic to advanced:
+
+| # | Example | Command | Topics |
+|---|---------|---------|--------|
+| 01 | [Simulation](fdars-core/examples/01_simulation/) | `cargo run -p fdars-core --example simulation` | KL expansion, eigenfunctions, noise |
+| 02 | [Functional Operations](fdars-core/examples/02_functional_operations/) | `cargo run -p fdars-core --example functional_operations` | Mean, centering, derivatives, norms, inner products |
+| 03 | [Smoothing](fdars-core/examples/03_smoothing/) | `cargo run -p fdars-core --example smoothing` | Nadaraya-Watson, local linear/polynomial, k-NN |
+| 04 | [Basis Representation](fdars-core/examples/04_basis_representation/) | `cargo run -p fdars-core --example basis_representation` | B-splines, Fourier, P-splines, GCV/AIC/BIC |
+| 05 | [Depth Measures](fdars-core/examples/05_depth_measures/) | `cargo run -p fdars-core --example depth_measures` | 8 depth measures, outlier ranking |
+| 06 | [Distances and Metrics](fdars-core/examples/06_distances_and_metrics/) | `cargo run -p fdars-core --example distances_and_metrics` | Lp, Hausdorff, DTW, Fourier, h-shift |
+| 07 | [Clustering](fdars-core/examples/07_clustering/) | `cargo run -p fdars-core --example clustering` | K-means, fuzzy c-means, silhouette, CH index |
+| 08 | [Regression](fdars-core/examples/08_regression/) | `cargo run -p fdars-core --example regression` | FPCA, PLS regression |
+| 09 | [Outlier Detection](fdars-core/examples/09_outlier_detection/) | `cargo run -p fdars-core --example outlier_detection` | LRT bootstrap, depth confirmation |
+| 10 | [Seasonal Analysis](fdars-core/examples/10_seasonal_analysis/) | `cargo run -p fdars-core --example seasonal_analysis` | FFT, ACF, Autoperiod, SAZED, peak detection |
+| 11 | [Detrending](fdars-core/examples/11_detrending/) | `cargo run -p fdars-core --example detrending` | Linear/polynomial/LOESS, STL decomposition |
+| 12 | [Streaming Depth](fdars-core/examples/12_streaming_depth/) | `cargo run -p fdars-core --example streaming_depth` | Online depth, rolling windows |
+| 13 | [Irregular Data](fdars-core/examples/13_irregular_data/) | `cargo run -p fdars-core --example irregular_data` | CSR storage, regularization, kernel mean |
+| 14 | [Complete Pipeline](fdars-core/examples/14_complete_pipeline/) | `cargo run -p fdars-core --example complete_pipeline` | End-to-end: simulate → smooth → outliers → FPCA → cluster |
+
 ## Performance
 
 With the `parallel` feature (enabled by default), computationally intensive operations use `rayon` for multi-core performance. The library also supports WASM targets with sequential execution.
+
+## Documentation
+
+- **R Package**: [https://sipemu.github.io/fdars/](https://sipemu.github.io/fdars/)
+- **Rust Crate**: [https://docs.rs/fdars-core](https://docs.rs/fdars-core)
 
 ## License
 
