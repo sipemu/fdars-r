@@ -5,3 +5,6 @@ for f in src/rust/vendor/*/.cargo-checksum.json; do
         mv "$f" "$(dirname "$f")/cargo-checksum.json"
     fi
 done
+
+# Remove generated Makevars (tarball ships Makevars.in; configure regenerates)
+rm -f src/Makevars

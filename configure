@@ -44,5 +44,14 @@ for f in src/rust/vendor/*/cargo-checksum.json; do
     fi
 done
 
+# Generate src/Makevars from template with platform-specific linker flags
+# GNU ld supports --version-script and --wrap to hide/intercept symbols
+# that R CMD check flags (abort, exit, _exit). macOS ld does not.
+WRAP_FLAGS=""
+if [ "$(uname -s)" = "Linux" ]; then
+    WRAP_FLAGS="-Wl,--version-script=\$(CURDIR)/symbols.map -Wl,--wrap=abort -Wl,--wrap=exit -Wl,--wrap=_exit"
+fi
+sed "s|@WRAP_FLAGS@|${WRAP_FLAGS}|g" src/Makevars.in > src/Makevars
+
 echo "Rust toolchain OK"
 exit 0
