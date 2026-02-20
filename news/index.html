@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fdars</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +56,14 @@
       <small>Source: <a href="https://github.com/sipemu/fdars-r/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.2" id="fdars-032">fdars 0.3.2<a class="anchor" aria-label="anchor" href="#fdars-032"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-3-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-3-2"></a></h3>
+<ul><li>Fixed compiled code WARNING: wrapped <code>abort</code>/<code>exit</code>/<code>_exit</code> symbols using linker <code>--wrap</code> flag to convert process termination into R errors</li>
+<li>Reduced test CPU time by limiting Rust thread pool (<code>RAYON_NUM_THREADS=2</code>)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="fdars-031">fdars 0.3.1<a class="anchor" aria-label="anchor" href="#fdars-031"></a></h2>
 <div class="section level3">

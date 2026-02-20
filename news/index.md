@@ -1,5 +1,15 @@
 # Changelog
 
+## fdars 0.3.2
+
+### Bug Fixes
+
+- Fixed compiled code WARNING: wrapped `abort`/`exit`/`_exit` symbols
+  using linker `--wrap` flag to convert process termination into R
+  errors
+- Reduced test CPU time by limiting Rust thread pool
+  (`RAYON_NUM_THREADS=2`)
+
 ## fdars 0.3.1
 
 ### Bug Fixes
