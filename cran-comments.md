@@ -2,52 +2,31 @@
 
 ## R CMD check results
 
-0 errors | 1 warning | 4 notes
+0 errors | 0 warnings | 1 note
 
-### WARNING
-
-1. **checkbashisms script not available**
-   - System tool availability issue, not a package issue.
-   - The configure script uses portable POSIX shell syntax.
-
-### NOTEs
+### NOTE
 
 1. **New submission**
    - This is a new submission to CRAN.
-   - Package size is due to vendored Rust crate sources.
-
-2. **Non-portable compilation flags**
-   - These flags come from the system R configuration, not from the package.
-
-3. **Compiled code contains exit/abort**
-   - These symbols come from the Rust standard library's panic handling
-     infrastructure and are present in all Rust-based packages on CRAN.
-   - They are unreachable in normal operation:
-     - All Rust code uses proper error handling via `Result` types
-     - Panics are caught at the R-Rust boundary by extendr
-     - The extendr framework converts Rust panics to R errors safely
-   - This is standard for Rust packages and does not affect package safety.
-
-4. **HTML tidy not available**
-   - System tool availability issue, not a package issue.
+   - Package size (~33 MB) is due to vendored Rust crate sources required for
+     offline compilation per CRAN policy.
 
 ## Resubmission
 
-Fixes from v0.3.0 submission feedback:
+Fixes from v0.3.1 submission feedback:
 
-- Fixed Windows installation failure: added configure.win/cleanup.win to
-  restore cargo checksum files (renamed to avoid hidden files NOTE)
-- Wrapped slow bootstrap examples (`outliers.depth.pond`) in `\donttest{}`
-- Deployed pkgdown site (fixes 404 URL NOTE)
+- **Compiled code WARNING (exit/abort)**: Used linker `--wrap` flag to intercept
+  `abort`/`exit`/`_exit` from the Rust standard library, replacing them with
+  `Rf_error()` wrappers that safely convert to R errors. Combined with a linker
+  version script that hides all symbols except `R_init_fdars`.
+- **Test CPU time NOTE**: Limited Rust thread pool to 2 threads via
+  `RAYON_NUM_THREADS=2` in test setup.
 
 ## Changes Since Last Submission
 
-- Upgraded fdars-core (Rust backend) from v0.3.1 to v0.4.0
-  - New `FdMatrix` type for safer matrix handling (internal API change)
-  - New streaming depth module (internal)
-- Removed test/bench/example directories from vendored crates
-- Removed all hidden files from vendored crates (`.cargo_vcs_info.json`, etc.)
-  - Cargo checksum files renamed to avoid hidden file NOTE; restored by configure script
+- Wrapped `abort`/`exit`/`_exit` symbols with `Rf_error()` via `--wrap` linker flag
+- Added linker version script to export only `R_init_fdars`
+- Limited Rust parallelism in tests to reduce CPU time
 
 ## Package Description
 
@@ -86,7 +65,7 @@ The package includes a configure script that:
 ## Test Coverage
 
 - All examples run without errors
-- All tests pass
+- All tests pass (1714 tests)
 - 15 vignettes build successfully
 
 ## Test Environments

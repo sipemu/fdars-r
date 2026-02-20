@@ -4,7 +4,8 @@ RUST_SRC = rust
 RUST_TARGET_DIR = $(RUST_SRC)/target/$(RUST_TARGET)/release
 STATLIB = $(RUST_TARGET_DIR)/libfdars.a
 
-PKG_LIBS = -L$(RUST_TARGET_DIR) -lfdars -lws2_32 -luserenv -lbcrypt -ladvapi32 -lntdll
+PKG_LIBS = -L$(RUST_TARGET_DIR) -lfdars -lws2_32 -luserenv -lbcrypt -ladvapi32 -lntdll \
+  -Wl,--wrap=abort -Wl,--wrap=exit -Wl,--wrap=_exit
 
 OBJECTS = entrypoint.o
 

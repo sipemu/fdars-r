@@ -2,7 +2,9 @@ RUST_SRC = rust
 RUST_TARGET_DIR = $(RUST_SRC)/target/release
 STATLIB = $(RUST_TARGET_DIR)/libfdars.a
 
-PKG_LIBS = -L$(RUST_TARGET_DIR) -lfdars -lpthread -ldl -lm
+PKG_LIBS = -L$(RUST_TARGET_DIR) -lfdars -lpthread -ldl -lm \
+  -Wl,--version-script=$(CURDIR)/symbols.map \
+  -Wl,--wrap=abort -Wl,--wrap=exit -Wl,--wrap=_exit
 
 OBJECTS = entrypoint.o
 
