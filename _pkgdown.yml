@@ -55,26 +55,26 @@ articles:
 - title: Getting Started
   contents:
   - introduction
-  - custom-plotting
-  - intro-to-smoothing
-  - working-with-derivatives
-  - simulation-toolbox
-  - irregular-sampling
+  - articles/custom-plotting
+  - articles/intro-to-smoothing
+  - articles/working-with-derivatives
+  - articles/simulation-toolbox
+  - articles/irregular-sampling
 - title: Core Methods
   contents:
-  - fpca
-  - basis-representation
+  - articles/fpca
+  - articles/basis-representation
   - depth-functions
-  - distance-metrics
+  - articles/distance-metrics
 - title: Analysis
   contents:
-  - clustering
-  - outlier-detection
-  - regression
-  - seasonal-analysis
+  - articles/clustering
+  - articles/outlier-detection
+  - articles/regression
+  - articles/seasonal-analysis
 - title: Advanced
   contents:
-  - covariance-functions
+  - articles/covariance-functions
 
 reference:
 - title: Functional Data Objects
