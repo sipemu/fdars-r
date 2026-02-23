@@ -18,6 +18,7 @@
 ^scripts$
 ^CHANGELOG\.md$
 ^Rplots\.pdf$
+^.*\.tar\.gz$
 ^validation$
 # Exclude windows-sys paths that are too long (>100 bytes)
 ^src/rust/vendor/windows-sys.*/src/Windows/Win32/Management/MobileDeviceManagementRegistration
