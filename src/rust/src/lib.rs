@@ -4432,74 +4432,95 @@ fn outliers_thres_lrt(
     let nb = nb as usize;
     let n_keep = ((1.0 - trim) * n as f64).ceil() as usize;
 
-    // Compute column standard deviations for smoothing
+    // First, compute FM depth on the original data and identify the trimmed
+    // (deep) set. Bootstrap only from these curves to avoid the masking effect
+    // where outliers inflate the bootstrap distribution threshold.
+    let orig_depths = compute_fm_depth_internal(data_slice, n, m);
+    let mut orig_depth_idx: Vec<(usize, f64)> = orig_depths
+        .iter()
+        .enumerate()
+        .map(|(i, &d)| (i, d))
+        .collect();
+    orig_depth_idx
+        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    let clean_idx: Vec<usize> = orig_depth_idx
+        .iter()
+        .take(n_keep)
+        .map(|(i, _)| *i)
+        .collect();
+    let n_clean = clean_idx.len();
+
+    // Compute column standard deviations from the clean set only
     let col_vars: Vec<f64> = (0..m)
         .map(|j| {
             let mut sum = 0.0;
             let mut sum_sq = 0.0;
-            for i in 0..n {
+            for &i in &clean_idx {
                 let val = data_slice[i + j * n];
                 sum += val;
                 sum_sq += val * val;
             }
-            let mean = sum / n as f64;
-            let var = sum_sq / n as f64 - mean * mean;
+            let mean = sum / n_clean as f64;
+            let var = sum_sq / n_clean as f64 - mean * mean;
             var.max(0.0).sqrt()
         })
         .collect();
 
     // Run bootstrap iterations in parallel
+    // Resample from the clean (trimmed) set to compute the null distribution
     let max_dists: Vec<f64> = (0..nb)
         .into_par_iter()
         .map(|b| {
             let mut rng = StdRng::seed_from_u64(seed + b as u64);
 
-            // Resample with replacement
-            let indices: Vec<usize> = (0..n).map(|_| rng.gen_range(0..n)).collect();
+            // Resample with replacement from the clean set only
+            let indices: Vec<usize> =
+                (0..n_clean).map(|_| clean_idx[rng.gen_range(0..n_clean)]).collect();
 
             // Build resampled data with smoothing noise
-            let mut boot_data = vec![0.0; n * m];
+            let mut boot_data = vec![0.0; n_clean * m];
             for (new_i, &old_i) in indices.iter().enumerate() {
                 for j in 0..m {
                     let noise: f64 = rng.sample::<f64, _>(StandardNormal) * smo * col_vars[j];
-                    boot_data[new_i + j * n] = data_slice[old_i + j * n] + noise;
+                    boot_data[new_i + j * n_clean] = data_slice[old_i + j * n] + noise;
                 }
             }
 
             // Compute FM depth for bootstrap sample
-            let depths = compute_fm_depth_internal(&boot_data, n, m);
+            let depths = compute_fm_depth_internal(&boot_data, n_clean, m);
 
-            // Get indices of top n_keep curves by depth
+            // Get indices of top n_keep_boot curves by depth
+            let n_keep_boot = ((1.0 - trim) * n_clean as f64).ceil() as usize;
             let mut depth_idx: Vec<(usize, f64)> =
                 depths.iter().enumerate().map(|(i, &d)| (i, d)).collect();
             depth_idx.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-            let keep_idx: Vec<usize> = depth_idx.iter().take(n_keep).map(|(i, _)| *i).collect();
+            let keep_idx: Vec<usize> = depth_idx.iter().take(n_keep_boot).map(|(i, _)| *i).collect();
 
             // Compute trimmed mean and variance of kept curves
             let mut trimmed_mean = vec![0.0; m];
             for j in 0..m {
                 for &i in &keep_idx {
-                    trimmed_mean[j] += boot_data[i + j * n];
+                    trimmed_mean[j] += boot_data[i + j * n_clean];
                 }
-                trimmed_mean[j] /= n_keep as f64;
+                trimmed_mean[j] /= n_keep_boot as f64;
             }
 
             let mut trimmed_var = vec![0.0; m];
             for j in 0..m {
                 for &i in &keep_idx {
-                    let diff = boot_data[i + j * n] - trimmed_mean[j];
+                    let diff = boot_data[i + j * n_clean] - trimmed_mean[j];
                     trimmed_var[j] += diff * diff;
                 }
-                trimmed_var[j] /= n_keep as f64;
+                trimmed_var[j] /= n_keep_boot as f64;
                 trimmed_var[j] = trimmed_var[j].max(1e-10); // Avoid division by zero
             }
 
             // Compute max normalized distance to trimmed mean
             let mut max_dist = 0.0;
-            for i in 0..n {
+            for i in 0..n_clean {
                 let mut dist = 0.0;
                 for j in 0..m {
-                    let diff = boot_data[i + j * n] - trimmed_mean[j];
+                    let diff = boot_data[i + j * n_clean] - trimmed_mean[j];
                     dist += diff * diff / trimmed_var[j];
                 }
                 dist = (dist / m as f64).sqrt();
