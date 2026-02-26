@@ -42,6 +42,8 @@ navbar:
         href: articles/regression.html
       - text: Seasonal Analysis
         href: articles/seasonal-analysis.html
+      - text: Andrews Transformation
+        href: articles/andrews-transformation.html
       - text: "---"
       - text: Advanced
       - text: Covariance Functions
@@ -72,6 +74,7 @@ articles:
   - articles/outlier-detection
   - articles/regression
   - articles/seasonal-analysis
+  - articles/andrews-transformation
 - title: Advanced
   contents:
   - articles/covariance-functions
