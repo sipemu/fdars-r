@@ -170,8 +170,11 @@ The age of peak height velocity is an important biological marker:
 
 ```{r find-phv}
 # Find age of maximum velocity for each individual
+# Restrict to ages >= 8 to find the *pubertal* growth spurt,
+# not the high velocity in early childhood
+pubertal <- which(age >= 8)
 phv_ages <- apply(fd_velocity$data, 1, function(v) {
-  age[which.max(v)]
+  age[pubertal[which.max(v[pubertal])]]
 })
 
 # Summary statistics

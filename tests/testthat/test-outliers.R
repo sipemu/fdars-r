@@ -299,13 +299,101 @@ test_that("outliergram outlier types are valid", {
   result <- outliergram(fd, factor = 1.0)
 
   if (length(result$outliers) > 0) {
-    valid_types <- c("shape", "magnitude_high", "magnitude_low", "mixed")
-    expect_true(all(result$outlier_type %in% valid_types))
+    expect_true(all(result$outlier_type %in% "shape"))
   }
 })
 
 test_that("outliergram validates input", {
   expect_error(outliergram(matrix(1:10, 2, 5)))
+})
+
+test_that("outliergram uses finite-sample parabola coefficients", {
+  set.seed(42)
+  m <- 50
+  t_grid <- seq(0, 1, length.out = m)
+  n <- 30
+  X <- matrix(0, n, m)
+  for (i in 1:n) X[i, ] <- sin(2 * pi * t_grid) + rnorm(m, sd = 0.2)
+  fd <- fdata(X, argvals = t_grid)
+
+  result <- outliergram(fd)
+
+  # Finite-sample coefficients per Arribas-Gil & Romo (2014), Prop. 1
+  expected_a0 <- -2 / (n * (n - 1))
+  expected_a1 <- 2 * (n + 1) / (n - 1)
+  expected_a2 <- -2 * (n + 1) / (n - 1)
+
+  expect_equal(unname(result$parabola["a0"]), expected_a0)
+  expect_equal(unname(result$parabola["a1"]), expected_a1)
+  expect_equal(unname(result$parabola["a2"]), expected_a2)
+})
+
+test_that("outliergram uses boxplot fence threshold", {
+  set.seed(42)
+  m <- 50
+  t_grid <- seq(0, 1, length.out = m)
+  n <- 30
+  X <- matrix(0, n, m)
+  for (i in 1:n) X[i, ] <- sin(2 * pi * t_grid) + rnorm(m, sd = 0.2)
+  fd <- fdata(X, argvals = t_grid)
+
+  result <- outliergram(fd, factor = 1.5)
+
+  # Threshold should be Q3 + 1.5 * IQR of the distances
+  d <- result$dist_to_parabola
+  q1 <- unname(quantile(d, 0.25))
+  q3 <- unname(quantile(d, 0.75))
+  expected_threshold <- q3 + 1.5 * (q3 - q1)
+  expect_equal(unname(result$threshold), unname(expected_threshold))
+
+  # All detected outliers must have distance > threshold
+  if (length(result$outliers) > 0) {
+    expect_true(all(d[result$outliers] > result$threshold))
+  }
+  # All non-outliers must have distance <= threshold
+  non_outliers <- setdiff(seq_len(n), result$outliers)
+  expect_true(all(d[non_outliers] <= result$threshold))
+})
+
+test_that("outliergram detects shape outliers but not pure magnitude outliers", {
+  set.seed(42)
+  m <- 50
+  t_grid <- seq(0, 1, length.out = m)
+  n <- 32
+  X <- matrix(0, n, m)
+  for (i in 1:29) X[i, ] <- sin(2 * pi * t_grid) + rnorm(m, sd = 0.15)
+  X[30, ] <- sin(2 * pi * t_grid) + 3   # magnitude outlier (shifted up)
+  X[31, ] <- sin(2 * pi * t_grid) - 3   # magnitude outlier (shifted down)
+  X[32, ] <- sin(4 * pi * t_grid)       # shape outlier (different frequency)
+  fd <- fdata(X, argvals = t_grid)
+
+  result <- outliergram(fd, factor = 1.5)
+
+  # Shape outlier (curve 32) should be detected
+
+  expect_true(32 %in% result$outliers)
+
+  # Pure magnitude outliers (30, 31) should NOT be detected by outliergram
+  # because shifted curves still follow the MEI-MBD parabolic relationship
+  expect_false(30 %in% result$outliers)
+  expect_false(31 %in% result$outliers)
+})
+
+test_that("outliergram dist_to_parabola is positive below parabola", {
+  set.seed(42)
+  m <- 50
+  t_grid <- seq(0, 1, length.out = m)
+  n <- 20
+  X <- matrix(0, n, m)
+  for (i in 1:n) X[i, ] <- sin(2 * pi * t_grid) + rnorm(m, sd = 0.2)
+  fd <- fdata(X, argvals = t_grid)
+
+  result <- outliergram(fd)
+
+  # dist_to_parabola = mbd_expected - mbd, so positive means below parabola
+  mbd_expected <- result$parabola["a0"] + result$parabola["a1"] * result$mei +
+                  result$parabola["a2"] * result$mei^2
+  expect_equal(unname(result$dist_to_parabola), unname(mbd_expected - result$mbd))
 })
 
 # ============== print methods tests ==============

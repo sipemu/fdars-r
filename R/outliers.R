@@ -758,9 +758,7 @@ plot.magnitudeshape <- function(x, ...) {
 #' @param fdataobj An object of class 'fdata'.
 #' @param factor Factor to adjust the outlier detection threshold. Higher values
 #'   make detection less sensitive. Default is 1.5.
-#' @param mei_threshold Threshold for classifying magnitude outliers based on MEI.
-#'   Curves with MEI < mei_threshold or MEI > (1 - mei_threshold) are considered
-#'   to have extreme magnitude. Default is 0.25.
+#' @param mei_threshold Deprecated and ignored. Kept for backwards compatibility.
 #' @param ... Additional arguments (currently ignored).
 #'
 #' @return An object of class 'outliergram' with components:
@@ -769,34 +767,27 @@ plot.magnitudeshape <- function(x, ...) {
 #'   \item{mei}{MEI values for each curve}
 #'   \item{mbd}{MBD values for each curve}
 #'   \item{outliers}{Indices of detected outliers}
-#'   \item{outlier_type}{Character vector of outlier types for each detected outlier:
-#'     "shape", "magnitude_high", "magnitude_low", or "mixed"}
+#'   \item{outlier_type}{Character vector of outlier types ("shape") for each
+#'     detected outlier}
 #'   \item{n_outliers}{Number of outliers detected}
 #'   \item{factor}{The factor used for threshold adjustment}
 #'   \item{parabola}{Coefficients of the parabolic boundary (a0, a1, a2)}
+#'   \item{threshold}{The boxplot-fence threshold for distance below the parabola}
+#'   \item{dist_to_parabola}{Vertical distance below the parabola for each curve
+#'     (positive values indicate the point is below the parabola)}
 #' }
 #'
 #' @details
-#' The outliergram plots MEI on the x-axis versus MBD on the y-axis. For standard
-#' functional data, these values lie near a parabola. The theoretical relationship
-#' for uniformly distributed data is:
-#' \deqn{MBD = a_0 + a_1 \cdot MEI + a_2 \cdot MEI^2}
+#' The outliergram plots MEI on the x-axis versus MBD on the y-axis. For a
+#' sample of size \eqn{n}, the theoretical relationship is bounded by the
+#' finite-sample parabola (Arribas-Gil & Romo, 2014, Proposition 1):
+#' \deqn{MBD \le a_0 + a_1 \cdot MEI + a_2 \cdot MEI^2}
+#' where \eqn{a_0 = -2/(n(n-1))}, \eqn{a_1 = 2(n+1)/(n-1)},
+#' \eqn{a_2 = -2(n+1)/(n-1)}.
 #'
-#' Points that fall significantly below this parabola are identified as outliers.
-#' The \code{factor} parameter controls the sensitivity: lower values detect more
-#' outliers.
-#'
-#' \strong{Outlier Type Classification:}
-#' \itemize{
-#'   \item \strong{shape}: Curves with unusual shape but typical magnitude
-#'     (moderate MEI, low MBD). These curves cross other curves frequently.
-#'   \item \strong{magnitude_high}: Curves shifted upward (high MEI, typically
-#'     above most other curves).
-#'   \item \strong{magnitude_low}: Curves shifted downward (low MEI, typically
-#'     below most other curves).
-#'   \item \strong{mixed}: Curves with both unusual shape and extreme magnitude
-#'     (extreme MEI and low MBD).
-#' }
+#' Shape outliers are detected using a boxplot fence on the vertical distances
+#' below the parabola: a curve is flagged when its distance exceeds
+#' \eqn{Q_3 + \mathrm{factor} \times IQR}.
 #'
 #' @references
 #' Arribas-Gil, A. and Romo, J. (2014). Shape outlier detection and visualization
@@ -836,65 +827,33 @@ outliergram <- function(fdataobj, factor = 1.5, mei_threshold = 0.25, ...) {
   mei <- depth(fdataobj, method = "MEI")
   mbd <- depth(fdataobj, method = "MBD")
 
-  # Theoretical parabola coefficients for uniform data
-  # MBD_max occurs at MEI = 0.5, with MBD_max = 0.5
-  # Parabola: MBD = a0 + a1*MEI + a2*MEI^2
-  # For uniform: passes through (0,0), (0.5, 0.5), (1,0)
-  # This gives: a0 = 0, a1 = 2, a2 = -2
-  # So: MBD_theoretical = 2*MEI - 2*MEI^2 = 2*MEI*(1 - MEI)
-  a0 <- 0
-  a1 <- 2
-  a2 <- -2
+  # Finite-sample parabola coefficients (Arribas-Gil & Romo, 2014, Prop. 1)
+  # MBD = a0 + a1*MEI + a2*MEI^2 is the theoretical upper bound relating
+  # MBD and MEI for a sample of size n.
+  a0 <- -2 / (n * (n - 1))
+  a1 <- 2 * (n + 1) / (n - 1)
+  a2 <- -2 * (n + 1) / (n - 1)
 
   # Compute expected MBD based on MEI
   mbd_expected <- a0 + a1 * mei + a2 * mei^2
 
-  # Compute vertical distance from parabola
-  dist_to_parabola <- mbd - mbd_expected
+  # Compute vertical distance below the parabola (positive = below)
+  # d_i > 0 means the point is below the parabola (potential shape outlier)
+  dist_to_parabola <- mbd_expected - mbd
 
-  # Compute threshold based on the distribution of distances
-  # Use median and MAD for robust estimation
-  med_dist <- stats::median(dist_to_parabola)
-  mad_dist <- stats::mad(dist_to_parabola, constant = 1.4826)
+  # Outlier detection using boxplot fence (Arribas-Gil & Romo, 2014)
+  q1 <- stats::quantile(dist_to_parabola, 0.25)
+  q3 <- stats::quantile(dist_to_parabola, 0.75)
+  iqr <- q3 - q1
+  threshold <- q3 + factor * iqr
+  shape_outliers <- which(dist_to_parabola > threshold)
 
-  # Outliers are points significantly below the parabola (shape outliers)
-  threshold <- med_dist - factor * mad_dist
-  shape_outliers <- which(dist_to_parabola < threshold)
-
-  # Also detect magnitude outliers based on extreme MEI
-  # These may lie on the parabola but have unusual position
-  magnitude_high_outliers <- which(mei < mei_threshold)
-  magnitude_low_outliers <- which(mei > (1 - mei_threshold))
-
-  # Combine all outliers (unique indices)
-  all_outliers <- unique(c(shape_outliers, magnitude_high_outliers, magnitude_low_outliers))
-  all_outliers <- sort(all_outliers)
+  # All outliers are shape outliers (magnitude detection via MEI threshold
+  # is not part of the original outliergram method)
+  all_outliers <- sort(shape_outliers)
 
   # Classify outlier types
-  outlier_type <- character(length(all_outliers))
-  if (length(all_outliers) > 0) {
-    for (i in seq_along(all_outliers)) {
-      idx <- all_outliers[i]
-      mei_val <- mei[idx]
-      is_shape_outlier <- idx %in% shape_outliers
-      is_magnitude_high <- mei_val < mei_threshold
-      is_magnitude_low <- mei_val > (1 - mei_threshold)
-
-      if (is_shape_outlier && (is_magnitude_high || is_magnitude_low)) {
-        # Both unusual shape and extreme magnitude
-        outlier_type[i] <- "mixed"
-      } else if (is_magnitude_high) {
-        # Curve typically above others (low MEI = above)
-        outlier_type[i] <- "magnitude_high"
-      } else if (is_magnitude_low) {
-        # Curve typically below others (high MEI = below)
-        outlier_type[i] <- "magnitude_low"
-      } else {
-        # Only shape outlier (moderate MEI, low MBD)
-        outlier_type[i] <- "shape"
-      }
-    }
-  }
+  outlier_type <- rep("shape", length(all_outliers))
 
   outliers <- all_outliers
 
@@ -925,8 +884,8 @@ outliergram <- function(fdataobj, factor = 1.5, mei_threshold = 0.25, ...) {
 #' @param col_normal Color for normal observations. Default is "gray60".
 #' @param col_outlier Color for outliers (used when \code{color_by_type = FALSE}).
 #'   Default is "red".
-#' @param color_by_type Logical. If TRUE, color outliers by their type (shape,
-#'   magnitude_high, magnitude_low, mixed). Default is FALSE.
+#' @param color_by_type Logical. If TRUE, color outliers by their type.
+#'   Default is FALSE.
 #' @param show_parabola Logical. If TRUE, draw the theoretical parabola. Default TRUE.
 #' @param show_threshold Logical. If TRUE, draw the adjusted threshold parabola. Default TRUE.
 #' @param label What to use for labeling outlier points. Options:
@@ -995,12 +954,12 @@ plot.outliergram <- function(x, col_normal = "gray60", col_outlier = "red",
 
   # Create parabola data for plotting
   mei_seq <- seq(0, 1, length.out = 100)
+  mbd_parabola <- x$parabola["a0"] + x$parabola["a1"] * mei_seq +
+                  x$parabola["a2"] * mei_seq^2
   parabola_df <- data.frame(
     mei = mei_seq,
-    mbd_theoretical = x$parabola["a0"] + x$parabola["a1"] * mei_seq +
-                      x$parabola["a2"] * mei_seq^2,
-    mbd_threshold = x$parabola["a0"] + x$parabola["a1"] * mei_seq +
-                    x$parabola["a2"] * mei_seq^2 + x$threshold
+    mbd_theoretical = mbd_parabola,
+    mbd_threshold = mbd_parabola - x$threshold
   )
 
   # Build ggplot
