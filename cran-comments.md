@@ -11,18 +11,22 @@
    - Package size (~33 MB) is due to vendored Rust crate sources required for
      offline compilation per CRAN policy.
 
-## Resubmission
+## Resubmission (v0.3.3)
 
-Fixes from v0.3.1 submission feedback:
+Fixes from v0.3.2 reviewer feedback (Benjamin Altmann):
 
-- **Compiled code WARNING (exit/abort)**: Used linker `--wrap` flag to intercept
-  `abort`/`exit`/`_exit` from the Rust standard library, replacing them with
-  `Rf_error()` wrappers that safely convert to R errors. Combined with a linker
-  version script that hides all symbols except `R_init_fdars`.
-- **Test CPU time NOTE**: Limited Rust thread pool to 2 threads via
-  `RAYON_NUM_THREADS=2` in test setup.
+1. **Quoted software names**: 'Rust' now single-quoted in Title and Description.
+2. **Added references**: Ramsay & Silverman (2005, ISBN:978-0-387-40080-8) and
+   Ferraty & Vieu (2006, ISBN:978-0-387-30369-7) in DESCRIPTION.
+3. **Uncommented examples**: `flm.test` and `fmean.test.fdata` examples are now
+   executable, wrapped in `\donttest{}` (permutation tests take >5s).
+4. **Reset par()**: `addError` and `register.fd` examples now save/restore
+   graphical parameters via `oldpar <- par(...); on.exit(par(oldpar))` pattern.
+5. **Removed hardcoded set.seed**: Replaced `set.seed(123)` in `fregre.R` with
+   a deterministic Halton sequence for reproducible weight grids without
+   manipulating the user's RNG state.
 
-## Changes Since Last Submission
+### Previous resubmission (v0.3.2)
 
 - Wrapped `abort`/`exit`/`_exit` symbols with `Rf_error()` via `--wrap` linker flag
 - Added linker version script to export only `R_init_fdars`
