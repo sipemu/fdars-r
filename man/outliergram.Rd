@@ -12,9 +12,7 @@ outliergram(fdataobj, factor = 1.5, mei_threshold = 0.25, ...)
 \item{factor}{Factor to adjust the outlier detection threshold. Higher values
 make detection less sensitive. Default is 1.5.}
 
-\item{mei_threshold}{Threshold for classifying magnitude outliers based on MEI.
-Curves with MEI < mei_threshold or MEI > (1 - mei_threshold) are considered
-to have extreme magnitude. Default is 0.25.}
+\item{mei_threshold}{Deprecated and ignored. Kept for backwards compatibility.}
 
 \item{...}{Additional arguments (currently ignored).}
 }
@@ -25,11 +23,14 @@ An object of class 'outliergram' with components:
 \item{mei}{MEI values for each curve}
 \item{mbd}{MBD values for each curve}
 \item{outliers}{Indices of detected outliers}
-\item{outlier_type}{Character vector of outlier types for each detected outlier:
-"shape", "magnitude_high", "magnitude_low", or "mixed"}
+\item{outlier_type}{Character vector of outlier types ("shape") for each
+detected outlier}
 \item{n_outliers}{Number of outliers detected}
 \item{factor}{The factor used for threshold adjustment}
 \item{parabola}{Coefficients of the parabolic boundary (a0, a1, a2)}
+\item{threshold}{The boxplot-fence threshold for distance below the parabola}
+\item{dist_to_parabola}{Vertical distance below the parabola for each curve
+(positive values indicate the point is below the parabola)}
 }
 }
 \description{
@@ -38,26 +39,16 @@ MBD (Modified Band Depth) for outlier detection. Points below the parabolic
 boundary are identified as outliers, and each outlier is classified by type.
 }
 \details{
-The outliergram plots MEI on the x-axis versus MBD on the y-axis. For standard
-functional data, these values lie near a parabola. The theoretical relationship
-for uniformly distributed data is:
-\deqn{MBD = a_0 + a_1 \cdot MEI + a_2 \cdot MEI^2}
+The outliergram plots MEI on the x-axis versus MBD on the y-axis. For a
+sample of size \eqn{n}, the theoretical relationship is bounded by the
+finite-sample parabola (Arribas-Gil & Romo, 2014, Proposition 1):
+\deqn{MBD \le a_0 + a_1 \cdot MEI + a_2 \cdot MEI^2}
+where \eqn{a_0 = -2/(n(n-1))}, \eqn{a_1 = 2(n+1)/(n-1)},
+\eqn{a_2 = -2(n+1)/(n-1)}.
 
-Points that fall significantly below this parabola are identified as outliers.
-The \code{factor} parameter controls the sensitivity: lower values detect more
-outliers.
-
-\strong{Outlier Type Classification:}
-\itemize{
-\item \strong{shape}: Curves with unusual shape but typical magnitude
-(moderate MEI, low MBD). These curves cross other curves frequently.
-\item \strong{magnitude_high}: Curves shifted upward (high MEI, typically
-above most other curves).
-\item \strong{magnitude_low}: Curves shifted downward (low MEI, typically
-below most other curves).
-\item \strong{mixed}: Curves with both unusual shape and extreme magnitude
-(extreme MEI and low MBD).
-}
+Shape outliers are detected using a boxplot fence on the vertical distances
+below the parabola: a curve is flagged when its distance exceeds
+\eqn{Q_3 + \mathrm{factor} \times IQR}.
 }
 \examples{
 # Create functional data with different outlier types

@@ -16,6 +16,7 @@
 ^\.\./\.Rcheck$
 ^.*\.Rcheck$
 ^scripts$
+^examples$
 ^CHANGELOG\.md$
 ^Rplots\.pdf$
 ^.*\.tar\.gz$

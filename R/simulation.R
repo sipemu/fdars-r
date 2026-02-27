@@ -346,10 +346,10 @@ simMultiFunData <- function(n, argvals, M,
 #' fd_clean <- simFunData(n = 20, argvals = t, M = 5, seed = 42)
 #' fd_noisy <- addError(fd_clean, sd = 0.1)
 #'
-#' par(mfrow = c(1, 2))
+#' oldpar <- par(mfrow = c(1, 2))
 #' plot(fd_clean, main = "Clean Data")
 #' plot(fd_noisy, main = "With Noise (sd = 0.1)")
-#' par(mfrow = c(1, 1))
+#' par(oldpar)
 #'
 #' # Higher noise level
 #' fd_very_noisy <- addError(fd_clean, sd = 0.5)

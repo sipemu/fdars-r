@@ -34,5 +34,8 @@ the projected Cramer-von Mises statistic.
 \examples{
 fd <- fdata(matrix(rnorm(200), 20, 10))
 y <- rnorm(20)
-# test_result <- flm.test(fd, y, B = 100)
+\donttest{
+test_result <- flm.test(fd, y, B = 100)
+test_result$p.value
+}
 }

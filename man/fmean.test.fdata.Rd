@@ -28,5 +28,8 @@ Tests whether the mean function equals a specified value.
 }
 \examples{
 fd <- fdata(matrix(rnorm(200), 20, 10))
-# test_result <- fmean.test.fdata(fd, B = 100)
+\donttest{
+test_result <- fmean.test.fdata(fd, B = 100)
+test_result$p.value
+}
 }

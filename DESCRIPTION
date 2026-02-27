@@ -1,13 +1,17 @@
 Package: fdars
-Title: Functional Data Analysis in Rust
-Version: 0.3.2
+Title: Functional Data Analysis in 'Rust'
+Version: 0.3.3
 Authors@R:
     person("Simon", "Müller", role = c("aut", "cre"),
            email = "simon.mueller@muon-stat.com")
-Description: Functional data analysis tools with a high-performance Rust backend.
+Description: Functional data analysis tools with a high-performance 'Rust' backend.
     Provides methods for functional data manipulation, depth computation,
     distance metrics, regression, and statistical testing. Supports both
     1D functional data (curves) and 2D functional data (surfaces).
+    Methods are described in Ramsay and Silverman (2005,
+    ISBN:978-0-387-40080-8) "Functional Data Analysis" and Ferraty and
+    Vieu (2006, ISBN:978-0-387-30369-7) "Nonparametric Functional Data
+    Analysis".
 License: MIT + file LICENSE
 URL: https://sipemu.github.io/fdars-r/, https://github.com/sipemu/fdars-r
 BugReports: https://github.com/sipemu/fdars-r/issues

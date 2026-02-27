@@ -4,9 +4,9 @@
 \name{fdars-package}
 \alias{fdars}
 \alias{fdars-package}
-\title{fdars: Functional Data Analysis in Rust}
+\title{fdars: Functional Data Analysis in 'Rust'}
 \description{
-Functional data analysis tools with a high-performance Rust backend. Provides methods for functional data manipulation, depth computation, distance metrics, regression, and statistical testing. Supports both 1D functional data (curves) and 2D functional data (surfaces).
+Functional data analysis tools with a high-performance 'Rust' backend. Provides methods for functional data manipulation, depth computation, distance metrics, regression, and statistical testing. Supports both 1D functional data (curves) and 2D functional data (surfaces). Methods are described in Ramsay and Silverman (2005, ISBN:978-0-387-40080-8) "Functional Data Analysis" and Ferraty and Vieu (2006, ISBN:978-0-387-30369-7) "Nonparametric Functional Data Analysis".
 }
 \seealso{
 Useful links:

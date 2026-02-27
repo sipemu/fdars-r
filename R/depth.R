@@ -496,7 +496,6 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
   m_common <- min(sapply(derivs_obj, ncol))
 
   # Generate random projection vectors (smooth Gaussian processes)
-  set.seed(NULL)  # Use random seed for different projections each call
   projections <- matrix(rnorm(nproj * m_common), nproj, m_common)
 
   # Normalize projections

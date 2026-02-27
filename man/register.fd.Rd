@@ -49,9 +49,10 @@ reg <- register.fd(fd)
 print(reg)
 
 # Compare original vs registered
-par(mfrow = c(1, 2))
+oldpar <- par(mfrow = c(1, 2))
 plot(fd)
 plot(reg$registered)
+par(oldpar)
 }
 \seealso{
 \code{\link{metric.DTW}} for dynamic time warping distance

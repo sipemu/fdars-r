@@ -1045,12 +1045,19 @@ fregre.np.multi <- function(fdataobj.list, y, weights = NULL,
       w1_grid <- seq(0, 1, by = 0.1)
       weight_grid <- lapply(w1_grid, function(w1) c(w1, 1 - w1))
     } else {
-      # For >2 predictors, use simplex grid (simplified)
-      # Generate random points on simplex
-      set.seed(123)
+      # For >2 predictors, use deterministic simplex grid
+      # Generate evenly spaced points using Halton-like sequence
       n_grid <- 20
+      primes <- c(2, 3, 5, 7, 11, 13, 17, 19, 23, 29)[seq_len(min(p, 10))]
       weight_grid <- lapply(seq_len(n_grid), function(i) {
-        w <- runif(p)
+        w <- numeric(p)
+        for (j in seq_len(p)) {
+          # Van der Corput sequence for dimension j
+          base <- primes[((j - 1) %% length(primes)) + 1]
+          val <- 0; f <- 1; ii <- i
+          while (ii > 0) { f <- f / base; val <- val + (ii %% base) * f; ii <- ii %/% base }
+          w[j] <- val + 0.01
+        }
         w / sum(w)
       })
       # Add equal weights and extreme weights

@@ -24,8 +24,8 @@
 \item{col_outlier}{Color for outliers (used when \code{color_by_type = FALSE}).
 Default is "red".}
 
-\item{color_by_type}{Logical. If TRUE, color outliers by their type (shape,
-magnitude_high, magnitude_low, mixed). Default is FALSE.}
+\item{color_by_type}{Logical. If TRUE, color outliers by their type.
+Default is FALSE.}
 
 \item{show_parabola}{Logical. If TRUE, draw the theoretical parabola. Default TRUE.}
 

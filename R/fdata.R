@@ -1304,9 +1304,10 @@ print.fbplot <- function(x, ...) {
 #' print(reg)
 #'
 #' # Compare original vs registered
-#' par(mfrow = c(1, 2))
+#' oldpar <- par(mfrow = c(1, 2))
 #' plot(fd)
 #' plot(reg$registered)
+#' par(oldpar)
 register.fd <- function(fdataobj, target = NULL, max.shift = 0.2) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")

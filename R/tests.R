@@ -23,7 +23,10 @@
 #' @examples
 #' fd <- fdata(matrix(rnorm(200), 20, 10))
 #' y <- rnorm(20)
-#' # test_result <- flm.test(fd, y, B = 100)
+#' \donttest{
+#' test_result <- flm.test(fd, y, B = 100)
+#' test_result$p.value
+#' }
 flm.test <- function(fdataobj, y, B = 500, ...) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
@@ -99,7 +102,10 @@ flm.test <- function(fdataobj, y, B = 500, ...) {
 #' @export
 #' @examples
 #' fd <- fdata(matrix(rnorm(200), 20, 10))
-#' # test_result <- fmean.test.fdata(fd, B = 100)
+#' \donttest{
+#' test_result <- fmean.test.fdata(fd, B = 100)
+#' test_result$p.value
+#' }
 fmean.test.fdata <- function(fdataobj, mu0 = NULL, B = 500, ...) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
