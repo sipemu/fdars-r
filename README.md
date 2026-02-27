@@ -442,6 +442,10 @@ meta <- data.frame(group = c("A", "B"), value = c(1.5, 2.3))
 fd2d <- df_to_fdata2d(df, id_col = 1, s_col = 2, metadata = meta)
 ```
 
+## Examples
+
+- **[Wine Quality Analysis with Andrews Curves](examples/medium-andrews-wine.qmd)** — A comprehensive walkthrough using the UCI Wine dataset (178 wines, 13 chemicals, 3 cultivars) demonstrating outlier detection, clustering, hypothesis testing, FPCA, and process monitoring. Render with `quarto render examples/medium-andrews-wine.qmd`.
+
 ## License
 
 MIT
