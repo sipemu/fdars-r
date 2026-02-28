@@ -444,9 +444,9 @@ fd2d <- df_to_fdata2d(df, id_col = 1, s_col = 2, metadata = meta)
 
 ## Examples
 
-- **[Wine Quality Analysis with Andrews Curves](examples/medium-andrews-wine.qmd)** — A comprehensive walkthrough using the UCI Wine dataset (178 wines, 13 chemicals, 3 cultivars) demonstrating outlier detection, clustering, hypothesis testing, FPCA, and process monitoring. Render with `quarto render examples/medium-andrews-wine.qmd`.
+- **[Wine Quality Analysis with Andrews Curves](https://github.com/sipemu/fdars-r/blob/main/examples/medium-andrews-wine.qmd)** — A comprehensive walkthrough using the UCI Wine dataset (178 wines, 13 chemicals, 3 cultivars) demonstrating outlier detection, clustering, hypothesis testing, FPCA, and process monitoring. Render with `quarto render examples/medium-andrews-wine.qmd`.
 
-- **[Predictive Truck Maintenance with Andrews Curves](examples/scania-aps-failure.qmd)** — Applying the full FDA pipeline to the Scania APS Failure dataset (76,000 trucks, 170 anonymized sensors, binary failure classification) for fleet health monitoring, outlier triage, and sensor-level diagnostics. Render with `quarto render examples/scania-aps-failure.qmd`.
+- **[Predictive Truck Maintenance with Andrews Curves](https://github.com/sipemu/fdars-r/blob/main/examples/scania-aps-failure.qmd)** — Applying the full FDA pipeline to the Scania APS Failure dataset (76,000 trucks, 170 anonymized sensors, binary failure classification) for fleet health monitoring, outlier triage, and sensor-level diagnostics. Render with `quarto render examples/scania-aps-failure.qmd`.
 
 ## License
 

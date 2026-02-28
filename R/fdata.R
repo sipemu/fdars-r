@@ -489,6 +489,7 @@ fdata.cen <- function(fdataobj) {
 #'   At least one must be of class \code{fdata}.
 #'
 #' @return An \code{fdata} object with the result.
+#' @importFrom methods callGeneric
 #' @export
 #' @examples
 #' fd1 <- fdata(matrix(1:20, 4, 5))
