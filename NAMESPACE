@@ -2,6 +2,7 @@
 
 S3method("[",fdata)
 S3method("[",irregFdata)
+S3method(Ops,fdata)
 S3method(as.fdata,fdata)
 S3method(as.fdata,irregFdata)
 S3method(autoplot,fdata)

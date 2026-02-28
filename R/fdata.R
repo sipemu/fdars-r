@@ -478,6 +478,47 @@ fdata.cen <- function(fdataobj) {
   fdataobj
 }
 
+#' Arithmetic Operations for Functional Data
+#'
+#' Perform elementwise arithmetic on \code{fdata} objects.
+#' Supports addition, subtraction, multiplication, division, and exponentiation
+#' between two \code{fdata} objects or between an \code{fdata} object and a
+#' numeric scalar.
+#'
+#' @param e1,e2 Objects of class \code{fdata} or numeric scalars.
+#'   At least one must be of class \code{fdata}.
+#'
+#' @return An \code{fdata} object with the result.
+#' @export
+#' @examples
+#' fd1 <- fdata(matrix(1:20, 4, 5))
+#' fd2 <- fdata(matrix(21:40, 4, 5))
+#' fd1 + fd2
+#' fd1 * 2
+#' 3 - fd1
+Ops.fdata <- function(e1, e2) {
+  op <- .Generic
+
+  if (inherits(e1, "fdata") && inherits(e2, "fdata")) {
+    if (!identical(e1$argvals, e2$argvals)) {
+      stop("argvals of both fdata objects must be identical")
+    }
+    if (!identical(dim(e1$data), dim(e2$data))) {
+      stop("data dimensions must match")
+    }
+    result <- e1
+    result$data <- callGeneric(e1$data, e2$data)
+  } else if (inherits(e1, "fdata")) {
+    result <- e1
+    result$data <- callGeneric(e1$data, e2)
+  } else {
+    result <- e2
+    result$data <- callGeneric(e1, e2$data)
+  }
+
+  result
+}
+
 #' Compute functional mean
 #'
 #' Computes the pointwise mean function across all observations.
