@@ -44,6 +44,8 @@ navbar:
         href: articles/seasonal-analysis.html
       - text: Andrews Transformation
         href: articles/andrews-transformation.html
+      - text: Equivalence Testing
+        href: articles/equivalence-testing.html
       - text: "---"
       - text: Advanced
       - text: Covariance Functions
@@ -75,6 +77,7 @@ articles:
   - articles/regression
   - articles/seasonal-analysis
   - articles/andrews-transformation
+  - articles/equivalence-testing
 - title: Advanced
   contents:
   - articles/covariance-functions
