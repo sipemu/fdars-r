@@ -287,6 +287,7 @@ reference:
 - title: Statistical Tests
   contents:
   - fmean.test.fdata
+  - fequiv.test
   - group.test
 
 - title: Plotting
@@ -300,6 +301,7 @@ reference:
   - plot.cluster.fcm
   - plot.cluster.kmeans
   - plot.cluster.optim
+  - plot.fequiv.test
   - plot.group.distance
   - plot.outliergram
   - plot.outliers.fdata
@@ -334,6 +336,7 @@ reference:
   - print.fregre.np
   - print.fregre.np.multi
   - print.group.distance
+  - print.fequiv.test
   - print.group.test
   - print.kernel
   - print.magnitudeshape
@@ -365,5 +368,6 @@ reference:
 - title: Other
   contents:
   - "`[.fdata`"
+  - Ops.fdata
   - kernels
   - fdars-package
