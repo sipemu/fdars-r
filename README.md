@@ -76,6 +76,7 @@ Group similar curves together:
 - Geometric median (L1 median)
 - Bootstrap confidence intervals
 - Hypothesis testing for functional means
+- Functional equivalence test (TOST) via simultaneous confidence bands
 
 ### Gaussian Process Simulation
 Generate synthetic functional data:
@@ -359,6 +360,7 @@ trimvar(fd, trim = 0.1, method = "mode")
 
 - `group.distance` - Compute distances between groups (centroid, Hausdorff, depth-based)
 - `group.test` - Permutation test for significant group differences
+- `fequiv.test` - Functional equivalence test (TOST) with bootstrap SCB
 - `plot.group.distance` - Visualize group distances (heatmap, dendrogram)
 
 ### Clustering

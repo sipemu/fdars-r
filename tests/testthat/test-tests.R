@@ -185,3 +185,140 @@ test_that("fmean.test.fdata with custom mu0 matching data mean gives high p-valu
 
   expect_true(result$p.value > 0.05)
 })
+
+# =============================================================================
+# Functional Equivalence Test (fequiv.test)
+# =============================================================================
+
+test_that("fequiv.test returns correct class and structure", {
+  set.seed(1)
+  t <- seq(0, 1, length.out = 30)
+  fd1 <- fdata(matrix(rnorm(20 * 30), 20, 30), argvals = t)
+  fd2 <- fdata(matrix(rnorm(20 * 30), 20, 30), argvals = t)
+
+  result <- fequiv.test(fd1, fd2, delta = 2, n.boot = 100)
+
+  expect_s3_class(result, "fequiv.test")
+  expect_true(all(c("statistic", "delta", "critical.value", "scb.lower",
+                     "scb.upper", "diff.mean", "reject", "p.value", "alpha",
+                     "method", "argvals", "n1", "n2", "boot.stats",
+                     "data.name") %in% names(result)))
+  expect_equal(result$n1, 20)
+  expect_equal(result$n2, 20)
+  expect_length(result$diff.mean, 30)
+  expect_length(result$scb.lower, 30)
+  expect_length(result$scb.upper, 30)
+})
+
+test_that("fequiv.test declares equivalence for identical distributions with large delta", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 30)
+  X <- matrix(rnorm(40 * 30), 40, 30)
+  fd1 <- fdata(X[1:20, ], argvals = t)
+  fd2 <- fdata(X[21:40, ], argvals = t)
+
+  result <- fequiv.test(fd1, fd2, delta = 5, n.boot = 500)
+
+  expect_true(result$reject)
+})
+
+test_that("fequiv.test does NOT declare equivalence for distant means with small delta", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 30)
+  fd1 <- fdata(matrix(rnorm(20 * 30, mean = 0), 20, 30), argvals = t)
+  fd2 <- fdata(matrix(rnorm(20 * 30, mean = 10), 20, 30), argvals = t)
+
+  result <- fequiv.test(fd1, fd2, delta = 0.5, n.boot = 200)
+
+  expect_false(result$reject)
+})
+
+test_that("fequiv.test p-value is in [0, 1]", {
+  set.seed(7)
+  t <- seq(0, 1, length.out = 30)
+  fd1 <- fdata(matrix(rnorm(20 * 30), 20, 30), argvals = t)
+  fd2 <- fdata(matrix(rnorm(20 * 30), 20, 30), argvals = t)
+
+  result <- fequiv.test(fd1, fd2, delta = 1, n.boot = 100)
+
+  expect_true(result$p.value >= 0)
+  expect_true(result$p.value <= 1)
+})
+
+test_that("fequiv.test one-sample variant works", {
+  set.seed(10)
+  t <- seq(0, 1, length.out = 30)
+  fd <- fdata(matrix(rnorm(30 * 30, mean = 0, sd = 0.1), 30, 30), argvals = t)
+
+  # One-sample against zero with large delta: should declare equivalence
+
+  result <- fequiv.test(fd, delta = 2, n.boot = 200)
+
+  expect_s3_class(result, "fequiv.test")
+  expect_true(is.na(result$n2))
+  expect_true(result$reject)
+})
+
+test_that("fequiv.test validates inputs", {
+  t <- seq(0, 1, length.out = 30)
+  fd <- fdata(matrix(rnorm(20 * 30), 20, 30), argvals = t)
+
+  # Not fdata
+  expect_error(fequiv.test(matrix(1:10, 2, 5), delta = 1))
+  # Missing delta
+  expect_error(fequiv.test(fd))
+  # Negative delta
+  expect_error(fequiv.test(fd, delta = -1))
+  # Bad alpha
+  expect_error(fequiv.test(fd, delta = 1, alpha = 0.6))
+})
+
+test_that("fequiv.test boot.stats has correct length", {
+  set.seed(99)
+  t <- seq(0, 1, length.out = 20)
+  fd1 <- fdata(matrix(rnorm(15 * 20), 15, 20), argvals = t)
+  fd2 <- fdata(matrix(rnorm(15 * 20), 15, 20), argvals = t)
+
+  n_boot <- 77
+  result <- fequiv.test(fd1, fd2, delta = 1, n.boot = n_boot)
+
+  expect_length(result$boot.stats, n_boot)
+})
+
+test_that("fequiv.test percentile method works", {
+  set.seed(5)
+  t <- seq(0, 1, length.out = 20)
+  fd1 <- fdata(matrix(rnorm(15 * 20), 15, 20), argvals = t)
+  fd2 <- fdata(matrix(rnorm(15 * 20), 15, 20), argvals = t)
+
+  result <- fequiv.test(fd1, fd2, delta = 3, n.boot = 100,
+                        method = "percentile")
+
+  expect_s3_class(result, "fequiv.test")
+  expect_equal(result$method, "percentile")
+})
+
+test_that("fequiv.test handles unequal sample sizes", {
+  set.seed(33)
+  t <- seq(0, 1, length.out = 20)
+  fd1 <- fdata(matrix(rnorm(10 * 20), 10, 20), argvals = t)
+  fd2 <- fdata(matrix(rnorm(25 * 20), 25, 20), argvals = t)
+
+  result <- fequiv.test(fd1, fd2, delta = 2, n.boot = 100)
+
+  expect_equal(result$n1, 10)
+  expect_equal(result$n2, 25)
+  expect_s3_class(result, "fequiv.test")
+})
+
+test_that("print and plot methods for fequiv.test don't error", {
+  set.seed(1)
+  t <- seq(0, 1, length.out = 20)
+  fd1 <- fdata(matrix(rnorm(15 * 20), 15, 20), argvals = t)
+  fd2 <- fdata(matrix(rnorm(15 * 20), 15, 20), argvals = t)
+
+  result <- fequiv.test(fd1, fd2, delta = 2, n.boot = 50)
+
+  expect_output(print(result), "Functional Equivalence Test")
+  expect_s3_class(plot(result), "ggplot")
+})

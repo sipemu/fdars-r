@@ -2463,14 +2463,12 @@ fdata2basis.fdata <- function(x, nbasis = 10, type = c("bspline", "fourier"), ..
 #' @return An object of class 'fd' from the fda package.
 #'
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf requireNamespace("fda", quietly = TRUE)
 #' t <- seq(0, 1, length.out = 50)
 #' X <- matrix(0, 20, 50)
 #' for (i in 1:20) X[i, ] <- sin(2*pi*t) + rnorm(50, sd = 0.1)
 #' fd <- fdata(X, argvals = t)
 #' fd_obj <- fdata2fd(fd, nbasis = 10)
-#' }
 fdata2fd <- function(fdataobj, nbasis = 10, type = c("bspline", "fourier")) {
   if (!requireNamespace("fda", quietly = TRUE)) {
     stop("Package 'fda' is required for fdata2fd. Please install it.")

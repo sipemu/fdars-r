@@ -10,8 +10,24 @@
    - This is a new submission to CRAN.
    - Package size (~33 MB) is due to vendored Rust crate sources required for
      offline compilation per CRAN policy.
+   - Possibly misspelled words: Ferraty, Silverman, Vieu — these are author
+     surnames from the referenced textbooks (Ramsay & Silverman 2005;
+     Ferraty & Vieu 2006).
 
 ## Resubmission (v0.3.3)
+
+Fixes from v0.3.3 CRAN pre-test failures:
+
+1. **Fixed flaky RP depth test**: `test-validation-depth.R:83` failed on
+   Debian because RP (random projection) depth uses stochastic projections,
+   making the "deepest curve near center" assertion unreliable across
+   platforms. Replaced the brittle centrality check with a robust
+   non-degeneracy assertion (`sd(depths) > 0`). Structural validity
+   (depths in [0,1], correct length) was already tested above.
+2. **New feature: `fequiv.test()`**: Added functional equivalence test (TOST)
+   based on Dette & Kokot (2021, Biometrika 108(4):895-913) with multiplier
+   and percentile bootstrap methods, print and plot S3 methods, and 10 new
+   test cases.
 
 Fixes from v0.3.2 reviewer feedback (Benjamin Altmann):
 
@@ -69,13 +85,15 @@ The package includes a configure script that:
 ## Test Coverage
 
 - All examples run without errors
-- All tests pass (1714 tests)
+- All tests pass (1737 tests)
 - 15 vignettes build successfully
 
 ## Test Environments
 
 * Local: Manjaro Linux, R 4.5.2, Rust 1.84
 * GitHub Actions: Ubuntu, macOS, Windows (R release and devel)
+* win-builder: r-devel-windows-x86_64
+* CRAN incoming: r-devel-linux-x86_64-debian-gcc
 
 ## Downstream Dependencies
 

@@ -21,11 +21,11 @@ Converts an fdata object to an fd object from the fda package.
 Requires the fda package to be installed.
 }
 \examples{
-\donttest{
+\dontshow{if (requireNamespace("fda", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 t <- seq(0, 1, length.out = 50)
 X <- matrix(0, 20, 50)
 for (i in 1:20) X[i, ] <- sin(2*pi*t) + rnorm(50, sd = 0.1)
 fd <- fdata(X, argvals = t)
 fd_obj <- fdata2fd(fd, nbasis = 10)
-}
+\dontshow{\}) # examplesIf}
 }
