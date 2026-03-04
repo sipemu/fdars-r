@@ -48,7 +48,7 @@ for (i in 1:n) {
 }
 fd <- fdata(data, argvals = argvals)
 
-# Align
+# Align to cross-sectional mean (default)
 res <- elastic.align(fd)
 print(res)
 ```
@@ -57,7 +57,29 @@ print(res)
 plot(res, type = "both")
 ```
 
-## SRSF Transform
+You can also supply a custom target -- as a numeric vector or an `fdata` object:
+
+```{r align-target}
+# Use the deepest (most central) curve as target
+depths <- depth(fd, method = "FM")
+res_deep <- elastic.align(fd, target = fd[which.max(depths)])
+```
+
+### Inspecting Warping Functions
+
+The warping functions show how each curve's time axis is stretched or compressed
+to match the target:
+
+```{r warps}
+plot(res, type = "warps")
+```
+
+A warping function above the diagonal means that part of the curve has been
+sped up (compressed in time); below the diagonal means slowed down (stretched).
+
+## Mathematical Background
+
+### SRSF Transform
 
 The SRSF of a function $f$ is defined as:
 
@@ -87,43 +109,16 @@ max_error <- max(abs(f_original - f_reconstructed))
 cat("Round-trip max error:", format(max_error, digits = 4), "\n")
 ```
 
-## Alignment in Detail
+### Warping Functions
 
-### How It Works
+`elastic.align()` finds the optimal warping function $\gamma$ for each curve
+using dynamic programming. The warping functions satisfy $\gamma(0) = 0$ and
+$\gamma(1) = 1$ (boundary-preserving) and are monotone increasing (time never
+runs backward).
 
-`elastic.align()` aligns all curves to a common target using dynamic programming
-to find the optimal warping function $\gamma$ for each curve. The warping functions
-satisfy $\gamma(0) = 0$ and $\gamma(1) = 1$ (boundary-preserving) and are monotone
-increasing (time never runs backward).
+## Core Functions
 
-By default, the cross-sectional mean is used as the target:
-
-```{r align-detail}
-res <- elastic.align(fd)
-```
-
-You can also supply a custom target -- as a numeric vector or an `fdata` object:
-
-```{r align-target}
-# Use the deepest (most central) curve as target
-depths <- depth(fd, method = "FM")
-deepest <- fd[which.max(depths)]
-res_deep <- elastic.align(fd, target = deepest)
-```
-
-### Inspecting Warping Functions
-
-The warping functions show how each curve's time axis is stretched or compressed
-to match the target:
-
-```{r warps}
-plot(res, type = "warps")
-```
-
-A warping function above the diagonal means that part of the curve has been
-sped up (compressed in time); below the diagonal means slowed down (stretched).
-
-## Karcher Mean
+### Karcher Mean
 
 The **Karcher mean** (Frechet mean in the elastic metric) computes the mean shape
 by iteratively aligning curves to a running estimate of the mean. This produces a
@@ -155,7 +150,28 @@ ggplot(df_means, aes(x = t, y = value, color = type)) +
 The cross-sectional mean is attenuated by the phase shifts, while the Karcher mean
 recovers the true amplitude.
 
-## Elastic Distance Matrix
+For complex data, increase `max.iter` and check convergence:
+
+```{r karcher-custom}
+set.seed(42)
+n <- 20
+dm <- matrix(0, n, 100)
+for (i in 1:n) {
+  shift <- runif(1, -0.1, 0.1)
+  dm[i, ] <- exp(-25 * (argvals - 0.5 - shift)^2)
+}
+fd_bumps <- fdata(dm, argvals = argvals)
+
+km <- karcher.mean(fd_bumps, max.iter = 30, tol = 1e-4)
+cat("Converged:", km$converged, "\n")
+cat("Iterations:", km$n.iter, "\n")
+```
+
+```{r karcher-custom-plot}
+plot(km, type = "mean")
+```
+
+### Elastic Distance Matrix
 
 The elastic distance provides a reparameterization-invariant metric for
 clustering, MDS, and other distance-based methods:
@@ -215,156 +231,13 @@ in **timing**. The table below summarizes where it excels and where it does not.
 | Genuinely different shapes | Forced warping, VR < 0 | Use depth or distance methods instead |
 | Very noisy data (unsmoothed) | Noise-driven warping, VR < 0 | Pre-smooth with `fdata2basis()` + `basis2fdata()` |
 
-## Comparison with DTW and Shift Registration
-
-Three alignment strategies are available in **fdars**:
-
-| | Elastic (SRSF) | DTW | Shift Registration |
-|:--|:--|:--|:--|
-| **Function** | `elastic.align()` | `metric.DTW()` | `register.fd()` |
-| **Warping** | Smooth, monotone diffeomorphism | Piecewise constant, allows repeated indices | Global translation only |
-| **Metric** | Proper metric (triangle inequality holds) | Not a metric | Not applicable (no warping) |
-| **Amplitude/Phase** | Cleanly separates the two | Mixes them — can absorb amplitude differences into warping | Pure phase (shift), amplitude untouched |
-| **Degeneracy** | No "pinching" — SRSF penalizes compression | Can collapse entire regions to a single point | No degeneracy, but very limited |
-| **Mean** | Karcher mean is well-defined | No principled mean | Shift-corrected cross-sectional mean |
-| **Complexity** | $O(m^2)$ per pair (DP) | $O(m^2)$ per pair (DP) | $O(m)$ per curve (cross-correlation) |
-
-### Head-to-Head: Shifted Bumps
-
-The clearest way to see the differences is on data with localized features:
-
-```{r comparison-setup}
-set.seed(42)
-m_cmp <- 200
-argvals_cmp <- seq(0, 1, length.out = m_cmp)
-n_cmp <- 15
-
-# Two bumps with varying positions
-data_cmp <- matrix(0, n_cmp, m_cmp)
-for (i in 1:n_cmp) {
-  p1 <- 0.3 + runif(1, -0.06, 0.06)
-  p2 <- 0.7 + runif(1, -0.06, 0.06)
-  data_cmp[i, ] <- exp(-300 * (argvals_cmp - p1)^2) +
-                   exp(-300 * (argvals_cmp - p2)^2)
-}
-fd_cmp <- fdata(data_cmp, argvals = argvals_cmp)
-var_orig_cmp <- mean(apply(fd_cmp$data, 2, var))
-```
-
-**Elastic alignment** finds smooth, local warping for each bump independently:
-
-```{r comparison-elastic}
-res_elastic <- elastic.align(fd_cmp)
-vr_elastic <- 1 - mean(apply(res_elastic$aligned$data, 2, var)) / var_orig_cmp
-cat("Elastic VR:", round(vr_elastic * 100, 1), "%\n")
-```
-
-**Shift registration** applies a single global shift — it can center one bump
-but not both when they move independently:
-
-```{r comparison-shift}
-res_shift <- register.fd(fd_cmp)
-vr_shift <- 1 - mean(apply(res_shift$registered$data, 2, var)) / var_orig_cmp
-cat("Shift registration VR:", round(vr_shift * 100, 1), "%\n")
-```
-
-```{r comparison-plot, fig.height = 8}
-plot_curves <- function(data, argvals, title) {
-  n <- nrow(data)
-  m <- length(argvals)
-  df <- data.frame(
-    curve_id = rep(seq_len(n), each = m),
-    argval = rep(argvals, n),
-    value = as.vector(t(data))
-  )
-  ggplot(df, aes(x = argval, y = value, group = curve_id)) +
-    geom_line(alpha = 0.5) +
-    labs(title = title, x = "t", y = "value") +
-    theme_minimal()
-}
-
-p1 <- plot_curves(fd_cmp$data, argvals_cmp, "Original")
-p2 <- plot_curves(res_elastic$aligned$data, argvals_cmp,
-        paste0("Elastic (VR = ", round(vr_elastic * 100, 1), "%)"))
-p3 <- plot_curves(res_shift$registered$data, argvals_cmp,
-        paste0("Shift Registration (VR = ", round(vr_shift * 100, 1), "%)"))
-
-p1 / p2 / p3
-```
-
-Elastic alignment resolves the independent shifts of both bumps. Shift
-registration can only correct a single global offset, leaving residual
-phase variability when features move independently.
-
-### DTW Distance vs Elastic Distance
-
-DTW and elastic distances rank curves differently because DTW can absorb
-amplitude differences into warping while elastic alignment separates them:
-
-```{r comparison-distances}
-# Compute both distance matrices
-D_elastic <- elastic.distance(fd_cmp)
-D_dtw <- metric.DTW(fd_cmp)
-
-# Compare: correlation of off-diagonal entries
-idx <- upper.tri(D_elastic)
-cat("Correlation between elastic and DTW distances:",
-    round(cor(D_elastic[idx], D_dtw[idx]), 3), "\n")
-```
-
-```{r comparison-distances-plot, fig.height = 4}
-plot(D_elastic[idx], D_dtw[idx], pch = 19, cex = 0.6, col = "steelblue",
-     xlab = "Elastic distance", ylab = "DTW distance",
-     main = "Elastic vs DTW Pairwise Distances")
-abline(lm(D_dtw[idx] ~ D_elastic[idx]), col = "red", lwd = 1.5)
-```
-
-The distances are correlated but not identical. The key difference emerges
-when amplitude variability is present:
-
-```{r comparison-amplitude, fig.height = 4}
-set.seed(42)
-# Curves with BOTH amplitude and phase variability
-data_amp <- matrix(0, n_cmp, m_cmp)
-for (i in 1:n_cmp) {
-  amp <- runif(1, 0.5, 1.5)
-  shift <- runif(1, -0.06, 0.06)
-  data_amp[i, ] <- amp * exp(-200 * (argvals_cmp - 0.5 - shift)^2)
-}
-fd_amp <- fdata(data_amp, argvals = argvals_cmp)
-
-D_elastic_amp <- elastic.distance(fd_amp)
-D_dtw_amp <- metric.DTW(fd_amp)
-idx_amp <- upper.tri(D_elastic_amp)
-
-cat("Correlation (amplitude+phase):",
-    round(cor(D_elastic_amp[idx_amp], D_dtw_amp[idx_amp]), 3), "\n")
-```
-
-With mixed amplitude and phase, DTW distances are less correlated with elastic
-distances because DTW warping partially absorbs amplitude differences. Elastic
-distances preserve the amplitude/phase separation, making them more suitable
-for downstream analysis (clustering, MDS) when both sources of variability
-carry distinct meaning.
-
-### When to Use Each Method
-
-| Scenario | Recommended |
-|:---------|:------------|
-| Localized features with independent timing shifts | Elastic alignment |
-| Simple global time shift or delay | Shift registration (`register.fd`) — fast and sufficient |
-| Distance computation for clustering/MDS | Elastic distance (proper metric) or DTW (if metric property not needed) |
-| Noisy signals, speech-like data | DTW (more robust to noise without pre-smoothing) |
-| Periodic/circular data | `elastic.align(periodic = TRUE)` |
-| Need principled mean shape | `karcher.mean()` (no DTW equivalent) |
-
-## Visual Examples by Scenario
+## Scenario Gallery
 
 The following examples illustrate alignment behavior across different data
 scenarios. Each shows the **original** curves (left) and **aligned** curves
 (right) with variance reduction (VR) reported.
 
-### Works Well: ECG-like Multi-Peak Curves
+### ECG-like Multi-Peak Curves
 
 Sharp, localized features with timing differences are the ideal use case:
 
@@ -393,7 +266,7 @@ plot(res_ecg, type = "both") +
   plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
 ```
 
-### Works Well: Spectral Peaks
+### Spectral Peaks
 
 Multiple peaks at varying positions, common in spectroscopy and chromatography:
 
@@ -418,7 +291,7 @@ plot(res_spec, type = "both") +
   plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
 ```
 
-### Works Well: Growth-like Sigmoid Curves
+### Growth-like Sigmoid Curves
 
 Monotone S-shaped curves with timing shifts (e.g., growth curves with
 differing onset times):
@@ -442,7 +315,7 @@ plot(res_sig, type = "both") +
   plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
 ```
 
-### Medium: Mixed Amplitude and Phase Variability
+### Mixed Amplitude and Phase Variability
 
 When curves differ in both height *and* timing, alignment corrects the phase
 component but leaves amplitude variability untouched:
@@ -471,7 +344,7 @@ After alignment, curves still differ in amplitude (vertical spread) but peaks
 and valleys are now synchronized. The residual variance is real amplitude
 variability, not a failure of alignment.
 
-### Medium: Noisy Data (Raw vs Smoothed)
+### Noisy Data: Raw vs Smoothed
 
 Noise in derivatives overwhelms the SRSF. Pre-smoothing recovers alignment:
 
@@ -505,7 +378,7 @@ p_sm <- plot(res_sm, type = "both") +
 p_raw / p_sm
 ```
 
-### Medium: Boundary Mismatch
+### Boundary Mismatch
 
 When shifted curves have different values at the domain boundaries, alignment
 is excellent in the interior but constrained at the edges:
@@ -528,10 +401,10 @@ plot(res_bnd, type = "both") +
     "% — note residual spread at boundaries"))
 ```
 
-### Bad: Pure Amplitude Differences
+### Pure Amplitude Differences
 
 When curves differ only in height (no phase variability), alignment correctly
-produces identity warps — but also provides no benefit:
+produces identity warps -- no benefit, but no harm:
 
 ```{r gallery-amplitude, fig.height = 4}
 set.seed(42)
@@ -553,9 +426,7 @@ plot(res_amp, type = "both") +
     "% — no phase to correct, identity warps applied"))
 ```
 
-This is correct behavior: no spurious warping is introduced.
-
-### Bad: Genuinely Different Shapes
+### Genuinely Different Shapes
 
 Alignment should **not** be used when curves have fundamentally different
 shapes. Forced warping produces meaningless results:
@@ -586,237 +457,7 @@ plot(res_diff, type = "both") +
 When VR is very low or negative, it indicates the data is not suitable for
 elastic alignment. Use depth or distance methods instead.
 
-## Periodic Functional Data
-
-### The Problem
-
-Elastic alignment uses fixed boundary constraints $\gamma(0) = 0$, $\gamma(1) = 1$.
-This prevents the warping function from performing circular shifts, which means
-periodic data (e.g., curves on $[0, 2\pi]$ where $f(0) = f(2\pi)$) with large
-phase offsets cannot be properly aligned.
-
-For example, two copies of $\sin(t)$ shifted by half a period have identical
-shape but the boundary constraints force alignment to fail:
-
-```{r periodic-problem, fig.height = 4}
-set.seed(42)
-m <- 100
-argvals_p <- seq(0, 2 * pi, length.out = m)
-n <- 15
-data_p <- matrix(0, n, m)
-for (i in 1:n) {
-  shift <- sample(0:(m - 1), 1)
-  idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
-  data_p[i, ] <- sin(argvals_p[idx])
-}
-fd_p <- fdata(data_p, argvals = argvals_p)
-
-# Standard alignment struggles with circular shifts
-res_std <- elastic.align(fd_p)
-var_orig <- mean(apply(fd_p$data, 2, var))
-vr_std <- 1 - mean(apply(res_std$aligned$data, 2, var)) / var_orig
-```
-
-```{r periodic-problem-plot, fig.height = 4}
-plot(res_std, type = "both") +
-  plot_annotation(subtitle = paste0(
-    "Standard alignment on periodic data — VR = ", round(vr_std * 100, 1), "%"))
-```
-
-### The Solution
-
-Setting `periodic = TRUE` applies a two-stage approach:
-
-1. **Circular rotation**: Each curve is circularly shifted so that its global
-   maximum is at a canonical grid position
-2. **Elastic alignment**: Standard alignment on the rotated data
-
-```{r periodic-solution, fig.height = 4}
-res_per <- elastic.align(fd_p, periodic = TRUE)
-vr_per <- 1 - mean(apply(res_per$aligned$data, 2, var)) / var_orig
-```
-
-```{r periodic-solution-plot, fig.height = 4}
-plot(res_per, type = "both") +
-  plot_annotation(subtitle = paste0(
-    "Periodic alignment — VR = ", round(vr_per * 100, 1), "%"))
-```
-
-The rotation step removes large circular shifts that the boundary-constrained
-warping cannot handle, and the elastic step corrects any remaining timing
-differences.
-
-You can also apply the rotation step manually using `periodic.rotate()`:
-
-```{r periodic-rotate}
-rot <- periodic.rotate(fd_p)
-cat("Shifts applied:", head(rot$shifts), "...\n")
-```
-
-The `karcher.mean()` function also accepts `periodic = TRUE`:
-
-```{r periodic-karcher}
-km_per <- karcher.mean(fd_p, max.iter = 15, periodic = TRUE)
-print(km_per)
-```
-
-## Practical Guide
-
-### Pre-smooth Noisy Data
-
-The SRSF transform involves derivatives, so noise gets amplified. Always smooth
-noisy data before alignment:
-
-```{r presmooth}
-set.seed(42)
-noisy <- matrix(0, 15, 100)
-shifts <- runif(15, -0.1, 0.1)
-for (i in 1:15) {
-  noisy[i, ] <- sin(2 * pi * (argvals - shifts[i])) + rnorm(100, sd = 0.15)
-}
-fd_noisy <- fdata(noisy, argvals = argvals)
-
-# Smooth with B-spline basis
-coefs <- fdata2basis(fd_noisy, nbasis = 15, type = "bspline")
-fd_smooth <- basis2fdata(coefs, argvals)
-
-var_before <- mean(apply(fd_noisy$data, 2, var))
-
-# Align raw vs smoothed
-res_raw <- elastic.align(fd_noisy)
-res_smooth <- elastic.align(fd_smooth)
-
-vr_raw <- 1 - mean(apply(res_raw$aligned$data, 2, var)) / var_before
-vr_smooth <- 1 - mean(apply(res_smooth$aligned$data, 2, var)) / var_before
-cat("VR (raw):     ", round(vr_raw * 100, 1), "%\n")
-cat("VR (smoothed):", round(vr_smooth * 100, 1), "%\n")
-```
-
-### Use Sufficient Grid Resolution
-
-The dynamic programming alignment operates on the evaluation grid. Finer grids
-yield more accurate warping:
-
-```{r grid-resolution}
-set.seed(42)
-for (m in c(20, 50, 100, 200)) {
-  av <- seq(0, 1, length.out = m)
-  shifts <- runif(15, -0.1, 0.1)
-  dm <- matrix(0, 15, m)
-  for (i in 1:15) dm[i, ] <- sin(2 * pi * (av - shifts[i]))
-  fd_m <- fdata(dm, argvals = av)
-  ea <- elastic.align(fd_m)
-  var_red <- 1 - mean(apply(ea$aligned$data, 2, var)) /
-                  mean(apply(fd_m$data, 2, var))
-  cat(sprintf("  m = %3d: VR = %5.1f%%\n", m, var_red * 100))
-}
-```
-
-A minimum of 50-100 grid points is recommended.
-
-### Choose an Appropriate Target
-
-The target curve affects alignment quality. Three options:
-
-| Target | When to use |
-|:-------|:------------|
-| Cross-sectional mean (default) | General-purpose; robust with many curves |
-| Deepest curve | When outliers may distort the mean |
-| Known reference | When aligning to a standard template |
-
-```{r target-choice}
-set.seed(42)
-shifts <- runif(15, -0.1, 0.1)
-dm <- matrix(0, 15, 100)
-for (i in 1:15) dm[i, ] <- sin(2 * pi * (argvals - shifts[i]))
-fd <- fdata(dm, argvals = argvals)
-var_before <- mean(apply(fd$data, 2, var))
-
-# Default (cross-sectional mean)
-vr1 <- 1 - mean(apply(elastic.align(fd)$aligned$data, 2, var)) / var_before
-
-# Deepest curve
-depths <- depth(fd, method = "FM")
-vr2 <- 1 - mean(apply(elastic.align(fd, target = fd[which.max(depths)])$aligned$data, 2, var)) / var_before
-
-cat("Cross-sectional mean: VR =", round(vr1 * 100, 1), "%\n")
-cat("Deepest curve:        VR =", round(vr2 * 100, 1), "%\n")
-```
-
-### Alignment + FPCA
-
-Alignment before FPCA concentrates variance into the first principal component
-by removing phase variability that would otherwise spread across components:
-
-```{r alignment-fpca}
-set.seed(42)
-shifts <- runif(15, -0.1, 0.1)
-dm <- matrix(0, 15, 100)
-for (i in 1:15) dm[i, ] <- sin(2 * pi * (argvals - shifts[i]))
-fd <- fdata(dm, argvals = argvals)
-
-# FPCA before and after alignment
-pc_before <- fdata2pc(fd, ncomp = 3)
-ea <- elastic.align(fd)
-pc_after <- fdata2pc(ea$aligned, ncomp = 3)
-
-pve_before <- round(pc_before$d^2 / sum(pc_before$d^2) * 100, 1)
-pve_after <- round(pc_after$d^2 / sum(pc_after$d^2) * 100, 1)
-
-cat("Before alignment: PC1 =", pve_before[1], "%, PC2 =", pve_before[2], "%\n")
-cat("After alignment:  PC1 =", pve_after[1], "%, PC2 =", pve_after[2], "%\n")
-```
-
-## Example: Localized Peak Alignment
-
-Elastic alignment excels at aligning curves with localized features at varying
-positions -- the pattern seen in spectroscopy, ECG, and chromatography data:
-
-```{r peaks-example}
-set.seed(42)
-n <- 20
-dm <- matrix(0, n, 100)
-for (i in 1:n) {
-  # Two peaks with varying positions
-  p1 <- 0.3 + runif(1, -0.05, 0.05)
-  p2 <- 0.7 + runif(1, -0.05, 0.05)
-  dm[i, ] <- exp(-100 * (argvals - p1)^2) + 0.6 * exp(-100 * (argvals - p2)^2)
-}
-fd_peaks <- fdata(dm, argvals = argvals)
-
-res_peaks <- elastic.align(fd_peaks)
-
-var_red <- 1 - mean(apply(res_peaks$aligned$data, 2, var)) /
-               mean(apply(fd_peaks$data, 2, var))
-cat("Variance reduction:", round(var_red * 100, 1), "%\n")
-```
-
-```{r peaks-plot}
-plot(res_peaks, type = "both")
-```
-
-## Example: Shifted Gaussian Bumps
-
-```{r bumps-example}
-set.seed(42)
-dm <- matrix(0, 20, 100)
-shifts <- runif(20, -0.15, 0.15)
-for (i in 1:20) {
-  dm[i, ] <- exp(-25 * (argvals - 0.5 - shifts[i])^2)
-}
-fd_bumps <- fdata(dm, argvals = argvals)
-res_bumps <- elastic.align(fd_bumps)
-
-var_red <- 1 - mean(apply(res_bumps$aligned$data, 2, var)) /
-               mean(apply(fd_bumps$data, 2, var))
-cat("Variance reduction:", round(var_red * 100, 1), "%\n")
-```
-
-```{r bumps-plot}
-plot(res_bumps, type = "both")
-```
-
-## Example: Multi-Bump Alignment
+## Multi-Bump Scaling
 
 Real-world functional data often contains multiple peaks or features that vary
 independently. This section explores how elastic alignment handles curves with
@@ -1005,10 +646,227 @@ p4 / p7
 
 With 4 bumps, alignment still captures most of the variability. With 7
 tightly packed bumps, the monotonicity constraint on the warping function
-limits independent correction of each peak — stretching one inter-peak
+limits independent correction of each peak -- stretching one inter-peak
 region forces compression elsewhere. This is a fundamental limitation of
 elastic alignment, not a numerical issue: a single monotone time-warping
 cannot independently retime many closely spaced features.
+
+## Comparison with DTW and Shift Registration
+
+Three alignment strategies are available in **fdars**:
+
+| | Elastic (SRSF) | DTW | Shift Registration |
+|:--|:--|:--|:--|
+| **Function** | `elastic.align()` | `metric.DTW()` | `register.fd()` |
+| **Warping** | Smooth, monotone diffeomorphism | Piecewise constant, allows repeated indices | Global translation only |
+| **Metric** | Proper metric (triangle inequality holds) | Not a metric | Not applicable (no warping) |
+| **Amplitude/Phase** | Cleanly separates the two | Mixes them — can absorb amplitude differences into warping | Pure phase (shift), amplitude untouched |
+| **Degeneracy** | No "pinching" — SRSF penalizes compression | Can collapse entire regions to a single point | No degeneracy, but very limited |
+| **Mean** | Karcher mean is well-defined | No principled mean | Shift-corrected cross-sectional mean |
+| **Complexity** | $O(m^2)$ per pair (DP) | $O(m^2)$ per pair (DP) | $O(m)$ per curve (cross-correlation) |
+
+### Head-to-Head: Shifted Bumps
+
+The clearest way to see the differences is on data with localized features:
+
+```{r comparison-setup}
+set.seed(42)
+m_cmp <- 200
+argvals_cmp <- seq(0, 1, length.out = m_cmp)
+n_cmp <- 15
+
+# Two bumps with varying positions
+data_cmp <- matrix(0, n_cmp, m_cmp)
+for (i in 1:n_cmp) {
+  p1 <- 0.3 + runif(1, -0.06, 0.06)
+  p2 <- 0.7 + runif(1, -0.06, 0.06)
+  data_cmp[i, ] <- exp(-300 * (argvals_cmp - p1)^2) +
+                   exp(-300 * (argvals_cmp - p2)^2)
+}
+fd_cmp <- fdata(data_cmp, argvals = argvals_cmp)
+var_orig_cmp <- mean(apply(fd_cmp$data, 2, var))
+```
+
+**Elastic alignment** finds smooth, local warping for each bump independently:
+
+```{r comparison-elastic}
+res_elastic <- elastic.align(fd_cmp)
+vr_elastic <- 1 - mean(apply(res_elastic$aligned$data, 2, var)) / var_orig_cmp
+cat("Elastic VR:", round(vr_elastic * 100, 1), "%\n")
+```
+
+**Shift registration** applies a single global shift -- it can center one bump
+but not both when they move independently:
+
+```{r comparison-shift}
+res_shift <- register.fd(fd_cmp)
+vr_shift <- 1 - mean(apply(res_shift$registered$data, 2, var)) / var_orig_cmp
+cat("Shift registration VR:", round(vr_shift * 100, 1), "%\n")
+```
+
+```{r comparison-plot, fig.height = 8}
+plot_curves <- function(data, argvals, title) {
+  n <- nrow(data)
+  m <- length(argvals)
+  df <- data.frame(
+    curve_id = rep(seq_len(n), each = m),
+    argval = rep(argvals, n),
+    value = as.vector(t(data))
+  )
+  ggplot(df, aes(x = argval, y = value, group = curve_id)) +
+    geom_line(alpha = 0.5) +
+    labs(title = title, x = "t", y = "value") +
+    theme_minimal()
+}
+
+p1 <- plot_curves(fd_cmp$data, argvals_cmp, "Original")
+p2 <- plot_curves(res_elastic$aligned$data, argvals_cmp,
+        paste0("Elastic (VR = ", round(vr_elastic * 100, 1), "%)"))
+p3 <- plot_curves(res_shift$registered$data, argvals_cmp,
+        paste0("Shift Registration (VR = ", round(vr_shift * 100, 1), "%)"))
+
+p1 / p2 / p3
+```
+
+Elastic alignment resolves the independent shifts of both bumps. Shift
+registration can only correct a single global offset, leaving residual
+phase variability when features move independently.
+
+### DTW Distance vs Elastic Distance
+
+DTW and elastic distances rank curves differently because DTW can absorb
+amplitude differences into warping while elastic alignment separates them:
+
+```{r comparison-distances}
+# Compute both distance matrices
+D_elastic <- elastic.distance(fd_cmp)
+D_dtw <- metric.DTW(fd_cmp)
+
+# Compare: correlation of off-diagonal entries
+idx <- upper.tri(D_elastic)
+cat("Correlation between elastic and DTW distances:",
+    round(cor(D_elastic[idx], D_dtw[idx]), 3), "\n")
+```
+
+```{r comparison-distances-plot, fig.height = 4}
+plot(D_elastic[idx], D_dtw[idx], pch = 19, cex = 0.6, col = "steelblue",
+     xlab = "Elastic distance", ylab = "DTW distance",
+     main = "Elastic vs DTW Pairwise Distances")
+abline(lm(D_dtw[idx] ~ D_elastic[idx]), col = "red", lwd = 1.5)
+```
+
+The distances are correlated but not identical. The key difference emerges
+when amplitude variability is present:
+
+```{r comparison-amplitude, fig.height = 4}
+set.seed(42)
+# Curves with BOTH amplitude and phase variability
+data_amp <- matrix(0, n_cmp, m_cmp)
+for (i in 1:n_cmp) {
+  amp <- runif(1, 0.5, 1.5)
+  shift <- runif(1, -0.06, 0.06)
+  data_amp[i, ] <- amp * exp(-200 * (argvals_cmp - 0.5 - shift)^2)
+}
+fd_amp <- fdata(data_amp, argvals = argvals_cmp)
+
+D_elastic_amp <- elastic.distance(fd_amp)
+D_dtw_amp <- metric.DTW(fd_amp)
+idx_amp <- upper.tri(D_elastic_amp)
+
+cat("Correlation (amplitude+phase):",
+    round(cor(D_elastic_amp[idx_amp], D_dtw_amp[idx_amp]), 3), "\n")
+```
+
+With mixed amplitude and phase, DTW distances are less correlated with elastic
+distances because DTW warping partially absorbs amplitude differences. Elastic
+distances preserve the amplitude/phase separation, making them more suitable
+for downstream analysis (clustering, MDS) when both sources of variability
+carry distinct meaning.
+
+### When to Use Each Method
+
+| Scenario | Recommended |
+|:---------|:------------|
+| Localized features with independent timing shifts | Elastic alignment |
+| Simple global time shift or delay | Shift registration (`register.fd`) — fast and sufficient |
+| Distance computation for clustering/MDS | Elastic distance (proper metric) or DTW (if metric property not needed) |
+| Noisy signals, speech-like data | DTW (more robust to noise without pre-smoothing) |
+| Periodic/circular data | `elastic.align(periodic = TRUE)` |
+| Need principled mean shape | `karcher.mean()` (no DTW equivalent) |
+
+## Periodic Functional Data
+
+### The Problem
+
+Elastic alignment uses fixed boundary constraints $\gamma(0) = 0$, $\gamma(1) = 1$.
+This prevents the warping function from performing circular shifts, which means
+periodic data (e.g., curves on $[0, 2\pi]$ where $f(0) = f(2\pi)$) with large
+phase offsets cannot be properly aligned.
+
+For example, two copies of $\sin(t)$ shifted by half a period have identical
+shape but the boundary constraints force alignment to fail:
+
+```{r periodic-problem, fig.height = 4}
+set.seed(42)
+m <- 100
+argvals_p <- seq(0, 2 * pi, length.out = m)
+n <- 15
+data_p <- matrix(0, n, m)
+for (i in 1:n) {
+  shift <- sample(0:(m - 1), 1)
+  idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+  data_p[i, ] <- sin(argvals_p[idx])
+}
+fd_p <- fdata(data_p, argvals = argvals_p)
+
+# Standard alignment struggles with circular shifts
+res_std <- elastic.align(fd_p)
+var_orig <- mean(apply(fd_p$data, 2, var))
+vr_std <- 1 - mean(apply(res_std$aligned$data, 2, var)) / var_orig
+```
+
+```{r periodic-problem-plot, fig.height = 4}
+plot(res_std, type = "both") +
+  plot_annotation(subtitle = paste0(
+    "Standard alignment on periodic data — VR = ", round(vr_std * 100, 1), "%"))
+```
+
+### The Solution
+
+Setting `periodic = TRUE` applies a two-stage approach:
+
+1. **Circular rotation**: Each curve is circularly shifted so that its global
+   maximum is at a canonical grid position
+2. **Elastic alignment**: Standard alignment on the rotated data
+
+```{r periodic-solution, fig.height = 4}
+res_per <- elastic.align(fd_p, periodic = TRUE)
+vr_per <- 1 - mean(apply(res_per$aligned$data, 2, var)) / var_orig
+```
+
+```{r periodic-solution-plot, fig.height = 4}
+plot(res_per, type = "both") +
+  plot_annotation(subtitle = paste0(
+    "Periodic alignment — VR = ", round(vr_per * 100, 1), "%"))
+```
+
+The rotation step removes large circular shifts that the boundary-constrained
+warping cannot handle, and the elastic step corrects any remaining timing
+differences.
+
+You can also apply the rotation step manually using `periodic.rotate()`:
+
+```{r periodic-rotate}
+rot <- periodic.rotate(fd_p)
+cat("Shifts applied:", head(rot$shifts), "...\n")
+```
+
+The `karcher.mean()` function also accepts `periodic = TRUE`:
+
+```{r periodic-karcher}
+km_per <- karcher.mean(fd_p, max.iter = 15, periodic = TRUE)
+print(km_per)
+```
 
 ## Real Data: Berkeley Growth Velocity
 
@@ -1145,27 +1003,111 @@ Curves above the diagonal correspond to children whose growth spurt occurred
 earlier than average (biological clock runs ahead); curves below the diagonal
 indicate later-maturing children.
 
-## Karcher Mean with Custom Settings
+## Practical Tips
 
-For complex data, increase `max.iter` and check the aligned curves:
+### Pre-smooth Noisy Data
 
-```{r karcher-custom}
+The SRSF transform involves derivatives, so noise gets amplified. Always smooth
+noisy data before alignment:
+
+```{r presmooth}
 set.seed(42)
-n <- 20
-dm <- matrix(0, n, 100)
-for (i in 1:n) {
-  shift <- runif(1, -0.1, 0.1)
-  dm[i, ] <- exp(-25 * (argvals - 0.5 - shift)^2)
+noisy <- matrix(0, 15, 100)
+shifts <- runif(15, -0.1, 0.1)
+for (i in 1:15) {
+  noisy[i, ] <- sin(2 * pi * (argvals - shifts[i])) + rnorm(100, sd = 0.15)
 }
-fd <- fdata(dm, argvals = argvals)
+fd_noisy <- fdata(noisy, argvals = argvals)
 
-km <- karcher.mean(fd, max.iter = 30, tol = 1e-4)
-cat("Converged:", km$converged, "\n")
-cat("Iterations:", km$n.iter, "\n")
+# Smooth with B-spline basis
+coefs <- fdata2basis(fd_noisy, nbasis = 15, type = "bspline")
+fd_smooth <- basis2fdata(coefs, argvals)
+
+var_before <- mean(apply(fd_noisy$data, 2, var))
+
+# Align raw vs smoothed
+res_raw <- elastic.align(fd_noisy)
+res_smooth <- elastic.align(fd_smooth)
+
+vr_raw <- 1 - mean(apply(res_raw$aligned$data, 2, var)) / var_before
+vr_smooth <- 1 - mean(apply(res_smooth$aligned$data, 2, var)) / var_before
+cat("VR (raw):     ", round(vr_raw * 100, 1), "%\n")
+cat("VR (smoothed):", round(vr_smooth * 100, 1), "%\n")
 ```
 
-```{r karcher-custom-plot}
-plot(km, type = "mean")
+### Use Sufficient Grid Resolution
+
+The dynamic programming alignment operates on the evaluation grid. Finer grids
+yield more accurate warping:
+
+```{r grid-resolution}
+set.seed(42)
+for (m in c(20, 50, 100, 200)) {
+  av <- seq(0, 1, length.out = m)
+  shifts <- runif(15, -0.1, 0.1)
+  dm <- matrix(0, 15, m)
+  for (i in 1:15) dm[i, ] <- sin(2 * pi * (av - shifts[i]))
+  fd_m <- fdata(dm, argvals = av)
+  ea <- elastic.align(fd_m)
+  var_red <- 1 - mean(apply(ea$aligned$data, 2, var)) /
+                  mean(apply(fd_m$data, 2, var))
+  cat(sprintf("  m = %3d: VR = %5.1f%%\n", m, var_red * 100))
+}
+```
+
+A minimum of 50-100 grid points is recommended.
+
+### Choose an Appropriate Target
+
+The target curve affects alignment quality. Three options:
+
+| Target | When to use |
+|:-------|:------------|
+| Cross-sectional mean (default) | General-purpose; robust with many curves |
+| Deepest curve | When outliers may distort the mean |
+| Known reference | When aligning to a standard template |
+
+```{r target-choice}
+set.seed(42)
+shifts <- runif(15, -0.1, 0.1)
+dm <- matrix(0, 15, 100)
+for (i in 1:15) dm[i, ] <- sin(2 * pi * (argvals - shifts[i]))
+fd <- fdata(dm, argvals = argvals)
+var_before <- mean(apply(fd$data, 2, var))
+
+# Default (cross-sectional mean)
+vr1 <- 1 - mean(apply(elastic.align(fd)$aligned$data, 2, var)) / var_before
+
+# Deepest curve
+depths <- depth(fd, method = "FM")
+vr2 <- 1 - mean(apply(elastic.align(fd, target = fd[which.max(depths)])$aligned$data, 2, var)) / var_before
+
+cat("Cross-sectional mean: VR =", round(vr1 * 100, 1), "%\n")
+cat("Deepest curve:        VR =", round(vr2 * 100, 1), "%\n")
+```
+
+### Alignment + FPCA
+
+Alignment before FPCA concentrates variance into the first principal component
+by removing phase variability that would otherwise spread across components:
+
+```{r alignment-fpca}
+set.seed(42)
+shifts <- runif(15, -0.1, 0.1)
+dm <- matrix(0, 15, 100)
+for (i in 1:15) dm[i, ] <- sin(2 * pi * (argvals - shifts[i]))
+fd <- fdata(dm, argvals = argvals)
+
+# FPCA before and after alignment
+pc_before <- fdata2pc(fd, ncomp = 3)
+ea <- elastic.align(fd)
+pc_after <- fdata2pc(ea$aligned, ncomp = 3)
+
+pve_before <- round(pc_before$d^2 / sum(pc_before$d^2) * 100, 1)
+pve_after <- round(pc_after$d^2 / sum(pc_after$d^2) * 100, 1)
+
+cat("Before alignment: PC1 =", pve_before[1], "%, PC2 =", pve_before[2], "%\n")
+cat("After alignment:  PC1 =", pve_after[1], "%, PC2 =", pve_after[2], "%\n")
 ```
 
 ## Limitations
