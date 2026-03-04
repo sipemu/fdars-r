@@ -215,6 +215,149 @@ in **timing**. The table below summarizes where it excels and where it does not.
 | Genuinely different shapes | Forced warping, VR < 0 | Use depth or distance methods instead |
 | Very noisy data (unsmoothed) | Noise-driven warping, VR < 0 | Pre-smooth with `fdata2basis()` + `basis2fdata()` |
 
+## Comparison with DTW and Shift Registration
+
+Three alignment strategies are available in **fdars**:
+
+| | Elastic (SRSF) | DTW | Shift Registration |
+|:--|:--|:--|:--|
+| **Function** | `elastic.align()` | `metric.DTW()` | `register.fd()` |
+| **Warping** | Smooth, monotone diffeomorphism | Piecewise constant, allows repeated indices | Global translation only |
+| **Metric** | Proper metric (triangle inequality holds) | Not a metric | Not applicable (no warping) |
+| **Amplitude/Phase** | Cleanly separates the two | Mixes them — can absorb amplitude differences into warping | Pure phase (shift), amplitude untouched |
+| **Degeneracy** | No "pinching" — SRSF penalizes compression | Can collapse entire regions to a single point | No degeneracy, but very limited |
+| **Mean** | Karcher mean is well-defined | No principled mean | Shift-corrected cross-sectional mean |
+| **Complexity** | $O(m^2)$ per pair (DP) | $O(m^2)$ per pair (DP) | $O(m)$ per curve (cross-correlation) |
+
+### Head-to-Head: Shifted Bumps
+
+The clearest way to see the differences is on data with localized features:
+
+```{r comparison-setup}
+set.seed(42)
+m_cmp <- 200
+argvals_cmp <- seq(0, 1, length.out = m_cmp)
+n_cmp <- 15
+
+# Two bumps with varying positions
+data_cmp <- matrix(0, n_cmp, m_cmp)
+for (i in 1:n_cmp) {
+  p1 <- 0.3 + runif(1, -0.06, 0.06)
+  p2 <- 0.7 + runif(1, -0.06, 0.06)
+  data_cmp[i, ] <- exp(-300 * (argvals_cmp - p1)^2) +
+                   exp(-300 * (argvals_cmp - p2)^2)
+}
+fd_cmp <- fdata(data_cmp, argvals = argvals_cmp)
+var_orig_cmp <- mean(apply(fd_cmp$data, 2, var))
+```
+
+**Elastic alignment** finds smooth, local warping for each bump independently:
+
+```{r comparison-elastic}
+res_elastic <- elastic.align(fd_cmp)
+vr_elastic <- 1 - mean(apply(res_elastic$aligned$data, 2, var)) / var_orig_cmp
+cat("Elastic VR:", round(vr_elastic * 100, 1), "%\n")
+```
+
+**Shift registration** applies a single global shift — it can center one bump
+but not both when they move independently:
+
+```{r comparison-shift}
+res_shift <- register.fd(fd_cmp)
+vr_shift <- 1 - mean(apply(res_shift$registered$data, 2, var)) / var_orig_cmp
+cat("Shift registration VR:", round(vr_shift * 100, 1), "%\n")
+```
+
+```{r comparison-plot, fig.height = 8}
+plot_curves <- function(data, argvals, title) {
+  n <- nrow(data)
+  m <- length(argvals)
+  df <- data.frame(
+    curve_id = rep(seq_len(n), each = m),
+    argval = rep(argvals, n),
+    value = as.vector(t(data))
+  )
+  ggplot(df, aes(x = argval, y = value, group = curve_id)) +
+    geom_line(alpha = 0.5) +
+    labs(title = title, x = "t", y = "value") +
+    theme_minimal()
+}
+
+p1 <- plot_curves(fd_cmp$data, argvals_cmp, "Original")
+p2 <- plot_curves(res_elastic$aligned$data, argvals_cmp,
+        paste0("Elastic (VR = ", round(vr_elastic * 100, 1), "%)"))
+p3 <- plot_curves(res_shift$registered$data, argvals_cmp,
+        paste0("Shift Registration (VR = ", round(vr_shift * 100, 1), "%)"))
+
+p1 / p2 / p3
+```
+
+Elastic alignment resolves the independent shifts of both bumps. Shift
+registration can only correct a single global offset, leaving residual
+phase variability when features move independently.
+
+### DTW Distance vs Elastic Distance
+
+DTW and elastic distances rank curves differently because DTW can absorb
+amplitude differences into warping while elastic alignment separates them:
+
+```{r comparison-distances}
+# Compute both distance matrices
+D_elastic <- elastic.distance(fd_cmp)
+D_dtw <- metric.DTW(fd_cmp)
+
+# Compare: correlation of off-diagonal entries
+idx <- upper.tri(D_elastic)
+cat("Correlation between elastic and DTW distances:",
+    round(cor(D_elastic[idx], D_dtw[idx]), 3), "\n")
+```
+
+```{r comparison-distances-plot, fig.height = 4}
+plot(D_elastic[idx], D_dtw[idx], pch = 19, cex = 0.6, col = "steelblue",
+     xlab = "Elastic distance", ylab = "DTW distance",
+     main = "Elastic vs DTW Pairwise Distances")
+abline(lm(D_dtw[idx] ~ D_elastic[idx]), col = "red", lwd = 1.5)
+```
+
+The distances are correlated but not identical. The key difference emerges
+when amplitude variability is present:
+
+```{r comparison-amplitude, fig.height = 4}
+set.seed(42)
+# Curves with BOTH amplitude and phase variability
+data_amp <- matrix(0, n_cmp, m_cmp)
+for (i in 1:n_cmp) {
+  amp <- runif(1, 0.5, 1.5)
+  shift <- runif(1, -0.06, 0.06)
+  data_amp[i, ] <- amp * exp(-200 * (argvals_cmp - 0.5 - shift)^2)
+}
+fd_amp <- fdata(data_amp, argvals = argvals_cmp)
+
+D_elastic_amp <- elastic.distance(fd_amp)
+D_dtw_amp <- metric.DTW(fd_amp)
+idx_amp <- upper.tri(D_elastic_amp)
+
+cat("Correlation (amplitude+phase):",
+    round(cor(D_elastic_amp[idx_amp], D_dtw_amp[idx_amp]), 3), "\n")
+```
+
+With mixed amplitude and phase, DTW distances are less correlated with elastic
+distances because DTW warping partially absorbs amplitude differences. Elastic
+distances preserve the amplitude/phase separation, making them more suitable
+for downstream analysis (clustering, MDS) when both sources of variability
+carry distinct meaning.
+
+### When to Use Each Method
+
+| Scenario | Recommended |
+|:---------|:------------|
+| Localized features with independent timing shifts | Elastic alignment |
+| Simple global time shift or delay | Shift registration (`register.fd`) — fast and sufficient |
+| Distance computation for clustering/MDS | Elastic distance (proper metric) or DTW (if metric property not needed) |
+| Noisy signals, speech-like data | DTW (more robust to noise without pre-smoothing) |
+| Periodic/circular data | `elastic.align(periodic = TRUE)` |
+| Need principled mean shape | `karcher.mean()` (no DTW equivalent) |
+
 ## Visual Examples by Scenario
 
 The following examples illustrate alignment behavior across different data
