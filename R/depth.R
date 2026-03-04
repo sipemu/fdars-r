@@ -13,7 +13,8 @@
 #'   "RP" (random projection), "RT" (random Tukey), "BD" (band depth),
 #'   "MBD" (modified band depth), "MEI" (modified epigraph index),
 #'   "FSD" (functional spatial depth), "KFSD" (kernel functional spatial depth),
-#'   or "RPD" (random projection with derivatives). Default is "FM".
+#'   "RPD" (random projection with derivatives), or "streaming" (streaming
+#'   depth via pre-sorted reference). Default is "FM".
 #' @param ... Additional arguments passed to the specific depth function.
 #'
 #' @return A numeric vector of depth values, one per curve in fdataobj.
@@ -31,6 +32,7 @@
 #'   \item{FSD}{Functional spatial depth - based on spatial signs}
 #'   \item{KFSD}{Kernel functional spatial depth - smoothed FSD}
 #'   \item{RPD}{Random projection with derivatives - includes curve derivatives}
+#'   \item{streaming}{Streaming depth via pre-sorted reference (FM/MBD/BD selectable via \code{streaming.method})}
 #' }
 #'
 #' @export
@@ -42,7 +44,7 @@
 #' depth(fd, method = "mode")
 #' depth(fd, method = "RP")
 depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT",
-                  "BD", "MBD", "MEI", "FSD", "KFSD", "RPD"), ...) {
+                  "BD", "MBD", "MEI", "FSD", "KFSD", "RPD", "streaming"), ...) {
   method <- match.arg(method)
 
   switch(method,
@@ -55,7 +57,8 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
     "MEI" = .depth.MEI(fdataobj, fdataori, ...),
     "FSD" = .depth.FSD(fdataobj, fdataori, ...),
     "KFSD" = .depth.KFSD(fdataobj, fdataori, ...),
-    "RPD" = .depth.RPD(fdataobj, fdataori, ...)
+    "RPD" = .depth.RPD(fdataobj, fdataori, ...),
+    "streaming" = streaming.depth(fdataobj, fdataori, ...)
   )
 }
 
@@ -1055,5 +1058,54 @@ depth.KFSD <- function(fdataobj, fdataori = NULL, ...) {
 #' @export
 depth.RPD <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "RPD", ...)
+}
+
+#' Streaming Depth for Functional Data
+#'
+#' Compute depth values using a streaming (pre-sorted reference) algorithm.
+#' This approach pre-sorts the reference data at each time point, enabling
+#' O(T log N) depth computation per curve instead of O(N^2 T).
+#'
+#' @param fdataobj An object of class 'fdata' to compute depth for.
+#' @param fdataori An object of class 'fdata' as reference sample.
+#'   If NULL, uses fdataobj as reference.
+#' @param method Streaming depth method: "FM" (Fraiman-Muniz, default),
+#'   "MBD" (modified band depth), or "BD" (band depth).
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Numeric vector of depth values, one per curve in fdataobj.
+#'
+#' @export
+#' @examples
+#' fd <- fdata(matrix(rnorm(200), 20, 10))
+#' streaming.depth(fd, method = "FM")
+streaming.depth <- function(fdataobj, fdataori = NULL,
+                            method = c("FM", "MBD", "BD"), ...) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+  method <- match.arg(method)
+
+  if (is.null(fdataori)) {
+    streaming_depth_batch(fdataobj$data, method)
+  } else {
+    if (!inherits(fdataori, "fdata")) {
+      stop("fdataori must be of class 'fdata'")
+    }
+    streaming_depth_vs_ref(fdataori$data, fdataobj$data, method)
+  }
+}
+
+#' Streaming Depth (Alias)
+#'
+#' Alias for \code{\link{streaming.depth}}.
+#'
+#' @inheritParams streaming.depth
+#'
+#' @return Numeric vector of depth values.
+#' @seealso \code{\link{streaming.depth}}, \code{\link{depth}}
+#' @export
+depth.streaming <- function(fdataobj, fdataori = NULL, ...) {
+  streaming.depth(fdataobj, fdataori, ...)
 }
 

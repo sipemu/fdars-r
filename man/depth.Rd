@@ -7,7 +7,8 @@
 depth(
   fdataobj,
   fdataori = NULL,
-  method = c("FM", "mode", "RP", "RT", "BD", "MBD", "MEI", "FSD", "KFSD", "RPD"),
+  method = c("FM", "mode", "RP", "RT", "BD", "MBD", "MEI", "FSD", "KFSD", "RPD",
+    "streaming"),
   ...
 )
 }
@@ -21,7 +22,8 @@ If NULL, uses fdataobj as reference.}
 "RP" (random projection), "RT" (random Tukey), "BD" (band depth),
 "MBD" (modified band depth), "MEI" (modified epigraph index),
 "FSD" (functional spatial depth), "KFSD" (kernel functional spatial depth),
-or "RPD" (random projection with derivatives). Default is "FM".}
+"RPD" (random projection with derivatives), or "streaming" (streaming
+depth via pre-sorted reference). Default is "FM".}
 
 \item{...}{Additional arguments passed to the specific depth function.}
 }
@@ -47,6 +49,7 @@ Available methods:
 \item{FSD}{Functional spatial depth - based on spatial signs}
 \item{KFSD}{Kernel functional spatial depth - smoothed FSD}
 \item{RPD}{Random projection with derivatives - includes curve derivatives}
+\item{streaming}{Streaming depth via pre-sorted reference (FM/MBD/BD selectable via \code{streaming.method})}
 }
 }
 \examples{

@@ -47,6 +47,14 @@ navbar:
       - text: Equivalence Testing
         href: articles/equivalence-testing.html
       - text: "---"
+      - text: "New in 0.4.0"
+      - text: Elastic Alignment
+        href: articles/elastic-alignment.html
+      - text: Tolerance Bands
+        href: articles/tolerance-bands.html
+      - text: Streaming Depth
+        href: articles/streaming-depth.html
+      - text: "---"
       - text: Advanced
       - text: Covariance Functions
         href: articles/covariance-functions.html
@@ -78,6 +86,11 @@ articles:
   - articles/seasonal-analysis
   - articles/andrews-transformation
   - articles/equivalence-testing
+- title: "New in 0.4.0"
+  contents:
+  - articles/elastic-alignment
+  - articles/tolerance-bands
+  - articles/streaming-depth
 - title: Advanced
   contents:
   - articles/covariance-functions
@@ -122,6 +135,22 @@ reference:
   - pspline
   - pspline.2d
 
+- title: Elastic Alignment
+  contents:
+  - srsf.transform
+  - srsf.inverse
+  - elastic.align
+  - elastic.distance
+  - metric.elastic
+  - karcher.mean
+  - plot.elastic.align
+  - plot.karcher.mean
+
+- title: Tolerance Bands
+  contents:
+  - tolerance.band
+  - plot.tolerance.band
+
 - title: Depth Functions
   contents:
   - depth
@@ -135,6 +164,8 @@ reference:
   - depth.RP
   - depth.RPD
   - depth.RT
+  - streaming.depth
+  - depth.streaming
 
 - title: Distance & Metrics
   contents:
@@ -374,3 +405,39 @@ reference:
   - Ops.fdata
   - kernels
   - fdars-package
+
+- title: Internal (Rust Bindings)
+  desc: Low-level Rust function wrappers. Use the R-level functions instead.
+  contents:
+  - starts_with("alignment_")
+  - starts_with("tolerance_")
+  - starts_with("streaming_depth")
+  - starts_with("depth_")
+  - starts_with("metric_")
+  - starts_with("fdata_")
+  - starts_with("fdata2")
+  - starts_with("basis")
+  - starts_with("semimetric_")
+  - starts_with("compute_")
+  - starts_with("pcvm_")
+  - starts_with("rp_stat")
+  - starts_with("outliers_")
+  - starts_with("s_")
+  - starts_with("kmeans_")
+  - starts_with("fuzzycmeans_")
+  - starts_with("register_")
+  - starts_with("int_simpson")
+  - starts_with("inprod_")
+  - starts_with("knn_")
+  - starts_with("silhouette_")
+  - starts_with("calinski_")
+  - starts_with("seasonal_")
+  - starts_with("eigenfunctions_")
+  - starts_with("eigenvalues_")
+  - starts_with("sim_kl_")
+  - starts_with("add_error_")
+  - starts_with("irreg_")
+  - starts_with("fourier_")
+  - starts_with("select_basis")
+  - starts_with("pspline_")
+  - starts_with("geometric_")

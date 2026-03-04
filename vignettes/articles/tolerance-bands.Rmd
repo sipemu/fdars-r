@@ -1,0 +1,122 @@
+---
+title: "Functional Tolerance Bands"
+output: rmarkdown::html_vignette
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  out.width = "100%"
+)
+```
+
+## Introduction
+
+A **tolerance band** for functional data is a region expected to contain a given fraction of individual curves in the population -- the functional analogue of classical tolerance intervals. Unlike confidence bands (which target the mean), tolerance bands characterize the spread of individual curves.
+
+**fdars** provides five tolerance band methods:
+
+| Method | Key Properties |
+|--------|---------------|
+| FPCA | Bootstrap on PC scores; pointwise or simultaneous |
+| Conformal | Distribution-free; uses calibration/training split |
+| SCB (Degras) | Simultaneous confidence band for the mean |
+| Exponential family | For non-Gaussian data (Binomial, Poisson) |
+| Elastic | Alignment-based; removes phase variability first |
+
+## Generate Sample Data
+
+```{r setup}
+library(fdars)
+set.seed(42)
+
+argvals <- seq(0, 1, length.out = 50)
+n <- 60
+data <- matrix(0, n, 50)
+for (i in 1:n) {
+  data[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.3) +
+               rnorm(50, 0, 0.1)
+}
+fd <- fdata(data, argvals = argvals)
+plot(fd)
+```
+
+## FPCA Bootstrap Band
+
+The FPCA method reconstructs curves from their principal component scores and uses bootstrap resampling to estimate quantiles. Two types are available:
+
+- **Pointwise**: Independent interval at each evaluation point (narrower)
+- **Simultaneous**: Single scaling factor across all points (wider, controls family-wise error)
+
+```{r fpca}
+band_pw <- tolerance.band(fd, method = "fpca", coverage = 0.95,
+                          band.type = "pointwise", nb = 200, seed = 42)
+print(band_pw)
+plot(band_pw)
+```
+
+```{r fpca-sim}
+band_sim <- tolerance.band(fd, method = "fpca", coverage = 0.95,
+                           band.type = "simultaneous", nb = 200, seed = 42)
+plot(band_sim)
+```
+
+## Conformal Prediction Band
+
+The conformal method is **distribution-free**: it makes no parametric assumptions about the data-generating process. It splits data into a training set and calibration set, computing non-conformity scores on the calibration set to determine band width.
+
+Two score types are available:
+- **supnorm**: Maximum deviation (constant band width)
+- **l2**: Integrated squared deviation (variable band width)
+
+```{r conformal}
+band_conf <- tolerance.band(fd, method = "conformal", coverage = 0.95,
+                            score.type = "supnorm", seed = 42)
+plot(band_conf)
+```
+
+## SCB Degras (Mean Confidence Band)
+
+The Degras method constructs a **simultaneous confidence band for the mean function** using a multiplier bootstrap. This is technically a confidence band rather than a tolerance band, but is useful for assessing whether the mean is well-estimated.
+
+```{r scb}
+band_scb <- tolerance.band(fd, method = "scb", coverage = 0.95,
+                           nb = 200, seed = 42)
+plot(band_scb)
+```
+
+## Exponential Family Band
+
+For data from exponential family distributions (e.g., count data), the exponential family method applies the appropriate link function transformation before computing FPCA bands:
+
+```{r exponential}
+# Gaussian data (identity link)
+band_exp <- tolerance.band(fd, method = "exponential", family = "gaussian",
+                           nb = 200, seed = 42)
+plot(band_exp)
+```
+
+## Method Comparison
+
+```{r compare, fig.height = 8}
+methods <- c("fpca", "conformal", "scb")
+bands <- lapply(methods, function(m) {
+  tolerance.band(fd, method = m, coverage = 0.95, nb = 100, seed = 42)
+})
+
+par(mfrow = c(3, 1), mar = c(3, 4, 2, 1))
+for (i in seq_along(methods)) {
+  b <- bands[[i]]
+  plot(argvals, b$center, type = "l", col = "blue", lwd = 2,
+       ylim = range(c(b$lower, b$upper)),
+       main = paste0(methods[i], " (mean width: ",
+                     round(mean(b$upper - b$lower), 3), ")"),
+       xlab = "", ylab = "value")
+  polygon(c(argvals, rev(argvals)),
+          c(b$lower, rev(b$upper)),
+          col = rgb(0.27, 0.51, 0.71, 0.3), border = NA)
+}
+```

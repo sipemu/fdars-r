@@ -1,0 +1,137 @@
+---
+title: "Elastic Curve Alignment"
+output: rmarkdown::html_vignette
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  out.width = "100%"
+)
+```
+
+## Introduction
+
+When comparing functional data, observed curves often exhibit both **amplitude variability** (differences in height/shape) and **phase variability** (differences in timing/speed). Standard methods like the cross-sectional mean or PCA treat all variation as amplitude, which can produce blurred averages and inflated variance.
+
+**Elastic alignment** separates these two sources of variability by finding optimal **warping functions** $\gamma$ that retime each curve before comparison. The mathematical framework uses the **Square-Root Slope Function (SRSF)** representation, which makes the Fisher-Rao metric equivalent to the $L^2$ metric -- enabling efficient dynamic programming alignment.
+
+## SRSF Transform
+
+The SRSF of a function $f$ is defined as:
+
+$$q(t) = \text{sign}(f'(t)) \sqrt{|f'(t)|}$$
+
+This representation has the key property that the Fisher-Rao distance between two curves equals the $L^2$ distance between their SRSFs after optimal alignment.
+
+```{r srsf-demo}
+library(fdars)
+
+set.seed(42)
+argvals <- seq(0, 1, length.out = 100)
+
+# Create sample curves with different phases
+data <- matrix(0, 10, 100)
+for (i in 1:10) {
+  phase <- runif(1, -0.3, 0.3)
+  amp <- rnorm(1, 1, 0.2)
+  data[i, ] <- amp * sin(2 * pi * (argvals + phase))
+}
+fd <- fdata(data, argvals = argvals)
+
+# Compute SRSF transform
+q <- srsf.transform(fd)
+
+# Visualize original curves and their SRSFs
+p1 <- plot(fd) + ggplot2::labs(title = "Original Curves")
+p2 <- plot(q) + ggplot2::labs(title = "SRSF Representation")
+```
+
+The SRSF transform is invertible: given $q$ and an initial value $f_0$, we can reconstruct:
+
+$$f(t) = f_0 + \int_0^t q(s)|q(s)|\,ds$$
+
+```{r srsf-inverse}
+# Round-trip: SRSF -> inverse -> original
+f_original <- fd$data[1, ]
+q_values <- q$data[1, ]
+f_reconstructed <- srsf.inverse(q_values, argvals, f_original[1])
+
+plot(argvals, f_original, type = "l", col = "blue", lwd = 2,
+     xlab = "t", ylab = "f(t)", main = "SRSF Round-Trip")
+lines(argvals, f_reconstructed, col = "red", lty = 2, lwd = 2)
+legend("topright", c("Original", "Reconstructed"), col = c("blue", "red"), lty = 1:2)
+```
+
+## Pairwise Alignment
+
+The `elastic.align()` function aligns all curves to a common target. When no target is specified, the cross-sectional mean is used:
+
+```{r align}
+res <- elastic.align(fd)
+print(res)
+```
+
+The alignment separates amplitude from phase:
+
+```{r align-plot}
+plot(res, type = "both")
+```
+
+We can also inspect the warping functions:
+
+```{r warps}
+plot(res, type = "warps")
+```
+
+## Karcher Mean
+
+The **Karcher mean** (or Fréchet mean) computes the mean shape in the elastic metric by iteratively aligning curves to a running estimate of the mean:
+
+```{r karcher}
+km <- karcher.mean(fd, max.iter = 20, tol = 1e-4)
+print(km)
+```
+
+```{r karcher-plot}
+plot(km, type = "mean")
+```
+
+The Karcher mean provides a sharper, more representative average than the cross-sectional mean because it eliminates phase variability:
+
+```{r compare-means}
+cross_mean <- colMeans(fd$data)
+karcher <- as.numeric(km$mean$data)
+
+plot(argvals, cross_mean, type = "l", col = "blue", lwd = 2,
+     xlab = "t", ylab = "f(t)", main = "Cross-Sectional vs Karcher Mean")
+lines(argvals, karcher, col = "red", lwd = 2)
+legend("topright", c("Cross-sectional", "Karcher"), col = c("blue", "red"), lty = 1)
+```
+
+## Elastic Distance Matrix
+
+The Fisher-Rao distance provides a proper metric on function space that is invariant to reparameterization:
+
+```{r distance}
+D <- elastic.distance(fd)
+round(D[1:5, 1:5], 3)
+```
+
+This can be used in any distance-based method (clustering, MDS, etc.):
+
+```{r mds}
+mds <- cmdscale(D, k = 2)
+plot(mds, pch = 19, xlab = "MDS 1", ylab = "MDS 2",
+     main = "MDS of Elastic Distances")
+```
+
+The elastic distance is also available through the `metric()` dispatcher:
+
+```{r metric-elastic}
+D2 <- metric(fd, method = "elastic")
+all.equal(D, D2)
+```

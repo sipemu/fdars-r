@@ -16,6 +16,97 @@ use rayon::iter::ParallelIterator;
 use rustfft::num_complex::Complex;
 use rustfft::FftPlanner;
 
+/// Compute weighted Lp distance between two rows of an FdMatrix, branching on p.
+///
+/// Avoids `powf(p)` in the inner loop for p=1 and p=2, which are ~50-100× faster.
+#[inline(always)]
+fn lp_weighted_distance(
+    data1: &FdMatrix,
+    i: usize,
+    data2: &FdMatrix,
+    j: usize,
+    weights: &[f64],
+    n_points: usize,
+    p: f64,
+) -> f64 {
+    if (p - 2.0).abs() < 1e-14 {
+        let mut sum = 0.0;
+        for k in 0..n_points {
+            let diff = data1[(i, k)] - data2[(j, k)];
+            sum += diff * diff * weights[k];
+        }
+        sum.sqrt()
+    } else if (p - 1.0).abs() < 1e-14 {
+        let mut sum = 0.0;
+        for k in 0..n_points {
+            sum += (data1[(i, k)] - data2[(j, k)]).abs() * weights[k];
+        }
+        sum
+    } else {
+        let mut sum = 0.0;
+        for k in 0..n_points {
+            sum += (data1[(i, k)] - data2[(j, k)]).abs().powf(p) * weights[k];
+        }
+        sum.powf(1.0 / p)
+    }
+}
+
+/// Merge base integration weights with optional user weights.
+fn merge_weights(base: Vec<f64>, user_weights: &[f64]) -> Vec<f64> {
+    if user_weights.len() == base.len() {
+        base.iter()
+            .zip(user_weights.iter())
+            .map(|(b, u)| b * u)
+            .collect()
+    } else {
+        base
+    }
+}
+
+/// Build a symmetric distance matrix by computing upper-triangle entries in parallel.
+#[inline]
+fn self_distance_matrix(n: usize, compute: impl Fn(usize, usize) -> f64 + Sync) -> FdMatrix {
+    // Pre-allocate flat buffer for upper triangle: n*(n-1)/2 entries
+    let tri_len = n * (n - 1) / 2;
+    let upper_vals: Vec<f64> = iter_maybe_parallel!(0..n)
+        .flat_map(|i| ((i + 1)..n).map(|j| compute(i, j)).collect::<Vec<_>>())
+        .collect();
+    debug_assert_eq!(upper_vals.len(), tri_len);
+    // Scatter into symmetric matrix
+    let mut dist = FdMatrix::zeros(n, n);
+    let mut idx = 0;
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let d = upper_vals[idx];
+            dist[(i, j)] = d;
+            dist[(j, i)] = d;
+            idx += 1;
+        }
+    }
+    dist
+}
+
+/// Build an n1×n2 distance matrix by computing all pairs in parallel.
+#[inline]
+fn cross_distance_matrix(
+    n1: usize,
+    n2: usize,
+    compute: impl Fn(usize, usize) -> f64 + Sync,
+) -> FdMatrix {
+    // Pre-allocate flat buffer for all n1*n2 entries (row-major order)
+    let vals: Vec<f64> = iter_maybe_parallel!(0..n1)
+        .flat_map(|i| (0..n2).map(|j| compute(i, j)).collect::<Vec<_>>())
+        .collect();
+    // Scatter row-major vals into column-major FdMatrix
+    let mut dist = FdMatrix::zeros(n1, n2);
+    for i in 0..n1 {
+        for j in 0..n2 {
+            dist[(i, j)] = vals[i * n2 + j];
+        }
+    }
+    dist
+}
+
 /// Compute Lp distance matrix between two sets of functional data.
 ///
 /// # Arguments
@@ -43,35 +134,19 @@ pub fn lp_cross_1d(
         return FdMatrix::zeros(0, 0);
     }
 
-    let base_weights = simpsons_weights(argvals);
-    let weights: Vec<f64> = if user_weights.len() == n_points {
-        base_weights
-            .iter()
-            .zip(user_weights.iter())
-            .map(|(b, u)| b * u)
-            .collect()
-    } else {
-        base_weights
-    };
-
-    let pairs: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n2)
-        .flat_map(|j| {
-            (0..n1)
-                .map(|i| {
-                    let mut integral = 0.0;
-                    for k in 0..n_points {
-                        let diff = (data1[(i, k)] - data2[(j, k)]).abs();
-                        integral += diff.powf(p) * weights[k];
-                    }
-                    (i, j, integral.powf(1.0 / p))
-                })
+    let weights = merge_weights(simpsons_weights(argvals), user_weights);
+    let vals: Vec<f64> = iter_maybe_parallel!(0..n1)
+        .flat_map(|i| {
+            (0..n2)
+                .map(|j| lp_weighted_distance(data1, i, data2, j, &weights, n_points, p))
                 .collect::<Vec<_>>()
         })
         .collect();
-
     let mut dist = FdMatrix::zeros(n1, n2);
-    for (i, j, d) in pairs {
-        dist[(i, j)] = d;
+    for i in 0..n1 {
+        for j in 0..n2 {
+            dist[(i, j)] = vals[i * n2 + j];
+        }
     }
     dist
 }
@@ -87,38 +162,26 @@ pub fn lp_self_1d(data: &FdMatrix, argvals: &[f64], p: f64, user_weights: &[f64]
         return FdMatrix::zeros(0, 0);
     }
 
-    let base_weights = simpsons_weights(argvals);
-    let weights: Vec<f64> = if user_weights.len() == n_points {
-        base_weights
-            .iter()
-            .zip(user_weights.iter())
-            .map(|(b, u)| b * u)
-            .collect()
-    } else {
-        base_weights
-    };
-
-    let upper_triangle: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n)
+    let weights = merge_weights(simpsons_weights(argvals), user_weights);
+    // Inline the self-distance pattern rather than going through self_distance_matrix
+    // to ensure LLVM can fully optimize the tight p=2 inner loop.
+    let upper_vals: Vec<f64> = iter_maybe_parallel!(0..n)
         .flat_map(|i| {
             ((i + 1)..n)
-                .map(|j| {
-                    let mut integral = 0.0;
-                    for k in 0..n_points {
-                        let diff = (data[(i, k)] - data[(j, k)]).abs();
-                        integral += diff.powf(p) * weights[k];
-                    }
-                    (i, j, integral.powf(1.0 / p))
-                })
+                .map(|j| lp_weighted_distance(data, i, data, j, &weights, n_points, p))
                 .collect::<Vec<_>>()
         })
         .collect();
-
     let mut dist = FdMatrix::zeros(n, n);
-    for (i, j, d) in upper_triangle {
-        dist[(i, j)] = d;
-        dist[(j, i)] = d;
+    let mut idx = 0;
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let d = upper_vals[idx];
+            dist[(i, j)] = d;
+            dist[(j, i)] = d;
+            idx += 1;
+        }
     }
-
     dist
 }
 
@@ -139,35 +202,19 @@ pub fn lp_cross_2d(
         return FdMatrix::zeros(0, 0);
     }
 
-    let base_weights = simpsons_weights_2d(argvals_s, argvals_t);
-    let weights: Vec<f64> = if user_weights.len() == n_points {
-        base_weights
-            .iter()
-            .zip(user_weights.iter())
-            .map(|(bw, uw)| bw * uw)
-            .collect()
-    } else {
-        base_weights
-    };
-
-    let pairs: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n1)
+    let weights = merge_weights(simpsons_weights_2d(argvals_s, argvals_t), user_weights);
+    let vals: Vec<f64> = iter_maybe_parallel!(0..n1)
         .flat_map(|i| {
             (0..n2)
-                .map(|j| {
-                    let mut sum = 0.0;
-                    for k in 0..n_points {
-                        let diff = (data1[(i, k)] - data2[(j, k)]).abs();
-                        sum += weights[k] * diff.powf(p);
-                    }
-                    (i, j, sum.powf(1.0 / p))
-                })
+                .map(|j| lp_weighted_distance(data1, i, data2, j, &weights, n_points, p))
                 .collect::<Vec<_>>()
         })
         .collect();
-
     let mut dist = FdMatrix::zeros(n1, n2);
-    for (i, j, d) in pairs {
-        dist[(i, j)] = d;
+    for i in 0..n1 {
+        for j in 0..n2 {
+            dist[(i, j)] = vals[i * n2 + j];
+        }
     }
     dist
 }
@@ -186,39 +233,61 @@ pub fn lp_self_2d(
         return FdMatrix::zeros(0, 0);
     }
 
-    let base_weights = simpsons_weights_2d(argvals_s, argvals_t);
-    let weights: Vec<f64> = if user_weights.len() == n_points {
-        base_weights
-            .iter()
-            .zip(user_weights.iter())
-            .map(|(bw, uw)| bw * uw)
-            .collect()
-    } else {
-        base_weights
-    };
-
-    let upper_triangle: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n)
+    let weights = merge_weights(simpsons_weights_2d(argvals_s, argvals_t), user_weights);
+    let upper_vals: Vec<f64> = iter_maybe_parallel!(0..n)
         .flat_map(|i| {
             ((i + 1)..n)
-                .map(|j| {
-                    let mut sum = 0.0;
-                    for k in 0..n_points {
-                        let diff = (data[(i, k)] - data[(j, k)]).abs();
-                        sum += weights[k] * diff.powf(p);
-                    }
-                    (i, j, sum.powf(1.0 / p))
-                })
+                .map(|j| lp_weighted_distance(data, i, data, j, &weights, n_points, p))
                 .collect::<Vec<_>>()
         })
         .collect();
-
     let mut dist = FdMatrix::zeros(n, n);
-    for (i, j, d) in upper_triangle {
-        dist[(i, j)] = d;
-        dist[(j, i)] = d;
+    let mut idx = 0;
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let d = upper_vals[idx];
+            dist[(i, j)] = d;
+            dist[(j, i)] = d;
+            idx += 1;
+        }
     }
-
     dist
+}
+
+/// Precompute squared time differences for Hausdorff distance.
+fn precompute_mtt(argvals: &[f64]) -> Vec<f64> {
+    let m = argvals.len();
+    let mut result = Vec::with_capacity(m * m);
+    for s in 0..m {
+        for t in 0..m {
+            let diff = argvals[s] - argvals[t];
+            result.push(diff * diff);
+        }
+    }
+    result
+}
+
+/// Compute directed Hausdorff distance squared from one curve to another.
+fn directed_hausdorff_sq(
+    data_i: &FdMatrix,
+    row_i: usize,
+    data_j: &FdMatrix,
+    row_j: usize,
+    m: usize,
+    mtt: &[f64],
+) -> f64 {
+    (0..m)
+        .map(|s| {
+            let x_s = data_i[(row_i, s)];
+            (0..m)
+                .map(|t| {
+                    let y_t = data_j[(row_j, t)];
+                    let val_diff = x_s - y_t;
+                    val_diff * val_diff + mtt[s * m + t]
+                })
+                .fold(f64::INFINITY, |a, b| a.min(b))
+        })
+        .fold(f64::NEG_INFINITY, |a, b| a.max(b))
 }
 
 /// Compute Hausdorff distance matrix for self-distances (symmetric).
@@ -232,61 +301,12 @@ pub fn hausdorff_self_1d(data: &FdMatrix, argvals: &[f64]) -> FdMatrix {
         return FdMatrix::zeros(0, 0);
     }
 
-    // Precompute squared time differences
-    let mtt: Vec<f64> = {
-        let mut result = Vec::with_capacity(m * m);
-        for s in 0..m {
-            for t in 0..m {
-                let diff = argvals[s] - argvals[t];
-                result.push(diff * diff);
-            }
-        }
-        result
-    };
-
-    let upper_triangle: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n)
-        .flat_map(|i| {
-            ((i + 1)..n)
-                .map(|j| {
-                    let max_row_min = (0..m)
-                        .map(|s| {
-                            let x_s = data[(i, s)];
-                            (0..m)
-                                .map(|t| {
-                                    let y_t = data[(j, t)];
-                                    let val_diff = x_s - y_t;
-                                    (val_diff * val_diff + mtt[s * m + t]).sqrt()
-                                })
-                                .fold(f64::INFINITY, |a, b| a.min(b))
-                        })
-                        .fold(f64::NEG_INFINITY, |a, b| a.max(b));
-
-                    let max_col_min = (0..m)
-                        .map(|t| {
-                            let y_t = data[(j, t)];
-                            (0..m)
-                                .map(|s| {
-                                    let x_s = data[(i, s)];
-                                    let val_diff = x_s - y_t;
-                                    (val_diff * val_diff + mtt[s * m + t]).sqrt()
-                                })
-                                .fold(f64::INFINITY, |a, b| a.min(b))
-                        })
-                        .fold(f64::NEG_INFINITY, |a, b| a.max(b));
-
-                    (i, j, max_row_min.max(max_col_min))
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-
-    let mut dist = FdMatrix::zeros(n, n);
-    for (i, j, d) in upper_triangle {
-        dist[(i, j)] = d;
-        dist[(j, i)] = d;
-    }
-
-    dist
+    let mtt = precompute_mtt(argvals);
+    self_distance_matrix(n, |i, j| {
+        let d_ij = directed_hausdorff_sq(data, i, data, j, m, &mtt);
+        let d_ji = directed_hausdorff_sq(data, j, data, i, m, &mtt);
+        d_ij.max(d_ji).sqrt()
+    })
 }
 
 /// Compute Hausdorff cross-distances for 1D functional data.
@@ -299,115 +319,59 @@ pub fn hausdorff_cross_1d(data1: &FdMatrix, data2: &FdMatrix, argvals: &[f64]) -
         return FdMatrix::zeros(0, 0);
     }
 
-    let mtt: Vec<f64> = {
-        let mut result = Vec::with_capacity(m * m);
-        for s in 0..m {
-            for t in 0..m {
-                let diff = argvals[s] - argvals[t];
-                result.push(diff * diff);
-            }
-        }
-        result
-    };
+    let mtt = precompute_mtt(argvals);
+    cross_distance_matrix(n1, n2, |i, j| {
+        let d_ij = directed_hausdorff_sq(data1, i, data2, j, m, &mtt);
+        let d_ji = directed_hausdorff_sq(data2, j, data1, i, m, &mtt);
+        d_ij.max(d_ji).sqrt()
+    })
+}
 
-    let pairs: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n1)
-        .flat_map(|i| {
-            (0..n2)
-                .map(|j| {
-                    let max_row_min = (0..m)
-                        .map(|s| {
-                            let x_s = data1[(i, s)];
-                            (0..m)
-                                .map(|t| {
-                                    let y_t = data2[(j, t)];
-                                    let val_diff = x_s - y_t;
-                                    (val_diff * val_diff + mtt[s * m + t]).sqrt()
-                                })
-                                .fold(f64::INFINITY, |a, b| a.min(b))
-                        })
-                        .fold(f64::NEG_INFINITY, |a, b| a.max(b));
+/// Run the two-row DTW dynamic programming loop with a given cost function.
+#[inline]
+fn dtw_dp_loop(x: &[f64], y: &[f64], w: usize, cost_fn: impl Fn(f64, f64) -> f64) -> f64 {
+    let n = x.len();
+    let m = y.len();
+    let mut prev = vec![f64::INFINITY; m + 1];
+    let mut curr = vec![f64::INFINITY; m + 1];
+    prev[0] = 0.0;
 
-                    let max_col_min = (0..m)
-                        .map(|t| {
-                            let y_t = data2[(j, t)];
-                            (0..m)
-                                .map(|s| {
-                                    let x_s = data1[(i, s)];
-                                    let val_diff = x_s - y_t;
-                                    (val_diff * val_diff + mtt[s * m + t]).sqrt()
-                                })
-                                .fold(f64::INFINITY, |a, b| a.min(b))
-                        })
-                        .fold(f64::NEG_INFINITY, |a, b| a.max(b));
-
-                    (i, j, max_row_min.max(max_col_min))
-                })
-                .collect::<Vec<_>>()
+    // Precompute band bounds as usize to avoid isize casts in inner loop
+    let bounds: Vec<(usize, usize)> = (1..=n)
+        .map(|i| {
+            let r_i = i + 1;
+            let j_start = (r_i as isize - w as isize).max(1) as usize;
+            let j_end = (r_i + w - 1).min(m);
+            (j_start, j_end)
         })
         .collect();
 
-    let mut dist = FdMatrix::zeros(n1, n2);
-    for (i, j, d) in pairs {
-        dist[(i, j)] = d;
-    }
-    dist
-}
-
-/// Allocate and initialize the DTW cost matrix with boundary conditions and window band.
-fn initialize_dtw_matrix(n: usize, m: usize, w: usize) -> Vec<Vec<f64>> {
-    let mut dtw = vec![vec![0.0_f64; m + 1]; n + 1];
-    for j in 0..=m {
-        dtw[0][j] = f64::INFINITY;
-    }
-    for i in 0..=n {
-        dtw[i][0] = f64::INFINITY;
-    }
-    dtw[0][0] = 0.0;
-    for i in 1..=n {
-        let r_i = i + 1;
-        let j_start_r = 2.max(r_i as isize - w as isize) as usize;
-        let j_end_r = (m + 1).min(r_i + w);
-        for j_r in j_start_r..=j_end_r {
-            let j = j_r - 1;
-            if j <= m {
-                dtw[i][j] = 0.0;
-            }
+    for (i, &(j_start, j_end)) in bounds.iter().enumerate() {
+        curr.fill(f64::INFINITY);
+        for j in j_start..=j_end {
+            let cost = cost_fn(x[i], y[j - 1]);
+            curr[j] = cost + prev[j].min(curr[j - 1]).min(prev[j - 1]);
         }
+        std::mem::swap(&mut prev, &mut curr);
     }
-    dtw
+
+    prev[m]
 }
 
-/// Fill the DTW matrix using dynamic programming within the Sakoe-Chiba band.
-fn fill_dtw_matrix(
-    dtw: &mut [Vec<f64>],
-    x: &[f64],
-    y: &[f64],
-    n: usize,
-    m: usize,
-    w: usize,
-    p: f64,
-) {
-    for i in 1..=n {
-        let r_i = i + 1;
-        let j_start_r = 2.max(r_i as isize - w as isize) as usize;
-        let j_end_r = (m + 1).min(r_i + w);
-        for j_r in j_start_r..=j_end_r {
-            let j = j_r - 1;
-            if j <= m && j >= 1 {
-                let cost = (x[i - 1] - y[j - 1]).abs().powf(p);
-                dtw[i][j] = cost + dtw[i - 1][j].min(dtw[i][j - 1]).min(dtw[i - 1][j - 1]);
-            }
-        }
-    }
-}
-
-/// Compute DTW distance between two time series.
+/// Compute DTW distance between two time series using two-row DP.
+///
+/// Uses O(m) memory instead of O(nm) by keeping only two rows of the DP table.
 pub fn dtw_distance(x: &[f64], y: &[f64], p: f64, w: usize) -> f64 {
-    let n = x.len();
-    let m = y.len();
-    let mut dtw = initialize_dtw_matrix(n, m, w);
-    fill_dtw_matrix(&mut dtw, x, y, n, m, w, p);
-    dtw[n][m]
+    if (p - 2.0).abs() < 1e-14 {
+        dtw_dp_loop(x, y, w, |a, b| {
+            let d = a - b;
+            d * d
+        })
+    } else if (p - 1.0).abs() < 1e-14 {
+        dtw_dp_loop(x, y, w, |a, b| (a - b).abs())
+    } else {
+        dtw_dp_loop(x, y, w, |a, b| (a - b).abs().powf(p))
+    }
 }
 
 /// Compute DTW distance matrix for self-distances (symmetric).
@@ -417,23 +381,10 @@ pub fn dtw_self_1d(data: &FdMatrix, p: f64, w: usize) -> FdMatrix {
     if n == 0 || m == 0 {
         return FdMatrix::zeros(0, 0);
     }
-    let curves = data.rows();
-    let upper_triangle: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n)
-        .flat_map(|i| {
-            ((i + 1)..n)
-                .map(|j| {
-                    let d = dtw_distance(&curves[i], &curves[j], p, w);
-                    (i, j, d)
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n, n);
-    for (i, j, d) in upper_triangle {
-        dist[(i, j)] = d;
-        dist[(j, i)] = d;
-    }
-    dist
+    let rm = data.to_row_major();
+    self_distance_matrix(n, |i, j| {
+        dtw_distance(&rm[i * m..(i + 1) * m], &rm[j * m..(j + 1) * m], p, w)
+    })
 }
 
 /// Compute DTW cross-distance matrix.
@@ -445,28 +396,17 @@ pub fn dtw_cross_1d(data1: &FdMatrix, data2: &FdMatrix, p: f64, w: usize) -> FdM
     if n1 == 0 || n2 == 0 || m1 == 0 || m2 == 0 {
         return FdMatrix::zeros(0, 0);
     }
-    let curves1 = data1.rows();
-    let curves2 = data2.rows();
-    let pairs: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n1)
-        .flat_map(|i| {
-            (0..n2)
-                .map(|j| (i, j, dtw_distance(&curves1[i], &curves2[j], p, w)))
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n1, n2);
-    for (i, j, d) in pairs {
-        dist[(i, j)] = d;
-    }
-    dist
+    let rm1 = data1.to_row_major();
+    let rm2 = data2.to_row_major();
+    cross_distance_matrix(n1, n2, |i, j| {
+        dtw_distance(&rm1[i * m1..(i + 1) * m1], &rm2[j * m2..(j + 1) * m2], p, w)
+    })
 }
 
-/// Compute Fourier coefficients for a curve using FFT.
-fn fft_coefficients(data: &[f64], nfreq: usize) -> Vec<f64> {
+/// Compute Fourier coefficients for a curve using a pre-planned FFT.
+fn fft_coefficients_with_plan(data: &[f64], nfreq: usize, fft: &dyn rustfft::Fft<f64>) -> Vec<f64> {
     let n = data.len();
     let nfreq = nfreq.min(n / 2);
-    let mut planner = FftPlanner::<f64>::new();
-    let fft = planner.plan_fft_forward(n);
     let mut buffer: Vec<Complex<f64>> = data.iter().map(|&x| Complex::new(x, 0.0)).collect();
     fft.process(&mut buffer);
     buffer
@@ -483,30 +423,20 @@ pub fn fourier_self_1d(data: &FdMatrix, nfreq: usize) -> FdMatrix {
     if n == 0 || m == 0 {
         return FdMatrix::zeros(0, 0);
     }
-    let curves = data.rows();
-    let coeffs: Vec<Vec<f64>> = iter_maybe_parallel!(curves)
-        .map(|curve| fft_coefficients(&curve, nfreq))
+    let mut planner = FftPlanner::<f64>::new();
+    let fft = planner.plan_fft_forward(m);
+    let rm = data.to_row_major();
+    let coeffs: Vec<Vec<f64>> = iter_maybe_parallel!(0..n)
+        .map(|i| fft_coefficients_with_plan(&rm[i * m..(i + 1) * m], nfreq, fft.as_ref()))
         .collect();
-    let upper_triangle: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n)
-        .flat_map(|i| {
-            ((i + 1)..n)
-                .map(|j| {
-                    let dist_sq: f64 = coeffs[i]
-                        .iter()
-                        .zip(coeffs[j].iter())
-                        .map(|(a, b)| (a - b).powi(2))
-                        .sum();
-                    (i, j, dist_sq.sqrt())
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n, n);
-    for (i, j, d) in upper_triangle {
-        dist[(i, j)] = d;
-        dist[(j, i)] = d;
-    }
-    dist
+    self_distance_matrix(n, |i, j| {
+        coeffs[i]
+            .iter()
+            .zip(coeffs[j].iter())
+            .map(|(a, b)| (a - b).powi(2))
+            .sum::<f64>()
+            .sqrt()
+    })
 }
 
 /// Compute semimetric based on Fourier coefficients for cross-distances.
@@ -517,33 +447,24 @@ pub fn fourier_cross_1d(data1: &FdMatrix, data2: &FdMatrix, nfreq: usize) -> FdM
     if n1 == 0 || n2 == 0 || m == 0 || data2.ncols() != m {
         return FdMatrix::zeros(0, 0);
     }
-    let curves1 = data1.rows();
-    let curves2 = data2.rows();
-    let coeffs1: Vec<Vec<f64>> = iter_maybe_parallel!(curves1)
-        .map(|curve| fft_coefficients(&curve, nfreq))
+    let mut planner = FftPlanner::<f64>::new();
+    let fft = planner.plan_fft_forward(m);
+    let rm1 = data1.to_row_major();
+    let rm2 = data2.to_row_major();
+    let coeffs1: Vec<Vec<f64>> = iter_maybe_parallel!(0..n1)
+        .map(|i| fft_coefficients_with_plan(&rm1[i * m..(i + 1) * m], nfreq, fft.as_ref()))
         .collect();
-    let coeffs2: Vec<Vec<f64>> = iter_maybe_parallel!(curves2)
-        .map(|curve| fft_coefficients(&curve, nfreq))
+    let coeffs2: Vec<Vec<f64>> = iter_maybe_parallel!(0..n2)
+        .map(|i| fft_coefficients_with_plan(&rm2[i * m..(i + 1) * m], nfreq, fft.as_ref()))
         .collect();
-    let pairs: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n1)
-        .flat_map(|i| {
-            (0..n2)
-                .map(|j| {
-                    let dist_sq: f64 = coeffs1[i]
-                        .iter()
-                        .zip(coeffs2[j].iter())
-                        .map(|(a, b)| (a - b).powi(2))
-                        .sum();
-                    (i, j, dist_sq.sqrt())
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n1, n2);
-    for (i, j, d) in pairs {
-        dist[(i, j)] = d;
-    }
-    dist
+    cross_distance_matrix(n1, n2, |i, j| {
+        coeffs1[i]
+            .iter()
+            .zip(coeffs2[j].iter())
+            .map(|(a, b)| (a - b).powi(2))
+            .sum::<f64>()
+            .sqrt()
+    })
 }
 
 /// Compute weighted L2 distance at a given horizontal shift.
@@ -590,23 +511,15 @@ pub fn hshift_self_1d(data: &FdMatrix, argvals: &[f64], max_shift: usize) -> FdM
         return FdMatrix::zeros(0, 0);
     }
     let weights = simpsons_weights(argvals);
-    let curves = data.rows();
-    let upper_triangle: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n)
-        .flat_map(|i| {
-            ((i + 1)..n)
-                .map(|j| {
-                    let d = hshift_distance(&curves[i], &curves[j], &weights, max_shift);
-                    (i, j, d)
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n, n);
-    for (i, j, d) in upper_triangle {
-        dist[(i, j)] = d;
-        dist[(j, i)] = d;
-    }
-    dist
+    let rm = data.to_row_major();
+    self_distance_matrix(n, |i, j| {
+        hshift_distance(
+            &rm[i * m..(i + 1) * m],
+            &rm[j * m..(j + 1) * m],
+            &weights,
+            max_shift,
+        )
+    })
 }
 
 /// Compute semimetric based on horizontal shift for cross-distances.
@@ -623,26 +536,16 @@ pub fn hshift_cross_1d(
         return FdMatrix::zeros(0, 0);
     }
     let weights = simpsons_weights(argvals);
-    let curves1 = data1.rows();
-    let curves2 = data2.rows();
-    let pairs: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n1)
-        .flat_map(|i| {
-            (0..n2)
-                .map(|j| {
-                    (
-                        i,
-                        j,
-                        hshift_distance(&curves1[i], &curves2[j], &weights, max_shift),
-                    )
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n1, n2);
-    for (i, j, d) in pairs {
-        dist[(i, j)] = d;
-    }
-    dist
+    let rm1 = data1.to_row_major();
+    let rm2 = data2.to_row_major();
+    cross_distance_matrix(n1, n2, |i, j| {
+        hshift_distance(
+            &rm1[i * m..(i + 1) * m],
+            &rm2[j * m..(j + 1) * m],
+            &weights,
+            max_shift,
+        )
+    })
 }
 
 /// Compute Hausdorff distance between two 3D point clouds.
@@ -709,22 +612,7 @@ pub fn hausdorff_self_2d(data: &FdMatrix, argvals_s: &[f64], argvals_t: &[f64]) 
         return FdMatrix::zeros(0, 0);
     }
     let surfaces = extract_surfaces(data, argvals_s, argvals_t);
-    let upper_triangle: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n)
-        .flat_map(|i| {
-            ((i + 1)..n)
-                .map(|j| {
-                    let d = hausdorff_3d(&surfaces[i], &surfaces[j]);
-                    (i, j, d)
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n, n);
-    for (i, j, d) in upper_triangle {
-        dist[(i, j)] = d;
-        dist[(j, i)] = d;
-    }
-    dist
+    self_distance_matrix(n, |i, j| hausdorff_3d(&surfaces[i], &surfaces[j]))
 }
 
 /// Compute Hausdorff cross-distance for 2D surfaces.
@@ -743,18 +631,7 @@ pub fn hausdorff_cross_2d(
     }
     let surfaces1 = extract_surfaces(data1, argvals_s, argvals_t);
     let surfaces2 = extract_surfaces(data2, argvals_s, argvals_t);
-    let pairs: Vec<(usize, usize, f64)> = iter_maybe_parallel!(0..n1)
-        .flat_map(|i| {
-            (0..n2)
-                .map(|j| (i, j, hausdorff_3d(&surfaces1[i], &surfaces2[j])))
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    let mut dist = FdMatrix::zeros(n1, n2);
-    for (i, j, d) in pairs {
-        dist[(i, j)] = d;
-    }
-    dist
+    cross_distance_matrix(n1, n2, |i, j| hausdorff_3d(&surfaces1[i], &surfaces2[j]))
 }
 
 #[cfg(test)]

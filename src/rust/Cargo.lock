@@ -111,8 +111,9 @@ dependencies = [
 
 [[package]]
 name = "fdars-core"
-version = "0.4.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5996e88440469bba2bef6431cb7ae8466b30dd7d3802c88023b0d1b8670be7ab"
 dependencies = [
  "getrandom",
  "nalgebra",

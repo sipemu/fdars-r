@@ -22,6 +22,7 @@ metric(fdataobj, fdataref = NULL, method = "lp", ...)
 \item "fourier" - Semi-metric based on FFT coefficients
 \item "hshift" - Semi-metric with horizontal shift
 \item "kl" - Symmetric Kullback-Leibler divergence
+\item "elastic" - Elastic (Fisher-Rao) distance
 }}
 
 \item{...}{Additional arguments passed to the specific distance function.}

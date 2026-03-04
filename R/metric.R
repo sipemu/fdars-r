@@ -21,6 +21,7 @@
 #'     \item "fourier" - Semi-metric based on FFT coefficients
 #'     \item "hshift" - Semi-metric with horizontal shift
 #'     \item "kl" - Symmetric Kullback-Leibler divergence
+#'     \item "elastic" - Elastic (Fisher-Rao) distance
 #'   }
 #' @param ... Additional arguments passed to the specific distance function.
 #'
@@ -61,7 +62,7 @@ metric <- function(fdataobj, fdataref = NULL, method = "lp", ...) {
   }
 
   method <- match.arg(method, c("lp", "hausdorff", "dtw", "pca", "deriv",
-                                 "basis", "fourier", "hshift", "kl"))
+                                 "basis", "fourier", "hshift", "kl", "elastic"))
 
   switch(method,
     "lp" = metric.lp(fdataobj, fdataref, ...),
@@ -72,7 +73,8 @@ metric <- function(fdataobj, fdataref = NULL, method = "lp", ...) {
     "basis" = semimetric.basis(fdataobj, fdataref, ...),
     "fourier" = semimetric.fourier(fdataobj, fdataref, ...),
     "hshift" = semimetric.hshift(fdataobj, fdataref, ...),
-    "kl" = metric.kl(fdataobj, fdataref, ...)
+    "kl" = metric.kl(fdataobj, fdataref, ...),
+    "elastic" = metric.elastic(fdataobj, fdataref, ...)
   )
 }
 

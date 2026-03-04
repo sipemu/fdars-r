@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.81"
 name = "fdars-core"
-version = "0.4.0"
+version = "0.6.0"
 authors = ["Simon Muller"]
 build = false
 autolib = false
@@ -77,6 +77,10 @@ name = "distances_and_metrics"
 path = "examples/06_distances_and_metrics/main.rs"
 
 [[example]]
+name = "elastic_alignment"
+path = "examples/16_elastic_alignment/main.rs"
+
+[[example]]
 name = "functional_operations"
 path = "examples/02_functional_operations/main.rs"
 
@@ -108,9 +112,18 @@ path = "examples/03_smoothing/main.rs"
 name = "streaming_depth"
 path = "examples/12_streaming_depth/main.rs"
 
+[[example]]
+name = "tolerance_bands"
+path = "examples/15_tolerance_bands/main.rs"
+
 [[test]]
 name = "validate_against_r"
 path = "tests/validate_against_r.rs"
+
+[[bench]]
+name = "depth_benchmarks"
+path = "benches/depth_benchmarks.rs"
+harness = false
 
 [[bench]]
 name = "seasonal_benchmarks"

@@ -17,6 +17,9 @@ use std::f64::consts::PI;
 
 // Import shared utilities from fdars-core
 use fdars_core::{hilbert_transform, FdMatrix};
+use fdars_core::alignment;
+use fdars_core::tolerance;
+use fdars_core::streaming_depth::{self, StreamingDepth, SortedReferenceState, FullReferenceState};
 
 // =============================================================================
 // Helper functions
@@ -7924,7 +7927,7 @@ fn seasonal_detrend(
     list!(
         trend = trend_mat,
         detrended = detrended_mat,
-        method = result.method,
+        method = result.method.as_ref(),
         rss = result.rss,
         n_params = result.n_params as i32
     )
@@ -7991,7 +7994,7 @@ fn seasonal_decompose(
         seasonal = seasonal_mat,
         remainder = remainder_mat,
         period = result.period,
-        method = result.method
+        method = result.method.as_ref()
     )
     .into()
 }
@@ -8107,22 +8110,36 @@ fn add_error_curve_1d(data: RMatrix<f64>, sd: f64, seed: Robj) -> Robj {
 // Irregular functional data functions
 // =============================================================================
 
+/// Helper to construct IrregFdata from R inputs
+fn make_irreg_fdata(offsets: &[i32], argvals: Vec<f64>, values: Vec<f64>) -> Option<fdars_core::irreg_fdata::IrregFdata> {
+    let offsets_usize: Vec<usize> = offsets.iter().map(|&x| x as usize).collect();
+    // Compute rangeval from argvals
+    let range_min = argvals.iter().cloned().fold(f64::INFINITY, f64::min);
+    let range_max = argvals.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+    fdars_core::irreg_fdata::IrregFdata::from_flat(offsets_usize, argvals, values, [range_min, range_max])
+}
+
 /// Compute integral for each curve in irregular functional data
 #[extendr]
 fn irreg_integrate(offsets: Vec<i32>, argvals: Vec<f64>, values: Vec<f64>) -> Robj {
-    // Convert offsets to usize (R passes integers)
-    let offsets: Vec<usize> = offsets.iter().map(|&x| x as usize).collect();
+    let ifd = match make_irreg_fdata(&offsets, argvals, values) {
+        Some(ifd) => ifd,
+        None => return Robj::from(Vec::<f64>::new()),
+    };
 
-    let integrals = fdars_core::irreg_fdata::integrate_irreg(&offsets, &argvals, &values);
+    let integrals = fdars_core::irreg_fdata::integrate_irreg(&ifd);
     Robj::from(integrals)
 }
 
 /// Compute Lp norm for each curve in irregular functional data
 #[extendr]
 fn irreg_norm_lp(offsets: Vec<i32>, argvals: Vec<f64>, values: Vec<f64>, p: f64) -> Robj {
-    let offsets: Vec<usize> = offsets.iter().map(|&x| x as usize).collect();
+    let ifd = match make_irreg_fdata(&offsets, argvals, values) {
+        Some(ifd) => ifd,
+        None => return Robj::from(Vec::<f64>::new()),
+    };
 
-    let norms = fdars_core::irreg_fdata::norm_lp_irreg(&offsets, &argvals, &values, p);
+    let norms = fdars_core::irreg_fdata::norm_lp_irreg(&ifd, p);
     Robj::from(norms)
 }
 
@@ -8136,28 +8153,33 @@ fn irreg_mean_kernel(
     bandwidth: f64,
     kernel_type: i32,
 ) -> Robj {
-    let offsets: Vec<usize> = offsets.iter().map(|&x| x as usize).collect();
+    let ifd = match make_irreg_fdata(&offsets, argvals, values) {
+        Some(ifd) => ifd,
+        None => return Robj::from(Vec::<f64>::new()),
+    };
 
-    let mean = fdars_core::irreg_fdata::mean_irreg(
-        &offsets,
-        &argvals,
-        &values,
-        &target_argvals,
-        bandwidth,
-        kernel_type,
-    );
+    let kt = match kernel_type {
+        1 => fdars_core::irreg_fdata::KernelType::Gaussian,
+        _ => fdars_core::irreg_fdata::KernelType::Epanechnikov,
+    };
+
+    let mean = fdars_core::irreg_fdata::mean_irreg(&ifd, &target_argvals, bandwidth, kt);
     Robj::from(mean)
 }
 
 /// Compute pairwise Lp distances for irregular functional data
 #[extendr]
 fn irreg_metric_lp(offsets: Vec<i32>, argvals: Vec<f64>, values: Vec<f64>, p: f64) -> Robj {
-    let offsets: Vec<usize> = offsets.iter().map(|&x| x as usize).collect();
     let n = offsets.len() - 1;
+    let ifd = match make_irreg_fdata(&offsets, argvals, values) {
+        Some(ifd) => ifd,
+        None => return Robj::from(RMatrix::new_matrix(0, 0, |_, _| 0.0)),
+    };
 
-    let dist = fdars_core::irreg_fdata::metric_lp_irreg(&offsets, &argvals, &values, p);
+    let dist = fdars_core::irreg_fdata::metric_lp_irreg(&ifd, p);
+    let ds = dist.as_slice();
 
-    let result = RMatrix::new_matrix(n, n, |i, j| dist[i + j * n]);
+    let result = RMatrix::new_matrix(n, n, |i, j| ds[i + j * n]);
     Robj::from(result)
 }
 
@@ -8169,13 +8191,17 @@ fn irreg_to_regular(
     values: Vec<f64>,
     target_grid: Vec<f64>,
 ) -> Robj {
-    let offsets: Vec<usize> = offsets.iter().map(|&x| x as usize).collect();
     let n = offsets.len() - 1;
     let m = target_grid.len();
+    let ifd = match make_irreg_fdata(&offsets, argvals, values) {
+        Some(ifd) => ifd,
+        None => return Robj::from(RMatrix::new_matrix(0, 0, |_, _| 0.0)),
+    };
 
-    let data = fdars_core::irreg_fdata::to_regular_grid(&offsets, &argvals, &values, &target_grid);
+    let data = fdars_core::irreg_fdata::to_regular_grid(&ifd, &target_grid);
+    let ds = data.as_slice();
 
-    let result = RMatrix::new_matrix(n, m, |i, j| data[i + j * n]);
+    let result = RMatrix::new_matrix(n, m, |i, j| ds[i + j * n]);
     Robj::from(result)
 }
 
@@ -8389,6 +8415,364 @@ fn fourier_basis_with_range(t: &[f64], nbasis: usize, t_min: f64, t_max: f64) ->
 }
 
 // =============================================================================
+// Alignment functions
+// =============================================================================
+
+/// SRSF transform of functional data
+#[extendr]
+fn alignment_srsf_transform(data: RMatrix<f64>, argvals: Vec<f64>) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let result = alignment::srsf_transform(&fd, &argvals);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Inverse SRSF: reconstruct curve from SRSF representation
+#[extendr]
+fn alignment_srsf_inverse(q: Vec<f64>, argvals: Vec<f64>, f0: f64) -> Robj {
+    if q.len() != argvals.len() || q.is_empty() {
+        return Robj::from(Vec::<f64>::new());
+    }
+    Robj::from(alignment::srsf_inverse(&q, &argvals, f0))
+}
+
+/// Apply warping function to reparameterize a curve
+#[extendr]
+fn alignment_reparameterize(f: Vec<f64>, argvals: Vec<f64>, gamma: Vec<f64>) -> Robj {
+    if f.len() != argvals.len() || f.len() != gamma.len() || f.is_empty() {
+        return Robj::from(Vec::<f64>::new());
+    }
+    Robj::from(alignment::reparameterize_curve(&f, &argvals, &gamma))
+}
+
+/// Compose two warping functions
+#[extendr]
+fn alignment_compose_warps(gamma1: Vec<f64>, gamma2: Vec<f64>, argvals: Vec<f64>) -> Robj {
+    if gamma1.len() != argvals.len() || gamma2.len() != argvals.len() || argvals.is_empty() {
+        return Robj::from(Vec::<f64>::new());
+    }
+    Robj::from(alignment::compose_warps(&gamma1, &gamma2, &argvals))
+}
+
+/// Elastic alignment of one curve to another
+#[extendr]
+fn alignment_elastic_pair(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(gamma = Vec::<f64>::new(), f_aligned = Vec::<f64>::new(), distance = f64::NAN).into();
+    }
+    let res = alignment::elastic_align_pair(&f1, &f2, &argvals);
+    list!(gamma = res.gamma, f_aligned = res.f_aligned, distance = res.distance).into()
+}
+
+/// Elastic (Fisher-Rao) distance between two curves
+#[extendr]
+fn alignment_elastic_distance(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return Robj::from(f64::NAN);
+    }
+    Robj::from(alignment::elastic_distance(&f1, &f2, &argvals))
+}
+
+/// Align all curves to a target curve
+#[extendr]
+fn alignment_align_to_target(data: RMatrix<f64>, target: Vec<f64>, argvals: Vec<f64>) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m || target.len() != m {
+        return list!(
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            aligned_data = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            distances = Vec::<f64>::new()
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let res = alignment::align_to_target(&fd, &target, &argvals);
+    let gs = res.gammas.as_slice();
+    let as_ = res.aligned_data.as_slice();
+    let g_mat = RMatrix::new_matrix(res.gammas.nrows(), res.gammas.ncols(), |i, j| gs[i + j * res.gammas.nrows()]);
+    let a_mat = RMatrix::new_matrix(res.aligned_data.nrows(), res.aligned_data.ncols(), |i, j| as_[i + j * res.aligned_data.nrows()]);
+    list!(gammas = g_mat, aligned_data = a_mat, distances = res.distances).into()
+}
+
+/// Elastic self-distance matrix
+#[extendr]
+fn alignment_self_dist(data: RMatrix<f64>, argvals: Vec<f64>) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let result = alignment::elastic_self_distance_matrix(&fd, &argvals);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Elastic cross-distance matrix
+#[extendr]
+fn alignment_cross_dist(data1: RMatrix<f64>, data2: RMatrix<f64>, argvals: Vec<f64>) -> Robj {
+    let n1 = data1.nrows();
+    let m1 = data1.ncols();
+    let n2 = data2.nrows();
+    let m2 = data2.ncols();
+    if n1 == 0 || n2 == 0 || m1 < 2 || m1 != m2 || argvals.len() != m1 {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let d1 = data1.as_real_slice().unwrap();
+    let d2 = data2.as_real_slice().unwrap();
+    let fd1 = FdMatrix::from_slice(d1, n1, m1).expect("Invalid matrix dimensions");
+    let fd2 = FdMatrix::from_slice(d2, n2, m2).expect("Invalid matrix dimensions");
+    let result = alignment::elastic_cross_distance_matrix(&fd1, &fd2, &argvals);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Karcher (Fréchet) mean in elastic metric
+#[extendr]
+fn alignment_karcher_mean(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i32, tol: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return list!(
+            mean = Vec::<f64>::new(),
+            mean_srsf = Vec::<f64>::new(),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            aligned_data = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            n_iter = 0i32,
+            converged = false
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let res = alignment::karcher_mean(&fd, &argvals, max_iter as usize, tol);
+    let gs = res.gammas.as_slice();
+    let as_ = res.aligned_data.as_slice();
+    let g_mat = RMatrix::new_matrix(res.gammas.nrows(), res.gammas.ncols(), |i, j| gs[i + j * res.gammas.nrows()]);
+    let a_mat = RMatrix::new_matrix(res.aligned_data.nrows(), res.aligned_data.ncols(), |i, j| as_[i + j * res.aligned_data.nrows()]);
+    list!(
+        mean = res.mean,
+        mean_srsf = res.mean_srsf,
+        gammas = g_mat,
+        aligned_data = a_mat,
+        n_iter = res.n_iter as i32,
+        converged = res.converged
+    ).into()
+}
+
+// =============================================================================
+// Tolerance band functions
+// =============================================================================
+
+/// FPCA-based tolerance band
+#[extendr]
+fn tolerance_fpca(data: RMatrix<f64>, ncomp: i32, nb: i32, coverage: f64, band_type: &str, seed: Robj) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let seed_val = if seed.is_null() { 42u64 } else { seed.as_integer().unwrap_or(42) as u64 };
+    let bt = match band_type {
+        "simultaneous" => tolerance::BandType::Simultaneous,
+        _ => tolerance::BandType::Pointwise,
+    };
+    if n == 0 || m == 0 {
+        return list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match tolerance::fpca_tolerance_band(&fd, ncomp as usize, nb as usize, coverage, bt, seed_val) {
+        Some(band) => list!(lower = band.lower, upper = band.upper, center = band.center, half_width = band.half_width, success = true).into(),
+        None => list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into(),
+    }
+}
+
+/// Conformal prediction band
+#[extendr]
+fn tolerance_conformal(data: RMatrix<f64>, cal_fraction: f64, coverage: f64, score_type: &str, seed: Robj) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let seed_val = if seed.is_null() { 42u64 } else { seed.as_integer().unwrap_or(42) as u64 };
+    let st = match score_type {
+        "l2" | "L2" => tolerance::NonConformityScore::L2,
+        _ => tolerance::NonConformityScore::SupNorm,
+    };
+    if n == 0 || m == 0 {
+        return list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match tolerance::conformal_prediction_band(&fd, cal_fraction, coverage, st, seed_val) {
+        Some(band) => list!(lower = band.lower, upper = band.upper, center = band.center, half_width = band.half_width, success = true).into(),
+        None => list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into(),
+    }
+}
+
+/// SCB mean confidence band (Degras method)
+#[extendr]
+fn tolerance_scb_degras(data: RMatrix<f64>, argvals: Vec<f64>, bandwidth: f64, nb: i32, confidence: f64, multiplier: &str) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let mult = match multiplier {
+        "rademacher" | "Rademacher" => tolerance::MultiplierDistribution::Rademacher,
+        _ => tolerance::MultiplierDistribution::Gaussian,
+    };
+    if n == 0 || m == 0 || argvals.len() != m {
+        return list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match tolerance::scb_mean_degras(&fd, &argvals, bandwidth, nb as usize, confidence, mult) {
+        Some(band) => list!(lower = band.lower, upper = band.upper, center = band.center, half_width = band.half_width, success = true).into(),
+        None => list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into(),
+    }
+}
+
+/// Exponential family tolerance band
+#[extendr]
+fn tolerance_exponential(data: RMatrix<f64>, family: &str, ncomp: i32, nb: i32, coverage: f64, seed: Robj) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let seed_val = if seed.is_null() { 42u64 } else { seed.as_integer().unwrap_or(42) as u64 };
+    let fam = match family {
+        "binomial" => tolerance::ExponentialFamily::Binomial,
+        "poisson" => tolerance::ExponentialFamily::Poisson,
+        _ => tolerance::ExponentialFamily::Gaussian,
+    };
+    if n == 0 || m == 0 {
+        return list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match tolerance::exponential_family_tolerance_band(&fd, fam, ncomp as usize, nb as usize, coverage, seed_val) {
+        Some(band) => list!(lower = band.lower, upper = band.upper, center = band.center, half_width = band.half_width, success = true).into(),
+        None => list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into(),
+    }
+}
+
+/// Elastic tolerance band (alignment + FPCA)
+#[extendr]
+fn tolerance_elastic(data: RMatrix<f64>, argvals: Vec<f64>, ncomp: i32, nb: i32, coverage: f64, band_type: &str, max_iter: i32, seed: Robj) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let seed_val = if seed.is_null() { 42u64 } else { seed.as_integer().unwrap_or(42) as u64 };
+    let bt = match band_type {
+        "simultaneous" => tolerance::BandType::Simultaneous,
+        _ => tolerance::BandType::Pointwise,
+    };
+    if n == 0 || m == 0 || argvals.len() != m {
+        return list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match tolerance::elastic_tolerance_band(&fd, &argvals, ncomp as usize, nb as usize, coverage, bt, max_iter as usize, seed_val) {
+        Some(band) => list!(lower = band.lower, upper = band.upper, center = band.center, half_width = band.half_width, success = true).into(),
+        None => list!(lower = Vec::<f64>::new(), upper = Vec::<f64>::new(), center = Vec::<f64>::new(), half_width = Vec::<f64>::new(), success = false).into(),
+    }
+}
+
+// =============================================================================
+// Streaming depth functions
+// =============================================================================
+
+/// Streaming depth: batch self-depth computation
+#[extendr]
+fn streaming_depth_batch(data: RMatrix<f64>, method: &str) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m == 0 {
+        return Robj::from(Vec::<f64>::new());
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+
+    let depths = match method {
+        "MBD" => {
+            let state = SortedReferenceState::from_reference(&fd);
+            streaming_depth::StreamingMbd::new(state).depth_batch(&fd)
+        }
+        "BD" => {
+            let state = FullReferenceState::from_reference(&fd);
+            streaming_depth::StreamingBd::new(state).depth_batch(&fd)
+        }
+        _ => {
+            // FM (default)
+            let state = SortedReferenceState::from_reference(&fd);
+            streaming_depth::StreamingFraimanMuniz::new(state, true).depth_batch(&fd)
+        }
+    };
+    Robj::from(depths)
+}
+
+/// Streaming depth: new data against reference
+#[extendr]
+fn streaming_depth_vs_ref(ref_data: RMatrix<f64>, new_data: RMatrix<f64>, method: &str) -> Robj {
+    let nr = ref_data.nrows();
+    let mr = ref_data.ncols();
+    let nn = new_data.nrows();
+    let mn = new_data.ncols();
+    if nr == 0 || nn == 0 || mr == 0 || mr != mn {
+        return Robj::from(Vec::<f64>::new());
+    }
+    let ref_slice = ref_data.as_real_slice().unwrap();
+    let new_slice = new_data.as_real_slice().unwrap();
+    let ref_fd = FdMatrix::from_slice(ref_slice, nr, mr).expect("Invalid matrix dimensions");
+    let new_fd = FdMatrix::from_slice(new_slice, nn, mn).expect("Invalid matrix dimensions");
+
+    let depths = match method {
+        "MBD" => {
+            let state = SortedReferenceState::from_reference(&ref_fd);
+            streaming_depth::StreamingMbd::new(state).depth_batch(&new_fd)
+        }
+        "BD" => {
+            let state = FullReferenceState::from_reference(&ref_fd);
+            streaming_depth::StreamingBd::new(state).depth_batch(&new_fd)
+        }
+        _ => {
+            let state = SortedReferenceState::from_reference(&ref_fd);
+            streaming_depth::StreamingFraimanMuniz::new(state, true).depth_batch(&new_fd)
+        }
+    };
+    Robj::from(depths)
+}
+
+/// Streaming depth: single curve against reference
+#[extendr]
+fn streaming_depth_one(ref_data: RMatrix<f64>, curve: Vec<f64>, method: &str) -> Robj {
+    let nr = ref_data.nrows();
+    let mr = ref_data.ncols();
+    if nr == 0 || mr == 0 || curve.len() != mr {
+        return Robj::from(f64::NAN);
+    }
+    let ref_slice = ref_data.as_real_slice().unwrap();
+    let ref_fd = FdMatrix::from_slice(ref_slice, nr, mr).expect("Invalid matrix dimensions");
+
+    let depth = match method {
+        "MBD" => {
+            let state = SortedReferenceState::from_reference(&ref_fd);
+            streaming_depth::StreamingMbd::new(state).depth_one(&curve)
+        }
+        "BD" => {
+            let state = FullReferenceState::from_reference(&ref_fd);
+            streaming_depth::StreamingBd::new(state).depth_one(&curve)
+        }
+        _ => {
+            let state = SortedReferenceState::from_reference(&ref_fd);
+            streaming_depth::StreamingFraimanMuniz::new(state, true).depth_one(&curve)
+        }
+    };
+    Robj::from(depth)
+}
+
+// =============================================================================
 // Module exports
 // =============================================================================
 
@@ -8534,4 +8918,28 @@ extendr_module! {
     fn irreg_metric_lp;
     fn irreg_to_regular;
     fn irreg_fdata2basis;
+
+    // Alignment functions
+    fn alignment_srsf_transform;
+    fn alignment_srsf_inverse;
+    fn alignment_reparameterize;
+    fn alignment_compose_warps;
+    fn alignment_elastic_pair;
+    fn alignment_elastic_distance;
+    fn alignment_align_to_target;
+    fn alignment_self_dist;
+    fn alignment_cross_dist;
+    fn alignment_karcher_mean;
+
+    // Tolerance band functions
+    fn tolerance_fpca;
+    fn tolerance_conformal;
+    fn tolerance_scb_degras;
+    fn tolerance_exponential;
+    fn tolerance_elastic;
+
+    // Streaming depth functions
+    fn streaming_depth_batch;
+    fn streaming_depth_vs_ref;
+    fn streaming_depth_one;
 }

@@ -1,3 +1,32 @@
+# fdars 0.4.0
+
+## New Features
+
+### Elastic Alignment
+- Added `srsf.transform()` and `srsf.inverse()` for Square-Root Slope Function transforms
+- Added `elastic.align()` for elastic curve alignment with S3 print/plot methods
+- Added `elastic.distance()` for Fisher-Rao distance computation (self and cross)
+- Added `karcher.mean()` for Karcher (Fréchet) mean in the elastic metric with S3 print/plot methods
+- Added `metric.elastic()` and "elastic" option to `metric()` dispatcher
+
+### Tolerance Bands
+- Added `tolerance.band()` with 5 methods: "fpca", "conformal", "scb", "exponential", "elastic"
+- FPCA bootstrap bands (pointwise or simultaneous)
+- Distribution-free conformal prediction bands
+- Simultaneous confidence bands for the mean (Degras method)
+- Exponential family tolerance bands (Gaussian, Binomial, Poisson)
+- Elastic tolerance bands (alignment + FPCA)
+- S3 print/plot methods for `tolerance.band` objects
+
+### Streaming Depth
+- Added `streaming.depth()` for efficient O(T log N) depth computation
+- Supports FM, MBD, and BD methods with pre-sorted reference
+- Added `depth.streaming()` alias and "streaming" option to `depth()` dispatcher
+
+## Internal
+- Upgraded Rust backend (fdars-core) to v0.6.0
+- 18 new Rust bridge functions for alignment, tolerance, and streaming depth
+
 # fdars 0.3.2
 
 ## Bug Fixes

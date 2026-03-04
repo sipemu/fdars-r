@@ -1,0 +1,126 @@
+---
+title: "Streaming Depth Computation"
+output: rmarkdown::html_vignette
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  out.width = "100%"
+)
+```
+
+## Introduction
+
+Standard depth computations require $O(N^2 T)$ time for $N$ curves on $T$ grid points, which becomes expensive for large reference samples. **Streaming depth** decouples reference-set construction from query evaluation: the reference data is pre-sorted at each time point, enabling $O(T \log N)$ depth per query curve.
+
+This is particularly useful for:
+
+- **Online monitoring**: Evaluating new curves as they arrive against a fixed reference
+- **Large reference samples**: When $N$ is large, the $O(\log N)$ lookup is much faster than $O(N)$
+
+## Self-Depth (Batch)
+
+The simplest use case computes the depth of each curve relative to the full dataset:
+
+```{r batch}
+library(fdars)
+set.seed(42)
+
+# Generate functional data
+n <- 50
+m <- 100
+argvals <- seq(0, 1, length.out = m)
+data <- matrix(0, n, m)
+for (i in 1:n) {
+  data[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.3) + rnorm(m, 0, 0.05)
+}
+
+# Add an outlier
+data[1, ] <- 5 * cos(4 * pi * argvals)
+fd <- fdata(data, argvals = argvals)
+
+# Compute streaming FM depth
+d_fm <- streaming.depth(fd, method = "FM")
+head(round(d_fm, 4))
+```
+
+The outlier (curve 1) has the lowest depth:
+
+```{r outlier}
+cat("Outlier depth:", round(d_fm[1], 4), "\n")
+cat("Median depth:", round(median(d_fm[-1]), 4), "\n")
+```
+
+## Monitoring New Curves
+
+A key application is evaluating new observations against a fixed reference sample:
+
+```{r monitoring}
+# Split into reference and new data
+ref <- fd[1:40]
+new_curves <- fd[41:50]
+
+# Compute depth of new curves against reference
+d_new <- streaming.depth(new_curves, fdataori = ref, method = "FM")
+round(d_new, 4)
+```
+
+Curves with unusually low depth may be considered anomalous.
+
+## Comparing FM, MBD, and BD
+
+Three streaming depth methods are available:
+
+- **FM** (Fraiman-Muniz): Integrates pointwise depth ranks; robust general-purpose
+- **MBD** (Modified Band Depth): Based on fraction of time a curve is within bands; always in [0, 1]
+- **BD** (Band Depth): All-or-nothing band containment; more conservative
+
+```{r comparison}
+d_fm <- streaming.depth(fd, method = "FM")
+d_mbd <- streaming.depth(fd, method = "MBD")
+d_bd <- streaming.depth(fd, method = "BD")
+
+# Compare rankings
+df <- data.frame(
+  curve = 1:n,
+  FM = d_fm,
+  MBD = d_mbd,
+  BD = d_bd
+)
+
+# Correlations between methods
+round(cor(df[, -1]), 3)
+```
+
+The methods generally agree on ranking, though MBD and FM tend to be more concordant:
+
+```{r rank-plot}
+par(mfrow = c(1, 2))
+plot(rank(d_fm), rank(d_mbd), pch = 19,
+     xlab = "FM rank", ylab = "MBD rank", main = "FM vs MBD")
+abline(0, 1, col = "red")
+
+plot(rank(d_fm), rank(d_bd), pch = 19,
+     xlab = "FM rank", ylab = "BD rank", main = "FM vs BD")
+abline(0, 1, col = "red")
+```
+
+## Integration with the Depth Dispatcher
+
+Streaming depth is available through the `depth()` dispatcher:
+
+```{r dispatcher}
+d <- depth(fd, method = "streaming")
+all.equal(d, streaming.depth(fd, method = "FM"))
+```
+
+The `depth.streaming()` alias also works:
+
+```{r alias}
+d2 <- depth.streaming(fd)
+all.equal(d, d2)
+```
