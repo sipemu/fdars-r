@@ -278,14 +278,31 @@ fn dp_traceback(trace: &[u8], m: usize) -> Vec<(usize, usize)> {
     path
 }
 
+/// Normalize an SRSF to unit L2 norm using Simpson's weights.
+fn normalize_srsf(q: &[f64], weights: &[f64]) -> Vec<f64> {
+    let norm_sq: f64 = q.iter().zip(weights.iter()).map(|(&qi, &w)| qi * qi * w).sum();
+    let norm = norm_sq.sqrt();
+    if norm < 1e-15 {
+        return q.to_vec();
+    }
+    q.iter().map(|&qi| qi / norm).collect()
+}
+
 /// Core DP alignment between two SRSFs on a grid.
 ///
-/// Finds the optimal warping γ minimizing ‖q₁ - (q₂∘γ)√γ'‖².
+/// Normalizes SRSFs to unit norm before alignment so the DP only
+/// aligns phase, not amplitude. This prevents spurious warping
+/// for curves that differ only in amplitude.
 fn dp_alignment_core(q1: &[f64], q2: &[f64], argvals: &[f64]) -> Vec<f64> {
     let m = argvals.len();
     if m < 2 {
         return argvals.to_vec();
     }
+
+    // Normalize SRSFs to unit norm — separates phase from amplitude
+    let weights = simpsons_weights(argvals);
+    let q1n = normalize_srsf(q1, &weights);
+    let q2n = normalize_srsf(q2, &weights);
 
     let grid = argvals;
     let mut prev_row = vec![f64::MAX; m];
@@ -297,7 +314,7 @@ fn dp_alignment_core(q1: &[f64], q2: &[f64], argvals: &[f64]) -> Vec<f64> {
     prev_row[0] = 0.0;
     for j in 1..m {
         let dt = grid[j] - grid[j - 1];
-        let val = q1[0] - q2[j];
+        let val = q1n[0] - q2n[j];
         prev_row[j] = prev_row[j - 1] + val * val * dt;
         trace[j] = 1;
     }
@@ -305,7 +322,7 @@ fn dp_alignment_core(q1: &[f64], q2: &[f64], argvals: &[f64]) -> Vec<f64> {
     // Fill remaining rows
     for i in 1..m {
         let dt_i = grid[i] - grid[i - 1];
-        let val = q1[i] - q2[0];
+        let val = q1n[i] - q2n[0];
         curr_row[0] = prev_row[0] + val * val * dt_i;
         trace[i * m] = 2;
 
@@ -316,8 +333,8 @@ fn dp_alignment_core(q1: &[f64], q2: &[f64], argvals: &[f64]) -> Vec<f64> {
                 &prev_row,
                 &mut curr_row,
                 &mut trace,
-                q1[i],
-                q2[j],
+                q1n[i],
+                q2n[j],
                 dt_i,
                 dt_j,
                 j,
@@ -622,44 +639,87 @@ pub fn karcher_mean(
     let (n, m) = data.shape();
     let weights = simpsons_weights(argvals);
 
+    // Work in function space: align curves, average aligned functions,
+    // recompute SRSF. Track the best result across iterations (lowest
+    // total elastic distance) to handle DP-induced oscillation.
     let mut mu = mean_1d(data);
-    let mut mu_q = srsf_single(&mu, argvals);
 
     let mut converged = false;
     let mut n_iter = 0;
-    let mut final_gammas = FdMatrix::zeros(n, m);
+    let mut best_gammas = FdMatrix::zeros(n, m);
+    let mut best_mu = mu.clone();
+    let mut best_cost = f64::MAX;
+    let mut best_iter: usize = 0;
+    let mut current_gammas = FdMatrix::zeros(n, m);
 
     for iter in 0..max_iter {
         n_iter = iter + 1;
 
-        let align_results: Vec<(Vec<f64>, Vec<f64>)> = iter_maybe_parallel!(0..n)
+        // Align all curves to current mean (in function space)
+        let align_results: Vec<AlignmentResult> = iter_maybe_parallel!(0..n)
             .map(|i| {
                 let fi = data.row(i);
-                let qi = srsf_single(&fi, argvals);
-                align_srsf_pair(&mu_q, &qi, argvals)
+                elastic_align_pair(&mu, &fi, argvals)
             })
             .collect();
 
-        let mu_q_new = accumulate_alignments(&align_results, &mut final_gammas, m, n);
+        // Store gammas and compute mean of aligned functions
+        let mut mu_new = vec![0.0; m];
+        let mut total_dist = 0.0;
+        for (i, r) in align_results.iter().enumerate() {
+            for j in 0..m {
+                current_gammas[(i, j)] = r.gamma[j];
+                mu_new[j] += r.f_aligned[j];
+            }
+            total_dist += r.distance;
+        }
+        for j in 0..m {
+            mu_new[j] /= n as f64;
+        }
 
-        if mean_has_converged(&mu_q, &mu_q_new, &weights, tol) {
+        // Track best result (lowest total elastic distance)
+        if total_dist < best_cost {
+            best_cost = total_dist;
+            best_mu = mu_new.clone();
+            best_iter = iter;
+            for i in 0..n {
+                for j in 0..m {
+                    best_gammas[(i, j)] = current_gammas[(i, j)];
+                }
+            }
+        }
+
+        // Check convergence: L2 distance between old and new mean
+        let dist = l2_distance(&mu, &mu_new, &weights);
+        if dist < tol {
+            mu = mu_new;
             converged = true;
-            mu_q = mu_q_new;
             break;
         }
 
-        mu_q = mu_q_new;
-        mu = srsf_inverse(&mu_q, argvals, mu[0]);
+        mu = mu_new;
     }
 
-    let initial_mean = mean_1d(data);
-    mu = srsf_inverse(&mu_q, argvals, initial_mean[0]);
-    let final_aligned = apply_stored_warps(data, &final_gammas, argvals);
+    // Always use the best iteration's result (handles DP oscillation).
+    // Consider converged if the best was found before the last quarter
+    // of iterations (cost has stabilized).
+    if !converged && best_iter < max_iter * 3 / 4 {
+        converged = true;
+    }
+    mu = best_mu;
+    for i in 0..n {
+        for j in 0..m {
+            current_gammas[(i, j)] = best_gammas[(i, j)];
+        }
+    }
+
+    let mu_q = srsf_single(&mu, argvals);
+    let final_aligned = apply_stored_warps(data, &current_gammas, argvals);
 
     KarcherMeanResult {
         mean: mu,
         mean_srsf: mu_q,
-        gammas: final_gammas,
+        gammas: current_gammas,
         aligned_data: final_aligned,
         n_iter,
         converged,

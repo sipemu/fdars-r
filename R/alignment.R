@@ -78,6 +78,8 @@ elastic.align <- function(fdataobj, target = NULL) {
 
   if (is.null(target)) {
     target <- colMeans(fdataobj$data)
+  } else if (inherits(target, "fdata")) {
+    target <- as.numeric(target$data[1, ])
   }
 
   res <- alignment_align_to_target(fdataobj$data, as.numeric(target), argvals)
