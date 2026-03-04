@@ -27,6 +27,107 @@ A **tolerance band** for functional data is a region expected to contain a given
 | Exponential family | For non-Gaussian data (Binomial, Poisson) |
 | Elastic | Alignment-based; removes phase variability first |
 
+## Mathematical Framework
+
+### Setup
+
+Let $X_1, \ldots, X_n$ be i.i.d. random functions observed on a grid
+$t_1, \ldots, t_T \in [a, b]$ with mean function $\mu(t) = E[X(t)]$ and
+covariance function $C(s, t) = \text{Cov}(X(s), X(t))$.
+
+A **$(1 - \alpha)$-tolerance band** is a region $[\ell(t), u(t)]$ such that
+
+$$P\bigl(X_{\text{new}}(t) \in [\ell(t), u(t)] \;\text{for all } t\bigr) \geq 1 - \alpha$$
+
+for a new independent draw $X_{\text{new}}$ from the same process.
+
+### FPCA Method (Rathnayake and Cuevas, 2016)
+
+By the Karhunen-Loève expansion, each curve can be represented as
+
+$$X_i(t) = \mu(t) + \sum_{k=1}^K \xi_{ik} \phi_k(t)$$
+
+where $\phi_k$ are the eigenfunctions of $C$ and $\xi_{ik}$ are uncorrelated
+PC scores with $\text{Var}(\xi_{ik}) = \lambda_k$. The method proceeds:
+
+1. Estimate $\hat\mu$, $\hat\phi_k$, and scores $\hat\xi_{ik}$ from data
+2. Bootstrap: resample $\hat\xi^*_{ik}$ from the empirical score distribution
+   and reconstruct $X^*_i(t) = \hat\mu(t) + \sum_{k=1}^K \hat\xi^*_{ik} \hat\phi_k(t)$
+3. **Pointwise band**: At each $t_j$, set $\ell(t_j)$ and $u(t_j)$ to the
+   $\alpha/2$ and $1 - \alpha/2$ quantiles of the bootstrap distribution
+4. **Simultaneous band**: Find the smallest $c > 0$ such that a fraction
+   $\geq 1 - \alpha$ of bootstrap curves lie entirely within
+   $\hat\mu(t) \pm c \cdot \hat\sigma(t)$, where $\hat\sigma(t)$ is the
+   pointwise bootstrap standard deviation
+
+The simultaneous band is wider (controls family-wise coverage) while the
+pointwise band is narrower (controls marginal coverage at each $t$).
+
+### Conformal Method (Lei and Wasserman, 2014)
+
+The conformal approach is distribution-free. Split the data into a training set
+of size $n_{\text{train}}$ and a calibration set of size $n_{\text{cal}}$:
+
+1. Compute $\hat\mu(t)$ from the training set
+2. For each calibration curve $X_j$, compute a non-conformity score:
+   - **Sup-norm**: $R_j = \sup_t |X_j(t) - \hat\mu(t)|$
+   - **$L^2$**: $R_j = \bigl(\int |X_j(t) - \hat\mu(t)|^2 \, dt\bigr)^{1/2}$
+3. Set $\hat{q}$ to the $\lceil (1 - \alpha)(n_{\text{cal}} + 1) \rceil / n_{\text{cal}}$
+   quantile of $\{R_1, \ldots, R_{n_{\text{cal}}}\}$
+4. The band is $\hat\mu(t) \pm \hat{q}$ (sup-norm) or
+   $\hat\mu(t) \pm \hat{q} \cdot w(t)$ ($L^2$, with local weights)
+
+The key guarantee is finite-sample validity:
+$P(R_{\text{new}} \leq \hat{q}) \geq 1 - \alpha$, with no distributional assumptions.
+
+### SCB Degras Method (Degras, 2011)
+
+This constructs a **simultaneous confidence band for the mean** $\mu(t)$
+rather than a tolerance band for individual curves. Let
+
+$$S_n(t) = \frac{\sqrt{n}(\bar{X}_n(t) - \mu(t))}{\hat\sigma(t)}$$
+
+be the standardized process. Under regularity conditions, $S_n$ converges to a
+Gaussian process $G$ with known covariance structure. The critical value $c_\alpha$
+is obtained via a multiplier bootstrap:
+
+1. Generate $W_1^*, \ldots, W_n^* \stackrel{\text{iid}}{\sim} N(0, 1)$
+2. Compute $G^*(t) = \frac{1}{\sqrt{n} \hat\sigma(t)} \sum_{i=1}^n W_i^* (X_i(t) - \bar{X}_n(t))$
+3. Set $c_\alpha = $ the $(1-\alpha)$-quantile of $\sup_t |G^*(t)|$ across bootstrap replicates
+
+The SCB is then $\bar{X}_n(t) \pm c_\alpha \hat\sigma(t) / \sqrt{n}$.
+
+### Exponential Family Method
+
+For functional data from an exponential family with density
+
+$$f(x | \theta) = h(x) \exp(\theta x - A(\theta))$$
+
+the method applies the canonical link $g$ to transform data to the natural
+parameter scale, computes FPCA tolerance bands on the transformed data, and
+maps back through $g^{-1}$:
+
+1. Transform: $Y_i(t) = g(X_i(t))$
+2. Compute FPCA band $[\ell_Y(t), u_Y(t)]$ on $\{Y_i\}$
+3. Back-transform: $\ell(t) = g^{-1}(\ell_Y(t))$, $u(t) = g^{-1}(u_Y(t))$
+
+For Gaussian data ($g = \text{identity}$), this reduces to the standard FPCA band.
+For Poisson data ($g = \log$), the band respects the non-negativity constraint.
+
+### Elastic Method
+
+When curves exhibit **phase variability** (horizontal shifts), standard tolerance
+bands are inflated because they treat timing differences as amplitude variation.
+The elastic method removes this:
+
+1. Compute the Karcher mean $\hat\mu_K$ and warping functions
+   $\hat\gamma_1, \ldots, \hat\gamma_n$ using the elastic (Fisher-Rao) framework
+2. Align: $\tilde{X}_i(t) = X_i(\hat\gamma_i(t))$
+3. Compute an FPCA tolerance band on the aligned data $\{\tilde{X}_i\}$
+
+The resulting band is tighter because alignment concentrates variability into
+the amplitude component, reducing the effective variance at each grid point.
+
 ## Generate Sample Data
 
 ```{r setup}
