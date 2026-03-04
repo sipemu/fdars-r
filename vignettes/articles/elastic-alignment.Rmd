@@ -673,6 +673,200 @@ cat("Variance reduction:", round(var_red * 100, 1), "%\n")
 plot(res_bumps, type = "both")
 ```
 
+## Example: Multi-Bump Alignment
+
+Real-world functional data often contains multiple peaks or features that vary
+independently. This section explores how elastic alignment handles curves with
+**varying inter-bump distance** (peaks shift independently) and **varying bump
+width** (peaks broaden or narrow) as the number of bumps increases.
+
+### Two Bumps
+
+With two bumps, the warping function has enough freedom to independently
+adjust each peak's position and width:
+
+```{r multi-bump-2, fig.height = 8}
+set.seed(42)
+m <- 200
+argvals_mb <- seq(0, 1, length.out = m)
+n <- 20
+
+# Varying inter-bump distance
+data_pos <- matrix(0, n, m)
+for (i in 1:n) {
+  p1 <- 0.3
+  p2 <- 0.7 + runif(1, -0.12, 0.12)
+  data_pos[i, ] <- exp(-300 * (argvals_mb - p1)^2) +
+                   exp(-300 * (argvals_mb - p2)^2)
+}
+fd_pos <- fdata(data_pos, argvals = argvals_mb)
+res_pos <- elastic.align(fd_pos)
+vr_pos <- 1 - mean(apply(res_pos$aligned$data, 2, var)) /
+              mean(apply(fd_pos$data, 2, var))
+
+# Varying bump width
+data_w <- matrix(0, n, m)
+for (i in 1:n) {
+  w1 <- runif(1, 200, 500)
+  w2 <- runif(1, 200, 500)
+  data_w[i, ] <- exp(-w1 * (argvals_mb - 0.3)^2) +
+                 exp(-w2 * (argvals_mb - 0.7)^2)
+}
+fd_w <- fdata(data_w, argvals = argvals_mb)
+res_w <- elastic.align(fd_w)
+vr_w <- 1 - mean(apply(res_w$aligned$data, 2, var)) /
+             mean(apply(fd_w$data, 2, var))
+
+cat("2 bumps — varying position: VR =", round(vr_pos * 100, 1), "%\n")
+cat("2 bumps — varying width:    VR =", round(vr_w * 100, 1), "%\n")
+```
+
+```{r multi-bump-2-plot, fig.height = 8}
+p1 <- plot(res_pos, type = "both") +
+  plot_annotation(subtitle = paste0("Varying inter-bump distance — VR = ",
+                                    round(vr_pos * 100, 1), "%"))
+p2 <- plot(res_w, type = "both") +
+  plot_annotation(subtitle = paste0("Varying bump width — VR = ",
+                                    round(vr_w * 100, 1), "%"))
+p1 / p2
+```
+
+Both cases achieve near-perfect alignment. The warping function locally
+stretches/compresses the region around each bump to bring peaks into
+correspondence.
+
+### Scaling to More Bumps
+
+As the number of bumps increases, alignment becomes progressively harder.
+A monotone warping function that stretches one region must compress another,
+so with many tightly packed bumps the degrees of freedom become insufficient
+to independently correct each peak.
+
+```{r multi-bump-scaling}
+set.seed(42)
+results <- data.frame(
+  bumps = integer(), scenario = character(), VR = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (nb in c(2, 4, 5, 7)) {
+  positions_base <- seq(0.1, 0.9, length.out = nb)
+
+  # Varying positions
+  data_pos <- matrix(0, n, m)
+  for (i in 1:n) {
+    for (j in 1:nb) {
+      p <- positions_base[j] + runif(1, -0.04, 0.04)
+      data_pos[i, ] <- data_pos[i, ] + exp(-300 * (argvals_mb - p)^2)
+    }
+  }
+  fd_pos <- fdata(data_pos, argvals = argvals_mb)
+  res_pos <- elastic.align(fd_pos)
+  vr_pos <- 1 - mean(apply(res_pos$aligned$data, 2, var)) /
+                mean(apply(fd_pos$data, 2, var))
+
+  # Varying widths
+  data_w <- matrix(0, n, m)
+  for (i in 1:n) {
+    for (j in 1:nb) {
+      w <- runif(1, 200, 600)
+      data_w[i, ] <- data_w[i, ] + exp(-w * (argvals_mb - positions_base[j])^2)
+    }
+  }
+  fd_w <- fdata(data_w, argvals = argvals_mb)
+  res_w <- elastic.align(fd_w)
+  vr_w <- 1 - mean(apply(res_w$aligned$data, 2, var)) /
+               mean(apply(fd_w$data, 2, var))
+
+  # Both varying
+  data_both <- matrix(0, n, m)
+  for (i in 1:n) {
+    for (j in 1:nb) {
+      p <- positions_base[j] + runif(1, -0.04, 0.04)
+      w <- runif(1, 200, 600)
+      data_both[i, ] <- data_both[i, ] + exp(-w * (argvals_mb - p)^2)
+    }
+  }
+  fd_both <- fdata(data_both, argvals = argvals_mb)
+  res_both <- elastic.align(fd_both)
+  vr_both <- 1 - mean(apply(res_both$aligned$data, 2, var)) /
+                  mean(apply(fd_both$data, 2, var))
+
+  results <- rbind(results, data.frame(
+    bumps = rep(nb, 3),
+    scenario = c("Position", "Width", "Both"),
+    VR = c(vr_pos, vr_w, vr_both) * 100
+  ))
+}
+```
+
+```{r multi-bump-table}
+# Display as a table
+df_wide <- reshape(results, idvar = "bumps", timevar = "scenario",
+                   direction = "wide")
+names(df_wide) <- gsub("VR\\.", "", names(df_wide))
+for (col in c("Position", "Width", "Both")) {
+  df_wide[[col]] <- paste0(round(df_wide[[col]], 1), "%")
+}
+knitr::kable(df_wide, col.names = c("Bumps", "Varying Position",
+             "Varying Width", "Both Varying"),
+             align = "cccc",
+             caption = "Variance reduction by number of bumps and variability type")
+```
+
+### Visual Comparison: 4 vs 7 Bumps
+
+```{r multi-bump-4v7, fig.height = 8}
+set.seed(42)
+
+# 4 bumps — both varying
+pos4 <- seq(0.1, 0.9, length.out = 4)
+data4 <- matrix(0, n, m)
+for (i in 1:n) {
+  for (j in 1:4) {
+    p <- pos4[j] + runif(1, -0.04, 0.04)
+    w <- runif(1, 200, 600)
+    data4[i, ] <- data4[i, ] + exp(-w * (argvals_mb - p)^2)
+  }
+}
+fd4 <- fdata(data4, argvals = argvals_mb)
+res4 <- elastic.align(fd4)
+vr4 <- 1 - mean(apply(res4$aligned$data, 2, var)) /
+            mean(apply(fd4$data, 2, var))
+
+# 7 bumps — both varying
+pos7 <- seq(0.1, 0.9, length.out = 7)
+data7 <- matrix(0, n, m)
+for (i in 1:n) {
+  for (j in 1:7) {
+    p <- pos7[j] + runif(1, -0.04, 0.04)
+    w <- runif(1, 200, 600)
+    data7[i, ] <- data7[i, ] + exp(-w * (argvals_mb - p)^2)
+  }
+}
+fd7 <- fdata(data7, argvals = argvals_mb)
+res7 <- elastic.align(fd7)
+vr7 <- 1 - mean(apply(res7$aligned$data, 2, var)) /
+            mean(apply(fd7$data, 2, var))
+```
+
+```{r multi-bump-4v7-plot, fig.height = 8}
+p4 <- plot(res4, type = "both") +
+  plot_annotation(subtitle = paste0("4 bumps (both varying) — VR = ",
+                                    round(vr4 * 100, 1), "%"))
+p7 <- plot(res7, type = "both") +
+  plot_annotation(subtitle = paste0("7 bumps (both varying) — VR = ",
+                                    round(vr7 * 100, 1), "%"))
+p4 / p7
+```
+
+With 4 bumps, alignment still captures most of the variability. With 7
+tightly packed bumps, the monotonicity constraint on the warping function
+limits independent correction of each peak — stretching one inter-peak
+region forces compression elsewhere. This is a fundamental limitation of
+elastic alignment, not a numerical issue: a single monotone time-warping
+cannot independently retime many closely spaced features.
+
 ## Karcher Mean with Custom Settings
 
 For complex data, increase `max.iter` and check the aligned curves:
