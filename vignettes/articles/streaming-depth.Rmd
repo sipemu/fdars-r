@@ -109,6 +109,225 @@ plot(rank(d_fm), rank(d_bd), pch = 19,
 abline(0, 1, col = "red")
 ```
 
+## Outlier Detection
+
+Depth naturally provides an outlier score: curves with low depth are far from
+the centre of the distribution. A simple threshold on the depth values identifies
+magnitude outliers (shifted too high or too low) and shape outliers (unusual
+patterns).
+
+### Threshold-Based Detection
+
+```{r outlier-threshold}
+# Depth-based threshold: flag curves below the 5th percentile
+threshold <- quantile(d_fm, 0.05)
+outlier_idx <- which(d_fm < threshold)
+cat("Outlier indices:", outlier_idx, "\n")
+cat("Outlier depths:", round(d_fm[outlier_idx], 4), "\n")
+```
+
+### Combining with the Functional Boxplot
+
+The functional boxplot uses depth to define a central region and fences.
+Streaming depth can serve as the depth engine:
+
+```{r outlier-boxplot, fig.height = 5}
+bp <- boxplot(fd, depth.func = depth.streaming)
+cat("Functional boxplot outliers:", bp$outliers, "\n")
+```
+
+### Magnitude vs Shape Outliers
+
+Different outlier types have different depth signatures. **Magnitude outliers**
+(vertically shifted) are detected by all depth methods. **Shape outliers**
+(unusual pattern but similar range) are harder — MBD is particularly
+sensitive to them:
+
+```{r outlier-types, fig.height = 5}
+set.seed(42)
+n <- 40
+data_out <- matrix(0, n, m)
+for (i in 1:n) {
+  data_out[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.2) + rnorm(m, 0, 0.05)
+}
+
+# Add a magnitude outlier (shifted up)
+data_out[1, ] <- sin(2 * pi * argvals) + 3
+
+# Add a shape outlier (different frequency)
+data_out[2, ] <- sin(6 * pi * argvals)
+
+fd_out <- fdata(data_out, argvals = argvals)
+
+d_fm_out <- streaming.depth(fd_out, method = "FM")
+d_mbd_out <- streaming.depth(fd_out, method = "MBD")
+
+cat("Magnitude outlier (curve 1):\n")
+cat("  FM depth: ", round(d_fm_out[1], 4),
+    "  MBD depth:", round(d_mbd_out[1], 4), "\n")
+cat("Shape outlier (curve 2):\n")
+cat("  FM depth: ", round(d_fm_out[2], 4),
+    "  MBD depth:", round(d_mbd_out[2], 4), "\n")
+cat("Typical curve (curve 3):\n")
+cat("  FM depth: ", round(d_fm_out[3], 4),
+    "  MBD depth:", round(d_mbd_out[3], 4), "\n")
+```
+
+```{r outlier-types-plot, fig.height = 5}
+cols <- rep("grey70", n)
+cols[1] <- "red"
+cols[2] <- "blue"
+matplot(argvals, t(fd_out$data), type = "l", lty = 1, col = cols,
+        xlab = "t", ylab = "value",
+        main = "Magnitude outlier (red) vs Shape outlier (blue)")
+legend("topright", c("Magnitude", "Shape", "Normal"),
+       col = c("red", "blue", "grey70"), lty = 1, cex = 0.8)
+```
+
+## Depth-Based Trimming
+
+Streaming depth can drive robust summary statistics. The **trimmed mean**
+drops the least deep curves before averaging, providing a robust functional
+mean that is less sensitive to outliers than `colMeans`:
+
+```{r trimming}
+# Use streaming depth for trimmed mean
+tm_10 <- trimmed(fd_out, trim = 0.10, method = "FM")
+tm_25 <- trimmed(fd_out, trim = 0.25, method = "FM")
+raw_mean <- colMeans(fd_out$data)
+
+cat("Max |raw mean - trimmed 10%|:", round(max(abs(raw_mean - tm_10$data)), 4), "\n")
+cat("Max |raw mean - trimmed 25%|:", round(max(abs(raw_mean - tm_25$data)), 4), "\n")
+```
+
+```{r trimming-plot, fig.height = 5}
+plot(argvals, raw_mean, type = "l", col = "black", lwd = 2,
+     ylim = range(c(raw_mean, tm_25$data)),
+     xlab = "t", ylab = "value",
+     main = "Effect of Depth-Based Trimming on the Mean")
+lines(argvals, as.numeric(tm_10$data), col = "steelblue", lwd = 2)
+lines(argvals, as.numeric(tm_25$data), col = "firebrick", lwd = 2)
+lines(argvals, sin(2 * pi * argvals), col = "green3", lwd = 1, lty = 2)
+legend("topright",
+       c("Raw mean", "Trimmed 10%", "Trimmed 25%", "True signal"),
+       col = c("black", "steelblue", "firebrick", "green3"),
+       lwd = c(2, 2, 2, 1), lty = c(1, 1, 1, 2), cex = 0.8)
+```
+
+With outliers present, trimming at 25% recovers a mean much closer to the
+true generating function.
+
+## Process Monitoring
+
+A practical use case for streaming depth is **statistical process control**:
+a reference sample defines "normal" behaviour, and incoming curves are flagged
+when their depth falls below a control limit.
+
+```{r process-monitoring}
+set.seed(42)
+
+# Phase 1: Establish reference from in-control process
+n_ref <- 100
+data_ref <- matrix(0, n_ref, m)
+for (i in 1:n_ref) {
+  data_ref[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.2) + rnorm(m, 0, 0.05)
+}
+fd_ref <- fdata(data_ref, argvals = argvals)
+
+# Compute self-depth to establish control limit
+d_ref <- streaming.depth(fd_ref, method = "FM")
+control_limit <- quantile(d_ref, 0.01)  # 1st percentile
+cat("Control limit (1st percentile):", round(control_limit, 4), "\n")
+```
+
+```{r process-monitoring-sim}
+# Phase 2: Monitor 50 new curves (some from a shifted process)
+n_new <- 50
+data_new <- matrix(0, n_new, m)
+shift_point <- 35  # process shifts at curve 35
+for (i in 1:n_new) {
+  if (i < shift_point) {
+    # In-control
+    data_new[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.2) + rnorm(m, 0, 0.05)
+  } else {
+    # Out-of-control: mean shift
+    data_new[i, ] <- sin(2 * pi * argvals) + 0.8 + rnorm(1, 0, 0.2) + rnorm(m, 0, 0.05)
+  }
+}
+fd_new <- fdata(data_new, argvals = argvals)
+
+# Evaluate each new curve against reference
+d_monitor <- streaming.depth(fd_new, fdataori = fd_ref, method = "FM")
+alarms <- which(d_monitor < control_limit)
+```
+
+```{r process-monitoring-plot, fig.height = 5}
+plot(1:n_new, d_monitor, type = "b", pch = 19, cex = 0.7,
+     col = ifelse(d_monitor < control_limit, "red", "black"),
+     xlab = "Curve index", ylab = "Depth",
+     main = "Streaming Depth Control Chart")
+abline(h = control_limit, col = "red", lty = 2, lwd = 1.5)
+abline(v = shift_point - 0.5, col = "grey50", lty = 3)
+text(shift_point + 5, max(d_monitor) * 0.95, "Process shift", col = "grey50", cex = 0.8)
+legend("bottomleft", c("In control", "Alarm", "Control limit"),
+       col = c("black", "red", "red"), pch = c(19, 19, NA),
+       lty = c(NA, NA, 2), cex = 0.8)
+cat("Alarms at curves:", alarms, "\n")
+cat("First alarm:", min(alarms), "(shift at", shift_point, ")\n")
+```
+
+The depth chart detects the process shift shortly after it occurs. Unlike
+univariate control charts, this approach monitors the entire curve shape
+simultaneously.
+
+## Depth-Weighted Density Estimation
+
+Depth values can weight curves for density estimation or visualization,
+giving more influence to central curves and down-weighting outliers:
+
+```{r depth-weighted, fig.height = 5}
+# Use depth as weights for a weighted mean
+d_weights <- d_fm / sum(d_fm)
+weighted_mean <- colSums(fd$data * d_weights)
+simple_mean <- colMeans(fd$data)
+
+plot(argvals, simple_mean, type = "l", col = "black", lwd = 2,
+     ylim = range(c(simple_mean, weighted_mean)),
+     xlab = "t", ylab = "value",
+     main = "Simple Mean vs Depth-Weighted Mean")
+lines(argvals, weighted_mean, col = "steelblue", lwd = 2)
+legend("topright", c("Simple mean", "Depth-weighted mean"),
+       col = c("black", "steelblue"), lwd = 2, cex = 0.8)
+```
+
+The depth-weighted mean down-weights the outlier (curve 1), producing a more
+representative central tendency.
+
+## Performance: Streaming vs Standard Depth
+
+Streaming depth is designed for the scenario where a reference sample is
+fixed and many query curves must be evaluated. The pre-sorting step is
+$O(N T \log N)$, but each subsequent query is only $O(T \log N)$ instead of
+$O(N T)$:
+
+```{r performance}
+set.seed(42)
+sizes <- c(50, 100, 500, 1000)
+m_perf <- 100
+argvals_perf <- seq(0, 1, length.out = m_perf)
+
+cat("Streaming depth timing (self-depth, FM method):\n")
+for (n_size in sizes) {
+  data_perf <- matrix(rnorm(n_size * m_perf), n_size, m_perf)
+  fd_perf <- fdata(data_perf, argvals = argvals_perf)
+  t_elapsed <- system.time(streaming.depth(fd_perf, method = "FM"))["elapsed"]
+  cat(sprintf("  N = %4d: %.4f sec\n", n_size, t_elapsed))
+}
+```
+
+For large reference samples with many incoming queries, the streaming approach
+provides substantial speedup over recomputing standard depth from scratch.
+
 ## Integration with the Depth Dispatcher
 
 Streaming depth is available through the `depth()` dispatcher:
