@@ -26,6 +26,7 @@ Suggests:
     testthat (>= 3.0.0),
     fda.usc,
     fda,
+    fdasrvf,
     knitr,
     rmarkdown,
     dplyr,

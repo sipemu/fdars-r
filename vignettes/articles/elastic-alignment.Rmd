@@ -1010,6 +1010,141 @@ region forces compression elsewhere. This is a fundamental limitation of
 elastic alignment, not a numerical issue: a single monotone time-warping
 cannot independently retime many closely spaced features.
 
+## Real Data: Berkeley Growth Velocity
+
+The **Berkeley Growth Study** recorded the heights of 93 children (39 boys,
+54 girls) from ages 1 to 18. The growth *velocity* curves (cm/year) exhibit
+clear phase variability: each child's pubertal growth spurt occurs at a
+different age, creating horizontal shifts in the peak.
+
+This dataset is a standard benchmark in elastic FDA literature (Tucker et al.,
+2013; Srivastava and Klassen, 2016). It is available in the `fdasrvf` package.
+
+```{r growth-data}
+data(growth_vel, package = "fdasrvf")
+
+# growth_vel$f is 69 (grid) x 93 (curves) — transpose for fdata
+fd_growth <- fdata(t(growth_vel$f), argvals = growth_vel$time)
+cat("Curves:", nrow(fd_growth$data), "\n")
+cat("Grid points:", ncol(fd_growth$data), "\n")
+cat("Age range:", range(fd_growth$argvals), "\n")
+```
+
+### Full Age Range
+
+```{r growth-full, fig.height = 5}
+plot(fd_growth) + labs(title = "Berkeley Growth Velocity (all 93 children)",
+                       x = "Age (years)", y = "Growth velocity (cm/year)")
+```
+
+The dominant feature at age 1 (infant growth) and the pubertal spurt around
+ages 11--14 are both visible, but the pubertal peak is blurred by phase
+variability.
+
+```{r growth-full-align}
+res_growth <- elastic.align(fd_growth)
+var_orig_growth <- mean(apply(fd_growth$data, 2, var))
+vr_growth <- 1 - mean(apply(res_growth$aligned$data, 2, var)) / var_orig_growth
+cat("Full range VR:", round(vr_growth * 100, 1), "%\n")
+```
+
+```{r growth-full-plot, fig.height = 4}
+plot(res_growth, type = "both")
+```
+
+### Pubertal Growth Spurt (Ages 8--18)
+
+The pubertal region is where phase variability is strongest. Restricting to
+ages 8--18 isolates the growth spurt:
+
+```{r growth-pubertal}
+idx_pub <- which(fd_growth$argvals >= 8)
+fd_pub <- fdata(fd_growth$data[, idx_pub],
+                argvals = fd_growth$argvals[idx_pub])
+
+res_pub <- elastic.align(fd_pub)
+var_pub <- mean(apply(fd_pub$data, 2, var))
+vr_pub <- 1 - mean(apply(res_pub$aligned$data, 2, var)) / var_pub
+cat("Pubertal region VR:", round(vr_pub * 100, 1), "%\n")
+```
+
+```{r growth-pubertal-plot, fig.height = 4}
+plot(res_pub, type = "both") +
+  plot_annotation(subtitle = paste0("Ages 8–18 — VR = ",
+                                    round(vr_pub * 100, 1), "%"))
+```
+
+### Cross-Sectional Mean vs Karcher Mean
+
+The cross-sectional mean is attenuated because children's growth spurts are
+averaged at mismatched ages. The Karcher mean recovers the true peak amplitude:
+
+```{r growth-karcher}
+km_pub <- karcher.mean(fd_pub, max.iter = 20)
+cross_mean_pub <- colMeans(fd_pub$data)
+karcher_pub <- as.numeric(km_pub$mean$data)
+
+cat("Cross-sectional mean peak:", round(max(cross_mean_pub), 2), "cm/yr at age",
+    round(fd_pub$argvals[which.max(cross_mean_pub)], 1), "\n")
+cat("Karcher mean peak:        ", round(max(karcher_pub), 2), "cm/yr at age",
+    round(fd_pub$argvals[which.max(karcher_pub)], 1), "\n")
+```
+
+```{r growth-karcher-plot, fig.height = 5}
+df_means <- data.frame(
+  age = rep(fd_pub$argvals, 2),
+  velocity = c(cross_mean_pub, karcher_pub),
+  type = rep(c("Cross-sectional mean", "Karcher mean"),
+             each = length(fd_pub$argvals))
+)
+
+ggplot(df_means, aes(x = age, y = velocity, color = type)) +
+  geom_line(linewidth = 1.2) +
+  scale_color_manual(values = c("Cross-sectional mean" = "steelblue",
+                                "Karcher mean" = "firebrick")) +
+  labs(title = "Pubertal Growth Spurt: Cross-Sectional vs Karcher Mean",
+       x = "Age (years)", y = "Growth velocity (cm/year)", color = NULL)
+```
+
+The Karcher mean is sharper and taller because it aligns the growth spurts
+before averaging, rather than smearing them across different ages.
+
+### FPCA Before and After Alignment
+
+Alignment concentrates variance into fewer principal components:
+
+```{r growth-fpca}
+pc_before <- fdata2pc(fd_pub, ncomp = 3)
+pc_after <- fdata2pc(km_pub$aligned, ncomp = 3)
+
+pve_before <- round(pc_before$d^2 / sum(pc_before$d^2) * 100, 1)
+pve_after <- round(pc_after$d^2 / sum(pc_after$d^2) * 100, 1)
+
+cat("Before alignment: PC1 =", pve_before[1], "%, PC2 =", pve_before[2],
+    "%, PC3 =", pve_before[3], "%\n")
+cat("After alignment:  PC1 =", pve_after[1], "%, PC2 =", pve_after[2],
+    "%, PC3 =", pve_after[3], "%\n")
+```
+
+Before alignment, phase variability spreads across multiple PCs. After
+alignment, the remaining (amplitude) variability is more efficiently captured
+by the first PC.
+
+### Warping Functions Reveal Growth Timing
+
+The estimated warping functions show how each child's biological clock
+differs from the average:
+
+```{r growth-warps, fig.height = 4}
+plot(res_pub, type = "warps") +
+  labs(title = "Warping Functions (Ages 8–18)",
+       x = "Chronological age", y = "Biological age")
+```
+
+Curves above the diagonal correspond to children whose growth spurt occurred
+earlier than average (biological clock runs ahead); curves below the diagonal
+indicate later-maturing children.
+
 ## Karcher Mean with Custom Settings
 
 For complex data, increase `max.iter` and check the aligned curves:
