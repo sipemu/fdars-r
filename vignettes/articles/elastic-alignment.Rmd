@@ -29,6 +29,7 @@ dynamic programming alignment.
 ```{r setup}
 library(fdars)
 library(ggplot2)
+library(patchwork)
 theme_set(theme_minimal())
 ```
 
@@ -213,6 +214,308 @@ in **timing**. The table below summarizes where it excels and where it does not.
 | Rate-varying monotone curves | Spurious warping, VR < 0 | These are amplitude/shape differences, not phase |
 | Genuinely different shapes | Forced warping, VR < 0 | Use depth or distance methods instead |
 | Very noisy data (unsmoothed) | Noise-driven warping, VR < 0 | Pre-smooth with `fdata2basis()` + `basis2fdata()` |
+
+## Visual Examples by Scenario
+
+The following examples illustrate alignment behavior across different data
+scenarios. Each shows the **original** curves (left) and **aligned** curves
+(right) with variance reduction (VR) reported.
+
+### Works Well: ECG-like Multi-Peak Curves
+
+Sharp, localized features with timing differences are the ideal use case:
+
+```{r gallery-ecg, fig.height = 4}
+set.seed(42)
+n <- 20
+dm <- matrix(0, n, 100)
+for (i in 1:n) {
+  shift <- runif(1, -0.05, 0.05)
+  t_shifted <- argvals - shift
+  # P wave, QRS complex, T wave
+  dm[i, ] <- 0.2 * exp(-200 * (t_shifted - 0.2)^2) -
+             0.6 * exp(-500 * (t_shifted - 0.4)^2) +
+             1.0 * exp(-800 * (t_shifted - 0.43)^2) -
+             0.2 * exp(-500 * (t_shifted - 0.46)^2) +
+             0.3 * exp(-150 * (t_shifted - 0.65)^2)
+}
+fd_ecg <- fdata(dm, argvals = argvals)
+res_ecg <- elastic.align(fd_ecg)
+vr <- 1 - mean(apply(res_ecg$aligned$data, 2, var)) /
+          mean(apply(fd_ecg$data, 2, var))
+```
+
+```{r gallery-ecg-plot, fig.height = 4}
+plot(res_ecg, type = "both") +
+  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+```
+
+### Works Well: Spectral Peaks
+
+Multiple peaks at varying positions, common in spectroscopy and chromatography:
+
+```{r gallery-spectral, fig.height = 4}
+set.seed(42)
+n <- 20
+dm <- matrix(0, n, 100)
+for (i in 1:n) {
+  shift <- runif(1, -0.04, 0.04)
+  dm[i, ] <- 0.8 * exp(-300 * (argvals - 0.25 - shift)^2) +
+             1.0 * exp(-500 * (argvals - 0.50 - shift * 1.2)^2) +
+             0.5 * exp(-300 * (argvals - 0.75 - shift * 0.8)^2)
+}
+fd_spec <- fdata(dm, argvals = argvals)
+res_spec <- elastic.align(fd_spec)
+vr <- 1 - mean(apply(res_spec$aligned$data, 2, var)) /
+          mean(apply(fd_spec$data, 2, var))
+```
+
+```{r gallery-spectral-plot, fig.height = 4}
+plot(res_spec, type = "both") +
+  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+```
+
+### Works Well: Growth-like Sigmoid Curves
+
+Monotone S-shaped curves with timing shifts (e.g., growth curves with
+differing onset times):
+
+```{r gallery-sigmoid, fig.height = 4}
+set.seed(42)
+n <- 20
+dm <- matrix(0, n, 100)
+for (i in 1:n) {
+  shift <- runif(1, -0.1, 0.1)
+  dm[i, ] <- 1 / (1 + exp(-20 * (argvals - 0.5 - shift)))
+}
+fd_sig <- fdata(dm, argvals = argvals)
+res_sig <- elastic.align(fd_sig)
+vr <- 1 - mean(apply(res_sig$aligned$data, 2, var)) /
+          mean(apply(fd_sig$data, 2, var))
+```
+
+```{r gallery-sigmoid-plot, fig.height = 4}
+plot(res_sig, type = "both") +
+  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+```
+
+### Medium: Mixed Amplitude and Phase Variability
+
+When curves differ in both height *and* timing, alignment corrects the phase
+component but leaves amplitude variability untouched:
+
+```{r gallery-mixed, fig.height = 4}
+set.seed(42)
+n <- 20
+dm <- matrix(0, n, 100)
+for (i in 1:n) {
+  amp <- runif(1, 0.5, 1.5)
+  shift <- runif(1, -0.1, 0.1)
+  dm[i, ] <- amp * sin(2 * pi * (argvals - shift))
+}
+fd_mix <- fdata(dm, argvals = argvals)
+res_mix <- elastic.align(fd_mix)
+vr <- 1 - mean(apply(res_mix$aligned$data, 2, var)) /
+          mean(apply(fd_mix$data, 2, var))
+```
+
+```{r gallery-mixed-plot, fig.height = 4}
+plot(res_mix, type = "both") +
+  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+```
+
+After alignment, curves still differ in amplitude (vertical spread) but peaks
+and valleys are now synchronized. The residual variance is real amplitude
+variability, not a failure of alignment.
+
+### Medium: Noisy Data (Raw vs Smoothed)
+
+Noise in derivatives overwhelms the SRSF. Pre-smoothing recovers alignment:
+
+```{r gallery-noise, fig.height = 7}
+set.seed(42)
+n <- 20
+dm_clean <- matrix(0, n, 100)
+shifts <- runif(n, -0.1, 0.1)
+for (i in 1:n) dm_clean[i, ] <- sin(2 * pi * (argvals - shifts[i]))
+dm_noisy <- dm_clean + matrix(rnorm(n * 100, sd = 0.3), n, 100)
+fd_noisy <- fdata(dm_noisy, argvals = argvals)
+
+# Align raw noisy data
+res_noisy <- elastic.align(fd_noisy)
+vr_raw <- 1 - mean(apply(res_noisy$aligned$data, 2, var)) /
+              mean(apply(fd_noisy$data, 2, var))
+
+# Smooth first, then align
+coefs <- fdata2basis(fd_noisy, nbasis = 15, type = "bspline")
+fd_sm <- basis2fdata(coefs, argvals)
+res_sm <- elastic.align(fd_sm)
+vr_sm <- 1 - mean(apply(res_sm$aligned$data, 2, var)) /
+             mean(apply(fd_sm$data, 2, var))
+```
+
+```{r gallery-noise-plot, fig.height = 7}
+p_raw <- plot(res_noisy, type = "both") +
+  plot_annotation(subtitle = paste0("Raw data — VR = ", round(vr_raw * 100, 1), "%"))
+p_sm <- plot(res_sm, type = "both") +
+  plot_annotation(subtitle = paste0("After smoothing — VR = ", round(vr_sm * 100, 1), "%"))
+p_raw / p_sm
+```
+
+### Medium: Boundary Mismatch
+
+When shifted curves have different values at the domain boundaries, alignment
+is excellent in the interior but constrained at the edges:
+
+```{r gallery-boundary, fig.height = 4}
+set.seed(42)
+n <- 15
+dm <- matrix(0, n, 100)
+shifts <- runif(n, -0.15, 0.15)
+for (i in 1:n) dm[i, ] <- sin(2 * pi * (argvals - shifts[i]))
+fd_bnd <- fdata(dm, argvals = argvals)
+res_bnd <- elastic.align(fd_bnd)
+vr <- 1 - mean(apply(res_bnd$aligned$data, 2, var)) /
+          mean(apply(fd_bnd$data, 2, var))
+```
+
+```{r gallery-boundary-plot, fig.height = 4}
+plot(res_bnd, type = "both") +
+  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1),
+    "% — note residual spread at boundaries"))
+```
+
+### Bad: Pure Amplitude Differences
+
+When curves differ only in height (no phase variability), alignment correctly
+produces identity warps — but also provides no benefit:
+
+```{r gallery-amplitude, fig.height = 4}
+set.seed(42)
+n <- 15
+dm <- matrix(0, n, 100)
+for (i in 1:n) {
+  amp <- runif(1, 0.5, 2.0)
+  dm[i, ] <- amp * sin(2 * pi * argvals)
+}
+fd_amp <- fdata(dm, argvals = argvals)
+res_amp <- elastic.align(fd_amp)
+vr <- 1 - mean(apply(res_amp$aligned$data, 2, var)) /
+          mean(apply(fd_amp$data, 2, var))
+```
+
+```{r gallery-amplitude-plot, fig.height = 4}
+plot(res_amp, type = "both") +
+  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1),
+    "% — no phase to correct, identity warps applied"))
+```
+
+This is correct behavior: no spurious warping is introduced.
+
+### Bad: Genuinely Different Shapes
+
+Alignment should **not** be used when curves have fundamentally different
+shapes. Forced warping produces meaningless results:
+
+```{r gallery-different, fig.height = 4}
+set.seed(42)
+n <- 15
+dm <- matrix(0, n, 100)
+for (i in 1:n) {
+  if (i %% 5 == 1) dm[i, ] <- sin(2 * pi * argvals)
+  else if (i %% 5 == 2) dm[i, ] <- cos(6 * pi * argvals)
+  else if (i %% 5 == 3) dm[i, ] <- argvals^3
+  else if (i %% 5 == 4) dm[i, ] <- sin(10 * pi * argvals) * exp(-3 * argvals)
+  else dm[i, ] <- dnorm(argvals, 0.5, 0.05) / dnorm(0.5, 0.5, 0.05)
+}
+fd_diff <- fdata(dm, argvals = argvals)
+res_diff <- elastic.align(fd_diff)
+vr <- 1 - mean(apply(res_diff$aligned$data, 2, var)) /
+          mean(apply(fd_diff$data, 2, var))
+```
+
+```{r gallery-different-plot, fig.height = 4}
+plot(res_diff, type = "both") +
+  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1),
+    "% — forced warping of unrelated shapes"))
+```
+
+When VR is very low or negative, it indicates the data is not suitable for
+elastic alignment. Use depth or distance methods instead.
+
+## Periodic Functional Data
+
+### The Problem
+
+Elastic alignment uses fixed boundary constraints $\gamma(0) = 0$, $\gamma(1) = 1$.
+This prevents the warping function from performing circular shifts, which means
+periodic data (e.g., curves on $[0, 2\pi]$ where $f(0) = f(2\pi)$) with large
+phase offsets cannot be properly aligned.
+
+For example, two copies of $\sin(t)$ shifted by half a period have identical
+shape but the boundary constraints force alignment to fail:
+
+```{r periodic-problem, fig.height = 4}
+set.seed(42)
+m <- 100
+argvals_p <- seq(0, 2 * pi, length.out = m)
+n <- 15
+data_p <- matrix(0, n, m)
+for (i in 1:n) {
+  shift <- sample(0:(m - 1), 1)
+  idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+  data_p[i, ] <- sin(argvals_p[idx])
+}
+fd_p <- fdata(data_p, argvals = argvals_p)
+
+# Standard alignment struggles with circular shifts
+res_std <- elastic.align(fd_p)
+var_orig <- mean(apply(fd_p$data, 2, var))
+vr_std <- 1 - mean(apply(res_std$aligned$data, 2, var)) / var_orig
+```
+
+```{r periodic-problem-plot, fig.height = 4}
+plot(res_std, type = "both") +
+  plot_annotation(subtitle = paste0(
+    "Standard alignment on periodic data — VR = ", round(vr_std * 100, 1), "%"))
+```
+
+### The Solution
+
+Setting `periodic = TRUE` applies a two-stage approach:
+
+1. **Circular rotation**: Each curve is circularly shifted so that its global
+   maximum is at a canonical grid position
+2. **Elastic alignment**: Standard alignment on the rotated data
+
+```{r periodic-solution, fig.height = 4}
+res_per <- elastic.align(fd_p, periodic = TRUE)
+vr_per <- 1 - mean(apply(res_per$aligned$data, 2, var)) / var_orig
+```
+
+```{r periodic-solution-plot, fig.height = 4}
+plot(res_per, type = "both") +
+  plot_annotation(subtitle = paste0(
+    "Periodic alignment — VR = ", round(vr_per * 100, 1), "%"))
+```
+
+The rotation step removes large circular shifts that the boundary-constrained
+warping cannot handle, and the elastic step corrects any remaining timing
+differences.
+
+You can also apply the rotation step manually using `periodic.rotate()`:
+
+```{r periodic-rotate}
+rot <- periodic.rotate(fd_p)
+cat("Shifts applied:", head(rot$shifts), "...\n")
+```
+
+The `karcher.mean()` function also accepts `periodic = TRUE`:
+
+```{r periodic-karcher}
+km_per <- karcher.mean(fd_p, max.iter = 15, periodic = TRUE)
+print(km_per)
+```
 
 ## Practical Guide
 
@@ -457,3 +760,9 @@ for (domain in list(c(0, 1), c(0, 2*pi), c(0, 10), c(-1, 1))) {
   cat(sprintf("  [%g, %g]: VR = %.1f%%\n", domain[1], domain[2], var_red * 100))
 }
 ```
+
+## References
+
+- Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011). Shape analysis of elastic curves in Euclidean spaces. *IEEE Transactions on Pattern Analysis and Machine Intelligence*, 33(7):1415--1428.
+- Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for functional data using phase and amplitude separation. *Computational Statistics & Data Analysis*, 61:50--66.
+- Srivastava, A. and Klassen, E. (2016). *Functional and Shape Data Analysis*. Springer.

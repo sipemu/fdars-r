@@ -158,7 +158,6 @@ result_pct <- fequiv.test(fd1, fd2, delta = 0.5, n.boot = 1000,
 print(result_pct)
 ```
 
-## Reference
+## References
 
-Dette, H. and Kokot, K. (2021). Detecting relevant differences in the
-covariance operators of functional time series. *Biometrika*, 108(4):895--913.
+- Dette, H. and Kokot, K. (2021). Detecting relevant differences in the covariance operators of functional time series. *Biometrika*, 108(4):895--913.

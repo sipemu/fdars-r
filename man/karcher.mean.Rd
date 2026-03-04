@@ -4,7 +4,7 @@
 \alias{karcher.mean}
 \title{Karcher Mean in Elastic Metric}
 \usage{
-karcher.mean(fdataobj, max.iter = 20, tol = 1e-04)
+karcher.mean(fdataobj, max.iter = 20, tol = 1e-04, periodic = FALSE)
 }
 \arguments{
 \item{fdataobj}{An object of class 'fdata'.}
@@ -12,6 +12,10 @@ karcher.mean(fdataobj, max.iter = 20, tol = 1e-04)
 \item{max.iter}{Maximum number of iterations (default 20).}
 
 \item{tol}{Convergence tolerance (default 1e-4).}
+
+\item{periodic}{Logical; if TRUE, circularly rotate each curve to a canonical
+position before computing the Karcher mean. See \code{\link{elastic.align}}
+for details. Default is FALSE.}
 }
 \value{
 An object of class 'karcher.mean' with components:
@@ -22,6 +26,8 @@ An object of class 'karcher.mean' with components:
 \item{n.iter}{number of iterations used}
 \item{converged}{logical indicating convergence}
 \item{fdataobj}{the original fdata input}
+\item{rotations}{integer vector of circular rotation shifts applied
+(NULL when periodic = FALSE)}
 }
 }
 \description{
@@ -33,4 +39,14 @@ This simultaneously estimates the mean shape and aligns all curves.
 fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
 km <- karcher.mean(fd)
 }
+}
+\references{
+Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011).
+Shape analysis of elastic curves in Euclidean spaces.
+\emph{IEEE Transactions on Pattern Analysis and Machine Intelligence},
+33(7):1415--1428.
+
+Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+functional data using phase and amplitude separation.
+\emph{Computational Statistics & Data Analysis}, 61:50--66.
 }

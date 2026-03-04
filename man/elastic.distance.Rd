@@ -25,3 +25,13 @@ fd <- fdata(matrix(rnorm(100), 10, 10), argvals = seq(0, 1, length.out = 10))
 D <- elastic.distance(fd)
 }
 }
+\references{
+Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011).
+Shape analysis of elastic curves in Euclidean spaces.
+\emph{IEEE Transactions on Pattern Analysis and Machine Intelligence},
+33(7):1415--1428.
+
+Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+functional data using phase and amplitude separation.
+\emph{Computational Statistics & Data Analysis}, 61:50--66.
+}

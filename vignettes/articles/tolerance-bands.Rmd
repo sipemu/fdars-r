@@ -120,3 +120,9 @@ for (i in seq_along(methods)) {
           col = rgb(0.27, 0.51, 0.71, 0.3), border = NA)
 }
 ```
+
+## References
+
+- Rathnayake, L.N. and Cuevas, A. (2016). Tolerance bands for functional data. *Technometrics*, 58(3):326--334.
+- Lei, J. and Wasserman, L. (2014). Distribution-free prediction bands for non-parametric regression. *Journal of the Royal Statistical Society: Series B*, 76(1):71--96.
+- Degras, D. (2011). Simultaneous confidence bands for nonparametric regression with functional data. *Statistica Sinica*, 21(4):1735--1765.

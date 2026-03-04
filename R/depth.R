@@ -1075,6 +1075,14 @@ depth.RPD <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values, one per curve in fdataobj.
 #'
+#' @references
+#' Fraiman, R. and Muniz, G. (2001). Trimmed means for functional data.
+#' \emph{Test}, 10(2):419--440.
+#'
+#' Lopez-Pintado, S. and Romo, J. (2009). On the concept of depth for
+#' functional data. \emph{Journal of the American Statistical Association},
+#' 104(486):718--734.
+#'
 #' @export
 #' @examples
 #' fd <- fdata(matrix(rnorm(200), 20, 10))

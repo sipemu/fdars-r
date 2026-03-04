@@ -124,3 +124,8 @@ The `depth.streaming()` alias also works:
 d2 <- depth.streaming(fd)
 all.equal(d, d2)
 ```
+
+## References
+
+- Fraiman, R. and Muniz, G. (2001). Trimmed means for functional data. *Test*, 10(2):419--440.
+- Lopez-Pintado, S. and Romo, J. (2009). On the concept of depth for functional data. *Journal of the American Statistical Association*, 104(486):718--734.

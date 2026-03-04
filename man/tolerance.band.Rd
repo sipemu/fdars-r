@@ -100,3 +100,14 @@ fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
 band <- tolerance.band(fd, method = "fpca", nb = 100)
 }
 }
+\references{
+Rathnayake, L.N. and Cuevas, A. (2016). Tolerance bands for functional data.
+\emph{Technometrics}, 58(3):326--334.
+
+Lei, J. and Wasserman, L. (2014). Distribution-free prediction bands for
+non-parametric regression. \emph{Journal of the Royal Statistical Society:
+Series B}, 76(1):71--96.
+
+Degras, D. (2011). Simultaneous confidence bands for nonparametric
+regression with functional data. \emph{Statistica Sinica}, 21(4):1735--1765.
+}

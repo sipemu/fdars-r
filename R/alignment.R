@@ -12,6 +12,16 @@
 #'
 #' @return An object of class 'fdata' containing the SRSF-transformed curves.
 #'
+#' @references
+#' Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011).
+#' Shape analysis of elastic curves in Euclidean spaces.
+#' \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence},
+#' 33(7):1415--1428.
+#'
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
+#'
 #' @export
 #' @examples
 #' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
@@ -53,6 +63,11 @@ srsf.inverse <- function(q, argvals, f0 = 0) {
 #' @param fdataobj An object of class 'fdata'.
 #' @param target Optional target curve (numeric vector). If NULL, uses the
 #'   cross-sectional mean as the alignment target.
+#' @param periodic Logical; if TRUE, circularly rotate each curve to a canonical
+#'   position before elastic alignment. This two-stage approach handles periodic
+#'   functional data (e.g., data on \eqn{[0, 2\pi]} where \eqn{f(0) = f(2\pi)})
+#'   that would otherwise be poorly aligned due to fixed boundary constraints
+#'   \eqn{\gamma(0)=0, \gamma(1)=1}. Default is FALSE.
 #'
 #' @return An object of class 'elastic.align' with components:
 #' \describe{
@@ -61,7 +76,19 @@ srsf.inverse <- function(q, argvals, f0 = 0) {
 #'   \item{distances}{numeric vector of elastic distances}
 #'   \item{target}{the target curve used for alignment}
 #'   \item{fdataobj}{the original fdata input}
+#'   \item{rotations}{integer vector of circular rotation shifts applied
+#'     (NULL when periodic = FALSE)}
 #' }
+#'
+#' @references
+#' Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011).
+#' Shape analysis of elastic curves in Euclidean spaces.
+#' \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence},
+#' 33(7):1415--1428.
+#'
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
 #'
 #' @export
 #' @examples
@@ -69,27 +96,48 @@ srsf.inverse <- function(q, argvals, f0 = 0) {
 #' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
 #' res <- elastic.align(fd)
 #' }
-elastic.align <- function(fdataobj, target = NULL) {
+elastic.align <- function(fdataobj, target = NULL, periodic = FALSE) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
   }
 
   argvals <- fdataobj$argvals
+  rotations <- NULL
 
-  if (is.null(target)) {
-    target <- colMeans(fdataobj$data)
-  } else if (inherits(target, "fdata")) {
-    target <- as.numeric(target$data[1, ])
+  # Periodic pre-processing: circularly rotate curves to canonical position
+  if (periodic) {
+    rot <- .periodic_rotate(fdataobj$data)
+    work_data <- rot$data
+    rotations <- rot$shifts
+
+    if (!is.null(target)) {
+      if (inherits(target, "fdata")) {
+        target <- as.numeric(target$data[1, ])
+      }
+      target_rot <- .periodic_rotate(matrix(target, nrow = 1))
+      target <- as.numeric(target_rot$data[1, ])
+    } else {
+      target <- colMeans(work_data)
+    }
+  } else {
+    work_data <- fdataobj$data
+
+    if (is.null(target)) {
+      target <- colMeans(fdataobj$data)
+    } else if (inherits(target, "fdata")) {
+      target <- as.numeric(target$data[1, ])
+    }
   }
 
-  res <- alignment_align_to_target(fdataobj$data, as.numeric(target), argvals)
+  res <- alignment_align_to_target(work_data, as.numeric(target), argvals)
 
   result <- list(
     aligned = fdata(res$aligned_data, argvals = argvals),
     gammas = fdata(res$gammas, argvals = argvals),
     distances = res$distances,
     target = target,
-    fdataobj = fdataobj
+    fdataobj = fdataobj,
+    rotations = rotations
   )
   class(result) <- "elastic.align"
   result
@@ -104,6 +152,16 @@ elastic.align <- function(fdataobj, target = NULL) {
 #' @param ... Additional arguments (ignored).
 #'
 #' @return A distance matrix (numeric matrix).
+#'
+#' @references
+#' Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011).
+#' Shape analysis of elastic curves in Euclidean spaces.
+#' \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence},
+#' 33(7):1415--1428.
+#'
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
 #'
 #' @export
 #' @examples
@@ -149,6 +207,9 @@ metric.elastic <- function(fdataobj, fdataref = NULL, ...) {
 #' @param fdataobj An object of class 'fdata'.
 #' @param max.iter Maximum number of iterations (default 20).
 #' @param tol Convergence tolerance (default 1e-4).
+#' @param periodic Logical; if TRUE, circularly rotate each curve to a canonical
+#'   position before computing the Karcher mean. See \code{\link{elastic.align}}
+#'   for details. Default is FALSE.
 #'
 #' @return An object of class 'karcher.mean' with components:
 #' \describe{
@@ -158,7 +219,19 @@ metric.elastic <- function(fdataobj, fdataref = NULL, ...) {
 #'   \item{n.iter}{number of iterations used}
 #'   \item{converged}{logical indicating convergence}
 #'   \item{fdataobj}{the original fdata input}
+#'   \item{rotations}{integer vector of circular rotation shifts applied
+#'     (NULL when periodic = FALSE)}
 #' }
+#'
+#' @references
+#' Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011).
+#' Shape analysis of elastic curves in Euclidean spaces.
+#' \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence},
+#' 33(7):1415--1428.
+#'
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
 #'
 #' @export
 #' @examples
@@ -166,13 +239,23 @@ metric.elastic <- function(fdataobj, fdataref = NULL, ...) {
 #' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
 #' km <- karcher.mean(fd)
 #' }
-karcher.mean <- function(fdataobj, max.iter = 20, tol = 1e-4) {
+karcher.mean <- function(fdataobj, max.iter = 20, tol = 1e-4, periodic = FALSE) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
   }
 
   argvals <- fdataobj$argvals
-  res <- alignment_karcher_mean(fdataobj$data, argvals,
+  rotations <- NULL
+
+  if (periodic) {
+    rot <- .periodic_rotate(fdataobj$data)
+    work_data <- rot$data
+    rotations <- rot$shifts
+  } else {
+    work_data <- fdataobj$data
+  }
+
+  res <- alignment_karcher_mean(work_data, argvals,
                                 as.integer(max.iter), as.numeric(tol))
 
   result <- list(
@@ -181,7 +264,8 @@ karcher.mean <- function(fdataobj, max.iter = 20, tol = 1e-4) {
     gammas = fdata(res$gammas, argvals = argvals),
     n.iter = res$n_iter,
     converged = res$converged,
-    fdataobj = fdataobj
+    fdataobj = fdataobj,
+    rotations = rotations
   )
   class(result) <- "karcher.mean"
   result
@@ -198,6 +282,9 @@ print.elastic.align <- function(x, ...) {
   cat("Elastic Alignment\n")
   cat("  Curves:", n, "x", m, "grid points\n")
   cat("  Mean elastic distance:", round(mean(x$distances), 4), "\n")
+  if (!is.null(x$rotations)) {
+    cat("  Periodic: TRUE\n")
+  }
   invisible(x)
 }
 
@@ -246,6 +333,9 @@ print.karcher.mean <- function(x, ...) {
   cat("  Curves:", n, "x", m, "grid points\n")
   cat("  Iterations:", x$n.iter, "\n")
   cat("  Converged:", x$converged, "\n")
+  if (!is.null(x$rotations)) {
+    cat("  Periodic: TRUE\n")
+  }
   invisible(x)
 }
 
@@ -299,6 +389,79 @@ plot.karcher.mean <- function(x, type = c("mean", "aligned", "warps"), ...) {
 
   print(p)
   invisible(p)
+}
+
+# =============================================================================
+# Periodic rotation
+# =============================================================================
+
+#' Periodic Rotation for Functional Data
+#'
+#' Circularly rotate each curve so that its global maximum is at a canonical
+#' grid position. This is useful as a pre-processing step before elastic
+#' alignment of periodic functional data (e.g., data on \eqn{[0, 2\pi]} where
+#' \eqn{f(0) = f(2\pi)}).
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param target.pos Target grid index for the global maximum. If NULL
+#'   (default), uses \code{floor(ncol(fdataobj$data) / 4)}.
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{fdataobj}{fdata of rotated curves}
+#'   \item{shifts}{integer vector of circular shifts applied to each curve}
+#' }
+#'
+#' @references
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @export
+#' @examples
+#' # Periodic sinusoidal curves with random circular shifts
+#' argvals <- seq(0, 2 * pi, length.out = 100)
+#' data <- matrix(0, 10, 100)
+#' for (i in 1:10) {
+#'   shift <- sample(0:99, 1)
+#'   idx <- ((seq_len(100) - 1 + shift) %% 100) + 1
+#'   data[i, ] <- sin(argvals[idx])
+#' }
+#' fd <- fdata(data, argvals = argvals)
+#' rot <- periodic.rotate(fd)
+periodic.rotate <- function(fdataobj, target.pos = NULL) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+  rot <- .periodic_rotate(fdataobj$data, target_pos = target.pos)
+  list(
+    fdataobj = fdata(rot$data, argvals = fdataobj$argvals),
+    shifts = rot$shifts
+  )
+}
+
+#' @noRd
+.periodic_rotate <- function(data_matrix, target_pos = NULL) {
+  m <- ncol(data_matrix)
+  n <- nrow(data_matrix)
+
+  if (is.null(target_pos)) {
+    target_pos <- floor(m / 4)
+  }
+  target_pos <- as.integer(target_pos)
+
+  shifts <- integer(n)
+  rotated <- matrix(0, n, m)
+
+  for (i in seq_len(n)) {
+    max_idx <- which.max(data_matrix[i, ])
+    shift <- max_idx - target_pos
+    shifts[i] <- as.integer(shift)
+    # Circular shift: move elements so that max_idx lands at target_pos
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    rotated[i, ] <- data_matrix[i, idx]
+  }
+
+  list(data = rotated, shifts = shifts)
 }
 
 # =============================================================================
