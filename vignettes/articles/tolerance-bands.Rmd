@@ -99,6 +99,38 @@ band_exp <- tolerance.band(fd, method = "exponential", family = "gaussian",
 plot(band_exp)
 ```
 
+## Elastic (Alignment-Based) Band
+
+The elastic method first aligns curves using the Karcher mean in the elastic metric, removing phase variability. It then computes an FPCA tolerance band on the aligned data. This produces tighter bands when curves exhibit timing differences:
+
+```{r elastic}
+# Generate data with phase variability
+set.seed(42)
+data_phase <- matrix(0, n, 50)
+for (i in 1:n) {
+  shift <- runif(1, -0.05, 0.05)
+  data_phase[i, ] <- sin(2 * pi * (argvals - shift)) + rnorm(1, 0, 0.2) +
+                     rnorm(50, 0, 0.05)
+}
+fd_phase <- fdata(data_phase, argvals = argvals)
+
+band_elastic <- tolerance.band(fd_phase, method = "elastic", coverage = 0.95,
+                               nb = 200, max.iter = 10, seed = 42)
+print(band_elastic)
+plot(band_elastic)
+```
+
+Compare the elastic band to FPCA on the same phase-shifted data:
+
+```{r elastic-compare, fig.height = 4}
+band_fpca_phase <- tolerance.band(fd_phase, method = "fpca", coverage = 0.95,
+                                  nb = 200, seed = 42)
+cat("FPCA mean half-width:   ", round(mean(band_fpca_phase$half_width), 4), "\n")
+cat("Elastic mean half-width:", round(mean(band_elastic$half_width), 4), "\n")
+```
+
+The elastic band is narrower because alignment concentrates variance into amplitude rather than spreading it across both amplitude and phase.
+
 ## Method Comparison
 
 ```{r compare, fig.height = 8}
