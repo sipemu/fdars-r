@@ -30,8 +30,20 @@ navbar:
         href: articles/basis-representation.html
       - text: Depth Functions
         href: articles/depth-functions.html
+      - text: Streaming Depth
+        href: articles/streaming-depth.html
       - text: Distance Metrics
         href: articles/distance-metrics.html
+      - text: "---"
+      - text: Alignment
+      - text: Elastic Alignment
+        href: articles/elastic-alignment.html
+      - text: "---"
+      - text: Bands & Equivalence
+      - text: Tolerance Bands
+        href: articles/tolerance-bands.html
+      - text: Equivalence Testing
+        href: articles/equivalence-testing.html
       - text: "---"
       - text: Analysis
       - text: Clustering
@@ -44,16 +56,6 @@ navbar:
         href: articles/seasonal-analysis.html
       - text: Andrews Transformation
         href: articles/andrews-transformation.html
-      - text: Equivalence Testing
-        href: articles/equivalence-testing.html
-      - text: "---"
-      - text: "New in 0.4.0"
-      - text: Elastic Alignment
-        href: articles/elastic-alignment.html
-      - text: Tolerance Bands
-        href: articles/tolerance-bands.html
-      - text: Streaming Depth
-        href: articles/streaming-depth.html
       - text: "---"
       - text: Advanced
       - text: Covariance Functions
@@ -78,6 +80,14 @@ articles:
   - articles/basis-representation
   - depth-functions
   - articles/distance-metrics
+  - articles/streaming-depth
+- title: Alignment
+  contents:
+  - articles/elastic-alignment
+- title: Bands & Equivalence
+  contents:
+  - articles/tolerance-bands
+  - articles/equivalence-testing
 - title: Analysis
   contents:
   - articles/clustering
@@ -85,12 +95,6 @@ articles:
   - articles/regression
   - articles/seasonal-analysis
   - articles/andrews-transformation
-  - articles/equivalence-testing
-- title: "New in 0.4.0"
-  contents:
-  - articles/elastic-alignment
-  - articles/tolerance-bands
-  - articles/streaming-depth
 - title: Advanced
   contents:
   - articles/covariance-functions
@@ -143,6 +147,7 @@ reference:
   - elastic.distance
   - metric.elastic
   - karcher.mean
+  - periodic.rotate
   - plot.elastic.align
   - plot.karcher.mean
 
