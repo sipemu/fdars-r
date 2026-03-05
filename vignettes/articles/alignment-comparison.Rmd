@@ -1,0 +1,325 @@
+---
+title: "Comparing Alignment Methods"
+output: rmarkdown::html_vignette
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  out.width = "100%"
+)
+```
+
+## Introduction
+
+fdars provides four approaches to curve alignment, each with different trade-offs
+in terms of automation, smoothness, interpretability, and speed. This article
+compares them side-by-side on the same data, and provides guidance on when to
+use each method.
+
+The four methods are:
+
+1. **Elastic alignment** (`elastic.align`, `karcher.mean`) -- global optimization
+   via dynamic programming in SRSF space
+2. **Landmark registration** (`landmark.register`) -- feature-based piecewise-linear
+   warping
+3. **Constrained elastic alignment** (`elastic.align.constrained`) -- elastic
+   alignment with landmark pass-through constraints
+4. **TSRVF** (`tsrvf.transform`) -- not an alignment method per se, but a
+   linearization of elastic alignment for downstream analysis
+
+```{r setup}
+library(fdars)
+library(ggplot2)
+library(patchwork)
+theme_set(theme_minimal())
+```
+
+## Test Data
+
+We use two datasets that highlight different alignment challenges.
+
+### Dataset 1: Smooth Phase Shifts
+
+Curves with smooth, global timing differences -- the classic alignment scenario:
+
+```{r data-smooth}
+set.seed(42)
+argvals <- seq(0, 1, length.out = 200)
+n <- 15
+
+data_smooth <- matrix(0, n, 200)
+for (i in 1:n) {
+  shift <- runif(1, -0.1, 0.1)
+  amp <- rnorm(1, 1, 0.15)
+  data_smooth[i, ] <- amp * sin(2 * pi * (argvals - shift)) +
+                       0.4 * amp * sin(4 * pi * (argvals - shift * 0.7))
+}
+fd_smooth <- fdata(data_smooth, argvals = argvals)
+```
+
+### Dataset 2: Distinct Feature Shifts
+
+Curves with clearly identifiable peaks that shift independently -- where domain
+knowledge matters:
+
+```{r data-features}
+data_feat <- matrix(0, n, 200)
+for (i in 1:n) {
+  pk1 <- runif(1, 0.15, 0.35)
+  pk2 <- runif(1, 0.55, 0.75)
+  w1 <- rnorm(1, 1, 0.2)
+  w2 <- rnorm(1, 0.8, 0.15)
+  data_feat[i, ] <- w1 * exp(-200 * (argvals - pk1)^2) +
+                     w2 * exp(-200 * (argvals - pk2)^2) +
+                     0.05 * rnorm(200)
+}
+fd_feat <- fdata(data_feat, argvals = argvals)
+```
+
+```{r data-plot}
+p1 <- plot(fd_smooth) + labs(title = "Dataset 1: Smooth Phase Shifts")
+p2 <- plot(fd_feat) + labs(title = "Dataset 2: Distinct Features")
+p1 + p2
+```
+
+## Method 1: Elastic Alignment
+
+Elastic alignment finds the globally optimal warping function by minimizing the
+$L^2$ distance between SRSFs via dynamic programming. It requires no feature
+detection and produces smooth, diffeomorphic warping functions.
+
+**Mathematical basis**: minimize
+$\|\, q_1 - (q_2 \circ \gamma) \sqrt{\dot\gamma}\,\|_{L^2}^2$ over the warping
+group $\Gamma$, where $q_i$ is the SRSF of $f_i$.
+
+```{r elastic}
+ea_smooth <- elastic.align(fd_smooth)
+ea_feat <- elastic.align(fd_feat)
+```
+
+```{r elastic-plot}
+p1 <- plot(ea_smooth, type = "aligned") + labs(title = "Elastic (smooth data)")
+p2 <- plot(ea_feat, type = "aligned") + labs(title = "Elastic (feature data)")
+p1 + p2
+```
+
+## Method 2: Landmark Registration
+
+Landmark registration detects features (peaks, valleys, etc.) and warps curves
+so that corresponding features align to common target positions. The warping is
+piecewise-linear between anchor points.
+
+**Mathematical basis**: For landmarks $\tau_{i,j}$ and targets $\tau_j^*$,
+construct $\gamma_i$ as a piecewise-linear function satisfying
+$\gamma_i(\tau_j^*) = \tau_{i,j}$.
+
+```{r landmark}
+lr_smooth <- landmark.register(fd_smooth, kind = "peak", min.prominence = 0.3,
+                                expected.count = 1)
+lr_feat <- landmark.register(fd_feat, kind = "peak", min.prominence = 0.2,
+                              expected.count = 2)
+```
+
+```{r landmark-plot}
+p1 <- plot(lr_smooth, type = "registered") +
+  labs(title = "Landmark (smooth data)")
+p2 <- plot(lr_feat, type = "registered") +
+  labs(title = "Landmark (feature data)")
+p1 + p2
+```
+
+## Method 3: Constrained Elastic Alignment
+
+Constrained elastic alignment combines the smooth, globally optimal warping of
+elastic alignment with landmark pass-through constraints. The warping is
+computed by segmented dynamic programming between landmark anchor points.
+
+**Mathematical basis**: minimize $\|q_1 - (q_2 \circ \gamma) \sqrt{\dot\gamma}\|_{L^2}^2$
+subject to $\gamma(\tau_j^*) = \tau_{i,j}$ for each landmark pair.
+
+```{r constrained}
+ec_smooth <- elastic.align.constrained(fd_smooth, kind = "peak",
+                                        min.prominence = 0.3,
+                                        expected.count = 1)
+ec_feat <- elastic.align.constrained(fd_feat, kind = "peak",
+                                      min.prominence = 0.2,
+                                      expected.count = 2)
+```
+
+```{r constrained-plot}
+p1 <- plot(ec_smooth, type = "aligned") +
+  labs(title = "Constrained (smooth data)")
+p2 <- plot(ec_feat, type = "aligned") +
+  labs(title = "Constrained (feature data)")
+p1 + p2
+```
+
+## Warping Function Comparison
+
+The warping functions reveal the fundamental difference between methods. Elastic
+produces smooth warps, landmark produces piecewise-linear warps, and constrained
+is smooth but passes through landmark anchor points:
+
+```{r warps-compare}
+p1 <- plot(ea_feat, type = "warps") + labs(title = "Elastic Warps")
+p2 <- plot(lr_feat, type = "warps") + labs(title = "Landmark Warps")
+p3 <- plot(ec_feat, type = "warps") + labs(title = "Constrained Warps")
+p1 + p2 + p3
+```
+
+## Quantitative Comparison
+
+### Variance Reduction
+
+Variance reduction (VR) measures how much pointwise variance is removed by
+alignment. Higher VR means more phase variability was captured:
+
+$$\text{VR} = 1 - \frac{\text{mean pointwise variance (aligned)}}{\text{mean pointwise variance (original)}}$$
+
+```{r vr-comparison}
+vr <- function(original, aligned) {
+  var_orig <- mean(apply(original$data, 2, var))
+  var_aligned <- mean(apply(aligned$data, 2, var))
+  1 - var_aligned / var_orig
+}
+
+results <- data.frame(
+  Dataset = rep(c("Smooth shifts", "Distinct features"), each = 3),
+  Method = rep(c("Elastic", "Landmark", "Constrained"), 2),
+  VR = c(
+    vr(fd_smooth, ea_smooth$aligned),
+    vr(fd_smooth, lr_smooth$registered),
+    vr(fd_smooth, ec_smooth$aligned),
+    vr(fd_feat, ea_feat$aligned),
+    vr(fd_feat, lr_feat$registered),
+    vr(fd_feat, ec_feat$aligned)
+  )
+)
+
+results$VR <- round(results$VR, 3)
+print(results)
+```
+
+```{r vr-plot}
+ggplot(results, aes(x = Method, y = VR, fill = Dataset)) +
+  geom_col(position = "dodge") +
+  labs(title = "Variance Reduction by Method",
+       y = "Variance Reduction (higher = better)") +
+  scale_fill_manual(values = c("Smooth shifts" = "steelblue",
+                                "Distinct features" = "coral")) +
+  ylim(0, 1)
+```
+
+### Alignment Quality Diagnostics
+
+For the Karcher mean (elastic), we can compute detailed diagnostics:
+
+```{r quality}
+km_smooth <- karcher.mean(fd_smooth, max.iter = 15)
+aq_smooth <- alignment.quality(fd_smooth, km_smooth)
+print(aq_smooth)
+```
+
+### Amplitude-Phase Decomposition
+
+Elastic alignment uniquely provides a principled decomposition of total
+variability into amplitude and phase components:
+
+```{r decomposition}
+plot(aq_smooth, type = "variance")
+```
+
+## Decision Guide
+
+### Summary Table
+
+| Method | Warping | Automation | Speed | Smoothness | Feature control |
+|--------|---------|------------|-------|------------|----------------|
+| **Elastic** | Smooth diffeomorphism | Fully automatic | $O(nm^2)$ | High | None |
+| **Landmark** | Piecewise-linear | Needs feature type | $O(nm + nk)$ | Low (corners at landmarks) | Full |
+| **Constrained** | Smooth with anchors | Needs feature type | $O(nm^2/k)$ | High (between landmarks) | Partial |
+| **TSRVF** | (uses elastic) | Fully automatic | $O(nm^2)$ + PCA | High | None |
+
+### When to Use Each Method
+
+**Use elastic alignment when:**
+
+- You have no prior knowledge about which features should correspond
+- Curves have smooth, continuous timing differences
+- You want a principled metric space structure (Fisher-Rao distance)
+- You need amplitude-phase decomposition or TSRVF for downstream analysis
+
+**Use landmark registration when:**
+
+- Features are well-defined and domain-meaningful (ECG waves, spectral peaks)
+- You need guaranteed feature correspondence
+- Speed is critical (linear in grid size per landmark)
+- Curves have complex warping that confuses global DP (e.g., features moving in
+  opposite directions)
+
+**Use constrained elastic alignment when:**
+
+- You want both smooth warps and feature correspondence
+- Some features must align exactly, but the warping between them should be
+  optimized
+- You are comparing elastic and landmark results and want a middle ground
+
+**Use TSRVF when:**
+
+- You need to perform PCA, regression, or classification on aligned data
+- You want a Euclidean representation of curve shapes
+- You have already computed a Karcher mean and want to extract tangent vectors
+
+### Pitfalls
+
+| Method | Common pitfall | Mitigation |
+|--------|---------------|------------|
+| **Elastic** | Over-warping (pinching) on noisy data | Increase `lambda` penalty |
+| **Landmark** | Mismatched landmark correspondence | Use `expected.count`, increase `min.prominence` |
+| **Constrained** | Too few landmarks = barely constrained | Detect multiple landmark types |
+| **TSRVF** | Linearization error for curves far from mean | Check reconstruction quality |
+
+## Workflow Example
+
+A typical analysis workflow combining multiple methods:
+
+```{r workflow}
+# 1. Explore data
+plot(fd_feat) + labs(title = "Step 1: Explore")
+```
+
+```{r workflow-landmarks}
+# 2. Detect features to understand structure
+lms <- detect.landmarks(fd_feat, kind = "peak", min.prominence = 0.2)
+cat("Landmarks per curve:",
+    paste(sapply(lms, nrow), collapse = ", "), "\n")
+```
+
+```{r workflow-align}
+# 3. Align (choose method based on data)
+lr <- landmark.register(fd_feat, kind = "peak", min.prominence = 0.2,
+                         expected.count = 2)
+```
+
+```{r workflow-tsrvf}
+# 4. For downstream analysis, compute Karcher mean + TSRVF
+km <- karcher.mean(lr$registered, max.iter = 10)
+tv <- tsrvf.from.alignment(km)
+
+# 5. Standard PCA on tangent vectors
+pca <- prcomp(tv$tangent_vectors$data)
+var_exp <- cumsum(pca$sdev^2 / sum(pca$sdev^2))
+cat("Variance explained (first 3 PCs):",
+    round(var_exp[1:3] * 100, 1), "%\n")
+```
+
+## See Also
+
+- `vignette("elastic-alignment", package = "fdars")` -- elastic alignment details
+- `vignette("landmark-registration", package = "fdars")` -- landmark registration
+  details
+- `vignette("tsrvf", package = "fdars")` -- TSRVF for linearized analysis

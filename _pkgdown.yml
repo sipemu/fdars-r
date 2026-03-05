@@ -46,6 +46,13 @@ navbar:
       menu:
       - text: Elastic Alignment
         href: articles/elastic-alignment.html
+      - text: Landmark Registration
+        href: articles/landmark-registration.html
+      - text: TSRVF
+        href: articles/tsrvf.html
+      - text: "---"
+      - text: Comparing Alignment Methods
+        href: articles/alignment-comparison.html
     analyze:
       text: Analyze
       menu:
@@ -88,6 +95,9 @@ articles:
 - title: Align
   contents:
   - articles/elastic-alignment
+  - articles/landmark-registration
+  - articles/tsrvf
+  - articles/alignment-comparison
 - title: Analyze
   contents:
   - articles/tolerance-bands
