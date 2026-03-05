@@ -40,34 +40,38 @@ differ from each other.
 
 ### The Karhunen-Loève Expansion
 
-Any square-integrable random function $X(t)$ can be represented as:
+Any square-integrable random function $`X(t)`$ can be represented as:
 
-$$X(t) = \mu(t) + \sum\limits_{k = 1}^{\infty}\xi_{k}\phi_{k}(t)$$
+``` math
+X(t) = \mu(t) + \sum_{k=1}^{\infty} \xi_k \phi_k(t)
+```
 
 where:
 
-- $\mu(t)$ is the mean function
-- $\phi_{k}(t)$ are the **eigenfunctions** (functional principal
+- $`\mu(t)`$ is the mean function
+- $`\phi_k(t)`$ are the **eigenfunctions** (functional principal
   components)
-- $\xi_{k}$ are the **scores** (random coefficients)
+- $`\xi_k`$ are the **scores** (random coefficients)
 
 The eigenfunctions satisfy:
 
-$$\int C(s,t)\phi_{k}(s)\, ds = \lambda_{k}\phi_{k}(t)$$
+``` math
+\int C(s, t) \phi_k(s) \, ds = \lambda_k \phi_k(t)
+```
 
-where $C(s,t) = \text{Cov}\left( X(s),X(t) \right)$ is the covariance
-function and $\lambda_{k}$ are the eigenvalues (variances explained by
-each component).
+where $`C(s, t) = \text{Cov}(X(s), X(t))`$ is the covariance function
+and $`\lambda_k`$ are the eigenvalues (variances explained by each
+component).
 
 ### Key Properties
 
-1.  **Orthonormality**: $\int\phi_{j}(t)\phi_{k}(t)\, dt = \delta_{jk}$
+1.  **Orthonormality**: $`\int \phi_j(t) \phi_k(t) \, dt = \delta_{jk}`$
 2.  **Uncorrelated scores**:
-    $\text{Cov}\left( \xi_{j},\xi_{k} \right) = \lambda_{j}\delta_{jk}$
+    $`\text{Cov}(\xi_j, \xi_k) = \lambda_j \delta_{jk}`$
 3.  **Optimal reconstruction**: FPCA minimizes integrated squared error
     for any fixed number of components
 4.  **Variance ordering**:
-    $\lambda_{1} \geq \lambda_{2} \geq \cdots \geq 0$
+    $`\lambda_1 \geq \lambda_2 \geq \cdots \geq 0`$
 
 ## Example: Growth Curves
 
@@ -148,11 +152,11 @@ plot(fpca, type = "components", ncomp = 3, multiple = 2)
 Each facet shows one principal component with solid lines differentiated
 by color:
 
-- **Black**: Mean function $\mu(t)$
-- **Blue**: Mean + perturbation ($\mu + c \cdot \phi_{k}$)
-- **Coral**: Mean - perturbation ($\mu - c \cdot \phi_{k}$)
+- **Black**: Mean function $`\mu(t)`$
+- **Blue**: Mean + perturbation ($`\mu + c \cdot \phi_k`$)
+- **Coral**: Mean - perturbation ($`\mu - c \cdot \phi_k`$)
 
-where $c = 2 \times \sqrt{\lambda_{k}}$ scales the perturbation by the
+where $`c = 2 \times \sqrt{\lambda_k}`$ scales the perturbation by the
 component’s importance.
 
 You can show only the positive perturbation by setting
@@ -494,13 +498,13 @@ ggplot(df_curves, aes(x = t, y = height, group = curve_id, color = distance)) +
 FPCA on discretized curves is mathematically equivalent to classical PCA
 on the data matrix, but the functional interpretation adds value:
 
-| Aspect         | Classical PCA                 | FPCA                     |
-|----------------|-------------------------------|--------------------------|
-| Input          | Vectors in ${\mathbb{R}}^{p}$ | Functions in $L^{2}$     |
-| Output         | Loading vectors               | Eigenfunction curves     |
-| Interpretation | Variable weights              | Modes of variation       |
-| Reconstruction | Linear combination            | Functional approximation |
-| Smoothness     | Not enforced                  | Can be regularized       |
+| Aspect         | Classical PCA               | FPCA                     |
+|----------------|-----------------------------|--------------------------|
+| Input          | Vectors in $`\mathbb{R}^p`$ | Functions in $`L^2`$     |
+| Output         | Loading vectors             | Eigenfunction curves     |
+| Interpretation | Variable weights            | Modes of variation       |
+| Reconstruction | Linear combination          | Functional approximation |
+| Smoothness     | Not enforced                | Can be regularized       |
 
 ## References
 

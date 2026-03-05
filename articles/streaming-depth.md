@@ -2,19 +2,18 @@
 
 ## Introduction
 
-Standard depth computations require $O\left( N^{2}T \right)$ time for
-$N$ curves on $T$ grid points, which becomes expensive for large
-reference samples. **Streaming depth** decouples reference-set
-construction from query evaluation: the reference data is pre-sorted at
-each time point, enabling $O\left( T\log N \right)$ depth per query
-curve.
+Standard depth computations require $`O(N^2 T)`$ time for $`N`$ curves
+on $`T`$ grid points, which becomes expensive for large reference
+samples. **Streaming depth** decouples reference-set construction from
+query evaluation: the reference data is pre-sorted at each time point,
+enabling $`O(T \log N)`$ depth per query curve.
 
 This is particularly useful for:
 
 - **Online monitoring**: Evaluating new curves as they arrive against a
   fixed reference
-- **Large reference samples**: When $N$ is large, the
-  $O\left( \log N \right)$ lookup is much faster than $O(N)$
+- **Large reference samples**: When $`N`$ is large, the $`O(\log N)`$
+  lookup is much faster than $`O(N)`$
 
 ## Self-Depth (Batch)
 
@@ -350,8 +349,8 @@ more representative central tendency.
 
 Streaming depth is designed for the scenario where a reference sample is
 fixed and many query curves must be evaluated. The pre-sorting step is
-$O\left( NT\log N \right)$, but each subsequent query is only
-$O\left( T\log N \right)$ instead of $O(NT)$:
+$`O(N T \log N)`$, but each subsequent query is only $`O(T \log N)`$
+instead of $`O(N T)`$:
 
 ``` r
 set.seed(42)
@@ -368,9 +367,9 @@ for (n_size in sizes) {
   cat(sprintf("  N = %4d: %.4f sec\n", n_size, t_elapsed))
 }
 #>   N =   50: 0.0000 sec
-#>   N =  100: 0.0510 sec
-#>   N =  500: 0.0150 sec
-#>   N = 1000: 0.0140 sec
+#>   N =  100: 0.0010 sec
+#>   N =  500: 0.0010 sec
+#>   N = 1000: 0.0010 sec
 ```
 
 For large reference samples with many incoming queries, the streaming

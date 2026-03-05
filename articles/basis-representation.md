@@ -6,9 +6,11 @@ Basis representation is fundamental in functional data analysis. Instead
 of working with raw observations at discrete points, we represent curves
 as linear combinations of basis functions:
 
-$$X(t) = \sum\limits_{k = 1}^{K}c_{k}B_{k}(t)$$
+``` math
+X(t) = \sum_{k=1}^{K} c_k B_k(t)
+```
 
-where $B_{k}(t)$ are basis functions and $c_{k}$ are coefficients.
+where $`B_k(t)`$ are basis functions and $`c_k`$ are coefficients.
 
 This approach provides:
 
@@ -124,11 +126,11 @@ The key question: **How many basis functions should we use?**
 
 **fdars** provides three criteria to evaluate basis representations:
 
-| Criterion | Formula                            | Penalizes                    |
-|-----------|------------------------------------|------------------------------|
-| GCV       | $\frac{RSS/n}{(1 - edf/n)^{2}}$    | Effective degrees of freedom |
-| AIC       | $n\log(RSS/n) + 2 \cdot edf$       | Model complexity (moderate)  |
-| BIC       | $n\log(RSS/n) + \log(n) \cdot edf$ | Model complexity (strong)    |
+| Criterion | Formula | Penalizes |
+|----|----|----|
+| GCV | $`\frac{RSS/n}{(1 - edf/n)^2}`$ | Effective degrees of freedom |
+| AIC | $`n \log(RSS/n) + 2 \cdot edf`$ | Model complexity (moderate) |
+| BIC | $`n \log(RSS/n) + \log(n) \cdot edf`$ | Model complexity (strong) |
 
 ``` r
 # Compute criteria for different nbasis values
@@ -225,8 +227,8 @@ This signal has three distinct features that challenge different basis
 types:
 
 1.  **Polynomial trend**: Smooth, spanning the full domain
-2.  **Gaussian bump** at $t = 0.3$: A localized feature
-3.  **Sharp edge** at $t = 0.7$: A non-smooth transition
+2.  **Gaussian bump** at $`t=0.3`$: A localized feature
+3.  **Sharp edge** at $`t=0.7`$: A non-smooth transition
 
 Let’s see which basis type handles this better:
 
@@ -391,11 +393,13 @@ P-splines (Penalized B-splines) offer an alternative approach: instead
 of selecting the number of basis functions, we use many basis functions
 but add a roughness penalty:
 
-$$\text{minimize}\quad{||}y - Bc{||}^{2} + \lambda c\prime D\prime Dc$$
+``` math
+\text{minimize} \quad ||y - Bc||^2 + \lambda c' D' D c
+```
 
-where: - $B$ is the B-spline basis matrix - $c$ are coefficients - $D$
-is a difference matrix (controls smoothness) - $\lambda$ is the penalty
-parameter
+where: - $`B`$ is the B-spline basis matrix - $`c`$ are coefficients -
+$`D`$ is a difference matrix (controls smoothness) - $`\lambda`$ is the
+penalty parameter
 
 ``` r
 # Fit P-spline with fixed lambda

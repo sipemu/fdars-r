@@ -14,13 +14,12 @@ point-by-point (L2), others allow for timing shifts before comparing
 like curve shape (derivative-based) or frequency content
 (Fourier-based).
 
-A **metric** $d$ on a space $\mathcal{X}$ satisfies:
+A **metric** $`d`$ on a space $`\mathcal{X}`$ satisfies:
 
-1.  $d(f,g) \geq 0$ (non-negativity)
-2.  $\left. d(f,g) = 0\Leftrightarrow f = g \right.$ (identity of
-    indiscernibles)
-3.  $d(f,g) = d(g,f)$ (symmetry)
-4.  $d(f,h) \leq d(f,g) + d(g,h)$ (triangle inequality)
+1.  $`d(f, g) \geq 0`$ (non-negativity)
+2.  $`d(f, g) = 0 \Leftrightarrow f = g`$ (identity of indiscernibles)
+3.  $`d(f, g) = d(g, f)`$ (symmetry)
+4.  $`d(f, h) \leq d(f, g) + d(g, h)`$ (triangle inequality)
 
 A **semimetric** satisfies only conditions 1-3.
 
@@ -60,26 +59,30 @@ plot(fd)
 
 ### Lp Distance (metric.lp)
 
-The $L^{p}$ distance is the most common choice for functional data. It
-computes the integrated $L^{p}$ norm of the difference between two
+The $`L^p`$ distance is the most common choice for functional data. It
+computes the integrated $`L^p`$ norm of the difference between two
 functions:
 
-$$d_{p}(f,g) = \left( \int_{\mathcal{T}}\left| f(t) - g(t) \right|^{p}\, dt \right)^{1/p}$$
+``` math
+d_p(f, g) = \left( \int_{\mathcal{T}} |f(t) - g(t)|^p \, dt \right)^{1/p}
+```
 
 For discrete observations, this is approximated using numerical
 integration (Simpson’s rule):
 
-$$d_{p}(f,g) \approx \left( \sum\limits_{j = 1}^{m}w_{j}\left| f\left( t_{j} \right) - g\left( t_{j} \right) \right|^{p} \right)^{1/p}$$
+``` math
+d_p(f, g) \approx \left( \sum_{j=1}^{m} w_j |f(t_j) - g(t_j)|^p \right)^{1/p}
+```
 
-where $w_{j}$ are quadrature weights.
+where $`w_j`$ are quadrature weights.
 
 Special cases:
 
-- **$p = 2$ (L2/Euclidean)**: Most common, corresponds to the standard
+- **$`p = 2`$ (L2/Euclidean)**: Most common, corresponds to the standard
   functional norm. Sensitive to vertical differences.
-- **$p = 1$ (L1/Manhattan)**: More robust to outliers than L2.
-- **$p = \infty$ (L-infinity/Chebyshev)**: Maximum absolute difference,
-  $d_{\infty}(f,g) = \max_{t}\left| f(t) - g(t) \right|$.
+- **$`p = 1`$ (L1/Manhattan)**: More robust to outliers than L2.
+- **$`p = \infty`$ (L-infinity/Chebyshev)**: Maximum absolute
+  difference, $`d_\infty(f, g) = \max_t |f(t) - g(t)|`$.
 
 ``` r
 # L2 (Euclidean) distance - default
@@ -102,7 +105,9 @@ dist_linf <- metric.lp(fd, lp = Inf)
 
 Apply different weights to different parts of the domain:
 
-$$d_{p,w}(f,g) = \left( \int_{\mathcal{T}}w(t)\left| f(t) - g(t) \right|^{p}\, dt \right)^{1/p}$$
+``` math
+d_{p,w}(f, g) = \left( \int_{\mathcal{T}} w(t) |f(t) - g(t)|^p \, dt \right)^{1/p}
+```
 
 This is useful when certain parts of the domain are more important than
 others.
@@ -117,14 +122,15 @@ dist_weighted <- metric.lp(fd, lp = 2, w = w)
 
 ### Hausdorff Distance (metric.hausdorff)
 
-The Hausdorff distance treats curves as sets of points
-$\left( t,f(t) \right)$ in 2D space and computes the maximum of minimum
-distances:
+The Hausdorff distance treats curves as sets of points $`(t, f(t))`$ in
+2D space and computes the maximum of minimum distances:
 
-$$d_{H}(f,g) = \max\left\{ \sup\limits_{t \in \mathcal{T}}\inf\limits_{s \in \mathcal{T}} \parallel P_{f}(t) - P_{g}(s) \parallel ,\sup\limits_{s \in \mathcal{T}}\inf\limits_{t \in \mathcal{T}} \parallel P_{f}(t) - P_{g}(s) \parallel \right\}$$
+``` math
+d_H(f, g) = \max\left\{ \sup_{t \in \mathcal{T}} \inf_{s \in \mathcal{T}} \|P_f(t) - P_g(s)\|, \sup_{s \in \mathcal{T}} \inf_{t \in \mathcal{T}} \|P_f(t) - P_g(s)\| \right\}
+```
 
-where $P_{f}(t) = \left( t,f(t) \right)$ is the point on the graph of
-$f$ at time $t$.
+where $`P_f(t) = (t, f(t))`$ is the point on the graph of $`f`$ at time
+$`t`$.
 
 The Hausdorff distance is useful when:
 
@@ -145,17 +151,21 @@ print(round(as.matrix(dist_haus), 3))
 ### Dynamic Time Warping (metric.DTW)
 
 DTW allows for non-linear alignment of curves before computing the
-distance. It finds the optimal warping path $\pi$ that minimizes:
+distance. It finds the optimal warping path $`\pi`$ that minimizes:
 
-$$d_{DTW}(f,g) = \min\limits_{\pi}\sqrt{\sum\limits_{{(i,j)} \in \pi}\left| f\left( t_{i} \right) - g\left( t_{j} \right) \right|^{2}}$$
+``` math
+d_{DTW}(f, g) = \min_{\pi} \sqrt{\sum_{(i,j) \in \pi} |f(t_i) - g(t_j)|^2}
+```
 
 subject to boundary conditions, monotonicity, and continuity
 constraints.
 
 The **Sakoe-Chiba band** constraint limits the warping to
-$|i - j| \leq w$, preventing excessive distortion:
+$`|i - j| \leq w`$, preventing excessive distortion:
 
-$$d_{DTW}^{SC}(f,g) = \min\limits_{\pi:{|i - j|} \leq w}\sqrt{\sum\limits_{{(i,j)} \in \pi}\left| f\left( t_{i} \right) - g\left( t_{j} \right) \right|^{2}}$$
+``` math
+d_{DTW}^{SC}(f, g) = \min_{\pi: |i-j| \leq w} \sqrt{\sum_{(i,j) \in \pi} |f(t_i) - g(t_j)|^2}
+```
 
 DTW is particularly effective for:
 
@@ -195,22 +205,25 @@ dist_dtw_band <- metric.DTW(fd, w = round(m * 0.1))
 
 **Soft-DTW** (Cuturi & Blondel, 2017) is a differentiable relaxation of
 DTW that replaces the hard minimum with a soft minimum controlled by a
-smoothing parameter $\gamma > 0$:
+smoothing parameter $`\gamma > 0`$:
 
-$$\text{sdtw}_{\gamma}(f,g) = \min\limits_{\gamma}^{\text{soft}}\sum\limits_{{(i,j)} \in \pi}\left| f\left( t_{i} \right) - g\left( t_{j} \right) \right|^{2}$$
+``` math
+\text{sdtw}_\gamma(f, g) = \min_\gamma^{\text{soft}} \sum_{(i,j) \in \pi} |f(t_i) - g(t_j)|^2
+```
 
-where $\min^{\text{soft}}$ is the log-sum-exp soft minimum:
-$\min^{\text{soft}}\left( a_{1},\ldots,a_{n} \right) = - \gamma\log\sum_{k}\exp\left( - a_{k}/\gamma \right)$.
+where $`\min^\text{soft}`$ is the log-sum-exp soft minimum:
+$`\min^\text{soft}(a_1, \ldots, a_n) = -\gamma \log \sum_k \exp(-a_k / \gamma)`$.
 
-As $\left. \gamma\rightarrow 0 \right.$, Soft-DTW converges to standard
-DTW. As $\left. \gamma\rightarrow\infty \right.$, all warping paths
-receive equal weight. **Soft-DTW is not a metric** – it can assign
-negative values to self-distances. The **Soft-DTW divergence** corrects
-this:
+As $`\gamma \to 0`$, Soft-DTW converges to standard DTW. As
+$`\gamma \to \infty`$, all warping paths receive equal weight.
+**Soft-DTW is not a metric** – it can assign negative values to
+self-distances. The **Soft-DTW divergence** corrects this:
 
-$$D_{\gamma}(f,g) = \text{sdtw}_{\gamma}(f,g) - \frac{1}{2}\left\lbrack \text{sdtw}_{\gamma}(f,f) + \text{sdtw}_{\gamma}(g,g) \right\rbrack$$
+``` math
+D_\gamma(f, g) = \text{sdtw}_\gamma(f, g) - \frac{1}{2}\left[ \text{sdtw}_\gamma(f, f) + \text{sdtw}_\gamma(g, g) \right]
+```
 
-The divergence is non-negative, zero iff $f = g$, and symmetric.
+The divergence is non-negative, zero iff $`f = g`$, and symmetric.
 
 ``` r
 # Soft-DTW distance matrix (raw)
@@ -237,10 +250,10 @@ print(round(as.matrix(dist_sdtw_div), 3))
 #> curve4 62.441 63.158 86.142  0.000
 ```
 
-#### Effect of the Smoothing Parameter $\gamma$
+#### Effect of the Smoothing Parameter $`\gamma`$
 
-Small $\gamma$ approximates hard DTW (sharper, less smooth gradients);
-large $\gamma$ averages over more warping paths (smoother, less
+Small $`\gamma`$ approximates hard DTW (sharper, less smooth gradients);
+large $`\gamma`$ averages over more warping paths (smoother, less
 discriminative):
 
 ``` r
@@ -310,12 +323,16 @@ barycenter recovers the peak shape by accounting for alignment.
 The symmetric Kullback-Leibler divergence treats normalized curves as
 probability density functions:
 
-$$d_{KL}(f,g) = \frac{1}{2}\left\lbrack \int f(t)\log\frac{f(t)}{g(t)}\, dt + \int g(t)\log\frac{g(t)}{f(t)}\, dt \right\rbrack$$
+``` math
+d_{KL}(f, g) = \frac{1}{2}\left[ \int f(t) \log\frac{f(t)}{g(t)} \, dt + \int g(t) \log\frac{g(t)}{f(t)} \, dt \right]
+```
 
 Before computing, curves are shifted to be non-negative and normalized
 to integrate to 1:
 
-$$\widetilde{f}(t) = \frac{f(t) - \min\limits_{s}f(s) + \epsilon}{\int\left\lbrack f(s) - \min\limits_{s}f(s) + \epsilon \right\rbrack\, ds}$$
+``` math
+\tilde{f}(t) = \frac{f(t) - \min_s f(s) + \epsilon}{\int [f(s) - \min_s f(s) + \epsilon] \, ds}
+```
 
 This metric is useful for:
 
@@ -345,14 +362,16 @@ advantages.
 
 ### PCA-Based Semimetric (semimetric.pca)
 
-Projects curves onto the first $q$ principal components and computes the
-Euclidean distance in the reduced space:
+Projects curves onto the first $`q`$ principal components and computes
+the Euclidean distance in the reduced space:
 
-$$d_{PCA}(f,g) = \sqrt{\sum\limits_{k = 1}^{q}\left( \xi_{k}^{f} - \xi_{k}^{g} \right)^{2}}$$
+``` math
+d_{PCA}(f, g) = \sqrt{\sum_{k=1}^{q} (\xi_k^f - \xi_k^g)^2}
+```
 
-where $\xi_{k}^{f} = \langle f - \bar{f},\phi_{k}\rangle$ is the $k$-th
-principal component score of $f$, and $\phi_{k}$ are the eigenfunctions
-from functional PCA.
+where $`\xi_k^f = \langle f - \bar{f}, \phi_k \rangle`$ is the $`k`$-th
+principal component score of $`f`$, and $`\phi_k`$ are the
+eigenfunctions from functional PCA.
 
 This semimetric is useful for:
 
@@ -373,12 +392,14 @@ print(round(as.matrix(dist_pca), 3))
 
 ### Derivative-Based Semimetric (semimetric.deriv)
 
-Computes the $L^{p}$ distance based on the $r$-th derivative of the
+Computes the $`L^p`$ distance based on the $`r`$-th derivative of the
 curves:
 
-$$d_{deriv}^{(r)}(f,g) = \left( \int_{\mathcal{T}}\left| f^{(r)}(t) - g^{(r)}(t) \right|^{p}\, dt \right)^{1/p}$$
+``` math
+d_{deriv}^{(r)}(f, g) = \left( \int_{\mathcal{T}} |f^{(r)}(t) - g^{(r)}(t)|^p \, dt \right)^{1/p}
+```
 
-where $f^{(r)}$ denotes the $r$-th derivative of $f$.
+where $`f^{(r)}`$ denotes the $`r`$-th derivative of $`f`$.
 
 This semimetric focuses on the shape and dynamics of curves rather than
 their absolute values. It is particularly useful when:
@@ -409,10 +430,12 @@ print(round(as.matrix(dist_deriv1), 3))
 Projects curves onto a basis (B-spline or Fourier) and computes the
 Euclidean distance between the coefficient vectors:
 
-$$d_{basis}(f,g) = \parallel c^{f} - c^{g} \parallel_{2} = \sqrt{\sum\limits_{k = 1}^{K}\left( c_{k}^{f} - c_{k}^{g} \right)^{2}}$$
+``` math
+d_{basis}(f, g) = \|c^f - c^g\|_2 = \sqrt{\sum_{k=1}^{K} (c_k^f - c_k^g)^2}
+```
 
-where $c^{f} = \left( c_{1}^{f},\ldots,c_{K}^{f} \right)$ are the basis
-coefficients from $f(t) \approx \sum_{k = 1}^{K}c_{k}^{f}B_{k}(t)$.
+where $`c^f = (c_1^f, \ldots, c_K^f)`$ are the basis coefficients from
+$`f(t) \approx \sum_{k=1}^{K} c_k^f B_k(t)`$.
 
 For **B-splines**: Local support provides good approximation of local
 features.
@@ -440,11 +463,13 @@ print(round(as.matrix(dist_bspline), 3))
 ### Fourier Semimetric (semimetric.fourier)
 
 Uses the Fast Fourier Transform (FFT) to compute Fourier coefficients
-and measures distance based on the first $K$ frequency components:
+and measures distance based on the first $`K`$ frequency components:
 
-$$d_{FFT}(f,g) = \sqrt{\sum\limits_{k = 0}^{K}\left| {\widehat{f}}_{k} - {\widehat{g}}_{k} \right|^{2}}$$
+``` math
+d_{FFT}(f, g) = \sqrt{\sum_{k=0}^{K} |\hat{f}_k - \hat{g}_k|^2}
+```
 
-where ${\widehat{f}}_{k}$ is the $k$-th Fourier coefficient computed via
+where $`\hat{f}_k`$ is the $`k`$-th Fourier coefficient computed via
 FFT.
 
 This is computationally efficient for large datasets and particularly
@@ -464,12 +489,14 @@ print(round(as.matrix(dist_fft), 3))
 
 ### Horizontal Shift Semimetric (semimetric.hshift)
 
-Finds the optimal horizontal shift before computing the $L^{2}$
+Finds the optimal horizontal shift before computing the $`L^2`$
 distance:
 
-$$d_{hshift}(f,g) = \min\limits_{{|h|} \leq h_{max}}\left( \int_{\mathcal{T}}\left| f(t) - g(t + h) \right|^{2}\, dt \right)^{1/2}$$
+``` math
+d_{hshift}(f, g) = \min_{|h| \leq h_{max}} \left( \int_{\mathcal{T}} |f(t) - g(t+h)|^2 \, dt \right)^{1/2}
+```
 
-where $h$ is the shift in discrete time units and $h_{max}$ is the
+where $`h`$ is the shift in discrete time units and $`h_{max}`$ is the
 maximum allowed shift.
 
 This semimetric is simpler than DTW (only horizontal shifts, no warping)
@@ -501,13 +528,16 @@ framework.
 
 ### Elastic Distance (metric.elastic / elastic.distance)
 
-The elastic distance computes the $L^{2}$ distance between optimally
+The elastic distance computes the $`L^2`$ distance between optimally
 aligned SRSFs:
 
-$$d_{e}(f,g) = \min\limits_{\gamma \in \Gamma} \parallel q_{f} - \left( q_{g} \circ \gamma \right)\sqrt{\dot{\gamma}} \parallel_{L^{2}}$$
+``` math
+d_e(f, g) = \min_{\gamma \in \Gamma} \| q_f - (q_g \circ \gamma) \sqrt{\dot\gamma} \|_{L^2}
+```
 
-where $q_{f},q_{g}$ are the SRSFs of $f,g$ and $\Gamma$ is the warping
-group. This is a proper metric that is invariant to reparameterization.
+where $`q_f, q_g`$ are the SRSFs of $`f, g`$ and $`\Gamma`$ is the
+warping group. This is a proper metric that is invariant to
+reparameterization.
 
 ``` r
 dist_elastic <- elastic.distance(fd)
@@ -527,9 +557,11 @@ The **amplitude distance** measures the shape difference between curves
 *after* optimal alignment – it captures how much the curves differ in
 height, depth, and feature magnitude:
 
-$$d_{a}\left( f_{1},f_{2} \right) = \parallel q_{1} - \left( q_{2} \circ \gamma^{*} \right)\sqrt{{\dot{\gamma}}^{*}} \parallel_{L^{2}} - \lambda\int_{0}^{1}\left| {\dot{\gamma}}^{*}(t) - 1 \right|\, dt$$
+``` math
+d_a(f_1, f_2) = \| q_1 - (q_2 \circ \gamma^*) \sqrt{\dot\gamma^*} \|_{L^2} - \lambda \int_0^1 |\dot\gamma^*(t) - 1| \, dt
+```
 
-where $\lambda$ controls the penalty on warping complexity.
+where $`\lambda`$ controls the penalty on warping complexity.
 
 ``` r
 dist_amp <- amplitude.distance(fd, lambda = 0)
@@ -548,10 +580,12 @@ print(round(as.matrix(dist_amp), 3))
 The **phase distance** measures only the timing difference between
 curves – how much one curve’s time axis must be warped to match another:
 
-$$d_{p}\left( f_{1},f_{2} \right) = \arccos\left( \int_{0}^{1}\sqrt{{\dot{\gamma}}^{*}(t)}\, dt \right)$$
+``` math
+d_p(f_1, f_2) = \arccos\left( \int_0^1 \sqrt{\dot\gamma^*(t)} \, dt \right)
+```
 
 This is the geodesic distance of the warping function from the identity
-on the warping group $\Gamma$, which forms a Riemannian manifold.
+on the warping group $`\Gamma`$, which forms a Riemannian manifold.
 
 ``` r
 dist_phase <- phase.distance(fd, lambda = 0)

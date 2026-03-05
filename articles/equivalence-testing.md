@@ -19,14 +19,12 @@ Examples include:
 implements a functional **TOST** (Two One-Sided Tests) procedure based
 on the supremum norm. It constructs a simultaneous confidence band (SCB)
 for the mean difference and checks whether the entire band lies within
-an equivalence margin $\lbrack - \delta,\delta\rbrack$.
+an equivalence margin $`[-\delta, \delta]`$.
 
 **Hypotheses:**
 
-- $H_{0}$: $\sup_{t}\left| \mu_{1}(t) - \mu_{2}(t) \right| \geq \delta$
-  (NOT equivalent)
-- $H_{1}$: $\sup_{t}\left| \mu_{1}(t) - \mu_{2}(t) \right| < \delta$
-  (equivalent)
+- $`H_0`$: $`\sup_t |\mu_1(t) - \mu_2(t)| \geq \delta`$ (NOT equivalent)
+- $`H_1`$: $`\sup_t |\mu_1(t) - \mu_2(t)| < \delta`$ (equivalent)
 
 ## Setup
 
@@ -51,7 +49,7 @@ t_grid <- seq(0, 1, length.out = m)
 ## Example 1: Equivalent curves
 
 Two samples drawn from the same distribution should be declared
-equivalent with a reasonable $\delta$.
+equivalent with a reasonable $`\delta`$.
 
 ``` r
 # Two groups from the same process
@@ -85,7 +83,7 @@ print(result)
 
 The plot shows the mean difference curve (black), the simultaneous
 confidence band (green = equivalence declared, red = not declared), and
-the equivalence margins (dashed lines at $\pm \delta$).
+the equivalence margins (dashed lines at $`\pm\delta`$).
 
 ``` r
 plot(result)
@@ -134,7 +132,7 @@ equivalence is not declared.
 
 ## Choosing delta
 
-The equivalence margin $\delta$ is the maximum sup-norm difference you
+The equivalence margin $`\delta`$ is the maximum sup-norm difference you
 consider scientifically negligible. It must be chosen *before* looking
 at the data, based on domain knowledge:
 
@@ -142,7 +140,7 @@ at the data, based on domain knowledge:
   differences)
 - **Too small**: almost never declares equivalence (conservative)
 
-A useful diagnostic is to sweep over $\delta$ values and see where the
+A useful diagnostic is to sweep over $`\delta`$ values and see where the
 decision flips:
 
 ``` r
@@ -166,7 +164,7 @@ ggplot(df_sweep, aes(x = delta, y = as.numeric(equivalent))) +
 ## One-sample test
 
 You can also test whether a single sample’s mean is equivalent to a
-known reference function $\mu_{0}$.
+known reference function $`\mu_0`$.
 
 ``` r
 # Test if the sample mean is equivalent to the true generating function
