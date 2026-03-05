@@ -73,7 +73,7 @@ print(km)
 #> [1] 20 20 20
 #> 
 #> Within-cluster sum of squares:
-#> [1] 0.4199 0.4394 0.4486
+#> [1] 0.4394 0.4486 0.4199
 #> 
 #> Total within-cluster SS: 1.3079
 ```
@@ -93,9 +93,9 @@ plot(km)
 table(Predicted = km$cluster, True = true_clusters)
 #>          True
 #> Predicted  1  2  3
-#>         1 20  0  0
-#>         2  0 20  0
-#>         3  0  0 20
+#>         1  0 20  0
+#>         2  0  0 20
+#>         3 20  0  0
 
 # Cluster sizes
 km$size
@@ -103,7 +103,7 @@ km$size
 
 # Within-cluster sum of squares
 km$withinss
-#> [1] 0.4199106 0.4394076 0.4485967
+#> [1] 0.4394076 0.4485967 0.4199106
 ```
 
 ### Multiple Random Starts
@@ -401,9 +401,9 @@ conf_matrix <- table(Predicted = km$cluster, True = true_clusters)
 print(conf_matrix)
 #>          True
 #> Predicted  1  2  3
-#>         1 20  0  0
-#>         2  0 20  0
-#>         3  0  0 20
+#>         1  0 20  0
+#>         2  0  0 20
+#>         3 20  0  0
 
 # Accuracy (after optimal label matching)
 # Note: Cluster labels may be permuted

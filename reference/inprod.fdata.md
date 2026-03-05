@@ -35,6 +35,6 @@ fd1 <- fdata(X1, argvals = t)
 fd2 <- fdata(X2, argvals = t)
 # Inner product of sin and cos over [0,1] should be 0
 inprod.fdata(fd1, fd2)
-#>             [,1]
-#> [1,] 1.87123e-17
+#>              [,1]
+#> [1,] 2.218175e-17
 ```

@@ -386,12 +386,12 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 
 ### Choosing the Right Approach
 
-| Approach | Best For | Key Parameters |
-|----|----|----|
-| Direct basis fitting (irregFdata) | Sparse/irregular data | `nbasis`, `type` |
-| B-spline projection | Regular clean data | `nbasis`, `type="bspline"` |
-| P-spline smoothing | Noisy regular data | `nbasis`, `lambda` |
-| Fourier basis | Periodic/seasonal patterns | `nbasis`, `type="fourier"` |
+| Approach                          | Best For                   | Key Parameters             |
+|-----------------------------------|----------------------------|----------------------------|
+| Direct basis fitting (irregFdata) | Sparse/irregular data      | `nbasis`, `type`           |
+| B-spline projection               | Regular clean data         | `nbasis`, `type="bspline"` |
+| P-spline smoothing                | Noisy regular data         | `nbasis`, `lambda`         |
+| Fourier basis                     | Periodic/seasonal patterns | `nbasis`, `type="fourier"` |
 
 **Tip**: Use
 [`fdata2basis_cv()`](https://sipemu.github.io/fdars-r/reference/fdata2basis_cv.md)
@@ -621,15 +621,15 @@ if (any(!keep)) {
 
 ## Summary
 
-| Function | Purpose |
-|----|----|
-| [`irregFdata()`](https://sipemu.github.io/fdars-r/reference/irregFdata.md) | Create irregular functional data objects |
-| [`is.irregular()`](https://sipemu.github.io/fdars-r/reference/is.irregular.md) | Check if object is irregFdata |
-| [`sparsify()`](https://sipemu.github.io/fdars-r/reference/sparsify.md) | Convert regular to irregular data |
-| [`as.fdata()`](https://sipemu.github.io/fdars-r/reference/as.fdata.irregFdata.md) | Convert irregular to regular (with interpolation) |
-| [`fdata2basis()`](https://sipemu.github.io/fdars-r/reference/fdata2basis.md) | Fit basis coefficients (works with fdata and irregFdata) |
-| [`basis2fdata()`](https://sipemu.github.io/fdars-r/reference/basis2fdata.md) | Reconstruct curves from coefficients |
-| [`int.simpson()`](https://sipemu.github.io/fdars-r/reference/int.simpson.md) | Compute integrals (works with fdata and irregFdata) |
-| [`norm()`](https://sipemu.github.io/fdars-r/reference/norm.md) | Compute Lp norms (works with fdata and irregFdata) |
-| [`mean()`](https://rdrr.io/r/base/mean.html) | Estimate mean via kernel smoothing |
-| [`metric.lp()`](https://sipemu.github.io/fdars-r/reference/metric.lp.md) | Compute pairwise distances (works with fdata and irregFdata) |
+| Function                                                                          | Purpose                                                      |
+|-----------------------------------------------------------------------------------|--------------------------------------------------------------|
+| [`irregFdata()`](https://sipemu.github.io/fdars-r/reference/irregFdata.md)        | Create irregular functional data objects                     |
+| [`is.irregular()`](https://sipemu.github.io/fdars-r/reference/is.irregular.md)    | Check if object is irregFdata                                |
+| [`sparsify()`](https://sipemu.github.io/fdars-r/reference/sparsify.md)            | Convert regular to irregular data                            |
+| [`as.fdata()`](https://sipemu.github.io/fdars-r/reference/as.fdata.irregFdata.md) | Convert irregular to regular (with interpolation)            |
+| [`fdata2basis()`](https://sipemu.github.io/fdars-r/reference/fdata2basis.md)      | Fit basis coefficients (works with fdata and irregFdata)     |
+| [`basis2fdata()`](https://sipemu.github.io/fdars-r/reference/basis2fdata.md)      | Reconstruct curves from coefficients                         |
+| [`int.simpson()`](https://sipemu.github.io/fdars-r/reference/int.simpson.md)      | Compute integrals (works with fdata and irregFdata)          |
+| [`norm()`](https://sipemu.github.io/fdars-r/reference/norm.md)                    | Compute Lp norms (works with fdata and irregFdata)           |
+| [`mean()`](https://rdrr.io/r/base/mean.html)                                      | Estimate mean via kernel smoothing                           |
+| [`metric.lp()`](https://sipemu.github.io/fdars-r/reference/metric.lp.md)          | Compute pairwise distances (works with fdata and irregFdata) |
