@@ -13,15 +13,19 @@ navbar:
     learn:
       text: Learn
       menu:
+      - text: Getting Started
       - text: Introduction to fdars
         href: articles/introduction.html
       - text: Custom Plotting with ggplot2
         href: articles/custom-plotting.html
+      - text: "---"
+      - text: Preprocessing
       - text: Introduction to Smoothing
         href: articles/intro-to-smoothing.html
       - text: Working with Derivatives
         href: articles/working-with-derivatives.html
       - text: "---"
+      - text: Data
       - text: Simulation Toolbox
         href: articles/simulation-toolbox.html
       - text: Irregular Sampling
@@ -29,50 +33,59 @@ navbar:
     represent:
       text: Represent
       menu:
+      - text: Decomposition
       - text: Functional PCA (FPCA)
         href: articles/fpca.html
       - text: Basis Representation
         href: articles/basis-representation.html
       - text: "---"
+      - text: Ranking & Centrality
       - text: Depth Functions
         href: articles/depth-functions.html
       - text: Streaming Depth
         href: articles/streaming-depth.html
       - text: "---"
+      - text: Proximity
       - text: Distance Metrics
         href: articles/distance-metrics.html
     align:
       text: Align
       menu:
+      - text: Methods
       - text: Elastic Alignment
         href: articles/elastic-alignment.html
       - text: Landmark Registration
         href: articles/landmark-registration.html
-      - text: TSRVF
+      - text: TSRVF (Tangent Space)
         href: articles/tsrvf.html
       - text: "---"
+      - text: Guides
       - text: Comparing Alignment Methods
         href: articles/alignment-comparison.html
     analyze:
       text: Analyze
       menu:
+      - text: Inference
       - text: Tolerance Bands
         href: articles/tolerance-bands.html
       - text: Equivalence Testing
         href: articles/equivalence-testing.html
       - text: "---"
+      - text: Unsupervised
       - text: Clustering
         href: articles/clustering.html
       - text: Outlier Detection
         href: articles/outlier-detection.html
+      - text: "---"
+      - text: Supervised
       - text: Regression
         href: articles/regression.html
       - text: "---"
+      - text: Time Series
       - text: Seasonal Analysis
         href: articles/seasonal-analysis.html
       - text: Andrews Transformation
         href: articles/andrews-transformation.html
-      - text: "---"
       - text: Covariance Functions
         href: articles/covariance-functions.html
 
@@ -163,6 +176,7 @@ reference:
   - amplitude.distance
   - phase.distance
   - elastic.align.constrained
+  - alignment.pairwise.consistency
   - plot.elastic.align
   - plot.karcher.mean
   - plot.alignment.quality

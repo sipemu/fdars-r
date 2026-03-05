@@ -20,6 +20,12 @@ k-nearest neighbors regression, and outlier detection. **fdars** provides
 both true metrics (satisfying the triangle inequality) and semimetrics
 (which may not).
 
+Choosing the right distance measure depends on what kind of "similarity" matters
+for your application. Some distances compare curves point-by-point (L2), others
+allow for timing shifts before comparing (DTW, Soft-DTW, elastic), and still
+others focus on specific aspects like curve shape (derivative-based) or frequency
+content (Fourier-based).
+
 A **metric** $d$ on a space $\mathcal{X}$ satisfies:
 
 1. $d(f, g) \geq 0$ (non-negativity)
@@ -163,6 +169,100 @@ DTW with band constraint:
 # Restrict warping to 10% of the series length
 dist_dtw_band <- metric.DTW(fd, w = round(m * 0.1))
 ```
+
+### Soft-DTW (metric.softDTW)
+
+**Soft-DTW** (Cuturi & Blondel, 2017) is a differentiable relaxation of DTW
+that replaces the hard minimum with a soft minimum controlled by a smoothing
+parameter $\gamma > 0$:
+
+$$\text{sdtw}_\gamma(f, g) = \min_\gamma^{\text{soft}} \sum_{(i,j) \in \pi} |f(t_i) - g(t_j)|^2$$
+
+where $\min^\text{soft}$ is the log-sum-exp soft minimum:
+$\min^\text{soft}(a_1, \ldots, a_n) = -\gamma \log \sum_k \exp(-a_k / \gamma)$.
+
+As $\gamma \to 0$, Soft-DTW converges to standard DTW. As $\gamma \to \infty$,
+all warping paths receive equal weight. **Soft-DTW is not a metric** --
+it can assign negative values to self-distances. The **Soft-DTW divergence**
+corrects this:
+
+$$D_\gamma(f, g) = \text{sdtw}_\gamma(f, g) - \frac{1}{2}\left[ \text{sdtw}_\gamma(f, f) + \text{sdtw}_\gamma(g, g) \right]$$
+
+The divergence is non-negative, zero iff $f = g$, and symmetric.
+
+```{r softdtw}
+# Soft-DTW distance matrix (raw)
+dist_sdtw <- metric.softDTW(fd, gamma = 1.0)
+cat("Soft-DTW distance matrix:\n")
+print(round(as.matrix(dist_sdtw), 3))
+
+# Soft-DTW divergence (non-negative, symmetric)
+dist_sdtw_div <- metric.softDTW(fd, gamma = 1.0, divergence = TRUE)
+cat("\nSoft-DTW divergence matrix:\n")
+print(round(as.matrix(dist_sdtw_div), 3))
+```
+
+#### Effect of the Smoothing Parameter $\gamma$
+
+Small $\gamma$ approximates hard DTW (sharper, less smooth gradients); large
+$\gamma$ averages over more warping paths (smoother, less discriminative):
+
+```{r softdtw-gamma, fig.height = 4}
+gammas <- c(0.01, 0.1, 1.0, 10.0)
+sdtw_12 <- sapply(gammas, function(g) {
+  as.matrix(metric.softDTW(fd, gamma = g, divergence = TRUE))[1, 2]
+})
+
+df_gamma <- data.frame(gamma = gammas, divergence = sdtw_12)
+ggplot(df_gamma, aes(x = gamma, y = divergence)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_x_log10() +
+  labs(title = "Soft-DTW Divergence vs Smoothing Parameter",
+       subtitle = "Distance between sine and phase-shifted sine",
+       x = expression(gamma ~ "(log scale)"), y = "Divergence")
+```
+
+#### Soft-DTW Barycenter
+
+Soft-DTW provides a differentiable loss, making it suitable for computing
+**barycenters** (weighted averages under DTW alignment) via gradient descent:
+
+```{r softdtw-barycenter, fig.height = 4}
+# Create shifted bumps for barycenter computation
+set.seed(42)
+n_bary <- 10
+X_bary <- matrix(0, n_bary, m)
+for (i in 1:n_bary) {
+  shift <- runif(1, -0.1, 0.1)
+  X_bary[i, ] <- exp(-80 * (t_grid - 0.5 - shift)^2)
+}
+fd_bary <- fdata(X_bary, argvals = t_grid)
+
+bc <- softdtw.barycenter(fd_bary, gamma = 1.0)
+cross_mean <- colMeans(fd_bary$data)
+
+df_bc <- data.frame(
+  t = rep(t_grid, 2),
+  value = c(as.numeric(bc$barycenter$data), cross_mean),
+  type = rep(c("Soft-DTW Barycenter", "Cross-sectional Mean"), each = m)
+)
+
+ggplot() +
+  geom_line(data = data.frame(
+    t = rep(t_grid, n_bary),
+    value = as.vector(t(fd_bary$data)),
+    curve = rep(1:n_bary, each = m)
+  ), aes(x = t, y = value, group = curve), alpha = 0.25) +
+  geom_line(data = df_bc, aes(x = t, y = value, color = type), linewidth = 1.2) +
+  scale_color_manual(values = c("Cross-sectional Mean" = "steelblue",
+                                 "Soft-DTW Barycenter" = "firebrick")) +
+  labs(title = "Soft-DTW Barycenter vs Cross-Sectional Mean",
+       x = "t", y = "f(t)", color = NULL)
+```
+
+The cross-sectional mean is attenuated by the phase shifts; the Soft-DTW
+barycenter recovers the peak shape by accounting for alignment.
 
 ### Kullback-Leibler Divergence (metric.kl)
 
@@ -309,6 +409,78 @@ cat("Horizontal shift distances:\n")
 print(round(as.matrix(dist_hshift), 3))
 ```
 
+## Elastic Distances
+
+Elastic alignment provides a family of distances based on the Fisher-Rao metric
+and the SRSF transform. These distances decompose curve differences into
+amplitude (shape) and phase (timing) components. See
+`vignette("elastic-alignment", package = "fdars")` for the full framework.
+
+### Elastic Distance (metric.elastic / elastic.distance)
+
+The elastic distance computes the $L^2$ distance between optimally aligned
+SRSFs:
+
+$$d_e(f, g) = \min_{\gamma \in \Gamma} \| q_f - (q_g \circ \gamma) \sqrt{\dot\gamma} \|_{L^2}$$
+
+where $q_f, q_g$ are the SRSFs of $f, g$ and $\Gamma$ is the warping group.
+This is a proper metric that is invariant to reparameterization.
+
+```{r elastic-dist}
+dist_elastic <- elastic.distance(fd)
+cat("Elastic distance matrix:\n")
+print(round(dist_elastic, 3))
+```
+
+### Amplitude Distance (amplitude.distance)
+
+The **amplitude distance** measures the shape difference between curves *after*
+optimal alignment -- it captures how much the curves differ in height, depth,
+and feature magnitude:
+
+$$d_a(f_1, f_2) = \| q_1 - (q_2 \circ \gamma^*) \sqrt{\dot\gamma^*} \|_{L^2} - \lambda \int_0^1 |\dot\gamma^*(t) - 1| \, dt$$
+
+where $\lambda$ controls the penalty on warping complexity.
+
+```{r amplitude-dist}
+dist_amp <- amplitude.distance(fd, lambda = 0)
+cat("Amplitude distance matrix:\n")
+print(round(as.matrix(dist_amp), 3))
+```
+
+### Phase Distance (phase.distance)
+
+The **phase distance** measures only the timing difference between curves --
+how much one curve's time axis must be warped to match another:
+
+$$d_p(f_1, f_2) = \arccos\left( \int_0^1 \sqrt{\dot\gamma^*(t)} \, dt \right)$$
+
+This is the geodesic distance of the warping function from the identity on the
+warping group $\Gamma$, which forms a Riemannian manifold.
+
+```{r phase-dist}
+dist_phase <- phase.distance(fd, lambda = 0)
+cat("Phase distance matrix:\n")
+print(round(as.matrix(dist_phase), 3))
+```
+
+### Comparing Amplitude and Phase Distances
+
+The amplitude and phase distances capture orthogonal aspects of curve
+variability. Curves that differ mainly in timing (phase-shifted copies of the
+same shape) will have small amplitude distance but large phase distance:
+
+```{r elastic-compare, fig.height = 4}
+amp_vals <- as.vector(as.matrix(dist_amp))[upper.tri(as.matrix(dist_amp))]
+phase_vals <- as.vector(as.matrix(dist_phase))[upper.tri(as.matrix(dist_phase))]
+
+plot(amp_vals, phase_vals, pch = 19, col = "steelblue",
+     xlab = "Amplitude Distance", ylab = "Phase Distance",
+     main = "Amplitude vs Phase Pairwise Distances")
+abline(h = mean(phase_vals), lty = 2, col = "grey50")
+abline(v = mean(amp_vals), lty = 2, col = "grey50")
+```
+
 ## Unified Interface
 
 Use `metric()` for a unified interface to all distance functions:
@@ -319,6 +491,10 @@ d1 <- metric(fd, method = "lp", lp = 2)
 d2 <- metric(fd, method = "dtw")
 d3 <- metric(fd, method = "hausdorff")
 d4 <- metric(fd, method = "pca", ncomp = 2)
+d5 <- metric(fd, method = "softdtw", gamma = 1.0)
+d6 <- metric(fd, method = "elastic")
+d7 <- metric(fd, method = "amplitude")
+d8 <- metric(fd, method = "phase")
 ```
 
 ## Comparing Distance Measures
@@ -376,6 +552,11 @@ ggplot(dist_df, aes(x = Curve1, y = Curve2, fill = Distance)) +
 | Lp | Metric | Yes | No | O(nm) |
 | Hausdorff | Metric | Yes | Partial | O(nm²) |
 | DTW | Metric* | Yes* | Yes | O(nm²) |
+| Soft-DTW | Semimetric | No | Yes | O(nm²) |
+| Soft-DTW Div. | Semimetric | No*** | Yes | O(nm²) |
+| Elastic | Metric | Yes | Yes | O(nm²) |
+| Amplitude | Semimetric | No | Yes | O(nm²) |
+| Phase | Metric | Yes | Yes | O(nm²) |
 | KL | Semimetric | No | No | O(nm) |
 | PCA | Semimetric | Yes** | No | O(nm + nq²) |
 | Derivative | Semimetric | Yes** | No | O(nm) |
@@ -385,6 +566,7 @@ ggplot(dist_df, aes(x = Curve1, y = Curve2, fill = Distance)) +
 
 \* DTW satisfies triangle inequality when using the same warping path
 \** These satisfy triangle inequality in the reduced/transformed space
+\*** Soft-DTW divergence is non-negative and symmetric but does not satisfy triangle inequality
 
 ## Choosing a Distance Measure
 
@@ -393,7 +575,10 @@ ggplot(dist_df, aes(x = Curve1, y = Curve2, fill = Distance)) +
 | General purpose | L2 (`metric.lp`) |
 | Heavy-tailed noise | L1 (`metric.lp`, p=1) |
 | Worst-case analysis | L-infinity (`metric.lp`, p=Inf) |
-| Phase-shifted signals | DTW or H-shift |
+| Phase-shifted signals | DTW, H-shift, or Elastic |
+| Differentiable DTW loss | Soft-DTW (`metric.softDTW`) |
+| Reparameterization-invariant | Elastic (`elastic.distance`) |
+| Separate shape vs timing | Amplitude + Phase distances |
 | Curves that cross | Hausdorff |
 | High-dimensional data | PCA-based |
 | Shape comparison | Derivative-based |
@@ -434,10 +619,20 @@ y <- rnorm(n)
 fit_np <- fregre.np(fd_large, y, metric = metric.lp)
 ```
 
+## See Also
+
+- `vignette("elastic-alignment", package = "fdars")` -- elastic alignment
+  framework, Karcher mean, amplitude-phase decomposition
+- `vignette("alignment-comparison", package = "fdars")` -- comparing alignment
+  methods side-by-side
+
 ## References
 
 - Berndt, D.J. and Clifford, J. (1994). Using Dynamic Time Warping to Find
   Patterns in Time Series. *KDD Workshop*, 359-370.
+- Cuturi, M. and Blondel, M. (2017). Soft-DTW: a Differentiable Loss Function
+  for Time-Series. *Proceedings of the 34th International Conference on Machine
+  Learning*, 894-903.
 - Ferraty, F. and Vieu, P. (2006). *Nonparametric Functional Data Analysis*.
   Springer.
 - Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*.
@@ -445,3 +640,5 @@ fit_np <- fregre.np(fd_large, y, metric = metric.lp)
 - Sakoe, H. and Chiba, S. (1978). Dynamic programming algorithm optimization
   for spoken word recognition. *IEEE Transactions on Acoustics, Speech, and
   Signal Processing*, 26(1), 43-49.
+- Srivastava, A. and Klassen, E. (2016). *Functional and Shape Data Analysis*.
+  Springer.

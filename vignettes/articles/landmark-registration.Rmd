@@ -37,6 +37,28 @@ library(patchwork)
 theme_set(theme_minimal())
 ```
 
+## How It Works (Intuition)
+
+Landmark registration works like aligning sheet music by lining up the bar
+lines. You identify specific **landmarks** -- prominent peaks, valleys, or
+zero-crossings -- in each curve, then stretch or compress the time axis so
+that corresponding landmarks occur at the same position.
+
+The approach is simple:
+
+1. **Detect** features in each curve (e.g., the tallest peak)
+2. **Match** features across curves (the tallest peak in curve 1 corresponds
+   to the tallest peak in curve 2, etc.)
+3. **Compute target positions** by averaging where each feature occurs across
+   all curves
+4. **Warp** each curve so its features move to the target positions, with
+   straight-line interpolation between landmarks
+
+This is fast and interpretable -- you know exactly which features are being
+aligned and why. The trade-off is that the warping is piecewise-linear (with
+corners at landmark positions) rather than smooth, and you need features that
+can be reliably detected.
+
 ## Mathematical Framework
 
 ### The Registration Problem
@@ -139,6 +161,36 @@ for (i in 1:3) {
 }
 ```
 
+Visualizing detected landmarks overlaid on the curves makes it easier to verify
+that detection is working correctly:
+
+```{r detect-peaks-plot, fig.height = 5}
+# Build data frame of all curves
+n_curves <- nrow(fd$data)
+m_pts <- length(fd$argvals)
+df_curves <- data.frame(
+  curve = rep(seq_len(n_curves), each = m_pts),
+  t = rep(fd$argvals, n_curves),
+  value = as.vector(t(fd$data))
+)
+
+# Build data frame of detected landmarks
+df_lms <- do.call(rbind, lapply(seq_along(lms), function(i) {
+  if (nrow(lms[[i]]) > 0) {
+    data.frame(curve = i, t = lms[[i]]$position, value = lms[[i]]$value)
+  }
+}))
+
+ggplot() +
+  geom_line(data = df_curves, aes(x = t, y = value, group = curve),
+            alpha = 0.3) +
+  geom_point(data = df_lms, aes(x = t, y = value),
+             color = "red", size = 2.5, shape = 17) +
+  labs(title = "Detected Peaks (min.prominence = 0.3)",
+       x = "t", y = "f(t)") +
+  theme_minimal()
+```
+
 ### Landmark Types
 
 Four types of landmarks can be detected:
@@ -178,6 +230,40 @@ cat("Curve 1 - all peaks:", nrow(lms_all[[1]]), "\n")
 # Only prominent peaks
 lms_prominent <- detect.landmarks(fd, kind = "peak", min.prominence = 0.5)
 cat("Curve 1 - prominent peaks:", nrow(lms_prominent[[1]]), "\n")
+```
+
+The effect of prominence filtering is clearest when plotted. Low prominence
+thresholds keep minor bumps; higher thresholds retain only the dominant feature:
+
+```{r prominence-plot, fig.height = 6}
+# Show curve 1 with three prominence levels
+curve1_df <- data.frame(t = fd$argvals, value = fd$data[1, ])
+
+make_lm_df <- function(lm_list, label) {
+  li <- lm_list[[1]]
+  if (nrow(li) > 0) data.frame(t = li$position, value = li$value, level = label)
+  else data.frame(t = numeric(0), value = numeric(0), level = character(0))
+}
+
+lms_0 <- detect.landmarks(fd, kind = "peak", min.prominence = 0)
+lms_02 <- detect.landmarks(fd, kind = "peak", min.prominence = 0.2)
+lms_05 <- detect.landmarks(fd, kind = "peak", min.prominence = 0.5)
+
+df_pts <- rbind(
+  make_lm_df(lms_0, "min.prominence = 0"),
+  make_lm_df(lms_02, "min.prominence = 0.2"),
+  make_lm_df(lms_05, "min.prominence = 0.5")
+)
+df_pts$level <- factor(df_pts$level,
+  levels = c("min.prominence = 0", "min.prominence = 0.2", "min.prominence = 0.5"))
+
+ggplot(curve1_df, aes(x = t, y = value)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(data = df_pts, aes(x = t, y = value),
+             color = "red", size = 3, shape = 17) +
+  facet_wrap(~level, ncol = 1) +
+  labs(title = "Effect of Prominence Filtering (Curve 1)",
+       x = "t", y = "f(t)")
 ```
 
 ## Registration
@@ -227,24 +313,47 @@ lr2 <- landmark.register(fd2, kind = "peak", min.prominence = 0.3,
 cat("Target landmarks:", round(lr2$target_landmarks, 3), "\n")
 ```
 
+```{r expected-count-landmarks-plot, fig.height = 5}
+# Show detected landmarks on the two-peak data
+lms2 <- detect.landmarks(fd2, kind = "peak", min.prominence = 0.3)
+df_curves2 <- data.frame(
+  curve = rep(seq_len(n), each = 200),
+  t = rep(argvals, n),
+  value = as.vector(t(fd2$data))
+)
+df_lms2 <- do.call(rbind, lapply(seq_along(lms2), function(i) {
+  if (nrow(lms2[[i]]) > 0) {
+    data.frame(curve = i, t = lms2[[i]]$position, value = lms2[[i]]$value)
+  }
+}))
+target_df <- data.frame(t = lr2$target_landmarks)
+
+ggplot() +
+  geom_line(data = df_curves2, aes(x = t, y = value, group = curve), alpha = 0.3) +
+  geom_point(data = df_lms2, aes(x = t, y = value),
+             color = "red", size = 2.5, shape = 17) +
+  geom_vline(data = target_df, aes(xintercept = t),
+             linetype = "dashed", color = "blue", linewidth = 0.6) +
+  annotate("text", x = lr2$target_landmarks, y = max(fd2$data) * 1.05,
+           label = paste("target", seq_along(lr2$target_landmarks)),
+           color = "blue", size = 3) +
+  labs(title = "Detected Peaks and Target Positions",
+       subtitle = "Red triangles = detected peaks; blue dashed = target positions",
+       x = "t", y = "f(t)")
+```
+
 ```{r expected-count-plot}
 p1 <- plot(fd2) + labs(title = "Original (two peaks)")
 p2 <- plot(lr2$registered) + labs(title = "Landmark Registered")
 p1 + p2
 ```
 
-## Comparison: Elastic vs Landmark Registration
+## Comparison with Elastic Alignment
 
-Elastic alignment and landmark registration solve the same problem -- removing
-phase variability -- but with different strategies:
-
-| | Elastic | Landmark |
-|---|---------|----------|
-| **Approach** | Global DP optimization | Feature-based anchoring |
-| **Warping** | Smooth, globally optimal | Piecewise-linear between landmarks |
-| **Requires** | Nothing (fully automatic) | Detectable, meaningful features |
-| **Best for** | General-purpose alignment | Domain-driven feature alignment |
-| **Speed** | $O(nm^2)$ | $O(nm + nk)$ where $k$ = landmarks |
+Landmark and elastic alignment solve the same problem -- removing phase
+variability -- but with different strategies. Landmark registration is fast
+and guarantees feature correspondence, while elastic alignment produces
+smooth, globally optimal warps without requiring feature detection.
 
 ```{r comparison}
 # Same data, two approaches
@@ -256,11 +365,9 @@ p3 <- plot(lr, type = "registered") + labs(title = "Landmark Registration")
 p1 + p2 + p3
 ```
 
-### Constrained Elastic Alignment
-
-You can combine the best of both approaches using `elastic.align.constrained()`,
-which runs elastic alignment with landmark constraints. The warping must pass
-through the landmark positions, but is otherwise optimized:
+You can also combine both approaches via `elastic.align.constrained()`, which
+runs elastic alignment through landmark anchor points -- smooth warps with
+guaranteed feature correspondence:
 
 ```{r constrained}
 ec <- elastic.align.constrained(fd, kind = "peak", min.prominence = 0.5,
@@ -271,8 +378,9 @@ p_lr <- plot(lr, type = "registered") + labs(title = "Landmark")
 p_ea + p_ec + p_lr
 ```
 
-The constrained approach produces smooth warps (like elastic) while respecting
-feature correspondence (like landmark).
+For a detailed side-by-side comparison of all alignment methods (elastic,
+landmark, constrained, TSRVF) with variance reduction metrics and a decision
+guide, see `vignette("alignment-comparison", package = "fdars")`.
 
 ## See Also
 

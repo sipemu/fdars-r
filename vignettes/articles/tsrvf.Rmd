@@ -32,6 +32,29 @@ library(patchwork)
 theme_set(theme_minimal())
 ```
 
+## How It Works (Intuition)
+
+After elastic alignment, curve shapes live on a curved surface (a manifold) --
+think of points on the surface of a globe. Standard statistical methods like
+PCA assume data lives in a flat space (like a map), so applying them directly
+to aligned curves introduces distortion.
+
+The TSRVF solves this by **projecting curves onto a flat tangent plane** at the
+mean shape -- like laying a flat map tangent to the globe at one point. Near
+the point of contact, the map is a good approximation of the globe's surface.
+
+Each curve becomes a **tangent vector** -- a direction and magnitude showing how
+that curve's shape differs from the mean. These tangent vectors live in ordinary
+Euclidean space, so you can:
+
+- Run **PCA** to find the main modes of shape variation
+- Use **regression** with tangent vectors as predictors
+- Apply any **clustering** or **classification** method that works with vectors
+
+The projection is invertible: you can go from tangent vectors back to curves
+(by "projecting back onto the globe"), so you can reconstruct curves from
+their PC scores or model predictions.
+
 ## Mathematical Framework
 
 ### The Shape Space

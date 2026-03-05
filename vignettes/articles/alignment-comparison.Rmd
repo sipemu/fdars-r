@@ -23,13 +23,16 @@ use each method.
 The four methods are:
 
 1. **Elastic alignment** (`elastic.align`, `karcher.mean`) -- global optimization
-   via dynamic programming in SRSF space
+   via dynamic programming in SRSF space.
+   See `vignette("elastic-alignment", package = "fdars")` for full details.
 2. **Landmark registration** (`landmark.register`) -- feature-based piecewise-linear
-   warping
+   warping.
+   See `vignette("landmark-registration", package = "fdars")` for full details.
 3. **Constrained elastic alignment** (`elastic.align.constrained`) -- elastic
    alignment with landmark pass-through constraints
 4. **TSRVF** (`tsrvf.transform`) -- not an alignment method per se, but a
-   linearization of elastic alignment for downstream analysis
+   linearization of elastic alignment for downstream analysis.
+   See `vignette("tsrvf", package = "fdars")` for full details.
 
 ```{r setup}
 library(fdars)
@@ -319,7 +322,11 @@ cat("Variance explained (first 3 PCs):",
 
 ## See Also
 
-- `vignette("elastic-alignment", package = "fdars")` -- elastic alignment details
-- `vignette("landmark-registration", package = "fdars")` -- landmark registration
-  details
-- `vignette("tsrvf", package = "fdars")` -- TSRVF for linearized analysis
+- `vignette("elastic-alignment", package = "fdars")` -- elastic alignment
+  framework, quality diagnostics, amplitude-phase decomposition
+- `vignette("landmark-registration", package = "fdars")` -- landmark detection,
+  prominence filtering, registration workflow
+- `vignette("tsrvf", package = "fdars")` -- TSRVF for linearized elastic analysis,
+  elastic FPCA
+- `vignette("distance-metrics", package = "fdars")` -- Soft-DTW, elastic,
+  amplitude, and phase distances

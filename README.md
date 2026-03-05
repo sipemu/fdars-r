@@ -49,8 +49,27 @@ Multiple approaches to identify anomalous curves:
 Quantify differences between curves:
 - Lp distances (L1, L2, L∞)
 - Hausdorff distance
-- Dynamic time warping (DTW)
+- Dynamic time warping (DTW) and Soft-DTW (differentiable)
+- Elastic (Fisher-Rao) distance with amplitude-phase decomposition
 - PCA-based and derivative-based semimetrics
+
+### Elastic Alignment
+Separate amplitude and phase variability in functional data:
+- Pairwise elastic alignment via dynamic programming
+- Karcher (Frechet) mean in the elastic metric
+- Landmark registration (peak, valley, zero-crossing, inflection detection)
+- Constrained elastic alignment (landmarks + smooth warping)
+- TSRVF tangent space projection for linearized shape analysis
+- Alignment quality diagnostics (variance reduction, warp complexity)
+- Amplitude-phase decomposition and distance matrices
+
+### Tolerance & Confidence Bands
+Characterize curve-level variability:
+- FPCA bootstrap bands (pointwise and simultaneous)
+- Conformal prediction bands (distribution-free)
+- Elastic tolerance bands (alignment-based, removes phase variability)
+- Exponential family bands (for non-Gaussian data)
+- Simultaneous confidence band for the mean (Degras)
 
 ### Regression
 Predict scalar outcomes from functional predictors:
@@ -249,11 +268,15 @@ Measure similarity between curves using `metric()` with a method parameter:
 metric(fd, method = "lp")        # Lp distance (default, L2 = Euclidean)
 metric(fd, method = "hausdorff") # Hausdorff distance
 metric(fd, method = "dtw")       # Dynamic time warping
+metric(fd, method = "softdtw")   # Soft-DTW (differentiable)
+metric(fd, method = "elastic")   # Elastic (Fisher-Rao) distance
+metric(fd, method = "amplitude") # Amplitude distance (shape only)
+metric(fd, method = "phase")     # Phase distance (timing only)
 metric(fd, method = "pca")       # PCA-based semimetric
 metric(fd, method = "deriv")     # Derivative-based semimetric
 ```
 
-Individual functions are also available: `metric.lp`, `metric.hausdorff`, `metric.DTW`, `semimetric.pca`, `semimetric.deriv`.
+Individual functions are also available: `metric.lp`, `metric.hausdorff`, `metric.DTW`, `metric.softDTW`, `elastic.distance`, `amplitude.distance`, `phase.distance`, `semimetric.pca`, `semimetric.deriv`.
 
 ### Outlier Detection
 
@@ -370,8 +393,13 @@ trimvar(fd, trim = 0.1, method = "mode")
 - `cluster.fcm` - Fuzzy C-means clustering with soft membership
 - `cluster.init` - K-means++ center initialization
 
-### Curve Registration
+### Curve Registration & Alignment
 
+- `elastic.align` - Elastic alignment via SRSF and dynamic programming
+- `karcher.mean` - Karcher mean in the elastic metric
+- `landmark.register` - Landmark registration (peaks, valleys, etc.)
+- `elastic.align.constrained` - Constrained elastic alignment
+- `tsrvf.transform` - TSRVF tangent space projection
 - `register.fd` - Shift registration using cross-correlation
 
 ### Feature Extraction

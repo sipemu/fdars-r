@@ -17,15 +17,57 @@ knitr::opts_chunk$set(
 
 A **tolerance band** for functional data is a region expected to contain a given fraction of individual curves in the population -- the functional analogue of classical tolerance intervals. Unlike confidence bands (which target the mean), tolerance bands characterize the spread of individual curves.
 
-**fdars** provides five tolerance band methods:
+**fdars** provides four tolerance band methods, plus a confidence band for the mean:
+
+**Tolerance bands** (for individual curves):
 
 | Method | Key Properties |
 |--------|---------------|
 | FPCA | Bootstrap on PC scores; pointwise or simultaneous |
 | Conformal | Distribution-free; uses calibration/training split |
-| SCB (Degras) | Simultaneous confidence band for the mean |
 | Exponential family | For non-Gaussian data (Binomial, Poisson) |
 | Elastic | Alignment-based; removes phase variability first |
+
+**Confidence band** (for the mean function):
+
+| Method | Key Properties |
+|--------|---------------|
+| SCB (Degras) | Simultaneous confidence band for the mean via multiplier bootstrap |
+
+The distinction matters: a tolerance band captures the spread of *individual
+curves* in the population, while a confidence band quantifies the uncertainty
+in the estimated *mean function*. Tolerance bands are always wider than
+confidence bands because individual curve variability exceeds mean estimation
+uncertainty.
+
+## How It Works (Intuition)
+
+Imagine you have a collection of temperature curves measured over a year. A
+tolerance band answers: "If I measure one more year, where will the new curve
+likely fall?" The band should be wide enough to contain, say, 95% of future
+curves.
+
+The **FPCA method** breaks each curve into a mean shape plus a few dominant
+modes of variation (principal components). It resamples the scores on these
+modes to estimate where new curves might land.
+
+The **conformal method** takes a simpler, assumption-free approach: it holds
+out some curves, measures how far they deviate from the rest, and uses those
+deviations directly to set band width. No distributional assumptions needed.
+
+The **elastic method** first aligns curves to remove timing differences (phase
+variability), then builds a tolerance band on the aligned data. This is useful
+when curves have the same shape but differ in timing -- the band is tighter
+because alignment concentrates the variability.
+
+The **exponential family method** handles non-Gaussian data (e.g., count data)
+by transforming to a natural parameter scale, computing bands there, and
+transforming back.
+
+Finally, the **SCB Degras method** is different in kind: it builds a confidence
+band for the *mean function* rather than individual curves. It answers "where
+does the true population mean lie?" rather than "where will the next curve
+fall?"
 
 ## Mathematical Framework
 
@@ -179,15 +221,38 @@ band_conf <- tolerance.band(fd, method = "conformal", coverage = 0.95,
 plot(band_conf)
 ```
 
-## SCB Degras (Mean Confidence Band)
+## Mean Confidence Band (SCB Degras)
 
-The Degras method constructs a **simultaneous confidence band for the mean function** using a multiplier bootstrap. This is technically a confidence band rather than a tolerance band, but is useful for assessing whether the mean is well-estimated.
+The Degras (2011) method is fundamentally different from the tolerance band
+methods above. It constructs a **simultaneous confidence band for the mean
+function** $\mu(t) = E[X(t)]$, not a tolerance band for individual curves.
+
+**What it tells you**: "The true population mean lies within this band with 95%
+confidence." The band shrinks as $n \to \infty$ because we estimate the mean
+more precisely. In contrast, tolerance bands do *not* shrink with $n$ -- they
+target the spread of individual curves, which is a fixed population property.
+
+**How it works**: The method standardizes the empirical process
+$\sqrt{n}(\bar{X}_n(t) - \mu(t)) / \hat\sigma(t)$ and uses a multiplier
+bootstrap to estimate the distribution of its supremum. The critical value
+$c_\alpha$ controls the family-wise coverage across all $t$ simultaneously --
+the band is valid uniformly over the entire domain, not just pointwise.
+
+**When to use it**:
+
+- Testing whether a hypothesized mean function falls within the band
+- Comparing mean functions across groups (non-overlapping SCBs indicate
+  significant differences)
+- Assessing sample size adequacy (very wide SCBs suggest more data is needed)
 
 ```{r scb}
 band_scb <- tolerance.band(fd, method = "scb", coverage = 0.95,
                            nb = 200, seed = 42)
 plot(band_scb)
 ```
+
+Note how much narrower the SCB is compared to the tolerance bands above -- it
+targets the mean, not individual curves. The width scales as $O(1/\sqrt{n})$.
 
 ## Exponential Family Band
 
@@ -232,27 +297,15 @@ cat("Elastic mean half-width:", round(mean(band_elastic$half_width), 4), "\n")
 
 The elastic band is narrower because alignment concentrates variance into amplitude rather than spreading it across both amplitude and phase.
 
-## Method Comparison
+## Choosing a Method
 
-```{r compare, fig.height = 8}
-methods <- c("fpca", "conformal", "scb")
-bands <- lapply(methods, function(m) {
-  tolerance.band(fd, method = m, coverage = 0.95, nb = 100, seed = 42)
-})
-
-par(mfrow = c(3, 1), mar = c(3, 4, 2, 1))
-for (i in seq_along(methods)) {
-  b <- bands[[i]]
-  plot(argvals, b$center, type = "l", col = "blue", lwd = 2,
-       ylim = range(c(b$lower, b$upper)),
-       main = paste0(methods[i], " (mean width: ",
-                     round(mean(b$upper - b$lower), 3), ")"),
-       xlab = "", ylab = "value")
-  polygon(c(argvals, rev(argvals)),
-          c(b$lower, rev(b$upper)),
-          col = rgb(0.27, 0.51, 0.71, 0.3), border = NA)
-}
-```
+| Your goal | Recommended method |
+|-----------|-------------------|
+| General-purpose tolerance band | FPCA (`method = "fpca"`) |
+| No distributional assumptions | Conformal (`method = "conformal"`) |
+| Data with timing differences | Elastic (`method = "elastic"`) |
+| Count or binary functional data | Exponential (`method = "exponential"`) |
+| Confidence band for the mean | SCB Degras (`method = "scb"`) |
 
 ## References
 

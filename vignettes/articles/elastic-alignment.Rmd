@@ -77,6 +77,29 @@ plot(res, type = "warps")
 A warping function above the diagonal means that part of the curve has been
 sped up (compressed in time); below the diagonal means slowed down (stretched).
 
+## How It Works (Intuition)
+
+Imagine you record the heartbeat signal of several patients. Each heartbeat has
+the same features -- a P wave, a QRS complex, a T wave -- but the timing differs
+from patient to patient. If you simply average the raw signals, the peaks blur
+out because they don't line up.
+
+Elastic alignment fixes this by **stretching and compressing the time axis** of
+each curve until corresponding features line up. The key insight is to work with
+the **Square-Root Slope Function (SRSF)** -- a transformed version of the curve
+that makes the math tractable. In SRSF space, finding the best alignment
+reduces to a standard dynamic programming problem that can be solved efficiently.
+
+After alignment, variability splits cleanly into two parts:
+
+- **Amplitude variability**: genuine differences in curve shape (how tall the
+  peaks are, how deep the valleys)
+- **Phase variability**: differences in timing (when the peaks occur)
+
+The **Karcher mean** is the average curve shape, computed after alignment. Unlike
+the ordinary mean, it preserves sharp features because the peaks are aligned
+before averaging.
+
 ## Mathematical Framework
 
 ### The Space of Warping Functions
@@ -272,6 +295,122 @@ The elastic distance is also available through the `metric()` dispatcher:
 D2 <- metric(fd, method = "elastic")
 all.equal(D, D2)
 ```
+
+### Amplitude and Phase Distances
+
+The elastic framework uniquely decomposes the total distance between two curves
+into **amplitude** (shape) and **phase** (timing) components:
+
+```{r amp-phase-dist}
+D_amp <- amplitude.distance(fd, lambda = 0)
+D_phase <- phase.distance(fd, lambda = 0)
+
+cat("Amplitude distance (curves 1-2):", round(as.matrix(D_amp)[1, 2], 3), "\n")
+cat("Phase distance (curves 1-2):    ", round(as.matrix(D_phase)[1, 2], 3), "\n")
+cat("Elastic distance (curves 1-2):  ", round(D[1, 2], 3), "\n")
+```
+
+For these phase-shifted sine curves, most of the distance comes from phase
+(timing differences), with very little amplitude distance (the shapes are
+similar after alignment).
+
+## Alignment Quality Diagnostics
+
+After alignment, `alignment.quality()` provides a comprehensive set of
+diagnostics quantifying how well the alignment worked. It requires a Karcher
+mean result:
+
+```{r quality}
+km_diag <- karcher.mean(fd, max.iter = 20, tol = 1e-4)
+aq <- alignment.quality(fd, km_diag)
+print(aq)
+```
+
+The key quantities:
+
+- **Variance reduction**: fraction of total pointwise variance removed by alignment
+- **Phase-amplitude ratio**: how much of the total variability was due to phase
+- **Warp complexity**: average deviation of warping functions from the identity (higher = more warping needed)
+- **Warp smoothness**: measures the regularity of the warping functions
+
+```{r quality-plot, fig.height = 4}
+plot(aq, type = "variance")
+```
+
+The variance plot shows the pointwise variance before and after alignment.
+Regions where alignment reduces variance most correspond to features with the
+greatest timing differences.
+
+### Pairwise Consistency
+
+The `alignment.pairwise.consistency()` function checks whether pairwise
+alignments are consistent -- i.e., whether aligning A to C directly gives the
+same result as aligning A to B then B to C. A value near 1 indicates high
+consistency:
+
+```{r consistency}
+pc <- alignment.pairwise.consistency(fd, lambda = 0, max.triplets = 100)
+cat("Pairwise consistency:", round(pc, 3), "\n")
+```
+
+Low consistency can indicate that the data contains subgroups with different
+shapes, or that the alignment is sensitive to the choice of target.
+
+## Amplitude-Phase Decomposition
+
+For individual curve pairs, `elastic.decomposition()` provides the full
+decomposition of the elastic distance into amplitude and phase components:
+
+```{r decomposition}
+f1 <- fd[1]
+f2 <- fd[5]
+
+decomp <- elastic.decomposition(f1, f2, lambda = 0)
+cat("Amplitude distance:", round(decomp$d_amplitude, 4), "\n")
+cat("Phase distance:    ", round(decomp$d_phase, 4), "\n")
+```
+
+```{r decomp-plot, fig.height = 4}
+# Visualize the aligned pair
+f1_data <- as.numeric(f1$data)
+f2_aligned <- decomp$f_aligned
+df_pair <- data.frame(
+  t = rep(argvals, 2),
+  value = c(f1_data, f2_aligned),
+  curve = rep(c("f1 (target)", "f2 (aligned)"), each = length(argvals))
+)
+ggplot(df_pair, aes(x = t, y = value, color = curve)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c("f1 (target)" = "steelblue", "f2 (aligned)" = "firebrick")) +
+  labs(title = sprintf("Amplitude dist = %.3f, Phase dist = %.3f",
+                        decomp$d_amplitude, decomp$d_phase),
+       x = "t", y = "f(t)", color = NULL)
+```
+
+This decomposition is useful for understanding *why* two curves differ:
+is it because they have different shapes (amplitude) or different timing (phase)?
+
+## Constrained Alignment
+
+When curves have identifiable features (peaks, valleys), you can constrain the
+elastic alignment to pass through specific landmark positions. This combines the
+smoothness of elastic warping with guaranteed feature correspondence:
+
+```{r constrained-example}
+# Detect peaks and constrain alignment to pass through them
+ec <- elastic.align.constrained(fd, kind = "peak", min.prominence = 0.3,
+                                 expected.count = 1)
+```
+
+```{r constrained-plot, fig.height = 5}
+p1 <- plot(res, type = "warps") + labs(title = "Elastic Warps")
+p2 <- plot(ec, type = "warps") + labs(title = "Constrained Warps")
+p1 + p2
+```
+
+The constrained warps are smooth between landmarks (like elastic) but anchored
+at the peak positions (like landmark registration). For a detailed comparison
+of all alignment methods, see `vignette("alignment-comparison", package = "fdars")`.
 
 ## When to Use Elastic Alignment
 
