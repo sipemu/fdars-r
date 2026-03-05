@@ -7,13 +7,12 @@ home:
 
 navbar:
   structure:
-    left: [intro, reference, articles]
+    left: [intro, reference, learn, represent, align, analyze]
     right: [search, github]
   components:
-    articles:
-      text: Articles
+    learn:
+      text: Learn
       menu:
-      - text: Getting Started
       - text: Introduction to fdars
         href: articles/introduction.html
       - text: Custom Plotting with ggplot2
@@ -23,50 +22,55 @@ navbar:
       - text: Working with Derivatives
         href: articles/working-with-derivatives.html
       - text: "---"
-      - text: Core Methods
+      - text: Simulation Toolbox
+        href: articles/simulation-toolbox.html
+      - text: Irregular Sampling
+        href: articles/irregular-sampling.html
+    represent:
+      text: Represent
+      menu:
       - text: Functional PCA (FPCA)
         href: articles/fpca.html
       - text: Basis Representation
         href: articles/basis-representation.html
+      - text: "---"
       - text: Depth Functions
         href: articles/depth-functions.html
       - text: Streaming Depth
         href: articles/streaming-depth.html
+      - text: "---"
       - text: Distance Metrics
         href: articles/distance-metrics.html
-      - text: "---"
-      - text: Alignment
+    align:
+      text: Align
+      menu:
       - text: Elastic Alignment
         href: articles/elastic-alignment.html
-      - text: "---"
-      - text: Bands & Equivalence
+    analyze:
+      text: Analyze
+      menu:
       - text: Tolerance Bands
         href: articles/tolerance-bands.html
       - text: Equivalence Testing
         href: articles/equivalence-testing.html
       - text: "---"
-      - text: Analysis
       - text: Clustering
         href: articles/clustering.html
       - text: Outlier Detection
         href: articles/outlier-detection.html
       - text: Regression
         href: articles/regression.html
+      - text: "---"
       - text: Seasonal Analysis
         href: articles/seasonal-analysis.html
       - text: Andrews Transformation
         href: articles/andrews-transformation.html
       - text: "---"
-      - text: Advanced
       - text: Covariance Functions
         href: articles/covariance-functions.html
-      - text: Simulation Toolbox
-        href: articles/simulation-toolbox.html
-      - text: Irregular Sampling
-        href: articles/irregular-sampling.html
 
 articles:
-- title: Getting Started
+- title: Learn
   contents:
   - introduction
   - articles/custom-plotting
@@ -74,29 +78,25 @@ articles:
   - articles/working-with-derivatives
   - articles/simulation-toolbox
   - articles/irregular-sampling
-- title: Core Methods
+- title: Represent
   contents:
   - articles/fpca
   - articles/basis-representation
   - depth-functions
-  - articles/distance-metrics
   - articles/streaming-depth
-- title: Alignment
+  - articles/distance-metrics
+- title: Align
   contents:
   - articles/elastic-alignment
-- title: Bands & Equivalence
+- title: Analyze
   contents:
   - articles/tolerance-bands
   - articles/equivalence-testing
-- title: Analysis
-  contents:
   - articles/clustering
   - articles/outlier-detection
   - articles/regression
   - articles/seasonal-analysis
   - articles/andrews-transformation
-- title: Advanced
-  contents:
   - articles/covariance-functions
 
 reference:
