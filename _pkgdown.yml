@@ -39,6 +39,10 @@ navbar:
       - text: Basis Representation
         href: articles/basis-representation.html
       - text: "---"
+      - text: Transformation
+      - text: Andrews Curves
+        href: articles/andrews-transformation.html
+      - text: "---"
       - text: Ranking & Centrality
       - text: Depth Functions
         href: articles/depth-functions.html
@@ -84,8 +88,6 @@ navbar:
       - text: Time Series
       - text: Seasonal Analysis
         href: articles/seasonal-analysis.html
-      - text: Andrews Transformation
-        href: articles/andrews-transformation.html
       - text: Covariance Functions
         href: articles/covariance-functions.html
 
@@ -102,6 +104,7 @@ articles:
   contents:
   - articles/fpca
   - articles/basis-representation
+  - articles/andrews-transformation
   - depth-functions
   - articles/streaming-depth
   - articles/distance-metrics
@@ -119,7 +122,6 @@ articles:
   - articles/outlier-detection
   - articles/regression
   - articles/seasonal-analysis
-  - articles/andrews-transformation
   - articles/covariance-functions
 
 reference:

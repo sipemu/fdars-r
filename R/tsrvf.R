@@ -50,6 +50,8 @@ tsrvf.transform <- function(fdataobj, max.iter = 20, tol = 1e-4, lambda = 0) {
     tangent_vectors = fdata(res$tangent_vectors, argvals = argvals),
     mean = fdata(matrix(res$mean, nrow = 1), argvals = argvals),
     mean_srsf = res$mean_srsf,
+    mean_srsf_norm = res$mean_srsf_norm,
+    srsf_norms = res$srsf_norms,
     gammas = fdata(res$gammas, argvals = argvals),
     converged = res$converged,
     fdataobj = fdataobj
@@ -94,6 +96,8 @@ tsrvf.from.alignment <- function(karcher) {
     tangent_vectors = fdata(res$tangent_vectors, argvals = argvals),
     mean = karcher$mean,
     mean_srsf = res$mean_srsf,
+    mean_srsf_norm = res$mean_srsf_norm,
+    srsf_norms = res$srsf_norms,
     gammas = karcher$gammas,
     converged = res$converged,
     fdataobj = karcher$fdataobj
@@ -125,18 +129,8 @@ tsrvf.inverse <- function(tsrvf.obj) {
   argvals <- tsrvf.obj$mean$argvals
   mean_vec <- as.numeric(tsrvf.obj$mean$data[1, ])
   mean_srsf <- tsrvf.obj$mean_srsf
-
-  # Compute mean_srsf_norm and srsf_norms
-  # These are L2 norms on [0,1]
-  m <- length(argvals)
-  time_01 <- seq(0, 1, length.out = m)
-  h <- 1 / (m - 1)
-
-  mean_srsf_norm <- sqrt(sum(mean_srsf^2) * h)
-
-  n <- nrow(tsrvf.obj$tangent_vectors$data)
-  # Approximate srsf_norms as mean_srsf_norm (close for small tangent vectors)
-  srsf_norms <- rep(mean_srsf_norm, n)
+  mean_srsf_norm <- tsrvf.obj$mean_srsf_norm
+  srsf_norms <- tsrvf.obj$srsf_norms
 
   result <- alignment_tsrvf_inverse(
     tsrvf.obj$tangent_vectors$data, mean_vec,
@@ -144,6 +138,16 @@ tsrvf.inverse <- function(tsrvf.obj) {
     srsf_norms, tsrvf.obj$gammas$data,
     as.numeric(argvals), tsrvf.obj$converged
   )
+
+  # Correct initial values: the Rust SRSF inverse uses the mean's initial
+  # value for all curves, but each original curve has its own f_i(0).
+  # Since warping preserves endpoints (gamma(0) = 0), f_aligned_i(0) = f_i(0),
+  # and inverse warping also preserves it, so the correct initial value
+  # for each reconstructed curve is the original curve's initial value.
+  true_initials <- tsrvf.obj$fdataobj$data[, 1]
+  recon_initials <- result[, 1]
+  shift <- true_initials - recon_initials
+  result <- result + matrix(shift, nrow = nrow(result), ncol = ncol(result))
 
   fdata(result, argvals = argvals)
 }

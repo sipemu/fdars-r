@@ -8753,6 +8753,8 @@ fn alignment_tsrvf_transform(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i3
         tangent_vectors = tv_mat,
         mean = res.mean,
         mean_srsf = res.mean_srsf,
+        mean_srsf_norm = res.mean_srsf_norm,
+        srsf_norms = res.srsf_norms,
         gammas = g_mat,
         converged = res.converged
     ).into()
@@ -8796,6 +8798,8 @@ fn alignment_tsrvf_from_karcher(
         tangent_vectors = tv_mat,
         mean = res.mean,
         mean_srsf = res.mean_srsf,
+        mean_srsf_norm = res.mean_srsf_norm,
+        srsf_norms = res.srsf_norms,
         gammas = gammas,
         converged = res.converged
     ).into()
