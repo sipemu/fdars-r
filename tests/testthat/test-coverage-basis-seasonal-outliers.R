@@ -92,9 +92,9 @@ test_that("select.basis.auto validates input", {
 })
 
 test_that("fdata2basis_2d validates input", {
-  expect_error(fdata2basis_2d(list()), "fdata")
+  expect_error(fdata2basis_2d(list(), 1:10, 1:10, 5, 5, 0))
   fd <- fdata(matrix(rnorm(100), 10, 10))
-  expect_error(fdata2basis_2d(fd), "2D")
+  expect_error(fdata2basis_2d(fd$data, 1:10, 1:10, 5, 5, 0))
 })
 
 test_that("plot.basis.auto with pspline selection", {
