@@ -317,8 +317,7 @@ plot.elastic.align <- function(x, type = c("aligned", "original", "warps", "both
     p <- .plot_fdata_curves(x$aligned, title = "Aligned Curves")
   }
 
-  print(p)
-  invisible(p)
+  p
 }
 
 # =============================================================================
@@ -387,8 +386,7 @@ plot.karcher.mean <- function(x, type = c("mean", "aligned", "warps"), ...) {
       ggplot2::theme_minimal()
   }
 
-  print(p)
-  invisible(p)
+  p
 }
 
 # =============================================================================

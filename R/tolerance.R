@@ -211,6 +211,5 @@ plot.tolerance.band <- function(x, show.data = TRUE, ...) {
     ) +
     ggplot2::theme_minimal()
 
-  print(p)
-  invisible(p)
+  p
 }

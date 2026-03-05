@@ -77,28 +77,60 @@ plot(res, type = "warps")
 A warping function above the diagonal means that part of the curve has been
 sped up (compressed in time); below the diagonal means slowed down (stretched).
 
-## Mathematical Background
+## Mathematical Framework
+
+### The Space of Warping Functions
+
+Let $\mathcal{F}$ denote the space of absolutely continuous functions
+$f : [0, 1] \to \mathbb{R}$. The **warping group** is the set of
+orientation-preserving diffeomorphisms of $[0, 1]$:
+
+$$\Gamma = \{\gamma : [0, 1] \to [0, 1] \mid \gamma(0) = 0,\; \gamma(1) = 1,\; \dot\gamma > 0\}$$
+
+$\Gamma$ acts on $\mathcal{F}$ by composition: for $f \in \mathcal{F}$ and
+$\gamma \in \Gamma$, the warped function is $(f \circ \gamma)(t) = f(\gamma(t))$.
+This group action reparameterizes the curve without changing its shape -- only the
+speed at which the curve is traversed changes.
+
+### The Fisher-Rao Metric
+
+The **Fisher-Rao metric** on $\mathcal{F}$ is the unique Riemannian metric (up to
+scaling) that is invariant under the action of $\Gamma$. For two tangent vectors
+$\delta f_1, \delta f_2 \in T_f \mathcal{F}$, it is defined as:
+
+$$\langle \delta f_1, \delta f_2 \rangle_{FR} = \int_0^1 \frac{\delta f_1'(t) \, \delta f_2'(t)}{|f'(t)|} \, dt$$
+
+This metric is difficult to compute directly because it depends on the derivative
+of $f$ in the denominator. The SRSF transform resolves this by isometrically
+mapping the Fisher-Rao geometry to a flat $L^2$ space.
 
 ### SRSF Transform
 
-The SRSF of a function $f$ is defined as:
+The **Square-Root Slope Function** of $f$ is defined as:
 
 $$q(t) = \text{sign}(f'(t)) \sqrt{|f'(t)|}$$
 
-This representation has the key property that the Fisher-Rao distance between two
-curves equals the $L^2$ distance between their SRSFs after optimal alignment.
+This transform has three key properties:
+
+1. **Isometry**: The Fisher-Rao distance between $f_1$ and $f_2$ equals the
+   $L^2$ distance between their SRSFs $q_1$ and $q_2$ (after optimal alignment)
+2. **Equivariance**: Under the warping action $f \mapsto f \circ \gamma$, the
+   SRSF transforms as $q \mapsto (q \circ \gamma) \sqrt{\dot\gamma}$. This
+   is simply the standard action of $\Gamma$ on $L^2$
+3. **Invertibility**: Given $q$ and an initial value $f_0 = f(0)$, the original
+   function is recovered by:
+
+$$f(t) = f_0 + \int_0^t q(s)|q(s)|\,ds$$
 
 ```{r srsf-demo}
 q <- srsf.transform(fd)
-
-p1 <- plot(fd) + labs(title = "Original Curves")
-p2 <- plot(q) + labs(title = "SRSF Representation")
 ```
 
-The SRSF transform is invertible: given $q$ and an initial value $f_0$, we can
-reconstruct:
-
-$$f(t) = f_0 + \int_0^t q(s)|q(s)|\,ds$$
+```{r srsf-plot}
+p1 <- plot(fd) + labs(title = "Original Curves")
+p2 <- plot(q) + labs(title = "SRSF Representation")
+p1 + p2
+```
 
 ```{r srsf-inverse}
 f_original <- fd$data[1, ]
@@ -109,20 +141,63 @@ max_error <- max(abs(f_original - f_reconstructed))
 cat("Round-trip max error:", format(max_error, digits = 4), "\n")
 ```
 
-### Warping Functions
+### Alignment as Optimization
 
-`elastic.align()` finds the optimal warping function $\gamma$ for each curve
-using dynamic programming. The warping functions satisfy $\gamma(0) = 0$ and
-$\gamma(1) = 1$ (boundary-preserving) and are monotone increasing (time never
-runs backward).
+Given two functions $f_1, f_2 \in \mathcal{F}$ with SRSFs $q_1, q_2$, the
+**optimal alignment** finds:
+
+$$\gamma^* = \arg\min_{\gamma \in \Gamma} \| q_1 - (q_2 \circ \gamma) \sqrt{\dot\gamma} \|_{L^2}$$
+
+This is solved via dynamic programming in $O(m^2)$ time, where $m$ is the
+number of grid points. The aligned function is $f_2 \circ \gamma^*$, and the
+**elastic distance** between $f_1$ and $f_2$ is:
+
+$$d_e(f_1, f_2) = \| q_1 - (q_2 \circ \gamma^*) \sqrt{\dot\gamma^*} \|_{L^2}$$
+
+This distance satisfies all metric axioms (non-negativity, symmetry, triangle
+inequality) and is invariant to reparameterization: $d_e(f_1, f_2) = d_e(f_1 \circ \gamma, f_2 \circ \gamma)$
+for any $\gamma \in \Gamma$.
+
+### Amplitude-Phase Decomposition
+
+Elastic alignment provides a principled decomposition of total variability.
+For a sample $f_1, \ldots, f_n$ with aligned versions $\tilde{f}_i = f_i \circ \gamma_i^*$:
+
+- **Amplitude variability**: The residual variance in $\tilde{f}_1, \ldots, \tilde{f}_n$ after alignment. This captures genuine differences in curve shape (height, depth of features)
+- **Phase variability**: The variability in the warping functions $\gamma_1^*, \ldots, \gamma_n^*$ themselves. This captures differences in timing (when features occur)
+
+The **variance reduction** (VR) quantifies the proportion of total variance
+attributable to phase:
+
+$$\text{VR} = 1 - \frac{\text{Var}(\tilde{f}_1, \ldots, \tilde{f}_n)}{\text{Var}(f_1, \ldots, f_n)}$$
+
+where $\text{Var}$ denotes the mean pointwise variance
+$\frac{1}{T} \sum_{t} \text{Var}_i(f_i(t))$. A VR close to 1 indicates that
+most variability was phase (and has been removed); a VR near 0 indicates the
+variability is primarily amplitude.
+
+### Karcher Mean
+
+The **Karcher mean** (Frechet mean in the elastic metric) is the function
+$\mu^*$ that minimizes the sum of squared elastic distances:
+
+$$\mu^* = \arg\min_{\mu \in \mathcal{F}} \sum_{i=1}^n d_e(\mu, f_i)^2$$
+
+Since $d_e$ accounts for reparameterization, $\mu^*$ is a **shape-preserving
+average**: it recovers the common shape without blurring from phase variability.
+The algorithm iterates:
+
+1. Initialize $\hat\mu = \bar{f}$ (cross-sectional mean)
+2. Align all curves to $\hat\mu$: $\tilde{f}_i = f_i \circ \gamma_i^*$
+3. Update $\hat\mu \leftarrow \frac{1}{n} \sum_{i=1}^n \tilde{f}_i$
+4. Repeat until convergence ($\|\hat\mu^{(k+1)} - \hat\mu^{(k)}\|_{L^2} < \varepsilon$)
+
+In practice, convergence is guaranteed to a local minimum and typically occurs in
+5--20 iterations.
 
 ## Core Functions
 
 ### Karcher Mean
-
-The **Karcher mean** (Frechet mean in the elastic metric) computes the mean shape
-by iteratively aligning curves to a running estimate of the mean. This produces a
-sharper average than the cross-sectional mean because it removes phase variability:
 
 ```{r karcher}
 km <- karcher.mean(fd, max.iter = 20, tol = 1e-4)
@@ -173,7 +248,7 @@ plot(km, type = "mean")
 
 ### Elastic Distance Matrix
 
-The elastic distance provides a reparameterization-invariant metric for
+The elastic distance $d_e$ provides a reparameterization-invariant metric for
 clustering, MDS, and other distance-based methods:
 
 ```{r distance}
@@ -259,11 +334,11 @@ fd_ecg <- fdata(dm, argvals = argvals)
 res_ecg <- elastic.align(fd_ecg)
 vr <- 1 - mean(apply(res_ecg$aligned$data, 2, var)) /
           mean(apply(fd_ecg$data, 2, var))
+cat("ECG alignment VR:", round(vr * 100, 1), "%\n")
 ```
 
 ```{r gallery-ecg-plot, fig.height = 4}
-plot(res_ecg, type = "both") +
-  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+plot(res_ecg, type = "both")
 ```
 
 ### Spectral Peaks
@@ -284,11 +359,11 @@ fd_spec <- fdata(dm, argvals = argvals)
 res_spec <- elastic.align(fd_spec)
 vr <- 1 - mean(apply(res_spec$aligned$data, 2, var)) /
           mean(apply(fd_spec$data, 2, var))
+cat("Spectral alignment VR:", round(vr * 100, 1), "%\n")
 ```
 
 ```{r gallery-spectral-plot, fig.height = 4}
-plot(res_spec, type = "both") +
-  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+plot(res_spec, type = "both")
 ```
 
 ### Growth-like Sigmoid Curves
@@ -308,11 +383,11 @@ fd_sig <- fdata(dm, argvals = argvals)
 res_sig <- elastic.align(fd_sig)
 vr <- 1 - mean(apply(res_sig$aligned$data, 2, var)) /
           mean(apply(fd_sig$data, 2, var))
+cat("Sigmoid alignment VR:", round(vr * 100, 1), "%\n")
 ```
 
 ```{r gallery-sigmoid-plot, fig.height = 4}
-plot(res_sig, type = "both") +
-  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+plot(res_sig, type = "both")
 ```
 
 ### Mixed Amplitude and Phase Variability
@@ -333,11 +408,11 @@ fd_mix <- fdata(dm, argvals = argvals)
 res_mix <- elastic.align(fd_mix)
 vr <- 1 - mean(apply(res_mix$aligned$data, 2, var)) /
           mean(apply(fd_mix$data, 2, var))
+cat("Mixed amplitude+phase VR:", round(vr * 100, 1), "%\n")
 ```
 
 ```{r gallery-mixed-plot, fig.height = 4}
-plot(res_mix, type = "both") +
-  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1), "%"))
+plot(res_mix, type = "both")
 ```
 
 After alignment, curves still differ in amplitude (vertical spread) but peaks
@@ -348,7 +423,7 @@ variability, not a failure of alignment.
 
 Noise in derivatives overwhelms the SRSF. Pre-smoothing recovers alignment:
 
-```{r gallery-noise, fig.height = 7}
+```{r gallery-noise, fig.height = 4}
 set.seed(42)
 n <- 20
 dm_clean <- matrix(0, n, 100)
@@ -368,14 +443,17 @@ fd_sm <- basis2fdata(coefs, argvals)
 res_sm <- elastic.align(fd_sm)
 vr_sm <- 1 - mean(apply(res_sm$aligned$data, 2, var)) /
              mean(apply(fd_sm$data, 2, var))
+
+cat("Raw VR:     ", round(vr_raw * 100, 1), "%\n")
+cat("Smoothed VR:", round(vr_sm * 100, 1), "%\n")
 ```
 
-```{r gallery-noise-plot, fig.height = 7}
-p_raw <- plot(res_noisy, type = "both") +
-  plot_annotation(subtitle = paste0("Raw data — VR = ", round(vr_raw * 100, 1), "%"))
-p_sm <- plot(res_sm, type = "both") +
-  plot_annotation(subtitle = paste0("After smoothing — VR = ", round(vr_sm * 100, 1), "%"))
-p_raw / p_sm
+```{r gallery-noise-raw-plot, fig.height = 4}
+plot(res_noisy, type = "both")
+```
+
+```{r gallery-noise-smooth-plot, fig.height = 4}
+plot(res_sm, type = "both")
 ```
 
 ### Boundary Mismatch
@@ -393,12 +471,11 @@ fd_bnd <- fdata(dm, argvals = argvals)
 res_bnd <- elastic.align(fd_bnd)
 vr <- 1 - mean(apply(res_bnd$aligned$data, 2, var)) /
           mean(apply(fd_bnd$data, 2, var))
+cat("Boundary mismatch VR:", round(vr * 100, 1), "% — note residual spread at boundaries\n")
 ```
 
 ```{r gallery-boundary-plot, fig.height = 4}
-plot(res_bnd, type = "both") +
-  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1),
-    "% — note residual spread at boundaries"))
+plot(res_bnd, type = "both")
 ```
 
 ### Pure Amplitude Differences
@@ -418,12 +495,11 @@ fd_amp <- fdata(dm, argvals = argvals)
 res_amp <- elastic.align(fd_amp)
 vr <- 1 - mean(apply(res_amp$aligned$data, 2, var)) /
           mean(apply(fd_amp$data, 2, var))
+cat("Pure amplitude VR:", round(vr * 100, 1), "% — identity warps applied\n")
 ```
 
 ```{r gallery-amplitude-plot, fig.height = 4}
-plot(res_amp, type = "both") +
-  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1),
-    "% — no phase to correct, identity warps applied"))
+plot(res_amp, type = "both")
 ```
 
 ### Genuinely Different Shapes
@@ -446,12 +522,11 @@ fd_diff <- fdata(dm, argvals = argvals)
 res_diff <- elastic.align(fd_diff)
 vr <- 1 - mean(apply(res_diff$aligned$data, 2, var)) /
           mean(apply(fd_diff$data, 2, var))
+cat("Different shapes VR:", round(vr * 100, 1), "% — forced warping of unrelated shapes\n")
 ```
 
 ```{r gallery-different-plot, fig.height = 4}
-plot(res_diff, type = "both") +
-  plot_annotation(subtitle = paste0("VR = ", round(vr * 100, 1),
-    "% — forced warping of unrelated shapes"))
+plot(res_diff, type = "both")
 ```
 
 When VR is very low or negative, it indicates the data is not suitable for
@@ -469,7 +544,7 @@ width** (peaks broaden or narrow) as the number of bumps increases.
 With two bumps, the warping function has enough freedom to independently
 adjust each peak's position and width:
 
-```{r multi-bump-2, fig.height = 8}
+```{r multi-bump-2}
 set.seed(42)
 m <- 200
 argvals_mb <- seq(0, 1, length.out = m)
@@ -505,14 +580,12 @@ cat("2 bumps — varying position: VR =", round(vr_pos * 100, 1), "%\n")
 cat("2 bumps — varying width:    VR =", round(vr_w * 100, 1), "%\n")
 ```
 
-```{r multi-bump-2-plot, fig.height = 8}
-p1 <- plot(res_pos, type = "both") +
-  plot_annotation(subtitle = paste0("Varying inter-bump distance — VR = ",
-                                    round(vr_pos * 100, 1), "%"))
-p2 <- plot(res_w, type = "both") +
-  plot_annotation(subtitle = paste0("Varying bump width — VR = ",
-                                    round(vr_w * 100, 1), "%"))
-p1 / p2
+```{r multi-bump-2-pos-plot, fig.height = 4}
+plot(res_pos, type = "both")
+```
+
+```{r multi-bump-2-width-plot, fig.height = 4}
+plot(res_w, type = "both")
 ```
 
 Both cases achieve near-perfect alignment. The warping function locally
@@ -600,7 +673,7 @@ knitr::kable(df_wide, col.names = c("Bumps", "Varying Position",
 
 ### Visual Comparison: 4 vs 7 Bumps
 
-```{r multi-bump-4v7, fig.height = 8}
+```{r multi-bump-4v7}
 set.seed(42)
 
 # 4 bumps — both varying
@@ -632,16 +705,17 @@ fd7 <- fdata(data7, argvals = argvals_mb)
 res7 <- elastic.align(fd7)
 vr7 <- 1 - mean(apply(res7$aligned$data, 2, var)) /
             mean(apply(fd7$data, 2, var))
+
+cat("4 bumps (both varying) — VR =", round(vr4 * 100, 1), "%\n")
+cat("7 bumps (both varying) — VR =", round(vr7 * 100, 1), "%\n")
 ```
 
-```{r multi-bump-4v7-plot, fig.height = 8}
-p4 <- plot(res4, type = "both") +
-  plot_annotation(subtitle = paste0("4 bumps (both varying) — VR = ",
-                                    round(vr4 * 100, 1), "%"))
-p7 <- plot(res7, type = "both") +
-  plot_annotation(subtitle = paste0("7 bumps (both varying) — VR = ",
-                                    round(vr7 * 100, 1), "%"))
-p4 / p7
+```{r multi-bump-4-plot, fig.height = 4}
+plot(res4, type = "both")
+```
+
+```{r multi-bump-7-plot, fig.height = 4}
+plot(res7, type = "both")
 ```
 
 With 4 bumps, alignment still captures most of the variability. With 7
@@ -664,6 +738,16 @@ Three alignment strategies are available in **fdars**:
 | **Degeneracy** | No "pinching" — SRSF penalizes compression | Can collapse entire regions to a single point | No degeneracy, but very limited |
 | **Mean** | Karcher mean is well-defined | No principled mean | Shift-corrected cross-sectional mean |
 | **Complexity** | $O(m^2)$ per pair (DP) | $O(m^2)$ per pair (DP) | $O(m)$ per curve (cross-correlation) |
+
+### Why Elastic Alignment Avoids Degeneracy
+
+A key advantage of the SRSF framework is that the elastic distance penalizes
+"pinching" — collapsing a region of the curve to a single point. The SRSF
+of a warped function is $(q \circ \gamma)\sqrt{\dot\gamma}$, so when
+$\dot\gamma \to 0$ (extreme compression), the SRSF contribution vanishes
+rather than concentrating. This acts as a natural regularizer. In contrast,
+DTW allows repeated indices that effectively collapse entire regions to a
+single point, which can produce degenerate alignments.
 
 ### Head-to-Head: Shifted Bumps
 
@@ -704,7 +788,7 @@ vr_shift <- 1 - mean(apply(res_shift$registered$data, 2, var)) / var_orig_cmp
 cat("Shift registration VR:", round(vr_shift * 100, 1), "%\n")
 ```
 
-```{r comparison-plot, fig.height = 8}
+```{r comparison-plot, fig.height = 6}
 plot_curves <- function(data, argvals, title) {
   n <- nrow(data)
   m <- length(argvals)
@@ -823,12 +907,11 @@ fd_p <- fdata(data_p, argvals = argvals_p)
 res_std <- elastic.align(fd_p)
 var_orig <- mean(apply(fd_p$data, 2, var))
 vr_std <- 1 - mean(apply(res_std$aligned$data, 2, var)) / var_orig
+cat("Standard alignment on periodic data — VR:", round(vr_std * 100, 1), "%\n")
 ```
 
 ```{r periodic-problem-plot, fig.height = 4}
-plot(res_std, type = "both") +
-  plot_annotation(subtitle = paste0(
-    "Standard alignment on periodic data — VR = ", round(vr_std * 100, 1), "%"))
+plot(res_std, type = "both")
 ```
 
 ### The Solution
@@ -842,12 +925,11 @@ Setting `periodic = TRUE` applies a two-stage approach:
 ```{r periodic-solution, fig.height = 4}
 res_per <- elastic.align(fd_p, periodic = TRUE)
 vr_per <- 1 - mean(apply(res_per$aligned$data, 2, var)) / var_orig
+cat("Periodic alignment — VR:", round(vr_per * 100, 1), "%\n")
 ```
 
 ```{r periodic-solution-plot, fig.height = 4}
-plot(res_per, type = "both") +
-  plot_annotation(subtitle = paste0(
-    "Periodic alignment — VR = ", round(vr_per * 100, 1), "%"))
+plot(res_per, type = "both")
 ```
 
 The rotation step removes large circular shifts that the boundary-constrained
@@ -882,15 +964,28 @@ This dataset is a standard benchmark in elastic FDA literature (Tucker et al.,
 data(growth_vel, package = "fdasrvf")
 
 # growth_vel$f is 69 (grid) x 93 (curves) — transpose for fdata
-fd_growth <- fdata(t(growth_vel$f), argvals = growth_vel$time)
-cat("Curves:", nrow(fd_growth$data), "\n")
-cat("Grid points:", ncol(fd_growth$data), "\n")
-cat("Age range:", range(fd_growth$argvals), "\n")
+fd_growth_raw <- fdata(t(growth_vel$f), argvals = growth_vel$time)
+cat("Curves:", nrow(fd_growth_raw$data), "\n")
+cat("Grid points:", ncol(fd_growth_raw$data), "\n")
+cat("Age range:", range(fd_growth_raw$argvals), "\n")
+```
+
+The raw data has only 69 grid points, which is coarse for elastic alignment
+(the DP warping resolution is limited). We smooth with P-splines and evaluate
+on a finer grid:
+
+```{r growth-smooth}
+# Smooth with P-splines and evaluate on a finer grid
+fine_argvals <- seq(min(fd_growth_raw$argvals), max(fd_growth_raw$argvals),
+                    length.out = 200)
+coefs_growth <- fdata2basis(fd_growth_raw, nbasis = 25, type = "bspline")
+fd_growth <- basis2fdata(coefs_growth, fine_argvals)
+cat("Smoothed grid points:", ncol(fd_growth$data), "\n")
 ```
 
 ### Full Age Range
 
-```{r growth-full, fig.height = 5}
+```{r growth-full, fig.height = 4}
 plot(fd_growth) + labs(title = "Berkeley Growth Velocity (all 93 children)",
                        x = "Age (years)", y = "Growth velocity (cm/year)")
 ```
@@ -927,9 +1022,7 @@ cat("Pubertal region VR:", round(vr_pub * 100, 1), "%\n")
 ```
 
 ```{r growth-pubertal-plot, fig.height = 4}
-plot(res_pub, type = "both") +
-  plot_annotation(subtitle = paste0("Ages 8–18 — VR = ",
-                                    round(vr_pub * 100, 1), "%"))
+plot(res_pub, type = "both")
 ```
 
 ### Cross-Sectional Mean vs Karcher Mean
@@ -948,7 +1041,7 @@ cat("Karcher mean peak:        ", round(max(karcher_pub), 2), "cm/yr at age",
     round(fd_pub$argvals[which.max(karcher_pub)], 1), "\n")
 ```
 
-```{r growth-karcher-plot, fig.height = 5}
+```{r growth-karcher-plot, fig.height = 4}
 df_means <- data.frame(
   age = rep(fd_pub$argvals, 2),
   velocity = c(cross_mean_pub, karcher_pub),
@@ -994,9 +1087,7 @@ The estimated warping functions show how each child's biological clock
 differs from the average:
 
 ```{r growth-warps, fig.height = 4}
-plot(res_pub, type = "warps") +
-  labs(title = "Warping Functions (Ages 8–18)",
-       x = "Chronological age", y = "Biological age")
+plot(res_pub, type = "warps")
 ```
 
 Curves above the diagonal correspond to children whose growth spurt occurred

@@ -448,6 +448,5 @@ plot.fequiv.test <- function(x, ...) {
     ) +
     ggplot2::theme_minimal()
 
-  print(p)
-  invisible(p)
+  p
 }
