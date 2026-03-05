@@ -59,71 +59,65 @@ smooth, and you need features that can be reliably detected.
 
 ### The Registration Problem
 
-Given a sample of curves $`f_1, \ldots, f_n`$ observed on a common
-domain $`[a, b]`$, registration seeks warping functions
-$`\gamma_i : [a, b] \to [a, b]`$ such that the registered curves
-$`\tilde{f}_i(t) = f_i(\gamma_i(t))`$ have their salient features
-aligned.
+Given a sample of curves $f_{1},\ldots,f_{n}$ observed on a common
+domain $\lbrack a,b\rbrack$, registration seeks warping functions
+$\left. \gamma_{i}:\lbrack a,b\rbrack\rightarrow\lbrack a,b\rbrack \right.$
+such that the registered curves
+${\widetilde{f}}_{i}(t) = f_{i}\left( \gamma_{i}(t) \right)$ have their
+salient features aligned.
 
-In the landmark approach, we identify $`k`$ corresponding feature times
-$`\tau_{i,1}, \ldots, \tau_{i,k}`$ in each curve $`f_i`$, and common
-target times $`\tau_1^*, \ldots, \tau_k^*`$. The warping function
-$`\gamma_i`$ must satisfy:
+In the landmark approach, we identify $k$ corresponding feature times
+$\tau_{i,1},\ldots,\tau_{i,k}$ in each curve $f_{i}$, and common target
+times $\tau_{1}^{*},\ldots,\tau_{k}^{*}$. The warping function
+$\gamma_{i}$ must satisfy:
 
-``` math
-\gamma_i(\tau_j^*) = \tau_{i,j}, \quad j = 1, \ldots, k
-```
+$$\gamma_{i}\left( \tau_{j}^{*} \right) = \tau_{i,j},\quad j = 1,\ldots,k$$
 
-with boundary conditions $`\gamma_i(a) = a`$ and $`\gamma_i(b) = b`$.
+with boundary conditions $\gamma_{i}(a) = a$ and $\gamma_{i}(b) = b$.
 
 ### Piecewise-Linear Warping
 
 The simplest solution is piecewise-linear interpolation between the
-$`k+2`$ anchor points (boundaries plus landmarks). Let $`\tau_0^* = a`$,
-$`\tau_{k+1}^* = b`$, and similarly $`\tau_{i,0} = a`$,
-$`\tau_{i,k+1} = b`$. For $`t \in [\tau_j^*, \tau_{j+1}^*]`$:
+$k + 2$ anchor points (boundaries plus landmarks). Let
+$\tau_{0}^{*} = a$, $\tau_{k + 1}^{*} = b$, and similarly
+$\tau_{i,0} = a$, $\tau_{i,k + 1} = b$. For
+$t \in \left\lbrack \tau_{j}^{*},\tau_{j + 1}^{*} \right\rbrack$:
 
-``` math
-\gamma_i(t) = \tau_{i,j} + \frac{\tau_{i,j+1} - \tau_{i,j}}{\tau_{j+1}^* - \tau_j^*} (t - \tau_j^*)
-```
+$$\gamma_{i}(t) = \tau_{i,j} + \frac{\tau_{i,j + 1} - \tau_{i,j}}{\tau_{j + 1}^{*} - \tau_{j}^{*}}\left( t - \tau_{j}^{*} \right)$$
 
 This warping is monotone (orientation-preserving) as long as the
 landmarks are in the same order in every curve. The derivative
-$`\dot\gamma_i`$ is piecewise constant, with value
-$`(\tau_{i,j+1} - \tau_{i,j}) / (\tau_{j+1}^* - \tau_j^*)`$ on each
-segment.
+${\dot{\gamma}}_{i}$ is piecewise constant, with value
+$\left( \tau_{i,j + 1} - \tau_{i,j} \right)/\left( \tau_{j + 1}^{*} - \tau_{j}^{*} \right)$
+on each segment.
 
 ### Target Landmark Selection
 
-The common target times $`\tau_j^*`$ are chosen as the average of the
+The common target times $\tau_{j}^{*}$ are chosen as the average of the
 detected landmark positions across curves:
 
-``` math
-\tau_j^* = \frac{1}{n} \sum_{i=1}^n \tau_{i,j}
-```
+$$\tau_{j}^{*} = \frac{1}{n}\sum\limits_{i = 1}^{n}\tau_{i,j}$$
 
 This minimizes the total squared warping (in the piecewise-linear sense)
 and ensures the target positions are representative of the sample.
 
 ### Prominence and Feature Detection
 
-A **peak** at time $`t_0`$ in a curve $`f`$ is a local maximum:
-$`f(t_0) \geq f(t)`$ for all $`t`$ in a neighborhood of $`t_0`$. Its
-**prominence** is defined as:
+A **peak** at time $t_{0}$ in a curve $f$ is a local maximum:
+$f\left( t_{0} \right) \geq f(t)$ for all $t$ in a neighborhood of
+$t_{0}$. Its **prominence** is defined as:
 
-``` math
-\text{prom}(t_0) = f(t_0) - \max\left( \min_{t \in [t_L, t_0]} f(t),\; \min_{t \in [t_0, t_R]} f(t) \right)
-```
+$$\text{prom}\left( t_{0} \right) = f\left( t_{0} \right) - \max\left( \min\limits_{t \in {\lbrack t_{L},t_{0}\rbrack}}f(t),\;\min\limits_{t \in {\lbrack t_{0},t_{R}\rbrack}}f(t) \right)$$
 
-where $`t_L`$ and $`t_R`$ are the nearest higher peaks to the left and
+where $t_{L}$ and $t_{R}$ are the nearest higher peaks to the left and
 right (or the domain boundaries). Prominence measures how much a peak
 stands out from its surroundings – a peak nestled on the flank of a
 larger peak has low prominence, while an isolated peak has high
 prominence.
 
-Valleys are detected analogously (as peaks of $`-f`$). Zero-crossings
-are points where $`f`$ changes sign, and inflection points are where
-$`f''`$ changes sign.
+Valleys are detected analogously (as peaks of $- f$). Zero-crossings are
+points where $f$ changes sign, and inflection points are where $f''$
+changes sign.
 
 ## Quick Start
 

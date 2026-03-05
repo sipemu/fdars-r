@@ -466,19 +466,19 @@ cat("Correlation between age at PHV and max velocity:",
 
 ## Summary
 
-| Task | Function | Notes |
-|----|----|----|
-| First derivative | `deriv(fd, nderiv = 1)` | Velocity, rate of change |
-| Second derivative | `deriv(fd, nderiv = 2)` | Acceleration, curvature |
-| Derivative distance | `semimetric.deriv(fd, nderiv)` | Shape-based comparison |
-| Pre-smoothing | `pspline(fd)` | **Always smooth before differentiating!** |
+| Task                | Function                       | Notes                                     |
+|---------------------|--------------------------------|-------------------------------------------|
+| First derivative    | `deriv(fd, nderiv = 1)`        | Velocity, rate of change                  |
+| Second derivative   | `deriv(fd, nderiv = 2)`        | Acceleration, curvature                   |
+| Derivative distance | `semimetric.deriv(fd, nderiv)` | Shape-based comparison                    |
+| Pre-smoothing       | `pspline(fd)`                  | **Always smooth before differentiating!** |
 
 **Key Takeaways:**
 
 1.  **Always smooth before computing derivatives** - noise amplifies
     dramatically
-2.  **More smoothing for derivatives** - may need higher $`\lambda`$
-    than for curves
+2.  **More smoothing for derivatives** - may need higher $\lambda$ than
+    for curves
 3.  **Derivatives reveal dynamics** - growth spurts, timing, phase
     variation
 4.  **Derivative-based distances** - useful for shape-based clustering

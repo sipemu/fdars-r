@@ -22,8 +22,8 @@ for the mean:
 
 **Confidence band** (for the mean function):
 
-| Method | Key Properties |
-|----|----|
+| Method       | Key Properties                                                     |
+|--------------|--------------------------------------------------------------------|
 | SCB (Degras) | Simultaneous confidence band for the mean via multiplier bootstrap |
 
 The distinction matters: a tolerance band captures the spread of
@@ -66,110 +66,107 @@ will the next curve fall?”
 
 ### Setup
 
-Let $`X_1, \ldots, X_n`$ be i.i.d. random functions observed on a grid
-$`t_1, \ldots, t_T \in [a, b]`$ with mean function $`\mu(t) = E[X(t)]`$
-and covariance function $`C(s, t) = \text{Cov}(X(s), X(t))`$.
+Let $X_{1},\ldots,X_{n}$ be i.i.d. random functions observed on a grid
+$t_{1},\ldots,t_{T} \in \lbrack a,b\rbrack$ with mean function
+$\mu(t) = E\left\lbrack X(t) \right\rbrack$ and covariance function
+$C(s,t) = \text{Cov}\left( X(s),X(t) \right)$.
 
-A **$`(1 - \alpha)`$-tolerance band** is a region $`[\ell(t), u(t)]`$
-such that
+A **$(1 - \alpha)$-tolerance band** is a region
+$\left\lbrack \ell(t),u(t) \right\rbrack$ such that
 
-``` math
-P\bigl(X_{\text{new}}(t) \in [\ell(t), u(t)] \;\text{for all } t\bigr) \geq 1 - \alpha
-```
+$$P(X_{\text{new}}(t) \in \left\lbrack \ell(t),u(t) \right\rbrack\;{\text{for all}\mspace{6mu}}t) \geq 1 - \alpha$$
 
-for a new independent draw $`X_{\text{new}}`$ from the same process.
+for a new independent draw $X_{\text{new}}$ from the same process.
 
 ### FPCA Method (Rathnayake and Cuevas, 2016)
 
 By the Karhunen-Loève expansion, each curve can be represented as
 
-``` math
-X_i(t) = \mu(t) + \sum_{k=1}^K \xi_{ik} \phi_k(t)
-```
+$$X_{i}(t) = \mu(t) + \sum\limits_{k = 1}^{K}\xi_{ik}\phi_{k}(t)$$
 
-where $`\phi_k`$ are the eigenfunctions of $`C`$ and $`\xi_{ik}`$ are
-uncorrelated PC scores with $`\text{Var}(\xi_{ik}) = \lambda_k`$. The
-method proceeds:
+where $\phi_{k}$ are the eigenfunctions of $C$ and $\xi_{ik}$ are
+uncorrelated PC scores with
+$\text{Var}\left( \xi_{ik} \right) = \lambda_{k}$. The method proceeds:
 
-1.  Estimate $`\hat\mu`$, $`\hat\phi_k`$, and scores $`\hat\xi_{ik}`$
-    from data
-2.  Bootstrap: resample $`\hat\xi^*_{ik}`$ from the empirical score
-    distribution and reconstruct
-    $`X^*_i(t) = \hat\mu(t) + \sum_{k=1}^K \hat\xi^*_{ik} \hat\phi_k(t)`$
-3.  **Pointwise band**: At each $`t_j`$, set $`\ell(t_j)`$ and
-    $`u(t_j)`$ to the $`\alpha/2`$ and $`1 - \alpha/2`$ quantiles of the
-    bootstrap distribution
-4.  **Simultaneous band**: Find the smallest $`c > 0`$ such that a
-    fraction $`\geq 1 - \alpha`$ of bootstrap curves lie entirely within
-    $`\hat\mu(t) \pm c \cdot \hat\sigma(t)`$, where $`\hat\sigma(t)`$ is
-    the pointwise bootstrap standard deviation
+1.  Estimate $\widehat{\mu}$, ${\widehat{\phi}}_{k}$, and scores
+    ${\widehat{\xi}}_{ik}$ from data
+2.  Bootstrap: resample ${\widehat{\xi}}_{ik}^{*}$ from the empirical
+    score distribution and reconstruct
+    $X_{i}^{*}(t) = \widehat{\mu}(t) + \sum_{k = 1}^{K}{\widehat{\xi}}_{ik}^{*}{\widehat{\phi}}_{k}(t)$
+3.  **Pointwise band**: At each $t_{j}$, set $\ell\left( t_{j} \right)$
+    and $u\left( t_{j} \right)$ to the $\alpha/2$ and $1 - \alpha/2$
+    quantiles of the bootstrap distribution
+4.  **Simultaneous band**: Find the smallest $c > 0$ such that a
+    fraction $\geq 1 - \alpha$ of bootstrap curves lie entirely within
+    $\widehat{\mu}(t) \pm c \cdot \widehat{\sigma}(t)$, where
+    $\widehat{\sigma}(t)$ is the pointwise bootstrap standard deviation
 
 The simultaneous band is wider (controls family-wise coverage) while the
-pointwise band is narrower (controls marginal coverage at each $`t`$).
+pointwise band is narrower (controls marginal coverage at each $t$).
 
 ### Conformal Method (Lei and Wasserman, 2014)
 
 The conformal approach is distribution-free. Split the data into a
-training set of size $`n_{\text{train}}`$ and a calibration set of size
-$`n_{\text{cal}}`$:
+training set of size $n_{\text{train}}$ and a calibration set of size
+$n_{\text{cal}}$:
 
-1.  Compute $`\hat\mu(t)`$ from the training set
-2.  For each calibration curve $`X_j`$, compute a non-conformity score:
-    - **Sup-norm**: $`R_j = \sup_t |X_j(t) - \hat\mu(t)|`$
-    - **$`L^2`$**:
-      $`R_j = \bigl(\int |X_j(t) - \hat\mu(t)|^2 \, dt\bigr)^{1/2}`$
-3.  Set $`\hat{q}`$ to the
-    $`\lceil (1 - \alpha)(n_{\text{cal}} + 1) \rceil / n_{\text{cal}}`$
-    quantile of $`\{R_1, \ldots, R_{n_{\text{cal}}}\}`$
-4.  The band is $`\hat\mu(t) \pm \hat{q}`$ (sup-norm) or
-    $`\hat\mu(t) \pm \hat{q} \cdot w(t)`$ ($`L^2`$, with local weights)
+1.  Compute $\widehat{\mu}(t)$ from the training set
+2.  For each calibration curve $X_{j}$, compute a non-conformity score:
+    - **Sup-norm**:
+      $R_{j} = \sup_{t}\left| X_{j}(t) - \widehat{\mu}(t) \right|$
+    - **$L^{2}$**:
+      $R_{j} = (\int\left| X_{j}(t) - \widehat{\mu}(t) \right|^{2}\, dt)^{1/2}$
+3.  Set $\widehat{q}$ to the
+    $\lceil(1 - \alpha)\left( n_{\text{cal}} + 1 \right)\rceil/n_{\text{cal}}$
+    quantile of $\{ R_{1},\ldots,R_{n_{\text{cal}}}\}$
+4.  The band is $\widehat{\mu}(t) \pm \widehat{q}$ (sup-norm) or
+    $\widehat{\mu}(t) \pm \widehat{q} \cdot w(t)$ ($L^{2}$, with local
+    weights)
 
 The key guarantee is finite-sample validity:
-$`P(R_{\text{new}} \leq \hat{q}) \geq 1 - \alpha`$, with no
-distributional assumptions.
+$P\left( R_{\text{new}} \leq \widehat{q} \right) \geq 1 - \alpha$, with
+no distributional assumptions.
 
 ### SCB Degras Method (Degras, 2011)
 
-This constructs a **simultaneous confidence band for the mean**
-$`\mu(t)`$ rather than a tolerance band for individual curves. Let
+This constructs a **simultaneous confidence band for the mean** $\mu(t)$
+rather than a tolerance band for individual curves. Let
 
-``` math
-S_n(t) = \frac{\sqrt{n}(\bar{X}_n(t) - \mu(t))}{\hat\sigma(t)}
-```
+$$S_{n}(t) = \frac{\sqrt{n}\left( {\bar{X}}_{n}(t) - \mu(t) \right)}{\widehat{\sigma}(t)}$$
 
-be the standardized process. Under regularity conditions, $`S_n`$
-converges to a Gaussian process $`G`$ with known covariance structure.
-The critical value $`c_\alpha`$ is obtained via a multiplier bootstrap:
+be the standardized process. Under regularity conditions, $S_{n}$
+converges to a Gaussian process $G$ with known covariance structure. The
+critical value $c_{\alpha}$ is obtained via a multiplier bootstrap:
 
 1.  Generate
-    $`W_1^*, \ldots, W_n^* \stackrel{\text{iid}}{\sim} N(0, 1)`$
+    $W_{1}^{*},\ldots,W_{n}^{*}\overset{\text{iid}}{\sim}N(0,1)$
 2.  Compute
-    $`G^*(t) = \frac{1}{\sqrt{n} \hat\sigma(t)} \sum_{i=1}^n W_i^* (X_i(t) - \bar{X}_n(t))`$
-3.  Set \$c\_= \$ the $`(1-\alpha)`$-quantile of $`\sup_t |G^*(t)|`$
-    across bootstrap replicates
+    $G^{*}(t) = \frac{1}{\sqrt{n}\widehat{\sigma}(t)}\sum_{i = 1}^{n}W_{i}^{*}\left( X_{i}(t) - {\bar{X}}_{n}(t) \right)$
+3.  Set \$c\_= \$ the $(1 - \alpha)$-quantile of
+    $\sup_{t}\left| G^{*}(t) \right|$ across bootstrap replicates
 
-The SCB is then $`\bar{X}_n(t) \pm c_\alpha \hat\sigma(t) / \sqrt{n}`$.
+The SCB is then
+${\bar{X}}_{n}(t) \pm c_{\alpha}\widehat{\sigma}(t)/\sqrt{n}$.
 
 ### Exponential Family Method
 
 For functional data from an exponential family with density
 
-``` math
-f(x | \theta) = h(x) \exp(\theta x - A(\theta))
-```
+$$f\left( x|\theta \right) = h(x)\exp\left( \theta x - A(\theta) \right)$$
 
-the method applies the canonical link $`g`$ to transform data to the
+the method applies the canonical link $g$ to transform data to the
 natural parameter scale, computes FPCA tolerance bands on the
-transformed data, and maps back through $`g^{-1}`$:
+transformed data, and maps back through $g^{- 1}$:
 
-1.  Transform: $`Y_i(t) = g(X_i(t))`$
-2.  Compute FPCA band $`[\ell_Y(t), u_Y(t)]`$ on $`\{Y_i\}`$
-3.  Back-transform: $`\ell(t) = g^{-1}(\ell_Y(t))`$,
-    $`u(t) = g^{-1}(u_Y(t))`$
+1.  Transform: $Y_{i}(t) = g\left( X_{i}(t) \right)$
+2.  Compute FPCA band $\left\lbrack \ell_{Y}(t),u_{Y}(t) \right\rbrack$
+    on $\{ Y_{i}\}$
+3.  Back-transform: $\ell(t) = g^{- 1}\left( \ell_{Y}(t) \right)$,
+    $u(t) = g^{- 1}\left( u_{Y}(t) \right)$
 
-For Gaussian data ($`g = \text{identity}`$), this reduces to the
-standard FPCA band. For Poisson data ($`g = \log`$), the band respects
-the non-negativity constraint.
+For Gaussian data ($g = \text{identity}$), this reduces to the standard
+FPCA band. For Poisson data ($g = \log$), the band respects the
+non-negativity constraint.
 
 ### Elastic Method
 
@@ -177,12 +174,13 @@ When curves exhibit **phase variability** (horizontal shifts), standard
 tolerance bands are inflated because they treat timing differences as
 amplitude variation. The elastic method removes this:
 
-1.  Compute the Karcher mean $`\hat\mu_K`$ and warping functions
-    $`\hat\gamma_1, \ldots, \hat\gamma_n`$ using the elastic
-    (Fisher-Rao) framework
-2.  Align: $`\tilde{X}_i(t) = X_i(\hat\gamma_i(t))`$
+1.  Compute the Karcher mean ${\widehat{\mu}}_{K}$ and warping functions
+    ${\widehat{\gamma}}_{1},\ldots,{\widehat{\gamma}}_{n}$ using the
+    elastic (Fisher-Rao) framework
+2.  Align:
+    ${\widetilde{X}}_{i}(t) = X_{i}\left( {\widehat{\gamma}}_{i}(t) \right)$
 3.  Compute an FPCA tolerance band on the aligned data
-    $`\{\tilde{X}_i\}`$
+    $\{{\widetilde{X}}_{i}\}$
 
 The resulting band is tighter because alignment concentrates variability
 into the amplitude component, reducing the effective variance at each
@@ -271,21 +269,22 @@ plot(band_conf)
 
 The Degras (2011) method is fundamentally different from the tolerance
 band methods above. It constructs a **simultaneous confidence band for
-the mean function** $`\mu(t) = E[X(t)]`$, not a tolerance band for
-individual curves.
+the mean function** $\mu(t) = E\left\lbrack X(t) \right\rbrack$, not a
+tolerance band for individual curves.
 
 **What it tells you**: “The true population mean lies within this band
-with 95% confidence.” The band shrinks as $`n \to \infty`$ because we
-estimate the mean more precisely. In contrast, tolerance bands do *not*
-shrink with $`n`$ – they target the spread of individual curves, which
-is a fixed population property.
+with 95% confidence.” The band shrinks as
+$\left. n\rightarrow\infty \right.$ because we estimate the mean more
+precisely. In contrast, tolerance bands do *not* shrink with $n$ – they
+target the spread of individual curves, which is a fixed population
+property.
 
 **How it works**: The method standardizes the empirical process
-$`\sqrt{n}(\bar{X}_n(t) - \mu(t)) / \hat\sigma(t)`$ and uses a
-multiplier bootstrap to estimate the distribution of its supremum. The
-critical value $`c_\alpha`$ controls the family-wise coverage across all
-$`t`$ simultaneously – the band is valid uniformly over the entire
-domain, not just pointwise.
+$\sqrt{n}\left( {\bar{X}}_{n}(t) - \mu(t) \right)/\widehat{\sigma}(t)$
+and uses a multiplier bootstrap to estimate the distribution of its
+supremum. The critical value $c_{\alpha}$ controls the family-wise
+coverage across all $t$ simultaneously – the band is valid uniformly
+over the entire domain, not just pointwise.
 
 **When to use it**:
 
@@ -305,7 +304,7 @@ plot(band_scb)
 
 Note how much narrower the SCB is compared to the tolerance bands above
 – it targets the mean, not individual curves. The width scales as
-$`O(1/\sqrt{n})`$.
+$O\left( 1/\sqrt{n} \right)$.
 
 ## Exponential Family Band
 
