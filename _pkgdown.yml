@@ -38,10 +38,6 @@ navbar:
       - text: Alignment
       - text: Elastic Alignment
         href: articles/elastic-alignment.html
-      - text: Landmark Registration
-        href: articles/landmark-registration.html
-      - text: TSRVF
-        href: articles/tsrvf.html
       - text: "---"
       - text: Bands & Equivalence
       - text: Tolerance Bands
@@ -88,8 +84,6 @@ articles:
 - title: Alignment
   contents:
   - articles/elastic-alignment
-  - articles/landmark-registration
-  - articles/tsrvf
 - title: Bands & Equivalence
   contents:
   - articles/tolerance-bands

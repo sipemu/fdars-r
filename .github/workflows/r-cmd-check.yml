@@ -18,7 +18,6 @@ jobs:
       matrix:
         config:
           - {os: macos-latest, r: 'release'}
-          - {os: macos-latest, r: 'devel'}
           - {os: ubuntu-latest, r: 'release'}
           - {os: ubuntu-latest, r: 'devel'}
           - {os: windows-latest, r: 'release'}
@@ -47,7 +46,7 @@ jobs:
 
   coverage:
     name: Test coverage
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
