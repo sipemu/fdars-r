@@ -91,13 +91,13 @@ p1 + p2
 ## Method 1: Elastic Alignment
 
 Elastic alignment finds the globally optimal warping function by
-minimizing the $L^{2}$ distance between SRSFs via dynamic programming.
+minimizing the $`L^2`$ distance between SRSFs via dynamic programming.
 It requires no feature detection and produces smooth, diffeomorphic
 warping functions.
 
 **Mathematical basis**: minimize
-$\parallel \, q_{1} - \left( q_{2} \circ \gamma \right)\sqrt{\dot{\gamma}}\, \parallel_{L^{2}}^{2}$
-over the warping group $\Gamma$, where $q_{i}$ is the SRSF of $f_{i}$.
+$`\|\, q_1 - (q_2 \circ \gamma) \sqrt{\dot\gamma}\,\|_{L^2}^2`$ over the
+warping group $`\Gamma`$, where $`q_i`$ is the SRSF of $`f_i`$.
 
 ``` r
 ea_smooth <- elastic.align(fd_smooth)
@@ -118,9 +118,9 @@ Landmark registration detects features (peaks, valleys, etc.) and warps
 curves so that corresponding features align to common target positions.
 The warping is piecewise-linear between anchor points.
 
-**Mathematical basis**: For landmarks $\tau_{i,j}$ and targets
-$\tau_{j}^{*}$, construct $\gamma_{i}$ as a piecewise-linear function
-satisfying $\gamma_{i}\left( \tau_{j}^{*} \right) = \tau_{i,j}$.
+**Mathematical basis**: For landmarks $`\tau_{i,j}`$ and targets
+$`\tau_j^*`$, construct $`\gamma_i`$ as a piecewise-linear function
+satisfying $`\gamma_i(\tau_j^*) = \tau_{i,j}`$.
 
 ``` r
 lr_smooth <- landmark.register(fd_smooth, kind = "peak", min.prominence = 0.3,
@@ -147,9 +147,8 @@ warping is computed by segmented dynamic programming between landmark
 anchor points.
 
 **Mathematical basis**: minimize
-$\parallel q_{1} - \left( q_{2} \circ \gamma \right)\sqrt{\dot{\gamma}} \parallel_{L^{2}}^{2}$
-subject to $\gamma\left( \tau_{j}^{*} \right) = \tau_{i,j}$ for each
-landmark pair.
+$`\|q_1 - (q_2 \circ \gamma) \sqrt{\dot\gamma}\|_{L^2}^2`$ subject to
+$`\gamma(\tau_j^*) = \tau_{i,j}`$ for each landmark pair.
 
 ``` r
 ec_smooth <- elastic.align.constrained(fd_smooth, kind = "peak",
@@ -192,7 +191,9 @@ p1 + p2 + p3
 Variance reduction (VR) measures how much pointwise variance is removed
 by alignment. Higher VR means more phase variability was captured:
 
-$$\text{VR} = 1 - \frac{\text{mean pointwise variance (aligned)}}{\text{mean pointwise variance (original)}}$$
+``` math
+\text{VR} = 1 - \frac{\text{mean pointwise variance (aligned)}}{\text{mean pointwise variance (original)}}
+```
 
 ``` r
 vr <- function(original, aligned) {
@@ -270,12 +271,12 @@ plot(aq_smooth, type = "variance")
 
 ### Summary Table
 
-| Method          | Warping               | Automation         | Speed                          | Smoothness                 | Feature control |
-|-----------------|-----------------------|--------------------|--------------------------------|----------------------------|-----------------|
-| **Elastic**     | Smooth diffeomorphism | Fully automatic    | $O\left( nm^{2} \right)$       | High                       | None            |
-| **Landmark**    | Piecewise-linear      | Needs feature type | $O(nm + nk)$                   | Low (corners at landmarks) | Full            |
-| **Constrained** | Smooth with anchors   | Needs feature type | $O\left( nm^{2}/k \right)$     | High (between landmarks)   | Partial         |
-| **TSRVF**       | (uses elastic)        | Fully automatic    | $O\left( nm^{2} \right)$ + PCA | High                       | None            |
+| Method | Warping | Automation | Speed | Smoothness | Feature control |
+|----|----|----|----|----|----|
+| **Elastic** | Smooth diffeomorphism | Fully automatic | $`O(nm^2)`$ | High | None |
+| **Landmark** | Piecewise-linear | Needs feature type | $`O(nm + nk)`$ | Low (corners at landmarks) | Full |
+| **Constrained** | Smooth with anchors | Needs feature type | $`O(nm^2/k)`$ | High (between landmarks) | Partial |
+| **TSRVF** | (uses elastic) | Fully automatic | $`O(nm^2)`$ + PCA | High | None |
 
 ### When to Use Each Method
 
@@ -313,12 +314,12 @@ plot(aq_smooth, type = "variance")
 
 ### Pitfalls
 
-| Method          | Common pitfall                               | Mitigation                                      |
-|-----------------|----------------------------------------------|-------------------------------------------------|
-| **Elastic**     | Over-warping (pinching) on noisy data        | Increase `lambda` penalty                       |
-| **Landmark**    | Mismatched landmark correspondence           | Use `expected.count`, increase `min.prominence` |
-| **Constrained** | Too few landmarks = barely constrained       | Detect multiple landmark types                  |
-| **TSRVF**       | Linearization error for curves far from mean | Check reconstruction quality                    |
+| Method | Common pitfall | Mitigation |
+|----|----|----|
+| **Elastic** | Over-warping (pinching) on noisy data | Increase `lambda` penalty |
+| **Landmark** | Mismatched landmark correspondence | Use `expected.count`, increase `min.prominence` |
+| **Constrained** | Too few landmarks = barely constrained | Detect multiple landmark types |
+| **TSRVF** | Linearization error for curves far from mean | Check reconstruction quality |
 
 ## Workflow Example
 

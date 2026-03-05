@@ -21,6 +21,8 @@
   (FPCA)](https://sipemu.github.io/fdars-r/articles/fpca.md):
 - [Finding the Best Basis
   Representation](https://sipemu.github.io/fdars-r/articles/basis-representation.md):
+- [Andrews Transformation: From Tables to
+  Curves](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md):
 - [Functional Depth
   Functions](https://sipemu.github.io/fdars-r/articles/depth-functions.md):
 - [Streaming Depth
@@ -53,7 +55,5 @@
   Regression](https://sipemu.github.io/fdars-r/articles/regression.md):
 - [Seasonal Analysis of Functional
   Data](https://sipemu.github.io/fdars-r/articles/seasonal-analysis.md):
-- [Andrews Transformation: From Tables to
-  Curves](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md):
 - [Covariance Functions and Gaussian Process
   Generation](https://sipemu.github.io/fdars-r/articles/covariance-functions.md):

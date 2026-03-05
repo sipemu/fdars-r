@@ -3,8 +3,8 @@
 ## Introduction
 
 After elastic alignment, the aligned curves live on a **nonlinear
-manifold** – the quotient space $\mathcal{F}/\Gamma$ of functions modulo
-reparameterization. Standard linear operations (PCA, regression,
+manifold** – the quotient space $`\mathcal{F} / \Gamma`$ of functions
+modulo reparameterization. Standard linear operations (PCA, regression,
 hypothesis testing) are not directly valid on this curved space.
 
 The **Transported Square-Root Velocity Function (TSRVF)** solves this by
@@ -57,36 +57,38 @@ curves from their PC scores or model predictions.
 
 ### The Shape Space
 
-Let $\mathcal{F}$ denote the space of absolutely continuous functions
-$\left. f:\lbrack 0,1\rbrack\rightarrow{\mathbb{R}} \right.$, and let
-$\Gamma$ be the warping group of orientation-preserving diffeomorphisms
-of $\lbrack 0,1\rbrack$. The **shape space** is the quotient:
+Let $`\mathcal{F}`$ denote the space of absolutely continuous functions
+$`f : [0, 1] \to \mathbb{R}`$, and let $`\Gamma`$ be the warping group
+of orientation-preserving diffeomorphisms of $`[0, 1]`$. The **shape
+space** is the quotient:
 
-$$\mathcal{S} = \mathcal{F}/\Gamma$$
+``` math
+\mathcal{S} = \mathcal{F} / \Gamma
+```
 
-where two functions $f_{1},f_{2}$ are equivalent if
-$f_{1} = f_{2} \circ \gamma$ for some $\gamma \in \Gamma$. Points in
-$\mathcal{S}$ represent curve *shapes*, stripped of parameterization
+where two functions $`f_1, f_2`$ are equivalent if
+$`f_1 = f_2 \circ \gamma`$ for some $`\gamma \in \Gamma`$. Points in
+$`\mathcal{S}`$ represent curve *shapes*, stripped of parameterization
 effects.
 
-Via the SRSF transform
-$q(t) = \text{sign}\left( f\prime(t) \right)\sqrt{\left| f\prime(t) \right|}$,
-the shape space is isometric to the quotient of the unit Hilbert sphere
-${\mathbb{S}}^{\infty} \subset L^{2}$ by $\Gamma$. This is a nonlinear
+Via the SRSF transform $`q(t) = \text{sign}(f'(t)) \sqrt{|f'(t)|}`$, the
+shape space is isometric to the quotient of the unit Hilbert sphere
+$`\mathbb{S}^\infty \subset L^2`$ by $`\Gamma`$. This is a nonlinear
 manifold with nontrivial curvature.
 
 ### Exponential and Logarithmic Maps
 
-At a point $\lbrack\mu\rbrack$ on the shape space (represented by the
-Karcher mean), the **tangent space** $T_{\lbrack\mu\rbrack}\mathcal{S}$
-is a flat (Euclidean) vector space. The **exponential map**
-$\exp_{\lbrack\mu\rbrack}$ projects from the tangent space onto the
-manifold, and the **logarithmic map** $\log_{\lbrack\mu\rbrack}$ does
-the reverse:
+At a point $`[\mu]`$ on the shape space (represented by the Karcher
+mean), the **tangent space** $`T_{[\mu]} \mathcal{S}`$ is a flat
+(Euclidean) vector space. The **exponential map** $`\exp_{[\mu]}`$
+projects from the tangent space onto the manifold, and the **logarithmic
+map** $`\log_{[\mu]}`$ does the reverse:
 
-$$v_{i} = \log_{\lbrack\mu\rbrack}\left( \left\lbrack f_{i} \right\rbrack \right) \in T_{\lbrack\mu\rbrack}\mathcal{S}$$
+``` math
+v_i = \log_{[\mu]}([f_i]) \in T_{[\mu]} \mathcal{S}
+```
 
-These tangent vectors $v_{i}$ are the TSRVF representation. They capture
+These tangent vectors $`v_i`$ are the TSRVF representation. They capture
 how each curve’s *shape* differs from the mean, in a coordinate system
 where Euclidean distances approximate geodesic distances on the
 manifold.
@@ -94,35 +96,39 @@ manifold.
 ### The TSRVF Transform
 
 Given aligned SRSFs
-${\widetilde{q}}_{i} = \left( q_{i} \circ \gamma_{i}^{*} \right)\sqrt{{\dot{\gamma}}_{i}^{*}}$
-and the mean SRSF $\bar{q}$ (the Karcher mean in SRSF space), the TSRVF
-of the $i$-th curve is computed via the **inverse exponential map** on
-the sphere:
+$`\tilde{q}_i = (q_i \circ \gamma_i^*) \sqrt{\dot\gamma_i^*}`$ and the
+mean SRSF $`\bar{q}`$ (the Karcher mean in SRSF space), the TSRVF of the
+$`i`$-th curve is computed via the **inverse exponential map** on the
+sphere:
 
-$$v_{i} = \frac{\theta_{i}}{\sin\left( \theta_{i} \right)}\left( {\widetilde{q}}_{i} - \cos\left( \theta_{i} \right)\,\bar{q} \right)$$
+``` math
+v_i = \frac{\theta_i}{\sin(\theta_i)} \left( \tilde{q}_i - \cos(\theta_i) \, \bar{q} \right)
+```
 
 where
-$\theta_{i} = \cos^{- 1}\left( \langle{\widetilde{q}}_{i},\bar{q}\rangle_{L^{2}} \right)$
-is the geodesic distance between ${\widetilde{q}}_{i}$ and $\bar{q}$ on
-the sphere.
+$`\theta_i = \cos^{-1}(\langle \tilde{q}_i, \bar{q} \rangle_{L^2})`$ is
+the geodesic distance between $`\tilde{q}_i`$ and $`\bar{q}`$ on the
+sphere.
 
 Key properties:
 
-1.  **$v_{i} \in T_{\bar{q}}{\mathbb{S}}^{\infty}$**: the tangent
-    vectors are orthogonal to $\bar{q}$, i.e.,
-    $\langle v_{i},\bar{q}\rangle = 0$
+1.  **$`v_i \in T_{\bar{q}} \mathbb{S}^\infty`$**: the tangent vectors
+    are orthogonal to $`\bar{q}`$, i.e.,
+    $`\langle v_i, \bar{q} \rangle = 0`$
 2.  **Euclidean distances approximate geodesic distances**:
-    $\parallel v_{i} - v_{j} \parallel_{L^{2}} \approx d_{e}\left( f_{i},f_{j} \right)$
-    for curves near the mean
+    $`\|v_i - v_j\|_{L^2}
+    \approx d_e(f_i, f_j)`$ for curves near the mean
 3.  **Linear operations are valid**: addition, scalar multiplication,
     inner products in the tangent space have geometric meaning
 
 ### Inverse Transform
 
-To reconstruct a curve from its tangent vector $v$, we apply the
+To reconstruct a curve from its tangent vector $`v`$, we apply the
 **exponential map**:
 
-$$\widetilde{q} = \cos( \parallel v \parallel )\,\bar{q} + \sin( \parallel v \parallel )\,\frac{v}{\parallel v \parallel}$$
+``` math
+\tilde{q} = \cos(\|v\|) \, \bar{q} + \sin(\|v\|) \, \frac{v}{\|v\|}
+```
 
 This gives the aligned SRSF, from which the aligned curve is recovered
 via SRSF inversion.
@@ -261,13 +267,13 @@ lower-dimensional.
 
 ## When to Use TSRVF
 
-| Scenario                              | Recommended approach                                                                                                                                              |
-|---------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Scenario | Recommended approach |
+|----|----|
 | Exploratory alignment & visualization | [`karcher.mean()`](https://sipemu.github.io/fdars-r/reference/karcher.mean.md) / [`elastic.align()`](https://sipemu.github.io/fdars-r/reference/elastic.align.md) |
-| PCA on aligned data                   | [`tsrvf.transform()`](https://sipemu.github.io/fdars-r/reference/tsrvf.transform.md) + [`prcomp()`](https://rdrr.io/r/stats/prcomp.html)                          |
-| Regression with aligned predictors    | [`tsrvf.transform()`](https://sipemu.github.io/fdars-r/reference/tsrvf.transform.md) + standard regression                                                        |
-| Clustering aligned curves             | [`tsrvf.transform()`](https://sipemu.github.io/fdars-r/reference/tsrvf.transform.md) + any Euclidean clustering                                                   |
-| Classification                        | TSRVF scores as features                                                                                                                                          |
+| PCA on aligned data | [`tsrvf.transform()`](https://sipemu.github.io/fdars-r/reference/tsrvf.transform.md) + [`prcomp()`](https://rdrr.io/r/stats/prcomp.html) |
+| Regression with aligned predictors | [`tsrvf.transform()`](https://sipemu.github.io/fdars-r/reference/tsrvf.transform.md) + standard regression |
+| Clustering aligned curves | [`tsrvf.transform()`](https://sipemu.github.io/fdars-r/reference/tsrvf.transform.md) + any Euclidean clustering |
+| Classification | TSRVF scores as features |
 
 The key insight: **TSRVF converts a nonlinear shape analysis problem
 into a standard multivariate statistics problem**, at the cost of a

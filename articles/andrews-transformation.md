@@ -4,12 +4,12 @@
 
 Many potential fdars users have multivariate (tabular) data rather than
 functional data. The **Andrews transformation** (Andrews, 1972) provides
-a mathematically rigorous bridge: it maps each $p$-dimensional
-observation to a curve on $\lbrack - \pi,\pi\rbrack$ using a Fourier
-expansion where the data values serve as coefficients.
+a mathematically rigorous bridge: it maps each $`p`$-dimensional
+observation to a curve on $`[-\pi, \pi]`$ using a Fourier expansion
+where the data values serve as coefficients.
 
-The key property is that the $L^{2}$ distance between Andrews curves
-equals $\sqrt{\pi}$ times the Euclidean distance between the original
+The key property is that the $`L^2`$ distance between Andrews curves
+equals $`\sqrt{\pi}`$ times the Euclidean distance between the original
 observations — so all distance-based FDA methods produce results that
 are directly interpretable in the original multivariate space.
 
@@ -34,20 +34,24 @@ set.seed(42)
 
 ## Mathematical Background
 
-Given a $p$-dimensional observation
-$\mathbf{x} = \left( x_{1},x_{2},\ldots,x_{p} \right)$, the Andrews
-function is defined as:
+Given a $`p`$-dimensional observation
+$`\mathbf{x} = (x_1, x_2, \ldots, x_p)`$, the Andrews function is
+defined as:
 
-$$f_{\mathbf{x}}(t) = \frac{x_{1}}{\sqrt{2}} + x_{2}\sin(t) + x_{3}\cos(t) + x_{4}\sin(2t) + x_{5}\cos(2t) + \cdots$$
+``` math
+f_{\mathbf{x}}(t) = \frac{x_1}{\sqrt{2}} + x_2 \sin(t) + x_3 \cos(t) + x_4 \sin(2t) + x_5 \cos(2t) + \cdots
+```
 
-for $t \in \lbrack - \pi,\pi\rbrack$. The pattern is: the first
-coefficient is scaled by $1/\sqrt{2}$, then subsequent coefficients
-multiply alternating $\sin(kt)$ and $\cos(kt)$ terms.
+for $`t \in [-\pi, \pi]`$. The pattern is: the first coefficient is
+scaled by $`1/\sqrt{2}`$, then subsequent coefficients multiply
+alternating $`\sin(kt)`$ and $`\cos(kt)`$ terms.
 
-**Distance preservation theorem.** For any two observations $\mathbf{x}$
-and $\mathbf{y}$:
+**Distance preservation theorem.** For any two observations
+$`\mathbf{x}`$ and $`\mathbf{y}`$:
 
-$$\parallel f_{\mathbf{x}} - f_{\mathbf{y}} \parallel_{L^{2}} = \sqrt{\pi} \cdot \parallel \mathbf{x} - \mathbf{y} \parallel_{2}$$
+``` math
+\|f_{\mathbf{x}} - f_{\mathbf{y}}\|_{L^2} = \sqrt{\pi} \cdot \|\mathbf{x} - \mathbf{y}\|_2
+```
 
 This means Euclidean distances are preserved (up to a constant factor)
 when moving to the functional domain. Every distance-based FDA method —
@@ -451,8 +455,8 @@ ggplot(df_components, aes(x = t, y = loading, color = PC)) +
 
 ## Variable Ordering
 
-The Andrews transformation maps the first variable to the $1/\sqrt{2}$
-term, the second to $\sin(t)$, and so on. Because lower-frequency
+The Andrews transformation maps the first variable to the $`1/\sqrt{2}`$
+term, the second to $`\sin(t)`$, and so on. Because lower-frequency
 Fourier terms dominate visually, placing important variables first
 produces more informative plots.
 
@@ -558,7 +562,7 @@ cat("Cluster agreement:", agreement, "/", n, "(", round(100 * agreement / n, 1),
 ## Distance Verification
 
 We verify the theoretical result:
-$\parallel f_{\mathbf{x}} - f_{\mathbf{y}} \parallel_{L^{2}} = \sqrt{\pi} \cdot \parallel \mathbf{x} - \mathbf{y} \parallel_{2}$.
+$`\|f_{\mathbf{x}} - f_{\mathbf{y}}\|_{L^2} = \sqrt{\pi} \cdot \|\mathbf{x} - \mathbf{y}\|_2`$.
 
 ``` r
 # Compute pairwise Andrews (L2) distances
@@ -582,7 +586,7 @@ cat(sprintf("  Mean:   %.4f\n", mean(ratio)))
 cat(sprintf("  Median: %.4f\n", median(ratio)))
 #>   Median: 1.7725
 cat(sprintf("  SD:     %.2e\n", sd(ratio)))
-#>   SD:     3.91e-16
+#>   SD:     3.94e-16
 cat(sprintf("  sqrt(pi) = %.4f\n", sqrt(pi)))
 #>   sqrt(pi) = 1.7725
 ```
@@ -605,7 +609,7 @@ ggplot(df_dist, aes(x = euclidean, y = andrews)) +
 
 ![](andrews-transformation_files/figure-html/distance-scatter-1.png)
 
-The points fall exactly on the $\sqrt{\pi}$ line, confirming the
+The points fall exactly on the $`\sqrt{\pi}`$ line, confirming the
 distance preservation theorem.
 
 ## Best Practices
@@ -619,11 +623,11 @@ distance preservation theorem.
     Fourier terms that are visually dominant. Use ANOVA F-statistics,
     variance, or domain knowledge to rank.
 
-3.  **Use $m \geq 200$ grid points.** Fewer points can introduce
+3.  **Use $`m \geq 200`$ grid points.** Fewer points can introduce
     numerical artifacts in distance computations. The default of 200 is
     sufficient for most applications.
 
-4.  **Works best for small-to-moderate $p$.** With many variables,
+4.  **Works best for small-to-moderate $`p`$.** With many variables,
     higher-order Fourier terms oscillate rapidly and contribute little
     visual information. For high-dimensional data, consider dimension
     reduction (e.g., PCA) before applying the Andrews transformation.
@@ -635,17 +639,17 @@ distance preservation theorem.
 
 ## Summary
 
-| FDA Method                                                                                                                                        | What It Reveals on Andrews Curves                |
-|---------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
-| [`depth.FM()`](https://sipemu.github.io/fdars-r/reference/depth.FM.md) / [`depth.MBD()`](https://sipemu.github.io/fdars-r/reference/depth.MBD.md) | Centrality of multivariate observations          |
-| [`median()`](https://sipemu.github.io/fdars-r/reference/median.md) / [`trimmed()`](https://sipemu.github.io/fdars-r/reference/trimmed.md)         | Robust center of the multivariate distribution   |
-| [`outliers.depth.pond()`](https://sipemu.github.io/fdars-r/reference/outliers.depth.pond.md)                                                      | Observations far from the multivariate center    |
-| [`outliergram()`](https://sipemu.github.io/fdars-r/reference/outliergram.md)                                                                      | Shape outliers in the multivariate space         |
-| [`magnitudeshape()`](https://sipemu.github.io/fdars-r/reference/magnitudeshape.md)                                                                | Magnitude vs shape decomposition of outlyingness |
-| [`cluster.kmeans()`](https://sipemu.github.io/fdars-r/reference/cluster.kmeans.md)                                                                | Euclidean-distance-based partitioning            |
-| [`cluster.fcm()`](https://sipemu.github.io/fdars-r/reference/cluster.fcm.md)                                                                      | Soft cluster memberships (overlap detection)     |
-| [`fdata2pc()`](https://sipemu.github.io/fdars-r/reference/fdata2pc.md)                                                                            | Dominant directions of multivariate variation    |
-| [`metric.lp()`](https://sipemu.github.io/fdars-r/reference/metric.lp.md)                                                                          | $\sqrt{\pi} \times$ Euclidean distance           |
+| FDA Method | What It Reveals on Andrews Curves |
+|----|----|
+| [`depth.FM()`](https://sipemu.github.io/fdars-r/reference/depth.FM.md) / [`depth.MBD()`](https://sipemu.github.io/fdars-r/reference/depth.MBD.md) | Centrality of multivariate observations |
+| [`median()`](https://sipemu.github.io/fdars-r/reference/median.md) / [`trimmed()`](https://sipemu.github.io/fdars-r/reference/trimmed.md) | Robust center of the multivariate distribution |
+| [`outliers.depth.pond()`](https://sipemu.github.io/fdars-r/reference/outliers.depth.pond.md) | Observations far from the multivariate center |
+| [`outliergram()`](https://sipemu.github.io/fdars-r/reference/outliergram.md) | Shape outliers in the multivariate space |
+| [`magnitudeshape()`](https://sipemu.github.io/fdars-r/reference/magnitudeshape.md) | Magnitude vs shape decomposition of outlyingness |
+| [`cluster.kmeans()`](https://sipemu.github.io/fdars-r/reference/cluster.kmeans.md) | Euclidean-distance-based partitioning |
+| [`cluster.fcm()`](https://sipemu.github.io/fdars-r/reference/cluster.fcm.md) | Soft cluster memberships (overlap detection) |
+| [`fdata2pc()`](https://sipemu.github.io/fdars-r/reference/fdata2pc.md) | Dominant directions of multivariate variation |
+| [`metric.lp()`](https://sipemu.github.io/fdars-r/reference/metric.lp.md) | $`\sqrt{\pi} \times`$ Euclidean distance |
 
 ## References
 

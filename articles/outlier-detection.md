@@ -70,11 +70,11 @@ supports three different methods for computing the threshold.
 
 #### Threshold Methods
 
-| Method       | Formula                  | When to Use                                       |
-|--------------|--------------------------|---------------------------------------------------|
+| Method | Formula | When to Use |
+|----|----|----|
 | `"quantile"` | `quantile(depths, quan)` | When you expect a specific proportion of outliers |
-| `"mad"`      | `median - k × MAD`       | More robust when outliers may already exist       |
-| `"iqr"`      | `Q1 - k × IQR`           | Boxplot-style detection                           |
+| `"mad"` | `median - k × MAD` | More robust when outliers may already exist |
+| `"iqr"` | `Q1 - k × IQR` | Boxplot-style detection |
 
 **Default: 95th percentile threshold** (`quan = 0.05`), which flags
 curves in the bottom 5% of depths as outliers.
@@ -538,12 +538,12 @@ plot(og)
 
 **How to read the outliergram:**
 
-| Position     | MEI (X-axis) | MBD (Y-axis) | Interpretation                                     |
-|--------------|--------------|--------------|----------------------------------------------------|
-| Bottom-left  | Low          | Low          | **Extreme outlier** (unusual shape AND position)   |
-| Bottom-right | High         | Low          | **Magnitude outlier** (shifted up/down)            |
-| Top-left     | Low          | High         | **Shape outlier** (unusual pattern, typical level) |
-| Top-right    | High         | High         | **Normal curve** (typical shape and position)      |
+| Position | MEI (X-axis) | MBD (Y-axis) | Interpretation |
+|----|----|----|----|
+| Bottom-left | Low | Low | **Extreme outlier** (unusual shape AND position) |
+| Bottom-right | High | Low | **Magnitude outlier** (shifted up/down) |
+| Top-left | Low | High | **Shape outlier** (unusual pattern, typical level) |
+| Top-right | High | High | **Normal curve** (typical shape and position) |
 
 The parabolic boundary marks the theoretical limit for non-outlying
 curves. Points below this boundary are flagged as outliers.
@@ -561,12 +561,12 @@ plot(ms)
 
 **How to read the MS-plot:**
 
-| Quadrant     | Magnitude Outlyingness | Shape Outlyingness | Type                              |
-|--------------|------------------------|--------------------|-----------------------------------|
-| Bottom-left  | Low                    | Low                | **Normal curve**                  |
-| Bottom-right | High                   | Low                | **Magnitude outlier** only        |
-| Top-left     | Low                    | High               | **Shape outlier** only            |
-| Top-right    | High                   | High               | **Combined outlier** (both types) |
+| Quadrant | Magnitude Outlyingness | Shape Outlyingness | Type |
+|----|----|----|----|
+| Bottom-left | Low | Low | **Normal curve** |
+| Bottom-right | High | Low | **Magnitude outlier** only |
+| Top-left | Low | High | **Shape outlier** only |
+| Top-right | High | High | **Combined outlier** (both types) |
 
 The MS-plot is particularly useful when you want to understand *why* a
 curve is an outlier - is it because of its level (magnitude) or its

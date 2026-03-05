@@ -546,12 +546,12 @@ peak-to-peak distances.
 Peak detection quality depends heavily on parameters. Here’s a
 reference:
 
-| Parameter        | Purpose                    | Typical Values       | When to Adjust                   |
-|------------------|----------------------------|----------------------|----------------------------------|
-| `min_distance`   | Minimum time between peaks | `period * 0.8`       | Set to ~80% of expected period   |
-| `min_prominence` | How much peak stands out   | 0.1-0.5 x amplitude  | Increase if too many noise peaks |
-| `smooth_first`   | Pre-smooth noisy data      | `TRUE` for real data | Almost always use `TRUE`         |
-| `smooth_nbasis`  | Number of Fourier basis    | `NULL` (auto CV)     | Let CV choose optimal nbasis     |
+| Parameter | Purpose | Typical Values | When to Adjust |
+|----|----|----|----|
+| `min_distance` | Minimum time between peaks | `period * 0.8` | Set to ~80% of expected period |
+| `min_prominence` | How much peak stands out | 0.1-0.5 x amplitude | Increase if too many noise peaks |
+| `smooth_first` | Pre-smooth noisy data | `TRUE` for real data | Almost always use `TRUE` |
+| `smooth_nbasis` | Number of Fourier basis | `NULL` (auto CV) | Let CV choose optimal nbasis |
 
 ### Effect of Parameters
 
@@ -1273,12 +1273,12 @@ The
 function returns one of four classifications based on seasonal strength
 and timing variability:
 
-| Classification   | Seasonal Strength | Timing Variability | Interpretation                          |
-|------------------|-------------------|--------------------|-----------------------------------------|
-| **stable**       | \> 0.7            | \< 0.05            | Consistent pattern across cycles        |
-| **variable**     | 0.4 - 0.7         | 0.05 - 0.15        | Clear seasonality but parameters change |
-| **intermittent** | \< 0.4            | any                | Seasonality appears and disappears      |
-| **none**         | \< 0.2            | any                | No clear seasonal pattern               |
+| Classification | Seasonal Strength | Timing Variability | Interpretation |
+|----|----|----|----|
+| **stable** | \> 0.7 | \< 0.05 | Consistent pattern across cycles |
+| **variable** | 0.4 - 0.7 | 0.05 - 0.15 | Clear seasonality but parameters change |
+| **intermittent** | \< 0.4 | any | Seasonality appears and disappears |
+| **none** | \< 0.2 | any | No clear seasonal pattern |
 
 ``` r
 # Example: Stable seasonality - clean signal with consistent timing
@@ -1412,20 +1412,20 @@ cat("Seasonal strength:", round(ss_curves, 3), "\n")
 
 ### Function Reference
 
-| Function                                                                                                             | Purpose                                                   |
-|----------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
-| [`estimate.period()`](https://sipemu.github.io/fdars-r/reference/estimate.period.md)                                 | Estimate seasonal period (FFT or ACF method)              |
-| [`detect.periods()`](https://sipemu.github.io/fdars-r/reference/detect.periods.md)                                   | Detect multiple concurrent periodicities                  |
-| [`detect.peaks()`](https://sipemu.github.io/fdars-r/reference/detect.peaks.md)                                       | Find and characterize peaks (with auto GCV smoothing)     |
-| [`seasonal.strength()`](https://sipemu.github.io/fdars-r/reference/seasonal.strength.md)                             | Measure overall seasonality strength                      |
-| [`seasonal.strength.curve()`](https://sipemu.github.io/fdars-r/reference/seasonal.strength.curve.md)                 | Time-varying seasonality strength                         |
-| [`detect.seasonality.changes()`](https://sipemu.github.io/fdars-r/reference/detect.seasonality.changes.md)           | Find onset/cessation of seasonality                       |
-| [`detect.seasonality.changes.auto()`](https://sipemu.github.io/fdars-r/reference/detect.seasonality.changes.auto.md) | Auto threshold using Otsu’s method                        |
-| [`instantaneous.period()`](https://sipemu.github.io/fdars-r/reference/instantaneous.period.md)                       | Period estimation for smoothly drifting signals           |
-| [`analyze.peak.timing()`](https://sipemu.github.io/fdars-r/reference/analyze.peak.timing.md)                         | Analyze peak timing variability across cycles             |
-| [`classify.seasonality()`](https://sipemu.github.io/fdars-r/reference/classify.seasonality.md)                       | Classify seasonality type (stable/variable/intermittent)  |
-| [`detrend()`](https://sipemu.github.io/fdars-r/reference/detrend.md)                                                 | Remove trends (linear, polynomial, LOESS, differencing)   |
-| [`decompose()`](https://sipemu.github.io/fdars-r/reference/decompose.md)                                             | Seasonal-trend decomposition (additive or multiplicative) |
+| Function | Purpose |
+|----|----|
+| [`estimate.period()`](https://sipemu.github.io/fdars-r/reference/estimate.period.md) | Estimate seasonal period (FFT or ACF method) |
+| [`detect.periods()`](https://sipemu.github.io/fdars-r/reference/detect.periods.md) | Detect multiple concurrent periodicities |
+| [`detect.peaks()`](https://sipemu.github.io/fdars-r/reference/detect.peaks.md) | Find and characterize peaks (with auto GCV smoothing) |
+| [`seasonal.strength()`](https://sipemu.github.io/fdars-r/reference/seasonal.strength.md) | Measure overall seasonality strength |
+| [`seasonal.strength.curve()`](https://sipemu.github.io/fdars-r/reference/seasonal.strength.curve.md) | Time-varying seasonality strength |
+| [`detect.seasonality.changes()`](https://sipemu.github.io/fdars-r/reference/detect.seasonality.changes.md) | Find onset/cessation of seasonality |
+| [`detect.seasonality.changes.auto()`](https://sipemu.github.io/fdars-r/reference/detect.seasonality.changes.auto.md) | Auto threshold using Otsu’s method |
+| [`instantaneous.period()`](https://sipemu.github.io/fdars-r/reference/instantaneous.period.md) | Period estimation for smoothly drifting signals |
+| [`analyze.peak.timing()`](https://sipemu.github.io/fdars-r/reference/analyze.peak.timing.md) | Analyze peak timing variability across cycles |
+| [`classify.seasonality()`](https://sipemu.github.io/fdars-r/reference/classify.seasonality.md) | Classify seasonality type (stable/variable/intermittent) |
+| [`detrend()`](https://sipemu.github.io/fdars-r/reference/detrend.md) | Remove trends (linear, polynomial, LOESS, differencing) |
+| [`decompose()`](https://sipemu.github.io/fdars-r/reference/decompose.md) | Seasonal-trend decomposition (additive or multiplicative) |
 
 ### Decision Guide
 
@@ -1512,7 +1512,8 @@ periods <- detect.periods(fd)  # if multiple periods suspected
 
 All fdars Rust functions are thread-safe. Use
 [`parallel::mclapply()`](https://rdrr.io/r/parallel/mclapply.html) or
-`future.apply::future_lapply()` for parallel processing:
+[`future.apply::future_lapply()`](https://future.apply.futureverse.org/reference/future_lapply.html)
+for parallel processing:
 
 ``` r
 # Example batch processing workflow

@@ -496,8 +496,6 @@ if (requireNamespace("ggforce", quietly = TRUE)) {
 }
 ```
 
-![](custom-plotting_files/figure-html/hulls-1.png)
-
 ## Theming for Publication
 
 ``` r

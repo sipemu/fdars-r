@@ -9,10 +9,10 @@ cross-sectional mean or PCA treat all variation as amplitude, which can
 produce blurred averages and inflated variance.
 
 **Elastic alignment** separates these two sources of variability by
-finding optimal **warping functions** $\gamma$ that retime each curve
+finding optimal **warping functions** $`\gamma`$ that retime each curve
 before comparison. The mathematical framework uses the **Square-Root
 Slope Function (SRSF)** representation, which makes the Fisher-Rao
-metric equivalent to the $L^{2}$ metric – enabling efficient dynamic
+metric equivalent to the $`L^2`$ metric – enabling efficient dynamic
 programming alignment.
 
 ``` r
@@ -111,52 +111,59 @@ the peaks are aligned before averaging.
 
 ### The Space of Warping Functions
 
-Let $\mathcal{F}$ denote the space of absolutely continuous functions
-$\left. f:\lbrack 0,1\rbrack\rightarrow{\mathbb{R}} \right.$. The
-**warping group** is the set of orientation-preserving diffeomorphisms
-of $\lbrack 0,1\rbrack$:
+Let $`\mathcal{F}`$ denote the space of absolutely continuous functions
+$`f : [0, 1] \to \mathbb{R}`$. The **warping group** is the set of
+orientation-preserving diffeomorphisms of $`[0, 1]`$:
 
-$$\left. \Gamma = \{\gamma:\lbrack 0,1\rbrack\rightarrow\lbrack 0,1\rbrack \mid \gamma(0) = 0,\;\gamma(1) = 1,\;\dot{\gamma} > 0\} \right.$$
+``` math
+\Gamma = \{\gamma : [0, 1] \to [0, 1] \mid \gamma(0) = 0,\; \gamma(1) = 1,\; \dot\gamma > 0\}
+```
 
-$\Gamma$ acts on $\mathcal{F}$ by composition: for $f \in \mathcal{F}$
-and $\gamma \in \Gamma$, the warped function is
-$(f \circ \gamma)(t) = f\left( \gamma(t) \right)$. This group action
+$`\Gamma`$ acts on $`\mathcal{F}`$ by composition: for
+$`f \in \mathcal{F}`$ and $`\gamma \in \Gamma`$, the warped function is
+$`(f \circ \gamma)(t) = f(\gamma(t))`$. This group action
 reparameterizes the curve without changing its shape – only the speed at
 which the curve is traversed changes.
 
 ### The Fisher-Rao Metric
 
-The **Fisher-Rao metric** on $\mathcal{F}$ is the unique Riemannian
-metric (up to scaling) that is invariant under the action of $\Gamma$.
-For two tangent vectors
-$\delta f_{1},\delta f_{2} \in T_{f}\mathcal{F}$, it is defined as:
+The **Fisher-Rao metric** on $`\mathcal{F}`$ is the unique Riemannian
+metric (up to scaling) that is invariant under the action of $`\Gamma`$.
+For two tangent vectors $`\delta f_1, \delta f_2 \in T_f \mathcal{F}`$,
+it is defined as:
 
-$$\langle\delta f_{1},\delta f_{2}\rangle_{FR} = \int_{0}^{1}\frac{\delta f_{1}\prime(t)\,\delta f_{2}\prime(t)}{\left| f\prime(t) \right|}\, dt$$
+``` math
+\langle \delta f_1, \delta f_2 \rangle_{FR} = \int_0^1 \frac{\delta f_1'(t) \, \delta f_2'(t)}{|f'(t)|} \, dt
+```
 
 This metric is difficult to compute directly because it depends on the
-derivative of $f$ in the denominator. The SRSF transform resolves this
-by isometrically mapping the Fisher-Rao geometry to a flat $L^{2}$
+derivative of $`f`$ in the denominator. The SRSF transform resolves this
+by isometrically mapping the Fisher-Rao geometry to a flat $`L^2`$
 space.
 
 ### SRSF Transform
 
-The **Square-Root Slope Function** of $f$ is defined as:
+The **Square-Root Slope Function** of $`f`$ is defined as:
 
-$$q(t) = \text{sign}\left( f\prime(t) \right)\sqrt{\left| f\prime(t) \right|}$$
+``` math
+q(t) = \text{sign}(f'(t)) \sqrt{|f'(t)|}
+```
 
 This transform has three key properties:
 
-1.  **Isometry**: The Fisher-Rao distance between $f_{1}$ and $f_{2}$
-    equals the $L^{2}$ distance between their SRSFs $q_{1}$ and $q_{2}$
+1.  **Isometry**: The Fisher-Rao distance between $`f_1`$ and $`f_2`$
+    equals the $`L^2`$ distance between their SRSFs $`q_1`$ and $`q_2`$
     (after optimal alignment)
 2.  **Equivariance**: Under the warping action
-    $\left. f\mapsto f \circ \gamma \right.$, the SRSF transforms as
-    $\left. q\mapsto(q \circ \gamma)\sqrt{\dot{\gamma}} \right.$. This
-    is simply the standard action of $\Gamma$ on $L^{2}$
-3.  **Invertibility**: Given $q$ and an initial value $f_{0} = f(0)$,
+    $`f \mapsto f \circ \gamma`$, the SRSF transforms as
+    $`q \mapsto (q \circ \gamma) \sqrt{\dot\gamma}`$. This is simply the
+    standard action of $`\Gamma`$ on $`L^2`$
+3.  **Invertibility**: Given $`q`$ and an initial value $`f_0 = f(0)`$,
     the original function is recovered by:
 
-$$f(t) = f_{0} + \int_{0}^{t}q(s)\left| q(s) \right|\, ds$$
+``` math
+f(t) = f_0 + \int_0^t q(s)|q(s)|\,ds
+```
 
 ``` r
 q <- srsf.transform(fd)
@@ -182,65 +189,71 @@ cat("Round-trip max error:", format(max_error, digits = 4), "\n")
 
 ### Alignment as Optimization
 
-Given two functions $f_{1},f_{2} \in \mathcal{F}$ with SRSFs
-$q_{1},q_{2}$, the **optimal alignment** finds:
+Given two functions $`f_1, f_2 \in \mathcal{F}`$ with SRSFs
+$`q_1, q_2`$, the **optimal alignment** finds:
 
-$$\gamma^{*} = \arg\min\limits_{\gamma \in \Gamma} \parallel q_{1} - \left( q_{2} \circ \gamma \right)\sqrt{\dot{\gamma}} \parallel_{L^{2}}$$
+``` math
+\gamma^* = \arg\min_{\gamma \in \Gamma} \| q_1 - (q_2 \circ \gamma) \sqrt{\dot\gamma} \|_{L^2}
+```
 
-This is solved via dynamic programming in $O\left( m^{2} \right)$ time,
-where $m$ is the number of grid points. The aligned function is
-$f_{2} \circ \gamma^{*}$, and the **elastic distance** between $f_{1}$
-and $f_{2}$ is:
+This is solved via dynamic programming in $`O(m^2)`$ time, where $`m`$
+is the number of grid points. The aligned function is
+$`f_2 \circ \gamma^*`$, and the **elastic distance** between $`f_1`$ and
+$`f_2`$ is:
 
-$$d_{e}\left( f_{1},f_{2} \right) = \parallel q_{1} - \left( q_{2} \circ \gamma^{*} \right)\sqrt{{\dot{\gamma}}^{*}} \parallel_{L^{2}}$$
+``` math
+d_e(f_1, f_2) = \| q_1 - (q_2 \circ \gamma^*) \sqrt{\dot\gamma^*} \|_{L^2}
+```
 
 This distance satisfies all metric axioms (non-negativity, symmetry,
 triangle inequality) and is invariant to reparameterization:
-$d_{e}\left( f_{1},f_{2} \right) = d_{e}\left( f_{1} \circ \gamma,f_{2} \circ \gamma \right)$
-for any $\gamma \in \Gamma$.
+$`d_e(f_1, f_2) = d_e(f_1 \circ \gamma, f_2 \circ \gamma)`$ for any
+$`\gamma \in \Gamma`$.
 
 ### Amplitude-Phase Decomposition
 
 Elastic alignment provides a principled decomposition of total
-variability. For a sample $f_{1},\ldots,f_{n}$ with aligned versions
-${\widetilde{f}}_{i} = f_{i} \circ \gamma_{i}^{*}$:
+variability. For a sample $`f_1, \ldots, f_n`$ with aligned versions
+$`\tilde{f}_i = f_i \circ \gamma_i^*`$:
 
 - **Amplitude variability**: The residual variance in
-  ${\widetilde{f}}_{1},\ldots,{\widetilde{f}}_{n}$ after alignment. This
-  captures genuine differences in curve shape (height, depth of
-  features)
+  $`\tilde{f}_1, \ldots, \tilde{f}_n`$ after alignment. This captures
+  genuine differences in curve shape (height, depth of features)
 - **Phase variability**: The variability in the warping functions
-  $\gamma_{1}^{*},\ldots,\gamma_{n}^{*}$ themselves. This captures
+  $`\gamma_1^*, \ldots, \gamma_n^*`$ themselves. This captures
   differences in timing (when features occur)
 
 The **variance reduction** (VR) quantifies the proportion of total
 variance attributable to phase:
 
-$$\text{VR} = 1 - \frac{\text{Var}\left( {\widetilde{f}}_{1},\ldots,{\widetilde{f}}_{n} \right)}{\text{Var}\left( f_{1},\ldots,f_{n} \right)}$$
+``` math
+\text{VR} = 1 - \frac{\text{Var}(\tilde{f}_1, \ldots, \tilde{f}_n)}{\text{Var}(f_1, \ldots, f_n)}
+```
 
-where $\text{Var}$ denotes the mean pointwise variance
-$\frac{1}{T}\sum_{t}\text{Var}_{i}\left( f_{i}(t) \right)$. A VR close
-to 1 indicates that most variability was phase (and has been removed); a
-VR near 0 indicates the variability is primarily amplitude.
+where $`\text{Var}`$ denotes the mean pointwise variance
+$`\frac{1}{T} \sum_{t} \text{Var}_i(f_i(t))`$. A VR close to 1 indicates
+that most variability was phase (and has been removed); a VR near 0
+indicates the variability is primarily amplitude.
 
 ### Karcher Mean
 
 The **Karcher mean** (Frechet mean in the elastic metric) is the
-function $\mu^{*}$ that minimizes the sum of squared elastic distances:
+function $`\mu^*`$ that minimizes the sum of squared elastic distances:
 
-$$\mu^{*} = \arg\min\limits_{\mu \in \mathcal{F}}\sum\limits_{i = 1}^{n}d_{e}\left( \mu,f_{i} \right)^{2}$$
+``` math
+\mu^* = \arg\min_{\mu \in \mathcal{F}} \sum_{i=1}^n d_e(\mu, f_i)^2
+```
 
-Since $d_{e}$ accounts for reparameterization, $\mu^{*}$ is a
+Since $`d_e`$ accounts for reparameterization, $`\mu^*`$ is a
 **shape-preserving average**: it recovers the common shape without
 blurring from phase variability. The algorithm iterates:
 
-1.  Initialize $\widehat{\mu} = \bar{f}$ (cross-sectional mean)
-2.  Align all curves to $\widehat{\mu}$:
-    ${\widetilde{f}}_{i} = f_{i} \circ \gamma_{i}^{*}$
-3.  Update
-    $\left. \widehat{\mu}\leftarrow\frac{1}{n}\sum_{i = 1}^{n}{\widetilde{f}}_{i} \right.$
+1.  Initialize $`\hat\mu = \bar{f}`$ (cross-sectional mean)
+2.  Align all curves to $`\hat\mu`$:
+    $`\tilde{f}_i = f_i \circ \gamma_i^*`$
+3.  Update $`\hat\mu \leftarrow \frac{1}{n} \sum_{i=1}^n \tilde{f}_i`$
 4.  Repeat until convergence
-    ($\parallel {\widehat{\mu}}^{(k + 1)} - {\widehat{\mu}}^{(k)} \parallel_{L^{2}} < \varepsilon$)
+    ($`\|\hat\mu^{(k+1)} - \hat\mu^{(k)}\|_{L^2} < \varepsilon`$)
 
 In practice, convergence is guaranteed to a local minimum and typically
 occurs in 5–20 iterations.
@@ -308,7 +321,7 @@ plot(km, type = "mean")
 
 ### Elastic Distance Matrix
 
-The elastic distance $d_{e}$ provides a reparameterization-invariant
+The elastic distance $`d_e`$ provides a reparameterization-invariant
 metric for clustering, MDS, and other distance-based methods:
 
 ``` r
@@ -496,31 +509,31 @@ where it does not.
 
 ### Works Well
 
-| Scenario                      | Typical VR | Notes                                                |
-|:------------------------------|:----------:|:-----------------------------------------------------|
-| Shifted peaks / bumps         |  98-100%   | Best case: localized features with horizontal shifts |
-| ECG-like sharp peaks          |  98-100%   | Localized timing differences in multi-peak curves    |
-| Spectral data (shifted peaks) |   95-98%   | Multiple peaks with coherent timing shifts           |
-| Phase-shifted smooth curves   |   90-93%   | Sinusoidal, polynomial, sigmoid curves with shifts   |
-| Non-periodic curves           |  95-100%   | Works well when boundary values are similar          |
+| Scenario | Typical VR | Notes |
+|:---|:--:|:---|
+| Shifted peaks / bumps | 98-100% | Best case: localized features with horizontal shifts |
+| ECG-like sharp peaks | 98-100% | Localized timing differences in multi-peak curves |
+| Spectral data (shifted peaks) | 95-98% | Multiple peaks with coherent timing shifts |
+| Phase-shifted smooth curves | 90-93% | Sinusoidal, polynomial, sigmoid curves with shifts |
+| Non-periodic curves | 95-100% | Works well when boundary values are similar |
 
 ### Where It Degrades
 
-| Scenario                | Typical VR | Explanation                                                                     |
-|:------------------------|:----------:|:--------------------------------------------------------------------------------|
-| Mixed amplitude + phase |   40-65%   | Phase correction is partial when amplitude dominates                            |
-| Noisy data (raw)        |   0-30%    | Noise in derivatives overwhelms SRSF; smooth first                              |
-| Large boundary mismatch |   70-85%   | Fixed boundary ($\gamma(0) = 0$, $\gamma(1) = 1$) can’t correct endpoint values |
-| Coarse grids (m \< 50)  |   70-75%   | DP resolution limits alignment accuracy                                         |
+| Scenario | Typical VR | Explanation |
+|:---|:--:|:---|
+| Mixed amplitude + phase | 40-65% | Phase correction is partial when amplitude dominates |
+| Noisy data (raw) | 0-30% | Noise in derivatives overwhelms SRSF; smooth first |
+| Large boundary mismatch | 70-85% | Fixed boundary ($`\gamma(0)=0`$, $`\gamma(1)=1`$) can’t correct endpoint values |
+| Coarse grids (m \< 50) | 70-75% | DP resolution limits alignment accuracy |
 
 ### Where It Should NOT Be Used
 
-| Scenario                     | What happens                     | Recommendation                                                                                                                                                              |
-|:-----------------------------|:---------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Pure amplitude differences   | Identity warp (no harm, no help) | Use standard methods                                                                                                                                                        |
-| Rate-varying monotone curves | Spurious warping, VR \< 0        | These are amplitude/shape differences, not phase                                                                                                                            |
-| Genuinely different shapes   | Forced warping, VR \< 0          | Use depth or distance methods instead                                                                                                                                       |
-| Very noisy data (unsmoothed) | Noise-driven warping, VR \< 0    | Pre-smooth with [`fdata2basis()`](https://sipemu.github.io/fdars-r/reference/fdata2basis.md) + [`basis2fdata()`](https://sipemu.github.io/fdars-r/reference/basis2fdata.md) |
+| Scenario | What happens | Recommendation |
+|:---|:---|:---|
+| Pure amplitude differences | Identity warp (no harm, no help) | Use standard methods |
+| Rate-varying monotone curves | Spurious warping, VR \< 0 | These are amplitude/shape differences, not phase |
+| Genuinely different shapes | Forced warping, VR \< 0 | Use depth or distance methods instead |
+| Very noisy data (unsmoothed) | Noise-driven warping, VR \< 0 | Pre-smooth with [`fdata2basis()`](https://sipemu.github.io/fdars-r/reference/fdata2basis.md) + [`basis2fdata()`](https://sipemu.github.io/fdars-r/reference/basis2fdata.md) |
 
 ## Scenario Gallery
 
@@ -998,27 +1011,26 @@ features.
 
 Three alignment strategies are available in **fdars**:
 
-|                     | Elastic (SRSF)                                                                   | DTW                                                                        | Shift Registration                                                           |
-|:--------------------|:---------------------------------------------------------------------------------|:---------------------------------------------------------------------------|:-----------------------------------------------------------------------------|
-| **Function**        | [`elastic.align()`](https://sipemu.github.io/fdars-r/reference/elastic.align.md) | [`metric.DTW()`](https://sipemu.github.io/fdars-r/reference/metric.DTW.md) | [`register.fd()`](https://sipemu.github.io/fdars-r/reference/register.fd.md) |
-| **Warping**         | Smooth, monotone diffeomorphism                                                  | Piecewise constant, allows repeated indices                                | Global translation only                                                      |
-| **Metric**          | Proper metric (triangle inequality holds)                                        | Not a metric                                                               | Not applicable (no warping)                                                  |
-| **Amplitude/Phase** | Cleanly separates the two                                                        | Mixes them — can absorb amplitude differences into warping                 | Pure phase (shift), amplitude untouched                                      |
-| **Degeneracy**      | No “pinching” — SRSF penalizes compression                                       | Can collapse entire regions to a single point                              | No degeneracy, but very limited                                              |
-| **Mean**            | Karcher mean is well-defined                                                     | No principled mean                                                         | Shift-corrected cross-sectional mean                                         |
-| **Complexity**      | $O\left( m^{2} \right)$ per pair (DP)                                            | $O\left( m^{2} \right)$ per pair (DP)                                      | $O(m)$ per curve (cross-correlation)                                         |
+|  | Elastic (SRSF) | DTW | Shift Registration |
+|:---|:---|:---|:---|
+| **Function** | [`elastic.align()`](https://sipemu.github.io/fdars-r/reference/elastic.align.md) | [`metric.DTW()`](https://sipemu.github.io/fdars-r/reference/metric.DTW.md) | [`register.fd()`](https://sipemu.github.io/fdars-r/reference/register.fd.md) |
+| **Warping** | Smooth, monotone diffeomorphism | Piecewise constant, allows repeated indices | Global translation only |
+| **Metric** | Proper metric (triangle inequality holds) | Not a metric | Not applicable (no warping) |
+| **Amplitude/Phase** | Cleanly separates the two | Mixes them — can absorb amplitude differences into warping | Pure phase (shift), amplitude untouched |
+| **Degeneracy** | No “pinching” — SRSF penalizes compression | Can collapse entire regions to a single point | No degeneracy, but very limited |
+| **Mean** | Karcher mean is well-defined | No principled mean | Shift-corrected cross-sectional mean |
+| **Complexity** | $`O(m^2)`$ per pair (DP) | $`O(m^2)`$ per pair (DP) | $`O(m)`$ per curve (cross-correlation) |
 
 ### Why Elastic Alignment Avoids Degeneracy
 
 A key advantage of the SRSF framework is that the elastic distance
 penalizes “pinching” — collapsing a region of the curve to a single
 point. The SRSF of a warped function is
-$(q \circ \gamma)\sqrt{\dot{\gamma}}$, so when
-$\left. \dot{\gamma}\rightarrow 0 \right.$ (extreme compression), the
-SRSF contribution vanishes rather than concentrating. This acts as a
-natural regularizer. In contrast, DTW allows repeated indices that
-effectively collapse entire regions to a single point, which can produce
-degenerate alignments.
+$`(q \circ \gamma)\sqrt{\dot\gamma}`$, so when $`\dot\gamma \to 0`$
+(extreme compression), the SRSF contribution vanishes rather than
+concentrating. This acts as a natural regularizer. In contrast, DTW
+allows repeated indices that effectively collapse entire regions to a
+single point, which can produce degenerate alignments.
 
 ### Head-to-Head: Shifted Bumps
 
@@ -1151,26 +1163,26 @@ both sources of variability carry distinct meaning.
 
 ### When to Use Each Method
 
-| Scenario                                          | Recommended                                                                                        |
-|:--------------------------------------------------|:---------------------------------------------------------------------------------------------------|
-| Localized features with independent timing shifts | Elastic alignment                                                                                  |
-| Simple global time shift or delay                 | Shift registration (`register.fd`) — fast and sufficient                                           |
-| Distance computation for clustering/MDS           | Elastic distance (proper metric) or DTW (if metric property not needed)                            |
-| Noisy signals, speech-like data                   | DTW (more robust to noise without pre-smoothing)                                                   |
-| Periodic/circular data                            | `elastic.align(periodic = TRUE)`                                                                   |
-| Need principled mean shape                        | [`karcher.mean()`](https://sipemu.github.io/fdars-r/reference/karcher.mean.md) (no DTW equivalent) |
+| Scenario | Recommended |
+|:---|:---|
+| Localized features with independent timing shifts | Elastic alignment |
+| Simple global time shift or delay | Shift registration (`register.fd`) — fast and sufficient |
+| Distance computation for clustering/MDS | Elastic distance (proper metric) or DTW (if metric property not needed) |
+| Noisy signals, speech-like data | DTW (more robust to noise without pre-smoothing) |
+| Periodic/circular data | `elastic.align(periodic = TRUE)` |
+| Need principled mean shape | [`karcher.mean()`](https://sipemu.github.io/fdars-r/reference/karcher.mean.md) (no DTW equivalent) |
 
 ## Periodic Functional Data
 
 ### The Problem
 
-Elastic alignment uses fixed boundary constraints $\gamma(0) = 0$,
-$\gamma(1) = 1$. This prevents the warping function from performing
+Elastic alignment uses fixed boundary constraints $`\gamma(0) = 0`$,
+$`\gamma(1) = 1`$. This prevents the warping function from performing
 circular shifts, which means periodic data (e.g., curves on
-$\lbrack 0,2\pi\rbrack$ where $f(0) = f(2\pi)$) with large phase offsets
-cannot be properly aligned.
+$`[0, 2\pi]`$ where $`f(0) = f(2\pi)`$) with large phase offsets cannot
+be properly aligned.
 
-For example, two copies of $\sin(t)$ shifted by half a period have
+For example, two copies of $`\sin(t)`$ shifted by half a period have
 identical shape but the boundary constraints force alignment to fail:
 
 ``` r
@@ -1537,8 +1549,8 @@ cat("After alignment:  PC1 =", pve_after[1], "%, PC2 =", pve_after[2], "%\n")
 
 ### Fixed Boundary Conditions
 
-Warping functions are constrained to $\gamma(0) = 0$ and
-$\gamma(1) = 1$. This means the alignment cannot correct mismatches at
+Warping functions are constrained to $`\gamma(0) = 0`$ and
+$`\gamma(1) = 1`$. This means the alignment cannot correct mismatches at
 the domain boundaries. For shifted curves, the residual at the boundary
 equals the value difference:
 
@@ -1563,7 +1575,7 @@ corrected.
 
 ### Amplitude-Only Differences
 
-When curves differ only in amplitude (e.g., $f$ vs $2f$), alignment
+When curves differ only in amplitude (e.g., $`f`$ vs $`2f`$), alignment
 correctly produces identity warping – no spurious time distortion:
 
 ``` r
@@ -1585,8 +1597,7 @@ leaves amplitude untouched.
 
 ### Domain Independence
 
-The alignment works correctly on any domain, not just
-$\lbrack 0,1\rbrack$:
+The alignment works correctly on any domain, not just $`[0, 1]`$:
 
 ``` r
 for (domain in list(c(0, 1), c(0, 2*pi), c(0, 10), c(-1, 1))) {

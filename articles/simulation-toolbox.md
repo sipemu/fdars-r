@@ -32,13 +32,16 @@ tools.
 
 The Karhunen-Loeve (KL) expansion represents a stochastic process as:
 
-$$X(t) = \mu(t) + \sum\limits_{k = 1}^{\infty}\xi_{k}\phi_{k}(t)$$
+``` math
 
-where: - $\mu(t)$ is the mean function - $\phi_{k}(t)$ are orthonormal
-eigenfunctions - $\xi_{k} \sim N\left( 0,\lambda_{k} \right)$ are
-independent scores with variances $\lambda_{k}$
+X(t) = \mu(t) + \sum_{k=1}^{\infty} \xi_k \phi_k(t)
+```
 
-For simulation, we truncate to $M$ terms and generate curves via
+where: - $`\mu(t)`$ is the mean function - $`\phi_k(t)`$ are orthonormal
+eigenfunctions - $`\xi_k \sim N(0, \lambda_k)`$ are independent scores
+with variances $`\lambda_k`$
+
+For simulation, we truncate to $`M`$ terms and generate curves via
 [`simFunData()`](https://sipemu.github.io/fdars-r/reference/simFunData.md).
 
 ### Basic Example
@@ -125,7 +128,7 @@ autoplot(fd_poly) + labs(title = "Polynomial Basis Simulation")
 
 ### Wiener Process Eigenfunctions
 
-Eigenfunctions of Brownian motion covariance $K(s,t) = \min(s,t)$:
+Eigenfunctions of Brownian motion covariance $`K(s,t) = \min(s,t)`$:
 
 ``` r
 phi_wiener <- eFun(t, M = 5, type = "Wiener")
@@ -394,13 +397,13 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 
 ## Summary
 
-| Function                                                                                                                                                                                                           | Purpose                                                     |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
-| [`simFunData()`](https://sipemu.github.io/fdars-r/reference/simFunData.md)                                                                                                                                         | KL simulation with specified eigenfunctions/eigenvalues     |
-| [`simMultiFunData()`](https://sipemu.github.io/fdars-r/reference/simMultiFunData.md)                                                                                                                               | Multivariate functional data simulation                     |
-| [`eFun()`](https://sipemu.github.io/fdars-r/reference/eFun.md)                                                                                                                                                     | Generate eigenfunction bases (Fourier, Poly, Wiener)        |
-| [`eVal()`](https://sipemu.github.io/fdars-r/reference/eVal.md)                                                                                                                                                     | Generate eigenvalue sequences (linear, exponential, wiener) |
-| [`addError()`](https://sipemu.github.io/fdars-r/reference/addError.md)                                                                                                                                             | Add Gaussian noise (pointwise or curve-level)               |
-| [`sparsify()`](https://sipemu.github.io/fdars-r/reference/sparsify.md)                                                                                                                                             | Create irregular/sparse data from regular                   |
-| [`make.gaussian.process()`](https://sipemu.github.io/fdars-r/reference/make.gaussian.process.md)                                                                                                                   | GP simulation with covariance kernels                       |
-| [`r.brownian()`](https://sipemu.github.io/fdars-r/reference/r.brownian.md), [`r.ou()`](https://sipemu.github.io/fdars-r/reference/r.ou.md), [`r.bridge()`](https://sipemu.github.io/fdars-r/reference/r.bridge.md) | Specific random process generators                          |
+| Function | Purpose |
+|----|----|
+| [`simFunData()`](https://sipemu.github.io/fdars-r/reference/simFunData.md) | KL simulation with specified eigenfunctions/eigenvalues |
+| [`simMultiFunData()`](https://sipemu.github.io/fdars-r/reference/simMultiFunData.md) | Multivariate functional data simulation |
+| [`eFun()`](https://sipemu.github.io/fdars-r/reference/eFun.md) | Generate eigenfunction bases (Fourier, Poly, Wiener) |
+| [`eVal()`](https://sipemu.github.io/fdars-r/reference/eVal.md) | Generate eigenvalue sequences (linear, exponential, wiener) |
+| [`addError()`](https://sipemu.github.io/fdars-r/reference/addError.md) | Add Gaussian noise (pointwise or curve-level) |
+| [`sparsify()`](https://sipemu.github.io/fdars-r/reference/sparsify.md) | Create irregular/sparse data from regular |
+| [`make.gaussian.process()`](https://sipemu.github.io/fdars-r/reference/make.gaussian.process.md) | GP simulation with covariance kernels |
+| [`r.brownian()`](https://sipemu.github.io/fdars-r/reference/r.brownian.md), [`r.ou()`](https://sipemu.github.io/fdars-r/reference/r.ou.md), [`r.bridge()`](https://sipemu.github.io/fdars-r/reference/r.bridge.md) | Specific random process generators |

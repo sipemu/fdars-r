@@ -122,9 +122,9 @@ method. They balance two objectives:
 1.  **Fit the data closely** (minimize residuals)
 2.  **Keep the curve smooth** (penalize roughness)
 
-The smoothing parameter $\lambda$ controls this trade-off: - Small
-$\lambda$: Follows data closely, may be wiggly - Large $\lambda$: Very
-smooth, may miss real features
+The smoothing parameter $`\lambda`$ controls this trade-off: - Small
+$`\lambda`$: Follows data closely, may be wiggly - Large $`\lambda`$:
+Very smooth, may miss real features
 
 ### Automatic Smoothing with P-splines
 
@@ -209,7 +209,7 @@ ggplot(df_lambda, aes(x = age, y = height)) +
 ## Method 2: Kernel Smoothers
 
 Kernel smoothers estimate the value at each point using a weighted
-average of nearby observations. The bandwidth $h$ controls the
+average of nearby observations. The bandwidth $`h`$ controls the
 neighborhood size.
 
 ### Nadaraya-Watson Smoother
@@ -427,16 +427,16 @@ ggplot(df_mean, aes(x = age)) +
 
 ## Summary: When to Use Each Method
 
-| Method               | Best For                              | Key Parameter         |
-|----------------------|---------------------------------------|-----------------------|
-| **P-splines**        | General purpose, automatic tuning     | $\lambda$ (smoothing) |
-| **Kernel smoothers** | Non-parametric, local adaptation      | $h$ (bandwidth)       |
-| **Basis expansion**  | Dimensionality reduction, derivatives | $K$ (number of basis) |
+| Method | Best For | Key Parameter |
+|----|----|----|
+| **P-splines** | General purpose, automatic tuning | $`\lambda`$ (smoothing) |
+| **Kernel smoothers** | Non-parametric, local adaptation | $`h`$ (bandwidth) |
+| **Basis expansion** | Dimensionality reduction, derivatives | $`K`$ (number of basis) |
 
 **Recommendations:**
 
-1.  **Start with P-splines** - automatic $\lambda$ selection works well
-    in most cases
+1.  **Start with P-splines** - automatic $`\lambda`$ selection works
+    well in most cases
 2.  **Use basis expansion** when you need derivatives (smoother
     derivatives)
 3.  **Use kernel smoothers** for highly irregular sampling or adaptive
