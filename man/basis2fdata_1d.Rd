@@ -3,11 +3,11 @@
 \name{basis2fdata_1d}
 \alias{basis2fdata_1d}
 \title{Reconstruct functional data from basis coefficients
-Returns data matrix \link{n x m}}
+Returns data matrix (n x m)}
 \usage{
 basis2fdata_1d(coefs, argvals, nbasis, basis_type)
 }
 \description{
 Reconstruct functional data from basis coefficients
-Returns data matrix \link{n x m}
+Returns data matrix (n x m)
 }

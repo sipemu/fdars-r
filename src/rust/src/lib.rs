@@ -3326,7 +3326,7 @@ fn fdata2basis_1d(data: RMatrix<f64>, argvals: Vec<f64>, nbasis: i32, basis_type
 // =============================================================================
 
 /// Reconstruct functional data from basis coefficients
-/// Returns data matrix [n x m]
+/// Returns data matrix (n x m)
 #[extendr]
 fn basis2fdata_1d(coefs: RMatrix<f64>, argvals: Vec<f64>, nbasis: i32, basis_type: i32) -> Robj {
     let n = coefs.nrows();

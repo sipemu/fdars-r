@@ -196,7 +196,7 @@ fdata2pls_1d <- function(data, y, ncomp, `_lambda`) .Call(wrap__fdata2pls_1d, da
 fdata2basis_1d <- function(data, argvals, nbasis, basis_type) .Call(wrap__fdata2basis_1d, data, argvals, nbasis, basis_type)
 
 #' Reconstruct functional data from basis coefficients
-#' Returns data matrix [n x m]
+#' Returns data matrix (n x m)
 basis2fdata_1d <- function(coefs, argvals, nbasis, basis_type) .Call(wrap__basis2fdata_1d, coefs, argvals, nbasis, basis_type)
 
 #' Compute GCV score for basis fit
