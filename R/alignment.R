@@ -484,3 +484,353 @@ periodic.rotate <- function(fdataobj, target.pos = NULL) {
     ggplot2::labs(title = title, x = "t", y = "value") +
     ggplot2::theme_minimal()
 }
+
+# =============================================================================
+# Alignment Quality
+# =============================================================================
+
+#' Alignment Quality Diagnostics
+#'
+#' Compute comprehensive alignment quality metrics from a Karcher mean result,
+#' including warp complexity, smoothness, and variance decomposition.
+#'
+#' @param fdataobj An object of class 'fdata' (the original data).
+#' @param karcher An object of class 'karcher.mean'.
+#'
+#' @return An object of class 'alignment.quality' with components:
+#' \describe{
+#'   \item{warp_complexity}{Per-curve geodesic distance from warp to identity}
+#'   \item{mean_warp_complexity}{Mean warp complexity}
+#'   \item{warp_smoothness}{Per-curve bending energy}
+#'   \item{mean_warp_smoothness}{Mean bending energy}
+#'   \item{total_variance}{Total variance of original data}
+#'   \item{amplitude_variance}{Amplitude variance (after alignment)}
+#'   \item{phase_variance}{Phase variance (total - amplitude)}
+#'   \item{phase_amplitude_ratio}{Phase-to-total variance ratio}
+#'   \item{pointwise_variance_ratio}{Pointwise aligned/original variance ratio}
+#'   \item{mean_variance_reduction}{Mean variance reduction}
+#' }
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+#' km <- karcher.mean(fd, max.iter = 5)
+#' aq <- alignment.quality(fd, km)
+#' }
+alignment.quality <- function(fdataobj, karcher) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+  if (!inherits(karcher, "karcher.mean")) {
+    stop("karcher must be of class 'karcher.mean'")
+  }
+
+  argvals <- fdataobj$argvals
+  res <- alignment_quality_compute(
+    fdataobj$data,
+    as.numeric(karcher$mean$data[1, ]),
+    as.numeric(alignment_srsf_transform(karcher$mean$data, argvals)[1, ]),
+    karcher$gammas$data,
+    karcher$aligned$data,
+    argvals,
+    as.integer(karcher$n.iter),
+    karcher$converged
+  )
+
+  class(res) <- "alignment.quality"
+  res
+}
+
+#' @export
+print.alignment.quality <- function(x, ...) {
+  cat("Alignment Quality Diagnostics\n")
+  cat("  Mean warp complexity:", round(x$mean_warp_complexity, 4), "\n")
+  cat("  Mean warp smoothness:", round(x$mean_warp_smoothness, 4), "\n")
+  cat("  Total variance:     ", round(x$total_variance, 4), "\n")
+  cat("  Amplitude variance: ", round(x$amplitude_variance, 4), "\n")
+  cat("  Phase variance:     ", round(x$phase_variance, 4), "\n")
+  cat("  Phase/Total ratio:  ", round(x$phase_amplitude_ratio, 4), "\n")
+  cat("  Mean VR:            ", round(x$mean_variance_reduction, 4), "\n")
+  invisible(x)
+}
+
+#' Plot Alignment Quality Diagnostics
+#'
+#' @param x An object of class 'alignment.quality'.
+#' @param type Character: "variance" (default) or "complexity".
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A ggplot object (invisibly).
+#'
+#' @export
+plot.alignment.quality <- function(x, type = c("variance", "complexity"), ...) {
+  type <- match.arg(type)
+
+  if (type == "complexity") {
+    df <- data.frame(
+      curve = seq_along(x$warp_complexity),
+      complexity = x$warp_complexity,
+      smoothness = x$warp_smoothness
+    )
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$complexity, y = .data$smoothness)) +
+      ggplot2::geom_point() +
+      ggplot2::labs(title = "Warp Diagnostics",
+                    x = "Warp Complexity", y = "Bending Energy") +
+      ggplot2::theme_minimal()
+  } else {
+    df <- data.frame(
+      component = c("Amplitude", "Phase"),
+      variance = c(x$amplitude_variance, x$phase_variance)
+    )
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$component, y = .data$variance)) +
+      ggplot2::geom_col(fill = c("steelblue", "coral")) +
+      ggplot2::labs(title = "Variance Decomposition", x = "", y = "Variance") +
+      ggplot2::theme_minimal()
+  }
+
+  p
+}
+
+# =============================================================================
+# Elastic Decomposition
+# =============================================================================
+
+#' Elastic Phase-Amplitude Decomposition
+#'
+#' Decompose the difference between two curves into amplitude and phase
+#' components using the elastic (Fisher-Rao) framework.
+#'
+#' @param f1 An 'fdata' object with a single curve, or a numeric vector.
+#' @param f2 An 'fdata' object with a single curve, or a numeric vector.
+#' @param argvals Evaluation points (required if f1/f2 are numeric vectors).
+#' @param lambda Penalty weight on warp deviation from identity. Default 0.
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{gamma}{Warping function}
+#'   \item{f_aligned}{Aligned version of f2}
+#'   \item{d_amplitude}{Amplitude distance}
+#'   \item{d_phase}{Phase distance}
+#' }
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 50)
+#' f1 <- fdata(matrix(sin(2*pi*t), 1, 50), argvals = t)
+#' f2 <- fdata(matrix(sin(2*pi*t + 0.3), 1, 50), argvals = t)
+#' dec <- elastic.decomposition(f1, f2)
+#' }
+elastic.decomposition <- function(f1, f2, argvals = NULL, lambda = 0) {
+  if (inherits(f1, "fdata")) {
+    argvals <- f1$argvals
+    f1_vec <- as.numeric(f1$data[1, ])
+  } else {
+    f1_vec <- as.numeric(f1)
+  }
+
+  if (inherits(f2, "fdata")) {
+    f2_vec <- as.numeric(f2$data[1, ])
+  } else {
+    f2_vec <- as.numeric(f2)
+  }
+
+  if (is.null(argvals)) {
+    stop("argvals must be provided when f1/f2 are numeric vectors")
+  }
+
+  res <- alignment_decomposition(f1_vec, f2_vec, as.numeric(argvals),
+                                 as.numeric(lambda))
+  res
+}
+
+# =============================================================================
+# Amplitude and Phase Distance
+# =============================================================================
+
+#' Amplitude Distance Matrix
+#'
+#' Compute the pairwise amplitude distance matrix. The amplitude distance
+#' is the elastic (Fisher-Rao) distance after optimal alignment.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param fdataref Optional reference 'fdata'. If NULL, computes self-distances.
+#' @param lambda Penalty weight. Default 0.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A distance matrix.
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(60), 6, 10), argvals = seq(0, 1, length.out = 10))
+#' D <- amplitude.distance(fd)
+#' }
+amplitude.distance <- function(fdataobj, fdataref = NULL, lambda = 0, ...) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  if (is.null(fdataref)) {
+    D <- alignment_amplitude_dist(fdataobj$data, fdataobj$argvals,
+                                  as.numeric(lambda))
+  } else {
+    if (!inherits(fdataref, "fdata")) {
+      stop("fdataref must be of class 'fdata'")
+    }
+    # For cross-distances, use elastic cross-distance (amplitude = elastic distance)
+    D <- alignment_cross_dist(fdataobj$data, fdataref$data, fdataobj$argvals)
+  }
+
+  D <- as.matrix(D)
+
+  if (!is.null(rownames(fdataobj$data))) {
+    rownames(D) <- rownames(fdataobj$data)
+  }
+
+  if (is.null(fdataref)) {
+    if (!is.null(rownames(fdataobj$data))) {
+      colnames(D) <- rownames(fdataobj$data)
+    }
+  } else if (!is.null(rownames(fdataref$data))) {
+    colnames(D) <- rownames(fdataref$data)
+  }
+
+  D
+}
+
+#' Phase Distance Matrix
+#'
+#' Compute the pairwise phase distance matrix. The phase distance measures
+#' the geodesic distance of the optimal warping function from the identity.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param fdataref Optional reference 'fdata'. If NULL, computes self-distances.
+#' @param lambda Penalty weight. Default 0.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A distance matrix.
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(60), 6, 10), argvals = seq(0, 1, length.out = 10))
+#' D <- phase.distance(fd)
+#' }
+phase.distance <- function(fdataobj, fdataref = NULL, lambda = 0, ...) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  if (is.null(fdataref)) {
+    D <- alignment_phase_dist(fdataobj$data, fdataobj$argvals,
+                              as.numeric(lambda))
+  } else {
+    stop("phase.distance cross-distances not yet implemented; use self-distances")
+  }
+
+  D <- as.matrix(D)
+
+  if (!is.null(rownames(fdataobj$data))) {
+    rownames(D) <- rownames(fdataobj$data)
+    colnames(D) <- rownames(fdataobj$data)
+  }
+
+  D
+}
+
+# =============================================================================
+# Constrained Alignment
+# =============================================================================
+
+#' Landmark-Constrained Elastic Alignment
+#'
+#' Align a set of curves to a target curve with landmark constraints.
+#' The alignment is performed using segmented dynamic programming that
+#' passes through specified landmark positions.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param target Target curve (numeric vector or single-curve fdata). If NULL,
+#'   uses the cross-sectional mean.
+#' @param landmark.pairs A two-column matrix of landmark pairs
+#'   (target_t, source_t) for explicit constraints. If NULL, auto-detects.
+#' @param kind Landmark type for auto-detection: "peak", "valley", "zero",
+#'   "inflection". Default "peak".
+#' @param min.prominence Minimum prominence for auto-detection. Default 0.
+#' @param expected.count Expected number of landmarks for auto-detection.
+#'   Default 0 (all detected).
+#' @param lambda Penalty weight on warp deviation from identity. Default 0.
+#'
+#' @return An object of class 'elastic.align' with components:
+#' \describe{
+#'   \item{aligned}{fdata of aligned curves}
+#'   \item{gammas}{fdata of warping functions}
+#'   \item{distances}{numeric vector of elastic distances}
+#'   \item{target}{the target curve}
+#'   \item{fdataobj}{the original input}
+#' }
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 100)
+#' X <- matrix(0, 10, 100)
+#' for (i in 1:10) X[i, ] <- sin(2*pi*(t - i/50))
+#' fd <- fdata(X, argvals = t)
+#' res <- elastic.align.constrained(fd, kind = "peak")
+#' }
+elastic.align.constrained <- function(fdataobj, target = NULL,
+                                       landmark.pairs = NULL,
+                                       kind = "peak", min.prominence = 0,
+                                       expected.count = 0, lambda = 0) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  argvals <- fdataobj$argvals
+  n <- nrow(fdataobj$data)
+
+  if (is.null(target)) {
+    target <- colMeans(fdataobj$data)
+  } else if (inherits(target, "fdata")) {
+    target <- as.numeric(target$data[1, ])
+  }
+
+  aligned_data <- matrix(0, n, length(argvals))
+  gammas_data <- matrix(0, n, length(argvals))
+  distances <- numeric(n)
+
+  for (i in seq_len(n)) {
+    fi <- fdataobj$data[i, ]
+
+    if (!is.null(landmark.pairs)) {
+      res <- alignment_constrained(
+        as.numeric(target), as.numeric(fi), as.numeric(argvals),
+        as.numeric(landmark.pairs[, 1]),
+        as.numeric(landmark.pairs[, 2]),
+        as.numeric(lambda)
+      )
+    } else {
+      res <- alignment_with_landmarks(
+        as.numeric(target), as.numeric(fi), as.numeric(argvals),
+        kind, as.numeric(min.prominence),
+        as.integer(expected.count), as.numeric(lambda)
+      )
+    }
+
+    aligned_data[i, ] <- res$f_aligned
+    gammas_data[i, ] <- res$gamma
+    distances[i] <- res$distance
+  }
+
+  result <- list(
+    aligned = fdata(aligned_data, argvals = argvals),
+    gammas = fdata(gammas_data, argvals = argvals),
+    distances = distances,
+    target = target,
+    fdataobj = fdataobj
+  )
+  class(result) <- "elastic.align"
+  result
+}

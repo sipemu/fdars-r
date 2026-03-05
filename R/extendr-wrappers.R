@@ -222,9 +222,11 @@ basis_bic_1d <- function(data, argvals, nbasis, basis_type, lambda, pooled) .Cal
 #' P-spline fitting: returns coefficients, fitted values, and diagnostics
 pspline_fit_1d <- function(data, argvals, nbasis, lambda, order) .Call(wrap__pspline_fit_1d, data, argvals, nbasis, lambda, order)
 
-# fdata2basis_2d: R-level wrapper in R/basis.R (calls .Call directly)
+#' Project 2D functional data to tensor product basis coefficients
+fdata2basis_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
-# basis2fdata_2d: R-level wrapper in R/basis.R (calls .Call directly)
+#' Reconstruct 2D functional data from tensor product basis coefficients
+basis2fdata_2d <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
 #' 2D P-spline fitting with anisotropic penalties
 pspline_fit_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order) .Call(wrap__pspline_fit_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order)
@@ -487,6 +489,63 @@ alignment_cross_dist <- function(data1, data2, argvals) .Call(wrap__alignment_cr
 
 #' Karcher (Fréchet) mean in elastic metric
 alignment_karcher_mean <- function(data, argvals, max_iter, tol) .Call(wrap__alignment_karcher_mean, data, argvals, max_iter, tol)
+
+#' Soft-DTW self-distance matrix
+metric_soft_dtw_self_1d <- function(fdata, gamma) .Call(wrap__metric_soft_dtw_self_1d, fdata, gamma)
+
+#' Soft-DTW cross-distance matrix
+metric_soft_dtw_cross_1d <- function(fdata1, fdata2, gamma) .Call(wrap__metric_soft_dtw_cross_1d, fdata1, fdata2, gamma)
+
+#' Soft-DTW divergence self-distance matrix
+metric_soft_dtw_div_self_1d <- function(fdata, gamma) .Call(wrap__metric_soft_dtw_div_self_1d, fdata, gamma)
+
+#' Soft-DTW divergence cross-distance matrix
+metric_soft_dtw_div_cross_1d <- function(fdata1, fdata2, gamma) .Call(wrap__metric_soft_dtw_div_cross_1d, fdata1, fdata2, gamma)
+
+#' Soft-DTW barycenter computation
+metric_soft_dtw_barycenter <- function(fdata, gamma, max_iter, tol) .Call(wrap__metric_soft_dtw_barycenter, fdata, gamma, max_iter, tol)
+
+#' Detect landmarks in a single curve
+landmark_detect <- function(curve, argvals, kind, min_prominence) .Call(wrap__landmark_detect, curve, argvals, kind, min_prominence)
+
+#' Detect landmarks and register curves
+landmark_register_curves <- function(data, argvals, kind, min_prominence, expected_count) .Call(wrap__landmark_register_curves, data, argvals, kind, min_prominence, expected_count)
+
+#' Full TSRVF transform
+alignment_tsrvf_transform <- function(data, argvals, max_iter, tol, lambda) .Call(wrap__alignment_tsrvf_transform, data, argvals, max_iter, tol, lambda)
+
+#' Compute TSRVF from a pre-computed Karcher mean
+alignment_tsrvf_from_karcher <- function(mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged) .Call(wrap__alignment_tsrvf_from_karcher, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged)
+
+#' Inverse TSRVF: reconstruct curves from tangent vectors
+alignment_tsrvf_inverse <- function(tangent_vectors, mean, mean_srsf, mean_srsf_norm, srsf_norms, gammas, argvals, converged) .Call(wrap__alignment_tsrvf_inverse, tangent_vectors, mean, mean_srsf, mean_srsf_norm, srsf_norms, gammas, argvals, converged)
+
+#' Compute alignment quality metrics
+alignment_quality_compute <- function(data, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged) .Call(wrap__alignment_quality_compute, data, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged)
+
+#' Compute warp complexity
+alignment_warp_complexity <- function(gamma, argvals) .Call(wrap__alignment_warp_complexity, gamma, argvals)
+
+#' Compute warp smoothness
+alignment_warp_smoothness <- function(gamma, argvals) .Call(wrap__alignment_warp_smoothness, gamma, argvals)
+
+#' Elastic phase-amplitude decomposition
+alignment_decomposition <- function(f1, f2, argvals, lambda) .Call(wrap__alignment_decomposition, f1, f2, argvals, lambda)
+
+#' Amplitude self-distance matrix
+alignment_amplitude_dist <- function(data, argvals, lambda) .Call(wrap__alignment_amplitude_dist, data, argvals, lambda)
+
+#' Phase self-distance matrix
+alignment_phase_dist <- function(data, argvals, lambda) .Call(wrap__alignment_phase_dist, data, argvals, lambda)
+
+#' Pairwise alignment consistency
+alignment_pairwise_consistency <- function(data, argvals, lambda, max_triplets) .Call(wrap__alignment_pairwise_consistency, data, argvals, lambda, max_triplets)
+
+#' Elastic alignment with landmark constraints
+alignment_constrained <- function(f1, f2, argvals, landmark_targets, landmark_sources, lambda) .Call(wrap__alignment_constrained, f1, f2, argvals, landmark_targets, landmark_sources, lambda)
+
+#' Elastic alignment with automatic landmark detection
+alignment_with_landmarks <- function(f1, f2, argvals, kind, min_prominence, expected_count, lambda) .Call(wrap__alignment_with_landmarks, f1, f2, argvals, kind, min_prominence, expected_count, lambda)
 
 #' FPCA-based tolerance band
 tolerance_fpca <- function(data, ncomp, nb, coverage, band_type, seed) .Call(wrap__tolerance_fpca, data, ncomp, nb, coverage, band_type, seed)

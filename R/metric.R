@@ -22,6 +22,9 @@
 #'     \item "hshift" - Semi-metric with horizontal shift
 #'     \item "kl" - Symmetric Kullback-Leibler divergence
 #'     \item "elastic" - Elastic (Fisher-Rao) distance
+#'     \item "softdtw" - Soft Dynamic Time Warping
+#'     \item "amplitude" - Amplitude distance (elastic)
+#'     \item "phase" - Phase distance (elastic)
 #'   }
 #' @param ... Additional arguments passed to the specific distance function.
 #'
@@ -62,7 +65,8 @@ metric <- function(fdataobj, fdataref = NULL, method = "lp", ...) {
   }
 
   method <- match.arg(method, c("lp", "hausdorff", "dtw", "pca", "deriv",
-                                 "basis", "fourier", "hshift", "kl", "elastic"))
+                                 "basis", "fourier", "hshift", "kl", "elastic",
+                                 "softdtw", "amplitude", "phase"))
 
   switch(method,
     "lp" = metric.lp(fdataobj, fdataref, ...),
@@ -74,7 +78,10 @@ metric <- function(fdataobj, fdataref = NULL, method = "lp", ...) {
     "fourier" = semimetric.fourier(fdataobj, fdataref, ...),
     "hshift" = semimetric.hshift(fdataobj, fdataref, ...),
     "kl" = metric.kl(fdataobj, fdataref, ...),
-    "elastic" = metric.elastic(fdataobj, fdataref, ...)
+    "elastic" = metric.elastic(fdataobj, fdataref, ...),
+    "softdtw" = metric.softDTW(fdataobj, fdataref, ...),
+    "amplitude" = amplitude.distance(fdataobj, fdataref, ...),
+    "phase" = phase.distance(fdataobj, fdataref, ...)
   )
 }
 
@@ -870,4 +877,124 @@ metric.kl <- function(fdataobj, fdataref = NULL, eps = 1e-10, normalize = TRUE, 
   }
 
   D
+}
+
+#' Soft Dynamic Time Warping Distance
+#'
+#' Computes the Soft-DTW distance matrix between functional data objects.
+#' Soft-DTW is a differentiable relaxation of DTW that uses a smoothing
+#' parameter gamma to control the softness of the minimum operation.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param fdataref An object of class 'fdata'. If NULL, computes self-distances.
+#' @param gamma Smoothing parameter (> 0). Smaller values approximate hard DTW.
+#'   Default is 1.0.
+#' @param divergence Logical. If TRUE, computes the Soft-DTW divergence
+#'   (non-negative, zero for identical series) instead of raw Soft-DTW distance.
+#'   Default is FALSE.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A distance matrix.
+#'
+#' @references
+#' Cuturi, M. and Blondel, M. (2017). Soft-DTW: a Differentiable Loss Function
+#' for Time-Series. \emph{Proceedings of the 34th International Conference on
+#' Machine Learning (ICML)}.
+#'
+#' @export
+#' @examples
+#' fd <- fdata(matrix(rnorm(100), 10, 10))
+#' D <- metric.softDTW(fd, gamma = 1.0)
+#' D_div <- metric.softDTW(fd, gamma = 1.0, divergence = TRUE)
+metric.softDTW <- function(fdataobj, fdataref = NULL, gamma = 1.0,
+                           divergence = FALSE, ...) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  if (isTRUE(fdataobj$fdata2d)) {
+    stop("metric.softDTW not yet implemented for 2D functional data")
+  }
+
+  if (is.null(fdataref)) {
+    if (divergence) {
+      D <- metric_soft_dtw_div_self_1d(fdataobj$data, as.numeric(gamma))
+    } else {
+      D <- metric_soft_dtw_self_1d(fdataobj$data, as.numeric(gamma))
+    }
+  } else {
+    if (!inherits(fdataref, "fdata")) {
+      stop("fdataref must be of class 'fdata'")
+    }
+
+    if (isTRUE(fdataref$fdata2d)) {
+      stop("metric.softDTW not yet implemented for 2D functional data")
+    }
+
+    if (divergence) {
+      D <- metric_soft_dtw_div_cross_1d(fdataobj$data,
+                 fdataref$data, as.numeric(gamma))
+    } else {
+      D <- metric_soft_dtw_cross_1d(fdataobj$data,
+                 fdataref$data, as.numeric(gamma))
+    }
+  }
+
+  D <- as.matrix(D)
+
+  if (!is.null(rownames(fdataobj$data))) {
+    rownames(D) <- rownames(fdataobj$data)
+  }
+
+  if (is.null(fdataref)) {
+    if (!is.null(rownames(fdataobj$data))) {
+      colnames(D) <- rownames(fdataobj$data)
+    }
+  } else if (!is.null(rownames(fdataref$data))) {
+    colnames(D) <- rownames(fdataref$data)
+  }
+
+  D
+}
+
+#' Soft-DTW Barycenter
+#'
+#' Compute the barycenter (weighted average) of functional data using the
+#' Soft-DTW distance. The barycenter minimizes the sum of Soft-DTW distances
+#' to all input curves.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param gamma Smoothing parameter (> 0). Default is 1.0.
+#' @param max.iter Maximum number of iterations. Default is 100.
+#' @param tol Convergence tolerance. Default is 1e-5.
+#'
+#' @return An object of class 'fdata' containing the barycenter curve,
+#'   with attributes \code{n.iter} and \code{converged}.
+#'
+#' @references
+#' Cuturi, M. and Blondel, M. (2017). Soft-DTW: a Differentiable Loss Function
+#' for Time-Series. \emph{Proceedings of the 34th International Conference on
+#' Machine Learning (ICML)}.
+#'
+#' @export
+#' @examples
+#' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+#' bc <- softdtw.barycenter(fd, gamma = 1.0)
+softdtw.barycenter <- function(fdataobj, gamma = 1.0, max.iter = 100,
+                               tol = 1e-5) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  if (isTRUE(fdataobj$fdata2d)) {
+    stop("softdtw.barycenter not yet implemented for 2D functional data")
+  }
+
+  res <- metric_soft_dtw_barycenter(fdataobj$data,
+               as.numeric(gamma), as.integer(max.iter), as.numeric(tol))
+
+  result <- fdata(matrix(res$barycenter, nrow = 1), argvals = fdataobj$argvals)
+  attr(result, "n.iter") <- res$n_iter
+  attr(result, "converged") <- res$converged
+  result
 }

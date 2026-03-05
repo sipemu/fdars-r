@@ -18,6 +18,8 @@ use std::f64::consts::PI;
 // Import shared utilities from fdars-core
 use fdars_core::{hilbert_transform, FdMatrix};
 use fdars_core::alignment;
+use fdars_core::landmark;
+use fdars_core::metric as core_metric;
 use fdars_core::tolerance;
 use fdars_core::streaming_depth::{self, StreamingDepth, SortedReferenceState, FullReferenceState};
 
@@ -8467,7 +8469,7 @@ fn alignment_elastic_pair(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>) -> Robj
     if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
         return list!(gamma = Vec::<f64>::new(), f_aligned = Vec::<f64>::new(), distance = f64::NAN).into();
     }
-    let res = alignment::elastic_align_pair(&f1, &f2, &argvals);
+    let res = alignment::elastic_align_pair(&f1, &f2, &argvals, 0.0);
     list!(gamma = res.gamma, f_aligned = res.f_aligned, distance = res.distance).into()
 }
 
@@ -8477,7 +8479,7 @@ fn alignment_elastic_distance(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>) -> 
     if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
         return Robj::from(f64::NAN);
     }
-    Robj::from(alignment::elastic_distance(&f1, &f2, &argvals))
+    Robj::from(alignment::elastic_distance(&f1, &f2, &argvals, 0.0))
 }
 
 /// Align all curves to a target curve
@@ -8494,7 +8496,7 @@ fn alignment_align_to_target(data: RMatrix<f64>, target: Vec<f64>, argvals: Vec<
     }
     let data_slice = data.as_real_slice().unwrap();
     let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
-    let res = alignment::align_to_target(&fd, &target, &argvals);
+    let res = alignment::align_to_target(&fd, &target, &argvals, 0.0);
     let gs = res.gammas.as_slice();
     let as_ = res.aligned_data.as_slice();
     let g_mat = RMatrix::new_matrix(res.gammas.nrows(), res.gammas.ncols(), |i, j| gs[i + j * res.gammas.nrows()]);
@@ -8512,7 +8514,7 @@ fn alignment_self_dist(data: RMatrix<f64>, argvals: Vec<f64>) -> Robj {
     }
     let data_slice = data.as_real_slice().unwrap();
     let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
-    let result = alignment::elastic_self_distance_matrix(&fd, &argvals);
+    let result = alignment::elastic_self_distance_matrix(&fd, &argvals, 0.0);
     let s = result.as_slice();
     let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
     Robj::from(mat)
@@ -8532,7 +8534,7 @@ fn alignment_cross_dist(data1: RMatrix<f64>, data2: RMatrix<f64>, argvals: Vec<f
     let d2 = data2.as_real_slice().unwrap();
     let fd1 = FdMatrix::from_slice(d1, n1, m1).expect("Invalid matrix dimensions");
     let fd2 = FdMatrix::from_slice(d2, n2, m2).expect("Invalid matrix dimensions");
-    let result = alignment::elastic_cross_distance_matrix(&fd1, &fd2, &argvals);
+    let result = alignment::elastic_cross_distance_matrix(&fd1, &fd2, &argvals, 0.0);
     let s = result.as_slice();
     let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
     Robj::from(mat)
@@ -8555,7 +8557,7 @@ fn alignment_karcher_mean(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i32, 
     }
     let data_slice = data.as_real_slice().unwrap();
     let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
-    let res = alignment::karcher_mean(&fd, &argvals, max_iter as usize, tol);
+    let res = alignment::karcher_mean(&fd, &argvals, max_iter as usize, tol, 0.0);
     let gs = res.gammas.as_slice();
     let as_ = res.aligned_data.as_slice();
     let g_mat = RMatrix::new_matrix(res.gammas.nrows(), res.gammas.ncols(), |i, j| gs[i + j * res.gammas.nrows()]);
@@ -8568,6 +8570,442 @@ fn alignment_karcher_mean(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i32, 
         n_iter = res.n_iter as i32,
         converged = res.converged
     ).into()
+}
+
+// =============================================================================
+// Soft-DTW metric functions
+// =============================================================================
+
+/// Soft-DTW self-distance matrix
+#[extendr]
+fn metric_soft_dtw_self_1d(fdata: RMatrix<f64>, gamma: f64) -> Robj {
+    let n = fdata.nrows();
+    let m = fdata.ncols();
+    if n == 0 || m == 0 {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let data_slice = fdata.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let result = core_metric::soft_dtw_self_1d(&fd, gamma);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Soft-DTW cross-distance matrix
+#[extendr]
+fn metric_soft_dtw_cross_1d(fdata1: RMatrix<f64>, fdata2: RMatrix<f64>, gamma: f64) -> Robj {
+    let n1 = fdata1.nrows();
+    let m1 = fdata1.ncols();
+    let n2 = fdata2.nrows();
+    let m2 = fdata2.ncols();
+    if n1 == 0 || n2 == 0 || m1 == 0 || m2 == 0 {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let d1 = fdata1.as_real_slice().unwrap();
+    let d2 = fdata2.as_real_slice().unwrap();
+    let fd1 = FdMatrix::from_slice(d1, n1, m1).expect("Invalid matrix dimensions");
+    let fd2 = FdMatrix::from_slice(d2, n2, m2).expect("Invalid matrix dimensions");
+    let result = core_metric::soft_dtw_cross_1d(&fd1, &fd2, gamma);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Soft-DTW divergence self-distance matrix
+#[extendr]
+fn metric_soft_dtw_div_self_1d(fdata: RMatrix<f64>, gamma: f64) -> Robj {
+    let n = fdata.nrows();
+    let m = fdata.ncols();
+    if n == 0 || m == 0 {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let data_slice = fdata.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let result = core_metric::soft_dtw_div_self_1d(&fd, gamma);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Soft-DTW divergence cross-distance matrix
+#[extendr]
+fn metric_soft_dtw_div_cross_1d(fdata1: RMatrix<f64>, fdata2: RMatrix<f64>, gamma: f64) -> Robj {
+    let n1 = fdata1.nrows();
+    let m1 = fdata1.ncols();
+    let n2 = fdata2.nrows();
+    let m2 = fdata2.ncols();
+    if n1 == 0 || n2 == 0 || m1 == 0 || m2 == 0 {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let d1 = fdata1.as_real_slice().unwrap();
+    let d2 = fdata2.as_real_slice().unwrap();
+    let fd1 = FdMatrix::from_slice(d1, n1, m1).expect("Invalid matrix dimensions");
+    let fd2 = FdMatrix::from_slice(d2, n2, m2).expect("Invalid matrix dimensions");
+    let result = core_metric::soft_dtw_div_cross_1d(&fd1, &fd2, gamma);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Soft-DTW barycenter computation
+#[extendr]
+fn metric_soft_dtw_barycenter(fdata: RMatrix<f64>, gamma: f64, max_iter: i32, tol: f64) -> Robj {
+    let n = fdata.nrows();
+    let m = fdata.ncols();
+    if n == 0 || m == 0 {
+        return list!(barycenter = Vec::<f64>::new(), n_iter = 0i32, converged = true).into();
+    }
+    let data_slice = fdata.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let result = core_metric::soft_dtw_barycenter(&fd, gamma, max_iter as usize, tol);
+    list!(barycenter = result.barycenter, n_iter = result.n_iter as i32, converged = result.converged).into()
+}
+
+// =============================================================================
+// Landmark registration functions
+// =============================================================================
+
+/// Detect landmarks in a single curve
+#[extendr]
+fn landmark_detect(curve: Vec<f64>, argvals: Vec<f64>, kind: &str, min_prominence: f64) -> Robj {
+    if curve.len() != argvals.len() || curve.len() < 3 {
+        return list!(position = Vec::<f64>::new(), kind = Vec::<String>::new(), value = Vec::<f64>::new(), prominence = Vec::<f64>::new()).into();
+    }
+    let lk = match kind {
+        "peak" => landmark::LandmarkKind::Peak,
+        "valley" => landmark::LandmarkKind::Valley,
+        "zero" | "zero_crossing" => landmark::LandmarkKind::ZeroCrossing,
+        "inflection" => landmark::LandmarkKind::Inflection,
+        _ => landmark::LandmarkKind::Peak,
+    };
+    let lms = landmark::detect_landmarks(&curve, &argvals, lk, min_prominence);
+    let positions: Vec<f64> = lms.iter().map(|l| l.position).collect();
+    let kinds: Vec<String> = lms.iter().map(|l| match l.kind {
+        landmark::LandmarkKind::Peak => "peak".to_string(),
+        landmark::LandmarkKind::Valley => "valley".to_string(),
+        landmark::LandmarkKind::ZeroCrossing => "zero_crossing".to_string(),
+        landmark::LandmarkKind::Inflection => "inflection".to_string(),
+        landmark::LandmarkKind::Custom => "custom".to_string(),
+    }).collect();
+    let values: Vec<f64> = lms.iter().map(|l| l.value).collect();
+    let prominences: Vec<f64> = lms.iter().map(|l| l.prominence).collect();
+    list!(position = positions, kind = kinds, value = values, prominence = prominences).into()
+}
+
+/// Detect landmarks and register curves
+#[extendr]
+fn landmark_register_curves(data: RMatrix<f64>, argvals: Vec<f64>, kind: &str, min_prominence: f64, expected_count: i32) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 3 || argvals.len() != m {
+        return list!(
+            registered = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            target_landmarks = Vec::<f64>::new(),
+            n_landmarks = Vec::<i32>::new()
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let lk = match kind {
+        "peak" => landmark::LandmarkKind::Peak,
+        "valley" => landmark::LandmarkKind::Valley,
+        "zero" | "zero_crossing" => landmark::LandmarkKind::ZeroCrossing,
+        "inflection" => landmark::LandmarkKind::Inflection,
+        _ => landmark::LandmarkKind::Peak,
+    };
+    let result = landmark::detect_and_register(&fd, &argvals, lk, min_prominence, expected_count as usize);
+    let rs = result.registered.as_slice();
+    let gs = result.gammas.as_slice();
+    let r_mat = RMatrix::new_matrix(result.registered.nrows(), result.registered.ncols(), |i, j| rs[i + j * result.registered.nrows()]);
+    let g_mat = RMatrix::new_matrix(result.gammas.nrows(), result.gammas.ncols(), |i, j| gs[i + j * result.gammas.nrows()]);
+    let n_landmarks: Vec<i32> = result.landmarks.iter().map(|lms| lms.len() as i32).collect();
+    list!(registered = r_mat, gammas = g_mat, target_landmarks = result.target_landmarks, n_landmarks = n_landmarks).into()
+}
+
+// =============================================================================
+// TSRVF functions
+// =============================================================================
+
+/// Full TSRVF transform: compute Karcher mean + transport to tangent space
+#[extendr]
+fn alignment_tsrvf_transform(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i32, tol: f64, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return list!(
+            tangent_vectors = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            mean = Vec::<f64>::new(),
+            mean_srsf = Vec::<f64>::new(),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            converged = false
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let res = alignment::tsrvf_transform(&fd, &argvals, max_iter as usize, tol, lambda);
+    let tv_s = res.tangent_vectors.as_slice();
+    let g_s = res.gammas.as_slice();
+    let tv_mat = RMatrix::new_matrix(res.tangent_vectors.nrows(), res.tangent_vectors.ncols(), |i, j| tv_s[i + j * res.tangent_vectors.nrows()]);
+    let g_mat = RMatrix::new_matrix(res.gammas.nrows(), res.gammas.ncols(), |i, j| g_s[i + j * res.gammas.nrows()]);
+    list!(
+        tangent_vectors = tv_mat,
+        mean = res.mean,
+        mean_srsf = res.mean_srsf,
+        gammas = g_mat,
+        converged = res.converged
+    ).into()
+}
+
+/// Compute TSRVF from a pre-computed Karcher mean
+#[extendr]
+fn alignment_tsrvf_from_karcher(
+    mean: Vec<f64>, mean_srsf: Vec<f64>,
+    gammas: RMatrix<f64>, aligned_data: RMatrix<f64>,
+    argvals: Vec<f64>, n_iter: i32, converged: bool
+) -> Robj {
+    let n = aligned_data.nrows();
+    let m = aligned_data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return list!(
+            tangent_vectors = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            mean = Vec::<f64>::new(),
+            mean_srsf = Vec::<f64>::new(),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            converged = false
+        ).into();
+    }
+    // Reconstruct KarcherMeanResult
+    let g_slice = gammas.as_real_slice().unwrap();
+    let a_slice = aligned_data.as_real_slice().unwrap();
+    let g_fd = FdMatrix::from_slice(g_slice, n, m).expect("Invalid gammas dimensions");
+    let a_fd = FdMatrix::from_slice(a_slice, n, m).expect("Invalid aligned_data dimensions");
+    let karcher = alignment::KarcherMeanResult {
+        mean: mean.clone(),
+        mean_srsf: mean_srsf.clone(),
+        gammas: g_fd,
+        aligned_data: a_fd,
+        n_iter: n_iter as usize,
+        converged,
+    };
+    let res = alignment::tsrvf_from_alignment(&karcher, &argvals);
+    let tv_s = res.tangent_vectors.as_slice();
+    let tv_mat = RMatrix::new_matrix(res.tangent_vectors.nrows(), res.tangent_vectors.ncols(), |i, j| tv_s[i + j * res.tangent_vectors.nrows()]);
+    list!(
+        tangent_vectors = tv_mat,
+        mean = res.mean,
+        mean_srsf = res.mean_srsf,
+        gammas = gammas,
+        converged = res.converged
+    ).into()
+}
+
+/// Inverse TSRVF: reconstruct curves from tangent vectors
+#[extendr]
+fn alignment_tsrvf_inverse(
+    tangent_vectors: RMatrix<f64>, mean: Vec<f64>,
+    mean_srsf: Vec<f64>, mean_srsf_norm: f64,
+    srsf_norms: Vec<f64>, gammas: RMatrix<f64>,
+    argvals: Vec<f64>, converged: bool
+) -> Robj {
+    let n = tangent_vectors.nrows();
+    let m = tangent_vectors.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let tv_slice = tangent_vectors.as_real_slice().unwrap();
+    let g_slice = gammas.as_real_slice().unwrap();
+    let tv_fd = FdMatrix::from_slice(tv_slice, n, m).expect("Invalid tangent_vectors dimensions");
+    let g_fd = FdMatrix::from_slice(g_slice, n, m).expect("Invalid gammas dimensions");
+    let tsrvf_result = alignment::TsrvfResult {
+        tangent_vectors: tv_fd,
+        mean,
+        mean_srsf,
+        mean_srsf_norm,
+        srsf_norms,
+        gammas: g_fd,
+        converged,
+    };
+    let result = alignment::tsrvf_inverse(&tsrvf_result, &argvals);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+// =============================================================================
+// Alignment quality functions
+// =============================================================================
+
+/// Compute alignment quality metrics
+#[extendr]
+fn alignment_quality_compute(
+    data: RMatrix<f64>, mean: Vec<f64>, mean_srsf: Vec<f64>,
+    gammas: RMatrix<f64>, aligned_data: RMatrix<f64>,
+    argvals: Vec<f64>, n_iter: i32, converged: bool
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return list!(
+            warp_complexity = Vec::<f64>::new(),
+            mean_warp_complexity = 0.0,
+            warp_smoothness = Vec::<f64>::new(),
+            mean_warp_smoothness = 0.0,
+            total_variance = 0.0,
+            amplitude_variance = 0.0,
+            phase_variance = 0.0,
+            phase_amplitude_ratio = 0.0,
+            pointwise_variance_ratio = Vec::<f64>::new(),
+            mean_variance_reduction = 0.0
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let g_slice = gammas.as_real_slice().unwrap();
+    let a_slice = aligned_data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+    let g_fd = FdMatrix::from_slice(g_slice, n, m).expect("Invalid gammas dimensions");
+    let a_fd = FdMatrix::from_slice(a_slice, n, m).expect("Invalid aligned_data dimensions");
+    let karcher = alignment::KarcherMeanResult {
+        mean,
+        mean_srsf,
+        gammas: g_fd,
+        aligned_data: a_fd,
+        n_iter: n_iter as usize,
+        converged,
+    };
+    let q = alignment::alignment_quality(&fd, &karcher, &argvals);
+    list!(
+        warp_complexity = q.warp_complexity,
+        mean_warp_complexity = q.mean_warp_complexity,
+        warp_smoothness = q.warp_smoothness,
+        mean_warp_smoothness = q.mean_warp_smoothness,
+        total_variance = q.total_variance,
+        amplitude_variance = q.amplitude_variance,
+        phase_variance = q.phase_variance,
+        phase_amplitude_ratio = q.phase_amplitude_ratio,
+        pointwise_variance_ratio = q.pointwise_variance_ratio,
+        mean_variance_reduction = q.mean_variance_reduction
+    ).into()
+}
+
+/// Compute warp complexity (geodesic distance from identity)
+#[extendr]
+fn alignment_warp_complexity(gamma: Vec<f64>, argvals: Vec<f64>) -> f64 {
+    if gamma.len() != argvals.len() || gamma.len() < 2 {
+        return 0.0;
+    }
+    alignment::warp_complexity(&gamma, &argvals)
+}
+
+/// Compute warp smoothness (bending energy)
+#[extendr]
+fn alignment_warp_smoothness(gamma: Vec<f64>, argvals: Vec<f64>) -> f64 {
+    if gamma.len() != argvals.len() || gamma.len() < 3 {
+        return 0.0;
+    }
+    alignment::warp_smoothness(&gamma, &argvals)
+}
+
+// =============================================================================
+// Decomposition and distance functions
+// =============================================================================
+
+/// Elastic phase-amplitude decomposition
+#[extendr]
+fn alignment_decomposition(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(gamma = Vec::<f64>::new(), f_aligned = Vec::<f64>::new(), distance = f64::NAN, d_amplitude = f64::NAN, d_phase = f64::NAN).into();
+    }
+    let res = alignment::elastic_decomposition(&f1, &f2, &argvals, lambda);
+    list!(
+        gamma = res.alignment.gamma,
+        f_aligned = res.alignment.f_aligned,
+        distance = res.alignment.distance,
+        d_amplitude = res.d_amplitude,
+        d_phase = res.d_phase
+    ).into()
+}
+
+/// Amplitude self-distance matrix
+#[extendr]
+fn alignment_amplitude_dist(data: RMatrix<f64>, argvals: Vec<f64>, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let result = alignment::amplitude_self_distance_matrix(&fd, &argvals, lambda);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Phase self-distance matrix
+#[extendr]
+fn alignment_phase_dist(data: RMatrix<f64>, argvals: Vec<f64>, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let result = alignment::phase_self_distance_matrix(&fd, &argvals, lambda);
+    let s = result.as_slice();
+    let mat = RMatrix::new_matrix(result.nrows(), result.ncols(), |i, j| s[i + j * result.nrows()]);
+    Robj::from(mat)
+}
+
+/// Pairwise alignment consistency
+#[extendr]
+fn alignment_pairwise_consistency(data: RMatrix<f64>, argvals: Vec<f64>, lambda: f64, max_triplets: i32) -> f64 {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 3 || m < 2 || argvals.len() != m {
+        return 0.0;
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    alignment::pairwise_consistency(&fd, &argvals, lambda, max_triplets as usize)
+}
+
+// =============================================================================
+// Constrained alignment functions
+// =============================================================================
+
+/// Elastic alignment with explicit landmark constraints
+#[extendr]
+fn alignment_constrained(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, landmark_targets: Vec<f64>, landmark_sources: Vec<f64>, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(gamma = Vec::<f64>::new(), f_aligned = Vec::<f64>::new(), distance = f64::NAN, enforced_landmarks_target = Vec::<f64>::new(), enforced_landmarks_source = Vec::<f64>::new()).into();
+    }
+    let pairs: Vec<(f64, f64)> = landmark_targets.iter().zip(landmark_sources.iter()).map(|(&t, &s)| (t, s)).collect();
+    let res = alignment::elastic_align_pair_constrained(&f1, &f2, &argvals, &pairs, lambda);
+    let et: Vec<f64> = res.enforced_landmarks.iter().map(|&(t, _)| t).collect();
+    let es: Vec<f64> = res.enforced_landmarks.iter().map(|&(_, s)| s).collect();
+    list!(gamma = res.gamma, f_aligned = res.f_aligned, distance = res.distance, enforced_landmarks_target = et, enforced_landmarks_source = es).into()
+}
+
+/// Elastic alignment with automatic landmark detection
+#[extendr]
+fn alignment_with_landmarks(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, kind: &str, min_prominence: f64, expected_count: i32, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(gamma = Vec::<f64>::new(), f_aligned = Vec::<f64>::new(), distance = f64::NAN, enforced_landmarks_target = Vec::<f64>::new(), enforced_landmarks_source = Vec::<f64>::new()).into();
+    }
+    let lk = match kind {
+        "peak" => landmark::LandmarkKind::Peak,
+        "valley" => landmark::LandmarkKind::Valley,
+        "zero" | "zero_crossing" => landmark::LandmarkKind::ZeroCrossing,
+        "inflection" => landmark::LandmarkKind::Inflection,
+        _ => landmark::LandmarkKind::Peak,
+    };
+    let res = alignment::elastic_align_pair_with_landmarks(&f1, &f2, &argvals, lk, min_prominence, expected_count as usize, lambda);
+    let et: Vec<f64> = res.enforced_landmarks.iter().map(|&(t, _)| t).collect();
+    let es: Vec<f64> = res.enforced_landmarks.iter().map(|&(_, s)| s).collect();
+    list!(gamma = res.gamma, f_aligned = res.f_aligned, distance = res.distance, enforced_landmarks_target = et, enforced_landmarks_source = es).into()
 }
 
 // =============================================================================
@@ -8930,6 +9368,37 @@ extendr_module! {
     fn alignment_self_dist;
     fn alignment_cross_dist;
     fn alignment_karcher_mean;
+
+    // Soft-DTW functions
+    fn metric_soft_dtw_self_1d;
+    fn metric_soft_dtw_cross_1d;
+    fn metric_soft_dtw_div_self_1d;
+    fn metric_soft_dtw_div_cross_1d;
+    fn metric_soft_dtw_barycenter;
+
+    // Landmark registration functions
+    fn landmark_detect;
+    fn landmark_register_curves;
+
+    // TSRVF functions
+    fn alignment_tsrvf_transform;
+    fn alignment_tsrvf_from_karcher;
+    fn alignment_tsrvf_inverse;
+
+    // Alignment quality functions
+    fn alignment_quality_compute;
+    fn alignment_warp_complexity;
+    fn alignment_warp_smoothness;
+
+    // Decomposition & distance functions
+    fn alignment_decomposition;
+    fn alignment_amplitude_dist;
+    fn alignment_phase_dist;
+    fn alignment_pairwise_consistency;
+
+    // Constrained alignment functions
+    fn alignment_constrained;
+    fn alignment_with_landmarks;
 
     // Tolerance band functions
     fn tolerance_fpca;

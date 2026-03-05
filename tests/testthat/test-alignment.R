@@ -189,3 +189,103 @@ test_that("rotations are integer grid shifts of correct length", {
   # Print method should show Periodic: TRUE
   expect_output(print(res), "Periodic: TRUE")
 })
+
+# =============================================================================
+# Alignment quality tests
+# =============================================================================
+
+test_that("alignment.quality returns all expected fields", {
+  set.seed(42)
+  fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+  km <- karcher.mean(fd, max.iter = 5)
+  aq <- alignment.quality(fd, km)
+  expect_s3_class(aq, "alignment.quality")
+  expect_type(aq$warp_complexity, "double")
+  expect_type(aq$mean_warp_complexity, "double")
+  expect_type(aq$warp_smoothness, "double")
+  expect_type(aq$total_variance, "double")
+  expect_type(aq$amplitude_variance, "double")
+  expect_type(aq$phase_variance, "double")
+  expect_type(aq$phase_amplitude_ratio, "double")
+  expect_type(aq$pointwise_variance_ratio, "double")
+  expect_type(aq$mean_variance_reduction, "double")
+  expect_equal(length(aq$warp_complexity), 20)
+})
+
+test_that("alignment.quality print works", {
+  set.seed(42)
+  fd <- fdata(matrix(rnorm(100), 10, 10), argvals = seq(0, 1, length.out = 10))
+  km <- karcher.mean(fd, max.iter = 3)
+  aq <- alignment.quality(fd, km)
+  expect_output(print(aq), "Alignment Quality")
+})
+
+# =============================================================================
+# Elastic decomposition tests
+# =============================================================================
+
+test_that("elastic.decomposition returns d_amplitude and d_phase", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 50)
+  f1 <- fdata(matrix(sin(2 * pi * t), 1, 50), argvals = t)
+  f2 <- fdata(matrix(sin(2 * pi * t + 0.3), 1, 50), argvals = t)
+  dec <- elastic.decomposition(f1, f2)
+  expect_type(dec, "list")
+  expect_true(!is.null(dec$d_amplitude))
+  expect_true(!is.null(dec$d_phase))
+  expect_true(dec$d_amplitude >= 0)
+  expect_true(dec$d_phase >= 0)
+})
+
+# =============================================================================
+# Amplitude and phase distance tests
+# =============================================================================
+
+test_that("amplitude.distance returns proper distance matrix", {
+  set.seed(42)
+  fd <- fdata(matrix(rnorm(60), 6, 10), argvals = seq(0, 1, length.out = 10))
+  D <- amplitude.distance(fd)
+  expect_equal(nrow(D), 6)
+  expect_equal(ncol(D), 6)
+  # Symmetric
+  expect_equal(D, t(D), tolerance = 1e-10)
+  # Non-negative
+  expect_true(all(D >= -1e-10))
+})
+
+test_that("phase.distance returns proper distance matrix", {
+  set.seed(42)
+  fd <- fdata(matrix(rnorm(60), 6, 10), argvals = seq(0, 1, length.out = 10))
+  D <- phase.distance(fd)
+  expect_equal(nrow(D), 6)
+  expect_equal(ncol(D), 6)
+  # Non-negative
+  expect_true(all(D >= -1e-10))
+})
+
+test_that("metric dispatcher works with amplitude and phase", {
+  set.seed(42)
+  fd <- fdata(matrix(rnorm(60), 6, 10), argvals = seq(0, 1, length.out = 10))
+  Da <- metric(fd, method = "amplitude")
+  Dp <- metric(fd, method = "phase")
+  expect_equal(nrow(Da), 6)
+  expect_equal(nrow(Dp), 6)
+})
+
+# =============================================================================
+# Constrained alignment tests
+# =============================================================================
+
+test_that("elastic.align.constrained returns correct structure", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 100)
+  X <- matrix(0, 5, 100)
+  for (i in 1:5) X[i, ] <- sin(2 * pi * (t - i / 50))
+  fd <- fdata(X, argvals = t)
+  res <- elastic.align.constrained(fd, kind = "peak", min.prominence = 0.5,
+                                    expected.count = 1)
+  expect_s3_class(res, "elastic.align")
+  expect_s3_class(res$aligned, "fdata")
+  expect_equal(nrow(res$aligned$data), 5)
+  expect_equal(length(res$distances), 5)
+})

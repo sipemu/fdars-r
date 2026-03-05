@@ -38,6 +38,10 @@ navbar:
       - text: Alignment
       - text: Elastic Alignment
         href: articles/elastic-alignment.html
+      - text: Landmark Registration
+        href: articles/landmark-registration.html
+      - text: TSRVF
+        href: articles/tsrvf.html
       - text: "---"
       - text: Bands & Equivalence
       - text: Tolerance Bands
@@ -84,6 +88,8 @@ articles:
 - title: Alignment
   contents:
   - articles/elastic-alignment
+  - articles/landmark-registration
+  - articles/tsrvf
 - title: Bands & Equivalence
   contents:
   - articles/tolerance-bands
@@ -148,8 +154,27 @@ reference:
   - metric.elastic
   - karcher.mean
   - periodic.rotate
+  - alignment.quality
+  - elastic.decomposition
+  - amplitude.distance
+  - phase.distance
+  - elastic.align.constrained
   - plot.elastic.align
   - plot.karcher.mean
+  - plot.alignment.quality
+
+- title: Landmark Registration
+  contents:
+  - detect.landmarks
+  - landmark.register
+  - plot.landmark.register
+
+- title: TSRVF
+  contents:
+  - tsrvf.transform
+  - tsrvf.from.alignment
+  - tsrvf.inverse
+  - plot.tsrvf
 
 - title: Tolerance Bands
   contents:
@@ -179,6 +204,8 @@ reference:
   - metric.hausdorff
   - metric.kl
   - metric.lp
+  - metric.softDTW
+  - softdtw.barycenter
   - norm
   - semimetric.basis
   - semimetric.deriv
@@ -415,6 +442,7 @@ reference:
   desc: Low-level Rust function wrappers. Use the R-level functions instead.
   contents:
   - starts_with("alignment_")
+  - starts_with("landmark_")
   - starts_with("tolerance_")
   - starts_with("streaming_depth")
   - starts_with("depth_")

@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.81"
 name = "fdars-core"
-version = "0.6.1"
+version = "0.6.2"
 authors = ["Simon Muller"]
 build = false
 autolib = false
@@ -93,6 +93,10 @@ name = "irregular_data"
 path = "examples/13_irregular_data/main.rs"
 
 [[example]]
+name = "landmark_registration"
+path = "examples/18_landmark_registration/main.rs"
+
+[[example]]
 name = "outlier_detection"
 path = "examples/09_outlier_detection/main.rs"
 
@@ -119,6 +123,10 @@ path = "examples/12_streaming_depth/main.rs"
 [[example]]
 name = "tolerance_bands"
 path = "examples/15_tolerance_bands/main.rs"
+
+[[example]]
+name = "tsrvf"
+path = "examples/19_tsrvf/main.rs"
 
 [[test]]
 name = "validate_against_r"

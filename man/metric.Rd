@@ -23,6 +23,9 @@ metric(fdataobj, fdataref = NULL, method = "lp", ...)
 \item "hshift" - Semi-metric with horizontal shift
 \item "kl" - Symmetric Kullback-Leibler divergence
 \item "elastic" - Elastic (Fisher-Rao) distance
+\item "softdtw" - Soft Dynamic Time Warping
+\item "amplitude" - Amplitude distance (elastic)
+\item "phase" - Phase distance (elastic)
 }}
 
 \item{...}{Additional arguments passed to the specific distance function.}

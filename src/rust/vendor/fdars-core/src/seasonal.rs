@@ -404,7 +404,7 @@ fn try_add_peak(peaks: &mut Vec<usize>, candidate: usize, signal: &[f64], min_di
 }
 
 /// Find peaks in a 1D signal, returning indices.
-fn find_peaks_1d(signal: &[f64], min_distance: usize) -> Vec<usize> {
+pub(crate) fn find_peaks_1d(signal: &[f64], min_distance: usize) -> Vec<usize> {
     let n = signal.len();
     if n < 3 {
         return Vec::new();
@@ -422,7 +422,7 @@ fn find_peaks_1d(signal: &[f64], min_distance: usize) -> Vec<usize> {
 }
 
 /// Compute prominence for a peak (height above surrounding valleys).
-fn compute_prominence(signal: &[f64], peak_idx: usize) -> f64 {
+pub(crate) fn compute_prominence(signal: &[f64], peak_idx: usize) -> f64 {
     let n = signal.len();
     let peak_val = signal[peak_idx];
 
@@ -6207,5 +6207,40 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn test_constant_signal_fft_period() {
+        // Constant signal has no periodicity
+        let m = 100;
+        let argvals: Vec<f64> = (0..m).map(|i| i as f64 * 1.0).collect();
+        let data_vec: Vec<f64> = vec![5.0; m];
+        let data = FdMatrix::from_column_major(data_vec, 1, m).unwrap();
+        let result = estimate_period_fft(&data, &argvals);
+        // Should return something (even if period is meaningless for constant)
+        assert!(result.period.is_finite() || result.period.is_nan());
+    }
+
+    #[test]
+    fn test_very_short_series_period() {
+        // Very short series (4 points)
+        let argvals = vec![0.0, 1.0, 2.0, 3.0];
+        let data_vec = vec![1.0, -1.0, 1.0, -1.0];
+        let data = FdMatrix::from_column_major(data_vec, 1, 4).unwrap();
+        let result = estimate_period_fft(&data, &argvals);
+        assert!(result.period.is_finite() || result.period.is_nan());
+    }
+
+    #[test]
+    fn test_nan_sazed_no_panic() {
+        let mut data = vec![0.0; 50];
+        let argvals: Vec<f64> = (0..50).map(|i| i as f64).collect();
+        for i in 0..50 {
+            data[i] = (2.0 * std::f64::consts::PI * i as f64 / 10.0).sin();
+        }
+        data[10] = f64::NAN;
+        let result = sazed(&data, &argvals, None);
+        // Should not panic
+        assert!(result.period.is_finite() || result.period.is_nan());
     }
 }
