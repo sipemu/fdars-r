@@ -1,0 +1,31 @@
+pandoc: '3.5'
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  articles/alignment-comparison: alignment-comparison.html
+  articles/andrews-transformation: andrews-transformation.html
+  articles/basis-representation: basis-representation.html
+  articles/clustering: clustering.html
+  articles/covariance-functions: covariance-functions.html
+  articles/custom-plotting: custom-plotting.html
+  depth-functions: depth-functions.html
+  articles/distance-metrics: distance-metrics.html
+  articles/elastic-alignment: elastic-alignment.html
+  articles/equivalence-testing: equivalence-testing.html
+  articles/fpca: fpca.html
+  articles/intro-to-smoothing: intro-to-smoothing.html
+  introduction: introduction.html
+  articles/irregular-sampling: irregular-sampling.html
+  articles/landmark-registration: landmark-registration.html
+  articles/outlier-detection: outlier-detection.html
+  articles/regression: regression.html
+  articles/seasonal-analysis: seasonal-analysis.html
+  articles/simulation-toolbox: simulation-toolbox.html
+  articles/streaming-depth: streaming-depth.html
+  articles/tolerance-bands: tolerance-bands.html
+  articles/tsrvf: tsrvf.html
+  articles/working-with-derivatives: working-with-derivatives.html
+last_built: 2026-03-05T21:30Z
+urls:
+  reference: https://sipemu.github.io/fdars-r/reference
+  article: https://sipemu.github.io/fdars-r/articles

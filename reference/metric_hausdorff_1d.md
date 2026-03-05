@@ -1,0 +1,11 @@
+# Compute Hausdorff distance matrix for self-distances (symmetric)
+
+The Hausdorff distance treats curves as sets of points (t, f(t)) in 2D
+space. For each pair of curves, computes: max(max_s min_t d(s,t), max_t
+min_s d(s,t)) where d(s,t) = sqrt((x(s) - y(t))^2 + (s - t)^2)
+
+## Usage
+
+``` r
+metric_hausdorff_1d(fdata, argvals)
+```

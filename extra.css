@@ -1,0 +1,19 @@
+/* Navbar dropdown spacing */
+.navbar-nav .nav-item.dropdown {
+  margin-right: 0.5rem;
+}
+
+/* Wider dropdown menus for better readability */
+.navbar-nav .dropdown-menu {
+  min-width: 16rem;
+}
+
+/* Dropdown section headers */
+.dropdown-menu .dropdown-header {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6c757d;
+  padding: 0.5rem 1rem 0.25rem;
+}
