@@ -222,11 +222,11 @@ basis_bic_1d <- function(data, argvals, nbasis, basis_type, lambda, pooled) .Cal
 #' P-spline fitting: returns coefficients, fitted values, and diagnostics
 pspline_fit_1d <- function(data, argvals, nbasis, lambda, order) .Call(wrap__pspline_fit_1d, data, argvals, nbasis, lambda, order)
 
-#' Project 2D functional data to tensor product basis coefficients
-fdata2basis_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+#' Project 2D functional data to tensor product basis coefficients (raw binding)
+fdata2basis_2d_raw <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
-#' Reconstruct 2D functional data from tensor product basis coefficients
-basis2fdata_2d <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+#' Reconstruct 2D functional data from tensor product basis coefficients (raw binding)
+basis2fdata_2d_raw <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
 #' 2D P-spline fitting with anisotropic penalties
 pspline_fit_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order) .Call(wrap__pspline_fit_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order)
