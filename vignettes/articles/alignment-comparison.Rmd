@@ -236,6 +236,259 @@ variability into amplitude and phase components:
 plot(aq_smooth, type = "variance")
 ```
 
+## When Methods Succeed and Fail
+
+The examples above use well-behaved data. Real data is messier. This section
+shows targeted scenarios where each method shines and where it breaks down,
+so you can match the method to your data.
+
+### Scenario 1: Elastic Excels — Smooth Global Warping
+
+When curves differ only by smooth, continuous timing changes with no distinct
+features, elastic alignment is ideal. It finds the optimal warping without
+needing any manual tuning:
+
+```{r scenario-elastic-excels}
+set.seed(101)
+argvals <- seq(0, 1, length.out = 200)
+n <- 12
+
+# Smooth curves with continuous phase variation
+data_global <- matrix(0, n, 200)
+for (i in 1:n) {
+  # Smooth nonlinear warp of the time axis
+  warp_strength <- runif(1, -0.15, 0.15)
+  t_warped <- argvals + warp_strength * sin(pi * argvals)
+  t_warped <- (t_warped - min(t_warped)) / (max(t_warped) - min(t_warped))
+  amp <- rnorm(1, 1, 0.1)
+  data_global[i, ] <- amp * (sin(2 * pi * t_warped) + 0.3 * cos(6 * pi * t_warped))
+}
+fd_global <- fdata(data_global, argvals = argvals)
+
+ea_global <- elastic.align(fd_global)
+
+# Landmark registration struggles: no clear isolated peaks
+lr_global <- tryCatch(
+  landmark.register(fd_global, kind = "peak", min.prominence = 0.3, expected.count = 1),
+  error = function(e) NULL
+)
+
+p1 <- plot(fd_global) + labs(title = "Original: Smooth Warping")
+p2 <- plot(ea_global, type = "aligned") + labs(title = "Elastic: Clean alignment")
+if (!is.null(lr_global)) {
+  p3 <- plot(lr_global, type = "registered") + labs(title = "Landmark: Misses subtlety")
+  p1 + p2 + p3 + plot_layout(ncol = 3)
+} else {
+  p3 <- ggplot() + annotate("text", x = 0.5, y = 0.5,
+    label = "Landmark failed:\nno consistent features found",
+    size = 4, hjust = 0.5) + theme_void() + labs(title = "Landmark: Failed")
+  p1 + p2 + p3 + plot_layout(ncol = 3)
+}
+```
+
+**Why elastic wins**: The Fisher-Rao metric captures continuous phase variation
+naturally. Landmark registration needs identifiable features, and these smooth
+curves have overlapping, broad oscillations with no clear anchor points.
+
+### Scenario 2: Landmark Excels — Identifiable Features Shifting Independently
+
+When curves have clearly defined peaks or valleys that shift to different
+positions, landmark registration directly targets what matters:
+
+```{r scenario-landmark-excels}
+# Two-peak curves where peaks shift independently
+data_peaks <- matrix(0, n, 200)
+for (i in 1:n) {
+  pk1_pos <- runif(1, 0.15, 0.35)
+  pk2_pos <- runif(1, 0.6, 0.8)
+  h1 <- rnorm(1, 1.5, 0.2)
+  h2 <- rnorm(1, 1.0, 0.15)
+  data_peaks[i, ] <- h1 * exp(-300 * (argvals - pk1_pos)^2) +
+                      h2 * exp(-300 * (argvals - pk2_pos)^2)
+}
+fd_peaks <- fdata(data_peaks, argvals = argvals)
+
+lr_peaks <- landmark.register(fd_peaks, kind = "peak", min.prominence = 0.3,
+                               expected.count = 2)
+ea_peaks <- elastic.align(fd_peaks)
+
+p1 <- plot(fd_peaks) + labs(title = "Original: Two Shifting Peaks")
+p2 <- plot(lr_peaks, type = "registered") + labs(title = "Landmark: Peaks aligned")
+p3 <- plot(ea_peaks, type = "aligned") + labs(title = "Elastic: May swap features")
+p1 + p2 + p3 + plot_layout(ncol = 3)
+```
+
+**Why landmark wins**: It guarantees that peak 1 aligns to peak 1 and peak 2
+to peak 2. Elastic alignment has no feature awareness — it minimizes overall
+distance, which can sometimes swap or merge features when they are far apart.
+
+### Scenario 3: Elastic Struggles — Noisy Data
+
+When curves are noisy, elastic alignment's dynamic programming can over-warp,
+matching noise spikes rather than underlying signal. The solution: smooth first,
+then align:
+
+```{r scenario-noisy}
+# Clean signal + heavy noise
+data_noisy <- matrix(0, n, 200)
+for (i in 1:n) {
+  shift <- runif(1, -0.08, 0.08)
+  signal <- sin(2 * pi * (argvals - shift))
+  data_noisy[i, ] <- signal + rnorm(200, 0, 0.4)
+}
+fd_noisy <- fdata(data_noisy, argvals = argvals)
+
+# Direct alignment on noisy data: over-warping
+ea_noisy_raw <- elastic.align(fd_noisy)
+
+# Better approach: smooth first, then align
+fd_smooth_noisy <- fdata(t(apply(fd_noisy$data, 1, function(y) {
+  stats::smooth.spline(argvals, y, spar = 0.6)$y
+})), argvals = argvals)
+ea_noisy_smooth <- elastic.align(fd_smooth_noisy)
+
+p1 <- plot(fd_noisy) + labs(title = "Original: Noisy Curves")
+p2 <- plot(ea_noisy_raw, type = "aligned") +
+  labs(title = "Elastic on raw: Over-warps")
+p3 <- plot(ea_noisy_smooth, type = "aligned") +
+  labs(title = "Smooth then align: Controlled")
+p1 + p2 + p3 + plot_layout(ncol = 3)
+```
+
+```{r scenario-noisy-warps}
+p4 <- plot(ea_noisy_raw, type = "warps") +
+  labs(title = "Warps (raw): Overly complex")
+p5 <- plot(ea_noisy_smooth, type = "warps") +
+  labs(title = "Warps (smoothed): Reasonable")
+p4 + p5
+```
+
+**Lesson**: Always smooth noisy data before elastic alignment. The SRSF
+transform amplifies noise (it involves a derivative), causing the dynamic
+programming to match noise spikes. Pre-smoothing with splines or a kernel
+smoother prevents over-warping. Alternatively, use `karcher.mean()` with
+its `lambda` parameter to penalize warp complexity.
+
+### Scenario 4: Landmark Struggles — Variable Number of Features
+
+When curves have different numbers of features, landmark registration with a
+fixed `expected.count` forces all curves into the same template. This can
+produce artifacts:
+
+```{r scenario-variable-features}
+data_var <- matrix(0, n, 200)
+for (i in 1:n) {
+  # Some curves have 1 peak, others have 2
+  if (i <= n/2) {
+    pk1 <- runif(1, 0.3, 0.5)
+    data_var[i, ] <- 1.5 * exp(-300 * (argvals - pk1)^2)
+  } else {
+    pk1 <- runif(1, 0.2, 0.35)
+    pk2 <- runif(1, 0.6, 0.75)
+    data_var[i, ] <- exp(-300 * (argvals - pk1)^2) + exp(-300 * (argvals - pk2)^2)
+  }
+  data_var[i, ] <- data_var[i, ] + 0.02 * rnorm(200)
+}
+fd_var <- fdata(data_var, argvals = argvals)
+
+# Landmark fails gracefully but results are unreliable
+lr_var <- tryCatch(
+  landmark.register(fd_var, kind = "peak", min.prominence = 0.2, expected.count = 2),
+  error = function(e) NULL
+)
+ea_var <- elastic.align(fd_var)
+
+p1 <- plot(fd_var) + labs(title = "Original: Mixed 1-peak & 2-peak")
+p2 <- plot(ea_var, type = "aligned") + labs(title = "Elastic: Handles gracefully")
+if (!is.null(lr_var)) {
+  p3 <- plot(lr_var, type = "registered") +
+    labs(title = "Landmark: Forced 2-peak template")
+} else {
+  p3 <- ggplot() + annotate("text", x = 0.5, y = 0.5,
+    label = "Landmark failed:\ncannot find 2 peaks in all curves",
+    size = 4, hjust = 0.5) + theme_void() + labs(title = "Landmark: Failed")
+}
+p1 + p2 + p3 + plot_layout(ncol = 3)
+```
+
+**Why elastic wins here**: It makes no assumptions about features. When curves
+have genuinely different shapes, elastic alignment finds the best continuous
+warping for each pair. Landmark registration requires a consistent feature
+template across all curves.
+
+### Scenario 5: Constrained Excels — Best of Both Worlds
+
+When you have identifiable features AND want smooth warping between them,
+constrained elastic alignment is the best choice:
+
+```{r scenario-constrained-excels}
+# ECG-like data: sharp features + smooth variation between them
+data_ecg <- matrix(0, n, 200)
+for (i in 1:n) {
+  r_pos <- runif(1, 0.3, 0.45)
+  t_pos <- runif(1, 0.55, 0.7)
+  # R-wave (tall sharp peak)
+  r_wave <- 2.0 * exp(-800 * (argvals - r_pos)^2)
+  # T-wave (broader, shorter)
+  t_wave <- 0.6 * exp(-100 * (argvals - t_pos)^2)
+  # Baseline wander
+  baseline <- 0.15 * sin(2 * pi * argvals + runif(1, 0, 2*pi))
+  data_ecg[i, ] <- r_wave + t_wave + baseline + 0.03 * rnorm(200)
+}
+fd_ecg <- fdata(data_ecg, argvals = argvals)
+
+ea_ecg <- elastic.align(fd_ecg)
+lr_ecg <- landmark.register(fd_ecg, kind = "peak", min.prominence = 0.3,
+                             expected.count = 2)
+ec_ecg <- elastic.align.constrained(fd_ecg, kind = "peak",
+                                     min.prominence = 0.3,
+                                     expected.count = 2)
+
+p1 <- plot(fd_ecg) + labs(title = "Original: ECG-like")
+p2 <- plot(ea_ecg, type = "aligned") + labs(title = "Elastic: Good overall")
+p3 <- plot(lr_ecg, type = "registered") +
+  labs(title = "Landmark: Peaks aligned, warps angular")
+p4 <- plot(ec_ecg, type = "aligned") +
+  labs(title = "Constrained: Peaks aligned + smooth warps")
+(p1 + p2) / (p3 + p4)
+```
+
+```{r scenario-constrained-warps}
+p5 <- plot(ea_ecg, type = "warps") + labs(title = "Elastic warps")
+p6 <- plot(lr_ecg, type = "warps") + labs(title = "Landmark warps (piecewise-linear)")
+p7 <- plot(ec_ecg, type = "warps") + labs(title = "Constrained warps (smooth + anchored)")
+p5 + p6 + p7 + plot_layout(ncol = 3)
+```
+
+**Why constrained wins**: The R-wave and T-wave are clinically meaningful
+features that must correspond correctly (landmark guarantee). But between these
+features, elastic optimization produces smoother warps than the piecewise-linear
+interpolation of pure landmark registration.
+
+### Scenario Summary
+
+```{r scenario-summary, echo = FALSE}
+summary_df <- data.frame(
+  Scenario = c("Smooth global warping",
+               "Independent feature shifts",
+               "Noisy data",
+               "Variable number of features",
+               "Features + smooth variation"),
+  `Best method` = c("Elastic",
+                     "Landmark",
+                     "Elastic (with lambda)",
+                     "Elastic",
+                     "Constrained"),
+  `Why` = c("No features to anchor; elastic finds optimal continuous warp",
+            "Guarantees feature correspondence",
+            "Lambda penalty controls over-warping",
+            "No feature template required",
+            "Combines feature anchoring with smooth optimization"),
+  check.names = FALSE
+)
+knitr::kable(summary_df, align = "lll")
+```
+
 ## Decision Guide
 
 ### Summary Table
