@@ -30,9 +30,7 @@ theme_set(theme_minimal())
 
 The most common choice, producing infinitely differentiable (very
 smooth) sample paths:
-``` math
-k(s, t) = \sigma^2 \exp\left(-\frac{(s-t)^2}{2\ell^2}\right)
-```
+$$k(s,t) = \sigma^{2}\exp\left( - \frac{(s - t)^{2}}{2\ell^{2}} \right)$$
 
 ``` r
 t <- seq(0, 1, length.out = 100)
@@ -86,9 +84,7 @@ ggplot(df_ls, aes(x = t, y = value, group = curve, color = factor(curve))) +
 
 Produces rougher paths than Gaussian (continuous but not
 differentiable):
-``` math
-k(s, t) = \sigma^2 \exp\left(-\frac{|s-t|}{\ell}\right)
-```
+$$k(s,t) = \sigma^{2}\exp\left( - \frac{|s - t|}{\ell} \right)$$
 
 ``` r
 cov_exp <- kernel.exponential(variance = 1, length_scale = 0.2)
@@ -100,9 +96,9 @@ plot(fd_exp, main = "Exponential Covariance (rough)")
 
 ### Matern Family
 
-The Matern covariance is parameterized by smoothness parameter $`\nu`$.
-It interpolates between Exponential ($`\nu = 0.5`$) and Gaussian
-($`\nu \to \infty`$):
+The Matern covariance is parameterized by smoothness parameter $\nu$. It
+interpolates between Exponential ($\nu = 0.5$) and Gaussian
+($\left. \nu\rightarrow\infty \right.$):
 
 ``` r
 # Generate data for different nu values
@@ -132,17 +128,13 @@ ggplot(df_matern, aes(x = t, y = value, group = curve, color = factor(curve))) +
 
 ![](covariance-functions_files/figure-html/cov-matern-1.png)
 
-Common choices are: - $`\nu = 0.5`$: Equivalent to Exponential (rough) -
-$`\nu = 1.5`$: Once differentiable - $`\nu = 2.5`$: Twice
-differentiable - $`\nu = \infty`$: Equivalent to Gaussian (infinitely
-smooth)
+Common choices are: - $\nu = 0.5$: Equivalent to Exponential (rough) -
+$\nu = 1.5$: Once differentiable - $\nu = 2.5$: Twice differentiable -
+$\nu = \infty$: Equivalent to Gaussian (infinitely smooth)
 
 ### Brownian Motion
 
-Standard Brownian motion covariance:
-``` math
-k(s, t) = \sigma^2 \min(s, t)
-```
+Standard Brownian motion covariance: $$k(s,t) = \sigma^{2}\min(s,t)$$
 
 ``` r
 cov_brown <- kernel.brownian(variance = 1)
@@ -157,9 +149,7 @@ Note: Brownian covariance is only defined for 1D domains.
 ### Periodic
 
 For data with periodic structure:
-``` math
-k(s, t) = \sigma^2 \exp\left(-\frac{2\sin^2(\pi|s-t|/p)}{\ell^2}\right)
-```
+$$k(s,t) = \sigma^{2}\exp\left( - \frac{2\sin^{2}\left( \pi|s - t|/p \right)}{\ell^{2}} \right)$$
 
 ``` r
 t_long <- seq(0, 3, length.out = 200)
@@ -173,10 +163,7 @@ plot(fd_per, main = "Periodic Covariance (period = 1)")
 ### Linear
 
 Linear covariance produces functions that are linear combinations of a
-constant and a linear function:
-``` math
-k(s, t) = \sigma^2 (s \cdot t + c)
-```
+constant and a linear function: $$k(s,t) = \sigma^{2}(s \cdot t + c)$$
 
 ``` r
 cov_lin <- kernel.linear(variance = 1, offset = 0)
@@ -189,9 +176,7 @@ plot(fd_lin, main = "Linear Covariance")
 ### Polynomial
 
 Generalization of linear to polynomial basis functions:
-``` math
-k(s, t) = \sigma^2 (s \cdot t + c)^d
-```
+$$k(s,t) = \sigma^{2}(s \cdot t + c)^{d}$$
 
 ``` r
 cov_poly <- kernel.polynomial(variance = 1, offset = 1, degree = 3)
@@ -204,9 +189,7 @@ plot(fd_poly, main = "Polynomial Covariance (degree 3)")
 ### White Noise
 
 Diagonal covariance representing independent noise:
-``` math
-k(s, t) = \sigma^2 \mathbf{1}_{s=t}
-```
+$$k(s,t) = \sigma^{2}\mathbf{1}_{s = t}$$
 
 ``` r
 cov_white <- kernel.whitenoise(variance = 0.5)
@@ -345,16 +328,16 @@ ggplot(df_smooth_comp, aes(x = t, y = value, group = curve, color = factor(curve
 
 ## Summary Table
 
-| Covariance | Parameters | Smoothness | Notes |
-|----|----|----|----|
-| Gaussian | variance, length_scale | $`C^\infty`$ | Most common, very smooth |
-| Exponential | variance, length_scale | $`C^0`$ | Rough, non-differentiable |
-| Matern | variance, length_scale, nu | $`C^{[\nu-1]}`$ | Flexible smoothness |
-| Brownian | variance | $`C^0`$ | 1D only, non-stationary |
-| Linear | variance, offset | \- | Linear functions |
-| Polynomial | variance, offset, degree | \- | Polynomial functions |
-| WhiteNoise | variance | \- | Independent noise |
-| Periodic | variance, length_scale, period | $`C^\infty`$ | 1D only, periodic |
+| Covariance  | Parameters                     | Smoothness                  | Notes                     |
+|-------------|--------------------------------|-----------------------------|---------------------------|
+| Gaussian    | variance, length_scale         | $C^{\infty}$                | Most common, very smooth  |
+| Exponential | variance, length_scale         | $C^{0}$                     | Rough, non-differentiable |
+| Matern      | variance, length_scale, nu     | $C^{\lbrack\nu - 1\rbrack}$ | Flexible smoothness       |
+| Brownian    | variance                       | $C^{0}$                     | 1D only, non-stationary   |
+| Linear      | variance, offset               | \-                          | Linear functions          |
+| Polynomial  | variance, offset, degree       | \-                          | Polynomial functions      |
+| WhiteNoise  | variance                       | \-                          | Independent noise         |
+| Periodic    | variance, length_scale, period | $C^{\infty}$                | 1D only, periodic         |
 
 ## References
 

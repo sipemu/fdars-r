@@ -4,46 +4,42 @@
 
 Functional regression extends classical regression to handle functional
 predictors or responses. The most common setting is **scalar-on-function
-regression**, where a scalar response $`Y`$ is predicted from a
-functional predictor $`X(t)`$.
+regression**, where a scalar response $Y$ is predicted from a functional
+predictor $X(t)$.
 
 ### The Functional Linear Model
 
 The foundational model in functional regression is the **functional
 linear model**:
 
-``` math
-Y_i = \alpha + \int_{\mathcal{T}} \beta(t) X_i(t) \, dt + \epsilon_i
-```
+$$Y_{i} = \alpha + \int_{\mathcal{T}}\beta(t)X_{i}(t)\, dt + \epsilon_{i}$$
 
 where:
 
-- $`Y_i`$ is the scalar response for observation $`i`$
-- $`X_i(t)`$ is the functional predictor observed over domain
-  $`\mathcal{T}`$
-- $`\alpha`$ is the intercept
-- $`\beta(t)`$ is the **coefficient function** (unknown, to be
-  estimated)
-- $`\epsilon_i \sim N(0, \sigma^2)`$ are i.i.d. errors
+- $Y_{i}$ is the scalar response for observation $i$
+- $X_{i}(t)$ is the functional predictor observed over domain
+  $\mathcal{T}$
+- $\alpha$ is the intercept
+- $\beta(t)$ is the **coefficient function** (unknown, to be estimated)
+- $\epsilon_{i} \sim N\left( 0,\sigma^{2} \right)$ are i.i.d. errors
 
-The integral $`\int \beta(t) X_i(t) \, dt`$ can be interpreted as a
-weighted average of the functional predictor, where $`\beta(t)`$
-determines the importance of each time point $`t`$ in predicting $`Y`$.
+The integral $\int\beta(t)X_{i}(t)\, dt$ can be interpreted as a
+weighted average of the functional predictor, where $\beta(t)$
+determines the importance of each time point $t$ in predicting $Y$.
 
 ### The Estimation Challenge
 
 Unlike classical regression where we estimate a finite number of
-parameters, here we must estimate an entire *function* $`\beta(t)`$.
-This is an ill-posed inverse problem: infinitely many solutions may
-exist, and small changes in the data can lead to large changes in the
-estimate.
+parameters, here we must estimate an entire *function* $\beta(t)$. This
+is an ill-posed inverse problem: infinitely many solutions may exist,
+and small changes in the data can lead to large changes in the estimate.
 
 **fdars** provides three main approaches to regularize this problem:
 
 1.  **Principal Component Regression** (`fregre.pc`) — dimension
     reduction via FPCA
 2.  **Basis Expansion Regression** (`fregre.basis`) — represent
-    $`\beta(t)`$ in a finite basis
+    $\beta(t)$ in a finite basis
 3.  **Nonparametric Regression** (`fregre.np`) — make no parametric
     assumptions
 
@@ -101,36 +97,30 @@ onto its principal components.
 Using functional principal component analysis (FPCA), each curve can be
 represented as:
 
-``` math
-X_i(t) = \bar{X}(t) + \sum_{k=1}^{\infty} \xi_{ik} \phi_k(t)
-```
+$$X_{i}(t) = \bar{X}(t) + \sum\limits_{k = 1}^{\infty}\xi_{ik}\phi_{k}(t)$$
 
-where $`\phi_k(t)`$ are the eigenfunctions (principal components) and
-$`\xi_{ik} = \int (X_i(t) - \bar{X}(t)) \phi_k(t) \, dt`$ are the **PC
-scores**.
+where $\phi_{k}(t)$ are the eigenfunctions (principal components) and
+$\xi_{ik} = \int\left( X_{i}(t) - \bar{X}(t) \right)\phi_{k}(t)\, dt$
+are the **PC scores**.
 
-Truncating at $`K`$ components and substituting into the functional
-linear model gives:
+Truncating at $K$ components and substituting into the functional linear
+model gives:
 
-``` math
-Y_i = \alpha + \sum_{k=1}^{K} \gamma_k \xi_{ik} + \epsilon_i
-```
+$$Y_{i} = \alpha + \sum\limits_{k = 1}^{K}\gamma_{k}\xi_{ik} + \epsilon_{i}$$
 
-where $`\gamma_k = \int \beta(t) \phi_k(t) \, dt`$. This is now a
+where $\gamma_{k} = \int\beta(t)\phi_{k}(t)\, dt$. This is now a
 standard multiple linear regression with predictors
-$`\xi_{i1}, \ldots, \xi_{iK}`$.
+$\xi_{i1},\ldots,\xi_{iK}$.
 
 The coefficient function is reconstructed as:
 
-``` math
-\hat{\beta}(t) = \sum_{k=1}^{K} \hat{\gamma}_k \phi_k(t)
-```
+$$\widehat{\beta}(t) = \sum\limits_{k = 1}^{K}{\widehat{\gamma}}_{k}\phi_{k}(t)$$
 
 ### Choosing the Number of Components
 
-The key tuning parameter is $`K`$, the number of principal components:
+The key tuning parameter is $K$, the number of principal components:
 
-- **Too few**: underfitting, missing important variation in $`X(t)`$
+- **Too few**: underfitting, missing important variation in $X(t)$
 - **Too many**: overfitting, including noise components
 
 Cross-validation or information criteria (AIC, BIC) can guide the
@@ -207,61 +197,49 @@ cat("Test R2:", round(pred.R2(y_test, y_pred), 3), "\n")
 ## Basis Expansion Regression
 
 Basis expansion regression represents both the functional predictor
-$`X(t)`$ and the coefficient function $`\beta(t)`$ using a finite set of
+$X(t)$ and the coefficient function $\beta(t)$ using a finite set of
 basis functions, reducing the infinite-dimensional problem to a
 finite-dimensional one.
 
 ### Mathematical Formulation
 
-Let $`\{B_j(t)\}_{j=1}^{J}`$ be a set of basis functions (e.g.,
+Let $\{ B_{j}(t)\}_{j = 1}^{J}$ be a set of basis functions (e.g.,
 B-splines or Fourier). We expand:
 
-``` math
-X_i(t) = \sum_{j=1}^{J} c_{ij} B_j(t) \quad \text{and} \quad \beta(t) = \sum_{j=1}^{J} b_j B_j(t)
-```
+$$X_{i}(t) = \sum\limits_{j = 1}^{J}c_{ij}B_{j}(t)\quad\text{and}\quad\beta(t) = \sum\limits_{j = 1}^{J}b_{j}B_{j}(t)$$
 
 Substituting into the functional linear model:
 
-``` math
-Y_i = \alpha + \int \left(\sum_{j=1}^{J} b_j B_j(t)\right) \left(\sum_{k=1}^{J} c_{ik} B_k(t)\right) dt + \epsilon_i
-```
+$$Y_{i} = \alpha + \int\left( \sum\limits_{j = 1}^{J}b_{j}B_{j}(t) \right)\left( \sum\limits_{k = 1}^{J}c_{ik}B_{k}(t) \right)dt + \epsilon_{i}$$
 
 This simplifies to:
 
-``` math
-Y_i = \alpha + \mathbf{c}_i^\top \mathbf{W} \mathbf{b} + \epsilon_i
-```
+$$Y_{i} = \alpha + \mathbf{c}_{i}^{\top}\mathbf{W}\mathbf{b} + \epsilon_{i}$$
 
-where $`\mathbf{c}_i = (c_{i1}, \ldots, c_{iJ})^\top`$ are the basis
-coefficients of $`X_i(t)`$, $`\mathbf{b} = (b_1, \ldots, b_J)^\top`$ are
-the unknown coefficients of $`\beta(t)`$, and $`\mathbf{W}`$ is the
-**inner product matrix** with entries
-$`W_{jk} = \int B_j(t) B_k(t) \, dt`$.
+where $\mathbf{c}_{i} = \left( c_{i1},\ldots,c_{iJ} \right)^{\top}$ are
+the basis coefficients of $X_{i}(t)$,
+$\mathbf{b} = \left( b_{1},\ldots,b_{J} \right)^{\top}$ are the unknown
+coefficients of $\beta(t)$, and $\mathbf{W}$ is the **inner product
+matrix** with entries $W_{jk} = \int B_{j}(t)B_{k}(t)\, dt$.
 
 ### Ridge Regularization
 
 To prevent overfitting (especially with many basis functions), we add a
 roughness penalty. The **penalized least squares** objective is:
 
-``` math
-\min_{\alpha, \mathbf{b}} \sum_{i=1}^{n} \left(Y_i - \alpha - \mathbf{c}_i^\top \mathbf{W} \mathbf{b}\right)^2 + \lambda \int \left[\beta''(t)\right]^2 dt
-```
+$$\min\limits_{\alpha,\mathbf{b}}\sum\limits_{i = 1}^{n}\left( Y_{i} - \alpha - \mathbf{c}_{i}^{\top}\mathbf{W}\mathbf{b} \right)^{2} + \lambda\int\left\lbrack \beta''(t) \right\rbrack^{2}dt$$
 
-The penalty $`\int [\beta''(t)]^2 dt`$ discourages rapid oscillations.
-In matrix form:
+The penalty $\int\left\lbrack \beta''(t) \right\rbrack^{2}dt$
+discourages rapid oscillations. In matrix form:
 
-``` math
-\min_{\alpha, \mathbf{b}} \|\mathbf{Y} - \alpha \mathbf{1} - \mathbf{C}\mathbf{W}\mathbf{b}\|^2 + \lambda \mathbf{b}^\top \mathbf{R} \mathbf{b}
-```
+$$\min\limits_{\alpha,\mathbf{b}} \parallel \mathbf{Y} - \alpha\mathbf{1} - \mathbf{C}\mathbf{W}\mathbf{b} \parallel^{2} + \lambda\mathbf{b}^{\top}\mathbf{R}\mathbf{b}$$
 
-where $`\mathbf{R}`$ is the roughness penalty matrix with
-$`R_{jk} = \int B_j''(t) B_k''(t) \, dt`$.
+where $\mathbf{R}$ is the roughness penalty matrix with
+$R_{jk} = \int B_{j}''(t)B_{k}''(t)\, dt$.
 
 The solution is:
 
-``` math
-\hat{\mathbf{b}} = \left(\mathbf{W}^\top \mathbf{C}^\top \mathbf{C} \mathbf{W} + \lambda \mathbf{R}\right)^{-1} \mathbf{W}^\top \mathbf{C}^\top (\mathbf{Y} - \bar{Y})
-```
+$$\widehat{\mathbf{b}} = \left( \mathbf{W}^{\top}\mathbf{C}^{\top}\mathbf{C}\mathbf{W} + \lambda\mathbf{R} \right)^{- 1}\mathbf{W}^{\top}\mathbf{C}^{\top}\left( \mathbf{Y} - \bar{Y} \right)$$
 
 ### Basis Choice
 
@@ -315,76 +293,70 @@ fit_fourier <- fregre.basis(fd, y, nbasis = 11, type = "fourier")
 ## Nonparametric Regression
 
 Nonparametric functional regression makes no parametric assumptions
-about the relationship between $`X(t)`$ and $`Y`$. Instead, it estimates
-$`\mathbb{E}[Y | X = x]`$ directly using local averaging techniques.
+about the relationship between $X(t)$ and $Y$. Instead, it estimates
+${\mathbb{E}}\left\lbrack Y|X = x \right\rbrack$ directly using local
+averaging techniques.
 
 ### The General Framework
 
-Given a new functional observation $`X^*`$, the predicted response is:
+Given a new functional observation $X^{*}$, the predicted response is:
 
-``` math
-\hat{Y}^* = \hat{m}(X^*) = \sum_{i=1}^{n} w_i(X^*) Y_i
-```
+$${\widehat{Y}}^{*} = \widehat{m}\left( X^{*} \right) = \sum\limits_{i = 1}^{n}w_{i}\left( X^{*} \right)Y_{i}$$
 
-where $`w_i(X^*)`$ are weights that depend on the “distance” between
-$`X^*`$ and the training curves $`X_i`$. Different methods define these
-weights differently.
+where $w_{i}\left( X^{*} \right)$ are weights that depend on the
+“distance” between $X^{*}$ and the training curves $X_{i}$. Different
+methods define these weights differently.
 
 ### Functional Distance
 
-A key component is the **semimetric** $`d(X_i, X_j)`$ measuring
-similarity between curves. Common choices:
+A key component is the **semimetric** $d\left( X_{i},X_{j} \right)$
+measuring similarity between curves. Common choices:
 
-- **$`L^2`$ metric**:
-  $`d(X_i, X_j) = \sqrt{\int [X_i(t) - X_j(t)]^2 \, dt}`$
-- **$`L^p`$ metric**:
-  $`d(X_i, X_j) = \left(\int |X_i(t) - X_j(t)|^p \, dt\right)^{1/p}`$
+- **$L^{2}$ metric**:
+  $d\left( X_{i},X_{j} \right) = \sqrt{\int\left\lbrack X_{i}(t) - X_{j}(t) \right\rbrack^{2}\, dt}$
+- **$L^{p}$ metric**:
+  $d\left( X_{i},X_{j} \right) = \left( \int\left| X_{i}(t) - X_{j}(t) \right|^{p}\, dt \right)^{1/p}$
 - **PCA-based semimetric**:
-  $`d(X_i, X_j) = \sqrt{\sum_{k=1}^{K} (\xi_{ik} - \xi_{jk})^2}`$ using
-  PC scores
+  $d\left( X_{i},X_{j} \right) = \sqrt{\sum_{k = 1}^{K}\left( \xi_{ik} - \xi_{jk} \right)^{2}}$
+  using PC scores
 
 ### Nadaraya-Watson Estimator
 
 The **Nadaraya-Watson** (kernel regression) estimator uses:
 
-``` math
-\hat{m}(X^*) = \frac{\sum_{i=1}^{n} K\left(\frac{d(X^*, X_i)}{h}\right) Y_i}{\sum_{i=1}^{n} K\left(\frac{d(X^*, X_i)}{h}\right)}
-```
+$$\widehat{m}\left( X^{*} \right) = \frac{\sum\limits_{i = 1}^{n}K\left( \frac{d\left( X^{*},X_{i} \right)}{h} \right)Y_{i}}{\sum\limits_{i = 1}^{n}K\left( \frac{d\left( X^{*},X_{i} \right)}{h} \right)}$$
 
-where $`K(\cdot)`$ is a kernel function and $`h > 0`$ is the
-**bandwidth** controlling the smoothness:
+where $K( \cdot )$ is a kernel function and $h > 0$ is the **bandwidth**
+controlling the smoothness:
 
-- **Small $`h`$**: weights concentrated on nearest neighbors (low bias,
+- **Small $h$**: weights concentrated on nearest neighbors (low bias,
   high variance)
-- **Large $`h`$**: weights spread across many observations (high bias,
-  low variance)
+- **Large $h$**: weights spread across many observations (high bias, low
+  variance)
 
 Common kernels include:
 
-| Kernel       | Formula $`K(u)`$                               |
-|--------------|------------------------------------------------|
-| Gaussian     | $`\frac{1}{\sqrt{2\pi}} e^{-u^2/2}`$           |
-| Epanechnikov | $`\frac{3}{4}(1-u^2) \mathbf{1}_{|u| \leq 1}`$ |
-| Uniform      | $`\frac{1}{2} \mathbf{1}_{|u| \leq 1}`$        |
+| Kernel       | Formula $K(u)$                                                 |
+|--------------|----------------------------------------------------------------|
+| Gaussian     | $\frac{1}{\sqrt{2\pi}}e^{- u^{2}/2}$                           |
+| Epanechnikov | $\frac{3}{4}\left( 1 - u^{2} \right)\mathbf{1}_{{|u|} \leq 1}$ |
+| Uniform      | $\frac{1}{2}\mathbf{1}_{{|u|} \leq 1}$                         |
 
 ### k-Nearest Neighbors
 
-The **k-NN** estimator averages the responses of the $`k`$ closest
-curves:
+The **k-NN** estimator averages the responses of the $k$ closest curves:
 
-``` math
-\hat{m}(X^*) = \frac{1}{k} \sum_{i \in \mathcal{N}_k(X^*)} Y_i
-```
+$$\widehat{m}\left( X^{*} \right) = \frac{1}{k}\sum\limits_{i \in \mathcal{N}_{k}{(X^{*})}}Y_{i}$$
 
-where $`\mathcal{N}_k(X^*)`$ is the set of indices of the $`k`$ nearest
-neighbors of $`X^*`$.
+where $\mathcal{N}_{k}\left( X^{*} \right)$ is the set of indices of the
+$k$ nearest neighbors of $X^{*}$.
 
 Two variants are available:
 
-- **Global k-NN** (`kNN.gCV`): single $`k`$ selected by leave-one-out
+- **Global k-NN** (`kNN.gCV`): single $k$ selected by leave-one-out
   cross-validation
-- **Local k-NN** (`kNN.lCV`): adaptive $`k`$ that may vary per
-  prediction point
+- **Local k-NN** (`kNN.lCV`): adaptive $k$ that may vary per prediction
+  point
 
 ### Nadaraya-Watson Example
 
@@ -505,43 +477,43 @@ ggplot(df_pred, aes(x = Observed, y = PC)) +
   variation
 - Computationally efficient for large datasets
 - Interpretable: each PC represents a pattern in the data
-- Use when $`n`$ is small relative to the complexity of $`X(t)`$
+- Use when $n$ is small relative to the complexity of $X(t)$
 
 **Basis Expansion Regression** (`fregre.basis`):
 
-- Best when you believe $`\beta(t)`$ is smooth
+- Best when you believe $\beta(t)$ is smooth
 - Use B-splines for local features, Fourier for periodic patterns
-- The penalty parameter $`\lambda`$ provides automatic regularization
-- Good when you want to visualize and interpret $`\hat{\beta}(t)`$
+- The penalty parameter $\lambda$ provides automatic regularization
+- Good when you want to visualize and interpret $\widehat{\beta}(t)$
 
 **Nonparametric Regression** (`fregre.np`):
 
-- Best when the relationship between $`X`$ and $`Y`$ may be nonlinear
+- Best when the relationship between $X$ and $Y$ may be nonlinear
 - Makes minimal assumptions about the data-generating process
 - Computationally more expensive (requires distance calculations)
 - May require larger sample sizes for stable estimation
 
 ### Comparison Table
 
-| Method | Model | Key Parameter | Computation | Interpretability |
-|----|----|----|----|----|
-| PC Regression | $`Y = \alpha + \sum_k \gamma_k \xi_{ik}`$ | $`K`$ (# components) | Fast | High |
-| Basis Regression | $`Y = \alpha + \int \beta(t) X(t) dt`$ | $`\lambda`$ (penalty) | Fast | High |
-| Nadaraya-Watson | $`Y = m(X)`$ (nonparametric) | $`h`$ (bandwidth) | Moderate | Low |
-| k-NN | $`Y = \frac{1}{k}\sum_{j \in \mathcal{N}_k} Y_j`$ | $`k`$ (neighbors) | Moderate | Low |
+| Method           | Model                                              | Key Parameter       | Computation | Interpretability |
+|------------------|----------------------------------------------------|---------------------|-------------|------------------|
+| PC Regression    | $Y = \alpha + \sum_{k}\gamma_{k}\xi_{ik}$          | $K$ (# components)  | Fast        | High             |
+| Basis Regression | $Y = \alpha + \int\beta(t)X(t)dt$                  | $\lambda$ (penalty) | Fast        | High             |
+| Nadaraya-Watson  | $Y = m(X)$ (nonparametric)                         | $h$ (bandwidth)     | Moderate    | Low              |
+| k-NN             | $Y = \frac{1}{k}\sum_{j \in \mathcal{N}_{k}}Y_{j}$ | $k$ (neighbors)     | Moderate    | Low              |
 
 ## Prediction Metrics
 
 Model performance is evaluated using standard regression metrics. Given
-observed values $`y_1, \ldots, y_n`$ and predictions
-$`\hat{y}_1, \ldots, \hat{y}_n`$:
+observed values $y_{1},\ldots,y_{n}$ and predictions
+${\widehat{y}}_{1},\ldots,{\widehat{y}}_{n}$:
 
-| Metric | Formula | Interpretation |
-|----|----|----|
-| MAE | $`\frac{1}{n}\sum_{i=1}^n |y_i - \hat{y}_i|`$ | Average absolute error |
-| MSE | $`\frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2`$ | Average squared error |
-| RMSE | $`\sqrt{\text{MSE}}`$ | Error in original units |
-| $`R^2`$ | $`1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}`$ | Proportion of variance explained |
+| Metric  | Formula                                                                                               | Interpretation                   |
+|---------|-------------------------------------------------------------------------------------------------------|----------------------------------|
+| MAE     | $\frac{1}{n}\sum_{i = 1}^{n}\left| y_{i} - {\widehat{y}}_{i} \right|$                                 | Average absolute error           |
+| MSE     | $\frac{1}{n}\sum_{i = 1}^{n}\left( y_{i} - {\widehat{y}}_{i} \right)^{2}$                             | Average squared error            |
+| RMSE    | $\sqrt{\text{MSE}}$                                                                                   | Error in original units          |
+| $R^{2}$ | $1 - \frac{\sum\left( y_{i} - {\widehat{y}}_{i} \right)^{2}}{\sum\left( y_{i} - \bar{y} \right)^{2}}$ | Proportion of variance explained |
 
 ``` r
 # Available metrics for model evaluation
@@ -560,13 +532,11 @@ cat("R2:", pred.R2(y_test, pred1), "\n")
 All methods support **leave-one-out cross-validation** (LOOCV) for
 parameter selection:
 
-``` math
-\text{CV} = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_{-i})^2
-```
+$$\text{CV} = \frac{1}{n}\sum\limits_{i = 1}^{n}\left( Y_{i} - {\widehat{Y}}_{- i} \right)^{2}$$
 
-where $`\hat{Y}_{-i}`$ is the prediction for observation $`i`$ when it
-is left out of the training set. This is implemented efficiently using
-the “hat matrix trick” for linear methods.
+where ${\widehat{Y}}_{- i}$ is the prediction for observation $i$ when
+it is left out of the training set. This is implemented efficiently
+using the “hat matrix trick” for linear methods.
 
 ## References
 
