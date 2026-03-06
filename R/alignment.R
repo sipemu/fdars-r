@@ -260,6 +260,7 @@ karcher.mean <- function(fdataobj, max.iter = 20, tol = 1e-4, periodic = FALSE) 
 
   result <- list(
     mean = fdata(matrix(res$mean, nrow = 1), argvals = argvals),
+    mean_srsf = res$mean_srsf,
     aligned = fdata(res$aligned_data, argvals = argvals),
     gammas = fdata(res$gammas, argvals = argvals),
     n.iter = res$n_iter,

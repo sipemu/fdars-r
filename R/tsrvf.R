@@ -83,7 +83,13 @@ tsrvf.from.alignment <- function(karcher) {
 
   argvals <- karcher$mean$argvals
   mean_vec <- as.numeric(karcher$mean$data[1, ])
-  mean_srsf <- as.numeric(srsf.transform(karcher$mean)$data[1, ])
+  # Use the iteratively computed mean SRSF from the Karcher result when
+  # available; fall back to recomputing from the mean curve if not.
+  if (!is.null(karcher$mean_srsf) && length(karcher$mean_srsf) > 0) {
+    mean_srsf <- as.numeric(karcher$mean_srsf)
+  } else {
+    mean_srsf <- as.numeric(srsf.transform(karcher$mean)$data[1, ])
+  }
 
   res <- alignment_tsrvf_from_karcher(
     mean_vec, mean_srsf,
