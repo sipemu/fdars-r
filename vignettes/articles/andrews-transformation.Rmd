@@ -572,6 +572,12 @@ preservation theorem.
 | `fdata2pc()` | Dominant directions of multivariate variation |
 | `metric.lp()` | $\sqrt{\pi} \times$ Euclidean distance |
 
+## See Also
+
+- `vignette("depth-functions", package = "fdars")` — functional depth measures and ranking
+- `vignette("clustering", package = "fdars")` — functional data clustering
+- `vignette("outlier-detection", package = "fdars")` — functional outlier detection methods
+
 ## References
 
 - Andrews, D.F. (1972). Plots of high-dimensional data. *Biometrics*, 28(1),

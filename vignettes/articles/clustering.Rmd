@@ -377,6 +377,12 @@ system.time(cluster.kmeans(fd_large, ncl = 5, metric = metric.DTW, nstart = 10))
 | DTW | Slower | Yes |
 | PCA | Fast | No |
 
+## See Also
+
+- `vignette("distance-metrics", package = "fdars")` — distance and semimetric measures
+- `vignette("fpca", package = "fdars")` — functional principal component analysis
+- `vignette("outlier-detection", package = "fdars")` — functional outlier detection methods
+
 ## References
 
 - Abraham, C., Cornillon, P.A., Matzner-Løber, E., and Molinari, N. (2003).

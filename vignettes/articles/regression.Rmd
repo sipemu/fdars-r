@@ -133,11 +133,11 @@ cat("R-squared:", round(r2_pc, 3), "\n")
 
 ```{r fregre-pc-cv}
 # Find optimal number of components
-cv_pc <- fregre.pc.cv(fd, y, kmax = 10)
+cv_pc <- fregre.pc.cv(fd, y, ncomp.range = 1:10, seed = 42)
 
-cat("Optimal number of components:", cv_pc$ncomp.opt, "\n")
+cat("Optimal number of components:", cv_pc$optimal.ncomp, "\n")
 cat("CV error by component:\n")
-print(round(cv_pc$cv.error, 4))
+print(round(cv_pc$cv.errors, 4))
 ```
 
 ### Prediction
@@ -226,11 +226,11 @@ fit_basis_reg <- fregre.basis(fd, y, nbasis = 15, type = "bspline", lambda = 1)
 ```{r fregre-basis-cv}
 # Find optimal lambda
 cv_basis <- fregre.basis.cv(fd, y, nbasis = 15, type = "bspline",
-                            lambda = c(0, 0.001, 0.01, 0.1, 1, 10))
+                            lambda.range = c(0.001, 0.01, 0.1, 1, 10))
 
-cat("Optimal lambda:", cv_basis$lambda.opt, "\n")
+cat("Optimal lambda:", cv_basis$optimal.lambda, "\n")
 cat("CV error by lambda:\n")
-print(round(cv_basis$cv.error, 4))
+print(round(cv_basis$cv.errors, 4))
 ```
 
 ### Fourier Basis
@@ -319,9 +319,9 @@ cat("Global k-NN optimal k:", fit_knn_global$knn, "\n")
 
 ```{r np-cv}
 # Cross-validation for bandwidth
-cv_np <- fregre.np.cv(fd, y, h.seq = seq(0.1, 1, by = 0.1))
+cv_np <- fregre.np.cv(fd, y, h.range = seq(0.1, 1, by = 0.1))
 
-cat("Optimal bandwidth:", cv_np$h.opt, "\n")
+cat("Optimal bandwidth:", cv_np$optimal.h, "\n")
 ```
 
 ### Different Kernels
@@ -449,6 +449,11 @@ All methods support **leave-one-out cross-validation** (LOOCV) for parameter sel
 $$\text{CV} = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \hat{Y}_{-i})^2$$
 
 where $\hat{Y}_{-i}$ is the prediction for observation $i$ when it is left out of the training set. This is implemented efficiently using the "hat matrix trick" for linear methods.
+
+## See Also
+
+- `vignette("fpca", package = "fdars")` — functional principal component analysis
+- `vignette("basis-representation", package = "fdars")` — basis function representations (B-spline, Fourier)
 
 ## References
 

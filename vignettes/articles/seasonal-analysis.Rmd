@@ -1326,3 +1326,8 @@ results <- mclapply(series_list, function(fd) {
 - Process in batches of 1000-5000 series
 - Store only summary results (period, confidence, classification)
 - Stream data from disk rather than loading all at once
+
+## See Also
+
+- `vignette("working-with-derivatives", package = "fdars")` — estimating and analyzing functional derivatives
+- `vignette("simulation-toolbox", package = "fdars")` — simulating functional data

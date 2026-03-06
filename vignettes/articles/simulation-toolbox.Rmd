@@ -345,3 +345,8 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 | `sparsify()` | Create irregular/sparse data from regular |
 | `make.gaussian.process()` | GP simulation with covariance kernels |
 | `r.brownian()`, `r.ou()`, `r.bridge()` | Specific random process generators |
+
+## See Also
+
+- `vignette("covariance-functions", package = "fdars")` — covariance kernels for simulation
+- `vignette("irregular-sampling", package = "fdars")` — handling irregularly sampled data

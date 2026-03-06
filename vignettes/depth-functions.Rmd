@@ -287,6 +287,11 @@ system.time(depth(fd_large, method = "RP", nproj = 100))
 #>   0.089   0.000   0.089
 ```
 
+## See Also
+
+- `vignette("streaming-depth", package = "fdars")` — real-time depth computation for streaming data
+- `vignette("outlier-detection", package = "fdars")` — functional outlier detection methods
+
 ## References
 
 - Fraiman, R. and Muniz, G. (2001). Trimmed means for functional data.
