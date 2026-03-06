@@ -612,7 +612,7 @@ pca <- prcomp(tv$tangent_vectors$data)
 var_exp <- cumsum(pca$sdev^2 / sum(pca$sdev^2))
 cat("Variance explained (first 3 PCs):",
     round(var_exp[1:3] * 100, 1), "%\n")
-#> Variance explained (first 3 PCs): 16.5 28.8 39.9 %
+#> Variance explained (first 3 PCs): 16.4 28.8 40 %
 ```
 
 ## See Also
