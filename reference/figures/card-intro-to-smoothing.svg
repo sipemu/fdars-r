@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Noisy curve -->
+  <polyline points="20,65 30,58 40,72 50,48 60,62 70,40 80,55 90,35 100,50 110,30 120,45 130,28 140,42 150,25 160,38 170,22 180,35" stroke="#0d6efd" stroke-width="1" stroke-linecap="round" opacity="0.35"/>
+  <!-- Smooth curve -->
+  <path d="M20 62 Q50 52, 80 45 Q110 35, 140 32 Q165 28, 180 30" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
+  <!-- Arrow showing smoothing -->
+  <path d="M95 80 L95 58" stroke="#0d6efd" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <polygon points="92,60 95,53 98,60" fill="#0d6efd" opacity="0.6"/>
+</svg>

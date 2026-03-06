@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Depth bands (outer to inner, lighter to darker) -->
+  <path d="M20 80 Q60 50, 100 60 Q140 70, 180 45" stroke="#198754" stroke-width="8" stroke-linecap="round" opacity="0.1"/>
+  <path d="M20 78 Q60 48, 100 58 Q140 68, 180 43" stroke="#198754" stroke-width="6" stroke-linecap="round" opacity="0.2"/>
+  <path d="M20 75 Q60 45, 100 55 Q140 65, 180 40" stroke="#198754" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+  <!-- Median curve (deepest) -->
+  <path d="M20 72 Q60 42, 100 52 Q140 62, 180 37" stroke="#198754" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Outer curves -->
+  <path d="M20 90 Q60 60, 100 70 Q140 80, 180 55" stroke="#198754" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <path d="M20 60 Q60 30, 100 40 Q140 50, 180 25" stroke="#198754" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+</svg>

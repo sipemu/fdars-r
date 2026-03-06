@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Axes -->
+  <line x1="30" y1="100" x2="185" y2="100" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="100" x2="30" y2="15" stroke="#adb5bd" stroke-width="1.5"/>
+  <!-- Colored curves (ggplot2 style) -->
+  <path d="M35 80 Q70 25, 105 55 Q140 85, 180 35" stroke="#0d6efd" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M35 90 Q75 45, 110 60 Q145 75, 180 50" stroke="#e83e8c" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M35 70 Q65 40, 100 50 Q135 60, 180 30" stroke="#20c997" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Legend dots -->
+  <circle cx="140" cy="18" r="3" fill="#0d6efd"/>
+  <circle cx="155" cy="18" r="3" fill="#e83e8c"/>
+  <circle cx="170" cy="18" r="3" fill="#20c997"/>
+</svg>

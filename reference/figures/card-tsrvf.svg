@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Curved manifold surface (left) -->
+  <ellipse cx="55" cy="60" rx="40" ry="25" stroke="#fd7e14" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <!-- Point on manifold -->
+  <circle cx="55" cy="48" r="3" fill="#fd7e14"/>
+  <!-- Tangent plane (flat parallelogram) -->
+  <path d="M120 30 L180 30 L190 70 L130 70 Z" stroke="#fd7e14" stroke-width="1.5" fill="#fd7e14" fill-opacity="0.05" opacity="0.4"/>
+  <!-- Arrow from manifold to tangent space -->
+  <path d="M72 48 Q95 35, 125 42" stroke="#fd7e14" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+  <polygon points="123,38 130,42 123,46" fill="#fd7e14" opacity="0.5"/>
+  <!-- Point in tangent space -->
+  <circle cx="150" cy="50" r="3" fill="#fd7e14"/>
+  <!-- Vector in tangent space -->
+  <line x1="150" y1="50" x2="170" y2="42" stroke="#fd7e14" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <polygon points="168,38 175,40 170,45" fill="#fd7e14" opacity="0.7"/>
+</svg>

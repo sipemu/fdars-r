@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Curve with peaks -->
+  <path d="M20 80 Q45 25, 70 70 Q90 95, 110 30 Q130 -5, 150 65 Q170 90, 185 50" stroke="#fd7e14" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Landmark markers (triangles at peaks) -->
+  <polygon points="42,22 45,15 48,22" fill="#fd7e14" opacity="0.6"/>
+  <polygon points="107,27 110,20 113,27" fill="#fd7e14" opacity="0.6"/>
+  <!-- Landmark vertical dashes -->
+  <line x1="45" y1="25" x2="45" y2="105" stroke="#fd7e14" stroke-width="1" stroke-dasharray="3,3" opacity="0.3"/>
+  <line x1="110" y1="30" x2="110" y2="105" stroke="#fd7e14" stroke-width="1" stroke-dasharray="3,3" opacity="0.3"/>
+  <!-- Second curve (to be aligned) -->
+  <path d="M20 85 Q55 35, 80 72 Q100 90, 125 38 Q145 5, 165 68 Q178 88, 185 55" stroke="#fd7e14" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Axis -->
+  <line x1="15" y1="105" x2="190" y2="105" stroke="#adb5bd" stroke-width="1"/>
+</svg>

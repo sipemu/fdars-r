@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Periodic/seasonal curve -->
+  <path d="M15 60 Q30 25, 45 60 Q60 95, 75 60 Q90 25, 105 60 Q120 95, 135 60 Q150 25, 165 60 Q180 95, 192 60" stroke="#6f42c1" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Period markers -->
+  <line x1="15" y1="60" x2="15" y2="108" stroke="#6f42c1" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.3"/>
+  <line x1="75" y1="60" x2="75" y2="108" stroke="#6f42c1" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.3"/>
+  <line x1="135" y1="60" x2="135" y2="108" stroke="#6f42c1" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.3"/>
+  <!-- Period bracket -->
+  <line x1="15" y1="108" x2="75" y2="108" stroke="#6f42c1" stroke-width="1.2" opacity="0.4"/>
+  <line x1="15" y1="105" x2="15" y2="111" stroke="#6f42c1" stroke-width="1.2" opacity="0.4"/>
+  <line x1="75" y1="105" x2="75" y2="111" stroke="#6f42c1" stroke-width="1.2" opacity="0.4"/>
+  <text x="45" y="118" font-family="serif" font-style="italic" font-size="9" fill="#6f42c1" text-anchor="middle" opacity="0.5">T</text>
+</svg>

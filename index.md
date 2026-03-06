@@ -1,5 +1,3 @@
-# fdars
-
 [![R-CMD-check](https://github.com/sipemu/fdars-r/actions/workflows/r-cmd-check.yml/badge.svg)](https://github.com/sipemu/fdars-r/actions/workflows/r-cmd-check.yml)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/fdars)](https://CRAN.R-project.org/package=fdars)
@@ -9,533 +7,215 @@ downloads](https://cranlogs.r-pkg.org/badges/fdars)](https://cran.r-project.org/
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/sipemu/fdars-r/graph/badge.svg)](https://app.codecov.io/gh/sipemu/fdars-r)
 
-**Functional Data Analysis in Rust** - A high-performance R package for
-functional data analysis with a Rust backend.
+## Functional Data Analysis in Rust
 
-## What is Functional Data Analysis?
+**fdars** is a comprehensive R toolkit for functional data analysis
+powered by a high-performance Rust backend. Treat entire curves,
+spectra, and trajectories as single observations — then smooth, align,
+decompose, and analyze them with a consistent, pipe-friendly API.
 
-Functional Data Analysis (FDA) is a branch of statistics that deals with
-data where each observation is a function, curve, or surface rather than
-a single number or vector. Examples include:
+[Get started](https://sipemu.github.io/fdars-r/articles/introduction.md)
+[Reference](https://sipemu.github.io/fdars-r/reference/index.md)
 
-- **Temperature curves**: Daily temperature recordings over a year for
-  multiple weather stations
-- **Growth curves**: Height measurements of children tracked over time
-- **Spectroscopy data**: Absorbance spectra measured across wavelengths
-- **Financial trajectories**: Stock price movements over trading days
-- **Medical signals**: ECG, EEG, or fMRI time series
+------------------------------------------------------------------------
 
-Traditional statistical methods treat each time point as a separate
-variable, losing the inherent smoothness and continuity of the data. FDA
-treats the entire curve as a single observation, enabling more powerful
-and interpretable analyses.
+## Learn
 
-## Features
+Get started, preprocess, and simulate functional data.
 
-fdars is a comprehensive toolkit for functional data analysis with a
-high-performance Rust backend providing 10-200x speedups over pure R
-implementations.
+[](https://sipemu.github.io/fdars-r/articles/introduction.md)
 
-### Data Representation
+![Introduction](reference/figures/card-introduction.svg)
 
-- **1D functional data** - Curves, time series, spectra
-- **2D functional data** - Surfaces, images, spatial fields
-- **Metadata support** - Attach IDs and covariates to observations
-- **Flexible I/O** - Create from matrices, arrays, or data frames
+### Introduction to fdars
 
-### Depth & Centrality
+Get started with functional data objects and basic operations
 
-Measure how “central” or “typical” each curve is: - Fraiman-Muniz (FM),
-Band depth (BD), Modified band depth (MBD) - Modal depth, Random
-projection (RP, RT, RPD) - Functional spatial depth (FSD, KFSD) -
-Depth-based median, trimmed mean, trimmed variance
+[](https://sipemu.github.io/fdars-r/articles/custom-plotting.md)
 
-### Outlier Detection
+![Custom Plotting](reference/figures/card-custom-plotting.svg)
 
-Multiple approaches to identify anomalous curves: - Depth-based trimming
-and weighting - Likelihood ratio test (LRT) - Functional boxplot -
-Magnitude-Shape plot (magnitude vs shape outliers) - Outliergram (MEI vs
-MBD)
+### Custom Plotting
 
-### Distance & Similarity
+Customize curve visualizations with ggplot2
 
-Quantify differences between curves: - Lp distances (L1, L2, L∞) -
-Hausdorff distance - Dynamic time warping (DTW) and Soft-DTW
-(differentiable) - Elastic (Fisher-Rao) distance with amplitude-phase
-decomposition - PCA-based and derivative-based semimetrics
+[](https://sipemu.github.io/fdars-r/articles/intro-to-smoothing.md)
 
-### Elastic Alignment
+![Smoothing](reference/figures/card-intro-to-smoothing.svg)
 
-Separate amplitude and phase variability in functional data: - Pairwise
-elastic alignment via dynamic programming - Karcher (Frechet) mean in
-the elastic metric - Landmark registration (peak, valley, zero-crossing,
-inflection detection) - Constrained elastic alignment (landmarks +
-smooth warping) - TSRVF tangent space projection for linearized shape
-analysis - Alignment quality diagnostics (variance reduction, warp
-complexity) - Amplitude-phase decomposition and distance matrices
+### Introduction to Smoothing
 
-### Tolerance & Confidence Bands
+Smooth noisy curves using kernel and spline methods
 
-Characterize curve-level variability: - FPCA bootstrap bands (pointwise
-and simultaneous) - Conformal prediction bands (distribution-free) -
-Elastic tolerance bands (alignment-based, removes phase variability) -
-Exponential family bands (for non-Gaussian data) - Simultaneous
-confidence band for the mean (Degras)
+[](https://sipemu.github.io/fdars-r/articles/working-with-derivatives.md)
 
-### Regression
+![Derivatives](reference/figures/card-working-with-derivatives.svg)
 
-Predict scalar outcomes from functional predictors: - Principal
-component regression (`fregre.pc`) - Basis expansion regression
-(`fregre.basis`) - Nonparametric kernel regression (`fregre.np`) -
-Cross-validation for model selection
+### Working with Derivatives
 
-### Clustering
+Compute and analyze functional derivatives
 
-Group similar curves together: - K-means clustering with K-means++
-initialization - Fuzzy C-means with soft membership - Automatic
-selection of optimal k (silhouette, CH, elbow)
+[](https://sipemu.github.io/fdars-r/articles/simulation-toolbox.md)
 
-### Smoothing & Basis Expansion
+![Simulation](reference/figures/card-simulation-toolbox.svg)
 
-- Nadaraya-Watson, local linear/polynomial regression
-- B-spline and Fourier basis expansions
-- P-splines with automatic smoothing parameter selection
-- Cross-validation (GCV, AIC, BIC) for basis selection
+### Simulation Toolbox
 
-### Functional Statistics
+Generate synthetic functional data
 
-- Mean, variance, standard deviation, covariance
-- Geometric median (L1 median)
-- Bootstrap confidence intervals
-- Hypothesis testing for functional means
-- Functional equivalence test (TOST) via simultaneous confidence bands
+[](https://sipemu.github.io/fdars-r/articles/irregular-sampling.md)
 
-### Gaussian Process Simulation
+![Irregular Sampling](reference/figures/card-irregular-sampling.svg)
 
-Generate synthetic functional data: - Multiple covariance kernels
-(Gaussian, Matérn, Exponential, Periodic) - Kernel composition
-(addition, multiplication) - Brownian motion and Ornstein-Uhlenbeck
-processes
+### Irregular Sampling
 
-### Group Comparison
+Work with irregularly sampled and sparse data
 
-- Between-group distance matrices (centroid, Hausdorff, depth-based)
-- Permutation tests for significant group differences
-- Visualization (heatmaps, dendrograms)
+## Represent
 
-### Visualization
+Decompose, transform, rank, and measure functional data.
 
-- Curve plots with categorical/continuous coloring
-- Group means and confidence intervals
-- Functional boxplots
-- FPCA component visualization
-- Outlier diagnostic plots
+[](https://sipemu.github.io/fdars-r/articles/fpca.md)
 
-## Installation
+![FPCA](reference/figures/card-fpca.svg)
 
-### Prerequisites
+### Functional PCA
 
-- R (\>= 4.0)
-- Rust toolchain (install from [rustup.rs](https://rustup.rs/))
-- A C compiler (gcc, clang)
+Extract dominant modes of variation
 
-### From GitHub
+[](https://sipemu.github.io/fdars-r/articles/basis-representation.md)
 
-``` r
-# Install remotes if needed
-install.packages("remotes")
+![Basis Representation](reference/figures/card-basis-representation.svg)
 
-# Install fdars (with documentation)
-remotes::install_github("sipemu/fdars-r", build_vignettes = TRUE)
-```
+### Basis Representation
 
-**Note:** On Windows, you may need
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/) installed.
+Expand curves in B-spline and Fourier bases
 
-### From Binary Release (No Rust Required)
+[](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md)
 
-Download the pre-built binary from [GitHub
-Releases](https://github.com/sipemu/fdars-r/releases):
+![Andrews Curves](reference/figures/card-andrews-transformation.svg)
 
-``` r
-# macOS
-install.packages("path/to/fdars_x.y.z.tgz", repos = NULL, type = "mac.binary")
+### Andrews Curves
 
-# Windows
-install.packages("path/to/fdars_x.y.z.zip", repos = NULL, type = "win.binary")
-```
+Transform multivariate data into functional curves
 
-### From Source
+[](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
 
-``` bash
-# Clone the repository
-git clone https://github.com/sipemu/fdars-r.git
-cd fdars-r
-
-# Build and install
-R CMD build .
-R CMD INSTALL fdars_*.tar.gz
-```
-
-## Quick Start
-
-``` r
-library(fdars)
-
-# Create functional data from a matrix (rows = observations, cols = time points)
-t <- seq(0, 1, length.out = 100)
-X <- matrix(0, 20, 100)
-for (i in 1:20) {
-  X[i, ] <- sin(2 * pi * t) + rnorm(100, sd = 0.1)
-}
-fd <- fdata(X, argvals = t)
-
-# Compute depth - measures how "central" each curve is
-depths <- depth(fd)  # default: FM method
-depths <- depth(fd, method = "mode")  # or specify method
-
-# Find the functional median (most central curve)
-median_curve <- median(fd)  # default: FM method
-
-# Detect outliers
-outliers <- outliers.depth.trim(fd, trim = 0.1)
-
-# Functional regression: predict scalar y from functional X
-y <- rowMeans(X) + rnorm(20, sd = 0.1)
-model <- fregre.pc(fd, y, ncomp = 3)
-predictions <- predict(model, fd)
-
-# Cluster curves into groups
-clusters <- cluster.kmeans(fd, ncl = 2)
-
-# Smooth noisy curves
-S <- S.NW(t, h = 0.1)  # Nadaraya-Watson smoother
-smoothed <- S %*% X[1, ]
-```
-
-## Key Concepts
-
-### Functional Data Objects (`fdata`)
-
-The `fdata` class stores functional data as a matrix where rows are
-observations and columns are evaluation points:
-
-``` r
-fd <- fdata(data_matrix, argvals = time_points, rangeval = c(0, 1))
-```
-
-#### Identifiers and Metadata
-
-You can attach identifiers and metadata (covariates) to functional data
-objects:
-
-``` r
-# Create fdata with IDs and metadata
-meta <- data.frame(
-  group = factor(c("control", "treatment", ...)),
-  age = c(25, 32, ...),
-  response = c(0.5, 0.8, ...)
-)
-fd <- fdata(X, id = paste0("patient_", 1:n), metadata = meta)
-
-# Access fields
-fd$id              # Character vector of identifiers
-fd$metadata$group  # Access metadata columns
-
-# Subsetting preserves metadata
-fd_sub <- fd[1:10, ]  # id and metadata are also subsetted
-
-# View metadata info
-print(fd)    # Shows metadata columns
-summary(fd)  # Shows metadata types and ranges
-```
-
-**Note:** If metadata contains an `id` column or has non-default row
-names, they must match the fdata identifiers. An error is thrown on
-mismatch.
+![Depth Functions](reference/figures/card-depth-functions.svg)
 
 ### Depth Functions
 
-Depth measures how “central” or “typical” a curve is relative to a
-sample. Higher depth = more central.
+Rank curves from center outward using statistical depth
 
-Use the unified
-[`depth()`](https://sipemu.github.io/fdars-r/reference/depth.md)
-function with a `method` parameter:
+[](https://sipemu.github.io/fdars-r/articles/streaming-depth.md)
 
-``` r
-depth(fd, method = "FM")     # Fraiman-Muniz depth (default)
-depth(fd, method = "BD")     # Band depth
-depth(fd, method = "MBD")    # Modified band depth
-depth(fd, method = "mode")   # Modal depth (kernel density)
-depth(fd, method = "RP")     # Random projection depth
-depth(fd, method = "RT")     # Random Tukey depth
-depth(fd, method = "FSD")    # Functional spatial depth
-depth(fd, method = "KFSD")   # Kernel functional spatial depth
-depth(fd, method = "RPD")    # Random projection with derivatives
-```
+![Streaming Depth](reference/figures/card-streaming-depth.svg)
 
-### Functional Regression
+### Streaming Depth
 
-Predict a scalar response from functional predictors:
+Monitor depth in real-time as new curves arrive
 
-- `fregre.pc` - Principal component regression
-- `fregre.basis` - Basis expansion regression
-- `fregre.np` - Nonparametric kernel regression
+[](https://sipemu.github.io/fdars-r/articles/distance-metrics.md)
 
-All models support [`predict()`](https://rdrr.io/r/stats/predict.html)
-for new data.
+![Distance Metrics](reference/figures/card-distance-metrics.svg)
 
 ### Distance Metrics
 
-Measure similarity between curves using
-[`metric()`](https://sipemu.github.io/fdars-r/reference/metric.md) with
-a method parameter:
+Measure similarity with L^(p), DTW, and elastic distances
 
-``` r
-metric(fd, method = "lp")        # Lp distance (default, L2 = Euclidean)
-metric(fd, method = "hausdorff") # Hausdorff distance
-metric(fd, method = "dtw")       # Dynamic time warping
-metric(fd, method = "softdtw")   # Soft-DTW (differentiable)
-metric(fd, method = "elastic")   # Elastic (Fisher-Rao) distance
-metric(fd, method = "amplitude") # Amplitude distance (shape only)
-metric(fd, method = "phase")     # Phase distance (timing only)
-metric(fd, method = "pca")       # PCA-based semimetric
-metric(fd, method = "deriv")     # Derivative-based semimetric
-```
+## Align
 
-Individual functions are also available: `metric.lp`,
-`metric.hausdorff`, `metric.DTW`, `metric.softDTW`, `elastic.distance`,
-`amplitude.distance`, `phase.distance`, `semimetric.pca`,
-`semimetric.deriv`.
+Register and align curves to remove phase variability.
 
-### Outlier Detection
+[](https://sipemu.github.io/fdars-r/articles/elastic-alignment.md)
 
-Identify unusual curves:
+![Elastic Alignment](reference/figures/card-elastic-alignment.svg)
 
-- `outliers.depth.trim` - Trimmed depth-based detection
-- `outliers.depth.pond` - Weighted depth-based detection
-- `outliers.lrt` - Likelihood ratio test
-- `outliers.boxplot` - Functional boxplot-based detection
-- `magnitudeshape` - Magnitude-Shape outlier detection
-- `outliergram` - Outliergram (MEI vs MBD plot)
+### Elastic Alignment
 
-#### Labeling Outliers by ID or Metadata
+Remove phase variability via SRSF
 
-Both `magnitudeshape` and `outliergram` support labeling points by ID or
-metadata columns:
+[](https://sipemu.github.io/fdars-r/articles/landmark-registration.md)
 
-``` r
-# Create fdata with IDs and metadata
-fd <- fdata(X, id = paste0("patient_", 1:n),
-            metadata = data.frame(subject_id = paste0("S", 1:n)))
+![Landmark
+Registration](reference/figures/card-landmark-registration.svg)
 
-# Outliergram with custom labels
-og <- outliergram(fd)
-plot(og, label = "id")           # Label outliers with patient IDs
-plot(og, label = "subject_id")   # Label with metadata column
-plot(og, label_all = TRUE)       # Label ALL points, not just outliers
+### Landmark Registration
 
-# magnitudeshape with custom labels
-magnitudeshape(fd, label = "id")        # Label outliers with patient IDs
-magnitudeshape(fd, label = NULL)        # No labels
-```
+Align curves by matching peaks and valleys
 
-### Functional Statistics
+[](https://sipemu.github.io/fdars-r/articles/tsrvf.md)
 
-- `mean(fd)` - Functional mean
-- `var(fd)` - Functional variance
-- `sd(fd)` - Functional standard deviation
-- `cov(fd)` - Functional covariance
-- `gmed(fd)` - Geometric median (L1 median via Weiszfeld algorithm)
+![TSRVF](reference/figures/card-tsrvf.svg)
 
-### Covariance Functions and Gaussian Process Generation
+### TSRVF (Tangent Space)
 
-Generate synthetic functional data from Gaussian processes with various
-covariance kernels:
+Project aligned curves into a linear tangent space
 
-``` r
-# Smooth samples with Gaussian (squared exponential) kernel
-fd_smooth <- make_gaussian_process(n = 20, t = seq(0, 1, length.out = 100),
-                                   cov = kernel_gaussian(length_scale = 0.2))
+[](https://sipemu.github.io/fdars-r/articles/alignment-comparison.md)
 
-# Rough samples with Matern kernel
-fd_rough <- make_gaussian_process(n = 20, t = seq(0, 1, length.out = 100),
-                                  cov = kernel_matern(nu = 1.5))
+![Comparing Methods](reference/figures/card-alignment-comparison.svg)
 
-# Periodic samples
-fd_periodic <- make_gaussian_process(n = 10, t = seq(0, 2, length.out = 200),
-                                     cov = kernel_periodic(period = 0.5))
+### Comparing Methods
 
-# Combine kernels: signal + noise
-cov_total <- kernel_add(kernel_gaussian(variance = 1), kernel_whitenoise(variance = 0.1))
-fd_noisy <- make_gaussian_process(n = 10, t = seq(0, 1, length.out = 100), cov = cov_total)
-```
+Compare alignment methods side-by-side
 
-Available covariance functions: - `kernel_gaussian` - Squared
-exponential (RBF) kernel, infinitely smooth - `kernel_exponential` -
-Exponential kernel (Matern ν=0.5), rough - `kernel_matern` - Matern
-family with smoothness parameter ν - `kernel_brownian` - Brownian motion
-covariance (1D only) - `kernel_linear` - Linear kernel -
-`kernel_polynomial` - Polynomial kernel - `kernel_whitenoise` -
-Independent noise at each point - `kernel_periodic` - Periodic kernel
-(1D only) - `kernel_add` - Combine kernels by addition - `kernel_mult` -
-Combine kernels by multiplication
+## Analyze
 
-### Depth-Based Medians and Trimmed Means
+Infer, classify, predict, and model functional data.
 
-Use the unified functions with a `method` parameter:
+[](https://sipemu.github.io/fdars-r/articles/tolerance-bands.md)
 
-``` r
-# Median (curve with maximum depth)
-median(fd)                          # default: FM method
-median(fd, method = "mode")         # modal depth-based median
+![Tolerance Bands](reference/figures/card-tolerance-bands.svg)
 
-# Trimmed mean (mean of deepest curves)
-trimmed(fd, trim = 0.1)             # default: FM method
-trimmed(fd, trim = 0.1, method = "RP")  # RP depth-based trimmed mean
+### Tolerance Bands
 
-# Trimmed variance
-trimvar(fd, trim = 0.1)             # default: FM method
-trimvar(fd, trim = 0.1, method = "mode")
-```
+Construct tolerance and confidence bands
 
-### Visualization
+[](https://sipemu.github.io/fdars-r/articles/equivalence-testing.md)
 
-- `plot(fd, color = ...)` - Plot curves with coloring by numeric or
-  categorical variables
-  - `show.mean = TRUE` - Overlay group mean curves
-  - `show.ci = TRUE` - Show confidence interval ribbons per group
-- `boxplot.fdata` - Functional boxplot with depth-based envelopes
-- `magnitudeshape` - Magnitude-Shape outlier detection and visualization
-- `outliergram` - Outliergram for shape outlier detection (MEI vs MBD
-  plot)
-- `plot.fdata2pc` - FPCA visualization (components, variance, scores)
+![Equivalence Testing](reference/figures/card-equivalence-testing.svg)
 
-### Group Comparison
+### Equivalence Testing
 
-- `group.distance` - Compute distances between groups (centroid,
-  Hausdorff, depth-based)
-- `group.test` - Permutation test for significant group differences
-- `fequiv.test` - Functional equivalence test (TOST) with bootstrap SCB
-- `plot.group.distance` - Visualize group distances (heatmap,
-  dendrogram)
+Test functional equivalence between groups
+
+[](https://sipemu.github.io/fdars-r/articles/clustering.md)
+
+![Clustering](reference/figures/card-clustering.svg)
 
 ### Clustering
 
-- `cluster.kmeans` - K-means clustering for functional data
-- `cluster.optim` - Optimal k selection using silhouette, CH, or elbow
-- `cluster.fcm` - Fuzzy C-means clustering with soft membership
-- `cluster.init` - K-means++ center initialization
+Group similar curves with k-means and fuzzy c-means
 
-### Curve Registration & Alignment
+[](https://sipemu.github.io/fdars-r/articles/outlier-detection.md)
 
-- `elastic.align` - Elastic alignment via SRSF and dynamic programming
-- `karcher.mean` - Karcher mean in the elastic metric
-- `landmark.register` - Landmark registration (peaks, valleys, etc.)
-- `elastic.align.constrained` - Constrained elastic alignment
-- `tsrvf.transform` - TSRVF tangent space projection
-- `register.fd` - Shift registration using cross-correlation
+![Outlier Detection](reference/figures/card-outlier-detection.svg)
 
-### Feature Extraction
+### Outlier Detection
 
-- `localavg.fdata` - Extract local average features from curves
+Identify anomalous curves using depth
 
-### 2D Functional Data (Surfaces)
+[](https://sipemu.github.io/fdars-r/articles/regression.md)
 
-fdars supports 2D functional data (surfaces/images). The following
-functions have full 2D support:
+![Regression](reference/figures/card-regression.svg)
 
-| Category          | Functions                                                             |
-|-------------------|-----------------------------------------------------------------------|
-| **Depth**         | `depth` (methods: FM, mode, RP, RT, FSD, KFSD)                        |
-| **Distance**      | `metric.lp`, `metric.hausdorff`, `semimetric.pca`, `semimetric.deriv` |
-| **Statistics**    | `mean`, `var`, `sd`, `cov`, `gmed`, `deriv`                           |
-| **Centrality**    | `median`, `trimmed`, `trimvar` (all methods except BD, MBD, RPD)      |
-| **Regression**    | `fregre.np` (nonparametric)                                           |
-| **Visualization** | `plot` (heatmap + contours)                                           |
+### Regression
 
-**Note:** Band depths (BD, MBD), RPD, and DTW do not support 2D data.
+Predict scalar outcomes from functional predictors
 
-``` r
-# Create 2D functional data (e.g., 10 surfaces on a 20x30 grid)
-n <- 10
-m1 <- 20
-m2 <- 30
-s <- seq(0, 1, length.out = m1)
-t <- seq(0, 1, length.out = m2)
+[](https://sipemu.github.io/fdars-r/articles/seasonal-analysis.md)
 
-# Generate surfaces: f(s,t) = sin(2*pi*s) * cos(2*pi*t) + noise
-X <- array(0, dim = c(n, m1, m2))
-for (i in 1:n) {
-  for (si in 1:m1) {
-    for (ti in 1:m2) {
-      X[i, si, ti] <- sin(2*pi*s[si]) * cos(2*pi*t[ti]) + rnorm(1, sd = 0.1)
-    }
-  }
-}
+![Seasonal Analysis](reference/figures/card-seasonal-analysis.svg)
 
-fd2d <- fdata(X, argvals = list(s, t), fdata2d = TRUE)
+### Seasonal Analysis
 
-# All these work with 2D data:
-mean_surface <- mean(fd2d)           # Mean surface
-var_surface <- var(fd2d)             # Pointwise variance
-depths <- depth(fd2d)                # Depth values
-median_surface <- median(fd2d)       # Depth-based median
-gmed_surface <- gmed(fd2d)           # Geometric median
+Detect and decompose seasonal patterns
 
-# Plot 2D data (heatmap + contours)
-plot(fd2d)
-```
+[](https://sipemu.github.io/fdars-r/articles/covariance-functions.md)
 
-#### Converting DataFrames to 2D fdata
+![Covariance Functions](reference/figures/card-covariance-functions.svg)
 
-Use
-[`df_to_fdata2d()`](https://sipemu.github.io/fdars-r/reference/df_to_fdata2d.md)
-to convert long-format DataFrames to 2D functional data:
+### Covariance Functions
 
-``` r
-# DataFrame structure: id column, s-index column, t-value columns
-df <- data.frame(
-  id = rep(c("surf1", "surf2"), each = 5),
-  s = rep(1:5, 2),
-  t1 = rnorm(10), t2 = rnorm(10), t3 = rnorm(10)
-)
-
-# Convert to 2D fdata
-fd2d <- df_to_fdata2d(df, id_col = 1, s_col = 2)
-
-# With metadata (must have one row per surface)
-meta <- data.frame(group = c("A", "B"), value = c(1.5, 2.3))
-fd2d <- df_to_fdata2d(df, id_col = 1, s_col = 2, metadata = meta)
-```
-
-## Examples
-
-- **[Wine Quality Analysis with Andrews
-  Curves](https://github.com/sipemu/fdars-r/blob/main/examples/medium-andrews-wine.qmd)**
-  — A comprehensive walkthrough using the UCI Wine dataset (178 wines,
-  13 chemicals, 3 cultivars) demonstrating outlier detection,
-  clustering, hypothesis testing, FPCA, and process monitoring. Render
-  with `quarto render examples/medium-andrews-wine.qmd`.
-
-- **[Predictive Truck Maintenance with Andrews
-  Curves](https://github.com/sipemu/fdars-r/blob/main/examples/scania-aps-failure.qmd)**
-  — Applying the full FDA pipeline to the Scania APS Failure dataset
-  (76,000 trucks, 170 anonymized sensors, binary failure classification)
-  for fleet health monitoring, outlier triage, and sensor-level
-  diagnostics. Render with
-  `quarto render examples/scania-aps-failure.qmd`.
-
-## License
-
-MIT
-
-## Author
-
-Simon Mueller
-
-## Acknowledgments
-
-- Built with [extendr](https://extendr.rs/) for R-Rust integration
-- Uses [rayon](https://github.com/rayon-rs/rayon) for parallelization
+Build GP models with composable kernels

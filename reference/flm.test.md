@@ -56,6 +56,6 @@ y <- rnorm(20)
 # \donttest{
 test_result <- flm.test(fd, y, B = 100)
 test_result$p.value
-#> [1] 0.51
+#> [1] 0.66
 # }
 ```

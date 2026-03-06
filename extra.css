@@ -17,3 +17,96 @@
   color: #6c757d;
   padding: 0.5rem 1rem 0.25rem;
 }
+
+/* ── Card navigation grid ────────────────────────────────── */
+
+.fdars-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 991.98px) {
+  .fdars-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .fdars-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card link wrapper */
+.fdars-card {
+  text-decoration: none !important;
+  color: inherit;
+  display: block;
+}
+
+.fdars-card .card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-top-width: 3px;
+  border-top-style: solid;
+}
+
+.fdars-card:hover .card {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.fdars-card:focus .card {
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+
+/* Section colors via border-top */
+.fdars-card.fdars-learn .card    { border-top-color: #0d6efd; }
+.fdars-card.fdars-represent .card { border-top-color: #198754; }
+.fdars-card.fdars-align .card    { border-top-color: #fd7e14; }
+.fdars-card.fdars-analyze .card  { border-top-color: #6f42c1; }
+
+/* Focus outline colours */
+.fdars-card.fdars-learn:focus .card    { outline-color: #0d6efd; }
+.fdars-card.fdars-represent:focus .card { outline-color: #198754; }
+.fdars-card.fdars-align:focus .card    { outline-color: #fd7e14; }
+.fdars-card.fdars-analyze:focus .card  { outline-color: #6f42c1; }
+
+/* Card image */
+.fdars-card-img {
+  height: 120px;
+  object-fit: contain;
+  padding: 1rem 1.5rem 0.5rem;
+  background: #f8f9fa;
+}
+
+/* Card body */
+.fdars-card .card-body {
+  padding: 0.75rem 1rem;
+}
+
+.fdars-card .card-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.fdars-card .card-text {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+/* Section headings */
+.fdars-section-heading {
+  font-weight: 700;
+  margin-top: 2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 3px solid;
+}
+
+.fdars-section-heading.fdars-learn    { border-bottom-color: #0d6efd; color: #0d6efd; }
+.fdars-section-heading.fdars-represent { border-bottom-color: #198754; color: #198754; }
+.fdars-section-heading.fdars-align    { border-bottom-color: #fd7e14; color: #fd7e14; }
+.fdars-section-heading.fdars-analyze  { border-bottom-color: #6f42c1; color: #6f42c1; }

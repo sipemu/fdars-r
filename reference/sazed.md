@@ -117,7 +117,7 @@ print(result)  # Shows consensus period and component details
 #>   Spectral:      2.0050
 #>   ACF Peak:      2.0050
 #>   ACF Average:   2.0036
-#>   Zero-crossing: 2.0010
+#>   Zero-crossing: 2.0008
 #>   Spectral Diff: 2.0000
 
 # With trend - SAZED's spectral_diff component handles this

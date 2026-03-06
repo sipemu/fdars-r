@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Bundle of functional curves -->
+  <path d="M20 90 Q60 20, 100 55 Q140 90, 180 30" stroke="#0d6efd" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M20 80 Q55 30, 95 60 Q135 90, 180 40" stroke="#0d6efd" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <path d="M20 95 Q65 35, 105 58 Q145 80, 180 25" stroke="#0d6efd" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M20 85 Q50 45, 90 65 Q130 85, 180 35" stroke="#0d6efd" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <path d="M20 100 Q70 40, 110 52 Q150 65, 180 20" stroke="#0d6efd" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+</svg>

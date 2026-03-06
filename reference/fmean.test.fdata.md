@@ -49,6 +49,6 @@ fd <- fdata(matrix(rnorm(200), 20, 10))
 # \donttest{
 test_result <- fmean.test.fdata(fd, B = 100)
 test_result$p.value
-#> [1] 0.95
+#> [1] 0.92
 # }
 ```

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- B-spline basis functions -->
+  <path d="M10 100 Q25 100, 35 50 Q45 0, 55 50 Q65 100, 80 100" stroke="#198754" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  <path d="M40 100 Q55 100, 65 40 Q75 -10, 85 40 Q95 100, 110 100" stroke="#198754" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M70 100 Q85 100, 95 45 Q105 -5, 115 45 Q125 100, 140 100" stroke="#198754" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M100 100 Q115 100, 125 42 Q135 -8, 145 42 Q155 100, 170 100" stroke="#198754" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <path d="M130 100 Q145 100, 155 48 Q165 0, 175 48 Q185 100, 195 100" stroke="#198754" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <!-- Axis -->
+  <line x1="10" y1="102" x2="195" y2="102" stroke="#adb5bd" stroke-width="1"/>
+</svg>
