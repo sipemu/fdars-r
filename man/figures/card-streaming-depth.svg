@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Existing curves (faded) -->
+  <path d="M15 70 Q45 35, 75 50 Q105 65, 130 45" stroke="#198754" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 80 Q50 45, 80 55 Q110 65, 130 50" stroke="#198754" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 60 Q40 30, 70 48 Q100 68, 130 40" stroke="#198754" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+  <!-- Vertical dashed line (stream boundary) -->
+  <line x1="130" y1="15" x2="130" y2="105" stroke="#198754" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <!-- New arriving curve (bold, extends right) -->
+  <path d="M15 75 Q48 40, 78 52 Q108 65, 130 47 Q150 38, 180 30" stroke="#198754" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Streaming arrow -->
+  <line x1="150" y1="15" x2="170" y2="15" stroke="#198754" stroke-width="1.5" opacity="0.5"/>
+  <polygon points="168,11 175,15 168,19" fill="#198754" opacity="0.5"/>
+  <!-- t label -->
+  <text x="126" y="112" font-family="serif" font-style="italic" font-size="10" fill="#198754" opacity="0.5">t</text>
+</svg>

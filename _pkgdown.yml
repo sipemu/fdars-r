@@ -4,6 +4,7 @@ template:
 
 home:
   title: fdars - Functional Data Analysis in Rust
+  sidebar: false
 
 navbar:
   structure:

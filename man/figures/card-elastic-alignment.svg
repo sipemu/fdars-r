@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Misaligned curves (left) -->
+  <path d="M15 80 Q35 25, 55 55 Q70 80, 85 60" stroke="#fd7e14" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M15 85 Q45 30, 65 50 Q78 70, 85 55" stroke="#fd7e14" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <!-- Arrow -->
+  <line x1="92" y1="55" x2="108" y2="55" stroke="#fd7e14" stroke-width="1.5" opacity="0.5"/>
+  <polygon points="106,51 113,55 106,59" fill="#fd7e14" opacity="0.5"/>
+  <!-- Aligned curves (right) -->
+  <path d="M115 78 Q140 28, 160 52 Q175 72, 185 55" stroke="#fd7e14" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M115 82 Q142 30, 162 50 Q176 68, 185 52" stroke="#fd7e14" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+  <!-- Warping function hint below -->
+  <path d="M15 105 Q40 95, 55 100 Q70 108, 85 105" stroke="#fd7e14" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+</svg>

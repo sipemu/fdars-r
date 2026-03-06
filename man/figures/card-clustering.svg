@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Cluster 1 (upper) -->
+  <path d="M20 40 Q60 15, 100 28 Q140 42, 180 20" stroke="#6f42c1" stroke-width="2" stroke-linecap="round"/>
+  <path d="M20 45 Q62 20, 102 32 Q142 44, 180 25" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <path d="M20 35 Q58 12, 98 25 Q138 38, 180 18" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <!-- Cluster 2 (lower) -->
+  <path d="M20 85 Q60 60, 100 72 Q140 85, 180 68" stroke="#9775d0" stroke-width="2" stroke-linecap="round"/>
+  <path d="M20 90 Q62 65, 102 76 Q142 88, 180 72" stroke="#9775d0" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <path d="M20 80 Q58 58, 98 70 Q138 82, 180 65" stroke="#9775d0" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <!-- Dividing line -->
+  <line x1="15" y1="56" x2="185" y2="56" stroke="#6f42c1" stroke-width="1" stroke-dasharray="4,4" opacity="0.2"/>
+</svg>

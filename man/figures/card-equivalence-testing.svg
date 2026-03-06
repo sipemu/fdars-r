@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Group 1 curves -->
+  <path d="M20 65 Q55 30, 90 50 Q120 65, 150 45" stroke="#6f42c1" stroke-width="2" stroke-linecap="round"/>
+  <path d="M20 70 Q58 35, 93 52 Q122 62, 150 48" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <!-- Group 2 curves -->
+  <path d="M20 75 Q52 42, 88 55 Q118 68, 150 52" stroke="#6f42c1" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <path d="M20 80 Q50 48, 85 58 Q115 72, 150 55" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Equivalence symbol -->
+  <line x1="160" y1="48" x2="185" y2="48" stroke="#6f42c1" stroke-width="2" opacity="0.6"/>
+  <line x1="160" y1="55" x2="185" y2="55" stroke="#6f42c1" stroke-width="2" opacity="0.6"/>
+  <!-- Question mark -->
+  <text x="190" y="56" font-family="sans-serif" font-weight="bold" font-size="14" fill="#6f42c1" opacity="0.4">?</text>
+</svg>

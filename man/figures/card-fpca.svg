@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Mean curve -->
+  <path d="M20 65 Q60 35, 100 55 Q140 75, 180 50" stroke="#198754" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- PC1 mode + -->
+  <path d="M20 50 Q60 20, 100 40 Q140 60, 180 35" stroke="#198754" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="6,3" opacity="0.5"/>
+  <!-- PC1 mode - -->
+  <path d="M20 80 Q60 50, 100 70 Q140 90, 180 65" stroke="#198754" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="6,3" opacity="0.5"/>
+  <!-- Vertical arrows showing variation -->
+  <line x1="60" y1="28" x2="60" y2="48" stroke="#198754" stroke-width="1" opacity="0.4"/>
+  <line x1="60" y1="48" x2="60" y2="28" stroke="#198754" stroke-width="1" opacity="0.4" marker-end="none"/>
+  <polygon points="57,30 60,23 63,30" fill="#198754" opacity="0.4"/>
+  <polygon points="57,46 60,53 63,46" fill="#198754" opacity="0.4"/>
+  <!-- Label -->
+  <text x="168" y="18" font-family="serif" font-style="italic" font-size="10" fill="#198754" opacity="0.6">PC1</text>
+</svg>

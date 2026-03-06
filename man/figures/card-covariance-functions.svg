@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- RBF/Gaussian kernel shape -->
+  <path d="M15 95 Q25 95, 40 90 Q60 75, 80 35 Q90 15, 100 10 Q110 15, 120 35 Q140 75, 160 90 Q175 95, 190 95" stroke="#6f42c1" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Periodic kernel (faded) -->
+  <path d="M15 92 Q35 70, 50 85 Q65 95, 80 75 Q95 55, 100 50 Q105 55, 120 75 Q135 95, 150 85 Q165 70, 190 92" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Matern kernel (faded) -->
+  <path d="M15 95 Q30 93, 50 85 Q70 65, 85 30 Q95 10, 100 8 Q105 10, 115 30 Q130 65, 150 85 Q170 93, 190 95" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.2" stroke-dasharray="4,3"/>
+  <!-- Axis -->
+  <line x1="10" y1="98" x2="195" y2="98" stroke="#adb5bd" stroke-width="1"/>
+  <!-- Label -->
+  <text x="100" y="115" font-family="serif" font-style="italic" font-size="9" fill="#6f42c1" text-anchor="middle" opacity="0.5">k(x,x')</text>
+</svg>
