@@ -376,6 +376,13 @@ into amplitude rather than spreading it across both amplitude and phase.
 | Count or binary functional data | Exponential (`method = "exponential"`) |
 | Confidence band for the mean    | SCB Degras (`method = "scb"`)          |
 
+## See Also
+
+- `vignette("equivalence-testing", package = "fdars")` — equivalence
+  testing for functional data
+- `vignette("fpca", package = "fdars")` — functional principal component
+  analysis
+
 ## References
 
 - Rathnayake, L.N. and Cuevas, A. (2016). Tolerance bands for functional

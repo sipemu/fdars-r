@@ -570,6 +570,15 @@ ggplot(df_comp, aes(x = t, y = value, color = method, linetype = method, linewid
     - Automatic smoothing parameter selection
 4.  **Validate** by comparing reconstructed curves to the original data
 
+## See Also
+
+- `vignette("fpca", package = "fdars")` — functional principal component
+  analysis
+- `vignette("intro-to-smoothing", package = "fdars")` — smoothing
+  techniques for functional data
+- `vignette("regression", package = "fdars")` — scalar-on-function
+  regression methods
+
 ## References
 
 - Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*.

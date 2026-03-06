@@ -339,6 +339,11 @@ ggplot(df_smooth_comp, aes(x = t, y = value, group = curve, color = factor(curve
 | WhiteNoise  | variance                       | \-                          | Independent noise         |
 | Periodic    | variance, length_scale, period | $C^{\infty}$                | 1D only, periodic         |
 
+## See Also
+
+- `vignette("simulation-toolbox", package = "fdars")` — simulating
+  functional data
+
 ## References
 
 - Rasmussen, C.E. and Williams, C.K.I. (2006). *Gaussian Processes for

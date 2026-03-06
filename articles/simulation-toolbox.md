@@ -404,3 +404,10 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 | [`sparsify()`](https://sipemu.github.io/fdars-r/reference/sparsify.md)                                                                                                                                             | Create irregular/sparse data from regular                   |
 | [`make.gaussian.process()`](https://sipemu.github.io/fdars-r/reference/make.gaussian.process.md)                                                                                                                   | GP simulation with covariance kernels                       |
 | [`r.brownian()`](https://sipemu.github.io/fdars-r/reference/r.brownian.md), [`r.ou()`](https://sipemu.github.io/fdars-r/reference/r.ou.md), [`r.bridge()`](https://sipemu.github.io/fdars-r/reference/r.bridge.md) | Specific random process generators                          |
+
+## See Also
+
+- `vignette("covariance-functions", package = "fdars")` — covariance
+  kernels for simulation
+- `vignette("irregular-sampling", package = "fdars")` — handling
+  irregularly sampled data

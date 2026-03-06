@@ -221,6 +221,11 @@ print(result_pct)
 #> Decision: Reject H0 -- equivalence declared
 ```
 
+## See Also
+
+- `vignette("tolerance-bands", package = "fdars")` — tolerance and
+  confidence bands for functional data
+
 ## References
 
 - Dette, H. and Kokot, K. (2021). Detecting relevant differences in the

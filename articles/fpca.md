@@ -502,6 +502,15 @@ on the data matrix, but the functional interpretation adds value:
 | Reconstruction | Linear combination            | Functional approximation |
 | Smoothness     | Not enforced                  | Can be regularized       |
 
+## See Also
+
+- `vignette("regression", package = "fdars")` — scalar-on-function
+  regression methods
+- `vignette("clustering", package = "fdars")` — functional data
+  clustering
+- `vignette("basis-representation", package = "fdars")` — basis function
+  representations (B-spline, Fourier)
+
 ## References
 
 - Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*,

@@ -573,3 +573,12 @@ fd %>%
   labs(x = "Time", y = "Value") +
   theme_minimal()
 ```
+
+## See Also
+
+- `vignette("intro-to-smoothing", package = "fdars")` — smoothing
+  techniques for functional data
+- `vignette("fpca", package = "fdars")` — functional principal component
+  analysis
+- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+  — functional depth measures and ranking

@@ -736,10 +736,12 @@ fit_np <- fregre.np(fd_large, y, metric = metric.lp)
 
 ## See Also
 
-- `vignette("elastic-alignment", package = "fdars")` – elastic alignment
-  framework, Karcher mean, amplitude-phase decomposition
-- `vignette("alignment-comparison", package = "fdars")` – comparing
-  alignment methods side-by-side
+- `vignette("clustering", package = "fdars")` — functional data
+  clustering
+- `vignette("elastic-alignment", package = "fdars")` — elastic curve
+  alignment using SRVF
+- `vignette("regression", package = "fdars")` — scalar-on-function
+  regression methods
 
 ## References
 

@@ -442,6 +442,20 @@ ggplot(df_mean, aes(x = age)) +
 3.  **Use kernel smoothers** for highly irregular sampling or adaptive
     smoothing
 
+## See Also
+
+- `vignette("basis-representation", package = "fdars")` — basis function
+  representations (B-spline, Fourier)
+- `vignette("working-with-derivatives", package = "fdars")` — estimating
+  and analyzing functional derivatives
+
+## See Also
+
+- `vignette("basis-representation", package = "fdars")` — basis function
+  representations (B-spline, Fourier)
+- `vignette("working-with-derivatives", package = "fdars")` — estimating
+  and analyzing functional derivatives
+
 ## References
 
 - Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*.

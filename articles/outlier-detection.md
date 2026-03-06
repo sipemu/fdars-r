@@ -636,6 +636,15 @@ magnitudeshape(fd_labeled, label = "subject")
 5.  **Validate findings**: Check detected outliers make sense
     contextually
 
+## See Also
+
+- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+  — functional depth measures and ranking
+- `vignette("streaming-depth", package = "fdars")` — real-time depth
+  computation for streaming data
+- `vignette("clustering", package = "fdars")` — functional data
+  clustering
+
 ## References
 
 - Febrero, M., Galeano, P., and González-Manteiga, W. (2008). Outlier

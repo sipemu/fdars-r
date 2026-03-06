@@ -214,7 +214,7 @@ irregular/sparse functional data:
 - **Convert** irregular data to regular representation
 
 For comprehensive coverage of basis functions, see
-`vignette("basis-representation")`.
+`vignette("basis-representation", package = "fdars")`.
 
 ### Direct Basis Fitting (Recommended)
 
@@ -633,3 +633,10 @@ if (any(!keep)) {
 | [`norm()`](https://sipemu.github.io/fdars-r/reference/norm.md)                    | Compute Lp norms (works with fdata and irregFdata)           |
 | [`mean()`](https://rdrr.io/r/base/mean.html)                                      | Estimate mean via kernel smoothing                           |
 | [`metric.lp()`](https://sipemu.github.io/fdars-r/reference/metric.lp.md)          | Compute pairwise distances (works with fdata and irregFdata) |
+
+## See Also
+
+- `vignette("basis-representation", package = "fdars")` — basis function
+  representations (B-spline, Fourier)
+- `vignette("simulation-toolbox", package = "fdars")` — simulating
+  functional data

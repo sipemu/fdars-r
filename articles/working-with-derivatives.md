@@ -484,6 +484,24 @@ cat("Correlation between age at PHV and max velocity:",
 4.  **Derivative-based distances** - useful for shape-based clustering
     and comparison
 
+## See Also
+
+- `vignette("intro-to-smoothing", package = "fdars")` — smoothing
+  techniques for functional data
+- `vignette("fpca", package = "fdars")` — functional principal component
+  analysis
+- `vignette("distance-metrics", package = "fdars")` — distance and
+  semimetric measures
+
+## See Also
+
+- `vignette("intro-to-smoothing", package = "fdars")` — smoothing
+  techniques for functional data
+- `vignette("fpca", package = "fdars")` — functional principal component
+  analysis
+- `vignette("distance-metrics", package = "fdars")` — distance and
+  semimetric measures
+
 ## References
 
 - Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*.

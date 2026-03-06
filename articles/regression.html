@@ -316,17 +316,15 @@ choice.</p>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Find optimal number of components</span></span>
-<span><span class="va">cv_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.pc.cv.html">fregre.pc.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, kmax <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">cv_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.pc.cv.html">fregre.pc.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp.range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal number of components:"</span>, <span class="va">cv_pc</span><span class="op">$</span><span class="va">ncomp.opt</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Optimal number of components:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal number of components:"</span>, <span class="va">cv_pc</span><span class="op">$</span><span class="va">optimal.ncomp</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Optimal number of components: 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV error by component:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CV error by component:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_pc</span><span class="op">$</span><span class="va">cv.error</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      1      2      3      4      5      6      7      8      9     10     11 </span></span>
-<span><span class="co">#&gt; 0.2674 0.2700 0.2720 0.2735 0.2785 0.2735 0.2691 0.2718 0.2728 0.2744 0.2735 </span></span>
-<span><span class="co">#&gt;     12     13     14     15 </span></span>
-<span><span class="co">#&gt; 0.2746 0.2714 0.2703 0.2746</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_pc</span><span class="op">$</span><span class="va">cv.errors</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      1      2      3      4      5      6      7      8      9     10 </span></span>
+<span><span class="co">#&gt; 0.2662 0.2670 0.2724 0.2722 0.2740 0.2688 0.2778 0.2714 0.2747 0.2722</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
@@ -441,15 +439,15 @@ support</li>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Find optimal lambda</span></span>
 <span><span class="va">cv_basis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.basis.cv.html">fregre.basis.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, nbasis <span class="op">=</span> <span class="fl">15</span>, type <span class="op">=</span> <span class="st">"bspline"</span>,</span>
-<span>                            lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">1</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span>                            lambda.range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">1</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal lambda:"</span>, <span class="va">cv_basis</span><span class="op">$</span><span class="va">lambda.opt</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Optimal lambda:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal lambda:"</span>, <span class="va">cv_basis</span><span class="op">$</span><span class="va">optimal.lambda</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Optimal lambda: 10</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV error by lambda:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CV error by lambda:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_basis</span><span class="op">$</span><span class="va">cv.error</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      0  0.001   0.01    0.1      1     10 </span></span>
-<span><span class="co">#&gt; 0.5967 0.5926 0.5605 0.4299 0.3209 0.2977</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_basis</span><span class="op">$</span><span class="va">cv.errors</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  0.001   0.01    0.1      1     10 </span></span>
+<span><span class="co">#&gt; 0.6124 0.5766 0.4332 0.3047 0.2794</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fourier-basis">Fourier Basis<a class="anchor" aria-label="anchor" href="#fourier-basis"></a>
@@ -610,10 +608,10 @@ that may vary per prediction point</li>
 </h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Cross-validation for bandwidth</span></span>
-<span><span class="va">cv_np</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.np.cv.html">fregre.np.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, h.seq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cv_np</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.np.cv.html">fregre.np.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, h.range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal bandwidth:"</span>, <span class="va">cv_np</span><span class="op">$</span><span class="va">h.opt</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Optimal bandwidth:</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal bandwidth:"</span>, <span class="va">cv_np</span><span class="op">$</span><span class="va">optimal.h</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Optimal bandwidth: 0.2</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="different-kernels">Different Kernels<a class="anchor" aria-label="anchor" href="#different-kernels"></a>
@@ -858,6 +856,18 @@ is the prediction for observation
 when it is left out of the training set. This is implemented efficiently
 using the “hat matrix trick” for linear methods.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
+</h2>
+<ul>
+<li>
+<code>vignette("fpca", package = "fdars")</code> — functional
+principal component analysis</li>
+<li>
+<code>vignette("basis-representation", package = "fdars")</code> —
+basis function representations (B-spline, Fourier)</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

@@ -156,17 +156,15 @@ cat("R-squared:", round(r2_pc, 3), "\n")
 
 ``` r
 # Find optimal number of components
-cv_pc <- fregre.pc.cv(fd, y, kmax = 10)
+cv_pc <- fregre.pc.cv(fd, y, ncomp.range = 1:10, seed = 42)
 
-cat("Optimal number of components:", cv_pc$ncomp.opt, "\n")
-#> Optimal number of components:
+cat("Optimal number of components:", cv_pc$optimal.ncomp, "\n")
+#> Optimal number of components: 1
 cat("CV error by component:\n")
 #> CV error by component:
-print(round(cv_pc$cv.error, 4))
-#>      1      2      3      4      5      6      7      8      9     10     11 
-#> 0.2674 0.2700 0.2720 0.2735 0.2785 0.2735 0.2691 0.2718 0.2728 0.2744 0.2735 
-#>     12     13     14     15 
-#> 0.2746 0.2714 0.2703 0.2746
+print(round(cv_pc$cv.errors, 4))
+#>      1      2      3      4      5      6      7      8      9     10 
+#> 0.2662 0.2670 0.2724 0.2722 0.2740 0.2688 0.2778 0.2714 0.2747 0.2722
 ```
 
 ### Prediction
@@ -271,15 +269,15 @@ fit_basis_reg <- fregre.basis(fd, y, nbasis = 15, type = "bspline", lambda = 1)
 ``` r
 # Find optimal lambda
 cv_basis <- fregre.basis.cv(fd, y, nbasis = 15, type = "bspline",
-                            lambda = c(0, 0.001, 0.01, 0.1, 1, 10))
+                            lambda.range = c(0.001, 0.01, 0.1, 1, 10))
 
-cat("Optimal lambda:", cv_basis$lambda.opt, "\n")
-#> Optimal lambda:
+cat("Optimal lambda:", cv_basis$optimal.lambda, "\n")
+#> Optimal lambda: 10
 cat("CV error by lambda:\n")
 #> CV error by lambda:
-print(round(cv_basis$cv.error, 4))
-#>      0  0.001   0.01    0.1      1     10 
-#> 0.5967 0.5926 0.5605 0.4299 0.3209 0.2977
+print(round(cv_basis$cv.errors, 4))
+#>  0.001   0.01    0.1      1     10 
+#> 0.6124 0.5766 0.4332 0.3047 0.2794
 ```
 
 ### Fourier Basis
@@ -390,10 +388,10 @@ cat("Global k-NN optimal k:", fit_knn_global$knn, "\n")
 
 ``` r
 # Cross-validation for bandwidth
-cv_np <- fregre.np.cv(fd, y, h.seq = seq(0.1, 1, by = 0.1))
+cv_np <- fregre.np.cv(fd, y, h.range = seq(0.1, 1, by = 0.1))
 
-cat("Optimal bandwidth:", cv_np$h.opt, "\n")
-#> Optimal bandwidth:
+cat("Optimal bandwidth:", cv_np$optimal.h, "\n")
+#> Optimal bandwidth: 0.2
 ```
 
 ### Different Kernels
@@ -537,6 +535,13 @@ $$\text{CV} = \frac{1}{n}\sum\limits_{i = 1}^{n}\left( Y_{i} - {\widehat{Y}}_{- 
 where ${\widehat{Y}}_{- i}$ is the prediction for observation $i$ when
 it is left out of the training set. This is implemented efficiently
 using the “hat matrix trick” for linear methods.
+
+## See Also
+
+- `vignette("fpca", package = "fdars")` — functional principal component
+  analysis
+- `vignette("basis-representation", package = "fdars")` — basis function
+  representations (B-spline, Fourier)
 
 ## References
 

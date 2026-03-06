@@ -647,6 +647,15 @@ distance preservation theorem.
 | [`fdata2pc()`](https://sipemu.github.io/fdars-r/reference/fdata2pc.md)                                                                            | Dominant directions of multivariate variation    |
 | [`metric.lp()`](https://sipemu.github.io/fdars-r/reference/metric.lp.md)                                                                          | $\sqrt{\pi} \times$ Euclidean distance           |
 
+## See Also
+
+- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+  — functional depth measures and ranking
+- `vignette("clustering", package = "fdars")` — functional data
+  clustering
+- `vignette("outlier-detection", package = "fdars")` — functional
+  outlier detection methods
+
 ## References
 
 - Andrews, D.F. (1972). Plots of high-dimensional data. *Biometrics*,

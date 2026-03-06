@@ -263,6 +263,15 @@ system.time(depth(fd_large, method = "FM"))
 #>   0.045   0.000   0.045
 ```
 
+## See Also
+
+- `vignette("custom-plotting", package = "fdars")` — visualization and
+  ggplot2 integration
+- `vignette("elastic-alignment", package = "fdars")` — elastic curve
+  alignment using SRVF
+- `vignette("fpca", package = "fdars")` — functional principal component
+  analysis
+
 ## References
 
 - Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*.

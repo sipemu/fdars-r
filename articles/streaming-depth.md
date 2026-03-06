@@ -369,7 +369,7 @@ for (n_size in sizes) {
 }
 #>   N =   50: 0.0000 sec
 #>   N =  100: 0.0000 sec
-#>   N =  500: 0.0010 sec
+#>   N =  500: 0.0020 sec
 #>   N = 1000: 0.0020 sec
 ```
 
@@ -398,6 +398,13 @@ d2 <- depth.streaming(fd)
 all.equal(d, d2)
 #> [1] TRUE
 ```
+
+## See Also
+
+- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+  — functional depth measures and ranking
+- `vignette("outlier-detection", package = "fdars")` — functional
+  outlier detection methods
 
 ## References
 
