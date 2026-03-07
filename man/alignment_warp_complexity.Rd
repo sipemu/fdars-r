@@ -2,10 +2,10 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{alignment_warp_complexity}
 \alias{alignment_warp_complexity}
-\title{Compute warp complexity}
+\title{Compute warp complexity (geodesic distance from identity)}
 \usage{
 alignment_warp_complexity(gamma, argvals)
 }
 \description{
-Compute warp complexity
+Compute warp complexity (geodesic distance from identity)
 }

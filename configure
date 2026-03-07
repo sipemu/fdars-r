@@ -2,6 +2,10 @@
 # Configure script for fdars R package
 # Checks for Rust toolchain availability
 
+# Rust installed via rustup lives in ~/.cargo/bin which may not be in PATH
+# (shell startup scripts like .bash_profile are not sourced during R CMD INSTALL)
+export PATH="$HOME/.cargo/bin:$PATH"
+
 # Check for cargo
 if ! command -v cargo >/dev/null 2>&1; then
     echo "-----------------------------------------------------"

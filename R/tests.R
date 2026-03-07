@@ -296,21 +296,18 @@ fequiv.test <- function(fdataobj1, fdataobj2 = NULL, delta, mu0 = NULL,
 
   if (method == "multiplier") {
     # Gaussian multiplier bootstrap
+    # colMeans(centered * g) has Var = sigma^2/n, matching Var(x_bar),
+    # so bootstrap statistics are directly on the scale of d_hat - d.
     for (b in seq_len(n.boot)) {
       g1 <- rnorm(n1)
-      z_boot <- colMeans(centered1 * g1) / sqrt(n1)
+      z_boot <- colMeans(centered1 * g1)
       if (two_sample) {
         g2 <- rnorm(n2)
-        z_boot <- z_boot - colMeans(centered2 * g2) / sqrt(n2)
+        z_boot <- z_boot - colMeans(centered2 * g2)
       }
       boot_stats[b] <- .sup_norm(z_boot)
     }
-    # SCB half-width scaling
-    if (two_sample) {
-      scale_factor <- sqrt(1 / n1 + 1 / n2)
-    } else {
-      scale_factor <- 1 / sqrt(n1)
-    }
+    scale_factor <- 1
   } else {
     # Percentile bootstrap
     for (b in seq_len(n.boot)) {
@@ -418,7 +415,7 @@ plot.fequiv.test <- function(x, ...) {
     stop("Package 'ggplot2' is required for plot.fequiv.test")
   }
 
-  band_color <- if (x$reject) "#2ca02c" else "#d62728"
+  band_color <- "steelblue"
 
   df <- data.frame(
     t = x$argvals,

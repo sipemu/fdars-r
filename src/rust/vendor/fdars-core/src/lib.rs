@@ -32,16 +32,21 @@ pub mod parallel;
 
 pub mod alignment;
 pub mod basis;
+pub mod classification;
 pub mod clustering;
 pub mod depth;
 pub mod detrend;
+pub mod famm;
 pub mod fdata;
+pub mod function_on_scalar;
+pub mod gmm;
 pub mod helpers;
 pub mod irreg_fdata;
 pub mod landmark;
 pub mod metric;
 pub mod outliers;
 pub mod regression;
+pub mod scalar_on_function;
 pub mod seasonal;
 pub mod simulation;
 pub mod smoothing;
@@ -75,8 +80,8 @@ pub use helpers::{
 
 // Re-export warping utilities
 pub use warping::{
-    exp_map_sphere, gam_to_psi, inner_product_l2, inv_exp_map_sphere, invert_gamma, l2_norm_l2,
-    normalize_warp, phase_distance, psi_to_gam,
+    exp_map_sphere, gam_to_psi, gam_to_psi_smooth, inner_product_l2, inv_exp_map_sphere,
+    invert_gamma, l2_norm_l2, normalize_warp, phase_distance, psi_to_gam,
 };
 
 // Re-export seasonal analysis types
@@ -109,6 +114,29 @@ pub use tolerance::{
     scb_mean_degras, BandType, EquivalenceBootstrap, EquivalenceTestResult, ExponentialFamily,
     MultiplierDistribution, NonConformityScore, ToleranceBand,
 };
+
+// Re-export FAMM types
+pub use famm::{fmm, fmm_predict, fmm_test_fixed, FmmResult, FmmTestResult};
+
+// Re-export function-on-scalar regression types
+pub use function_on_scalar::{
+    fanova, fosr, fosr_fpc, predict_fosr, FanovaResult, FosrFpcResult, FosrResult,
+};
+
+// Re-export scalar-on-function regression types
+pub use scalar_on_function::{
+    fregre_cv, fregre_lm, fregre_np_mixed, functional_logistic, predict_fregre_lm,
+    predict_fregre_np, FregreCvResult, FregreLmResult, FregreNpResult, FunctionalLogisticResult,
+};
+
+// Re-export classification types
+pub use classification::{
+    fclassif_cv, fclassif_dd, fclassif_kernel, fclassif_knn, fclassif_lda, fclassif_qda,
+    ClassifCvResult, ClassifResult,
+};
+
+// Re-export GMM clustering types
+pub use gmm::{gmm_cluster, gmm_em, predict_gmm, CovType, GmmClusterResult, GmmResult};
 
 // Re-export streaming depth types
 pub use streaming_depth::{

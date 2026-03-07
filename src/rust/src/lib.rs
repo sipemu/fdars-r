@@ -23,6 +23,14 @@ use fdars_core::metric as core_metric;
 use fdars_core::tolerance;
 use fdars_core::streaming_depth::{self, StreamingDepth, SortedReferenceState, FullReferenceState};
 
+// New modules from fdars-core 0.7.2
+use fdars_core::scalar_on_function;
+use fdars_core::function_on_scalar;
+use fdars_core::classification;
+use fdars_core::gmm;
+use fdars_core::famm;
+use fdars_core::depth as core_depth;
+
 // =============================================================================
 // Helper functions
 // =============================================================================
@@ -8830,6 +8838,7 @@ fn alignment_tsrvf_inverse(
         srsf_norms,
         gammas: g_fd,
         converged,
+        initial_values: vec![0.0; n], // Initial values for SRSF inversion
     };
     let result = alignment::tsrvf_inverse(&tsrvf_result, &argvals);
     let s = result.as_slice();
@@ -9215,6 +9224,924 @@ fn streaming_depth_one(ref_data: RMatrix<f64>, curve: Vec<f64>, method: &str) ->
 }
 
 // =============================================================================
+// Scalar-on-function regression
+// =============================================================================
+
+/// Functional linear model (FPC-based)
+#[extendr]
+fn fregre_lm_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    scalar_covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+
+    let scov = match scalar_covariates {
+        Nullable::NotNull(sc) => {
+            let sc_s = sc.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(sc_s, sc.nrows(), sc.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let result = scalar_on_function::fregre_lm(&fd, &y, scov.as_ref(), ncomp as usize);
+    match result {
+        Some(r) => {
+            let beta_t = Robj::from(r.beta_t.clone());
+            let gamma = Robj::from(r.gamma.clone());
+            let fitted = Robj::from(r.fitted_values.clone());
+            let resid = Robj::from(r.residuals.clone());
+            let std_err = Robj::from(r.std_errors.clone());
+            let coefs = Robj::from(r.coefficients.clone());
+            r!(list!(
+                intercept = r.intercept,
+                beta_t = beta_t,
+                gamma = gamma,
+                fitted_values = fitted,
+                residuals = resid,
+                r_squared = r.r_squared,
+                r_squared_adj = r.r_squared_adj,
+                std_errors = std_err,
+                ncomp = r.ncomp as i32,
+                coefficients = coefs,
+                residual_se = r.residual_se,
+                gcv = r.gcv,
+                // FPCA fields for prediction
+                fpca_mean = Robj::from(r.fpca.mean.clone()),
+                fpca_rotation_data = Robj::from(r.fpca.rotation.as_slice().to_vec()),
+                fpca_rotation_nrow = r.fpca.rotation.nrows() as i32,
+                fpca_rotation_ncol = r.fpca.rotation.ncols() as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Nonparametric functional regression with mixed predictors
+#[extendr]
+fn fregre_np_mixed_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    argvals: Vec<f64>,
+    scalar_covariates: Nullable<RMatrix<f64>>,
+    h_func: f64,
+    h_scalar: f64,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+
+    let scov = match scalar_covariates {
+        Nullable::NotNull(sc) => {
+            let sc_s = sc.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(sc_s, sc.nrows(), sc.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let result = scalar_on_function::fregre_np_mixed(&fd, &y, &argvals, scov.as_ref(), h_func, h_scalar);
+    match result {
+        Some(r) => {
+            r!(list!(
+                fitted_values = Robj::from(r.fitted_values),
+                residuals = Robj::from(r.residuals),
+                r_squared = r.r_squared,
+                h_func = r.h_func,
+                h_scalar = r.h_scalar,
+                cv_error = r.cv_error
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Functional logistic regression
+#[extendr]
+fn functional_logistic_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    scalar_covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+    max_iter: i32,
+    tol: f64,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+
+    let scov = match scalar_covariates {
+        Nullable::NotNull(sc) => {
+            let sc_s = sc.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(sc_s, sc.nrows(), sc.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let result = scalar_on_function::functional_logistic(
+        &fd, &y, scov.as_ref(), ncomp as usize, max_iter as usize, tol,
+    );
+    match result {
+        Some(r) => {
+            let pred_classes: Vec<i32> = r.predicted_classes.iter().map(|&c| c as i32).collect();
+            r!(list!(
+                intercept = r.intercept,
+                beta_t = Robj::from(r.beta_t),
+                gamma = Robj::from(r.gamma),
+                probabilities = Robj::from(r.probabilities),
+                predicted_classes = Robj::from(pred_classes),
+                ncomp = r.ncomp as i32,
+                accuracy = r.accuracy,
+                coefficients = Robj::from(r.coefficients),
+                log_likelihood = r.log_likelihood,
+                iterations = r.iterations as i32,
+                fpca_mean = Robj::from(r.fpca.mean.clone()),
+                fpca_rotation_data = Robj::from(r.fpca.rotation.as_slice().to_vec()),
+                fpca_rotation_nrow = r.fpca.rotation.nrows() as i32,
+                fpca_rotation_ncol = r.fpca.rotation.ncols() as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Cross-validation for FPC component selection
+#[extendr]
+fn fregre_cv_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    scalar_covariates: Nullable<RMatrix<f64>>,
+    k_min: i32,
+    k_max: i32,
+    n_folds: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+
+    let scov = match scalar_covariates {
+        Nullable::NotNull(sc) => {
+            let sc_s = sc.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(sc_s, sc.nrows(), sc.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let result = scalar_on_function::fregre_cv(
+        &fd, &y, scov.as_ref(), k_min as usize, k_max as usize, n_folds as usize,
+    );
+    match result {
+        Some(r) => {
+            let k_values: Vec<i32> = r.k_values.iter().map(|&k| k as i32).collect();
+            r!(list!(
+                k_values = Robj::from(k_values),
+                cv_errors = Robj::from(r.cv_errors),
+                optimal_k = r.optimal_k as i32,
+                min_cv_error = r.min_cv_error
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Function-on-scalar regression
+// =============================================================================
+
+/// Helper to return FdMatrix as R list with data, nrow, ncol
+fn fdmatrix_to_robj(mat: &FdMatrix) -> Robj {
+    let s = mat.as_slice();
+    RMatrix::new_matrix(mat.nrows(), mat.ncols(), |i, j| s[i + j * mat.nrows()]).into()
+}
+
+/// Function-on-scalar regression (penalized)
+#[extendr]
+fn fosr_rust(data: RMatrix<f64>, predictors: RMatrix<f64>, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+
+    let ps = predictors.as_real_slice().unwrap();
+    let pred = FdMatrix::from_slice(ps, predictors.nrows(), predictors.ncols()).expect("Invalid predictors");
+
+    let result = function_on_scalar::fosr(&fd, &pred, lambda);
+    match result {
+        Some(r) => {
+            r!(list!(
+                intercept = Robj::from(r.intercept),
+                beta = fdmatrix_to_robj(&r.beta),
+                fitted = fdmatrix_to_robj(&r.fitted),
+                residuals = fdmatrix_to_robj(&r.residuals),
+                r_squared_t = Robj::from(r.r_squared_t),
+                r_squared = r.r_squared,
+                beta_se = fdmatrix_to_robj(&r.beta_se),
+                lambda = r.lambda,
+                gcv = r.gcv
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// FPC-based function-on-scalar regression
+#[extendr]
+fn fosr_fpc_rust(data: RMatrix<f64>, predictors: RMatrix<f64>, ncomp: i32) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+
+    let ps = predictors.as_real_slice().unwrap();
+    let pred = FdMatrix::from_slice(ps, predictors.nrows(), predictors.ncols()).expect("Invalid predictors");
+
+    let result = function_on_scalar::fosr_fpc(&fd, &pred, ncomp as usize);
+    match result {
+        Some(r) => {
+            r!(list!(
+                intercept = Robj::from(r.intercept),
+                beta = fdmatrix_to_robj(&r.beta),
+                fitted = fdmatrix_to_robj(&r.fitted),
+                residuals = fdmatrix_to_robj(&r.residuals),
+                r_squared_t = Robj::from(r.r_squared_t),
+                r_squared = r.r_squared,
+                ncomp = r.ncomp as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Functional ANOVA
+#[extendr]
+fn fanova_rust(data: RMatrix<f64>, groups: Vec<i32>, n_perm: i32) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+
+    let groups_usize: Vec<usize> = groups.iter().map(|&g| g as usize).collect();
+
+    let result = function_on_scalar::fanova(&fd, &groups_usize, n_perm as usize);
+    match result {
+        Some(r) => {
+            let group_labels: Vec<i32> = r.group_labels.iter().map(|&g| g as i32).collect();
+            r!(list!(
+                group_means = fdmatrix_to_robj(&r.group_means),
+                overall_mean = Robj::from(r.overall_mean),
+                f_statistic_t = Robj::from(r.f_statistic_t),
+                global_statistic = r.global_statistic,
+                p_value = r.p_value,
+                n_perm = r.n_perm as i32,
+                n_groups = r.n_groups as i32,
+                group_labels = Robj::from(group_labels)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Predict from function-on-scalar regression
+#[extendr]
+fn predict_fosr_rust(
+    intercept: Vec<f64>,
+    beta_data: RMatrix<f64>,
+    new_predictors: RMatrix<f64>,
+    lambda: f64,
+) -> Robj {
+    let bs = beta_data.as_real_slice().unwrap();
+    let beta = FdMatrix::from_slice(bs, beta_data.nrows(), beta_data.ncols()).expect("Invalid beta");
+
+    let m = intercept.len();
+    let ps = new_predictors.as_real_slice().unwrap();
+    let pred = FdMatrix::from_slice(ps, new_predictors.nrows(), new_predictors.ncols()).expect("Invalid predictors");
+
+    // Reconstruct a minimal FosrResult for prediction
+    let p = pred.ncols();
+    let fosr_result = function_on_scalar::FosrResult {
+        intercept: intercept.clone(),
+        beta: beta.clone(),
+        fitted: FdMatrix::zeros(1, m),
+        residuals: FdMatrix::zeros(1, m),
+        r_squared_t: vec![0.0; m],
+        r_squared: 0.0,
+        beta_se: FdMatrix::zeros(p, m),
+        lambda,
+        gcv: 0.0,
+    };
+
+    let result = function_on_scalar::predict_fosr(&fosr_result, &pred);
+    fdmatrix_to_robj(&result)
+}
+
+// =============================================================================
+// Classification
+// =============================================================================
+
+/// Helper: convert ClassifResult to R list
+fn classif_result_to_robj(r: &classification::ClassifResult) -> Robj {
+    let predicted: Vec<i32> = r.predicted.iter().map(|&c| c as i32).collect();
+    let confusion: Vec<Vec<i32>> = r.confusion.iter()
+        .map(|row| row.iter().map(|&c| c as i32).collect())
+        .collect();
+    let conf_flat: Vec<i32> = confusion.iter().flat_map(|row| row.iter().copied()).collect();
+    let nc = r.n_classes;
+
+    let probs = match &r.probabilities {
+        Some(p) => fdmatrix_to_robj(p),
+        None => r!(NULL),
+    };
+
+    let conf_mat = RMatrix::new_matrix(nc, nc, |i, j| conf_flat[i * nc + j] as f64);
+
+    r!(list!(
+        predicted = Robj::from(predicted),
+        probabilities = probs,
+        accuracy = r.accuracy,
+        confusion = Robj::from(conf_mat),
+        n_classes = r.n_classes as i32,
+        ncomp = r.ncomp as i32
+    ))
+}
+
+/// LDA classification
+#[extendr]
+fn fclassif_lda_rust(
+    data: RMatrix<f64>,
+    y: Vec<i32>,
+    covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let y_usize: Vec<usize> = y.iter().map(|&c| c as usize).collect();
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    match classification::fclassif_lda(&fd, &y_usize, cov.as_ref(), ncomp as usize) {
+        Some(r) => classif_result_to_robj(&r),
+        None => r!(NULL),
+    }
+}
+
+/// QDA classification
+#[extendr]
+fn fclassif_qda_rust(
+    data: RMatrix<f64>,
+    y: Vec<i32>,
+    covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let y_usize: Vec<usize> = y.iter().map(|&c| c as usize).collect();
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    match classification::fclassif_qda(&fd, &y_usize, cov.as_ref(), ncomp as usize) {
+        Some(r) => classif_result_to_robj(&r),
+        None => r!(NULL),
+    }
+}
+
+/// kNN classification
+#[extendr]
+fn fclassif_knn_rust(
+    data: RMatrix<f64>,
+    y: Vec<i32>,
+    covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+    k_nn: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let y_usize: Vec<usize> = y.iter().map(|&c| c as usize).collect();
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    match classification::fclassif_knn(&fd, &y_usize, cov.as_ref(), ncomp as usize, k_nn as usize) {
+        Some(r) => classif_result_to_robj(&r),
+        None => r!(NULL),
+    }
+}
+
+/// Kernel classification
+#[extendr]
+fn fclassif_kernel_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    y: Vec<i32>,
+    covariates: Nullable<RMatrix<f64>>,
+    h_func: f64,
+    h_scalar: f64,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let y_usize: Vec<usize> = y.iter().map(|&c| c as usize).collect();
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    match classification::fclassif_kernel(&fd, &argvals, &y_usize, cov.as_ref(), h_func, h_scalar) {
+        Some(r) => classif_result_to_robj(&r),
+        None => r!(NULL),
+    }
+}
+
+/// DD-plot classification
+#[extendr]
+fn fclassif_dd_rust(
+    data: RMatrix<f64>,
+    y: Vec<i32>,
+    covariates: Nullable<RMatrix<f64>>,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let y_usize: Vec<usize> = y.iter().map(|&c| c as usize).collect();
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    match classification::fclassif_dd(&fd, &y_usize, cov.as_ref()) {
+        Some(r) => classif_result_to_robj(&r),
+        None => r!(NULL),
+    }
+}
+
+/// Cross-validated classification
+#[extendr]
+fn fclassif_cv_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    y: Vec<i32>,
+    covariates: Nullable<RMatrix<f64>>,
+    method: &str,
+    ncomp: i32,
+    nfold: i32,
+    seed: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let y_usize: Vec<usize> = y.iter().map(|&c| c as usize).collect();
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    match classification::fclassif_cv(
+        &fd, &argvals, &y_usize, cov.as_ref(), method,
+        ncomp as usize, nfold as usize, seed as u64,
+    ) {
+        Some(r) => {
+            r!(list!(
+                error_rate = r.error_rate,
+                fold_errors = Robj::from(r.fold_errors),
+                best_ncomp = r.best_ncomp as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// GMM clustering
+// =============================================================================
+
+/// GMM clustering with automatic K selection
+#[extendr]
+fn gmm_cluster_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    covariates: Nullable<RMatrix<f64>>,
+    k_range: Vec<i32>,
+    nbasis: i32,
+    basis_type: i32,
+    cov_type: &str,
+    cov_weight: f64,
+    max_iter: i32,
+    tol: f64,
+    n_init: i32,
+    seed: i32,
+    use_icl: bool,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let k_range_usize: Vec<usize> = k_range.iter().map(|&k| k as usize).collect();
+    let ct = match cov_type {
+        "diagonal" | "diag" => gmm::CovType::Diagonal,
+        _ => gmm::CovType::Full,
+    };
+
+    let result = gmm::gmm_cluster(
+        &fd, &argvals, cov.as_ref(), &k_range_usize,
+        nbasis as usize, basis_type, ct, cov_weight,
+        max_iter as usize, tol, n_init as usize, seed as u64, use_icl,
+    );
+
+    match result {
+        Some(r) => {
+            let best = &r.best;
+            let cluster: Vec<i32> = best.cluster.iter().map(|&c| c as i32 + 1).collect();
+            let membership = fdmatrix_to_robj(&best.membership);
+            let weights = Robj::from(best.weights.clone());
+            let bic_k: Vec<i32> = r.bic_values.iter().map(|&(k, _)| k as i32).collect();
+            let bic_v: Vec<f64> = r.bic_values.iter().map(|&(_, v)| v).collect();
+            let icl_v: Vec<f64> = r.icl_values.iter().map(|&(_, v)| v).collect();
+
+            // Flatten means for R
+            let means_flat: Vec<f64> = best.means.iter().flat_map(|m| m.iter().copied()).collect();
+            let k = best.k;
+            let d = best.d;
+            let means_mat = RMatrix::new_matrix(k, d, |i, j| means_flat[i * d + j]);
+
+            // Flatten covariances
+            let cov_flat: Vec<f64> = best.covariances.iter().flat_map(|c| c.iter().copied()).collect();
+
+            r!(list!(
+                cluster = Robj::from(cluster),
+                membership = membership,
+                means = Robj::from(means_mat),
+                weights = weights,
+                covariances = Robj::from(cov_flat),
+                log_likelihood = best.log_likelihood,
+                bic = best.bic,
+                icl = best.icl,
+                iterations = best.iterations as i32,
+                converged = best.converged,
+                k = best.k as i32,
+                d = best.d as i32,
+                bic_k = Robj::from(bic_k),
+                bic_values = Robj::from(bic_v),
+                icl_values = Robj::from(icl_v),
+                cov_type = cov_type,
+                nbasis = nbasis,
+                basis_type = basis_type,
+                cov_weight = cov_weight
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Raw GMM EM on feature matrix
+#[extendr]
+fn gmm_em_rust(
+    features: RMatrix<f64>,
+    k: i32,
+    cov_type: &str,
+    max_iter: i32,
+    tol: f64,
+    seed: i32,
+) -> Robj {
+    let n = features.nrows();
+    let d = features.ncols();
+    let fs = features.as_real_slice().unwrap();
+
+    // Convert R matrix (col-major) to Vec<Vec<f64>> (row-major)
+    let feat_vecs: Vec<Vec<f64>> = (0..n)
+        .map(|i| (0..d).map(|j| fs[i + j * n]).collect())
+        .collect();
+
+    let ct = match cov_type {
+        "diagonal" | "diag" => gmm::CovType::Diagonal,
+        _ => gmm::CovType::Full,
+    };
+
+    let result = gmm::gmm_em(&feat_vecs, k as usize, ct, max_iter as usize, tol, seed as u64);
+    match result {
+        Some(r) => {
+            let cluster: Vec<i32> = r.cluster.iter().map(|&c| c as i32 + 1).collect();
+            r!(list!(
+                cluster = Robj::from(cluster),
+                membership = fdmatrix_to_robj(&r.membership),
+                weights = Robj::from(r.weights),
+                log_likelihood = r.log_likelihood,
+                bic = r.bic,
+                icl = r.icl,
+                converged = r.converged,
+                k = r.k as i32,
+                d = r.d as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Predict from GMM
+#[extendr]
+fn predict_gmm_rust(
+    new_data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    new_covariates: Nullable<RMatrix<f64>>,
+    means_data: RMatrix<f64>,
+    covariances: Vec<f64>,
+    weights: Vec<f64>,
+    k: i32,
+    d: i32,
+    nbasis: i32,
+    basis_type: i32,
+    cov_weight: f64,
+    cov_type: &str,
+) -> Robj {
+    let n = new_data.nrows();
+    let m = new_data.ncols();
+    let ds = new_data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+
+    let ncov = match new_covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let ku = k as usize;
+    let du = d as usize;
+    let ct = match cov_type {
+        "diagonal" | "diag" => gmm::CovType::Diagonal,
+        _ => gmm::CovType::Full,
+    };
+
+    // Reconstruct means from R matrix
+    let ms = means_data.as_real_slice().unwrap();
+    let means_vec: Vec<Vec<f64>> = (0..ku)
+        .map(|i| (0..du).map(|j| ms[i + j * ku]).collect())
+        .collect();
+
+    // Reconstruct covariances
+    let cov_per = if ct == gmm::CovType::Full { du * du } else { du };
+    let covs: Vec<Vec<f64>> = (0..ku)
+        .map(|i| covariances[i * cov_per..(i + 1) * cov_per].to_vec())
+        .collect();
+
+    // Build a GmmResult for prediction
+    let gmm_result = gmm::GmmResult {
+        cluster: vec![0; 1],
+        membership: FdMatrix::zeros(1, ku),
+        means: means_vec,
+        covariances: covs,
+        weights,
+        log_likelihood: 0.0,
+        bic: 0.0,
+        icl: 0.0,
+        iterations: 0,
+        converged: true,
+        k: ku,
+        d: du,
+    };
+
+    let result = gmm::predict_gmm(&fd, &argvals, ncov.as_ref(), &gmm_result, nbasis as usize, basis_type, cov_weight, ct);
+    match result {
+        Some((cluster, membership)) => {
+            let cluster_r: Vec<i32> = cluster.iter().map(|&c| c as i32 + 1).collect();
+            r!(list!(
+                cluster = Robj::from(cluster_r),
+                membership = fdmatrix_to_robj(&membership)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Functional mixed models (FAMM)
+// =============================================================================
+
+/// Functional mixed model
+#[extendr]
+fn fmm_rust(
+    data: RMatrix<f64>,
+    subject_ids: Vec<i32>,
+    covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let sids: Vec<usize> = subject_ids.iter().map(|&s| s as usize).collect();
+
+    let cov = match covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let result = famm::fmm(&fd, &sids, cov.as_ref(), ncomp as usize);
+    match result {
+        Some(r) => {
+            r!(list!(
+                mean_function = Robj::from(r.mean_function),
+                beta_functions = fdmatrix_to_robj(&r.beta_functions),
+                random_effects = fdmatrix_to_robj(&r.random_effects),
+                fitted = fdmatrix_to_robj(&r.fitted),
+                residuals = fdmatrix_to_robj(&r.residuals),
+                random_variance = Robj::from(r.random_variance),
+                sigma2_eps = r.sigma2_eps,
+                sigma2_u = Robj::from(r.sigma2_u),
+                ncomp = r.ncomp as i32,
+                n_subjects = r.n_subjects as i32,
+                eigenvalues = Robj::from(r.eigenvalues)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Predict from functional mixed model
+#[extendr]
+fn fmm_predict_rust(
+    mean_function: Vec<f64>,
+    beta_data: RMatrix<f64>,
+    new_covariates: Nullable<RMatrix<f64>>,
+) -> Robj {
+    let m = mean_function.len();
+    let bs = beta_data.as_real_slice().unwrap();
+    let beta = FdMatrix::from_slice(bs, beta_data.nrows(), beta_data.ncols()).expect("Invalid beta");
+
+    let ncov = match new_covariates {
+        Nullable::NotNull(c) => {
+            let cs = c.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(cs, c.nrows(), c.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    // Construct a minimal FmmResult for prediction
+    let fmm_result = famm::FmmResult {
+        mean_function: mean_function.clone(),
+        beta_functions: beta.clone(),
+        random_effects: FdMatrix::zeros(1, m),
+        fitted: FdMatrix::zeros(1, m),
+        residuals: FdMatrix::zeros(1, m),
+        random_variance: vec![0.0; m],
+        sigma2_eps: 0.0,
+        sigma2_u: vec![0.0],
+        ncomp: 0,
+        n_subjects: 0,
+        eigenvalues: vec![0.0],
+    };
+
+    let result = famm::fmm_predict(&fmm_result, ncov.as_ref());
+    fdmatrix_to_robj(&result)
+}
+
+/// Permutation test for fixed effects in FMM
+#[extendr]
+fn fmm_test_fixed_rust(
+    data: RMatrix<f64>,
+    subject_ids: Vec<i32>,
+    covariates: RMatrix<f64>,
+    ncomp: i32,
+    n_perm: i32,
+    seed: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+    let sids: Vec<usize> = subject_ids.iter().map(|&s| s as usize).collect();
+
+    let cs = covariates.as_real_slice().unwrap();
+    let cov = FdMatrix::from_slice(cs, covariates.nrows(), covariates.ncols()).expect("Invalid covariates");
+
+    let result = famm::fmm_test_fixed(
+        &fd, &sids, &cov, ncomp as usize, n_perm as usize, seed as u64,
+    );
+    match result {
+        Some(r) => {
+            r!(list!(
+                f_statistics = Robj::from(r.f_statistics),
+                p_values = Robj::from(r.p_values)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Seeded depth variants
+// =============================================================================
+
+/// Random projection depth with optional seed
+#[extendr]
+fn depth_rp_1d_seeded(
+    data_obj: RMatrix<f64>,
+    data_ori: RMatrix<f64>,
+    nproj: i32,
+    seed: Nullable<i32>,
+) -> Robj {
+    let n_obj = data_obj.nrows();
+    let m = data_obj.ncols();
+    let n_ori = data_ori.nrows();
+
+    let ds_obj = data_obj.as_real_slice().unwrap();
+    let ds_ori = data_ori.as_real_slice().unwrap();
+
+    let fd_obj = FdMatrix::from_slice(ds_obj, n_obj, m).expect("Invalid data_obj");
+    let fd_ori = FdMatrix::from_slice(ds_ori, n_ori, m).expect("Invalid data_ori");
+
+    let seed_val = match seed {
+        Nullable::NotNull(s) => Some(s as u64),
+        Nullable::Null => None,
+    };
+
+    let depths = core_depth::random_projection_1d_seeded(&fd_obj, &fd_ori, nproj as usize, seed_val);
+    Robj::from(depths)
+}
+
+/// Random Tukey depth with optional seed
+#[extendr]
+fn depth_rt_1d_seeded(
+    data_obj: RMatrix<f64>,
+    data_ori: RMatrix<f64>,
+    nproj: i32,
+    seed: Nullable<i32>,
+) -> Robj {
+    let n_obj = data_obj.nrows();
+    let m = data_obj.ncols();
+    let n_ori = data_ori.nrows();
+
+    let ds_obj = data_obj.as_real_slice().unwrap();
+    let ds_ori = data_ori.as_real_slice().unwrap();
+
+    let fd_obj = FdMatrix::from_slice(ds_obj, n_obj, m).expect("Invalid data_obj");
+    let fd_ori = FdMatrix::from_slice(ds_ori, n_ori, m).expect("Invalid data_ori");
+
+    let seed_val = match seed {
+        Nullable::NotNull(s) => Some(s as u64),
+        Nullable::Null => None,
+    };
+
+    let depths = core_depth::random_tukey_1d_seeded(&fd_obj, &fd_ori, nproj as usize, seed_val);
+    Robj::from(depths)
+}
+
+// =============================================================================
 // Module exports
 // =============================================================================
 
@@ -9415,4 +10342,38 @@ extendr_module! {
     fn streaming_depth_batch;
     fn streaming_depth_vs_ref;
     fn streaming_depth_one;
+
+    // Scalar-on-function regression
+    fn fregre_lm_rust;
+    fn fregre_np_mixed_rust;
+    fn functional_logistic_rust;
+    fn fregre_cv_rust;
+
+    // Function-on-scalar regression
+    fn fosr_rust;
+    fn fosr_fpc_rust;
+    fn fanova_rust;
+    fn predict_fosr_rust;
+
+    // Classification
+    fn fclassif_lda_rust;
+    fn fclassif_qda_rust;
+    fn fclassif_knn_rust;
+    fn fclassif_kernel_rust;
+    fn fclassif_dd_rust;
+    fn fclassif_cv_rust;
+
+    // GMM clustering
+    fn gmm_cluster_rust;
+    fn gmm_em_rust;
+    fn predict_gmm_rust;
+
+    // Functional mixed models
+    fn fmm_rust;
+    fn fmm_predict_rust;
+    fn fmm_test_fixed_rust;
+
+    // Seeded depth variants
+    fn depth_rp_1d_seeded;
+    fn depth_rt_1d_seeded;
 }

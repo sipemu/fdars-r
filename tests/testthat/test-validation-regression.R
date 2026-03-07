@@ -661,3 +661,123 @@ test_that("print.fregre.np shows k info for kNN models", {
   fit_lcv <- fdars::fregre.np(fd, y, type.S = "kNN.lCV", knn = 15)
   expect_output(print(fit_lcv), "local")
 })
+
+# =============================================================================
+# fregre.lm Tests (FPC-based functional linear model)
+# =============================================================================
+
+test_that("fregre.lm returns correct structure", {
+  set.seed(42)
+  n <- 50
+  m <- 30
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(0, n, m)
+  for (i in 1:n) {
+    X[i, ] <- sin(2 * pi * t_grid * (1 + 0.2 * i/n)) + rnorm(m, sd = 0.1)
+  }
+  y <- rowMeans(X) + rnorm(n, sd = 0.1)
+
+  fd <- fdars::fdata(X, argvals = t_grid)
+  model <- fdars::fregre.lm(fd, y, ncomp = 3)
+
+  expect_s3_class(model, "fregre.lm")
+  expect_length(model$fitted.values, n)
+  expect_length(model$residuals, n)
+  expect_true(!is.null(model$r.squared))
+  expect_gte(model$r.squared, 0)
+})
+
+test_that("fregre.lm produces reasonable fit", {
+  set.seed(42)
+  n <- 50
+  m <- 30
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(0, n, m)
+  for (i in 1:n) {
+    X[i, ] <- sin(2 * pi * t_grid) * i/n + rnorm(m, sd = 0.1)
+  }
+  y <- rowMeans(X) + rnorm(n, sd = 0.1)
+
+  fd <- fdars::fdata(X, argvals = t_grid)
+  model <- fdars::fregre.lm(fd, y, ncomp = 3)
+
+  # Should have non-negative R-squared
+  expect_gte(model$r.squared, 0)
+})
+
+test_that("print.fregre.lm produces output", {
+  set.seed(42)
+  n <- 30
+  m <- 20
+  X <- matrix(rnorm(n * m), n, m)
+  y <- rnorm(n)
+  fd <- fdars::fdata(X)
+
+  model <- fdars::fregre.lm(fd, y, ncomp = 3)
+  expect_output(print(model), "Functional Linear Model")
+  expect_output(print(model), "R-squared")
+})
+
+# =============================================================================
+# functional.logistic Tests
+# =============================================================================
+
+test_that("functional.logistic returns correct structure", {
+  set.seed(42)
+  n <- 40
+  m <- 30
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(0, n, m)
+  for (i in 1:n) {
+    X[i, ] <- sin(2 * pi * t_grid) * (2 * (i > n/2) - 1) + rnorm(m, sd = 0.2)
+  }
+  y <- as.numeric(1:n > n/2)  # Binary 0/1
+
+  fd <- fdars::fdata(X, argvals = t_grid)
+  model <- fdars::functional.logistic(fd, y, ncomp = 3)
+
+  expect_s3_class(model, "fregre.logistic")
+  expect_true("probabilities" %in% names(model))
+  expect_true("predicted.classes" %in% names(model))
+  expect_true("accuracy" %in% names(model))
+  expect_length(model$probabilities, n)
+  expect_length(model$predicted.classes, n)
+})
+
+test_that("functional.logistic probabilities are valid", {
+  set.seed(42)
+  n <- 40
+  m <- 20
+  X <- matrix(rnorm(n * m), n, m)
+  y <- rep(c(0, 1), each = n/2)  # Binary 0/1
+
+  fd <- fdars::fdata(X)
+  model <- fdars::functional.logistic(fd, y, ncomp = 2)
+
+  expect_true(all(model$probabilities >= 0))
+  expect_true(all(model$probabilities <= 1))
+})
+
+test_that("fregre.lm.cv selects reasonable ncomp", {
+  set.seed(42)
+  n <- 50
+  m <- 30
+  t_grid <- seq(0, 1, length.out = m)
+
+  X <- matrix(0, n, m)
+  for (i in 1:n) {
+    X[i, ] <- sin(2 * pi * t_grid) * i/n + rnorm(m, sd = 0.1)
+  }
+  y <- rowMeans(X) + rnorm(n, sd = 0.1)
+
+  fd <- fdars::fdata(X, argvals = t_grid)
+  cv_result <- fdars::fregre.lm.cv(fd, y, k.range = 1:5, nfold = 5)
+
+  expect_true("optimal.k" %in% names(cv_result))
+  expect_true("cv.errors" %in% names(cv_result))
+  expect_gte(cv_result$optimal.k, 1)
+  expect_lte(cv_result$optimal.k, 5)
+})

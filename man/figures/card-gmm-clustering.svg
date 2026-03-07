@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- GMM ellipses -->
+  <ellipse cx="55" cy="40" rx="35" ry="20" stroke="#6f42c1" stroke-width="1.5" fill="#6f42c1" fill-opacity="0.08" stroke-dasharray="3,2"/>
+  <ellipse cx="145" cy="45" rx="30" ry="25" stroke="#9775d0" stroke-width="1.5" fill="#9775d0" fill-opacity="0.08" stroke-dasharray="3,2"/>
+  <ellipse cx="100" cy="85" rx="40" ry="18" stroke="#b8a0e0" stroke-width="1.5" fill="#b8a0e0" fill-opacity="0.08" stroke-dasharray="3,2"/>
+  <!-- Data points cluster 1 -->
+  <circle cx="45" cy="35" r="2.5" fill="#6f42c1" opacity="0.7"/>
+  <circle cx="55" cy="30" r="2.5" fill="#6f42c1" opacity="0.7"/>
+  <circle cx="65" cy="40" r="2.5" fill="#6f42c1" opacity="0.7"/>
+  <circle cx="50" cy="45" r="2.5" fill="#6f42c1" opacity="0.7"/>
+  <circle cx="60" cy="38" r="2.5" fill="#6f42c1" opacity="0.7"/>
+  <!-- Data points cluster 2 -->
+  <circle cx="135" cy="40" r="2.5" fill="#9775d0" opacity="0.7"/>
+  <circle cx="150" cy="35" r="2.5" fill="#9775d0" opacity="0.7"/>
+  <circle cx="155" cy="50" r="2.5" fill="#9775d0" opacity="0.7"/>
+  <circle cx="140" cy="55" r="2.5" fill="#9775d0" opacity="0.7"/>
+  <circle cx="148" cy="45" r="2.5" fill="#9775d0" opacity="0.7"/>
+  <!-- Data points cluster 3 -->
+  <circle cx="85" cy="82" r="2.5" fill="#b8a0e0" opacity="0.7"/>
+  <circle cx="100" cy="78" r="2.5" fill="#b8a0e0" opacity="0.7"/>
+  <circle cx="115" cy="88" r="2.5" fill="#b8a0e0" opacity="0.7"/>
+  <circle cx="95" cy="92" r="2.5" fill="#b8a0e0" opacity="0.7"/>
+  <circle cx="108" cy="85" r="2.5" fill="#b8a0e0" opacity="0.7"/>
+</svg>

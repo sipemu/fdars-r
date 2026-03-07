@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.81"
 name = "fdars-core"
-version = "0.6.2"
+version = "0.7.2"
 authors = ["Simon Muller"]
 build = false
 autolib = false
@@ -57,6 +57,10 @@ name = "basis_representation"
 path = "examples/04_basis_representation/main.rs"
 
 [[example]]
+name = "classification"
+path = "examples/23_classification/main.rs"
+
+[[example]]
 name = "clustering"
 path = "examples/07_clustering/main.rs"
 
@@ -85,8 +89,16 @@ name = "equivalence_test"
 path = "examples/17_equivalence_test/main.rs"
 
 [[example]]
+name = "function_on_scalar"
+path = "examples/21_function_on_scalar/main.rs"
+
+[[example]]
 name = "functional_operations"
 path = "examples/02_functional_operations/main.rs"
+
+[[example]]
+name = "gmm_clustering"
+path = "examples/22_gmm_clustering/main.rs"
 
 [[example]]
 name = "irregular_data"
@@ -97,12 +109,20 @@ name = "landmark_registration"
 path = "examples/18_landmark_registration/main.rs"
 
 [[example]]
+name = "mixed_effects"
+path = "examples/24_mixed_effects/main.rs"
+
+[[example]]
 name = "outlier_detection"
 path = "examples/09_outlier_detection/main.rs"
 
 [[example]]
 name = "regression"
 path = "examples/08_regression/main.rs"
+
+[[example]]
+name = "scalar_on_function"
+path = "examples/20_scalar_on_function/main.rs"
 
 [[example]]
 name = "seasonal_analysis"
@@ -131,6 +151,10 @@ path = "examples/19_tsrvf/main.rs"
 [[test]]
 name = "validate_against_r"
 path = "tests/validate_against_r.rs"
+
+[[test]]
+name = "validate_new_modules"
+path = "tests/validate_new_modules.rs"
 
 [[bench]]
 name = "depth_benchmarks"

@@ -8,7 +8,7 @@ home:
 
 navbar:
   structure:
-    left: [intro, reference, learn, represent, align, analyze]
+    left: [intro, reference, learn, represent, align, regression, analyze]
     right: [search, github]
   components:
     learn:
@@ -67,6 +67,28 @@ navbar:
       - text: Guides
       - text: Comparing Alignment Methods
         href: articles/alignment-comparison.html
+    regression:
+      text: Regression
+      menu:
+      - text: Nonparametric
+      - text: Kernel & kNN Regression
+        href: articles/regression.html
+      - text: "---"
+      - text: Scalar-on-Function
+      - text: Functional Regression
+        href: articles/functional-regression.html
+      - text: "---"
+      - text: Function-on-Scalar
+      - text: Functional Regression (FOSR)
+        href: articles/functional-regression.html#function-on-scalar-regression
+      - text: "---"
+      - text: Classification
+      - text: Supervised Classification
+        href: articles/functional-classification.html
+      - text: "---"
+      - text: Repeated Measures
+      - text: Functional Mixed Models
+        href: articles/functional-mixed-models.html
     analyze:
       text: Analyze
       menu:
@@ -77,14 +99,12 @@ navbar:
         href: articles/equivalence-testing.html
       - text: "---"
       - text: Unsupervised
-      - text: Clustering
+      - text: Clustering (K-Means)
         href: articles/clustering.html
+      - text: GMM Clustering
+        href: articles/gmm-clustering.html
       - text: Outlier Detection
         href: articles/outlier-detection.html
-      - text: "---"
-      - text: Supervised
-      - text: Regression
-        href: articles/regression.html
       - text: "---"
       - text: Time Series
       - text: Seasonal Analysis
@@ -115,13 +135,19 @@ articles:
   - articles/landmark-registration
   - articles/tsrvf
   - articles/alignment-comparison
+- title: Regression
+  contents:
+  - articles/regression
+  - articles/functional-regression
+  - articles/functional-classification
+  - articles/functional-mixed-models
 - title: Analyze
   contents:
   - articles/tolerance-bands
   - articles/equivalence-testing
   - articles/clustering
+  - articles/gmm-clustering
   - articles/outlier-detection
-  - articles/regression
   - articles/seasonal-analysis
   - articles/covariance-functions
 
@@ -238,6 +264,7 @@ reference:
 - title: Clustering
   contents:
   - cluster.fcm
+  - cluster.gmm
   - cluster.init
   - cluster.kmeans
   - cluster.optim
@@ -256,17 +283,38 @@ reference:
   contents:
   - fregre.basis
   - fregre.basis.cv
+  - fregre.lm
+  - fregre.lm.cv
   - fregre.np
   - fregre.np.cv
+  - fregre.np.mixed
   - fregre.np.multi
   - fregre.pc
   - fregre.pc.cv
+  - functional.logistic
   - optim.np
   - flm.test
   - pred.MAE
   - pred.MSE
   - pred.R2
   - pred.RMSE
+
+- title: Function-on-Scalar Regression
+  contents:
+  - fosr
+  - fosr.fpc
+  - fanova
+
+- title: Classification
+  contents:
+  - fclassif
+  - fclassif.cv
+
+- title: Functional Mixed Models
+  contents:
+  - fmm
+  - fmm.predict
+  - fmm.test.fixed
 
 - title: Seasonal Analysis
   contents:
@@ -386,9 +434,14 @@ reference:
   - plot.basis.auto
   - plot.basis.cv
   - plot.cluster.fcm
+  - plot.cluster.gmm
   - plot.cluster.kmeans
   - plot.cluster.optim
+  - plot.fanova
+  - plot.fclassif
   - plot.fequiv.test
+  - plot.fmm
+  - plot.fosr
   - plot.group.distance
   - plot.outliergram
   - plot.outliers.fdata
@@ -404,7 +457,10 @@ reference:
 
 - title: Prediction
   contents:
+  - predict.cluster.gmm
+  - predict.fosr
   - predict.fregre.fd
+  - predict.fregre.lm
   - predict.fregre.np
   - predict.fregre.np.multi
 
@@ -416,10 +472,19 @@ reference:
   - print.basis.auto
   - print.basis.cv
   - print.cluster.fcm
+  - print.cluster.gmm
   - print.cluster.kmeans
   - print.cluster.optim
+  - print.fanova
   - print.fbplot
+  - print.fclassif
+  - print.fclassif.cv
+  - print.fmm
+  - print.fmm.test
+  - print.fosr
   - print.fregre.fd
+  - print.fregre.lm
+  - print.fregre.logistic
   - print.fregre.np
   - print.fregre.np.multi
   - print.group.distance
@@ -495,3 +560,13 @@ reference:
   - starts_with("select_basis")
   - starts_with("pspline_")
   - starts_with("geometric_")
+  - starts_with("fregre_")
+  - starts_with("functional_logistic")
+  - starts_with("fosr_")
+  - starts_with("fanova_")
+  - starts_with("predict_fosr")
+  - starts_with("predict_gmm")
+  - starts_with("fclassif_")
+  - starts_with("gmm_")
+  - starts_with("fmm_")
+  - starts_with("fdmatrix_")

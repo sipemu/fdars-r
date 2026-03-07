@@ -474,11 +474,14 @@ same shape) will have small amplitude distance but large phase distance:
 amp_vals <- as.vector(as.matrix(dist_amp))[upper.tri(as.matrix(dist_amp))]
 phase_vals <- as.vector(as.matrix(dist_phase))[upper.tri(as.matrix(dist_phase))]
 
-plot(amp_vals, phase_vals, pch = 19, col = "steelblue",
-     xlab = "Amplitude Distance", ylab = "Phase Distance",
-     main = "Amplitude vs Phase Pairwise Distances")
-abline(h = mean(phase_vals), lty = 2, col = "grey50")
-abline(v = mean(amp_vals), lty = 2, col = "grey50")
+df_ap <- data.frame(amplitude = amp_vals, phase = phase_vals)
+ggplot(df_ap, aes(x = amplitude, y = phase)) +
+  geom_point(color = "steelblue", size = 1.5) +
+  geom_hline(yintercept = mean(phase_vals), linetype = "dashed", color = "grey50") +
+  geom_vline(xintercept = mean(amp_vals), linetype = "dashed", color = "grey50") +
+  labs(title = "Amplitude vs Phase Pairwise Distances",
+       x = "Amplitude Distance", y = "Phase Distance") +
+  theme_minimal()
 ```
 
 ## Unified Interface

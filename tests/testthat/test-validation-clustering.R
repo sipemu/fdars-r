@@ -462,6 +462,73 @@ test_that("cluster.fcm rejects non-fdata input", {
 })
 
 # =============================================================================
+# cluster.gmm Tests (Gaussian Mixture Models)
+# =============================================================================
+
+test_that("cluster.gmm returns correct structure", {
+  data <- create_clustered_data()
+  result <- fdars::cluster.gmm(data$fd, k.range = 2:4, seed = 123)
+
+  expect_s3_class(result, "cluster.gmm")
+  expect_true("cluster" %in% names(result))
+  expect_true("membership" %in% names(result))
+  expect_true("weights" %in% names(result))
+  expect_true("bic" %in% names(result))
+  expect_true("k" %in% names(result))
+  expect_true("converged" %in% names(result))
+
+  expect_length(result$cluster, data$n)
+  expect_true(all(result$cluster >= 1))
+})
+
+test_that("cluster.gmm membership probabilities are valid", {
+  data <- create_clustered_data()
+  result <- fdars::cluster.gmm(data$fd, k.range = 3, seed = 123)
+
+  # Membership values should be in [0, 1]
+  expect_true(all(result$membership >= 0 & result$membership <= 1))
+
+  # Rows should sum to 1
+  row_sums <- rowSums(result$membership)
+  expect_equal(row_sums, rep(1, data$n), tolerance = 1e-4)
+})
+
+test_that("cluster.gmm recovers known clusters", {
+  data <- create_clustered_data()
+  result <- fdars::cluster.gmm(data$fd, k.range = 2:5, seed = 123)
+
+  # Should select k close to 3 for well-separated 3-cluster data
+  expect_true(result$k >= 2 && result$k <= 5)
+})
+
+test_that("cluster.gmm is reproducible with seed", {
+  data <- create_clustered_data()
+  result1 <- fdars::cluster.gmm(data$fd, k.range = 3, seed = 456)
+  result2 <- fdars::cluster.gmm(data$fd, k.range = 3, seed = 456)
+
+  expect_equal(result1$cluster, result2$cluster)
+})
+
+test_that("print.cluster.gmm works", {
+  data <- create_clustered_data()
+  result <- fdars::cluster.gmm(data$fd, k.range = 3, seed = 123)
+
+  expect_output(print(result), "Gaussian Mixture Model")
+})
+
+test_that("plot.cluster.gmm works", {
+  data <- create_clustered_data()
+  result <- fdars::cluster.gmm(data$fd, k.range = 2:4, seed = 123)
+
+  expect_no_error(plot(result))
+})
+
+test_that("cluster.gmm rejects non-fdata input", {
+  X <- matrix(rnorm(100), 10, 10)
+  expect_error(fdars::cluster.gmm(X, k.range = 2:3))
+})
+
+# =============================================================================
 # cluster.init Tests
 # =============================================================================
 

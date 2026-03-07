@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{alignment_constrained}
 \alias{alignment_constrained}
-\title{Elastic alignment with landmark constraints}
+\title{Elastic alignment with explicit landmark constraints}
 \usage{
 alignment_constrained(
   f1,
@@ -14,5 +14,5 @@ alignment_constrained(
 )
 }
 \description{
-Elastic alignment with landmark constraints
+Elastic alignment with explicit landmark constraints
 }

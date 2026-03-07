@@ -252,7 +252,7 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
 
 # Internal: Random Projection Depth implementation
 # @noRd
-.depth.RP <- function(fdataobj, fdataori = NULL, nproj = 50, ...) {
+.depth.RP <- function(fdataobj, fdataori = NULL, nproj = 50, seed = NULL, ...) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
   }
@@ -294,12 +294,17 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
     stop("fdataobj and fdataori must have the same number of evaluation points")
   }
 
-  .Call("wrap__depth_rp_1d", fdataobj$data, fdataori$data, as.integer(nproj))
+  if (!is.null(seed)) {
+    .Call("wrap__depth_rp_1d_seeded", fdataobj$data, fdataori$data,
+          as.integer(nproj), as.integer(seed))
+  } else {
+    .Call("wrap__depth_rp_1d", fdataobj$data, fdataori$data, as.integer(nproj))
+  }
 }
 
 # Internal: Random Tukey Depth implementation
 # @noRd
-.depth.RT <- function(fdataobj, fdataori = NULL, nproj = 50, ...) {
+.depth.RT <- function(fdataobj, fdataori = NULL, nproj = 50, seed = NULL, ...) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
   }
@@ -341,7 +346,12 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
     stop("fdataobj and fdataori must have the same number of evaluation points")
   }
 
-  .Call("wrap__depth_rt_1d", fdataobj$data, fdataori$data, as.integer(nproj))
+  if (!is.null(seed)) {
+    .Call("wrap__depth_rt_1d_seeded", fdataobj$data, fdataori$data,
+          as.integer(nproj), as.integer(seed))
+  } else {
+    .Call("wrap__depth_rt_1d", fdataobj$data, fdataori$data, as.integer(nproj))
+  }
 }
 
 # Internal: Functional Spatial Depth implementation

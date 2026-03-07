@@ -2,10 +2,10 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{alignment_warp_smoothness}
 \alias{alignment_warp_smoothness}
-\title{Compute warp smoothness}
+\title{Compute warp smoothness (bending energy)}
 \usage{
 alignment_warp_smoothness(gamma, argvals)
 }
 \description{
-Compute warp smoothness
+Compute warp smoothness (bending energy)
 }

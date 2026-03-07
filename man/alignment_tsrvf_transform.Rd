@@ -2,10 +2,10 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{alignment_tsrvf_transform}
 \alias{alignment_tsrvf_transform}
-\title{Full TSRVF transform}
+\title{Full TSRVF transform: compute Karcher mean + transport to tangent space}
 \usage{
 alignment_tsrvf_transform(data, argvals, max_iter, tol, lambda)
 }
 \description{
-Full TSRVF transform
+Full TSRVF transform: compute Karcher mean + transport to tangent space
 }

@@ -222,11 +222,11 @@ basis_bic_1d <- function(data, argvals, nbasis, basis_type, lambda, pooled) .Cal
 #' P-spline fitting: returns coefficients, fitted values, and diagnostics
 pspline_fit_1d <- function(data, argvals, nbasis, lambda, order) .Call(wrap__pspline_fit_1d, data, argvals, nbasis, lambda, order)
 
-#' Project 2D functional data to tensor product basis coefficients (raw binding)
-fdata2basis_2d_raw <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+#' Project 2D functional data to tensor product basis coefficients
+fdata2basis_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
-#' Reconstruct 2D functional data from tensor product basis coefficients (raw binding)
-basis2fdata_2d_raw <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+#' Reconstruct 2D functional data from tensor product basis coefficients
+basis2fdata_2d <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
 #' 2D P-spline fitting with anisotropic penalties
 pspline_fit_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order) .Call(wrap__pspline_fit_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order)
@@ -511,7 +511,7 @@ landmark_detect <- function(curve, argvals, kind, min_prominence) .Call(wrap__la
 #' Detect landmarks and register curves
 landmark_register_curves <- function(data, argvals, kind, min_prominence, expected_count) .Call(wrap__landmark_register_curves, data, argvals, kind, min_prominence, expected_count)
 
-#' Full TSRVF transform
+#' Full TSRVF transform: compute Karcher mean + transport to tangent space
 alignment_tsrvf_transform <- function(data, argvals, max_iter, tol, lambda) .Call(wrap__alignment_tsrvf_transform, data, argvals, max_iter, tol, lambda)
 
 #' Compute TSRVF from a pre-computed Karcher mean
@@ -523,10 +523,10 @@ alignment_tsrvf_inverse <- function(tangent_vectors, mean, mean_srsf, mean_srsf_
 #' Compute alignment quality metrics
 alignment_quality_compute <- function(data, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged) .Call(wrap__alignment_quality_compute, data, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged)
 
-#' Compute warp complexity
+#' Compute warp complexity (geodesic distance from identity)
 alignment_warp_complexity <- function(gamma, argvals) .Call(wrap__alignment_warp_complexity, gamma, argvals)
 
-#' Compute warp smoothness
+#' Compute warp smoothness (bending energy)
 alignment_warp_smoothness <- function(gamma, argvals) .Call(wrap__alignment_warp_smoothness, gamma, argvals)
 
 #' Elastic phase-amplitude decomposition
@@ -541,7 +541,7 @@ alignment_phase_dist <- function(data, argvals, lambda) .Call(wrap__alignment_ph
 #' Pairwise alignment consistency
 alignment_pairwise_consistency <- function(data, argvals, lambda, max_triplets) .Call(wrap__alignment_pairwise_consistency, data, argvals, lambda, max_triplets)
 
-#' Elastic alignment with landmark constraints
+#' Elastic alignment with explicit landmark constraints
 alignment_constrained <- function(f1, f2, argvals, landmark_targets, landmark_sources, lambda) .Call(wrap__alignment_constrained, f1, f2, argvals, landmark_targets, landmark_sources, lambda)
 
 #' Elastic alignment with automatic landmark detection
@@ -570,6 +570,72 @@ streaming_depth_vs_ref <- function(ref_data, new_data, method) .Call(wrap__strea
 
 #' Streaming depth: single curve against reference
 streaming_depth_one <- function(ref_data, curve, method) .Call(wrap__streaming_depth_one, ref_data, curve, method)
+
+#' Functional linear model (FPC-based)
+fregre_lm_rust <- function(data, y, scalar_covariates, ncomp) .Call(wrap__fregre_lm_rust, data, y, scalar_covariates, ncomp)
+
+#' Nonparametric functional regression with mixed predictors
+fregre_np_mixed_rust <- function(data, y, argvals, scalar_covariates, h_func, h_scalar) .Call(wrap__fregre_np_mixed_rust, data, y, argvals, scalar_covariates, h_func, h_scalar)
+
+#' Functional logistic regression
+functional_logistic_rust <- function(data, y, scalar_covariates, ncomp, max_iter, tol) .Call(wrap__functional_logistic_rust, data, y, scalar_covariates, ncomp, max_iter, tol)
+
+#' Cross-validation for FPC component selection
+fregre_cv_rust <- function(data, y, scalar_covariates, k_min, k_max, n_folds) .Call(wrap__fregre_cv_rust, data, y, scalar_covariates, k_min, k_max, n_folds)
+
+#' Function-on-scalar regression (penalized)
+fosr_rust <- function(data, predictors, lambda) .Call(wrap__fosr_rust, data, predictors, lambda)
+
+#' FPC-based function-on-scalar regression
+fosr_fpc_rust <- function(data, predictors, ncomp) .Call(wrap__fosr_fpc_rust, data, predictors, ncomp)
+
+#' Functional ANOVA
+fanova_rust <- function(data, groups, n_perm) .Call(wrap__fanova_rust, data, groups, n_perm)
+
+#' Predict from function-on-scalar regression
+predict_fosr_rust <- function(intercept, beta_data, new_predictors, lambda) .Call(wrap__predict_fosr_rust, intercept, beta_data, new_predictors, lambda)
+
+#' LDA classification
+fclassif_lda_rust <- function(data, y, covariates, ncomp) .Call(wrap__fclassif_lda_rust, data, y, covariates, ncomp)
+
+#' QDA classification
+fclassif_qda_rust <- function(data, y, covariates, ncomp) .Call(wrap__fclassif_qda_rust, data, y, covariates, ncomp)
+
+#' kNN classification
+fclassif_knn_rust <- function(data, y, covariates, ncomp, k_nn) .Call(wrap__fclassif_knn_rust, data, y, covariates, ncomp, k_nn)
+
+#' Kernel classification
+fclassif_kernel_rust <- function(data, argvals, y, covariates, h_func, h_scalar) .Call(wrap__fclassif_kernel_rust, data, argvals, y, covariates, h_func, h_scalar)
+
+#' DD-plot classification
+fclassif_dd_rust <- function(data, y, covariates) .Call(wrap__fclassif_dd_rust, data, y, covariates)
+
+#' Cross-validated classification
+fclassif_cv_rust <- function(data, argvals, y, covariates, method, ncomp, nfold, seed) .Call(wrap__fclassif_cv_rust, data, argvals, y, covariates, method, ncomp, nfold, seed)
+
+#' GMM clustering with automatic K selection
+gmm_cluster_rust <- function(data, argvals, covariates, k_range, nbasis, basis_type, cov_type, cov_weight, max_iter, tol, n_init, seed, use_icl) .Call(wrap__gmm_cluster_rust, data, argvals, covariates, k_range, nbasis, basis_type, cov_type, cov_weight, max_iter, tol, n_init, seed, use_icl)
+
+#' Raw GMM EM on feature matrix
+gmm_em_rust <- function(features, k, cov_type, max_iter, tol, seed) .Call(wrap__gmm_em_rust, features, k, cov_type, max_iter, tol, seed)
+
+#' Predict from GMM
+predict_gmm_rust <- function(new_data, argvals, new_covariates, means_data, covariances, weights, k, d, nbasis, basis_type, cov_weight, cov_type) .Call(wrap__predict_gmm_rust, new_data, argvals, new_covariates, means_data, covariances, weights, k, d, nbasis, basis_type, cov_weight, cov_type)
+
+#' Functional mixed model
+fmm_rust <- function(data, subject_ids, covariates, ncomp) .Call(wrap__fmm_rust, data, subject_ids, covariates, ncomp)
+
+#' Predict from functional mixed model
+fmm_predict_rust <- function(mean_function, beta_data, new_covariates) .Call(wrap__fmm_predict_rust, mean_function, beta_data, new_covariates)
+
+#' Permutation test for fixed effects in FMM
+fmm_test_fixed_rust <- function(data, subject_ids, covariates, ncomp, n_perm, seed) .Call(wrap__fmm_test_fixed_rust, data, subject_ids, covariates, ncomp, n_perm, seed)
+
+#' Random projection depth with optional seed
+depth_rp_1d_seeded <- function(data_obj, data_ori, nproj, seed) .Call(wrap__depth_rp_1d_seeded, data_obj, data_ori, nproj, seed)
+
+#' Random Tukey depth with optional seed
+depth_rt_1d_seeded <- function(data_obj, data_ori, nproj, seed) .Call(wrap__depth_rt_1d_seeded, data_obj, data_ori, nproj, seed)
 
 
 # nolint end

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Population mean (thick red) -->
+  <path d="M15 60 Q55 30, 100 55 Q145 75, 185 45" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Subject random effects (thin blue) -->
+  <path d="M15 50 Q55 25, 100 45 Q145 60, 185 38" stroke="#6f42c1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 65 Q55 40, 100 60 Q145 78, 185 50" stroke="#6f42c1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 55 Q55 20, 100 50 Q145 70, 185 42" stroke="#6f42c1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 70 Q55 35, 100 65 Q145 85, 185 55" stroke="#6f42c1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 45 Q55 28, 100 42 Q145 55, 185 35" stroke="#6f42c1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Labels -->
+  <text x="10" y="110" font-family="serif" font-style="italic" font-size="9" fill="#c0392b" opacity="0.8">μ(t)</text>
+  <text x="45" y="110" font-family="serif" font-style="italic" font-size="9" fill="#6f42c1" opacity="0.6">bᵢ(t)</text>
+</svg>

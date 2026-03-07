@@ -1302,3 +1302,329 @@ predict.fregre.np.multi <- function(object, newdata.list = NULL, ...) {
 
   y_pred
 }
+
+# =============================================================================
+# Scalar-on-function regression (Rust-backed via fdars-core)
+# =============================================================================
+
+#' Functional Linear Model (FPC-based)
+#'
+#' Fits a functional linear model using FPC regression with the Rust backend.
+#' Supports optional scalar covariates.
+#'
+#' @param fdataobj An object of class 'fdata' (functional covariate).
+#' @param y Response vector (scalar).
+#' @param scalar.covariates Optional matrix of scalar covariates (n x p).
+#' @param ncomp Number of FPC components to use. If NULL, uses min(n-1, 15).
+#'
+#' @return A fitted regression object of class 'fregre.lm' with components:
+#'   \item{intercept}{Intercept term}
+#'   \item{beta.t}{Functional coefficient beta(t) as fdata}
+#'   \item{gamma}{Scalar covariate coefficients}
+#'   \item{fitted.values}{Fitted values}
+#'   \item{residuals}{Residuals}
+#'   \item{r.squared}{R-squared}
+#'   \item{r.squared.adj}{Adjusted R-squared}
+#'   \item{ncomp}{Number of FPC components used}
+#'   \item{gcv}{GCV criterion value}
+#'
+#' @seealso \code{\link{fregre.pc}} for the R-native FPC regression,
+#'   \code{\link{fregre.lm.cv}} for cross-validated component selection
+#'
+#' @export
+fregre.lm <- function(fdataobj, y, scalar.covariates = NULL, ncomp = NULL) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  n <- nrow(fdataobj$data)
+  m <- ncol(fdataobj$data)
+
+  if (length(y) != n) {
+    stop("Length of y must equal number of curves in fdataobj")
+  }
+
+  if (is.null(ncomp)) {
+    ncomp <- min(n - 1, 15)
+  }
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  result <- .Call("wrap__fregre_lm_rust", fdataobj$data, as.numeric(y),
+                  sc, as.integer(ncomp))
+
+  if (is.null(result)) {
+    stop("fregre.lm failed: check data dimensions and ncomp")
+  }
+
+  beta_fd <- fdata(matrix(result$beta_t, nrow = 1), argvals = fdataobj$argvals,
+                   names = list(main = "beta(t)", xlab = fdataobj$names$xlab,
+                                ylab = "beta"))
+
+  structure(
+    list(
+      intercept = result$intercept,
+      beta.t = beta_fd,
+      gamma = result$gamma,
+      coefficients = result$coefficients,
+      fitted.values = result$fitted_values,
+      residuals = result$residuals,
+      r.squared = result$r_squared,
+      r.squared.adj = result$r_squared_adj,
+      std.errors = result$std_errors,
+      ncomp = result$ncomp,
+      residual.se = result$residual_se,
+      gcv = result$gcv,
+      fdataobj = fdataobj,
+      y = y,
+      scalar.covariates = scalar.covariates,
+      .fpca_mean = result$fpca_mean,
+      .fpca_rotation = matrix(result$fpca_rotation_data,
+                              nrow = result$fpca_rotation_nrow,
+                              ncol = result$fpca_rotation_ncol),
+      call = match.call()
+    ),
+    class = "fregre.lm"
+  )
+}
+
+#' Nonparametric Functional Regression with Mixed Predictors
+#'
+#' Fits a nonparametric kernel regression with functional and scalar predictors
+#' using the Rust backend.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param y Response vector.
+#' @param scalar.covariates Optional matrix of scalar covariates.
+#' @param h.func Bandwidth for functional distance kernel. If NULL, auto-selected.
+#' @param h.scalar Bandwidth for scalar covariates kernel. If NULL, auto-selected.
+#'
+#' @return A fitted regression object of class 'fregre.np'.
+#'
+#' @export
+fregre.np.mixed <- function(fdataobj, y, scalar.covariates = NULL,
+                             h.func = NULL, h.scalar = NULL) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  n <- nrow(fdataobj$data)
+  if (length(y) != n) {
+    stop("Length of y must equal number of curves in fdataobj")
+  }
+
+  if (is.null(h.func)) h.func <- 0.0
+  if (is.null(h.scalar)) h.scalar <- 0.0
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  result <- .Call("wrap__fregre_np_mixed_rust", fdataobj$data, as.numeric(y),
+                  as.numeric(fdataobj$argvals), sc,
+                  as.numeric(h.func), as.numeric(h.scalar))
+
+  if (is.null(result)) {
+    stop("fregre.np.mixed failed: check data dimensions")
+  }
+
+  structure(
+    list(
+      fitted.values = result$fitted_values,
+      residuals = result$residuals,
+      r.squared = result$r_squared,
+      h.func = result$h_func,
+      h.scalar = result$h_scalar,
+      cv.error = result$cv_error,
+      fdataobj = fdataobj,
+      y = y,
+      scalar.covariates = scalar.covariates,
+      call = match.call()
+    ),
+    class = "fregre.np"
+  )
+}
+
+#' Functional Logistic Regression
+#'
+#' Binary logistic regression with functional and optional scalar predictors
+#' using FPC projection and IRLS.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param y Binary response vector (0/1).
+#' @param scalar.covariates Optional matrix of scalar covariates.
+#' @param ncomp Number of FPC components (default 3).
+#' @param max.iter Maximum IRLS iterations (default 100).
+#' @param tol Convergence tolerance (default 1e-6).
+#'
+#' @return A fitted object of class 'fregre.logistic' with components:
+#'   \item{probabilities}{Predicted probabilities P(Y=1)}
+#'   \item{predicted.classes}{Predicted class labels (0 or 1)}
+#'   \item{accuracy}{Classification accuracy on training data}
+#'   \item{log.likelihood}{Log-likelihood at convergence}
+#'
+#' @export
+functional.logistic <- function(fdataobj, y, scalar.covariates = NULL,
+                                 ncomp = 3, max.iter = 100, tol = 1e-6) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  n <- nrow(fdataobj$data)
+  if (length(y) != n) {
+    stop("Length of y must equal number of curves in fdataobj")
+  }
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  result <- .Call("wrap__functional_logistic_rust", fdataobj$data, as.numeric(y),
+                  sc, as.integer(ncomp), as.integer(max.iter), as.numeric(tol))
+
+  if (is.null(result)) {
+    stop("functional.logistic failed: check data dimensions and response")
+  }
+
+  beta_fd <- fdata(matrix(result$beta_t, nrow = 1), argvals = fdataobj$argvals,
+                   names = list(main = "beta(t)", xlab = fdataobj$names$xlab,
+                                ylab = "beta"))
+
+  structure(
+    list(
+      intercept = result$intercept,
+      beta.t = beta_fd,
+      gamma = result$gamma,
+      probabilities = result$probabilities,
+      predicted.classes = result$predicted_classes,
+      ncomp = result$ncomp,
+      accuracy = result$accuracy,
+      coefficients = result$coefficients,
+      log.likelihood = result$log_likelihood,
+      iterations = result$iterations,
+      fdataobj = fdataobj,
+      y = y,
+      scalar.covariates = scalar.covariates,
+      .fpca_mean = result$fpca_mean,
+      .fpca_rotation = matrix(result$fpca_rotation_data,
+                              nrow = result$fpca_rotation_nrow,
+                              ncol = result$fpca_rotation_ncol),
+      call = match.call()
+    ),
+    class = "fregre.logistic"
+  )
+}
+
+#' Cross-Validation for FPC Component Selection (fregre.lm)
+#'
+#' Uses the Rust backend to select the optimal number of FPC components
+#' via k-fold cross-validation for the functional linear model.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param y Response vector.
+#' @param scalar.covariates Optional matrix of scalar covariates.
+#' @param k.range Range of FPC component counts to try.
+#' @param nfold Number of CV folds (default 10).
+#'
+#' @return A list with \code{optimal.k}, \code{cv.errors}, and \code{model}.
+#'
+#' @export
+fregre.lm.cv <- function(fdataobj, y, scalar.covariates = NULL,
+                          k.range = NULL, nfold = 10) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  n <- nrow(fdataobj$data)
+  m <- ncol(fdataobj$data)
+
+  if (is.null(k.range)) {
+    k.range <- c(1L, min(n - 1L, m, 15L))
+  } else {
+    k.range <- c(min(k.range), max(k.range))
+  }
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  result <- .Call("wrap__fregre_cv_rust", fdataobj$data, as.numeric(y),
+                  sc, as.integer(k.range[1]), as.integer(k.range[2]),
+                  as.integer(nfold))
+
+  if (is.null(result)) {
+    stop("fregre.lm.cv failed")
+  }
+
+  final_model <- fregre.lm(fdataobj, y, scalar.covariates, ncomp = result$optimal_k)
+
+  list(
+    optimal.k = result$optimal_k,
+    cv.errors = result$cv_errors,
+    k.values = result$k_values,
+    min.cv.error = result$min_cv_error,
+    model = final_model
+  )
+}
+
+#' Print method for fregre.lm objects
+#' @param x A fregre.lm object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
+#' @export
+print.fregre.lm <- function(x, ...) {
+  cat("Functional Linear Model (FPC-based)\n")
+  cat("====================================\n")
+  cat("  Number of observations:", length(x$y), "\n")
+  cat("  Number of FPC components:", x$ncomp, "\n")
+  if (length(x$gamma) > 0) {
+    cat("  Scalar covariates:", length(x$gamma), "\n")
+  }
+  cat("  R-squared:", round(x$r.squared, 4), "\n")
+  cat("  Adjusted R-squared:", round(x$r.squared.adj, 4), "\n")
+  cat("  GCV:", round(x$gcv, 4), "\n")
+  invisible(x)
+}
+
+#' Print method for fregre.logistic objects
+#' @param x A fregre.logistic object.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
+#' @export
+print.fregre.logistic <- function(x, ...) {
+  cat("Functional Logistic Regression\n")
+  cat("==============================\n")
+  cat("  Number of observations:", length(x$y), "\n")
+  cat("  Number of FPC components:", x$ncomp, "\n")
+  cat("  Accuracy:", round(x$accuracy, 4), "\n")
+  cat("  Log-likelihood:", round(x$log.likelihood, 2), "\n")
+  cat("  Iterations:", x$iterations, "\n")
+  invisible(x)
+}
+
+#' Predict method for fregre.lm objects
+#' @param object A fregre.lm object.
+#' @param newdata An fdata object (or NULL for fitted values).
+#' @param new.scalar Optional new scalar covariates matrix.
+#' @param ... Additional arguments (ignored).
+#' @return Predicted values.
+#' @export
+predict.fregre.lm <- function(object, newdata = NULL, new.scalar = NULL, ...) {
+  if (is.null(newdata)) {
+    return(object$fitted.values)
+  }
+  if (!inherits(newdata, "fdata")) {
+    newdata <- fdata(newdata, argvals = object$fdataobj$argvals)
+  }
+
+  # Project new data into FPC space
+  X_centered <- sweep(newdata$data, 2, object$.fpca_mean)
+  scores <- X_centered %*% object$.fpca_rotation
+
+  ncomp <- object$ncomp
+  coefs <- object$coefficients
+  y_pred <- rep(object$intercept, nrow(newdata$data))
+  y_pred <- y_pred + as.vector(scores[, seq_len(ncomp), drop = FALSE] %*%
+                                 coefs[seq_len(ncomp)])
+
+  if (!is.null(new.scalar) && length(object$gamma) > 0) {
+    new.scalar <- as.matrix(new.scalar)
+    y_pred <- y_pred + as.vector(new.scalar %*% object$gamma)
+  }
+
+  y_pred
+}

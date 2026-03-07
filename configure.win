@@ -2,6 +2,9 @@
 # Configure script for fdars R package (Windows)
 # Checks for Rust toolchain availability
 
+# Rust installed via rustup lives in ~/.cargo/bin which may not be in PATH
+export PATH="$HOME/.cargo/bin:$PATH"
+
 # Check for cargo
 if ! command -v cargo >/dev/null 2>&1; then
     echo "-----------------------------------------------------"

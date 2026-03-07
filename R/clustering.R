@@ -801,3 +801,204 @@ plot.cluster.fcm <- function(x, type = c("curves", "membership"), ...) {
 
   p
 }
+
+# =============================================================================
+# Gaussian Mixture Model Clustering
+# =============================================================================
+
+#' Gaussian Mixture Model Clustering for Functional Data
+#'
+#' Performs model-based clustering using Gaussian mixture models on functional
+#' data. Curves are projected onto a B-spline or Fourier basis before fitting.
+#' Automatic K selection via BIC or ICL.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param k.range Range of number of clusters to try (default 2:6).
+#' @param covariates Optional matrix of scalar covariates to include.
+#' @param nbasis Number of basis functions for projection (default 10).
+#' @param basis.type Basis type: "bspline" (default) or "fourier".
+#' @param cov.type Covariance structure: "full" (default) or "diagonal".
+#' @param cov.weight Weight for covariates vs basis coefficients (default 1).
+#' @param max.iter Maximum EM iterations (default 100).
+#' @param tol Convergence tolerance (default 1e-4).
+#' @param n.init Number of random initializations (default 5).
+#' @param seed Optional random seed.
+#' @param criterion Model selection criterion: "bic" (default) or "icl".
+#'
+#' @return An object of class 'cluster.gmm' with components:
+#'   \item{cluster}{Integer vector of cluster assignments (1-indexed)}
+#'   \item{membership}{Matrix of posterior membership probabilities}
+#'   \item{means}{Component means matrix}
+#'   \item{weights}{Mixing proportions}
+#'   \item{bic}{BIC of selected model}
+#'   \item{icl}{ICL of selected model}
+#'   \item{k}{Number of clusters selected}
+#'   \item{converged}{Whether EM converged}
+#'   \item{bic.values}{BIC values for each K tried}
+#'
+#' @seealso \code{\link{cluster.kmeans}} for hard clustering,
+#'   \code{\link{cluster.fcm}} for fuzzy clustering
+#'
+#' @export
+cluster.gmm <- function(fdataobj, k.range = 2:6, covariates = NULL,
+                          nbasis = 10, basis.type = c("bspline", "fourier"),
+                          cov.type = c("full", "diagonal"),
+                          cov.weight = 1, max.iter = 100, tol = 1e-4,
+                          n.init = 5, seed = NULL,
+                          criterion = c("bic", "icl")) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  basis.type <- match.arg(basis.type)
+  cov.type <- match.arg(cov.type)
+  criterion <- match.arg(criterion)
+
+  basis_int <- if (basis.type == "fourier") 1L else 0L
+  use_icl <- criterion == "icl"
+  seed_val <- if (!is.null(seed)) as.integer(seed) else 42L
+  cov_mat <- if (!is.null(covariates)) as.matrix(covariates) else NULL
+
+  result <- .Call("wrap__gmm_cluster_rust", fdataobj$data,
+                  as.numeric(fdataobj$argvals), cov_mat,
+                  as.integer(k.range), as.integer(nbasis), basis_int,
+                  as.character(cov.type), as.numeric(cov.weight),
+                  as.integer(max.iter), as.numeric(tol),
+                  as.integer(n.init), seed_val, use_icl)
+
+  if (is.null(result)) {
+    stop("cluster.gmm failed: check data dimensions")
+  }
+
+  # BIC curve data frame
+  bic_df <- data.frame(k = result$bic_k, bic = result$bic_values,
+                       icl = result$icl_values)
+
+  structure(
+    list(
+      cluster = result$cluster,
+      membership = result$membership,
+      means = result$means,
+      weights = result$weights,
+      covariances = result$covariances,
+      bic = result$bic,
+      icl = result$icl,
+      log.likelihood = result$log_likelihood,
+      k = result$k,
+      d = result$d,
+      converged = result$converged,
+      iterations = result$iterations,
+      bic.values = bic_df,
+      criterion = criterion,
+      cov.type = result$cov_type,
+      nbasis = result$nbasis,
+      basis.type = basis.type,
+      cov.weight = result$cov_weight,
+      fdataobj = fdataobj,
+      covariates = covariates
+    ),
+    class = "cluster.gmm"
+  )
+}
+
+#' Predict Cluster Membership for New Functional Data
+#'
+#' Assigns new functional observations to clusters using a fitted GMM.
+#'
+#' @param object A fitted 'cluster.gmm' object.
+#' @param newdata An fdata object of new curves.
+#' @param new.covariates Optional matrix of covariates for new data.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A list with \code{cluster} (assignments) and \code{membership} (probabilities).
+#'
+#' @export
+predict.cluster.gmm <- function(object, newdata, new.covariates = NULL, ...) {
+  if (!inherits(newdata, "fdata")) {
+    stop("newdata must be of class 'fdata'")
+  }
+
+  basis_int <- if (object$basis.type == "fourier") 1L else 0L
+  ncov <- if (!is.null(new.covariates)) as.matrix(new.covariates) else NULL
+
+  result <- .Call("wrap__predict_gmm_rust", newdata$data,
+                  as.numeric(newdata$argvals), ncov,
+                  object$means, object$covariances, object$weights,
+                  as.integer(object$k), as.integer(object$d),
+                  as.integer(object$nbasis), basis_int,
+                  as.numeric(object$cov.weight), object$cov.type)
+
+  if (is.null(result)) {
+    stop("predict.cluster.gmm failed")
+  }
+
+  list(cluster = result$cluster, membership = result$membership)
+}
+
+#' Print Method for cluster.gmm Objects
+#' @param x An object of class 'cluster.gmm'.
+#' @param ... Additional arguments (ignored).
+#' @return Invisibly returns the input object \code{x}.
+#' @export
+print.cluster.gmm <- function(x, ...) {
+  cat("Gaussian Mixture Model Clustering\n")
+  cat("==================================\n")
+  cat("  Number of clusters:", x$k, "\n")
+  cat("  Number of observations:", length(x$cluster), "\n")
+  cat("  Criterion:", toupper(x$criterion), "\n")
+  cat("  BIC:", round(x$bic, 2), "\n")
+  cat("  ICL:", round(x$icl, 2), "\n")
+  cat("  Converged:", x$converged, "\n")
+  cat("  Covariance type:", x$cov.type, "\n")
+  cat("  Basis:", x$basis.type, "(", x$nbasis, "functions )\n")
+  cat("\nCluster sizes:\n")
+  print(table(x$cluster))
+  invisible(x)
+}
+
+#' Plot Method for cluster.gmm Objects
+#'
+#' Plots BIC/ICL model selection curve and cluster memberships.
+#'
+#' @param x An object of class 'cluster.gmm'.
+#' @param type Type of plot: "bic" (default) or "membership".
+#' @param ... Additional arguments (ignored).
+#' @return A ggplot object.
+#' @export
+plot.cluster.gmm <- function(x, type = c("bic", "membership"), ...) {
+  type <- match.arg(type)
+
+  if (type == "bic") {
+    df <- x$bic.values
+    yvar <- if (x$criterion == "icl") "icl" else "bic"
+    ylab <- if (x$criterion == "icl") "ICL" else "BIC"
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$k, y = .data[[yvar]])) +
+      ggplot2::geom_line(linewidth = 0.8) +
+      ggplot2::geom_point(size = 3) +
+      ggplot2::geom_vline(xintercept = x$k, linetype = "dashed",
+                          color = "red", linewidth = 0.8) +
+      ggplot2::labs(x = "Number of clusters (K)", y = ylab,
+                    title = paste(ylab, "Model Selection")) +
+      ggplot2::scale_x_continuous(breaks = df$k)
+    return(p)
+  }
+
+  # Membership plot
+  mem <- x$membership
+  n <- nrow(mem)
+  nc <- ncol(mem)
+
+  df <- data.frame(
+    curve = rep(seq_len(n), nc),
+    cluster = factor(rep(seq_len(nc), each = n)),
+    membership = as.vector(mem)
+  )
+
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$curve, y = .data$membership,
+                                     fill = .data$cluster)) +
+    ggplot2::geom_bar(stat = "identity", position = "stack") +
+    ggplot2::labs(x = "Observation", y = "Membership Probability",
+                  title = "GMM Cluster Membership",
+                  fill = "Cluster")
+}

@@ -1,0 +1,169 @@
+---
+title: "Functional Mixed Models for Repeated Measures"
+output: rmarkdown::html_vignette
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  out.width = "100%"
+)
+```
+
+## Introduction
+
+In many studies, each subject is observed multiple times, producing repeated
+functional measurements. A **functional mixed model** (FMM) decomposes the
+variation into:
+
+$$Y_{ij}(t) = \mu(t) + \sum_k x_{ij,k} \beta_k(t) + b_i(t) + \varepsilon_{ij}(t)$$
+
+where:
+
+- $\mu(t)$ is the population mean function
+- $\beta_k(t)$ are fixed-effect coefficient functions (e.g., treatment effects)
+- $b_i(t)$ are subject-level random effects
+- $\varepsilon_{ij}(t)$ is measurement error
+
+**fdars** provides `fmm()` for fitting, `fmm.predict()` for prediction, and
+`fmm.test.fixed()` for testing fixed effects via permutation.
+
+```{r setup}
+library(fdars)
+library(ggplot2)
+theme_set(theme_minimal())
+```
+
+## Simulated Repeated Measures Data
+
+We simulate a clinical trial with 15 subjects, each measured at 3 time points,
+with a binary treatment covariate.
+
+```{r data}
+set.seed(42)
+n_subjects <- 15
+n_visits <- 3
+n_total <- n_subjects * n_visits
+m <- 80
+t_grid <- seq(0, 1, length.out = m)
+
+# Subject-specific random effects
+subject_effects <- matrix(0, n_subjects, m)
+for (i in 1:n_subjects) {
+  subject_effects[i, ] <- 0.3 * rnorm(1) * sin(2 * pi * t_grid) +
+    0.2 * rnorm(1) * cos(4 * pi * t_grid)
+}
+
+# Treatment assignment (first 8 subjects treated, rest control)
+treatment <- c(rep(1, 8), rep(0, 7))
+
+# Generate observations
+Y <- matrix(0, n_total, m)
+subject_ids <- rep(1:n_subjects, each = n_visits)
+covariates <- matrix(0, n_total, 1)
+
+for (i in 1:n_total) {
+  subj <- subject_ids[i]
+  trt <- treatment[subj]
+  covariates[i, 1] <- trt
+
+  Y[i, ] <- sin(2 * pi * t_grid) +                         # Mean function
+    trt * 0.5 * cos(2 * pi * t_grid) +                      # Treatment effect
+    subject_effects[subj, ] +                                 # Random effect
+    rnorm(m, sd = 0.1)                                        # Noise
+}
+
+fd <- fdata(Y, argvals = t_grid)
+```
+
+## Fitting the Functional Mixed Model
+
+```{r fmm-fit}
+fit <- fmm(fd, subject_ids, covariates = covariates, ncomp = 3)
+print(fit)
+```
+
+## Visualizing Fixed and Random Effects
+
+The plot shows the population mean (red) overlaid with subject-specific
+random effects (blue):
+
+```{r fmm-plot}
+plot(fit)
+```
+
+## Examining Model Components
+
+```{r components}
+# Residual variance
+cat("Residual variance:", round(fit$sigma2.eps, 4), "\n")
+
+# Number of subjects
+cat("Number of subjects:", fit$n.subjects, "\n")
+
+# FPC components used for random effects
+cat("FPC components:", fit$ncomp, "\n")
+```
+
+## Population-Level Prediction
+
+`fmm.predict()` generates predictions using fixed effects only (no random
+effects), useful for predicting the population-level response for new
+covariate values.
+
+```{r predict}
+# Predict for treated and control groups
+new_cov <- matrix(c(1, 0), nrow = 2)
+pred <- fmm.predict(fit, new.covariates = new_cov)
+
+# Plot predictions
+df_pred <- data.frame(
+  t = rep(t_grid, 2),
+  value = as.vector(t(pred$data)),
+  group = factor(rep(c("Treated", "Control"), each = m))
+)
+
+ggplot(df_pred, aes(x = t, y = value, color = group)) +
+  geom_line(linewidth = 1) +
+  labs(x = "t", y = "Y(t)",
+       title = "Predicted Population-Level Responses",
+       color = "Group")
+```
+
+## Testing Fixed Effects
+
+`fmm.test.fixed()` tests whether the treatment has a significant effect
+using a permutation F-test that respects within-subject correlation:
+
+```{r test}
+test_result <- fmm.test.fixed(fd, subject_ids, covariates,
+                               ncomp = 3, n.perm = 500, seed = 123)
+print(test_result)
+```
+
+## Comparison: Ignoring Subject Structure
+
+What happens if we ignore the repeated measures structure and treat
+all observations as independent?
+
+```{r naive-comparison}
+# Naive approach: function-on-scalar regression ignoring subjects
+fosr_naive <- fosr(fd, covariates)
+cat("Naive FOSR R-squared:", round(fosr_naive$r.squared, 4), "\n")
+
+# FMM accounts for subject-level variation
+cat("FMM residual variance:", round(fit$sigma2.eps, 4), "\n")
+```
+
+The FMM separates subject-level variation from residual noise, giving a
+cleaner estimate of the treatment effect.
+
+## See Also
+
+- `vignette("articles/functional-regression")` for scalar-on-function and
+  function-on-scalar regression
+- `vignette("articles/fpca")` for the FPC decomposition underlying the
+  random effects
