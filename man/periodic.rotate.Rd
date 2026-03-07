@@ -4,13 +4,37 @@
 \alias{periodic.rotate}
 \title{Periodic Rotation for Functional Data}
 \usage{
-periodic.rotate(fdataobj, target.pos = NULL)
+periodic.rotate(
+  fdataobj,
+  target.pos = NULL,
+  method = c("peak", "xcorr", "landmark", "iterative"),
+  reference = NULL,
+  landmark.func = NULL,
+  max.iter = 5,
+  ...
+)
 }
 \arguments{
 \item{fdataobj}{An object of class 'fdata'.}
 
-\item{target.pos}{Target grid index for the global maximum. If NULL
+\item{target.pos}{Target grid index for the feature position. If NULL
 (default), uses \code{floor(ncol(fdataobj$data) / 4)}.}
+
+\item{method}{Rotation method: \code{"peak"} (default), \code{"xcorr"},
+\code{"landmark"}, or \code{"iterative"}.}
+
+\item{reference}{Reference curve for cross-correlation methods. A numeric
+vector or single-curve \code{fdata}. If NULL, uses the cross-sectional
+mean.}
+
+\item{landmark.func}{A function taking a numeric vector (one curve) and
+returning a single integer grid index. Required when
+\code{method = "landmark"}.}
+
+\item{max.iter}{Maximum number of rotation-alignment iterations for
+\code{method = "iterative"}. Default 5.}
+
+\item{...}{Additional arguments (ignored).}
 }
 \value{
 A list with components:
@@ -20,10 +44,26 @@ A list with components:
 }
 }
 \description{
-Circularly rotate each curve so that its global maximum is at a canonical
-grid position. This is useful as a pre-processing step before elastic
+Circularly rotate each curve to a canonical position before elastic
 alignment of periodic functional data (e.g., data on \eqn{[0, 2\pi]} where
 \eqn{f(0) = f(2\pi)}).
+}
+\details{
+Four methods are available:
+\describe{
+\item{\code{"peak"}}{Shift each curve's global maximum to \code{target.pos}
+using \code{which.max}. Fast and simple, but fragile when curves have
+multiple peaks of similar height.}
+\item{\code{"xcorr"}}{Circular cross-correlation with a reference curve
+(via \code{stats::convolve}). The lag maximising cross-correlation is the
+optimal shift. Robust to multi-peak shapes.}
+\item{\code{"landmark"}}{Like \code{"peak"}, but uses a user-supplied
+function \code{landmark.func(curve) -> index} to locate the feature of
+interest (e.g., steepest rise, first zero crossing).}
+\item{\code{"iterative"}}{Alternate cross-correlation rotation and elastic
+alignment for up to \code{max.iter} iterations. Useful when the optimal
+rotation depends on the alignment and vice versa.}
+}
 }
 \examples{
 # Periodic sinusoidal curves with random circular shifts
@@ -36,6 +76,9 @@ for (i in 1:10) {
 }
 fd <- fdata(data, argvals = argvals)
 rot <- periodic.rotate(fd)
+
+# Cross-correlation method (robust to multi-peak curves)
+rot_xcorr <- periodic.rotate(fd, method = "xcorr")
 }
 \references{
 Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data

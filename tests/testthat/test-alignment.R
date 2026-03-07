@@ -191,6 +191,205 @@ test_that("rotations are integer grid shifts of correct length", {
 })
 
 # =============================================================================
+# Rotation method tests
+# =============================================================================
+
+test_that("periodic.rotate method='peak' is backward compatible", {
+  set.seed(42)
+  m <- 50
+  argvals <- seq(0, 1, length.out = m)
+  data <- matrix(0, 5, m)
+  for (i in 1:5) {
+    shift <- sample(0:(m - 1), 1)
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    data[i, ] <- sin(2 * pi * argvals[idx])
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  rot1 <- periodic.rotate(fd)
+  rot2 <- periodic.rotate(fd, method = "peak")
+  expect_equal(rot1$shifts, rot2$shifts)
+  expect_equal(rot1$fdataobj$data, rot2$fdataobj$data)
+})
+
+test_that("xcorr method recovers known circular shifts", {
+  set.seed(42)
+  m <- 100
+  argvals <- seq(0, 2 * pi, length.out = m)
+  base_curve <- sin(argvals) + 0.5 * sin(3 * argvals)
+
+  known_shifts <- c(0L, 10L, 25L, 50L, 75L)
+  n <- length(known_shifts)
+  data <- matrix(0, n, m)
+  for (i in seq_len(n)) {
+    idx <- ((seq_len(m) - 1L + known_shifts[i]) %% m) + 1L
+    data[i, ] <- base_curve[idx]
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  rot <- periodic.rotate(fd, method = "xcorr", reference = base_curve)
+
+  # After rotation, all curves should be nearly identical to the reference
+  for (i in seq_len(n)) {
+    expect_equal(as.numeric(rot$fdataobj$data[i, ]), base_curve,
+                 tolerance = 1e-10)
+  }
+})
+
+test_that("xcorr with NULL reference uses cross-sectional mean", {
+  set.seed(42)
+  m <- 100
+  argvals <- seq(0, 2 * pi, length.out = m)
+  n <- 10
+  data <- matrix(0, n, m)
+  for (i in 1:n) {
+    shift <- sample(0:(m - 1), 1)
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    data[i, ] <- sin(argvals[idx])
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  rot <- periodic.rotate(fd, method = "xcorr")
+  expect_type(rot$shifts, "integer")
+  expect_equal(length(rot$shifts), n)
+
+  # Rotated curves should be more coherent — lower variance
+  var_before <- mean(apply(fd$data, 2, var))
+  var_after <- mean(apply(rot$fdataobj$data, 2, var))
+  expect_lt(var_after, var_before)
+})
+
+test_that("landmark method works with custom function", {
+  m <- 100
+  argvals <- seq(0, 2 * pi, length.out = m)
+  data <- matrix(0, 5, m)
+  for (i in 1:5) {
+    shift <- (i - 1) * 20
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    data[i, ] <- sin(argvals[idx])
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  # Use which.max as landmark function (equivalent to peak method)
+  rot <- periodic.rotate(fd, method = "landmark",
+                         landmark.func = which.max)
+  expect_type(rot$shifts, "integer")
+  expect_equal(length(rot$shifts), 5)
+})
+
+test_that("landmark method errors without landmark.func", {
+  fd <- fdata(matrix(1:10, 1, 10), argvals = 1:10)
+  expect_error(periodic.rotate(fd, method = "landmark"),
+               "landmark.func is required")
+})
+
+test_that("landmark method validates return value", {
+  fd <- fdata(matrix(1:10, 1, 10), argvals = 1:10)
+
+  # Returns out of range
+  bad_func <- function(x) 0L
+  expect_error(periodic.rotate(fd, method = "landmark",
+                                landmark.func = bad_func),
+               "single integer index")
+
+  # Returns multiple values
+  bad_func2 <- function(x) c(1L, 2L)
+  expect_error(periodic.rotate(fd, method = "landmark",
+                                landmark.func = bad_func2),
+               "single integer index")
+})
+
+test_that("iterative method converges on periodic data", {
+  set.seed(42)
+  m <- 100
+  argvals <- seq(0, 2 * pi, length.out = m)
+  n <- 8
+  data <- matrix(0, n, m)
+  for (i in 1:n) {
+    shift <- sample(0:(m - 1), 1)
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    data[i, ] <- sin(argvals[idx])
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  rot <- periodic.rotate(fd, method = "iterative", max.iter = 5)
+  expect_type(rot$shifts, "integer")
+  expect_equal(length(rot$shifts), n)
+
+  # Should produce coherent rotations
+  var_before <- mean(apply(fd$data, 2, var))
+  var_after <- mean(apply(rot$fdataobj$data, 2, var))
+  expect_lt(var_after, var_before)
+})
+
+test_that("elastic.align passes rotate.method through", {
+  set.seed(42)
+  m <- 100
+  argvals <- seq(0, 2 * pi, length.out = m)
+  n <- 10
+  data <- matrix(0, n, m)
+  for (i in 1:n) {
+    shift <- sample(0:(m - 1), 1)
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    data[i, ] <- sin(argvals[idx])
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  res <- elastic.align(fd, periodic = TRUE, rotate.method = "xcorr")
+  expect_s3_class(res, "elastic.align")
+  expect_false(is.null(res$rotations))
+  expect_equal(res$rotate_method, "xcorr")
+  expect_output(print(res), "method: xcorr")
+})
+
+test_that("karcher.mean passes rotate.method through", {
+  set.seed(42)
+  m <- 50
+  argvals <- seq(0, 2 * pi, length.out = m)
+  n <- 8
+  data <- matrix(0, n, m)
+  for (i in 1:n) {
+    shift <- sample(0:(m - 1), 1)
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    data[i, ] <- sin(argvals[idx])
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  km <- karcher.mean(fd, max.iter = 5, periodic = TRUE,
+                     rotate.method = "xcorr")
+  expect_s3_class(km, "karcher.mean")
+  expect_false(is.null(km$rotations))
+  expect_equal(km$rotate_method, "xcorr")
+  expect_output(print(km), "method: xcorr")
+})
+
+test_that("xcorr outperforms peak on multi-peak curves", {
+  set.seed(123)
+  m <- 200
+  argvals <- seq(0, 2 * pi, length.out = m)
+
+  # Create curves with two peaks of similar height
+  base <- sin(argvals) + 0.95 * sin(2 * argvals + 0.3)
+  n <- 15
+  data <- matrix(0, n, m)
+  shifts <- sample(0:(m - 1), n)
+  for (i in 1:n) {
+    idx <- ((seq_len(m) - 1L + shifts[i]) %% m) + 1L
+    data[i, ] <- base[idx]
+  }
+  fd <- fdata(data, argvals = argvals)
+
+  rot_peak <- periodic.rotate(fd, method = "peak")
+  rot_xcorr <- periodic.rotate(fd, method = "xcorr")
+
+  var_peak <- mean(apply(rot_peak$fdataobj$data, 2, var))
+  var_xcorr <- mean(apply(rot_xcorr$fdataobj$data, 2, var))
+
+  # xcorr should have lower or equal variance (better alignment)
+  expect_lte(var_xcorr, var_peak + 1e-10)
+})
+
+# =============================================================================
 # Alignment quality tests
 # =============================================================================
 

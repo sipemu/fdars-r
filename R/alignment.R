@@ -68,6 +68,12 @@ srsf.inverse <- function(q, argvals, f0 = 0) {
 #'   functional data (e.g., data on \eqn{[0, 2\pi]} where \eqn{f(0) = f(2\pi)})
 #'   that would otherwise be poorly aligned due to fixed boundary constraints
 #'   \eqn{\gamma(0)=0, \gamma(1)=1}. Default is FALSE.
+#' @param rotate.method Rotation method when \code{periodic = TRUE}: one of
+#'   \code{"peak"} (default), \code{"xcorr"}, \code{"landmark"}, or
+#'   \code{"iterative"}. See \code{\link{periodic.rotate}} for details.
+#' @param rotate.args A named list of additional arguments passed to
+#'   \code{\link{periodic.rotate}} (e.g., \code{reference}, \code{landmark.func},
+#'   \code{max.iter}).
 #'
 #' @return An object of class 'elastic.align' with components:
 #' \describe{
@@ -78,6 +84,7 @@ srsf.inverse <- function(q, argvals, f0 = 0) {
 #'   \item{fdataobj}{the original fdata input}
 #'   \item{rotations}{integer vector of circular rotation shifts applied
 #'     (NULL when periodic = FALSE)}
+#'   \item{rotate_method}{the rotation method used (NULL when periodic = FALSE)}
 #' }
 #'
 #' @references
@@ -96,17 +103,34 @@ srsf.inverse <- function(q, argvals, f0 = 0) {
 #' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
 #' res <- elastic.align(fd)
 #' }
-elastic.align <- function(fdataobj, target = NULL, periodic = FALSE) {
+elastic.align <- function(fdataobj, target = NULL, periodic = FALSE,
+                          rotate.method = "peak", rotate.args = list()) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
   }
 
   argvals <- fdataobj$argvals
   rotations <- NULL
+  rotate_method_used <- NULL
 
   # Periodic pre-processing: circularly rotate curves to canonical position
   if (periodic) {
-    rot <- .periodic_rotate(fdataobj$data)
+    rotate_method_used <- match.arg(rotate.method,
+                                    c("peak", "xcorr", "landmark", "iterative"))
+
+    # Extract reference from rotate.args if present
+    ref_arg <- rotate.args$reference
+    if (!is.null(ref_arg) && inherits(ref_arg, "fdata")) {
+      ref_arg <- as.numeric(ref_arg$data[1, ])
+    }
+
+    rot <- do.call(.periodic_rotate, c(
+      list(data_matrix = fdataobj$data,
+           method = rotate_method_used,
+           argvals = argvals),
+      list(reference = ref_arg),
+      rotate.args[!names(rotate.args) %in% "reference"]
+    ))
     work_data <- rot$data
     rotations <- rot$shifts
 
@@ -114,8 +138,13 @@ elastic.align <- function(fdataobj, target = NULL, periodic = FALSE) {
       if (inherits(target, "fdata")) {
         target <- as.numeric(target$data[1, ])
       }
-      target_rot <- .periodic_rotate(matrix(target, nrow = 1))
-      target <- as.numeric(target_rot$data[1, ])
+      # Don't rotate the target when using xcorr/iterative — it IS the reference
+      if (rotate_method_used %in% c("peak", "landmark")) {
+        target_rot <- .periodic_rotate(matrix(target, nrow = 1),
+                                       method = rotate_method_used,
+                                       landmark_func = rotate.args$landmark.func)
+        target <- as.numeric(target_rot$data[1, ])
+      }
     } else {
       target <- colMeans(work_data)
     }
@@ -137,7 +166,8 @@ elastic.align <- function(fdataobj, target = NULL, periodic = FALSE) {
     distances = res$distances,
     target = target,
     fdataobj = fdataobj,
-    rotations = rotations
+    rotations = rotations,
+    rotate_method = rotate_method_used
   )
   class(result) <- "elastic.align"
   result
@@ -210,6 +240,12 @@ metric.elastic <- function(fdataobj, fdataref = NULL, ...) {
 #' @param periodic Logical; if TRUE, circularly rotate each curve to a canonical
 #'   position before computing the Karcher mean. See \code{\link{elastic.align}}
 #'   for details. Default is FALSE.
+#' @param rotate.method Rotation method when \code{periodic = TRUE}: one of
+#'   \code{"peak"} (default), \code{"xcorr"}, \code{"landmark"}, or
+#'   \code{"iterative"}. See \code{\link{periodic.rotate}} for details.
+#' @param rotate.args A named list of additional arguments passed to
+#'   \code{\link{periodic.rotate}} (e.g., \code{reference}, \code{landmark.func},
+#'   \code{max.iter}).
 #'
 #' @return An object of class 'karcher.mean' with components:
 #' \describe{
@@ -221,6 +257,7 @@ metric.elastic <- function(fdataobj, fdataref = NULL, ...) {
 #'   \item{fdataobj}{the original fdata input}
 #'   \item{rotations}{integer vector of circular rotation shifts applied
 #'     (NULL when periodic = FALSE)}
+#'   \item{rotate_method}{the rotation method used (NULL when periodic = FALSE)}
 #' }
 #'
 #' @references
@@ -239,16 +276,32 @@ metric.elastic <- function(fdataobj, fdataref = NULL, ...) {
 #' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
 #' km <- karcher.mean(fd)
 #' }
-karcher.mean <- function(fdataobj, max.iter = 20, tol = 1e-4, periodic = FALSE) {
+karcher.mean <- function(fdataobj, max.iter = 20, tol = 1e-4, periodic = FALSE,
+                         rotate.method = "peak", rotate.args = list()) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
   }
 
   argvals <- fdataobj$argvals
   rotations <- NULL
+  rotate_method_used <- NULL
 
   if (periodic) {
-    rot <- .periodic_rotate(fdataobj$data)
+    rotate_method_used <- match.arg(rotate.method,
+                                    c("peak", "xcorr", "landmark", "iterative"))
+
+    ref_arg <- rotate.args$reference
+    if (!is.null(ref_arg) && inherits(ref_arg, "fdata")) {
+      ref_arg <- as.numeric(ref_arg$data[1, ])
+    }
+
+    rot <- do.call(.periodic_rotate, c(
+      list(data_matrix = fdataobj$data,
+           method = rotate_method_used,
+           argvals = argvals),
+      list(reference = ref_arg),
+      rotate.args[!names(rotate.args) %in% "reference"]
+    ))
     work_data <- rot$data
     rotations <- rot$shifts
   } else {
@@ -266,7 +319,8 @@ karcher.mean <- function(fdataobj, max.iter = 20, tol = 1e-4, periodic = FALSE) 
     n.iter = res$n_iter,
     converged = res$converged,
     fdataobj = fdataobj,
-    rotations = rotations
+    rotations = rotations,
+    rotate_method = rotate_method_used
   )
   class(result) <- "karcher.mean"
   result
@@ -284,7 +338,11 @@ print.elastic.align <- function(x, ...) {
   cat("  Curves:", n, "x", m, "grid points\n")
   cat("  Mean elastic distance:", round(mean(x$distances), 4), "\n")
   if (!is.null(x$rotations)) {
-    cat("  Periodic: TRUE\n")
+    cat("  Periodic: TRUE")
+    if (!is.null(x$rotate_method)) {
+      cat(" (method:", x$rotate_method, ")")
+    }
+    cat("\n")
   }
   invisible(x)
 }
@@ -334,7 +392,11 @@ print.karcher.mean <- function(x, ...) {
   cat("  Iterations:", x$n.iter, "\n")
   cat("  Converged:", x$converged, "\n")
   if (!is.null(x$rotations)) {
-    cat("  Periodic: TRUE\n")
+    cat("  Periodic: TRUE")
+    if (!is.null(x$rotate_method)) {
+      cat(" (method:", x$rotate_method, ")")
+    }
+    cat("\n")
   }
   invisible(x)
 }
@@ -396,14 +458,40 @@ plot.karcher.mean <- function(x, type = c("mean", "aligned", "warps"), ...) {
 
 #' Periodic Rotation for Functional Data
 #'
-#' Circularly rotate each curve so that its global maximum is at a canonical
-#' grid position. This is useful as a pre-processing step before elastic
+#' Circularly rotate each curve to a canonical position before elastic
 #' alignment of periodic functional data (e.g., data on \eqn{[0, 2\pi]} where
 #' \eqn{f(0) = f(2\pi)}).
 #'
+#' Four methods are available:
+#' \describe{
+#'   \item{\code{"peak"}}{Shift each curve's global maximum to \code{target.pos}
+#'     using \code{which.max}. Fast and simple, but fragile when curves have
+#'     multiple peaks of similar height.}
+#'   \item{\code{"xcorr"}}{Circular cross-correlation with a reference curve
+#'     (via \code{stats::convolve}). The lag maximising cross-correlation is the
+#'     optimal shift. Robust to multi-peak shapes.}
+#'   \item{\code{"landmark"}}{Like \code{"peak"}, but uses a user-supplied
+#'     function \code{landmark.func(curve) -> index} to locate the feature of
+#'     interest (e.g., steepest rise, first zero crossing).}
+#'   \item{\code{"iterative"}}{Alternate cross-correlation rotation and elastic
+#'     alignment for up to \code{max.iter} iterations. Useful when the optimal
+#'     rotation depends on the alignment and vice versa.}
+#' }
+#'
 #' @param fdataobj An object of class 'fdata'.
-#' @param target.pos Target grid index for the global maximum. If NULL
+#' @param target.pos Target grid index for the feature position. If NULL
 #'   (default), uses \code{floor(ncol(fdataobj$data) / 4)}.
+#' @param method Rotation method: \code{"peak"} (default), \code{"xcorr"},
+#'   \code{"landmark"}, or \code{"iterative"}.
+#' @param reference Reference curve for cross-correlation methods. A numeric
+#'   vector or single-curve \code{fdata}. If NULL, uses the cross-sectional
+#'   mean.
+#' @param landmark.func A function taking a numeric vector (one curve) and
+#'   returning a single integer grid index. Required when
+#'   \code{method = "landmark"}.
+#' @param max.iter Maximum number of rotation-alignment iterations for
+#'   \code{method = "iterative"}. Default 5.
+#' @param ... Additional arguments (ignored).
 #'
 #' @return A list with components:
 #' \describe{
@@ -427,11 +515,28 @@ plot.karcher.mean <- function(x, type = c("mean", "aligned", "warps"), ...) {
 #' }
 #' fd <- fdata(data, argvals = argvals)
 #' rot <- periodic.rotate(fd)
-periodic.rotate <- function(fdataobj, target.pos = NULL) {
+#'
+#' # Cross-correlation method (robust to multi-peak curves)
+#' rot_xcorr <- periodic.rotate(fd, method = "xcorr")
+periodic.rotate <- function(fdataobj, target.pos = NULL,
+                            method = c("peak", "xcorr", "landmark",
+                                       "iterative"),
+                            reference = NULL, landmark.func = NULL,
+                            max.iter = 5, ...) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
   }
-  rot <- .periodic_rotate(fdataobj$data, target_pos = target.pos)
+  method <- match.arg(method)
+
+  if (!is.null(reference) && inherits(reference, "fdata")) {
+    reference <- as.numeric(reference$data[1, ])
+  }
+
+  rot <- .periodic_rotate(fdataobj$data, target_pos = target.pos,
+                          method = method, reference = reference,
+                          landmark_func = landmark.func,
+                          max_iter = max.iter,
+                          argvals = fdataobj$argvals)
   list(
     fdataobj = fdata(rot$data, argvals = fdataobj$argvals),
     shifts = rot$shifts
@@ -439,7 +544,22 @@ periodic.rotate <- function(fdataobj, target.pos = NULL) {
 }
 
 #' @noRd
-.periodic_rotate <- function(data_matrix, target_pos = NULL) {
+.periodic_rotate <- function(data_matrix, target_pos = NULL,
+                             method = "peak", reference = NULL,
+                             landmark_func = NULL, max_iter = 5,
+                             argvals = NULL) {
+  method <- match.arg(method, c("peak", "xcorr", "landmark", "iterative"))
+
+  switch(method,
+    peak = .rotate_peak(data_matrix, target_pos),
+    xcorr = .rotate_xcorr(data_matrix, reference),
+    landmark = .rotate_landmark(data_matrix, target_pos, landmark_func),
+    iterative = .rotate_iterative(data_matrix, max_iter, argvals)
+  )
+}
+
+#' @noRd
+.rotate_peak <- function(data_matrix, target_pos = NULL) {
   m <- ncol(data_matrix)
   n <- nrow(data_matrix)
 
@@ -455,12 +575,115 @@ periodic.rotate <- function(fdataobj, target.pos = NULL) {
     max_idx <- which.max(data_matrix[i, ])
     shift <- max_idx - target_pos
     shifts[i] <- as.integer(shift)
-    # Circular shift: move elements so that max_idx lands at target_pos
     idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
     rotated[i, ] <- data_matrix[i, idx]
   }
 
   list(data = rotated, shifts = shifts)
+}
+
+#' @noRd
+.rotate_xcorr <- function(data_matrix, reference = NULL) {
+  m <- ncol(data_matrix)
+  n <- nrow(data_matrix)
+
+  if (is.null(reference)) {
+    reference <- colMeans(data_matrix)
+  }
+
+  shifts <- integer(n)
+  rotated <- matrix(0, n, m)
+
+  for (i in seq_len(n)) {
+    # Circular cross-correlation via FFT
+    xcorr <- stats::convolve(data_matrix[i, ], reference, conj = TRUE,
+                             type = "circular")
+    # convolve with conj=TRUE computes sum_k x[k] * y[k+lag]
+    # The maximum gives the best-matching lag
+    best_lag <- which.max(xcorr) - 1L
+    shifts[i] <- as.integer(best_lag)
+    idx <- ((seq_len(m) - 1L + best_lag) %% m) + 1L
+    rotated[i, ] <- data_matrix[i, idx]
+  }
+
+  list(data = rotated, shifts = shifts)
+}
+
+#' @noRd
+.rotate_landmark <- function(data_matrix, target_pos = NULL,
+                             landmark_func = NULL) {
+  if (is.null(landmark_func)) {
+    stop("landmark.func is required when method = 'landmark'")
+  }
+
+  m <- ncol(data_matrix)
+  n <- nrow(data_matrix)
+
+  if (is.null(target_pos)) {
+    target_pos <- floor(m / 4)
+  }
+  target_pos <- as.integer(target_pos)
+
+  shifts <- integer(n)
+  rotated <- matrix(0, n, m)
+
+  for (i in seq_len(n)) {
+    lm_idx <- landmark_func(data_matrix[i, ])
+    if (!is.numeric(lm_idx) || length(lm_idx) != 1 ||
+        lm_idx < 1 || lm_idx > m || lm_idx != round(lm_idx)) {
+      stop(sprintf(
+        "landmark.func must return a single integer index in [1, %d]; got %s for curve %d",
+        m, deparse(lm_idx), i
+      ))
+    }
+    lm_idx <- as.integer(lm_idx)
+    shift <- lm_idx - target_pos
+    shifts[i] <- shift
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    rotated[i, ] <- data_matrix[i, idx]
+  }
+
+  list(data = rotated, shifts = shifts)
+}
+
+#' @noRd
+.rotate_iterative <- function(data_matrix, max_iter = 5, argvals = NULL) {
+  if (is.null(argvals)) {
+    stop("argvals is required for method = 'iterative'")
+  }
+
+  n <- nrow(data_matrix)
+  m <- ncol(data_matrix)
+  current_data <- data_matrix
+  cumulative_shifts <- integer(n)
+
+  for (iter in seq_len(max_iter)) {
+    # Step 1: compute reference as cross-sectional mean
+    ref <- colMeans(current_data)
+
+    # Step 2: cross-correlate all curves against reference
+    rot <- .rotate_xcorr(current_data, reference = ref)
+
+    # Accumulate shifts
+    cumulative_shifts <- cumulative_shifts + rot$shifts
+
+    # Step 3: check convergence (all shifts zero)
+    if (all(rot$shifts == 0L)) break
+
+    # Step 4: elastic alignment on rotated data
+    aligned <- alignment_align_to_target(rot$data, ref, argvals)
+    current_data <- aligned$aligned_data
+  }
+
+  # Apply cumulative shifts to original data for final output
+  rotated <- matrix(0, n, m)
+  for (i in seq_len(n)) {
+    shift <- cumulative_shifts[i]
+    idx <- ((seq_len(m) - 1L + shift) %% m) + 1L
+    rotated[i, ] <- data_matrix[i, idx]
+  }
+
+  list(data = rotated, shifts = cumulative_shifts)
 }
 
 # =============================================================================

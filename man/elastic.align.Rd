@@ -4,7 +4,13 @@
 \alias{elastic.align}
 \title{Elastic Curve Alignment}
 \usage{
-elastic.align(fdataobj, target = NULL, periodic = FALSE)
+elastic.align(
+  fdataobj,
+  target = NULL,
+  periodic = FALSE,
+  rotate.method = "peak",
+  rotate.args = list()
+)
 }
 \arguments{
 \item{fdataobj}{An object of class 'fdata'.}
@@ -17,6 +23,14 @@ position before elastic alignment. This two-stage approach handles periodic
 functional data (e.g., data on \eqn{[0, 2\pi]} where \eqn{f(0) = f(2\pi)})
 that would otherwise be poorly aligned due to fixed boundary constraints
 \eqn{\gamma(0)=0, \gamma(1)=1}. Default is FALSE.}
+
+\item{rotate.method}{Rotation method when \code{periodic = TRUE}: one of
+\code{"peak"} (default), \code{"xcorr"}, \code{"landmark"}, or
+\code{"iterative"}. See \code{\link{periodic.rotate}} for details.}
+
+\item{rotate.args}{A named list of additional arguments passed to
+\code{\link{periodic.rotate}} (e.g., \code{reference}, \code{landmark.func},
+\code{max.iter}).}
 }
 \value{
 An object of class 'elastic.align' with components:
@@ -28,6 +42,7 @@ An object of class 'elastic.align' with components:
 \item{fdataobj}{the original fdata input}
 \item{rotations}{integer vector of circular rotation shifts applied
 (NULL when periodic = FALSE)}
+\item{rotate_method}{the rotation method used (NULL when periodic = FALSE)}
 }
 }
 \description{

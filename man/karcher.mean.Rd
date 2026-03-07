@@ -4,7 +4,14 @@
 \alias{karcher.mean}
 \title{Karcher Mean in Elastic Metric}
 \usage{
-karcher.mean(fdataobj, max.iter = 20, tol = 1e-04, periodic = FALSE)
+karcher.mean(
+  fdataobj,
+  max.iter = 20,
+  tol = 1e-04,
+  periodic = FALSE,
+  rotate.method = "peak",
+  rotate.args = list()
+)
 }
 \arguments{
 \item{fdataobj}{An object of class 'fdata'.}
@@ -16,6 +23,14 @@ karcher.mean(fdataobj, max.iter = 20, tol = 1e-04, periodic = FALSE)
 \item{periodic}{Logical; if TRUE, circularly rotate each curve to a canonical
 position before computing the Karcher mean. See \code{\link{elastic.align}}
 for details. Default is FALSE.}
+
+\item{rotate.method}{Rotation method when \code{periodic = TRUE}: one of
+\code{"peak"} (default), \code{"xcorr"}, \code{"landmark"}, or
+\code{"iterative"}. See \code{\link{periodic.rotate}} for details.}
+
+\item{rotate.args}{A named list of additional arguments passed to
+\code{\link{periodic.rotate}} (e.g., \code{reference}, \code{landmark.func},
+\code{max.iter}).}
 }
 \value{
 An object of class 'karcher.mean' with components:
@@ -28,6 +43,7 @@ An object of class 'karcher.mean' with components:
 \item{fdataobj}{the original fdata input}
 \item{rotations}{integer vector of circular rotation shifts applied
 (NULL when periodic = FALSE)}
+\item{rotate_method}{the rotation method used (NULL when periodic = FALSE)}
 }
 }
 \description{
