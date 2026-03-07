@@ -76,11 +76,11 @@ print(result)
 #> Significance level (alpha): 0.05 
 #> ---
 #> Test statistic (sup|d_hat|): 0.2307 
-#> Critical value: 0.0141 
-#> SCB range: [ -0.2035 , 0.2448 ]
-#> P-value: <2e-16 
+#> Critical value: 0.2708 
+#> SCB range: [ -0.4602 , 0.5015 ]
+#> P-value: 0.104 
 #> ---
-#> Decision: Reject H0 -- equivalence declared
+#> Decision: Fail to reject H0 -- equivalence NOT declared
 ```
 
 The plot shows the mean difference curve (black), the simultaneous
@@ -116,8 +116,8 @@ print(result2)
 #> Significance level (alpha): 0.05 
 #> ---
 #> Test statistic (sup|d_hat|): 0.9969 
-#> Critical value: 0.014 
-#> SCB range: [ -1.0109 , -0.5899 ]
+#> Critical value: 0.2694 
+#> SCB range: [ -1.2663 , -0.3345 ]
 #> P-value: 1 
 #> ---
 #> Decision: Fail to reject H0 -- equivalence NOT declared
@@ -182,8 +182,8 @@ print(result_one)
 #> Significance level (alpha): 0.05 
 #> ---
 #> Test statistic (sup|d_hat|): 0.1243 
-#> Critical value: 0.0061 
-#> SCB range: [ -0.1305 , 0.1088 ]
+#> Critical value: 0.1839 
+#> SCB range: [ -0.3082 , 0.2866 ]
 #> P-value: <2e-16 
 #> ---
 #> Decision: Reject H0 -- equivalence declared

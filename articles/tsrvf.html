@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fdars</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,6 +78,25 @@
   </ul>
 </li>
 <li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-regression" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Regression</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-regression">
+<li><h6 class="dropdown-header" data-toc-skip>Nonparametric</h6></li>
+    <li><a class="dropdown-item" href="../articles/regression.html">Kernel &amp; kNN Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Scalar-on-Function</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html">Functional Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Function-on-Scalar</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html#function-on-scalar-regression">Functional Regression (FOSR)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Classification</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-classification.html">Supervised Classification</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Repeated Measures</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-mixed-models.html">Functional Mixed Models</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-analyze" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Analyze</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-analyze">
 <li><h6 class="dropdown-header" data-toc-skip>Inference</h6></li>
@@ -85,11 +104,9 @@
     <li><a class="dropdown-item" href="../articles/equivalence-testing.html">Equivalence Testing</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Unsupervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering</a></li>
+    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering (K-Means)</a></li>
+    <li><a class="dropdown-item" href="../articles/gmm-clustering.html">GMM Clustering</a></li>
     <li><a class="dropdown-item" href="../articles/outlier-detection.html">Outlier Detection</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Supervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/regression.html">Regression</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Time Series</h6></li>
     <li><a class="dropdown-item" href="../articles/seasonal-analysis.html">Seasonal Analysis</a></li>
@@ -308,7 +325,7 @@ recovered via SRSF inversion.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">tv</span><span class="op">)</span></span>
 <span><span class="co">#&gt; TSRVF (Transported SRSF)</span></span>
 <span><span class="co">#&gt;   Curves: 20 x 100 grid points</span></span>
-<span><span class="co">#&gt;   Converged: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt;   Converged: FALSE</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Original Curves"</span><span class="op">)</span></span>
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">tv</span>, type <span class="op">=</span> <span class="st">"tangent"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"TSRVF Tangent Vectors"</span><span class="op">)</span></span>
@@ -362,7 +379,7 @@ that respect the geometry of the shape space.</p>
 <span><span class="va">var_explained</span> <span class="op">&lt;-</span> <span class="va">pca_result</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">pca_result</span><span class="op">$</span><span class="va">sdev</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Variance explained by first 3 PCs:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">var_explained</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variance explained by first 3 PCs: 83.2 93.8 97.5 %</span></span></code></pre></div>
+<span><span class="co">#&gt; Variance explained by first 3 PCs: 92.1 96.6 98.4 %</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="va">pca_result</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
 <span><span class="va">df_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>PC1 <span class="op">=</span> <span class="va">scores</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, PC2 <span class="op">=</span> <span class="va">scores</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>

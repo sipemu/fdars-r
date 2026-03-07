@@ -159,11 +159,11 @@ print(result)
 #> Significance level (alpha): 0.05 
 #> ---
 #> Test statistic (sup|d_hat|): 0.5827 
-#> Critical value: 0.0442 
-#> SCB range: [ -0.6269 , 0.5484 ]
-#> P-value: <2e-16 
+#> Critical value: 0.852 
+#> SCB range: [ -1.4347 , 1.3562 ]
+#> P-value: 0.988 
 #> ---
-#> Decision: Reject H0 -- equivalence declared
+#> Decision: Fail to reject H0 -- equivalence NOT declared
 plot(result)
 
 # }

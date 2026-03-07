@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fdars</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,6 +78,25 @@
   </ul>
 </li>
 <li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-regression" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Regression</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-regression">
+<li><h6 class="dropdown-header" data-toc-skip>Nonparametric</h6></li>
+    <li><a class="dropdown-item" href="../articles/regression.html">Kernel &amp; kNN Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Scalar-on-Function</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html">Functional Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Function-on-Scalar</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html#function-on-scalar-regression">Functional Regression (FOSR)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Classification</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-classification.html">Supervised Classification</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Repeated Measures</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-mixed-models.html">Functional Mixed Models</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-analyze" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Analyze</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-analyze">
 <li><h6 class="dropdown-header" data-toc-skip>Inference</h6></li>
@@ -85,11 +104,9 @@
     <li><a class="dropdown-item" href="../articles/equivalence-testing.html">Equivalence Testing</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Unsupervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering</a></li>
+    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering (K-Means)</a></li>
+    <li><a class="dropdown-item" href="../articles/gmm-clustering.html">GMM Clustering</a></li>
     <li><a class="dropdown-item" href="../articles/outlier-detection.html">Outlier Detection</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Supervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/regression.html">Regression</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Time Series</h6></li>
     <li><a class="dropdown-item" href="../articles/seasonal-analysis.html">Seasonal Analysis</a></li>
@@ -656,10 +673,10 @@ reparameterization.</p>
 <span><span class="co">#&gt; Elastic distance matrix:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dist_elastic</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       [,1]  [,2]  [,3]  [,4]</span></span>
-<span><span class="co">#&gt; [1,] 0.000 0.354 1.212 1.950</span></span>
-<span><span class="co">#&gt; [2,] 0.354 0.000 0.841 1.954</span></span>
-<span><span class="co">#&gt; [3,] 1.212 0.841 0.000 2.130</span></span>
-<span><span class="co">#&gt; [4,] 1.950 1.954 2.130 0.000</span></span></code></pre></div>
+<span><span class="co">#&gt; [1,] 0.000 0.354 1.212 1.927</span></span>
+<span><span class="co">#&gt; [2,] 0.354 0.000 0.841 1.975</span></span>
+<span><span class="co">#&gt; [3,] 1.212 0.841 0.000 2.120</span></span>
+<span><span class="co">#&gt; [4,] 1.927 1.975 2.120 0.000</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="amplitude-distance-amplitude-distance">Amplitude Distance (amplitude.distance)<a class="anchor" aria-label="anchor" href="#amplitude-distance-amplitude-distance"></a>
@@ -677,10 +694,10 @@ controls the penalty on warping complexity.</p>
 <span><span class="co">#&gt; Amplitude distance matrix:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_amp</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        curve1 curve2 curve3 curve4</span></span>
-<span><span class="co">#&gt; curve1  0.000  0.354  1.212  1.950</span></span>
-<span><span class="co">#&gt; curve2  0.354  0.000  0.841  1.954</span></span>
-<span><span class="co">#&gt; curve3  1.212  0.841  0.000  2.130</span></span>
-<span><span class="co">#&gt; curve4  1.950  1.954  2.130  0.000</span></span></code></pre></div>
+<span><span class="co">#&gt; curve1  0.000  0.354  1.212  1.927</span></span>
+<span><span class="co">#&gt; curve2  0.354  0.000  0.841  1.975</span></span>
+<span><span class="co">#&gt; curve3  1.212  0.841  0.000  2.120</span></span>
+<span><span class="co">#&gt; curve4  1.927  1.975  2.120  0.000</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="phase-distance-phase-distance">Phase Distance (phase.distance)<a class="anchor" aria-label="anchor" href="#phase-distance-phase-distance"></a>
@@ -699,10 +716,10 @@ which forms a Riemannian manifold.</p>
 <span><span class="co">#&gt; Phase distance matrix:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_phase</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        curve1 curve2 curve3 curve4</span></span>
-<span><span class="co">#&gt; curve1  0.000  0.119  0.414  0.412</span></span>
-<span><span class="co">#&gt; curve2  0.119  0.000  0.334  0.414</span></span>
-<span><span class="co">#&gt; curve3  0.414  0.334  0.000  0.511</span></span>
-<span><span class="co">#&gt; curve4  0.412  0.414  0.511  0.000</span></span></code></pre></div>
+<span><span class="co">#&gt; curve1  0.000  0.119  0.420  0.416</span></span>
+<span><span class="co">#&gt; curve2  0.119  0.000  0.342  0.419</span></span>
+<span><span class="co">#&gt; curve3  0.420  0.342  0.000  0.529</span></span>
+<span><span class="co">#&gt; curve4  0.416  0.419  0.529  0.000</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="comparing-amplitude-and-phase-distances">Comparing Amplitude and Phase Distances<a class="anchor" aria-label="anchor" href="#comparing-amplitude-and-phase-distances"></a>
@@ -715,11 +732,14 @@ distance:</p>
 <code class="sourceCode R"><span><span class="va">amp_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_amp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_amp</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">phase_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_phase</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_phase</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">amp_vals</span>, <span class="va">phase_vals</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"steelblue"</span>,</span>
-<span>     xlab <span class="op">=</span> <span class="st">"Amplitude Distance"</span>, ylab <span class="op">=</span> <span class="st">"Phase Distance"</span>,</span>
-<span>     main <span class="op">=</span> <span class="st">"Amplitude vs Phase Pairwise Distances"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">phase_vals</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"grey50"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">amp_vals</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"grey50"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">df_ap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="va">amp_vals</span>, phase <span class="op">=</span> <span class="va">phase_vals</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_ap</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">amplitude</span>, y <span class="op">=</span> <span class="va">phase</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"steelblue"</span>, size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">phase_vals</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey50"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">amp_vals</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey50"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Amplitude vs Phase Pairwise Distances"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Amplitude Distance"</span>, y <span class="op">=</span> <span class="st">"Phase Distance"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="distance-metrics_files/figure-html/elastic-compare-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 </div>

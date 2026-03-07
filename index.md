@@ -27,49 +27,37 @@ Get started, preprocess, and simulate functional data.
 
 ![Introduction](reference/figures/card-introduction.svg)
 
-### Introduction to fdars
-
-Get started with functional data objects and basic operations
+Introduction to fdars
 
 [](https://sipemu.github.io/fdars-r/articles/custom-plotting.md)
 
 ![Custom Plotting](reference/figures/card-custom-plotting.svg)
 
-### Custom Plotting
-
-Customize curve visualizations with ggplot2
+Custom Plotting
 
 [](https://sipemu.github.io/fdars-r/articles/intro-to-smoothing.md)
 
 ![Smoothing](reference/figures/card-intro-to-smoothing.svg)
 
-### Introduction to Smoothing
-
-Smooth noisy curves using kernel and spline methods
+Introduction to Smoothing
 
 [](https://sipemu.github.io/fdars-r/articles/working-with-derivatives.md)
 
 ![Derivatives](reference/figures/card-working-with-derivatives.svg)
 
-### Working with Derivatives
-
-Compute and analyze functional derivatives
+Working with Derivatives
 
 [](https://sipemu.github.io/fdars-r/articles/simulation-toolbox.md)
 
 ![Simulation](reference/figures/card-simulation-toolbox.svg)
 
-### Simulation Toolbox
-
-Generate synthetic functional data
+Simulation Toolbox
 
 [](https://sipemu.github.io/fdars-r/articles/irregular-sampling.md)
 
 ![Irregular Sampling](reference/figures/card-irregular-sampling.svg)
 
-### Irregular Sampling
-
-Work with irregularly sampled and sparse data
+Irregular Sampling
 
 ## Represent
 
@@ -79,49 +67,37 @@ Decompose, transform, rank, and measure functional data.
 
 ![FPCA](reference/figures/card-fpca.svg)
 
-### Functional PCA
-
-Extract dominant modes of variation
+Functional PCA
 
 [](https://sipemu.github.io/fdars-r/articles/basis-representation.md)
 
 ![Basis Representation](reference/figures/card-basis-representation.svg)
 
-### Basis Representation
-
-Expand curves in B-spline and Fourier bases
+Basis Representation
 
 [](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md)
 
 ![Andrews Curves](reference/figures/card-andrews-transformation.svg)
 
-### Andrews Curves
-
-Transform multivariate data into functional curves
+Andrews Curves
 
 [](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
 
 ![Depth Functions](reference/figures/card-depth-functions.svg)
 
-### Depth Functions
-
-Rank curves from center outward using statistical depth
+Depth Functions
 
 [](https://sipemu.github.io/fdars-r/articles/streaming-depth.md)
 
 ![Streaming Depth](reference/figures/card-streaming-depth.svg)
 
-### Streaming Depth
-
-Monitor depth in real-time as new curves arrive
+Streaming Depth
 
 [](https://sipemu.github.io/fdars-r/articles/distance-metrics.md)
 
 ![Distance Metrics](reference/figures/card-distance-metrics.svg)
 
-### Distance Metrics
-
-Measure similarity with L^(p), DTW, and elastic distances
+Distance Metrics
 
 ## Align
 
@@ -131,91 +107,98 @@ Register and align curves to remove phase variability.
 
 ![Elastic Alignment](reference/figures/card-elastic-alignment.svg)
 
-### Elastic Alignment
-
-Remove phase variability via SRSF
+Elastic Alignment
 
 [](https://sipemu.github.io/fdars-r/articles/landmark-registration.md)
 
 ![Landmark
 Registration](reference/figures/card-landmark-registration.svg)
 
-### Landmark Registration
-
-Align curves by matching peaks and valleys
+Landmark Registration
 
 [](https://sipemu.github.io/fdars-r/articles/tsrvf.md)
 
 ![TSRVF](reference/figures/card-tsrvf.svg)
 
-### TSRVF (Tangent Space)
-
-Project aligned curves into a linear tangent space
+TSRVF (Tangent Space)
 
 [](https://sipemu.github.io/fdars-r/articles/alignment-comparison.md)
 
 ![Comparing Methods](reference/figures/card-alignment-comparison.svg)
 
-### Comparing Methods
+Comparing Methods
 
-Compare alignment methods side-by-side
+## Regression
 
-## Analyze
-
-Infer, classify, predict, and model functional data.
-
-[](https://sipemu.github.io/fdars-r/articles/tolerance-bands.md)
-
-![Tolerance Bands](reference/figures/card-tolerance-bands.svg)
-
-### Tolerance Bands
-
-Construct tolerance and confidence bands
-
-[](https://sipemu.github.io/fdars-r/articles/equivalence-testing.md)
-
-![Equivalence Testing](reference/figures/card-equivalence-testing.svg)
-
-### Equivalence Testing
-
-Test functional equivalence between groups
-
-[](https://sipemu.github.io/fdars-r/articles/clustering.md)
-
-![Clustering](reference/figures/card-clustering.svg)
-
-### Clustering
-
-Group similar curves with k-means and fuzzy c-means
-
-[](https://sipemu.github.io/fdars-r/articles/outlier-detection.md)
-
-![Outlier Detection](reference/figures/card-outlier-detection.svg)
-
-### Outlier Detection
-
-Identify anomalous curves using depth
+Regression, classification, and mixed models for functional data.
 
 [](https://sipemu.github.io/fdars-r/articles/regression.md)
 
 ![Regression](reference/figures/card-regression.svg)
 
-### Regression
+Nonparametric Regression
 
-Predict scalar outcomes from functional predictors
+[](https://sipemu.github.io/fdars-r/articles/functional-regression.md)
+
+![Functional
+Regression](reference/figures/card-functional-regression.svg)
+
+Functional Regression
+
+[](https://sipemu.github.io/fdars-r/articles/functional-classification.md)
+
+![Classification](reference/figures/card-functional-classification.svg)
+
+Classification
+
+[](https://sipemu.github.io/fdars-r/articles/functional-mixed-models.md)
+
+![Mixed Models](reference/figures/card-functional-mixed-models.svg)
+
+Mixed Models
+
+## Analyze
+
+Infer, cluster, detect outliers, and test functional data.
+
+[](https://sipemu.github.io/fdars-r/articles/tolerance-bands.md)
+
+![Tolerance Bands](reference/figures/card-tolerance-bands.svg)
+
+Tolerance Bands
+
+[](https://sipemu.github.io/fdars-r/articles/equivalence-testing.md)
+
+![Equivalence Testing](reference/figures/card-equivalence-testing.svg)
+
+Equivalence Testing
+
+[](https://sipemu.github.io/fdars-r/articles/clustering.md)
+
+![Clustering](reference/figures/card-clustering.svg)
+
+Clustering
+
+[](https://sipemu.github.io/fdars-r/articles/gmm-clustering.md)
+
+![GMM Clustering](reference/figures/card-gmm-clustering.svg)
+
+GMM Clustering
+
+[](https://sipemu.github.io/fdars-r/articles/outlier-detection.md)
+
+![Outlier Detection](reference/figures/card-outlier-detection.svg)
+
+Outlier Detection
 
 [](https://sipemu.github.io/fdars-r/articles/seasonal-analysis.md)
 
 ![Seasonal Analysis](reference/figures/card-seasonal-analysis.svg)
 
-### Seasonal Analysis
-
-Detect and decompose seasonal patterns
+Seasonal Analysis
 
 [](https://sipemu.github.io/fdars-r/articles/covariance-functions.md)
 
 ![Covariance Functions](reference/figures/card-covariance-functions.svg)
 
-### Covariance Functions
-
-Build GP models with composable kernels
+Covariance Functions

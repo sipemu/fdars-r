@@ -31,6 +31,8 @@ library(fdars)
 #> The following object is masked from 'package:base':
 #> 
 #>     norm
+library(ggplot2)
+theme_set(theme_minimal())
 set.seed(42)
 
 # Generate functional data
@@ -115,14 +117,29 @@ The methods generally agree on ranking, though MBD and FM tend to be
 more concordant:
 
 ``` r
-par(mfrow = c(1, 2))
-plot(rank(d_fm), rank(d_mbd), pch = 19,
-     xlab = "FM rank", ylab = "MBD rank", main = "FM vs MBD")
-abline(0, 1, col = "red")
+df_rank <- data.frame(
+  FM = rank(d_fm), MBD = rank(d_mbd), BD = rank(d_bd)
+)
 
-plot(rank(d_fm), rank(d_bd), pch = 19,
-     xlab = "FM rank", ylab = "BD rank", main = "FM vs BD")
-abline(0, 1, col = "red")
+p1 <- ggplot(df_rank, aes(x = FM, y = MBD)) +
+  geom_point(size = 1.5) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(title = "FM vs MBD", x = "FM rank", y = "MBD rank") +
+  theme_minimal()
+
+p2 <- ggplot(df_rank, aes(x = FM, y = BD)) +
+  geom_point(size = 1.5) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(title = "FM vs BD", x = "FM rank", y = "BD rank") +
+  theme_minimal()
+
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  library(patchwork)
+  p1 + p2
+} else {
+  print(p1)
+  print(p2)
+}
 ```
 
 ![](streaming-depth_files/figure-html/rank-plot-1.png)
@@ -201,14 +218,25 @@ cat("  FM depth: ", round(d_fm_out[3], 4),
 ```
 
 ``` r
-cols <- rep("grey70", n)
-cols[1] <- "red"
-cols[2] <- "blue"
-matplot(argvals, t(fd_out$data), type = "l", lty = 1, col = cols,
-        xlab = "t", ylab = "value",
-        main = "Magnitude outlier (red) vs Shape outlier (blue)")
-legend("topright", c("Magnitude", "Shape", "Normal"),
-       col = c("red", "blue", "grey70"), lty = 1, cex = 0.8)
+curve_type <- rep("Normal", n)
+curve_type[1] <- "Magnitude"
+curve_type[2] <- "Shape"
+
+df_out <- data.frame(
+  t = rep(argvals, each = n),
+  value = as.vector(fd_out$data),
+  curve = rep(1:n, times = m),
+  type = rep(curve_type, times = m)
+)
+
+ggplot(df_out, aes(x = t, y = value, group = curve, color = type)) +
+  geom_line(aes(alpha = type), linewidth = 0.5) +
+  scale_color_manual(values = c("Magnitude" = "red", "Shape" = "blue", "Normal" = "grey70")) +
+  scale_alpha_manual(values = c("Magnitude" = 1, "Shape" = 1, "Normal" = 0.5), guide = "none") +
+  labs(title = "Magnitude outlier (red) vs Shape outlier (blue)",
+       x = "t", y = "value", color = NULL) +
+  theme_minimal() +
+  theme(legend.position = "top")
 ```
 
 ![](streaming-depth_files/figure-html/outlier-types-plot-1.png)
@@ -232,17 +260,25 @@ cat("Max |raw mean - trimmed 25%|:", round(max(abs(raw_mean - tm_25$data)), 4), 
 ```
 
 ``` r
-plot(argvals, raw_mean, type = "l", col = "black", lwd = 2,
-     ylim = range(c(raw_mean, tm_25$data)),
-     xlab = "t", ylab = "value",
-     main = "Effect of Depth-Based Trimming on the Mean")
-lines(argvals, as.numeric(tm_10$data), col = "steelblue", lwd = 2)
-lines(argvals, as.numeric(tm_25$data), col = "firebrick", lwd = 2)
-lines(argvals, sin(2 * pi * argvals), col = "green3", lwd = 1, lty = 2)
-legend("topright",
-       c("Raw mean", "Trimmed 10%", "Trimmed 25%", "True signal"),
-       col = c("black", "steelblue", "firebrick", "green3"),
-       lwd = c(2, 2, 2, 1), lty = c(1, 1, 1, 2), cex = 0.8)
+df_trim <- data.frame(
+  t = rep(argvals, 4),
+  value = c(raw_mean, as.numeric(tm_10$data), as.numeric(tm_25$data),
+            sin(2 * pi * argvals)),
+  Method = factor(rep(c("Raw mean", "Trimmed 10%", "Trimmed 25%", "True signal"),
+                      each = m),
+                  levels = c("Raw mean", "Trimmed 10%", "Trimmed 25%", "True signal"))
+)
+
+ggplot(df_trim, aes(x = t, y = value, color = Method, linetype = Method)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c("Raw mean" = "black", "Trimmed 10%" = "steelblue",
+                                "Trimmed 25%" = "firebrick", "True signal" = "green3")) +
+  scale_linetype_manual(values = c("Raw mean" = "solid", "Trimmed 10%" = "solid",
+                                   "Trimmed 25%" = "solid", "True signal" = "dashed")) +
+  labs(title = "Effect of Depth-Based Trimming on the Mean",
+       x = "t", y = "value") +
+  theme_minimal() +
+  theme(legend.position = "top")
 ```
 
 ![](streaming-depth_files/figure-html/trimming-plot-1.png)
@@ -296,16 +332,24 @@ alarms <- which(d_monitor < control_limit)
 ```
 
 ``` r
-plot(1:n_new, d_monitor, type = "b", pch = 19, cex = 0.7,
-     col = ifelse(d_monitor < control_limit, "red", "black"),
-     xlab = "Curve index", ylab = "Depth",
-     main = "Streaming Depth Control Chart")
-abline(h = control_limit, col = "red", lty = 2, lwd = 1.5)
-abline(v = shift_point - 0.5, col = "grey50", lty = 3)
-text(shift_point + 5, max(d_monitor) * 0.95, "Process shift", col = "grey50", cex = 0.8)
-legend("bottomleft", c("In control", "Alarm", "Control limit"),
-       col = c("black", "red", "red"), pch = c(19, 19, NA),
-       lty = c(NA, NA, 2), cex = 0.8)
+df_monitor <- data.frame(
+  index = 1:n_new,
+  depth = d_monitor,
+  status = ifelse(d_monitor < control_limit, "Alarm", "In control")
+)
+
+ggplot(df_monitor, aes(x = index, y = depth, color = status)) +
+  geom_line(color = "grey40", linewidth = 0.4) +
+  geom_point(size = 1.5) +
+  geom_hline(yintercept = control_limit, linetype = "dashed", color = "red", linewidth = 0.8) +
+  geom_vline(xintercept = shift_point - 0.5, linetype = "dotted", color = "grey50") +
+  annotate("text", x = shift_point + 5, y = max(d_monitor) * 0.95,
+           label = "Process shift", color = "grey50", size = 3) +
+  scale_color_manual(values = c("In control" = "black", "Alarm" = "red")) +
+  labs(title = "Streaming Depth Control Chart",
+       x = "Curve index", y = "Depth", color = NULL) +
+  theme_minimal() +
+  theme(legend.position = "top")
 ```
 
 ![](streaming-depth_files/figure-html/process-monitoring-plot-1.png)
@@ -332,13 +376,19 @@ d_weights <- d_fm / sum(d_fm)
 weighted_mean <- colSums(fd$data * d_weights)
 simple_mean <- colMeans(fd$data)
 
-plot(argvals, simple_mean, type = "l", col = "black", lwd = 2,
-     ylim = range(c(simple_mean, weighted_mean)),
-     xlab = "t", ylab = "value",
-     main = "Simple Mean vs Depth-Weighted Mean")
-lines(argvals, weighted_mean, col = "steelblue", lwd = 2)
-legend("topright", c("Simple mean", "Depth-weighted mean"),
-       col = c("black", "steelblue"), lwd = 2, cex = 0.8)
+df_wmean <- data.frame(
+  t = rep(argvals, 2),
+  value = c(simple_mean, weighted_mean),
+  Method = rep(c("Simple mean", "Depth-weighted mean"), each = m)
+)
+
+ggplot(df_wmean, aes(x = t, y = value, color = Method)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c("Simple mean" = "black", "Depth-weighted mean" = "steelblue")) +
+  labs(title = "Simple Mean vs Depth-Weighted Mean",
+       x = "t", y = "value") +
+  theme_minimal() +
+  theme(legend.position = "top")
 ```
 
 ![](streaming-depth_files/figure-html/depth-weighted-1.png)
@@ -367,10 +417,10 @@ for (n_size in sizes) {
   t_elapsed <- system.time(streaming.depth(fd_perf, method = "FM"))["elapsed"]
   cat(sprintf("  N = %4d: %.4f sec\n", n_size, t_elapsed))
 }
-#>   N =   50: 0.0010 sec
+#>   N =   50: 0.0000 sec
 #>   N =  100: 0.0000 sec
 #>   N =  500: 0.0010 sec
-#>   N = 1000: 0.0020 sec
+#>   N = 1000: 0.0030 sec
 ```
 
 For large reference samples with many incoming queries, the streaming

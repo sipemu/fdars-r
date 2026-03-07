@@ -1,6 +1,6 @@
-# Compute warp complexity
+# Compute warp complexity (geodesic distance from identity)
 
-Compute warp complexity
+Compute warp complexity (geodesic distance from identity)
 
 ## Usage
 

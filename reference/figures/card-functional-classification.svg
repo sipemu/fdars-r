@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Class 1 curves (upper) -->
+  <path d="M15 30 Q55 15, 100 25 Q145 35, 185 20" stroke="#6f42c1" stroke-width="2" stroke-linecap="round"/>
+  <path d="M15 35 Q55 20, 100 30 Q145 38, 185 25" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Class 2 curves (middle) -->
+  <path d="M15 60 Q55 45, 100 65 Q145 75, 185 55" stroke="#9775d0" stroke-width="2" stroke-linecap="round"/>
+  <path d="M15 65 Q55 50, 100 68 Q145 78, 185 60" stroke="#9775d0" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Class 3 curves (lower) -->
+  <path d="M15 90 Q55 80, 100 95 Q145 105, 185 88" stroke="#b8a0e0" stroke-width="2" stroke-linecap="round"/>
+  <path d="M15 95 Q55 85, 100 98 Q145 108, 185 92" stroke="#b8a0e0" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Class labels -->
+  <circle cx="188" cy="20" r="4" fill="#6f42c1" opacity="0.6"/>
+  <circle cx="188" cy="55" r="4" fill="#9775d0" opacity="0.6"/>
+  <circle cx="188" cy="88" r="4" fill="#b8a0e0" opacity="0.6"/>
+</svg>

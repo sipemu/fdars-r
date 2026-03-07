@@ -124,6 +124,7 @@ ggplot(df_curves, aes(x = t, y = value, group = curve, color = species)) +
                                 "virginica" = "#4DAF4A")) +
   labs(title = "Andrews Curves of Iris Data",
        x = expression(t), y = expression(f[x](t)), color = "Species") +
+  theme_minimal() +
   theme(legend.position = "bottom")
 ```
 
@@ -149,6 +150,7 @@ ggplot(df_means, aes(x = t, y = value, color = species)) +
                                 "virginica" = "#4DAF4A")) +
   labs(title = "Mean Andrews Curves by Species",
        x = expression(t), y = expression(bar(f)(t)), color = "Species") +
+  theme_minimal() +
   theme(legend.position = "bottom")
 ```
 
@@ -506,6 +508,7 @@ p1 <- ggplot(df_orig, aes(x = t, y = value, group = curve, color = species)) +
                                 "virginica" = "#4DAF4A")) +
   labs(title = "Original Variable Order",
        x = expression(t), y = expression(f[x](t)), color = "Species") +
+  theme_minimal() +
   theme(legend.position = "bottom")
 
 p2 <- ggplot(df_reord, aes(x = t, y = value, group = curve, color = species)) +
@@ -514,6 +517,7 @@ p2 <- ggplot(df_reord, aes(x = t, y = value, group = curve, color = species)) +
                                 "virginica" = "#4DAF4A")) +
   labs(title = "Reordered by ANOVA F-statistic",
        x = expression(t), y = expression(f[x](t)), color = "Species") +
+  theme_minimal() +
   theme(legend.position = "bottom")
 
 if (requireNamespace("patchwork", quietly = TRUE)) {
@@ -600,6 +604,7 @@ ggplot(df_dist, aes(x = euclidean, y = andrews)) +
        subtitle = sprintf("Red line: slope = sqrt(pi) ≈ %.4f", sqrt(pi)),
        x = "Euclidean Distance (standardized data)",
        y = "Andrews L2 Distance") +
+  theme_minimal() +
   coord_equal()
 ```
 

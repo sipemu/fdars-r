@@ -409,7 +409,7 @@ decomp_mult <- decompose(fd_mult, period = 2.5, method = "multiplicative")
 cat("Multiplicative decomposition:\n")
 #> Multiplicative decomposition:
 cat("  Seasonal range:", round(range(decomp_mult$seasonal$data[1,]), 3), "\n")
-#>   Seasonal range: 0.631 1.469
+#>   Seasonal range: 0.637 1.455
 cat("  (Values near 1 indicate multiplicative factors)\n")
 #>   (Values near 1 indicate multiplicative factors)
 ```

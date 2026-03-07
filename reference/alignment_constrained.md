@@ -1,6 +1,6 @@
-# Elastic alignment with landmark constraints
+# Elastic alignment with explicit landmark constraints
 
-Elastic alignment with landmark constraints
+Elastic alignment with explicit landmark constraints
 
 ## Usage
 

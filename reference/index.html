@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fdars</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,17 +57,32 @@
     <li><a class="dropdown-item" href="../articles/alignment-comparison.html">Comparing Alignment Methods</a></li>
   </ul></li>
 <li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-regression" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Regression</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-regression"><li><h6 class="dropdown-header" data-toc-skip>Nonparametric</h6></li>
+    <li><a class="dropdown-item" href="../articles/regression.html">Kernel &amp; kNN Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Scalar-on-Function</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html">Functional Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Function-on-Scalar</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html#function-on-scalar-regression">Functional Regression (FOSR)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Classification</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-classification.html">Supervised Classification</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Repeated Measures</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-mixed-models.html">Functional Mixed Models</a></li>
+  </ul></li>
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-analyze" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Analyze</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-analyze"><li><h6 class="dropdown-header" data-toc-skip>Inference</h6></li>
     <li><a class="dropdown-item" href="../articles/tolerance-bands.html">Tolerance Bands</a></li>
     <li><a class="dropdown-item" href="../articles/equivalence-testing.html">Equivalence Testing</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Unsupervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering</a></li>
+    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering (K-Means)</a></li>
+    <li><a class="dropdown-item" href="../articles/gmm-clustering.html">GMM Clustering</a></li>
     <li><a class="dropdown-item" href="../articles/outlier-detection.html">Outlier Detection</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Supervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/regression.html">Regression</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Time Series</h6></li>
     <li><a class="dropdown-item" href="../articles/seasonal-analysis.html">Seasonal Analysis</a></li>
@@ -773,6 +788,13 @@
 
         <dt>
 
+          <code><a href="cluster.gmm.html">cluster.gmm()</a></code>
+
+        </dt>
+        <dd>Gaussian Mixture Model Clustering for Functional Data</dd>
+
+        <dt>
+
           <code><a href="cluster.init.html">cluster.init()</a></code>
 
         </dt>
@@ -875,6 +897,20 @@
 
         <dt>
 
+          <code><a href="fregre.lm.html">fregre.lm()</a></code>
+
+        </dt>
+        <dd>Functional Linear Model (FPC-based)</dd>
+
+        <dt>
+
+          <code><a href="fregre.lm.cv.html">fregre.lm.cv()</a></code>
+
+        </dt>
+        <dd>Cross-Validation for FPC Component Selection (fregre.lm)</dd>
+
+        <dt>
+
           <code><a href="fregre.np.html">fregre.np()</a></code>
 
         </dt>
@@ -886,6 +922,13 @@
 
         </dt>
         <dd>Cross-Validation for Nonparametric Functional Regression</dd>
+
+        <dt>
+
+          <code><a href="fregre.np.mixed.html">fregre.np.mixed()</a></code>
+
+        </dt>
+        <dd>Nonparametric Functional Regression with Mixed Predictors</dd>
 
         <dt>
 
@@ -907,6 +950,13 @@
 
         </dt>
         <dd>Cross-Validation for Functional PC Regression</dd>
+
+        <dt>
+
+          <code><a href="functional.logistic.html">functional.logistic()</a></code>
+
+        </dt>
+        <dd>Functional Logistic Regression</dd>
 
         <dt>
 
@@ -949,6 +999,89 @@
 
         </dt>
         <dd>Root Mean Squared Error</dd>
+      </dl></div><div class="section level2">
+      <h2 id="function-on-scalar-regression">Function-on-Scalar Regression<a class="anchor" aria-label="anchor" href="#function-on-scalar-regression"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="fosr.html">fosr()</a></code>
+
+        </dt>
+        <dd>Function-on-Scalar Regression</dd>
+
+        <dt>
+
+          <code><a href="fosr.fpc.html">fosr.fpc()</a></code>
+
+        </dt>
+        <dd>FPC-based Function-on-Scalar Regression</dd>
+
+        <dt>
+
+          <code><a href="fanova.html">fanova()</a></code>
+
+        </dt>
+        <dd>Functional ANOVA</dd>
+      </dl></div><div class="section level2">
+      <h2 id="classification">Classification<a class="anchor" aria-label="anchor" href="#classification"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="fclassif.html">fclassif()</a></code>
+
+        </dt>
+        <dd>Supervised Classification of Functional Data</dd>
+
+        <dt>
+
+          <code><a href="fclassif.cv.html">fclassif.cv()</a></code>
+
+        </dt>
+        <dd>Cross-Validated Functional Classification</dd>
+      </dl></div><div class="section level2">
+      <h2 id="functional-mixed-models">Functional Mixed Models<a class="anchor" aria-label="anchor" href="#functional-mixed-models"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="fmm.html">fmm()</a></code>
+
+        </dt>
+        <dd>Functional Mixed Models</dd>
+
+        <dt>
+
+          <code><a href="fmm.predict.html">fmm.predict()</a></code>
+
+        </dt>
+        <dd>Predict from Functional Mixed Model</dd>
+
+        <dt>
+
+          <code><a href="fmm.test.fixed.html">fmm.test.fixed()</a></code>
+
+        </dt>
+        <dd>Permutation Test for Fixed Effects in FMM</dd>
       </dl></div><div class="section level2">
       <h2 id="seasonal-analysis">Seasonal Analysis<a class="anchor" aria-label="anchor" href="#seasonal-analysis"></a></h2>
 
@@ -1670,6 +1803,13 @@
 
         <dt>
 
+          <code><a href="plot.cluster.gmm.html">plot(<i>&lt;cluster.gmm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot Method for cluster.gmm Objects</dd>
+
+        <dt>
+
           <code><a href="plot.cluster.kmeans.html">plot(<i>&lt;cluster.kmeans&gt;</i>)</a></code>
 
         </dt>
@@ -1684,10 +1824,38 @@
 
         <dt>
 
+          <code><a href="plot.fanova.html">plot(<i>&lt;fanova&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot method for fanova objects</dd>
+
+        <dt>
+
+          <code><a href="plot.fclassif.html">plot(<i>&lt;fclassif&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot method for fclassif objects</dd>
+
+        <dt>
+
           <code><a href="plot.fequiv.test.html">plot(<i>&lt;fequiv.test&gt;</i>)</a></code>
 
         </dt>
         <dd>Plot method for fequiv.test</dd>
+
+        <dt>
+
+          <code><a href="plot.fmm.html">plot(<i>&lt;fmm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot method for fmm objects</dd>
+
+        <dt>
+
+          <code><a href="plot.fosr.html">plot(<i>&lt;fosr&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot method for fosr objects</dd>
 
         <dt>
 
@@ -1784,10 +1952,31 @@
 
       <dl><dt>
 
+          <code><a href="predict.cluster.gmm.html">predict(<i>&lt;cluster.gmm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predict Cluster Membership for New Functional Data</dd>
+
+        <dt>
+
+          <code><a href="predict.fosr.html">predict(<i>&lt;fosr&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predict from Function-on-Scalar Regression</dd>
+
+        <dt>
+
           <code><a href="predict.fregre.fd.html">predict(<i>&lt;fregre.fd&gt;</i>)</a></code>
 
         </dt>
         <dd>Predict Method for Functional Regression (fregre.fd)</dd>
+
+        <dt>
+
+          <code><a href="predict.fregre.lm.html">predict(<i>&lt;fregre.lm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predict method for fregre.lm objects</dd>
 
         <dt>
 
@@ -1856,6 +2045,13 @@
 
         <dt>
 
+          <code><a href="print.cluster.gmm.html">print(<i>&lt;cluster.gmm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Method for cluster.gmm Objects</dd>
+
+        <dt>
+
           <code><a href="print.cluster.kmeans.html">print(<i>&lt;cluster.kmeans&gt;</i>)</a></code>
 
         </dt>
@@ -1870,6 +2066,13 @@
 
         <dt>
 
+          <code><a href="print.fanova.html">print(<i>&lt;fanova&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fanova objects</dd>
+
+        <dt>
+
           <code><a href="print.fbplot.html">print(<i>&lt;fbplot&gt;</i>)</a></code>
 
         </dt>
@@ -1877,10 +2080,59 @@
 
         <dt>
 
+          <code><a href="print.fclassif.html">print(<i>&lt;fclassif&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fclassif objects</dd>
+
+        <dt>
+
+          <code><a href="print.fclassif.cv.html">print(<i>&lt;fclassif.cv&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fclassif.cv objects</dd>
+
+        <dt>
+
+          <code><a href="print.fmm.html">print(<i>&lt;fmm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fmm objects</dd>
+
+        <dt>
+
+          <code><a href="print.fmm.test.html">print(<i>&lt;fmm.test&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fmm.test objects</dd>
+
+        <dt>
+
+          <code><a href="print.fosr.html">print(<i>&lt;fosr&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fosr objects</dd>
+
+        <dt>
+
           <code><a href="print.fregre.fd.html">print(<i>&lt;fregre.fd&gt;</i>)</a></code>
 
         </dt>
         <dd>Print method for fregre objects</dd>
+
+        <dt>
+
+          <code><a href="print.fregre.lm.html">print(<i>&lt;fregre.lm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fregre.lm objects</dd>
+
+        <dt>
+
+          <code><a href="print.fregre.logistic.html">print(<i>&lt;fregre.logistic&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for fregre.logistic objects</dd>
 
         <dt>
 
@@ -2171,7 +2423,7 @@
           <code><a href="alignment_constrained.html">alignment_constrained()</a></code>
 
         </dt>
-        <dd>Elastic alignment with landmark constraints</dd>
+        <dd>Elastic alignment with explicit landmark constraints</dd>
 
         <dt>
 
@@ -2276,21 +2528,21 @@
           <code><a href="alignment_tsrvf_transform.html">alignment_tsrvf_transform()</a></code>
 
         </dt>
-        <dd>Full TSRVF transform</dd>
+        <dd>Full TSRVF transform: compute Karcher mean + transport to tangent space</dd>
 
         <dt>
 
           <code><a href="alignment_warp_complexity.html">alignment_warp_complexity()</a></code>
 
         </dt>
-        <dd>Compute warp complexity</dd>
+        <dd>Compute warp complexity (geodesic distance from identity)</dd>
 
         <dt>
 
           <code><a href="alignment_warp_smoothness.html">alignment_warp_smoothness()</a></code>
 
         </dt>
-        <dd>Compute warp smoothness</dd>
+        <dd>Compute warp smoothness (bending energy)</dd>
 
         <dt>
 
@@ -2455,6 +2707,13 @@
 
         <dt>
 
+          <code><a href="depth_rp_1d_seeded.html">depth_rp_1d_seeded()</a></code>
+
+        </dt>
+        <dd>Random projection depth with optional seed</dd>
+
+        <dt>
+
           <code><a href="depth_rp_2d.html">depth_rp_2d()</a></code>
 
         </dt>
@@ -2466,6 +2725,13 @@
 
         </dt>
         <dd>Compute random Tukey depth</dd>
+
+        <dt>
+
+          <code><a href="depth_rt_1d_seeded.html">depth_rt_1d_seeded()</a></code>
+
+        </dt>
+        <dd>Random Tukey depth with optional seed</dd>
 
         <dt>
 
@@ -2658,13 +2924,6 @@
 
         <dt>
 
-          <code><a href="fdata2basis_2d_raw.html">fdata2basis_2d_raw()</a></code>
-
-        </dt>
-        <dd>Project 2D functional data to tensor product basis coefficients (raw binding)</dd>
-
-        <dt>
-
           <code><a href="fdata2basis_cv.html">fdata2basis_cv()</a></code>
 
         </dt>
@@ -2746,13 +3005,6 @@
 
         </dt>
         <dd>Reconstruct 2D Functional Data from Tensor Product Basis Coefficients</dd>
-
-        <dt>
-
-          <code><a href="basis2fdata_2d_raw.html">basis2fdata_2d_raw()</a></code>
-
-        </dt>
-        <dd>Reconstruct 2D functional data from tensor product basis coefficients (raw binding)</dd>
 
         <dt>
 
@@ -3215,6 +3467,146 @@
 
         </dt>
         <dd>Compute the geometric median (L1 median) of 2D functional data using Weiszfeld's algorithm Data is stored as n x (m1*m2) matrix where each row is a flattened surface</dd>
+
+        <dt>
+
+          <code><a href="fregre_cv_rust.html">fregre_cv_rust()</a></code>
+
+        </dt>
+        <dd>Cross-validation for FPC component selection</dd>
+
+        <dt>
+
+          <code><a href="fregre_lm_rust.html">fregre_lm_rust()</a></code>
+
+        </dt>
+        <dd>Functional linear model (FPC-based)</dd>
+
+        <dt>
+
+          <code><a href="fregre_np_mixed_rust.html">fregre_np_mixed_rust()</a></code>
+
+        </dt>
+        <dd>Nonparametric functional regression with mixed predictors</dd>
+
+        <dt>
+
+          <code><a href="functional_logistic_rust.html">functional_logistic_rust()</a></code>
+
+        </dt>
+        <dd>Functional logistic regression</dd>
+
+        <dt>
+
+          <code><a href="fosr_fpc_rust.html">fosr_fpc_rust()</a></code>
+
+        </dt>
+        <dd>FPC-based function-on-scalar regression</dd>
+
+        <dt>
+
+          <code><a href="fosr_rust.html">fosr_rust()</a></code>
+
+        </dt>
+        <dd>Function-on-scalar regression (penalized)</dd>
+
+        <dt>
+
+          <code><a href="fanova_rust.html">fanova_rust()</a></code>
+
+        </dt>
+        <dd>Functional ANOVA</dd>
+
+        <dt>
+
+          <code><a href="predict_fosr_rust.html">predict_fosr_rust()</a></code>
+
+        </dt>
+        <dd>Predict from function-on-scalar regression</dd>
+
+        <dt>
+
+          <code><a href="predict_gmm_rust.html">predict_gmm_rust()</a></code>
+
+        </dt>
+        <dd>Predict from GMM</dd>
+
+        <dt>
+
+          <code><a href="fclassif_cv_rust.html">fclassif_cv_rust()</a></code>
+
+        </dt>
+        <dd>Cross-validated classification</dd>
+
+        <dt>
+
+          <code><a href="fclassif_dd_rust.html">fclassif_dd_rust()</a></code>
+
+        </dt>
+        <dd>DD-plot classification</dd>
+
+        <dt>
+
+          <code><a href="fclassif_kernel_rust.html">fclassif_kernel_rust()</a></code>
+
+        </dt>
+        <dd>Kernel classification</dd>
+
+        <dt>
+
+          <code><a href="fclassif_knn_rust.html">fclassif_knn_rust()</a></code>
+
+        </dt>
+        <dd>kNN classification</dd>
+
+        <dt>
+
+          <code><a href="fclassif_lda_rust.html">fclassif_lda_rust()</a></code>
+
+        </dt>
+        <dd>LDA classification</dd>
+
+        <dt>
+
+          <code><a href="fclassif_qda_rust.html">fclassif_qda_rust()</a></code>
+
+        </dt>
+        <dd>QDA classification</dd>
+
+        <dt>
+
+          <code><a href="gmm_cluster_rust.html">gmm_cluster_rust()</a></code>
+
+        </dt>
+        <dd>GMM clustering with automatic K selection</dd>
+
+        <dt>
+
+          <code><a href="gmm_em_rust.html">gmm_em_rust()</a></code>
+
+        </dt>
+        <dd>Raw GMM EM on feature matrix</dd>
+
+        <dt>
+
+          <code><a href="fmm_predict_rust.html">fmm_predict_rust()</a></code>
+
+        </dt>
+        <dd>Predict from functional mixed model</dd>
+
+        <dt>
+
+          <code><a href="fmm_rust.html">fmm_rust()</a></code>
+
+        </dt>
+        <dd>Functional mixed model</dd>
+
+        <dt>
+
+          <code><a href="fmm_test_fixed_rust.html">fmm_test_fixed_rust()</a></code>
+
+        </dt>
+        <dd>Permutation test for fixed effects in FMM</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

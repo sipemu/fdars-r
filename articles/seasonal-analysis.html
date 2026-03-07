@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fdars</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,6 +77,25 @@
     <li><a class="dropdown-item" href="../articles/alignment-comparison.html">Comparing Alignment Methods</a></li>
   </ul>
 </li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-regression" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Regression</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-regression">
+<li><h6 class="dropdown-header" data-toc-skip>Nonparametric</h6></li>
+    <li><a class="dropdown-item" href="../articles/regression.html">Kernel &amp; kNN Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Scalar-on-Function</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html">Functional Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Function-on-Scalar</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html#function-on-scalar-regression">Functional Regression (FOSR)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Classification</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-classification.html">Supervised Classification</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Repeated Measures</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-mixed-models.html">Functional Mixed Models</a></li>
+  </ul>
+</li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-analyze" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Analyze</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-analyze">
@@ -85,11 +104,9 @@
     <li><a class="dropdown-item" href="../articles/equivalence-testing.html">Equivalence Testing</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Unsupervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering</a></li>
+    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering (K-Means)</a></li>
+    <li><a class="dropdown-item" href="../articles/gmm-clustering.html">GMM Clustering</a></li>
     <li><a class="dropdown-item" href="../articles/outlier-detection.html">Outlier Detection</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Supervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/regression.html">Regression</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Time Series</h6></li>
     <li><a class="dropdown-item" href="../articles/seasonal-analysis.html">Seasonal Analysis</a></li>
@@ -502,7 +519,7 @@ multiplicative decomposition:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Multiplicative decomposition:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Multiplicative decomposition:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Seasonal range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">decomp_mult</span><span class="op">$</span><span class="va">seasonal</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Seasonal range: 0.631 1.469</span></span>
+<span><span class="co">#&gt;   Seasonal range: 0.637 1.455</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  (Values near 1 indicate multiplicative factors)\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   (Values near 1 indicate multiplicative factors)</span></span></code></pre></div>
 </div>

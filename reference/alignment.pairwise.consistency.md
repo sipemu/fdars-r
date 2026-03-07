@@ -45,6 +45,6 @@ X <- matrix(0, 10, 100)
 for (i in 1:10) X[i, ] <- sin(2*pi*(t - i/50))
 fd <- fdata(X, argvals = t)
 alignment.pairwise.consistency(fd, lambda = 0)
-#> [1] 0.004180664
+#> [1] 0.004202139
 # }
 ```

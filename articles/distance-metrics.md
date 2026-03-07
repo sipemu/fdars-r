@@ -515,10 +515,10 @@ cat("Elastic distance matrix:\n")
 #> Elastic distance matrix:
 print(round(dist_elastic, 3))
 #>       [,1]  [,2]  [,3]  [,4]
-#> [1,] 0.000 0.354 1.212 1.950
-#> [2,] 0.354 0.000 0.841 1.954
-#> [3,] 1.212 0.841 0.000 2.130
-#> [4,] 1.950 1.954 2.130 0.000
+#> [1,] 0.000 0.354 1.212 1.927
+#> [2,] 0.354 0.000 0.841 1.975
+#> [3,] 1.212 0.841 0.000 2.120
+#> [4,] 1.927 1.975 2.120 0.000
 ```
 
 ### Amplitude Distance (amplitude.distance)
@@ -537,10 +537,10 @@ cat("Amplitude distance matrix:\n")
 #> Amplitude distance matrix:
 print(round(as.matrix(dist_amp), 3))
 #>        curve1 curve2 curve3 curve4
-#> curve1  0.000  0.354  1.212  1.950
-#> curve2  0.354  0.000  0.841  1.954
-#> curve3  1.212  0.841  0.000  2.130
-#> curve4  1.950  1.954  2.130  0.000
+#> curve1  0.000  0.354  1.212  1.927
+#> curve2  0.354  0.000  0.841  1.975
+#> curve3  1.212  0.841  0.000  2.120
+#> curve4  1.927  1.975  2.120  0.000
 ```
 
 ### Phase Distance (phase.distance)
@@ -559,10 +559,10 @@ cat("Phase distance matrix:\n")
 #> Phase distance matrix:
 print(round(as.matrix(dist_phase), 3))
 #>        curve1 curve2 curve3 curve4
-#> curve1  0.000  0.119  0.414  0.412
-#> curve2  0.119  0.000  0.334  0.414
-#> curve3  0.414  0.334  0.000  0.511
-#> curve4  0.412  0.414  0.511  0.000
+#> curve1  0.000  0.119  0.420  0.416
+#> curve2  0.119  0.000  0.342  0.419
+#> curve3  0.420  0.342  0.000  0.529
+#> curve4  0.416  0.419  0.529  0.000
 ```
 
 ### Comparing Amplitude and Phase Distances
@@ -576,11 +576,14 @@ distance:
 amp_vals <- as.vector(as.matrix(dist_amp))[upper.tri(as.matrix(dist_amp))]
 phase_vals <- as.vector(as.matrix(dist_phase))[upper.tri(as.matrix(dist_phase))]
 
-plot(amp_vals, phase_vals, pch = 19, col = "steelblue",
-     xlab = "Amplitude Distance", ylab = "Phase Distance",
-     main = "Amplitude vs Phase Pairwise Distances")
-abline(h = mean(phase_vals), lty = 2, col = "grey50")
-abline(v = mean(amp_vals), lty = 2, col = "grey50")
+df_ap <- data.frame(amplitude = amp_vals, phase = phase_vals)
+ggplot(df_ap, aes(x = amplitude, y = phase)) +
+  geom_point(color = "steelblue", size = 1.5) +
+  geom_hline(yintercept = mean(phase_vals), linetype = "dashed", color = "grey50") +
+  geom_vline(xintercept = mean(amp_vals), linetype = "dashed", color = "grey50") +
+  labs(title = "Amplitude vs Phase Pairwise Distances",
+       x = "Amplitude Distance", y = "Phase Distance") +
+  theme_minimal()
 ```
 
 ![](distance-metrics_files/figure-html/elastic-compare-1.png)

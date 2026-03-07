@@ -1,6 +1,6 @@
-# Compute warp smoothness
+# Compute warp smoothness (bending energy)
 
-Compute warp smoothness
+Compute warp smoothness (bending energy)
 
 ## Usage
 

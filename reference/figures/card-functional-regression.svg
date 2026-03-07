@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Functional response curves -->
+  <path d="M15 80 Q50 25, 90 55 Q130 85, 185 35" stroke="#6f42c1" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M15 75 Q50 30, 90 50 Q130 70, 185 40" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <path d="M15 85 Q50 20, 90 60 Q130 90, 185 30" stroke="#6f42c1" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Scalar predictor arrows -->
+  <text x="10" y="105" font-family="serif" font-style="italic" font-size="11" fill="#6f42c1" opacity="0.7">x₁</text>
+  <text x="35" y="105" font-family="serif" font-style="italic" font-size="11" fill="#6f42c1" opacity="0.7">x₂</text>
+  <!-- Beta function (dashed) -->
+  <path d="M70 95 Q100 70, 130 90 Q160 105, 185 80" stroke="#9775d0" stroke-width="2" stroke-linecap="round" stroke-dasharray="4,3"/>
+  <text x="170" y="105" font-family="serif" font-style="italic" font-size="10" fill="#9775d0">β(t)</text>
+</svg>

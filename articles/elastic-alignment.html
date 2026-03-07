@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fdars</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,6 +78,25 @@
   </ul>
 </li>
 <li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-regression" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Regression</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-regression">
+<li><h6 class="dropdown-header" data-toc-skip>Nonparametric</h6></li>
+    <li><a class="dropdown-item" href="../articles/regression.html">Kernel &amp; kNN Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Scalar-on-Function</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html">Functional Regression</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Function-on-Scalar</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-regression.html#function-on-scalar-regression">Functional Regression (FOSR)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Classification</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-classification.html">Supervised Classification</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Repeated Measures</h6></li>
+    <li><a class="dropdown-item" href="../articles/functional-mixed-models.html">Functional Mixed Models</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-analyze" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Analyze</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-analyze">
 <li><h6 class="dropdown-header" data-toc-skip>Inference</h6></li>
@@ -85,11 +104,9 @@
     <li><a class="dropdown-item" href="../articles/equivalence-testing.html">Equivalence Testing</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Unsupervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering</a></li>
+    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering (K-Means)</a></li>
+    <li><a class="dropdown-item" href="../articles/gmm-clustering.html">GMM Clustering</a></li>
     <li><a class="dropdown-item" href="../articles/outlier-detection.html">Outlier Detection</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Supervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/regression.html">Regression</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Time Series</h6></li>
     <li><a class="dropdown-item" href="../articles/seasonal-analysis.html">Seasonal Analysis</a></li>
@@ -176,7 +193,7 @@ metric – enabling efficient dynamic programming alignment.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Elastic Alignment</span></span>
 <span><span class="co">#&gt;   Curves: 15 x 100 grid points</span></span>
-<span><span class="co">#&gt;   Mean elastic distance: 0.2018</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean elastic distance: 0.2025</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/quick-start-plot-1.png" class="r-plt" alt="" width="100%"></p>
@@ -460,7 +477,7 @@ the original function is recovered by:</li>
 <span></span>
 <span><span class="va">max_error</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">f_original</span> <span class="op">-</span> <span class="va">f_reconstructed</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Round-trip max error:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">max_error</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Round-trip max error: 0.001007</span></span></code></pre></div>
+<span><span class="co">#&gt; Round-trip max error: 0.0006717</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="alignment-as-optimization">Alignment as Optimization<a class="anchor" aria-label="anchor" href="#alignment-as-optimization"></a>
@@ -565,7 +582,7 @@ typically occurs in 5–20 iterations.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">km</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Karcher Mean (Elastic)</span></span>
 <span><span class="co">#&gt;   Curves: 15 x 100 grid points</span></span>
-<span><span class="co">#&gt;   Iterations: 2 </span></span>
+<span><span class="co">#&gt;   Iterations: 18 </span></span>
 <span><span class="co">#&gt;   Converged: TRUE</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
@@ -602,7 +619,7 @@ convergence:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">km</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Converged: TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">km</span><span class="op">$</span><span class="va">n.iter</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Iterations: 2</span></span></code></pre></div>
+<span><span class="co">#&gt; Iterations: 20</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">km</span>, type <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/karcher-custom-plot-1.png" class="r-plt" alt="" width="100%"></p>
@@ -647,11 +664,11 @@ two curves into <strong>amplitude</strong> (shape) and
 <span><span class="va">D_phase</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phase.distance.html">phase.distance</a></span><span class="op">(</span><span class="va">fd</span>, lambda <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude distance (curves 1-2):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">D_amp</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude distance (curves 1-2): 0.06</span></span>
+<span><span class="co">#&gt; Amplitude distance (curves 1-2): 0.061</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase distance (curves 1-2):    "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">D_phase</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase distance (curves 1-2):     0.041</span></span>
+<span><span class="co">#&gt; Phase distance (curves 1-2):     0.051</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Elastic distance (curves 1-2):  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">D</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Elastic distance (curves 1-2):   0.06</span></span></code></pre></div>
+<span><span class="co">#&gt; Elastic distance (curves 1-2):   0.061</span></span></code></pre></div>
 <p>For these phase-shifted sine curves, most of the distance comes from
 phase (timing differences), with very little amplitude distance (the
 shapes are similar after alignment).</p>
@@ -667,13 +684,13 @@ the Karcher mean and alignment quality:</p>
 <span><span class="va">aq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alignment.quality.html">alignment.quality</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">km_diag</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">aq</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Alignment Quality Diagnostics</span></span>
-<span><span class="co">#&gt;   Mean warp complexity: 0.0668 </span></span>
-<span><span class="co">#&gt;   Mean warp smoothness: 13.121 </span></span>
+<span><span class="co">#&gt;   Mean warp complexity: 0.0669 </span></span>
+<span><span class="co">#&gt;   Mean warp smoothness: 20.6504 </span></span>
 <span><span class="co">#&gt;   Total variance:      0.0457 </span></span>
-<span><span class="co">#&gt;   Amplitude variance:  0.0106 </span></span>
-<span><span class="co">#&gt;   Phase variance:      0.0351 </span></span>
-<span><span class="co">#&gt;   Phase/Total ratio:   0.7687 </span></span>
-<span><span class="co">#&gt;   Mean VR:             0.1508</span></span></code></pre></div>
+<span><span class="co">#&gt;   Amplitude variance:  0.0104 </span></span>
+<span><span class="co">#&gt;   Phase variance:      0.0353 </span></span>
+<span><span class="co">#&gt;   Phase/Total ratio:   0.7733 </span></span>
+<span><span class="co">#&gt;   Mean VR:             0.1479</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="before-vs-after-what-changed">Before vs After: What Changed?<a class="anchor" aria-label="anchor" href="#before-vs-after-what-changed"></a>
 </h3>
@@ -716,20 +733,20 @@ computed on the original and aligned curves:</p>
 <tr class="odd">
 <td align="left">Mean pairwise L² distance</td>
 <td align="right">0.2603</td>
-<td align="right">0.1252</td>
-<td align="right">51.9%</td>
+<td align="right">0.1243</td>
+<td align="right">52.3%</td>
 </tr>
 <tr class="even">
 <td align="left">Mean pointwise variance</td>
 <td align="right">0.0494</td>
-<td align="right">0.0122</td>
-<td align="right">75.4%</td>
+<td align="right">0.0120</td>
+<td align="right">75.8%</td>
 </tr>
 <tr class="odd">
 <td align="left">Mean cross-sectional SD</td>
 <td align="right">0.2043</td>
-<td align="right">0.0659</td>
-<td align="right">67.7%</td>
+<td align="right">0.0652</td>
+<td align="right">68.1%</td>
 </tr>
 </tbody>
 </table>
@@ -856,9 +873,9 @@ and phase components:</p>
 <span></span>
 <span><span class="va">decomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.decomposition.html">elastic.decomposition</a></span><span class="op">(</span><span class="va">f1</span>, <span class="va">f2</span>, lambda <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude distance:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">decomp</span><span class="op">$</span><span class="va">d_amplitude</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude distance: 0.2482</span></span>
+<span><span class="co">#&gt; Amplitude distance: 0.2483</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase distance:    "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">decomp</span><span class="op">$</span><span class="va">d_phase</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase distance:     0.0786</span></span></code></pre></div>
+<span><span class="co">#&gt; Phase distance:     0.0789</span></span></code></pre></div>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize the aligned pair</span></span>
 <span><span class="va">f1_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">f1</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
@@ -1649,7 +1666,7 @@ separates them:</p>
 <span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="va">D_elastic</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between elastic and DTW distances:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">D_elastic</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span>, <span class="va">D_dtw</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Correlation between elastic and DTW distances: 0.899</span></span></code></pre></div>
+<span><span class="co">#&gt; Correlation between elastic and DTW distances: 0.895</span></span></code></pre></div>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_ed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>elastic <span class="op">=</span> <span class="va">D_elastic</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span>, dtw <span class="op">=</span> <span class="va">D_dtw</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_ed</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">elastic</span>, y <span class="op">=</span> <span class="va">dtw</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -2155,7 +2172,7 @@ results when curves have complex shapes.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">km_per</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Karcher Mean (Elastic)</span></span>
 <span><span class="co">#&gt;   Curves: 15 x 100 grid points</span></span>
-<span><span class="co">#&gt;   Iterations: 2 </span></span>
+<span><span class="co">#&gt;   Iterations: 1 </span></span>
 <span><span class="co">#&gt;   Converged: TRUE </span></span>
 <span><span class="co">#&gt;   Periodic: TRUE (method: peak )</span></span></code></pre></div>
 </div>
@@ -2271,7 +2288,7 @@ the true peak amplitude:</p>
 <span><span class="co">#&gt; Cross-sectional mean peak: 6.39 cm/yr at age 11.5</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Karcher mean peak:        "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">karcher_pub</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"cm/yr at age"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">karcher_pub</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Karcher mean peak:         8.43 cm/yr at age 12.4</span></span></code></pre></div>
+<span><span class="co">#&gt; Karcher mean peak:         8.42 cm/yr at age 12.4</span></span></code></pre></div>
 <div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span>, <span class="fl">2</span><span class="op">)</span>,</span>
@@ -2309,7 +2326,7 @@ per-child warping functions interpretable and mutually comparable.</p>
 <span><span class="co">#&gt; Before alignment: PC1 = 67.6 %, PC2 = 26.3 %, PC3 = 6.1 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"After alignment:  PC1 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"%, PC2 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
 <span>    <span class="st">"%, PC3 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; After alignment:  PC1 = 58 %, PC2 = 31.5 %, PC3 = 10.5 %</span></span></code></pre></div>
+<span><span class="co">#&gt; After alignment:  PC1 = 58.1 %, PC2 = 32.1 %, PC3 = 9.8 %</span></span></code></pre></div>
 <p>Before alignment, phase variability spreads across multiple PCs.
 After alignment, the remaining (amplitude) variability is more
 efficiently captured by the first PC.</p>
@@ -2387,9 +2404,9 @@ practically negligible:</p>
 <span><span class="co">#&gt; Equivalence margin (delta): 0.5 </span></span>
 <span><span class="co">#&gt; Significance level (alpha): 0.05 </span></span>
 <span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Test statistic (sup|d_hat|): 1.9975 </span></span>
-<span><span class="co">#&gt; Critical value: 0.0135 </span></span>
-<span><span class="co">#&gt; SCB range: [ -0.0135 , 2.011 ]</span></span>
+<span><span class="co">#&gt; Test statistic (sup|d_hat|): 2.0022 </span></span>
+<span><span class="co">#&gt; Critical value: 0.4279 </span></span>
+<span><span class="co">#&gt; SCB range: [ -0.4279 , 2.43 ]</span></span>
 <span><span class="co">#&gt; P-value: 1 </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Decision: Fail to reject H0 -- equivalence NOT declared</span></span></code></pre></div>
@@ -2493,10 +2510,10 @@ Averaging this gives a single “timing shift” score per child:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Earliest maturer: child"</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>,</span>
 <span>    <span class="st">"(shift ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"years)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Earliest maturer: child 42 (shift = -1.72 years)</span></span>
+<span><span class="co">#&gt; Earliest maturer: child 42 (shift = -1.83 years)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Latest maturer:   child"</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>,</span>
 <span>    <span class="st">"(shift ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"years)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Latest maturer:   child 26 (shift = 2.07 years)</span></span></code></pre></div>
+<span><span class="co">#&gt; Latest maturer:   child 26 (shift = 2 years)</span></span></code></pre></div>
 <p>These scalar scores can be used as covariates in standard regression,
 or for correlation with other variables (e.g., adult height, BMI):</p>
 <div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
@@ -2516,7 +2533,7 @@ functions identifies the main modes of timing variation:</p>
 <code class="sourceCode R"><span><span class="va">pc_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2pc.html">fdata2pc</a></span><span class="op">(</span><span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span>, ncomp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">pve_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pc_warps</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">pc_warps</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Warp PC1:"</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"% — PC2:"</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warp PC1: 93 % — PC2: 7 %</span></span></code></pre></div>
+<span><span class="co">#&gt; Warp PC1: 92.5 % — PC2: 7.5 %</span></span></code></pre></div>
 <div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  PC1 <span class="op">=</span> <span class="va">pc_warps</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>

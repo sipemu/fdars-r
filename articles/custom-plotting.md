@@ -295,7 +295,7 @@ ggplot(df_long, aes(x = t, y = value, group = curve_id)) +
   geom_line(alpha = 0.5, linewidth = 0.3) +
   facet_wrap(~ group, ncol = 2) +
   labs(x = "Time (s)", y = "Signal") +
-  theme_bw()
+  theme_minimal()
 ```
 
 ![](custom-plotting_files/figure-html/facet-group-1.png) \### Facet by

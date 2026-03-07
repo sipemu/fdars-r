@@ -1,6 +1,6 @@
-# Full TSRVF transform
+# Full TSRVF transform: compute Karcher mean + transport to tangent space
 
-Full TSRVF transform
+Full TSRVF transform: compute Karcher mean + transport to tangent space
 
 ## Usage
 

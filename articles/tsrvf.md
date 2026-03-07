@@ -149,7 +149,7 @@ tv <- tsrvf.transform(fd, max.iter = 15, tol = 1e-4)
 print(tv)
 #> TSRVF (Transported SRSF)
 #>   Curves: 20 x 100 grid points
-#>   Converged: TRUE
+#>   Converged: FALSE
 ```
 
 ``` r
@@ -210,7 +210,7 @@ pca_result <- prcomp(tv_data, center = TRUE, scale. = FALSE)
 var_explained <- pca_result$sdev^2 / sum(pca_result$sdev^2)
 cat("Variance explained by first 3 PCs:",
     round(cumsum(var_explained)[1:3] * 100, 1), "%\n")
-#> Variance explained by first 3 PCs: 83.2 93.8 97.5 %
+#> Variance explained by first 3 PCs: 92.1 96.6 98.4 %
 ```
 
 ``` r

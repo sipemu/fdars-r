@@ -50,7 +50,7 @@ res <- elastic.align(fd)
 print(res)
 #> Elastic Alignment
 #>   Curves: 15 x 100 grid points
-#>   Mean elastic distance: 0.2018
+#>   Mean elastic distance: 0.2025
 ```
 
 ``` r
@@ -281,7 +281,7 @@ f_reconstructed <- srsf.inverse(q_values, argvals, f_original[1])
 
 max_error <- max(abs(f_original - f_reconstructed))
 cat("Round-trip max error:", format(max_error, digits = 4), "\n")
-#> Round-trip max error: 0.001007
+#> Round-trip max error: 0.0006717
 ```
 
 ### Alignment as Optimization
@@ -358,7 +358,7 @@ km <- karcher.mean(fd, max.iter = 20, tol = 1e-4)
 print(km)
 #> Karcher Mean (Elastic)
 #>   Curves: 15 x 100 grid points
-#>   Iterations: 2 
+#>   Iterations: 18 
 #>   Converged: TRUE
 ```
 
@@ -401,7 +401,7 @@ km <- karcher.mean(fd_bumps, max.iter = 30, tol = 1e-4)
 cat("Converged:", km$converged, "\n")
 #> Converged: TRUE
 cat("Iterations:", km$n.iter, "\n")
-#> Iterations: 2
+#> Iterations: 20
 ```
 
 ``` r
@@ -455,11 +455,11 @@ D_amp <- amplitude.distance(fd, lambda = 0)
 D_phase <- phase.distance(fd, lambda = 0)
 
 cat("Amplitude distance (curves 1-2):", round(as.matrix(D_amp)[1, 2], 3), "\n")
-#> Amplitude distance (curves 1-2): 0.06
+#> Amplitude distance (curves 1-2): 0.061
 cat("Phase distance (curves 1-2):    ", round(as.matrix(D_phase)[1, 2], 3), "\n")
-#> Phase distance (curves 1-2):     0.041
+#> Phase distance (curves 1-2):     0.051
 cat("Elastic distance (curves 1-2):  ", round(D[1, 2], 3), "\n")
-#> Elastic distance (curves 1-2):   0.06
+#> Elastic distance (curves 1-2):   0.061
 ```
 
 For these phase-shifted sine curves, most of the distance comes from
@@ -476,13 +476,13 @@ km_diag <- karcher.mean(fd, max.iter = 20, tol = 1e-4)
 aq <- alignment.quality(fd, km_diag)
 print(aq)
 #> Alignment Quality Diagnostics
-#>   Mean warp complexity: 0.0668 
-#>   Mean warp smoothness: 13.121 
+#>   Mean warp complexity: 0.0669 
+#>   Mean warp smoothness: 20.6504 
 #>   Total variance:      0.0457 
-#>   Amplitude variance:  0.0106 
-#>   Phase variance:      0.0351 
-#>   Phase/Total ratio:   0.7687 
-#>   Mean VR:             0.1508
+#>   Amplitude variance:  0.0104 
+#>   Phase variance:      0.0353 
+#>   Phase/Total ratio:   0.7733 
+#>   Mean VR:             0.1479
 ```
 
 ### Before vs After: What Changed?
@@ -520,9 +520,9 @@ knitr::kable(tab, align = "lrrr")
 
 | Metric                    | Before |  After | Reduction |
 |:--------------------------|-------:|-------:|----------:|
-| Mean pairwise L² distance | 0.2603 | 0.1252 |     51.9% |
-| Mean pointwise variance   | 0.0494 | 0.0122 |     75.4% |
-| Mean cross-sectional SD   | 0.2043 | 0.0659 |     67.7% |
+| Mean pairwise L² distance | 0.2603 | 0.1243 |     52.3% |
+| Mean pointwise variance   | 0.0494 | 0.0120 |     75.8% |
+| Mean cross-sectional SD   | 0.2043 | 0.0652 |     68.1% |
 
 ### Pointwise Variance: Where Did Alignment Help?
 
@@ -650,9 +650,9 @@ f2 <- fd[5]
 
 decomp <- elastic.decomposition(f1, f2, lambda = 0)
 cat("Amplitude distance:", round(decomp$d_amplitude, 4), "\n")
-#> Amplitude distance: 0.2482
+#> Amplitude distance: 0.2483
 cat("Phase distance:    ", round(decomp$d_phase, 4), "\n")
-#> Phase distance:     0.0786
+#> Phase distance:     0.0789
 ```
 
 ``` r
@@ -1324,7 +1324,7 @@ D_dtw <- metric.DTW(fd_cmp)
 idx <- upper.tri(D_elastic)
 cat("Correlation between elastic and DTW distances:",
     round(cor(D_elastic[idx], D_dtw[idx]), 3), "\n")
-#> Correlation between elastic and DTW distances: 0.899
+#> Correlation between elastic and DTW distances: 0.895
 ```
 
 ``` r
@@ -1800,7 +1800,7 @@ km_per <- karcher.mean(fd_p, max.iter = 15, periodic = TRUE)
 print(km_per)
 #> Karcher Mean (Elastic)
 #>   Curves: 15 x 100 grid points
-#>   Iterations: 2 
+#>   Iterations: 1 
 #>   Converged: TRUE 
 #>   Periodic: TRUE (method: peak )
 ```
@@ -1927,7 +1927,7 @@ cat("Cross-sectional mean peak:", round(max(cross_mean_pub), 2), "cm/yr at age",
 #> Cross-sectional mean peak: 6.39 cm/yr at age 11.5
 cat("Karcher mean peak:        ", round(max(karcher_pub), 2), "cm/yr at age",
     round(fd_pub$argvals[which.max(karcher_pub)], 1), "\n")
-#> Karcher mean peak:         8.43 cm/yr at age 12.4
+#> Karcher mean peak:         8.42 cm/yr at age 12.4
 ```
 
 ``` r
@@ -1970,7 +1970,7 @@ cat("Before alignment: PC1 =", pve_before[1], "%, PC2 =", pve_before[2],
 #> Before alignment: PC1 = 67.6 %, PC2 = 26.3 %, PC3 = 6.1 %
 cat("After alignment:  PC1 =", pve_after[1], "%, PC2 =", pve_after[2],
     "%, PC3 =", pve_after[3], "%\n")
-#> After alignment:  PC1 = 58 %, PC2 = 31.5 %, PC3 = 10.5 %
+#> After alignment:  PC1 = 58.1 %, PC2 = 32.1 %, PC3 = 9.8 %
 ```
 
 Before alignment, phase variability spreads across multiple PCs. After
@@ -2045,9 +2045,9 @@ print(equiv)
 #> Equivalence margin (delta): 0.5 
 #> Significance level (alpha): 0.05 
 #> ---
-#> Test statistic (sup|d_hat|): 1.9975 
-#> Critical value: 0.0135 
-#> SCB range: [ -0.0135 , 2.011 ]
+#> Test statistic (sup|d_hat|): 2.0022 
+#> Critical value: 0.4279 
+#> SCB range: [ -0.4279 , 2.43 ]
 #> P-value: 1 
 #> ---
 #> Decision: Fail to reject H0 -- equivalence NOT declared
@@ -2161,10 +2161,10 @@ timing_shift <- rowMeans(km_pub$gammas$data - identity)
 
 cat("Earliest maturer: child", which.min(timing_shift),
     "(shift =", round(min(timing_shift), 2), "years)\n")
-#> Earliest maturer: child 42 (shift = -1.72 years)
+#> Earliest maturer: child 42 (shift = -1.83 years)
 cat("Latest maturer:   child", which.max(timing_shift),
     "(shift =", round(max(timing_shift), 2), "years)\n")
-#> Latest maturer:   child 26 (shift = 2.07 years)
+#> Latest maturer:   child 26 (shift = 2 years)
 ```
 
 These scalar scores can be used as covariates in standard regression, or
@@ -2191,7 +2191,7 @@ the main modes of timing variation:
 pc_warps <- fdata2pc(km_pub$gammas, ncomp = 2)
 pve_warps <- round(pc_warps$d^2 / sum(pc_warps$d^2) * 100, 1)
 cat("Warp PC1:", pve_warps[1], "% — PC2:", pve_warps[2], "%\n")
-#> Warp PC1: 93 % — PC2: 7 %
+#> Warp PC1: 92.5 % — PC2: 7.5 %
 ```
 
 ``` r

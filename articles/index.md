@@ -41,6 +41,17 @@
 - [Comparing Alignment
   Methods](https://sipemu.github.io/fdars-r/articles/alignment-comparison.md):
 
+### Regression
+
+- [Functional
+  Regression](https://sipemu.github.io/fdars-r/articles/regression.md):
+- [Functional Regression: Scalar and Function
+  Responses](https://sipemu.github.io/fdars-r/articles/functional-regression.md):
+- [Supervised Classification of Functional
+  Data](https://sipemu.github.io/fdars-r/articles/functional-classification.md):
+- [Functional Mixed Models for Repeated
+  Measures](https://sipemu.github.io/fdars-r/articles/functional-mixed-models.md):
+
 ### Analyze
 
 - [Functional Tolerance
@@ -49,10 +60,10 @@
   Testing](https://sipemu.github.io/fdars-r/articles/equivalence-testing.md):
 - [Functional
   Clustering](https://sipemu.github.io/fdars-r/articles/clustering.md):
+- [Model-Based Clustering with Gaussian
+  Mixtures](https://sipemu.github.io/fdars-r/articles/gmm-clustering.md):
 - [Outlier
   Detection](https://sipemu.github.io/fdars-r/articles/outlier-detection.md):
-- [Functional
-  Regression](https://sipemu.github.io/fdars-r/articles/regression.md):
 - [Seasonal Analysis of Functional
   Data](https://sipemu.github.io/fdars-r/articles/seasonal-analysis.md):
 - [Covariance Functions and Gaussian Process

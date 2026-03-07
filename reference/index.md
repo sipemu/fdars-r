@@ -199,6 +199,8 @@
 
 - [`cluster.fcm()`](https://sipemu.github.io/fdars-r/reference/cluster.fcm.md)
   : Fuzzy C-Means Clustering for Functional Data
+- [`cluster.gmm()`](https://sipemu.github.io/fdars-r/reference/cluster.gmm.md)
+  : Gaussian Mixture Model Clustering for Functional Data
 - [`cluster.init()`](https://sipemu.github.io/fdars-r/reference/cluster.init.md)
   : K-Means++ Center Initialization
 - [`cluster.kmeans()`](https://sipemu.github.io/fdars-r/reference/cluster.kmeans.md)
@@ -229,16 +231,24 @@
   : Functional Basis Regression
 - [`fregre.basis.cv()`](https://sipemu.github.io/fdars-r/reference/fregre.basis.cv.md)
   : Cross-Validation for Functional Basis Regression
+- [`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md)
+  : Functional Linear Model (FPC-based)
+- [`fregre.lm.cv()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.cv.md)
+  : Cross-Validation for FPC Component Selection (fregre.lm)
 - [`fregre.np()`](https://sipemu.github.io/fdars-r/reference/fregre.np.md)
   : Nonparametric Functional Regression
 - [`fregre.np.cv()`](https://sipemu.github.io/fdars-r/reference/fregre.np.cv.md)
   : Cross-Validation for Nonparametric Functional Regression
+- [`fregre.np.mixed()`](https://sipemu.github.io/fdars-r/reference/fregre.np.mixed.md)
+  : Nonparametric Functional Regression with Mixed Predictors
 - [`fregre.np.multi()`](https://sipemu.github.io/fdars-r/reference/fregre.np.multi.md)
   : Nonparametric Regression with Multiple Functional Predictors
 - [`fregre.pc()`](https://sipemu.github.io/fdars-r/reference/fregre.pc.md)
   : Functional Regression
 - [`fregre.pc.cv()`](https://sipemu.github.io/fdars-r/reference/fregre.pc.cv.md)
   : Cross-Validation for Functional PC Regression
+- [`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md)
+  : Functional Logistic Regression
 - [`optim.np()`](https://sipemu.github.io/fdars-r/reference/optim.np.md)
   : Optimize Bandwidth Using Cross-Validation
 - [`flm.test()`](https://sipemu.github.io/fdars-r/reference/flm.test.md)
@@ -251,6 +261,31 @@
   R-Squared (Coefficient of Determination)
 - [`pred.RMSE()`](https://sipemu.github.io/fdars-r/reference/pred.RMSE.md)
   : Root Mean Squared Error
+
+## Function-on-Scalar Regression
+
+- [`fosr()`](https://sipemu.github.io/fdars-r/reference/fosr.md) :
+  Function-on-Scalar Regression
+- [`fosr.fpc()`](https://sipemu.github.io/fdars-r/reference/fosr.fpc.md)
+  : FPC-based Function-on-Scalar Regression
+- [`fanova()`](https://sipemu.github.io/fdars-r/reference/fanova.md) :
+  Functional ANOVA
+
+## Classification
+
+- [`fclassif()`](https://sipemu.github.io/fdars-r/reference/fclassif.md)
+  : Supervised Classification of Functional Data
+- [`fclassif.cv()`](https://sipemu.github.io/fdars-r/reference/fclassif.cv.md)
+  : Cross-Validated Functional Classification
+
+## Functional Mixed Models
+
+- [`fmm()`](https://sipemu.github.io/fdars-r/reference/fmm.md) :
+  Functional Mixed Models
+- [`fmm.predict()`](https://sipemu.github.io/fdars-r/reference/fmm.predict.md)
+  : Predict from Functional Mixed Model
+- [`fmm.test.fixed()`](https://sipemu.github.io/fdars-r/reference/fmm.test.fixed.md)
+  : Permutation Test for Fixed Effects in FMM
 
 ## Seasonal Analysis
 
@@ -460,12 +495,22 @@
   : Plot method for basis.cv objects
 - [`plot(`*`<cluster.fcm>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.cluster.fcm.md)
   : Plot Method for cluster.fcm Objects
+- [`plot(`*`<cluster.gmm>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.cluster.gmm.md)
+  : Plot Method for cluster.gmm Objects
 - [`plot(`*`<cluster.kmeans>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.cluster.kmeans.md)
   : Plot Method for cluster.kmeans Objects
 - [`plot(`*`<cluster.optim>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.cluster.optim.md)
   : Plot Method for cluster.optim Objects
+- [`plot(`*`<fanova>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.fanova.md)
+  : Plot method for fanova objects
+- [`plot(`*`<fclassif>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.fclassif.md)
+  : Plot method for fclassif objects
 - [`plot(`*`<fequiv.test>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.fequiv.test.md)
   : Plot method for fequiv.test
+- [`plot(`*`<fmm>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.fmm.md)
+  : Plot method for fmm objects
+- [`plot(`*`<fosr>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.fosr.md)
+  : Plot method for fosr objects
 - [`plot(`*`<group.distance>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.group.distance.md)
   : Plot method for group.distance
 - [`plot(`*`<outliergram>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.outliergram.md)
@@ -493,8 +538,14 @@
 
 ## Prediction
 
+- [`predict(`*`<cluster.gmm>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.cluster.gmm.md)
+  : Predict Cluster Membership for New Functional Data
+- [`predict(`*`<fosr>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.fosr.md)
+  : Predict from Function-on-Scalar Regression
 - [`predict(`*`<fregre.fd>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.fregre.fd.md)
   : Predict Method for Functional Regression (fregre.fd)
+- [`predict(`*`<fregre.lm>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.fregre.lm.md)
+  : Predict method for fregre.lm objects
 - [`predict(`*`<fregre.np>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.fregre.np.md)
   : Predict Method for Nonparametric Functional Regression (fregre.np)
 - [`predict(`*`<fregre.np.multi>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.fregre.np.multi.md)
@@ -514,14 +565,32 @@
   : Print method for basis.cv objects
 - [`print(`*`<cluster.fcm>`*`)`](https://sipemu.github.io/fdars-r/reference/print.cluster.fcm.md)
   : Print Method for cluster.fcm Objects
+- [`print(`*`<cluster.gmm>`*`)`](https://sipemu.github.io/fdars-r/reference/print.cluster.gmm.md)
+  : Print Method for cluster.gmm Objects
 - [`print(`*`<cluster.kmeans>`*`)`](https://sipemu.github.io/fdars-r/reference/print.cluster.kmeans.md)
   : Print Method for cluster.kmeans Objects
 - [`print(`*`<cluster.optim>`*`)`](https://sipemu.github.io/fdars-r/reference/print.cluster.optim.md)
   : Print Method for cluster.optim Objects
+- [`print(`*`<fanova>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fanova.md)
+  : Print method for fanova objects
 - [`print(`*`<fbplot>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fbplot.md)
   : Print Method for fbplot Objects
+- [`print(`*`<fclassif>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fclassif.md)
+  : Print method for fclassif objects
+- [`print(`*`<fclassif.cv>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fclassif.cv.md)
+  : Print method for fclassif.cv objects
+- [`print(`*`<fmm>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fmm.md)
+  : Print method for fmm objects
+- [`print(`*`<fmm.test>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fmm.test.md)
+  : Print method for fmm.test objects
+- [`print(`*`<fosr>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fosr.md)
+  : Print method for fosr objects
 - [`print(`*`<fregre.fd>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fregre.fd.md)
   : Print method for fregre objects
+- [`print(`*`<fregre.lm>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fregre.lm.md)
+  : Print method for fregre.lm objects
+- [`print(`*`<fregre.logistic>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fregre.logistic.md)
+  : Print method for fregre.logistic objects
 - [`print(`*`<fregre.np>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fregre.np.md)
   : Print method for fregre.np objects
 - [`print(`*`<fregre.np.multi>`*`)`](https://sipemu.github.io/fdars-r/reference/print.fregre.np.multi.md)
@@ -608,7 +677,7 @@ Low-level Rust function wrappers. Use the R-level functions instead.
 - [`alignment_compose_warps()`](https://sipemu.github.io/fdars-r/reference/alignment_compose_warps.md)
   : Compose two warping functions
 - [`alignment_constrained()`](https://sipemu.github.io/fdars-r/reference/alignment_constrained.md)
-  : Elastic alignment with landmark constraints
+  : Elastic alignment with explicit landmark constraints
 - [`alignment_cross_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_cross_dist.md)
   : Elastic cross-distance matrix
 - [`alignment_decomposition()`](https://sipemu.github.io/fdars-r/reference/alignment_decomposition.md)
@@ -638,11 +707,12 @@ Low-level Rust function wrappers. Use the R-level functions instead.
 - [`alignment_tsrvf_inverse()`](https://sipemu.github.io/fdars-r/reference/alignment_tsrvf_inverse.md)
   : Inverse TSRVF: reconstruct curves from tangent vectors
 - [`alignment_tsrvf_transform()`](https://sipemu.github.io/fdars-r/reference/alignment_tsrvf_transform.md)
-  : Full TSRVF transform
+  : Full TSRVF transform: compute Karcher mean + transport to tangent
+  space
 - [`alignment_warp_complexity()`](https://sipemu.github.io/fdars-r/reference/alignment_warp_complexity.md)
-  : Compute warp complexity
+  : Compute warp complexity (geodesic distance from identity)
 - [`alignment_warp_smoothness()`](https://sipemu.github.io/fdars-r/reference/alignment_warp_smoothness.md)
-  : Compute warp smoothness
+  : Compute warp smoothness (bending energy)
 - [`alignment_with_landmarks()`](https://sipemu.github.io/fdars-r/reference/alignment_with_landmarks.md)
   : Elastic alignment with automatic landmark detection
 - [`landmark_detect()`](https://sipemu.github.io/fdars-r/reference/landmark_detect.md)
@@ -703,11 +773,15 @@ Low-level Rust function wrappers. Use the R-level functions instead.
   the flattened surface space
 - [`depth_rp_1d()`](https://sipemu.github.io/fdars-r/reference/depth_rp_1d.md)
   : Compute random projection depth
+- [`depth_rp_1d_seeded()`](https://sipemu.github.io/fdars-r/reference/depth_rp_1d_seeded.md)
+  : Random projection depth with optional seed
 - [`depth_rp_2d()`](https://sipemu.github.io/fdars-r/reference/depth_rp_2d.md)
   : Random projection depth for 2D functional data (surfaces) Projects
   surfaces to scalars using random projections
 - [`depth_rt_1d()`](https://sipemu.github.io/fdars-r/reference/depth_rt_1d.md)
   : Compute random Tukey depth
+- [`depth_rt_1d_seeded()`](https://sipemu.github.io/fdars-r/reference/depth_rt_1d_seeded.md)
+  : Random Tukey depth with optional seed
 - [`depth_rt_2d()`](https://sipemu.github.io/fdars-r/reference/depth_rt_2d.md)
   : Random Tukey depth for 2D functional data (surfaces)
 - [`metric_dtw_cross_1d()`](https://sipemu.github.io/fdars-r/reference/metric_dtw_cross_1d.md)
@@ -767,9 +841,6 @@ Low-level Rust function wrappers. Use the R-level functions instead.
   fourier
 - [`fdata2basis_2d()`](https://sipemu.github.io/fdars-r/reference/fdata2basis_2d.md)
   : Convert 2D Functional Data to Tensor Product Basis Coefficients
-- [`fdata2basis_2d_raw()`](https://sipemu.github.io/fdars-r/reference/fdata2basis_2d_raw.md)
-  : Project 2D functional data to tensor product basis coefficients (raw
-  binding)
 - [`fdata2basis_cv()`](https://sipemu.github.io/fdars-r/reference/fdata2basis_cv.md)
   : Cross-Validation for Basis Function Number Selection
 - [`fdata2fd()`](https://sipemu.github.io/fdars-r/reference/fdata2fd.md)
@@ -797,9 +868,6 @@ Low-level Rust function wrappers. Use the R-level functions instead.
 - [`basis2fdata_2d()`](https://sipemu.github.io/fdars-r/reference/basis2fdata_2d.md)
   : Reconstruct 2D Functional Data from Tensor Product Basis
   Coefficients
-- [`basis2fdata_2d_raw()`](https://sipemu.github.io/fdars-r/reference/basis2fdata_2d_raw.md)
-  : Reconstruct 2D functional data from tensor product basis
-  coefficients (raw binding)
 - [`basis_aic_1d()`](https://sipemu.github.io/fdars-r/reference/basis_aic_1d.md)
   : Compute AIC for basis fit AIC = n \* log(RSS/n) + 2 \* total_edf
   Where total_edf = n_curves \* edf (each curve has edf parameters) When
@@ -979,3 +1047,43 @@ Low-level Rust function wrappers. Use the R-level functions instead.
   : Compute the geometric median (L1 median) of 2D functional data using
   Weiszfeld's algorithm Data is stored as n x (m1\*m2) matrix where each
   row is a flattened surface
+- [`fregre_cv_rust()`](https://sipemu.github.io/fdars-r/reference/fregre_cv_rust.md)
+  : Cross-validation for FPC component selection
+- [`fregre_lm_rust()`](https://sipemu.github.io/fdars-r/reference/fregre_lm_rust.md)
+  : Functional linear model (FPC-based)
+- [`fregre_np_mixed_rust()`](https://sipemu.github.io/fdars-r/reference/fregre_np_mixed_rust.md)
+  : Nonparametric functional regression with mixed predictors
+- [`functional_logistic_rust()`](https://sipemu.github.io/fdars-r/reference/functional_logistic_rust.md)
+  : Functional logistic regression
+- [`fosr_fpc_rust()`](https://sipemu.github.io/fdars-r/reference/fosr_fpc_rust.md)
+  : FPC-based function-on-scalar regression
+- [`fosr_rust()`](https://sipemu.github.io/fdars-r/reference/fosr_rust.md)
+  : Function-on-scalar regression (penalized)
+- [`fanova_rust()`](https://sipemu.github.io/fdars-r/reference/fanova_rust.md)
+  : Functional ANOVA
+- [`predict_fosr_rust()`](https://sipemu.github.io/fdars-r/reference/predict_fosr_rust.md)
+  : Predict from function-on-scalar regression
+- [`predict_gmm_rust()`](https://sipemu.github.io/fdars-r/reference/predict_gmm_rust.md)
+  : Predict from GMM
+- [`fclassif_cv_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_cv_rust.md)
+  : Cross-validated classification
+- [`fclassif_dd_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_dd_rust.md)
+  : DD-plot classification
+- [`fclassif_kernel_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_kernel_rust.md)
+  : Kernel classification
+- [`fclassif_knn_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_knn_rust.md)
+  : kNN classification
+- [`fclassif_lda_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_lda_rust.md)
+  : LDA classification
+- [`fclassif_qda_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_qda_rust.md)
+  : QDA classification
+- [`gmm_cluster_rust()`](https://sipemu.github.io/fdars-r/reference/gmm_cluster_rust.md)
+  : GMM clustering with automatic K selection
+- [`gmm_em_rust()`](https://sipemu.github.io/fdars-r/reference/gmm_em_rust.md)
+  : Raw GMM EM on feature matrix
+- [`fmm_predict_rust()`](https://sipemu.github.io/fdars-r/reference/fmm_predict_rust.md)
+  : Predict from functional mixed model
+- [`fmm_rust()`](https://sipemu.github.io/fdars-r/reference/fmm_rust.md)
+  : Functional mixed model
+- [`fmm_test_fixed_rust()`](https://sipemu.github.io/fdars-r/reference/fmm_test_fixed_rust.md)
+  : Permutation test for fixed effects in FMM

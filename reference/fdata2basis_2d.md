@@ -6,12 +6,9 @@ which is the Kronecker product of two 1D bases.
 ## Usage
 
 ``` r
-fdata2basis_2d(
-  fdataobj,
-  nbasis.s = 10,
-  nbasis.t = 10,
-  type = c("bspline", "fourier")
-)
+fdata2basis_2d(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+
+fdata2basis_2d(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 ```
 
 ## Arguments
@@ -52,4 +49,5 @@ fd2d <- fdata(array(surface, dim = c(1, 20, 20)))
 
 # Project to tensor product basis
 coefs <- fdata2basis_2d(fd2d, nbasis.s = 7, nbasis.t = 7, type = "fourier")
+#> Error in fdata2basis_2d(fd2d, nbasis.s = 7, nbasis.t = 7, type = "fourier"): unused arguments (nbasis.s = 7, nbasis.t = 7, type = "fourier")
 ```
