@@ -76,22 +76,11 @@ fd <- andrews_transform(X)
 ```
 
 ``` r
-n <- nrow(fd$data)
-m <- ncol(fd$data)
-df_plot <- data.frame(
-  t = rep(fd$argvals, each = n),
-  value = as.vector(fd$data),
-  Species = rep(species, m)
-)
-
-ggplot(df_plot, aes(x = t, y = value, group = interaction(Species, rep(1:n, m)),
-                     color = Species)) +
-  geom_line(alpha = 0.35, linewidth = 0.4) +
+plot(fd, color = species, alpha = 0.35, show.mean = TRUE,
+     palette = c("setosa" = "#E69F00", "versicolor" = "#56B4E9",
+                 "virginica" = "#009E73")) +
   labs(x = expression(t), y = expression(f[x](t)),
-       title = "Iris Andrews Curves by Species") +
-  scale_color_manual(values = c("setosa" = "#E69F00",
-                                 "versicolor" = "#56B4E9",
-                                 "virginica" = "#009E73"))
+       title = "Iris Andrews Curves by Species")
 ```
 
 ![](functional-classification_files/figure-html/iris-plot-1.png)
