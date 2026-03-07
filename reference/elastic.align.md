@@ -7,7 +7,13 @@ alignment target.
 ## Usage
 
 ``` r
-elastic.align(fdataobj, target = NULL, periodic = FALSE)
+elastic.align(
+  fdataobj,
+  target = NULL,
+  periodic = FALSE,
+  rotate.method = "peak",
+  rotate.args = list()
+)
 ```
 
 ## Arguments
@@ -28,6 +34,19 @@ elastic.align(fdataobj, target = NULL, periodic = FALSE)
   functional data (e.g., data on \\\[0, 2\pi\]\\ where \\f(0) =
   f(2\pi)\\) that would otherwise be poorly aligned due to fixed
   boundary constraints \\\gamma(0)=0, \gamma(1)=1\\. Default is FALSE.
+
+- rotate.method:
+
+  Rotation method when `periodic = TRUE`: one of `"peak"` (default),
+  `"xcorr"`, `"landmark"`, or `"iterative"`. See
+  [`periodic.rotate`](https://sipemu.github.io/fdars-r/reference/periodic.rotate.md)
+  for details.
+
+- rotate.args:
+
+  A named list of additional arguments passed to
+  [`periodic.rotate`](https://sipemu.github.io/fdars-r/reference/periodic.rotate.md)
+  (e.g., `reference`, `landmark.func`, `max.iter`).
 
 ## Value
 
@@ -57,6 +76,10 @@ An object of class 'elastic.align' with components:
 
   integer vector of circular rotation shifts applied (NULL when periodic
   = FALSE)
+
+- rotate_method:
+
+  the rotation method used (NULL when periodic = FALSE)
 
 ## References
 
