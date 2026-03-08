@@ -8,111 +8,30 @@ home:
 
 navbar:
   structure:
-    left: [intro, reference, learn, represent, align, regression, analyze]
+    left: [reference, learn, examples]
     right: [search, github]
   components:
+    reference:
+      text: Reference
+      href: reference/index.html
     learn:
       text: Learn
-      menu:
-      - text: Getting Started
-      - text: Introduction to fdars
-        href: articles/introduction.html
-      - text: Custom Plotting with ggplot2
-        href: articles/custom-plotting.html
-      - text: "---"
-      - text: Preprocessing
-      - text: Introduction to Smoothing
-        href: articles/intro-to-smoothing.html
-      - text: Working with Derivatives
-        href: articles/working-with-derivatives.html
-      - text: "---"
-      - text: Data
-      - text: Simulation Toolbox
-        href: articles/simulation-toolbox.html
-      - text: Irregular Sampling
-        href: articles/irregular-sampling.html
-    represent:
-      text: Represent
-      menu:
-      - text: Decomposition
-      - text: Functional PCA (FPCA)
-        href: articles/fpca.html
-      - text: Basis Representation
-        href: articles/basis-representation.html
-      - text: "---"
-      - text: Transformation
-      - text: Andrews Curves
-        href: articles/andrews-transformation.html
-      - text: "---"
-      - text: Ranking & Centrality
-      - text: Depth Functions
-        href: articles/depth-functions.html
-      - text: Streaming Depth
-        href: articles/streaming-depth.html
-      - text: "---"
-      - text: Proximity
-      - text: Distance Metrics
-        href: articles/distance-metrics.html
-    align:
-      text: Align
-      menu:
-      - text: Methods
-      - text: Elastic Alignment
-        href: articles/elastic-alignment.html
-      - text: Landmark Registration
-        href: articles/landmark-registration.html
-      - text: TSRVF (Tangent Space)
-        href: articles/tsrvf.html
-      - text: "---"
-      - text: Guides
-      - text: Comparing Alignment Methods
-        href: articles/alignment-comparison.html
-    regression:
-      text: Regression
-      menu:
-      - text: Nonparametric
-      - text: Kernel & kNN Regression
-        href: articles/regression.html
-      - text: "---"
-      - text: Scalar-on-Function
-      - text: Functional Regression
-        href: articles/functional-regression.html
-      - text: "---"
-      - text: Function-on-Scalar
-      - text: Functional Regression (FOSR)
-        href: articles/functional-regression.html#function-on-scalar-regression
-      - text: "---"
-      - text: Classification
-      - text: Supervised Classification
-        href: articles/functional-classification.html
-      - text: "---"
-      - text: Repeated Measures
-      - text: Functional Mixed Models
-        href: articles/functional-mixed-models.html
-    analyze:
-      text: Analyze
-      menu:
-      - text: Inference
-      - text: Tolerance Bands
-        href: articles/tolerance-bands.html
-      - text: Equivalence Testing
-        href: articles/equivalence-testing.html
-      - text: "---"
-      - text: Unsupervised
-      - text: Clustering (K-Means)
-        href: articles/clustering.html
-      - text: GMM Clustering
-        href: articles/gmm-clustering.html
-      - text: Outlier Detection
-        href: articles/outlier-detection.html
-      - text: "---"
-      - text: Time Series
-      - text: Seasonal Analysis
-        href: articles/seasonal-analysis.html
-      - text: Covariance Functions
-        href: articles/covariance-functions.html
+      href: index.html
+    examples:
+      text: Examples
+      href: articles/examples.html
 
 articles:
+- title: Navigation
+  contents:
+  - articles/examples
+- title: Examples
+  contents:
+  - articles/example-berkeley-growth
+  - articles/example-andrews-wine-intro
+  - articles/example-andrews-wine
+  - articles/example-andrews-wine-clustering
+  - articles/example-andrews-wine-qc
 - title: Learn
   contents:
   - introduction
@@ -190,6 +109,11 @@ reference:
   - select.basis.auto
   - pspline
   - pspline.2d
+
+- title: Andrews Transformation
+  contents:
+  - andrews_transform
+  - andrews_loadings
 
 - title: Elastic Alignment
   contents:

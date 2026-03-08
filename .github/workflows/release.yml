@@ -2,22 +2,24 @@ name: Release
 
 on:
   push:
+    branches: [main]
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-release:
-    name: Build ${{ matrix.config.os }}
+  build-binaries:
+    name: Build ${{ matrix.config.type }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
           - {os: macos-latest, type: 'macOS', r-version: 'release'}
-          - {os: windows-latest, type: 'Windows', r-version: '4.2.2'}
+          - {os: windows-latest, type: 'Windows', r-version: 'release'}
 
     steps:
       - uses: actions/checkout@v4
@@ -39,36 +41,30 @@ jobs:
 
       - name: Build Binary Package
         run: |
-          # Generate documentation first
           roxygen2::roxygenize()
-          # Build binary with manual
           pkg_path <- devtools::build(binary = TRUE, path = "..", args = c("--no-build-vignettes"))
-          writeLines(pkg_path, "../pkg_path.txt")
+          cat("Built:", pkg_path, "\n")
         shell: Rscript {0}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.config.type }}-binary
+          name: fdars-${{ matrix.config.type }}
           path: |
-            *.tgz
-            *.zip
+            ../*.tgz
+            ../*.zip
 
   release:
-    needs: build-release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-binaries
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download macOS Artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: macOS-binary
-
-      - name: Download Windows Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: Windows-binary
+          merge-multiple: true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -81,7 +77,7 @@ jobs:
 
             ### Installation
 
-            **Windows / macOS:**
+            **Windows / macOS (no Rust needed):**
             Download the attached `.zip` (Windows) or `.tgz` (macOS) file and install:
             ```r
             install.packages("path/to/fdars_x.y.z.zip", repos = NULL, type = "win.binary")  # Windows

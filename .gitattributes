@@ -1,0 +1,3 @@
+# Prevent line-ending conversion in vendored Rust sources
+# (CRLF would break cargo checksum verification on Windows)
+src/rust/vendor/** -text
