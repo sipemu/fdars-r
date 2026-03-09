@@ -42,7 +42,9 @@ jobs:
       - name: Build Binary Package
         run: |
           roxygen2::roxygenize()
-          pkg_path <- devtools::build(binary = TRUE, path = "..", args = c("--no-build-vignettes"))
+          out_dir <- normalizePath(file.path(getwd(), "pkg_output"))
+          dir.create(out_dir, showWarnings = FALSE)
+          pkg_path <- devtools::build(binary = TRUE, path = out_dir, args = c("--no-build-vignettes"))
           cat("Built:", pkg_path, "\n")
         shell: Rscript {0}
 
@@ -50,9 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fdars-${{ matrix.config.type }}
-          path: |
-            ../*.tgz
-            ../*.zip
+          path: pkg_output/
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
