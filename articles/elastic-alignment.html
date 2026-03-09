@@ -2101,380 +2101,9 @@ results when curves have complex shapes.</p>
 <div class="section level2">
 <h2 id="real-data-berkeley-growth-velocity">Real Data: Berkeley Growth Velocity<a class="anchor" aria-label="anchor" href="#real-data-berkeley-growth-velocity"></a>
 </h2>
-<p>The <strong>Berkeley Growth Study</strong> recorded the heights of 93
-children (39 boys, 54 girls) from ages 1 to 18. The growth
-<em>velocity</em> curves (cm/year) exhibit clear phase variability: each
-child’s pubertal growth spurt occurs at a different age, creating
-horizontal shifts in the peak.</p>
-<p>The primary output of elastic alignment here is the <strong>warping
-functions</strong> – each
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>
-encodes <em>when</em> child
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>’s
-growth spurt occurred relative to the population, i.e., their biological
-maturation timing. These warpings are directly useful for downstream
-analysis (correlating puberty timing with other variables, clustering by
-maturation pattern, etc.). The aligned curves themselves are a
-byproduct: they represent pure amplitude variability (how <em>tall</em>
-the growth spurt is) after timing differences have been removed.</p>
-<p>This dataset is a standard benchmark in elastic FDA literature
-(Tucker et al., 2013; Srivastava and Klassen, 2016). It is available in
-the <code>fdasrvf</code> package.</p>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">growth_vel</span>, package <span class="op">=</span> <span class="st">"fdasrvf"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># growth_vel$f is 69 (grid) x 93 (curves) — transpose for fdata</span></span>
-<span><span class="co"># Standard ordering: first 39 = boys, last 54 = girls</span></span>
-<span><span class="va">fd_growth_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">growth_vel</span><span class="op">$</span><span class="va">f</span><span class="op">)</span>, argvals <span class="op">=</span> <span class="va">growth_vel</span><span class="op">$</span><span class="va">time</span><span class="op">)</span></span>
-<span><span class="va">gender</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Boy"</span>, <span class="fl">39</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Girl"</span>, <span class="fl">54</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Curves:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fd_growth_raw</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>,</span>
-<span>    <span class="st">"("</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Boy"</span><span class="op">)</span>, <span class="st">"boys,"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Girl"</span><span class="op">)</span>, <span class="st">"girls)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Curves: 93 ( 39 boys, 54 girls)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Grid points:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fd_growth_raw</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Grid points: 69</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Age range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">fd_growth_raw</span><span class="op">$</span><span class="va">argvals</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Age range: 1 18</span></span></code></pre></div>
-<p>The raw data has only 69 grid points, which is coarse for elastic
-alignment (the DP warping resolution is limited). We smooth with
-P-splines and evaluate on a finer grid:</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Smooth with P-splines and evaluate on a finer grid</span></span>
-<span><span class="va">fine_argvals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">fd_growth_raw</span><span class="op">$</span><span class="va">argvals</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">fd_growth_raw</span><span class="op">$</span><span class="va">argvals</span><span class="op">)</span>,</span>
-<span>                    length.out <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span>
-<span><span class="va">coefs_growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2basis.html">fdata2basis</a></span><span class="op">(</span><span class="va">fd_growth_raw</span>, nbasis <span class="op">=</span> <span class="fl">25</span>, type <span class="op">=</span> <span class="st">"bspline"</span><span class="op">)</span></span>
-<span><span class="va">fd_growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis2fdata.html">basis2fdata</a></span><span class="op">(</span><span class="va">coefs_growth</span>, <span class="va">fine_argvals</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Smoothed grid points:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fd_growth</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Smoothed grid points: 200</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="full-age-range">Full Age Range<a class="anchor" aria-label="anchor" href="#full-age-range"></a>
-</h3>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd_growth</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Berkeley Growth Velocity (all 93 children)"</span>,</span>
-<span>                       x <span class="op">=</span> <span class="st">"Age (years)"</span>, y <span class="op">=</span> <span class="st">"Growth velocity (cm/year)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/growth-full-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The dominant feature at age 1 (infant growth) and the pubertal spurt
-around ages 11–14 are both visible, but the pubertal peak is blurred by
-phase variability.</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res_growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.align.html">elastic.align</a></span><span class="op">(</span><span class="va">fd_growth</span><span class="op">)</span></span>
-<span><span class="va">var_orig_growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_growth</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">vr_growth</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">res_growth</span><span class="op">$</span><span class="va">aligned</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">var_orig_growth</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Full range VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_growth</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Full range VR: 48.6 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_growth</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/growth-full-plot-1.png" class="r-plt" alt="" width="100%"></p>
-</div>
-<div class="section level3">
-<h3 id="pubertal-growth-spurt-ages-818">Pubertal Growth Spurt (Ages 8–18)<a class="anchor" aria-label="anchor" href="#pubertal-growth-spurt-ages-818"></a>
-</h3>
-<p>The pubertal region is where phase variability is strongest.
-Restricting to ages 8–18 isolates the growth spurt:</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">idx_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">fd_growth</span><span class="op">$</span><span class="va">argvals</span> <span class="op">&gt;=</span> <span class="fl">8</span><span class="op">)</span></span>
-<span><span class="va">fd_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">fd_growth</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="va">idx_pub</span><span class="op">]</span>,</span>
-<span>                argvals <span class="op">=</span> <span class="va">fd_growth</span><span class="op">$</span><span class="va">argvals</span><span class="op">[</span><span class="va">idx_pub</span><span class="op">]</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">res_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.align.html">elastic.align</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">)</span></span>
-<span><span class="va">var_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">vr_pub</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">res_pub</span><span class="op">$</span><span class="va">aligned</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">var_pub</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Pubertal region VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_pub</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Pubertal region VR: 77.7 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_pub</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/growth-pubertal-plot-1.png" class="r-plt" alt="" width="100%"></p>
-</div>
-<div class="section level3">
-<h3 id="cross-sectional-mean-vs-karcher-mean">Cross-Sectional Mean vs Karcher Mean<a class="anchor" aria-label="anchor" href="#cross-sectional-mean-vs-karcher-mean"></a>
-</h3>
-<p>The Karcher mean serves as the <strong>reference frame</strong> that
-gives the warping functions their meaning – each
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>
-is defined as “warp curve
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-to match <em>this</em> mean.” Without a consistent reference, the
-warpings would not be comparable across children.</p>
-<p>As a bonus, the Karcher mean also recovers a de-blurred population
-average. The cross-sectional mean is attenuated because children’s
-growth spurts are averaged at mismatched ages; the Karcher mean recovers
-the true peak amplitude:</p>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">km_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/karcher.mean.html">karcher.mean</a></span><span class="op">(</span><span class="va">fd_pub</span>, max.iter <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">cross_mean_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="va">karcher_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">km_pub</span><span class="op">$</span><span class="va">mean</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Cross-sectional mean peak:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">cross_mean_pub</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"cm/yr at age"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">cross_mean_pub</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Cross-sectional mean peak: 6.39 cm/yr at age 11.5</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Karcher mean peak:        "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">karcher_pub</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"cm/yr at age"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">karcher_pub</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Karcher mean peak:         8.42 cm/yr at age 12.4</span></span></code></pre></div>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  velocity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cross_mean_pub</span>, <span class="va">karcher_pub</span><span class="op">)</span>,</span>
-<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cross-sectional mean"</span>, <span class="st">"Karcher mean"</span><span class="op">)</span>,</span>
-<span>             each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_means</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">velocity</span>, color <span class="op">=</span> <span class="va">type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cross-sectional mean"</span> <span class="op">=</span> <span class="st">"steelblue"</span>,</span>
-<span>                                <span class="st">"Karcher mean"</span> <span class="op">=</span> <span class="st">"firebrick"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Pubertal Growth Spurt: Cross-Sectional vs Karcher Mean"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Age (years)"</span>, y <span class="op">=</span> <span class="st">"Growth velocity (cm/year)"</span>, color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/growth-karcher-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The Karcher mean is sharper and taller because it aligns the growth
-spurts before averaging, rather than smearing them across different
-ages. This sharper shape is a better estimate of the typical growth
-velocity profile – but its primary role is as the anchor that makes the
-per-child warping functions interpretable and mutually comparable.</p>
-</div>
-<div class="section level3">
-<h3 id="fpca-before-and-after-alignment">FPCA Before and After Alignment<a class="anchor" aria-label="anchor" href="#fpca-before-and-after-alignment"></a>
-</h3>
-<p>Alignment concentrates variance into fewer principal components:</p>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pc_before</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2pc.html">fdata2pc</a></span><span class="op">(</span><span class="va">fd_pub</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">pc_after</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2pc.html">fdata2pc</a></span><span class="op">(</span><span class="va">km_pub</span><span class="op">$</span><span class="va">aligned</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pve_before</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pc_before</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">pc_before</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">pve_after</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pc_after</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">pc_after</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Before alignment: PC1 ="</span>, <span class="va">pve_before</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"%, PC2 ="</span>, <span class="va">pve_before</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
-<span>    <span class="st">"%, PC3 ="</span>, <span class="va">pve_before</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Before alignment: PC1 = 67.6 %, PC2 = 26.3 %, PC3 = 6.1 %</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"After alignment:  PC1 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"%, PC2 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
-<span>    <span class="st">"%, PC3 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; After alignment:  PC1 = 58.1 %, PC2 = 32.1 %, PC3 = 9.8 %</span></span></code></pre></div>
-<p>Before alignment, phase variability spreads across multiple PCs.
-After alignment, the remaining (amplitude) variability is more
-efficiently captured by the first PC.</p>
-</div>
-<div class="section level3">
-<h3 id="warping-functions-reveal-growth-timing">Warping Functions Reveal Growth Timing<a class="anchor" aria-label="anchor" href="#warping-functions-reveal-growth-timing"></a>
-</h3>
-<p>The warping functions are the main extracted quantity from this
-analysis. Each
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>
-maps population-average time to child
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>’s
-biological time, revealing how their developmental clock differs from
-the Karcher mean reference:</p>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">n_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">res_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="va">m_pub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">res_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="va">df_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">res_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">argvals</span>, <span class="va">n_pub</span><span class="op">)</span>,</span>
-<span>  gamma <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">res_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">data</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  curve <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_pub</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">m_pub</span><span class="op">)</span>,</span>
-<span>  sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">gender</span>, each <span class="op">=</span> <span class="va">m_pub</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_warps</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">gamma</span>, group <span class="op">=</span> <span class="va">curve</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey60"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Boy <span class="op">=</span> <span class="st">"steelblue"</span>, Girl <span class="op">=</span> <span class="st">"coral"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Warping Functions by Sex"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Reference age (years)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">gamma</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span>, color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/growth-warps-1.png" class="r-plt" alt="" width="100%"></p>
-<p>Each
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\gamma_i(t)</annotation></semantics></math>
-maps from the reference time axis (the Karcher mean) to the
-corresponding age in child
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>’s
-original curve. Curves <strong>below</strong> the diagonal
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&lt;</mo><mi>t</mi></mrow><annotation encoding="application/x-tex">\gamma_i(t) &lt; t</annotation></semantics></math>)
-indicate that the growth spurt occurred at a younger age than the
-population average – i.e., earlier maturation. Curves
-<strong>above</strong> the diagonal indicate later maturation.</p>
-<p>The colour separation confirms the well-known pattern: girls (coral)
-cluster below the diagonal, reflecting earlier pubertal timing, while
-boys (blue) cluster above.</p>
-</div>
-<div class="section level3">
-<h3 id="testing-the-gender-difference-in-timing">Testing the Gender Difference in Timing<a class="anchor" aria-label="anchor" href="#testing-the-gender-difference-in-timing"></a>
-</h3>
-<p>The visual pattern suggests boys and girls differ in pubertal timing.
-We can test this formally with <code><a href="../reference/fequiv.test.html">fequiv.test()</a></code>, which checks
-whether the mean warping functions of two groups are equivalent within a
-margin
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>.
-If equivalence is <em>not</em> declared, we have evidence the timing
-patterns genuinely differ.</p>
-<p>We use
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\delta = 0.5</annotation></semantics></math>
-years – differences smaller than half a year would be considered
-practically negligible:</p>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">warps_boys</span> <span class="op">&lt;-</span> <span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Boy"</span><span class="op">]</span></span>
-<span><span class="va">warps_girls</span> <span class="op">&lt;-</span> <span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Girl"</span><span class="op">]</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">equiv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fequiv.test.html">fequiv.test</a></span><span class="op">(</span><span class="va">warps_boys</span>, <span class="va">warps_girls</span>, delta <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                     n.boot <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">equiv</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Functional Equivalence Test (TOST)</span></span>
-<span><span class="co">#&gt; ===================================</span></span>
-<span><span class="co">#&gt; Data: warps_boys and warps_girls </span></span>
-<span><span class="co">#&gt; Two-sample test, n1 = 39 , n2 = 54 </span></span>
-<span><span class="co">#&gt; Bootstrap method: multiplier </span></span>
-<span><span class="co">#&gt; Equivalence margin (delta): 0.5 </span></span>
-<span><span class="co">#&gt; Significance level (alpha): 0.05 </span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Test statistic (sup|d_hat|): 2.0022 </span></span>
-<span><span class="co">#&gt; Critical value: 0.4279 </span></span>
-<span><span class="co">#&gt; SCB range: [ -0.4279 , 2.43 ]</span></span>
-<span><span class="co">#&gt; P-value: 1 </span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Decision: Fail to reject H0 -- equivalence NOT declared</span></span></code></pre></div>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">equiv</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Age (years)"</span>,</span>
-<span>       y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html" class="external-link">hat</a></span><span class="op">(</span><span class="va">gamma</span><span class="op">)</span><span class="op">[</span><span class="va">boys</span><span class="op">]</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html" class="external-link">hat</a></span><span class="op">(</span><span class="va">gamma</span><span class="op">)</span><span class="op">[</span><span class="va">girls</span><span class="op">]</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/growth-gender-test-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The mean difference curve (solid line) and its simultaneous
-confidence band (shaded) both far exceed the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo><mi>δ</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\pm\delta = 0.5</annotation></semantics></math>
-year margins (dashed lines), so equivalence is decisively rejected.</p>
-<p>The mean warping functions for each group show the separation
-directly:</p>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">t_pub</span> <span class="op">&lt;-</span> <span class="va">warps_boys</span><span class="op">$</span><span class="va">argvals</span></span>
-<span><span class="va">mean_warp_boys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">warps_boys</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="va">mean_warp_girls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">warps_girls</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Pointwise 95% CI via bootstrap</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">n_boot</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
-<span><span class="va">boot_boys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_boot</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_pub</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">boot_girls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_boot</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_pub</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_boot</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">boot_boys</span><span class="op">[</span><span class="va">b</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">warps_boys</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">warps_boys</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>,</span>
-<span>                              replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span>
-<span>  <span class="va">boot_girls</span><span class="op">[</span><span class="va">b</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">warps_girls</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">warps_girls</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>,</span>
-<span>                               replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">ci_boys_lo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_boys</span>, <span class="fl">2</span>, <span class="va">quantile</span>, <span class="fl">0.025</span><span class="op">)</span></span>
-<span><span class="va">ci_boys_hi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_boys</span>, <span class="fl">2</span>, <span class="va">quantile</span>, <span class="fl">0.975</span><span class="op">)</span></span>
-<span><span class="va">ci_girls_lo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_girls</span>, <span class="fl">2</span>, <span class="va">quantile</span>, <span class="fl">0.025</span><span class="op">)</span></span>
-<span><span class="va">ci_girls_hi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_girls</span>, <span class="fl">2</span>, <span class="va">quantile</span>, <span class="fl">0.975</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">df_ci</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="va">t_pub</span>, lo <span class="op">=</span> <span class="va">ci_boys_lo</span>, hi <span class="op">=</span> <span class="va">ci_boys_hi</span>, group <span class="op">=</span> <span class="st">"Boys"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="va">t_pub</span>, lo <span class="op">=</span> <span class="va">ci_girls_lo</span>, hi <span class="op">=</span> <span class="va">ci_girls_hi</span>, group <span class="op">=</span> <span class="st">"Girls"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">df_mean_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_pub</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  gamma <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mean_warp_boys</span>, <span class="va">mean_warp_girls</span>, <span class="va">t_pub</span><span class="op">)</span>,</span>
-<span>  group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Boys"</span>, <span class="st">"Girls"</span>, <span class="st">"Identity"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_pub</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_ci</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, ymin <span class="op">=</span> <span class="va">lo</span>, ymax <span class="op">=</span> <span class="va">hi</span>, fill <span class="op">=</span> <span class="va">group</span><span class="op">)</span>,</span>
-<span>              alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_mean_warps</span>,</span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">gamma</span>, color <span class="op">=</span> <span class="va">group</span>, linetype <span class="op">=</span> <span class="va">group</span><span class="op">)</span>,</span>
-<span>            linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey60"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Boys <span class="op">=</span> <span class="st">"steelblue"</span>, Girls <span class="op">=</span> <span class="st">"coral"</span>,</span>
-<span>                                Identity <span class="op">=</span> <span class="st">"grey60"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Boys <span class="op">=</span> <span class="st">"steelblue"</span>, Girls <span class="op">=</span> <span class="st">"coral"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Boys <span class="op">=</span> <span class="st">"solid"</span>, Girls <span class="op">=</span> <span class="st">"solid"</span>,</span>
-<span>                                   Identity <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Mean Warping Functions by Sex (95% CI)"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Reference age (years)"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bar</span><span class="op">(</span><span class="va">gamma</span><span class="op">)</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>       color <span class="op">=</span> <span class="cn">NULL</span>, linetype <span class="op">=</span> <span class="cn">NULL</span>, fill <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/growth-mean-warps-1.png" class="r-plt" alt="" width="100%"></p>
-<p>Girls’ mean warping sits below the identity (the growth spurt
-features occur at younger ages), while boys’ sits above. The vertical
-gap between the two curves represents the timing difference at each
-reference age.</p>
-<p>We can quantify the timing gap directly from the original curves:</p>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">peak_ages</span> <span class="op">&lt;-</span> <span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">data</span>, <span class="fl">1</span>, <span class="va">which.max</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Boys: mean peak age ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">peak_ages</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Boy"</span><span class="op">]</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>    <span class="st">"years (sd ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/sd.html">sd</a></span><span class="op">(</span><span class="va">peak_ages</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Boy"</span><span class="op">]</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">")\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Boys: mean peak age = 13.5 years (sd = 1.3 )</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Girls: mean peak age ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">peak_ages</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Girl"</span><span class="op">]</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>    <span class="st">"years (sd ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/sd.html">sd</a></span><span class="op">(</span><span class="va">peak_ages</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Girl"</span><span class="op">]</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">")\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Girls: mean peak age = 11.4 years (sd = 1.3 )</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Difference:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">peak_ages</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Boy"</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">peak_ages</span><span class="op">[</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"Girl"</span><span class="op">]</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"years\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Difference: 2.1 years</span></span></code></pre></div>
-<p>The equivalence test on the warping functions confirms what the peak
-ages show: boys and girls have meaningfully different growth timing.</p>
-</div>
-<div class="section level3">
-<h3 id="working-with-warping-functions">Working with Warping Functions<a class="anchor" aria-label="anchor" href="#working-with-warping-functions"></a>
-</h3>
-<p>The warping functions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>
-are <code>fdata</code> objects, so they can be used with any fdars
-function. Here are concrete ways to extract information from them:</p>
-<p><strong>Scalar summaries per child.</strong> The deviation from the
-identity
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>t</mi></mrow><annotation encoding="application/x-tex">\gamma_i(t) - t</annotation></semantics></math>
-summarises how much each child’s timing differs from the reference.
-Averaging this gives a single “timing shift” score per child:</p>
-<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Timing shift: mean deviation from identity (positive = later, negative = earlier)</span></span>
-<span><span class="va">t_pub</span> <span class="op">&lt;-</span> <span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">argvals</span></span>
-<span><span class="va">identity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">t_pub</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>,</span>
-<span>                   ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_pub</span><span class="op">)</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">timing_shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">data</span> <span class="op">-</span> <span class="va">identity</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Earliest maturer: child"</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>,</span>
-<span>    <span class="st">"(shift ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"years)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Earliest maturer: child 42 (shift = -1.83 years)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Latest maturer:   child"</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>,</span>
-<span>    <span class="st">"(shift ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"years)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Latest maturer:   child 26 (shift = 2 years)</span></span></code></pre></div>
-<p>These scalar scores can be used as covariates in standard regression,
-or for correlation with other variables (e.g., adult height, BMI):</p>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>shift <span class="op">=</span> <span class="va">timing_shift</span>, sex <span class="op">=</span> <span class="va">gender</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_shift</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span>, y <span class="op">=</span> <span class="va">shift</span>, fill <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.6</span>, outlier.shape <span class="op">=</span> <span class="fl">21</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey50"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Boy <span class="op">=</span> <span class="st">"steelblue"</span>, Girl <span class="op">=</span> <span class="st">"coral"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Timing Shift Scores by Sex"</span>,</span>
-<span>       x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Mean timing shift (years)"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/warp-boxplot-1.png" class="r-plt" alt="" width="100%"></p>
-<p><strong>FPCA on warping functions.</strong> The warpings themselves
-can be analysed as functional data. Functional PCA on the warping
-functions identifies the main modes of timing variation:</p>
-<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pc_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2pc.html">fdata2pc</a></span><span class="op">(</span><span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span>, ncomp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">pve_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pc_warps</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">pc_warps</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Warp PC1:"</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"% — PC2:"</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warp PC1: 92.5 % — PC2: 7.5 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  PC1 <span class="op">=</span> <span class="va">pc_warps</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
-<span>  PC2 <span class="op">=</span> <span class="va">pc_warps</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>,</span>
-<span>  sex <span class="op">=</span> <span class="va">gender</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_scores</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Boy <span class="op">=</span> <span class="st">"steelblue"</span>, Girl <span class="op">=</span> <span class="st">"coral"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"PCA of Warping Functions"</span>,</span>
-<span>       x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PC1 ("</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
-<span>       y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PC2 ("</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
-<span>       color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-<p><img src="elastic-alignment_files/figure-html/warp-fpca-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The PC1 score is almost perfectly correlated with the mean timing
-shift
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>≈</mo><mn>0.99</mn></mrow><annotation encoding="application/x-tex">r \approx 0.99</annotation></semantics></math>)
-and clearly separates boys from girls. PC2 captures a secondary mode of
-timing variation orthogonal to the early/late shift – its interpretation
-would require inspecting the eigenfunctions.</p>
-</div>
+<p>For a full worked example applying elastic alignment, Karcher mean,
+FPCA, and equivalence testing to the Berkeley Growth Study data, see
+<code><a href="../articles/example-berkeley-growth.html">vignette("articles/example-berkeley-growth")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="practical-tips">Practical Tips<a class="anchor" aria-label="anchor" href="#practical-tips"></a>
@@ -2484,7 +2113,7 @@ would require inspecting the eigenfunctions.</p>
 </h3>
 <p>The SRSF transform involves derivatives, so noise gets amplified.
 Always smooth noisy data before alignment:</p>
-<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">noisy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">15</span>, <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">shifts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span></span>
@@ -2515,7 +2144,7 @@ Always smooth noisy data before alignment:</p>
 </h3>
 <p>The dynamic programming alignment operates on the evaluation grid.
 Finer grids yield more accurate warping:</p>
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">m</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">av</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
@@ -2562,7 +2191,7 @@ Finer grids yield more accurate warping:</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">shifts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">15</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -2588,7 +2217,7 @@ Finer grids yield more accurate warping:</p>
 <p>Alignment before FPCA concentrates variance into the first principal
 component by removing phase variability that would otherwise spread
 across components:</p>
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">shifts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">15</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -2622,7 +2251,7 @@ and
 This means the alignment cannot correct mismatches at the domain
 boundaries. For shifted curves, the residual at the boundary equals the
 value difference:</p>
-<div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">argvals</span><span class="op">)</span></span>
 <span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="op">(</span><span class="va">argvals</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -2648,7 +2277,7 @@ vs
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>f</mi></mrow><annotation encoding="application/x-tex">2f</annotation></semantics></math>),
 alignment correctly produces identity warping – no spurious time
 distortion:</p>
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">argvals</span><span class="op">)</span></span>
 <span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">argvals</span><span class="op">)</span></span>
 <span><span class="va">fd_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">f1</span>, <span class="va">f2</span><span class="op">)</span>, argvals <span class="op">=</span> <span class="va">argvals</span><span class="op">)</span></span>
@@ -2668,7 +2297,7 @@ phase and leaves amplitude untouched.</p>
 </h3>
 <p>The alignment works correctly on any domain, not just
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>:</p>
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">domain</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">*</span><span class="va">pi</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">av</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="va">domain</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">domain</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span>  <span class="va">range</span> <span class="op">&lt;-</span> <span class="va">domain</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">domain</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>

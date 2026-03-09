@@ -14,9 +14,6 @@ powered by a high-performance Rust backend. Treat entire curves,
 spectra, and trajectories as single observations — then smooth, align,
 decompose, and analyze them with a consistent, pipe-friendly API.
 
-[Get started](https://sipemu.github.io/fdars-r/articles/introduction.md)
-[Reference](https://sipemu.github.io/fdars-r/reference/index.md)
-
 ------------------------------------------------------------------------
 
 ## Learn

@@ -32,6 +32,137 @@ library(ggplot2)
 theme_set(theme_minimal())
 ```
 
+## Why Functional Classification?
+
+The fundamental problem is: given a curve $X_{i}(t)$, predict a class
+label $g_{i} \in \{ 1,\ldots,G\}$. One might be tempted to discretize
+each curve at $m$ grid points and apply a standard multivariate
+classifier. However, this approach faces two obstacles:
+
+1.  **Curse of dimensionality.** With $m$ grid points (often 100–1000),
+    multivariate classifiers struggle unless $n \gg m$. Covariance
+    matrices become singular, nearest-neighbor distances concentrate,
+    and decision boundaries overfit.
+
+2.  **Ignoring smoothness.** Discretization treats
+    $X_{i}\left( t_{1} \right)$ and $X_{i}\left( t_{2} \right)$ as
+    unrelated features, discarding the continuity and smoothness of the
+    underlying curves.
+
+Functional classification resolves this by first projecting curves onto
+a low-dimensional basis — typically the leading FPC directions — and
+then classifying in that reduced space. This simultaneously regularizes
+the problem (since $K \ll m$) and respects the functional structure
+(since FPCs capture the dominant modes of variation).
+
+For methods that work directly in function space (kernel classifier, DD
+classifier), distances are computed using proper functional metrics
+($L^{2}$ norm or depth), avoiding discretization artifacts entirely.
+
+## Mathematical Framework
+
+All FPC-based methods (LDA, QDA, kNN) start by computing the scores
+${\mathbf{ξ}}_{i} = \left( \xi_{i1},\ldots,\xi_{iK} \right)^{T}$ where
+$\xi_{ik} = \int\left\lbrack X_{i}(t) - \bar{X}(t) \right\rbrack\phi_{k}(t)\, dt$
+and $\phi_{k}$ are the eigenfunctions of the pooled covariance operator.
+Classification then operates in ${\mathbb{R}}^{K}$.
+
+### Linear Discriminant Analysis (LDA)
+
+LDA assumes that the FPC scores within each class are Gaussian with a
+common covariance:
+
+$${\mathbf{ξ}} \mid g = k\; \sim \;\mathcal{N}\left( {\mathbf{μ}}_{k},\,\mathbf{\Sigma}_{\text{pool}} \right)$$
+
+The **pooled covariance** is:
+
+$${\widehat{\mathbf{\Sigma}}}_{\text{pool}} = \frac{1}{n - G}\sum\limits_{g = 1}^{G}\sum\limits_{i \in g}\left( {\mathbf{ξ}}_{i} - {\bar{\mathbf{ξ}}}_{g} \right)\left( {\mathbf{ξ}}_{i} - {\bar{\mathbf{ξ}}}_{g} \right)^{T}$$
+
+Classification uses the **log-posterior discriminant**:
+
+$$\delta_{g}({\mathbf{ξ}}) = \log\pi_{g} - \frac{1}{2}\left( {\mathbf{ξ}} - {\mathbf{μ}}_{g} \right)^{T}\mathbf{\Sigma}_{\text{pool}}^{- 1}\left( {\mathbf{ξ}} - {\mathbf{μ}}_{g} \right)$$
+
+where $\pi_{g}$ is the prior probability of class $g$ (estimated by
+class proportions). The observation is assigned to
+$\widehat{g} = \arg\max_{g}\delta_{g}({\mathbf{ξ}})$. Because
+$\mathbf{\Sigma}_{\text{pool}}$ is shared, the decision boundaries are
+linear (hyperplanes) in the FPC score space.
+
+### Quadratic Discriminant Analysis (QDA)
+
+QDA relaxes the equal-covariance assumption by estimating a
+**class-specific covariance** $\mathbf{\Sigma}_{g}$ for each group. The
+discriminant becomes:
+
+$$\delta_{g}({\mathbf{ξ}}) = \log\pi_{g} - \frac{1}{2}\log\left| \mathbf{\Sigma}_{g} \right| - \frac{1}{2}\left( {\mathbf{ξ}} - {\mathbf{μ}}_{g} \right)^{T}\mathbf{\Sigma}_{g}^{- 1}\left( {\mathbf{ξ}} - {\mathbf{μ}}_{g} \right)$$
+
+The additional $\log\left| \mathbf{\Sigma}_{g} \right|$ term penalizes
+classes with large spread. Decision boundaries are now quadratic
+(ellipsoidal). QDA is more flexible than LDA but requires enough
+observations per class to reliably estimate $\mathbf{\Sigma}_{g}$ —
+roughly $n_{g} > K(K + 1)/2$ as a rule of thumb.
+
+### k-Nearest Neighbors (kNN)
+
+kNN classifies by majority vote among the $k$ closest training curves in
+FPC space, using Euclidean distance:
+
+$$d\left( {\mathbf{ξ}}_{i},{\mathbf{ξ}}_{j} \right) = \parallel {\mathbf{ξ}}_{i} - {\mathbf{ξ}}_{j} \parallel_{2} = \sqrt{\sum\limits_{l = 1}^{K}\left( \xi_{il} - \xi_{jl} \right)^{2}}$$
+
+The predicted class is whichever label appears most often among the $k$
+neighbors. kNN makes no distributional assumptions, making it robust to
+non-Gaussian score distributions and nonlinear class boundaries. The
+choice of $k$ is typically made via cross-validation: small $k$ gives
+flexible but noisy boundaries; large $k$ gives smoother but potentially
+biased boundaries.
+
+### Kernel Classifier
+
+The kernel classifier works directly in function space without dimension
+reduction. It uses the $L^{2}$ functional distance with Simpson’s rule
+integration weights:
+
+$$d\left( X_{i},X_{j} \right) = \sqrt{\int_{0}^{1}\left\lbrack X_{i}(t) - X_{j}(t) \right\rbrack^{2}\, dt}$$
+
+Classification uses a Gaussian kernel to weight contributions from
+training curves:
+
+$$K(d,h) = \exp\!\left( - \frac{d^{2}}{2h^{2}} \right)$$
+
+The predicted class is:
+
+$$\widehat{g}(X) = \arg\max\limits_{g}\sum\limits_{j:\, y_{j} = g}K(d\left( X,X_{j} \right),\, h)$$
+
+That is, for each class, the kernel weights of all training curves in
+that class are summed, and the class with the largest total weight wins.
+The **bandwidth** $h$ controls the locality of the classifier.
+[`fclassif()`](https://sipemu.github.io/fdars-r/reference/fclassif.md)
+selects $h$ via leave-one-out cross-validation over a grid of distance
+percentiles.
+
+### DD-Classifier (Depth-vs-Depth)
+
+The depth-based classifier avoids both dimension reduction and distance
+computation. Instead, it computes the **statistical depth** of each
+curve with respect to each class distribution:
+
+$$D_{g}\left( X_{i} \right) = {\text{depth of}\mspace{6mu}}X_{i}{\mspace{6mu}\text{w.r.t. class}\mspace{6mu}}g$$
+
+using the Fraiman–Muniz integrated depth:
+
+$$D_{\text{FM}}(X) = \int_{0}^{1}D_{1}(X(t);\, F_{t})\, dt$$
+
+where $D_{1}$ is the univariate depth (one minus twice the distance from
+the median CDF value) and $F_{t}$ is the marginal distribution at time
+$t$.
+
+For $G$ classes, each curve is mapped to a point
+$\left( D_{1}\left( X_{i} \right),\ldots,D_{G}\left( X_{i} \right) \right) \in {\mathbb{R}}^{G}$
+and classification proceeds in this “depth-depth” space. The simplest
+rule assigns to $\widehat{g} = \arg\max_{g}D_{g}\left( X_{i} \right)$:
+the class in which the curve is most “central”. This approach is robust
+to outliers because depth is a rank-based measure.
+
 ## Iris as Functional Data
 
 Instead of a toy simulation we use the classic **iris** dataset,
@@ -129,12 +260,15 @@ plot(results[["lda"]])
 ![](functional-classification_files/figure-html/confusion-1.png)
 
 Most errors are between versicolor and virginica, as expected from the
-overlapping Andrews curves.
+overlapping Andrews curves. Setosa is perfectly classified because its
+curves are well separated in the FPC score space.
 
 ## Cross-Validation
 
 [`fclassif.cv()`](https://sipemu.github.io/fdars-r/reference/fclassif.cv.md)
-evaluates out-of-sample error via k-fold cross-validation:
+evaluates out-of-sample error via k-fold cross-validation. This gives
+the most honest estimate of how each classifier would perform on new
+data, guarding against the optimism of training accuracy.
 
 ``` r
 set.seed(42)
@@ -157,6 +291,11 @@ print(cv_df)
 #> kernel KERNEL    0.667       0.333
 #> dd         DD    0.667       0.333
 ```
+
+The CV error rates account for overfitting. Methods that had perfect
+training accuracy (like QDA) may show higher CV error than simpler
+methods (like LDA), especially when sample sizes per class are small
+relative to the number of parameters.
 
 ## Choosing the Number of Components
 
@@ -181,18 +320,51 @@ ggplot(df_ncomp, aes(x = ncomp, y = error)) +
 
 ![](functional-classification_files/figure-html/ncomp-selection-1.png)
 
-## Method Selection Guidelines
+The optimal number of components balances two effects: adding early
+components captures the dominant modes of between-class variation,
+improving discrimination. Adding later components brings in directions
+that are mainly within-class noise, diluting the signal.
 
-- **LDA**: Good default when classes have similar covariance. Fast and
-  interpretable. Works well on iris.
-- **QDA**: Better when each class has its own covariance pattern. Needs
-  enough observations per class to estimate class-specific covariances.
-- **kNN**: Flexible nonparametric option. Tune $k$ via CV. Robust to
-  non-linear boundaries.
-- **Kernel**: Fully nonparametric — works directly in function space
-  without dimension reduction. Can be slow on large datasets.
-- **DD**: Robust to outliers. Uses depth-vs-depth plots for
-  classification. Less sensitive to distributional assumptions.
+## Choosing a Classifier
+
+The table below summarizes practical considerations:
+
+| Criterion        | LDA               | QDA                       | kNN      | Kernel   | DD          |
+|------------------|-------------------|---------------------------|----------|----------|-------------|
+| **Assumptions**  | Common covariance | Class-specific covariance | None     | None     | None        |
+| **Min. $n_{g}$** | $> K$             | $> K(K + 1)/2$            | $> k$    | $> 20$   | $> 20$      |
+| **Boundaries**   | Linear            | Quadratic                 | Flexible | Flexible | Depth-based |
+| **Tuning**       | $K$ only          | $K$ only                  | $K$, $k$ | $h$      | $K$         |
+| **Speed**        | Fast              | Fast                      | Moderate | Slow     | Moderate    |
+| **Robustness**   | Low               | Low                       | Moderate | Moderate | High        |
+
+**Rules of thumb:**
+
+- Start with **LDA** as a baseline — it is fast, interpretable, and
+  often competitive.
+- Try **QDA** when you suspect classes have different shapes in FPC
+  space (different covariance patterns).
+- Use **kNN** when decision boundaries may be nonlinear and you have
+  enough data per class.
+- Use the **kernel** classifier for small-to-moderate datasets where you
+  want to avoid the FPC projection step entirely.
+- Use **DD** when robustness to outliers is paramount or distributional
+  assumptions are suspect.
+
+## References
+
+- Delaigle, A. and Hall, P. (2012). Achieving near perfect
+  classification for functional data. *Journal of the Royal Statistical
+  Society: Series B*, 74(2), 267–286.
+- Cuevas, A., Febrero, M., and Fraiman, R. (2007). Robust estimation and
+  classification for functional data via projection pursuit.
+  *Computational Statistics*, 22(3), 481–496.
+- Li, J. and Yu, T. (2008). DD-classifier: nonparametric classification
+  procedure based on DD-plot. *Journal of the American Statistical
+  Association*, 103(483), 737–747.
+- Lopez-Pintado, S. and Romo, J. (2009). On the concept of depth for
+  functional data. *Journal of the American Statistical Association*,
+  104(486), 718–734.
 
 ## See Also
 

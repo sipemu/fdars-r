@@ -24,6 +24,7 @@
   max-width: 83.333% !important;
 }
 
+
 /* ── Gallery grid (sphinx-gallery style) ─────────────────── */
 
 .fdars-gallery {
@@ -110,3 +111,30 @@
   margin-top: 0.25rem;
   margin-bottom: 0.75rem;
 }
+
+/* ── Method tags inside gallery items ─────────────────── */
+
+.fdars-gallery-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem 0.6rem 0.4rem;
+  background: #fff;
+}
+
+.fdars-tag {
+  display: inline-block;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  color: #fff;
+}
+
+.fdars-tag-learn      { background: #0d6efd; }
+.fdars-tag-represent  { background: #198754; }
+.fdars-tag-align      { background: #fd7e14; }
+.fdars-tag-analyze    { background: #6f42c1; }
+.fdars-tag-regression { background: #dc3545; }

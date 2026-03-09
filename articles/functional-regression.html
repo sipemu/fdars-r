@@ -93,17 +93,130 @@ hypothesis testing.</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="why-functional-regression">Why Functional Regression?<a class="anchor" aria-label="anchor" href="#why-functional-regression"></a>
+</h2>
+<p>Classical regression assumes that predictors live in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>p</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^p</annotation></semantics></math>
+with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+finite and fixed. When the predictor is a curve
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X_i(t)</annotation></semantics></math>
+observed on a continuum, we face a fundamentally different problem: the
+regression coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
+is itself a function, and the “design matrix” is
+infinite-dimensional.</p>
+<p>This creates two immediate challenges:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Ill-posedness.</strong> The functional linear model
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>=</mo><mi>α</mi><mo>+</mo><mo>∫</mo><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">y_i = \alpha + \int X_i(t)\beta(t)\,dt + \varepsilon_i</annotation></semantics></math>
+has infinitely many solutions because the integral operator is compact.
+Without regularization, the least-squares estimate of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
+does not exist or is wildly unstable.</p></li>
+<li><p><strong>Curse of dimensionality.</strong> Naively discretizing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X_i(t)</annotation></semantics></math>
+at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
+grid points and running OLS gives
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
+parameters from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+observations. When
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>≫</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m \gg n</annotation></semantics></math>
+(the typical FDA setting), the model is massively
+overparameterized.</p></li>
+</ol>
+<p>Two strategies resolve these issues:</p>
+<ul>
+<li>
+<strong>Dimension reduction</strong>: project
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X_i(t)</annotation></semantics></math>
+onto its leading functional principal components (FPCs) and regress on
+the scores. This is the approach taken by <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> and
+<code><a href="../reference/fregre.pc.html">fregre.pc()</a></code>.</li>
+<li>
+<strong>Penalization</strong>: estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
+directly but penalize its roughness via a second-derivative penalty.
+This is the approach taken by <code><a href="../reference/fosr.html">fosr()</a></code> for the
+function-on-scalar direction.</li>
+</ul>
+<p>Both approaches replace the ill-posed infinite-dimensional problem
+with a well-conditioned finite-dimensional one.</p>
+</div>
+<div class="section level2">
 <h2 id="scalar-on-function-regression">Scalar-on-Function Regression<a class="anchor" aria-label="anchor" href="#scalar-on-function-regression"></a>
 </h2>
 <div class="section level3">
-<h3 id="fpc-based-functional-linear-model">FPC-Based Functional Linear Model<a class="anchor" aria-label="anchor" href="#fpc-based-functional-linear-model"></a>
+<h3 id="mathematical-framework">Mathematical Framework<a class="anchor" aria-label="anchor" href="#mathematical-framework"></a>
 </h3>
-<p>The functional linear model relates a scalar response
+<p>The <strong>functional linear model</strong> relates a scalar
+response
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mi>i</mi></msub><annotation encoding="application/x-tex">y_i</annotation></semantics></math>
 to a functional predictor
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X_i(t)</annotation></semantics></math>
 via:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>=</mo><mi>α</mi><mo>+</mo><mo>∫</mo><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">y_i = \alpha + \int X_i(t) \beta(t) \, dt + \varepsilon_i</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>=</mo><mi>α</mi><mo>+</mo><msubsup><mo>∫</mo><mn>0</mn><mn>1</mn></msubsup><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub><mo>,</mo><mspace width="1.0em"></mspace><msub><mi>ε</mi><mi>i</mi></msub><mover><mo>∼</mo><mtext mathvariant="normal">iid</mtext></mover><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">y_i = \alpha + \int_0^1 X_i(t)\,\beta(t)\,dt + \varepsilon_i, \quad \varepsilon_i \overset{\text{iid}}{\sim} (0, \sigma^2)</annotation></semantics></math></p>
+<p>The coefficient function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
+describes <em>how</em> the predictor curve at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+influences the response. A positive
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
+in some interval means that curves with higher values there tend to have
+higher
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mi>i</mi></msub><annotation encoding="application/x-tex">y_i</annotation></semantics></math>.</p>
+<div class="section level4">
+<h4 id="fpc-based-estimation">FPC-Based Estimation<a class="anchor" aria-label="anchor" href="#fpc-based-estimation"></a>
+</h4>
+<p>Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϕ</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><msub><mi>ϕ</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mi>…</mi></mrow><annotation encoding="application/x-tex">\phi_1(t), \phi_2(t), \ldots</annotation></semantics></math>
+be the eigenfunctions of the covariance operator of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>,
+and let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ξ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>=</mo><mo>∫</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mover><mi>X</mi><mo accent="true">‾</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>ϕ</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\xi_{ik} = \int (X_i(t) - \bar{X}(t))\phi_k(t)\,dt</annotation></semantics></math>
+be the FPC scores. Expanding
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>∞</mi></msubsup><msub><mi>γ</mi><mi>k</mi></msub><msub><mi>ϕ</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t) = \sum_{k=1}^\infty \gamma_k \phi_k(t)</annotation></semantics></math>
+and substituting gives:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>≈</mo><mi>α</mi><mo>+</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>γ</mi><mi>k</mi></msub><msub><mi>ξ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">y_i \approx \alpha + \sum_{k=1}^K \gamma_k \xi_{ik} + \varepsilon_i</annotation></semantics></math></p>
+<p>This reduces the functional regression to an ordinary multiple
+regression on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+FPC scores. The coefficient function is recovered as:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mi>k</mi></msub><msub><mi>ϕ</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta(t) = \sum_{k=1}^K \hat\gamma_k \phi_k(t)</annotation></semantics></math></p>
+<p>The number of components
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+controls the bias–variance trade-off: too few components oversimplify
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>;
+too many introduce noise. Cross-validation selects
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+in a data-driven way.</p>
+</div>
+<div class="section level4">
+<h4 id="standard-errors-and-gcv">Standard Errors and GCV<a class="anchor" aria-label="anchor" href="#standard-errors-and-gcv"></a>
+</h4>
+<p>With the FPC scores as predictors, standard OLS inference applies.
+The variance of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>γ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\gamma</annotation></semantics></math>
+is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>Ξ</mi><mi>T</mi></msup><mi>Ξ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\sigma^2 (\Xi^T\Xi)^{-1}</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Ξ</mi><annotation encoding="application/x-tex">\Xi</annotation></semantics></math>
+is the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">n \times K</annotation></semantics></math>
+score matrix. Generalized cross-validation provides a computationally
+efficient alternative to leave-one-out CV:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">GCV</mtext><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover><mi>y</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>h</mi><mrow><mi>i</mi><mi>i</mi></mrow></msub></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\text{GCV} = \frac{1}{n}\sum_{i=1}^n \left(\frac{y_i - \hat{y}_i}{1 - h_{ii}}\right)^2</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>h</mi><mrow><mi>i</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">h_{ii}</annotation></semantics></math>
+are the diagonal elements of the hat matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mo>=</mo><mi>Ξ</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>Ξ</mi><mi>T</mi></msup><mi>Ξ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>Ξ</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">H = \Xi(\Xi^T\Xi)^{-1}\Xi^T</annotation></semantics></math>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="fpc-based-functional-linear-model">FPC-Based Functional Linear Model<a class="anchor" aria-label="anchor" href="#fpc-based-functional-linear-model"></a>
+</h3>
 <p><code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> estimates
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
 by projecting onto functional principal components.</p>
@@ -135,18 +248,31 @@ by projecting onto functional principal components.</p>
 <span><span class="co">#&gt;   R-squared: 0.4371 </span></span>
 <span><span class="co">#&gt;   Adjusted R-squared: 0.4149 </span></span>
 <span><span class="co">#&gt;   GCV: 0.0968</span></span></code></pre></div>
+<p>The R-squared tells us how much scalar variance is explained by the
+leading FPC directions of the predictor curves. The estimated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta(t)</annotation></semantics></math>
+should approximate the true
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>sin</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mi>π</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t) = \sin(2\pi t)</annotation></semantics></math>
+used in the simulation.</p>
 </div>
 <div class="section level3">
 <h3 id="cross-validation-for-component-selection">Cross-Validation for Component Selection<a class="anchor" aria-label="anchor" href="#cross-validation-for-component-selection"></a>
 </h3>
 <p><code><a href="../reference/fregre.lm.cv.html">fregre.lm.cv()</a></code> selects the optimal number of FPC
-components via k-fold cross-validation.</p>
+components via k-fold cross-validation. This is the data-driven way to
+choose
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>,
+balancing approximation accuracy against overfitting.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.cv.html">fregre.lm.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, k.range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, nfold <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal ncomp:"</span>, <span class="va">cv_result</span><span class="op">$</span><span class="va">optimal.k</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Optimal ncomp: 6</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV errors:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_result</span><span class="op">$</span><span class="va">cv.errors</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CV errors: 0.0957 0.0959 0.0971 0.0971 0.0978 0.0938 0.0942 0.0951</span></span></code></pre></div>
+<p>The CV error typically decreases as components are added (capturing
+more signal), then plateaus or increases (adding noise). The optimal
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+sits at the elbow.</p>
 </div>
 <div class="section level3">
 <h3 id="comparison-with-fregre-pc">Comparison with fregre.pc<a class="anchor" aria-label="anchor" href="#comparison-with-fregre-pc"></a>
@@ -168,6 +294,37 @@ similar fits:</p>
 </h3>
 <p>For binary classification, <code><a href="../reference/functional.logistic.html">functional.logistic()</a></code> fits a
 logistic model with FPC features.</p>
+<div class="section level4">
+<h4 id="the-irls-algorithm">The IRLS Algorithm<a class="anchor" aria-label="anchor" href="#the-irls-algorithm"></a>
+</h4>
+<p>The functional logistic model uses the logit link on FPC scores:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mfrac><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>1</mn><mo>−</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo>=</mo><mi>α</mi><mo>+</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>γ</mi><mi>k</mi></msub><msub><mi>ξ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\log\frac{P(Y_i = 1)}{1 - P(Y_i = 1)} = \alpha + \sum_{k=1}^K \gamma_k \xi_{ik}</annotation></semantics></math></p>
+<p>This is estimated via <strong>Iteratively Reweighted Least Squares
+(IRLS)</strong>, which alternates between:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Working response</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mi>i</mi></msub><mo>=</mo><msub><mover><mi>η</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">z_i = \hat\eta_i + (y_i - \hat{p}_i) / [\hat{p}_i(1 - \hat{p}_i)]</annotation></semantics></math>
+</li>
+<li>
+<strong>Working weights</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w_i = \hat{p}_i(1 - \hat{p}_i)</annotation></semantics></math>
+</li>
+<li>
+<strong>Weighted least squares</strong>: update
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>γ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\gamma</annotation></semantics></math>
+by regressing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Ξ</mi><annotation encoding="application/x-tex">\Xi</annotation></semantics></math>
+with weights
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+</li>
+</ol>
+<p>Convergence is monitored via the log-likelihood:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>γ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">[</mo><msub><mi>y</mi><mi>i</mi></msub><mo>log</mo><msub><mi>p</mi><mi>i</mi></msub><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\ell(\gamma) = \sum_{i=1}^n \bigl[y_i \log p_i + (1 - y_i)\log(1 - p_i)\bigr]</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>i</mi></msub><mo>=</mo><msup><mtext mathvariant="normal">logit</mtext><mrow><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>α</mi><mo>+</mo><msubsup><mi>ξ</mi><mi>i</mi><mi>T</mi></msubsup><mi>γ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p_i = \text{logit}^{-1}(\alpha + \xi_i^T\gamma)</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create binary response (0/1)</span></span>
 <span><span class="va">y_bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">y</span> <span class="op">&gt;</span> <span class="fu"><a href="../reference/median.html">median</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
@@ -184,17 +341,65 @@ logistic model with FPC features.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Probabilities range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">logit_fit</span><span class="op">$</span><span class="va">probabilities</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Probabilities range: 0.01257656 0.9824597</span></span></code></pre></div>
+<p>The estimated probabilities near 0 or 1 indicate confident
+classification; values near 0.5 indicate curves in the overlap region
+where the predictor’s FPC scores do not clearly separate the two
+classes.</p>
+</div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="function-on-scalar-regression">Function-on-Scalar Regression<a class="anchor" aria-label="anchor" href="#function-on-scalar-regression"></a>
 </h2>
 <div class="section level3">
+<h3 id="mathematical-framework-1">Mathematical Framework<a class="anchor" aria-label="anchor" href="#mathematical-framework-1"></a>
+</h3>
+<p>When the <em>response</em> is a function and the predictors are
+scalar, the model is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mspace width="0.167em"></mspace><msub><mi>β</mi><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Y_i(t) = \mu(t) + \sum_{j=1}^p x_{ij}\,\beta_j(t) + \varepsilon_i(t)</annotation></semantics></math></p>
+<p>Each coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta_j(t)</annotation></semantics></math>
+is a function describing how predictor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+modifies the response curve at each time point
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
+The intercept
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mu(t)</annotation></semantics></math>
+is the mean response when all predictors are zero.</p>
+<div class="section level4">
+<h4 id="penalized-estimation">Penalized Estimation<a class="anchor" aria-label="anchor" href="#penalized-estimation"></a>
+</h4>
+<p>Direct pointwise OLS at each
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+would produce coefficient estimates that are noisy and discontinuous
+across the time domain. <code><a href="../reference/fosr.html">fosr()</a></code> imposes smoothness via a
+second-difference roughness penalty. The penalized objective is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false" form="postfix">∥</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>−</mo><mi>μ</mi><mo>−</mo><msub><mi>X</mi><mi>i</mi></msub><mi>β</mi><msup><mo stretchy="false" form="postfix">∥</mo><mn>2</mn></msup><mo>+</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><mo>∫</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>β</mi><mi>j</mi></msub><mi>″</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\sum_{i=1}^n \|Y_i - \mu - X_i\beta\|^2 + \lambda \sum_{j=1}^p \int [\beta_j''(t)]^2\,dt</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\lambda &gt; 0</annotation></semantics></math>
+controls the trade-off between fidelity to the data and smoothness. In
+matrix form, the penalty uses the second-difference matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mo>=</mo><mo>arg</mo><munder><mo>min</mo><mi>β</mi></munder><mo stretchy="false" form="postfix">∥</mo><mi>Y</mi><mo>−</mo><mi>X</mi><mi>β</mi><msubsup><mo stretchy="false" form="postfix">∥</mo><mi>F</mi><mn>2</mn></msubsup><mo>+</mo><mi>λ</mi><mspace width="0.167em"></mspace><mtext mathvariant="normal">tr</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>β</mi><mi>T</mi></msup><msup><mi>D</mi><mi>T</mi></msup><mi>D</mi><mspace width="0.167em"></mspace><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta = \arg\min_\beta \|Y - X\beta\|_F^2 + \lambda\,\text{tr}(\beta^T D^T D\,\beta)</annotation></semantics></math></p>
+<p>The solution at each grid point is a ridge-type estimator:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mo>⋅</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>+</mo><mi>λ</mi><msup><mi>D</mi><mi>T</mi></msup><mi>D</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>⋅</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta(\cdot) = (X^TX + \lambda D^TD)^{-1} X^T Y(\cdot)</annotation></semantics></math></p>
+</div>
+<div class="section level4">
+<h4 id="pointwise-r-squared">Pointwise R-squared<a class="anchor" aria-label="anchor" href="#pointwise-r-squared"></a>
+</h4>
+<p>The goodness of fit is measured by the <strong>pointwise
+R-squared</strong>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>R</mi><mn>2</mn></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><mrow><munder><mo>∑</mo><mi>i</mi></munder><msup><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup></mrow><mrow><munder><mo>∑</mo><mi>i</mi></munder><msup><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mover><mi>Y</mi><mo accent="true">‾</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">R^2(t) = 1 - \frac{\sum_i [Y_i(t) - \hat{Y}_i(t)]^2}{\sum_i [Y_i(t) - \bar{Y}(t)]^2}</annotation></semantics></math></p>
+<p>The overall (mean) R-squared averages this across the domain. Values
+near 1 everywhere indicate the scalar predictors explain the functional
+response well at all time points; regions with low
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>R</mi><mn>2</mn></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">R^2(t)</annotation></semantics></math>
+suggest additional predictors or nonlinear effects may be needed.</p>
+</div>
+</div>
+<div class="section level3">
 <h3 id="penalized-fosr">Penalized FOSR<a class="anchor" aria-label="anchor" href="#penalized-fosr"></a>
 </h3>
-<p>When the response is a function and predictors are scalar, we
-have:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><munder><mo>∑</mo><mi>j</mi></munder><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>β</mi><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Y_i(t) = \mu(t) + \sum_j x_{ij} \beta_j(t) + \varepsilon_i(t)</annotation></semantics></math></p>
 <p><code><a href="../reference/fosr.html">fosr()</a></code> estimates the coefficient functions
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta_j(t)</annotation></semantics></math>
 with optional ridge penalty.</p>
@@ -228,6 +433,15 @@ with optional ridge penalty.</p>
 <span><span class="co">#&gt;   Evaluation points: 80 </span></span>
 <span><span class="co">#&gt;   R-squared: 0.6412 </span></span>
 <span><span class="co">#&gt;   Lambda: 0.1</span></span></code></pre></div>
+<p>The treatment coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta_1(t)</annotation></semantics></math>
+should recover the simulated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.5</mn><mo>cos</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mi>π</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">0.5\cos(2\pi t)</annotation></semantics></math>
+pattern, while the age coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta_2(t)</annotation></semantics></math>
+should approximate the linear
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.2</mn><mi>t</mi></mrow><annotation encoding="application/x-tex">0.2t</annotation></semantics></math>
+trend.</p>
 </div>
 <div class="section level3">
 <h3 id="visualizing-coefficient-functions">Visualizing Coefficient Functions<a class="anchor" aria-label="anchor" href="#visualizing-coefficient-functions"></a>
@@ -235,6 +449,10 @@ with optional ridge penalty.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fosr_fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="functional-regression_files/figure-html/fosr-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<p>Each panel shows one coefficient function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta_j(t)</annotation></semantics></math>.
+The shape reveals <em>when</em> during the functional domain each
+predictor has its strongest effect.</p>
 </div>
 <div class="section level3">
 <h3 id="fpc-based-fosr">FPC-Based FOSR<a class="anchor" aria-label="anchor" href="#fpc-based-fosr"></a>
@@ -245,6 +463,11 @@ of penalization:</p>
 <code class="sourceCode R"><span><span class="va">fosr_fpc_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.fpc.html">fosr.fpc</a></span><span class="op">(</span><span class="va">fd_y</span>, <span class="va">predictors</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"FPC-based R-squared:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fosr_fpc_fit</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; FPC-based R-squared: 0.6421</span></span></code></pre></div>
+<p>The FPC-based approach avoids choosing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+but requires selecting the number of components. When the response
+curves have strong low-rank structure (most variance in a few FPCs),
+this approach is efficient and stable.</p>
 </div>
 <div class="section level3">
 <h3 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
@@ -259,6 +482,50 @@ of penalization:</p>
 <div class="section level2">
 <h2 id="functional-anova">Functional ANOVA<a class="anchor" aria-label="anchor" href="#functional-anova"></a>
 </h2>
+<div class="section level3">
+<h3 id="mathematical-framework-2">Mathematical Framework<a class="anchor" aria-label="anchor" href="#mathematical-framework-2"></a>
+</h3>
+<p>Functional ANOVA tests whether the mean functions of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>
+groups are equal:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><msub><mi>μ</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>μ</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>⋯</mi><mo>=</mo><msub><mi>μ</mi><mi>G</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="1.0em"></mspace><mrow><mtext mathvariant="normal">for all </mtext><mspace width="0.333em"></mspace></mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">H_0: \mu_1(t) = \mu_2(t) = \cdots = \mu_G(t) \quad \text{for all } t</annotation></semantics></math></p>
+<p>At each grid point
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
+a pointwise F-statistic is computed:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>g</mi><mo>=</mo><mn>1</mn></mrow><mi>G</mi></munderover><msub><mi>n</mi><mi>g</mi></msub><msup><mrow><mo stretchy="true" form="prefix">[</mo><msub><mover><mi>Y</mi><mo accent="true">‾</mo></mover><mi>g</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mover><mi>Y</mi><mo accent="true">‾</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>G</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><munderover><mo>∑</mo><mrow><mi>g</mi><mo>=</mo><mn>1</mn></mrow><mi>G</mi></munderover><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><mi>g</mi></mrow></munder><msup><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mover><mi>Y</mi><mo accent="true">‾</mo></mover><mi>g</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mi>G</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">F(t) = \frac{\sum_{g=1}^G n_g [\bar{Y}_g(t) - \bar{Y}(t)]^2 / (G - 1)}{\sum_{g=1}^G \sum_{i \in g} [Y_i(t) - \bar{Y}_g(t)]^2 / (N - G)}</annotation></semantics></math></p>
+<p>These are summarized into a <strong>global test statistic</strong> by
+integration:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>F</mi><mtext mathvariant="normal">global</mtext></msub><mo>=</mo><mo>∫</mo><mi>F</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">F_{\text{global}} = \int F(t)\,dt</annotation></semantics></math></p>
+<div class="section level4">
+<h4 id="permutation-testing">Permutation Testing<a class="anchor" aria-label="anchor" href="#permutation-testing"></a>
+</h4>
+<p>Because the null distribution of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mtext mathvariant="normal">global</mtext></msub><annotation encoding="application/x-tex">F_{\text{global}}</annotation></semantics></math>
+is intractable, <code><a href="../reference/fanova.html">fanova()</a></code> uses a permutation approach:</p>
+<ol style="list-style-type: decimal">
+<li>Compute the observed
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mtext mathvariant="normal">obs</mtext></msub><annotation encoding="application/x-tex">F_{\text{obs}}</annotation></semantics></math>
+from the original data.</li>
+<li>For
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">b = 1, \ldots, B</annotation></semantics></math>:
+randomly permute group labels and compute
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>F</mi><mi>b</mi><mo>*</mo></msubsup><annotation encoding="application/x-tex">F_b^*</annotation></semantics></math>.</li>
+<li>The p-value is:</li>
+</ol>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mfrac><mrow><mn>1</mn><mo>+</mo><mi>#</mi><mo stretchy="false" form="prefix">{</mo><msubsup><mi>F</mi><mi>b</mi><mo>*</mo></msubsup><mo>≥</mo><msub><mi>F</mi><mtext mathvariant="normal">obs</mtext></msub><mo stretchy="false" form="postfix">}</mo></mrow><mrow><mi>B</mi><mo>+</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">p = \frac{1 + \#\{F_b^* \geq F_{\text{obs}}\}}{B + 1}</annotation></semantics></math></p>
+<p>The
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math>
+in numerator and denominator ensures the p-value is never exactly zero
+and accounts for the observed statistic being one of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">B + 1</annotation></semantics></math>
+values under consideration. This makes the test exact (valid at any
+sample size) and assumption-free regarding the distribution of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ε</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\varepsilon_i(t)</annotation></semantics></math>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="permutation-f-test">Permutation F-Test<a class="anchor" aria-label="anchor" href="#permutation-f-test"></a>
+</h3>
 <p><code><a href="../reference/fanova.html">fanova()</a></code> tests whether mean functions differ across
 groups using a permutation-based F-test.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -287,13 +554,84 @@ groups using a permutation-based F-test.</p>
 <span><span class="co">#&gt;   Global F-statistic: 577.3765 </span></span>
 <span><span class="co">#&gt;   P-value: 0.001996 </span></span>
 <span><span class="co">#&gt;   Permutations: 500</span></span></code></pre></div>
+<p>A small p-value rejects the null hypothesis that all groups share the
+same mean function. In this simulation, the three groups have clearly
+different shapes (sine, sine + cosine, linear), so we expect strong
+rejection.</p>
+</div>
 <div class="section level3">
 <h3 id="visualizing-group-means">Visualizing Group Means<a class="anchor" aria-label="anchor" href="#visualizing-group-means"></a>
 </h3>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anova_result</span><span class="op">)</span></span></code></pre></div>
 <p><img src="functional-regression_files/figure-html/fanova-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The group mean curves show the estimated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mi>g</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\mu_g(t)</annotation></semantics></math>
+for each group. Where the curves separate most, the pointwise
+F-statistic is largest.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="assumptions-and-diagnostics">Assumptions and Diagnostics<a class="anchor" aria-label="anchor" href="#assumptions-and-diagnostics"></a>
+</h2>
+<div class="section level3">
+<h3 id="when-fpc-based-regression-works-well">When FPC-Based Regression Works Well<a class="anchor" aria-label="anchor" href="#when-fpc-based-regression-works-well"></a>
+</h3>
+<ul>
+<li>
+<strong>Low intrinsic dimensionality</strong>: most predictor
+variability is captured by a few leading FPCs. This is common when
+curves are smooth.</li>
+<li>
+<strong>Linear relationship</strong>: the link between FPC scores
+and response is approximately linear. For nonlinear relationships,
+consider kernel regression (see
+<code><a href="../articles/regression.html">vignette("articles/regression")</a></code>).</li>
+<li>
+<strong>Adequate sample size</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+should be substantially larger than
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+to avoid overfitting.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="when-to-be-cautious">When to Be Cautious<a class="anchor" aria-label="anchor" href="#when-to-be-cautious"></a>
+</h3>
+<ul>
+<li>
+<strong>Local effects</strong>: if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
+is nonzero only on a small interval, the FPC basis (which captures
+<em>global</em> variance modes) may need many components to represent
+it, defeating the purpose of dimension reduction.</li>
+<li>
+<strong>Non-Gaussian errors</strong>: the permutation tests in
+<code><a href="../reference/fanova.html">fanova()</a></code> and <code><a href="../reference/fmm.test.fixed.html">fmm.test.fixed()</a></code> are
+distribution-free, but the confidence intervals from
+<code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> assume normality.</li>
+<li>
+<strong>Phase variability</strong>: if curves are misaligned, FPCs
+mix amplitude and phase variation. Consider elastic alignment first (see
+<code><a href="../articles/elastic-alignment.html">vignette("articles/elastic-alignment")</a></code>).</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<ul>
+<li>Ramsay, J.O. and Silverman, B.W. (2005). <em>Functional Data
+Analysis</em>, 2nd ed. Springer.</li>
+<li>Reiss, P.T. and Ogden, R.T. (2007). Functional Principal Component
+Regression and Functional Partial Least Squares. <em>Journal of the
+American Statistical Association</em>, 102(479), 984–996.</li>
+<li>Ferraty, F. and Vieu, P. (2006). <em>Nonparametric Functional Data
+Analysis: Theory and Practice</em>. Springer.</li>
+<li>Cuevas, A., Febrero, M., and Fraiman, R. (2004). An anova test for
+functional data. <em>Computational Statistics &amp; Data Analysis</em>,
+47(1), 111–122.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>

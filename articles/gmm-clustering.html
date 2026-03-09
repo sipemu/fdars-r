@@ -94,6 +94,209 @@ B-spline basis before fitting the mixture model.</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="why-model-based-clustering">Why Model-Based Clustering?<a class="anchor" aria-label="anchor" href="#why-model-based-clustering"></a>
+</h2>
+<p>K-means is a natural starting point for clustering, but it makes
+strong implicit assumptions:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Spherical clusters.</strong> K-means minimizes
+within-cluster sum of squares, which treats all directions equally. It
+cannot adapt to elongated or correlated cluster shapes.</li>
+<li>
+<strong>Equal-size clusters.</strong> K-means assigns each point to
+its nearest centroid, effectively giving all clusters equal “pull”
+regardless of their size.</li>
+<li>
+<strong>Hard assignment.</strong> Each observation belongs to
+exactly one cluster, with no notion of uncertainty.</li>
+</ol>
+<p>Gaussian mixture models relax all three assumptions by positing that
+the data arise from a mixture of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+Gaussian distributions, each with its own mean, covariance, and mixing
+weight. The EM algorithm provides:</p>
+<ul>
+<li>
+<strong>Soft (probabilistic) assignment</strong>: each observation
+gets a responsibility
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\tau_{ik} \in [0, 1]</annotation></semantics></math>
+for each cluster, quantifying classification uncertainty.</li>
+<li>
+<strong>Adaptive cluster shapes</strong>: full covariance matrices
+capture correlations between features within each cluster.</li>
+<li>
+<strong>Principled model selection</strong>: information criteria
+(BIC, ICL) balance fit against complexity, selecting both the number of
+clusters and the covariance structure.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="mathematical-framework">Mathematical Framework<a class="anchor" aria-label="anchor" href="#mathematical-framework"></a>
+</h2>
+<div class="section level3">
+<h3 id="gaussian-mixture-model">Gaussian Mixture Model<a class="anchor" aria-label="anchor" href="#gaussian-mixture-model"></a>
+</h3>
+<p>A
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>-component
+GMM models the density of the data
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐳</mi><mo>∈</mo><msup><mi>ℝ</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbf{z} \in \mathbb{R}^d</annotation></semantics></math>
+as:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐳</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>π</mi><mi>k</mi></msub><mspace width="0.167em"></mspace><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐳</mi><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>𝛍</mi><mi>k</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>𝚺</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\mathbf{z}) = \sum_{k=1}^K \pi_k \,\mathcal{N}(\mathbf{z};\, \boldsymbol\mu_k,\, \boldsymbol\Sigma_k)</annotation></semantics></math></p>
+<p>where:</p>
+<ul>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mi>k</mi></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\pi_k &gt; 0</annotation></semantics></math>
+are the <strong>mixing weights</strong> with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></msubsup><msub><mi>π</mi><mi>k</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\sum_{k=1}^K \pi_k = 1</annotation></semantics></math>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝛍</mi><mi>k</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\boldsymbol\mu_k \in \mathbb{R}^d</annotation></semantics></math>
+is the mean of component
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝚺</mi><mi>k</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mrow><mi>d</mi><mo>×</mo><mi>d</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\boldsymbol\Sigma_k \in \mathbb{R}^{d \times d}</annotation></semantics></math>
+is the covariance of component
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐳</mi><mo>;</mo><mspace width="0.167em"></mspace><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mi>𝚺</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{N}(\mathbf{z};\, \boldsymbol\mu,\, \boldsymbol\Sigma)</annotation></semantics></math>
+is the multivariate Gaussian density</li>
+</ul>
+<p>The <strong>log-likelihood</strong> for observations
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐳</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>𝐳</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{z}_1, \ldots, \mathbf{z}_n</annotation></semantics></math>
+is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>log</mo><mrow><mo stretchy="true" form="prefix">[</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>π</mi><mi>k</mi></msub><mspace width="0.167em"></mspace><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐳</mi><mi>i</mi></msub><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>𝛍</mi><mi>k</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>𝚺</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\ell(\theta) = \sum_{i=1}^n \log\left[\sum_{k=1}^K \pi_k \,\mathcal{N}(\mathbf{z}_i;\, \boldsymbol\mu_k,\, \boldsymbol\Sigma_k)\right]</annotation></semantics></math></p>
+<p>Direct maximization is difficult because of the log-of-sum structure.
+The EM algorithm resolves this.</p>
+</div>
+<div class="section level3">
+<h3 id="em-algorithm">EM Algorithm<a class="anchor" aria-label="anchor" href="#em-algorithm"></a>
+</h3>
+<p>The Expectation-Maximization algorithm alternates between two
+steps:</p>
+<p><strong>E-step.</strong> Compute the
+<strong>responsibilities</strong> (posterior cluster probabilities):</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>π</mi><mi>k</mi></msub><mspace width="0.167em"></mspace><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐳</mi><mi>i</mi></msub><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>𝛍</mi><mi>k</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>𝚺</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><munderover><mo>∑</mo><mrow><mi>c</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>π</mi><mi>c</mi></msub><mspace width="0.167em"></mspace><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐳</mi><mi>i</mi></msub><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>𝛍</mi><mi>c</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>𝚺</mi><mi>c</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">\tau_{ik} = \frac{\pi_k \,\mathcal{N}(\mathbf{z}_i;\, \boldsymbol\mu_k,\, \boldsymbol\Sigma_k)}{\sum_{c=1}^K \pi_c \,\mathcal{N}(\mathbf{z}_i;\, \boldsymbol\mu_c,\, \boldsymbol\Sigma_c)}</annotation></semantics></math></p>
+<p>Each
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">\tau_{ik}</annotation></semantics></math>
+is the probability that observation
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+was generated by component
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>,
+given the current parameter estimates.</p>
+<p><strong>M-step.</strong> Update parameters using the responsibilities
+as soft weights:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mi>k</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>π</mi><mi>k</mi></msub><mo>=</mo><mfrac><msub><mi>n</mi><mi>k</mi></msub><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">n_k = \sum_{i=1}^n \tau_{ik}, \qquad \pi_k = \frac{n_k}{n}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝛍</mi><mi>k</mi></msub><mo>=</mo><mfrac><mn>1</mn><msub><mi>n</mi><mi>k</mi></msub></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mspace width="0.167em"></mspace><msub><mi>𝐳</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\boldsymbol\mu_k = \frac{1}{n_k}\sum_{i=1}^n \tau_{ik}\,\mathbf{z}_i</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝚺</mi><mi>k</mi></msub><mo>=</mo><mfrac><mn>1</mn><msub><mi>n</mi><mi>k</mi></msub></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mspace width="0.167em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐳</mi><mi>i</mi></msub><mo>−</mo><msub><mi>𝛍</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐳</mi><mi>i</mi></msub><mo>−</mo><msub><mi>𝛍</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">\boldsymbol\Sigma_k = \frac{1}{n_k}\sum_{i=1}^n \tau_{ik}\,(\mathbf{z}_i - \boldsymbol\mu_k)(\mathbf{z}_i - \boldsymbol\mu_k)^T</annotation></semantics></math></p>
+<p>The algorithm iterates until convergence:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">|</mo><msup><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>−</mo><msup><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo stretchy="true" form="postfix">|</mo></mrow><mo>&lt;</mo><mi>ε</mi></mrow><annotation encoding="application/x-tex">|\ell^{(t+1)} - \ell^{(t)}| &lt; \varepsilon</annotation></semantics></math>.
+Each iteration is guaranteed to increase (or maintain) the
+log-likelihood, ensuring convergence to a local maximum.</p>
+<p><strong>Numerical stability.</strong> Computing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐳</mi><mi>i</mi></msub><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>𝛍</mi><mi>k</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>𝚺</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{N}(\mathbf{z}_i;\, \boldsymbol\mu_k,\, \boldsymbol\Sigma_k)</annotation></semantics></math>
+involves exponentiating large negative values, which can underflow. The
+implementation uses the <strong>log-sum-exp trick</strong>: work in log
+space and subtract the maximum before exponentiating.</p>
+<p><strong>Initialization.</strong> EM is sensitive to starting values.
+<code><a href="../reference/cluster.gmm.html">cluster.gmm()</a></code> uses <strong>K-means++
+initialization</strong> to obtain well-separated initial centroids,
+which substantially reduces the chance of converging to a poor local
+maximum.</p>
+</div>
+<div class="section level3">
+<h3 id="model-selection">Model Selection<a class="anchor" aria-label="anchor" href="#model-selection"></a>
+</h3>
+<div class="section level4">
+<h4 id="bic-bayesian-information-criterion">BIC (Bayesian Information Criterion)<a class="anchor" aria-label="anchor" href="#bic-bayesian-information-criterion"></a>
+</h4>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">BIC</mtext><mo>=</mo><mo>−</mo><mn>2</mn><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>p</mi><mo>log</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">\text{BIC} = -2\ell(\hat\theta) + p\log n</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+is the number of free parameters. For a full-covariance GMM with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+components in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+dimensions:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mi>K</mi><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><mi>d</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac><mo>+</mo><mi>d</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">p = K \cdot \left[\frac{d(d+1)}{2} + d + 1\right] - 1</annotation></semantics></math></p>
+<p>accounting for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">d(d+1)/2</annotation></semantics></math>
+covariance parameters,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+mean parameters, and 1 mixing weight per component, minus 1 for the
+sum-to-one constraint. Lower BIC is better.</p>
+</div>
+<div class="section level4">
+<h4 id="icl-integrated-completed-likelihood">ICL (Integrated Completed Likelihood)<a class="anchor" aria-label="anchor" href="#icl-integrated-completed-likelihood"></a>
+</h4>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">ICL</mtext><mo>=</mo><mtext mathvariant="normal">BIC</mtext><mo>−</mo><mn>2</mn><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>log</mo><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\text{ICL} = \text{BIC} - 2\sum_{i=1}^n\sum_{k=1}^K \tau_{ik}\log\tau_{ik}</annotation></semantics></math></p>
+<p>ICL adds an <strong>entropy penalty</strong> that penalizes overlap
+between clusters. When responsibilities are crisp
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>≈</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\tau_{ik} \approx 0</annotation></semantics></math>
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>),
+the entropy term is small and ICL
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>≈</mo><annotation encoding="application/x-tex">\approx</annotation></semantics></math>
+BIC. When clusters overlap heavily, the entropy is large and ICL
+penalizes more strongly, favoring fewer, better-separated clusters.</p>
+<p><strong>When BIC and ICL disagree:</strong> BIC tends to select more
+components (it is a better density estimator), while ICL tends to select
+fewer (it prioritizes well-separated clusters). If your goal is
+clustering, ICL is often more appropriate; if your goal is density
+estimation, prefer BIC.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="covariance-structures">Covariance Structures<a class="anchor" aria-label="anchor" href="#covariance-structures"></a>
+</h3>
+<ul>
+<li>
+<strong>Full</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">d(d+1)/2</annotation></semantics></math>
+free parameters per component. Captures all pairwise correlations.
+Flexible but data-hungry.</li>
+<li>
+<strong>Diagonal</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+parameters per component. Assumes features are independent within each
+cluster. Parsimonious, useful when the basis coefficients are
+approximately uncorrelated.</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="from-curves-to-features">From Curves to Features<a class="anchor" aria-label="anchor" href="#from-curves-to-features"></a>
+</h2>
+<p><code><a href="../reference/cluster.gmm.html">cluster.gmm()</a></code> does not operate on raw discretized
+curves. Instead, it first projects each curve onto a <strong>B-spline
+basis</strong>, producing a vector of basis coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐳</mi><mi>i</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbf{z}_i \in \mathbb{R}^d</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+equals the number of basis functions (<code>nbasis</code>). This
+step:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Reduces dimensionality</strong> from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
+grid points to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+basis coefficients (typically
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>=</mo><mn>10</mn><mtext mathvariant="normal">–</mtext><mn>30</mn></mrow><annotation encoding="application/x-tex">d = 10\text{--}30</annotation></semantics></math>).</li>
+<li>
+<strong>Imposes smoothness</strong> because B-splines are smooth by
+construction.</li>
+<li>
+<strong>Decorrelates</strong> (partially), since B-spline
+coefficients are less redundant than adjacent grid-point values.</li>
+</ol>
+<p>The choice of <code>nbasis</code> controls how much curve detail is
+retained. Too few basis functions smooth away cluster-distinguishing
+features; too many inflate the dimensionality and slow convergence.</p>
+</div>
+<div class="section level2">
 <h2 id="simulated-data">Simulated Data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -126,6 +329,11 @@ B-spline basis before fitting the mixture model.</p>
 <span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span></code></pre></div>
 <p><img src="gmm-clustering_files/figure-html/data-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The three clusters have visually distinct shapes: sinusoidal,
+cosinusoidal, and linear. The added noise
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.15</mn></mrow><annotation encoding="application/x-tex">\sigma = 0.15</annotation></semantics></math>)
+creates some overlap but the clusters remain well separated — an ideal
+scenario for GMM.</p>
 </div>
 <div class="section level2">
 <h2 id="fitting-a-gmm">Fitting a GMM<a class="anchor" aria-label="anchor" href="#fitting-a-gmm"></a>
@@ -150,6 +358,13 @@ selects the best model using BIC (default) or ICL.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  1  2  3  4  5  6 </span></span>
 <span><span class="co">#&gt; 16 14 21  9  9  6</span></span></code></pre></div>
+<p>The selected
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+should match the true number of clusters (3). The BIC values for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>&lt;</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">k &lt; 3</annotation></semantics></math>
+will be worse because they cannot capture the three distinct shapes, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>&gt;</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">k &gt; 3</annotation></semantics></math>
+will be penalized for unnecessary parameters.</p>
 </div>
 <div class="section level2">
 <h2 id="model-selection-bic-curve">Model Selection: BIC Curve<a class="anchor" aria-label="anchor" href="#model-selection-bic-curve"></a>
@@ -158,6 +373,12 @@ selects the best model using BIC (default) or ICL.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gmm_fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="gmm-clustering_files/figure-html/bic-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<p>A clear minimum (or elbow) at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">k = 3</annotation></semantics></math>
+confirms the true structure. When the BIC curve is flat, the data may
+not have well-defined clusters, or multiple values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+provide comparably good fits.</p>
 </div>
 <div class="section level2">
 <h2 id="soft-vs-hard-assignment">Soft vs Hard Assignment<a class="anchor" aria-label="anchor" href="#soft-vs-hard-assignment"></a>
@@ -177,6 +398,12 @@ selects the best model using BIC (default) or ICL.</p>
 <span><span class="co"># Maximum membership gives hard assignment</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hard clusters:"</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gmm_fit</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Hard clusters: 1 3 4 6 3 3</span></span></code></pre></div>
+<p>Membership probabilities near 1 indicate confident assignment; values
+like
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.6</mn><mo>,</mo><mn>0.3</mn><mo>,</mo><mn>0.1</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0.6, 0.3, 0.1)</annotation></semantics></math>
+indicate the curve sits between clusters. High-entropy observations are
+natural candidates for further investigation — they may be transitional
+curves, outliers, or evidence that the model needs refinement.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-k-means">Comparison with K-Means<a class="anchor" aria-label="anchor" href="#comparison-with-k-means"></a>
@@ -190,6 +417,10 @@ selects the best model using BIC (default) or ICL.</p>
 <span><span class="co">#&gt; GMM BIC: 322.95</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"GMM converged:"</span>, <span class="va">gmm_fit</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; GMM converged: TRUE</span></span></code></pre></div>
+<p>K-means and GMM often agree on well-separated clusters. The key
+differences emerge when clusters have unequal sizes, non-spherical
+shapes, or overlapping boundaries — situations where GMM’s flexibility
+pays off.</p>
 </div>
 <div class="section level2">
 <h2 id="covariance-types">Covariance Types<a class="anchor" aria-label="anchor" href="#covariance-types"></a>
@@ -210,6 +441,9 @@ independent within clusters).</li>
 <span><span class="co">#&gt; Full GMM BIC: 322.95</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Diagonal GMM BIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gmm_diag</span><span class="op">$</span><span class="va">bic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Diagonal GMM BIC: 1729.75</span></span></code></pre></div>
+<p>If the diagonal model achieves a comparable BIC, it suggests that the
+B-spline coefficients are approximately uncorrelated within clusters — a
+simpler model is adequate and will generalize better.</p>
 </div>
 <div class="section level2">
 <h2 id="predicting-new-observations">Predicting New Observations<a class="anchor" aria-label="anchor" href="#predicting-new-observations"></a>
@@ -235,6 +469,11 @@ independent within clusters).</li>
 <span><span class="co">#&gt; [1,]    0    1    0    0    0    0</span></span>
 <span><span class="co">#&gt; [2,]    0    1    0    0    0    0</span></span>
 <span><span class="co">#&gt; [3,]    0    1    0    0    0    0</span></span></code></pre></div>
+<p>The membership probabilities for new curves should be highly
+concentrated on the correct cluster, since the test curves were
+generated with lower noise
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">\sigma = 0.1</annotation></semantics></math>)
+than the training data.</p>
 </div>
 <div class="section level2">
 <h2 id="bic-vs-icl">BIC vs ICL<a class="anchor" aria-label="anchor" href="#bic-vs-icl"></a>
@@ -247,6 +486,28 @@ strongly than BIC:</p>
 <span><span class="co">#&gt; BIC selected k: 6</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ICL selected k:"</span>, <span class="va">gmm_icl</span><span class="op">$</span><span class="va">k</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ICL selected k: 6</span></span></code></pre></div>
+<p>When BIC and ICL agree, the clustering structure is unambiguous. When
+they disagree (ICL selects fewer clusters), it signals that some
+BIC-selected components overlap substantially and might be better
+interpreted as a single heterogeneous cluster.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<ul>
+<li>McLachlan, G.J. and Peel, D. (2000). <em>Finite Mixture Models</em>.
+Wiley.</li>
+<li>Fraley, C. and Raftery, A.E. (2002). Model-based clustering,
+discriminant analysis, and density estimation. <em>Journal of the
+American Statistical Association</em>, 97(458), 611–631.</li>
+<li>Jacques, J. and Preda, C. (2014). Functional data clustering: a
+survey. <em>Advances in Data Analysis and Classification</em>, 8(3),
+231–255.</li>
+<li>Biernacki, C., Celeux, G., and Govaert, G. (2000). Assessing a
+mixture model for clustering with the integrated completed likelihood.
+<em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>,
+22(7), 719–725.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
