@@ -1,5 +1,3 @@
-export PATH := $(HOME)/.cargo/bin:$(PATH)
-
 RUST_SRC = rust
 RUST_TARGET_DIR = $(RUST_SRC)/target/release
 STATLIB = $(RUST_TARGET_DIR)/libfdars.a
@@ -13,10 +11,11 @@ all: $(SHLIB)
 $(SHLIB): $(STATLIB) $(OBJECTS)
 
 $(STATLIB):
-	@rustc --version
-	@mkdir -p $(RUST_SRC)/.cargo
-	@cp $(RUST_SRC)/cargo_vendor_config.toml $(RUST_SRC)/.cargo/config.toml
-	cd $(RUST_SRC) && CARGO_HOME="$(CURDIR)/rust/.cargo" CARGO_TARGET_DIR=target cargo build --release --lib --offline -j 2
+	export PATH="$(HOME)/.cargo/bin:$$PATH" && \
+	  rustc --version && \
+	  mkdir -p $(RUST_SRC)/.cargo && \
+	  cp $(RUST_SRC)/cargo_vendor_config.toml $(RUST_SRC)/.cargo/config.toml && \
+	  cd $(RUST_SRC) && CARGO_HOME="$(CURDIR)/rust/.cargo" CARGO_TARGET_DIR=target cargo build --release --lib --offline -j 2
 
 clean:
 	rm -Rf $(OBJECTS) $(RUST_SRC)/target $(RUST_SRC)/.cargo

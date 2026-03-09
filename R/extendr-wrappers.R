@@ -10,631 +10,632 @@
 #' @useDynLib fdars, .registration = TRUE
 NULL
 
-#' Compute the mean function across all samples (1D)
+# Compute the mean function across all samples (1D)
 fdata_mean_1d <- function(data) .Call(wrap__fdata_mean_1d, data)
 
-#' Compute the mean function across all samples (2D surfaces)
-#' Data is stored as n x (m1*m2) matrix where each row is a flattened surface
+# Compute the mean function across all samples (2D surfaces)
+# Data is stored as n x (m1*m2) matrix where each row is a flattened surface
 fdata_mean_2d <- function(data) .Call(wrap__fdata_mean_2d, data)
 
-#' Center functional data by subtracting the mean function
+# Center functional data by subtracting the mean function
 fdata_center_1d <- function(data) .Call(wrap__fdata_center_1d, data)
 
-#' Compute Lp norm for each sample
+# Compute Lp norm for each sample
 fdata_norm_lp_1d <- function(data, argvals, p) .Call(wrap__fdata_norm_lp_1d, data, argvals, p)
 
-#' Compute numerical derivative of functional data (parallelized over rows)
+# Compute numerical derivative of functional data (parallelized over rows)
 fdata_deriv_1d <- function(data, argvals, nderiv) .Call(wrap__fdata_deriv_1d, data, argvals, nderiv)
 
-#' Compute 2D partial derivatives for surface data
-#'
-#' For a surface f(s,t), computes:
-#' - ds: partial derivative with respect to s (∂f/∂s)
-#' - dt: partial derivative with respect to t (∂f/∂t)
-#' - dsdt: mixed partial derivative (∂²f/∂s∂t)
-#'
-#' Data layout: n surfaces, each stored as m1*m2 values in row-major order (s varies fastest)
-#' Return: list with three matrices (ds, dt, dsdt), each n x (m1*m2)
+# Compute 2D partial derivatives for surface data
+#
+# For a surface f(s,t), computes:
+# - ds: partial derivative with respect to s (∂f/∂s)
+# - dt: partial derivative with respect to t (∂f/∂t)
+# - dsdt: mixed partial derivative (∂²f/∂s∂t)
+#
+# Data layout: n surfaces, each stored as m1*m2 values in row-major order (s varies fastest)
+# Return: list with three matrices (ds, dt, dsdt), each n x (m1*m2)
 fdata_deriv_2d <- function(data, argvals_s, argvals_t, m1, m2) .Call(wrap__fdata_deriv_2d, data, argvals_s, argvals_t, m1, m2)
 
-#' Compute the geometric median (L1 median) of functional data using Weiszfeld's algorithm
-#' The geometric median minimizes sum of L2 distances to all curves
+# Compute the geometric median (L1 median) of functional data using Weiszfeld's algorithm
+# The geometric median minimizes sum of L2 distances to all curves
 geometric_median_1d <- function(data, argvals, max_iter, tol) .Call(wrap__geometric_median_1d, data, argvals, max_iter, tol)
 
-#' Compute the geometric median (L1 median) of 2D functional data using Weiszfeld's algorithm
-#' Data is stored as n x (m1*m2) matrix where each row is a flattened surface
+# Compute the geometric median (L1 median) of 2D functional data using Weiszfeld's algorithm
+# Data is stored as n x (m1*m2) matrix where each row is a flattened surface
 geometric_median_2d <- function(data, argvals_s, argvals_t, max_iter, tol) .Call(wrap__geometric_median_2d, data, argvals_s, argvals_t, max_iter, tol)
 
-#' Compute Fraiman-Muniz depth
-#'
-#' Uses the FM1 formula from fda.usc: d = 1 - |0.5 - Fn(x)|
-#' With scale=TRUE (default): d = (1 - |0.5 - Fn(x)| - 0.5) * 2 = 2 * min(Fn(x), 1-Fn(x))
+# Compute Fraiman-Muniz depth
+#
+# Uses the FM1 formula from fda.usc: d = 1 - |0.5 - Fn(x)|
+# With scale=TRUE (default): d = (1 - |0.5 - Fn(x)| - 0.5) * 2 = 2 * min(Fn(x), 1-Fn(x))
 depth_fm_1d <- function(fdataobj, fdataori, `_trim`, scale) .Call(wrap__depth_fm_1d, fdataobj, fdataori, `_trim`, scale)
 
-#' Compute modal depth
+# Compute modal depth
 depth_mode_1d <- function(fdataobj, fdataori, h) .Call(wrap__depth_mode_1d, fdataobj, fdataori, h)
 
-#' Compute random projection depth
+# Compute random projection depth
 depth_rp_1d <- function(fdataobj, fdataori, nproj) .Call(wrap__depth_rp_1d, fdataobj, fdataori, nproj)
 
-#' Compute random Tukey depth
+# Compute random Tukey depth
 depth_rt_1d <- function(fdataobj, fdataori, nproj) .Call(wrap__depth_rt_1d, fdataobj, fdataori, nproj)
 
-#' Compute Functional Spatial Depth
+# Compute Functional Spatial Depth
 depth_fsd_1d <- function(fdataobj, fdataori) .Call(wrap__depth_fsd_1d, fdataobj, fdataori)
 
-#' Kernel Functional Spatial Depth (KFSD) for 1D functional data
-#' Implements the RKHS-based formulation matching fda.usc
-#' h is treated as the actual bandwidth, matching how fda.usc uses hq2
-#' argvals is used for trapezoidal integration to compute L2 norms
+# Kernel Functional Spatial Depth (KFSD) for 1D functional data
+# Implements the RKHS-based formulation matching fda.usc
+# h is treated as the actual bandwidth, matching how fda.usc uses hq2
+# argvals is used for trapezoidal integration to compute L2 norms
 depth_kfsd_1d <- function(fdataobj, fdataori, argvals, h) .Call(wrap__depth_kfsd_1d, fdataobj, fdataori, argvals, h)
 
-#' Band Depth (BD) for 1D functional data
-#' BD(x) = proportion of pairs (i,j) where x lies within the band formed by curves i and j
-#' A curve lies in the band if at every time point t, min(X_i(t), X_j(t)) <= x(t) <= max(X_i(t), X_j(t))
+# Band Depth (BD) for 1D functional data
+# BD(x) = proportion of pairs (i,j) where x lies within the band formed by curves i and j
+# A curve lies in the band if at every time point t, min(X_i(t), X_j(t)) <= x(t) <= max(X_i(t), X_j(t))
 depth_bd_1d <- function(fdataobj, fdataori) .Call(wrap__depth_bd_1d, fdataobj, fdataori)
 
-#' Modified Band Depth (MBD) for 1D functional data
-#' MBD(x) = average over pairs (i,j) of the proportion of the domain where x is inside the band
-#' This is more robust than BD as it doesn't require complete containment
+# Modified Band Depth (MBD) for 1D functional data
+# MBD(x) = average over pairs (i,j) of the proportion of the domain where x is inside the band
+# This is more robust than BD as it doesn't require complete containment
 depth_mbd_1d <- function(fdataobj, fdataori) .Call(wrap__depth_mbd_1d, fdataobj, fdataori)
 
-#' Modified Epigraph Index (MEI) for 1D functional data
-#' MEI measures the proportion of time a curve is below other curves
-#' MEI(x_i) = (1/n) * sum_j (1/m) * sum_t I(x_i(t) < x_j(t)) + 0.5*I(x_i(t) = x_j(t))
+# Modified Epigraph Index (MEI) for 1D functional data
+# MEI measures the proportion of time a curve is below other curves
+# MEI(x_i) = (1/n) * sum_j (1/m) * sum_t I(x_i(t) < x_j(t)) + 0.5*I(x_i(t) = x_j(t))
 depth_mei_1d <- function(fdataobj, fdataori) .Call(wrap__depth_mei_1d, fdataobj, fdataori)
 
-#' Fraiman-Muniz depth for 2D functional data (surfaces)
-#' Integrates univariate depth over (s,t) grid
+# Fraiman-Muniz depth for 2D functional data (surfaces)
+# Integrates univariate depth over (s,t) grid
 depth_fm_2d <- function(fdataobj, fdataori, m1, m2, scale) .Call(wrap__depth_fm_2d, fdataobj, fdataori, m1, m2, scale)
 
-#' Modal depth for 2D functional data (surfaces)
-#' Uses L2 distance in the flattened surface space
+# Modal depth for 2D functional data (surfaces)
+# Uses L2 distance in the flattened surface space
 depth_mode_2d <- function(fdataobj, fdataori, m1, m2, h) .Call(wrap__depth_mode_2d, fdataobj, fdataori, m1, m2, h)
 
-#' Random projection depth for 2D functional data (surfaces)
-#' Projects surfaces to scalars using random projections
+# Random projection depth for 2D functional data (surfaces)
+# Projects surfaces to scalars using random projections
 depth_rp_2d <- function(fdataobj, fdataori, m1, m2, nproj) .Call(wrap__depth_rp_2d, fdataobj, fdataori, m1, m2, nproj)
 
-#' Random Tukey depth for 2D functional data (surfaces)
+# Random Tukey depth for 2D functional data (surfaces)
 depth_rt_2d <- function(fdataobj, fdataori, m1, m2, nproj) .Call(wrap__depth_rt_2d, fdataobj, fdataori, m1, m2, nproj)
 
-#' Kernel Functional Spatial Depth (KFSD) for 2D functional data
-#' Implements the RKHS-based formulation matching fda.usc
+# Kernel Functional Spatial Depth (KFSD) for 2D functional data
+# Implements the RKHS-based formulation matching fda.usc
 depth_kfsd_2d <- function(fdataobj, fdataori, `_m1`, `_m2`, h) .Call(wrap__depth_kfsd_2d, fdataobj, fdataori, `_m1`, `_m2`, h)
 
-#' Functional Spatial Depth for 2D functional data
+# Functional Spatial Depth for 2D functional data
 depth_fsd_2d <- function(fdataobj, fdataori, m1, m2) .Call(wrap__depth_fsd_2d, fdataobj, fdataori, m1, m2)
 
-#' Compute Lp distance matrix between two sets of functional data
+# Compute Lp distance matrix between two sets of functional data
 metric_lp_1d <- function(fdata1, fdata2, argvals, p, w) .Call(wrap__metric_lp_1d, fdata1, fdata2, argvals, p, w)
 
-#' Compute Lp distance matrix for self-distances (symmetric)
+# Compute Lp distance matrix for self-distances (symmetric)
 metric_lp_self_1d <- function(fdata, argvals, p, w) .Call(wrap__metric_lp_self_1d, fdata, argvals, p, w)
 
-#' Compute Hausdorff distance matrix for self-distances (symmetric)
-#'
-#' The Hausdorff distance treats curves as sets of points (t, f(t)) in 2D space.
-#' For each pair of curves, computes: max(max_s min_t d(s,t), max_t min_s d(s,t))
-#' where d(s,t) = sqrt((x(s) - y(t))^2 + (s - t)^2)
+# Compute Hausdorff distance matrix for self-distances (symmetric)
+#
+# The Hausdorff distance treats curves as sets of points (t, f(t)) in 2D space.
+# For each pair of curves, computes: max(max_s min_t d(s,t), max_t min_s d(s,t))
+# where d(s,t) = sqrt((x(s) - y(t))^2 + (s - t)^2)
 metric_hausdorff_1d <- function(fdata, argvals) .Call(wrap__metric_hausdorff_1d, fdata, argvals)
 
-#' Compute Hausdorff distance matrix for cross-distances (n1 x n2)
-#'
-#' The Hausdorff distance treats curves as sets of points (t, f(t)) in 2D space.
+# Compute Hausdorff distance matrix for cross-distances (n1 x n2)
+#
+# The Hausdorff distance treats curves as sets of points (t, f(t)) in 2D space.
 metric_hausdorff_cross_1d <- function(fdata1, fdata2, argvals) .Call(wrap__metric_hausdorff_cross_1d, fdata1, fdata2, argvals)
 
-#' Compute DTW distance matrix for self-distances (symmetric)
+# Compute DTW distance matrix for self-distances (symmetric)
 metric_dtw_self_1d <- function(fdata, p, w) .Call(wrap__metric_dtw_self_1d, fdata, p, w)
 
-#' Compute DTW distance matrix for cross-distances (n1 x n2)
+# Compute DTW distance matrix for cross-distances (n1 x n2)
 metric_dtw_cross_1d <- function(fdata1, fdata2, p, w) .Call(wrap__metric_dtw_cross_1d, fdata1, fdata2, p, w)
 
-#' Compute Lp distance between two 2D functional data objects (surfaces)
-#'
-#' For 2D functional data, the Lp distance is computed as:
-#' d(f, g) = (∫∫ |f(s,t) - g(s,t)|^p ds dt)^(1/p)
-#'
-#' Data is stored as flattened matrices: n x (m1 * m2) where m1 = len(argvals_s), m2 = len(argvals_t)
-#' Data is stored in row-major order for the surface: f(s_i, t_j) is at index i * m2 + j
+# Compute Lp distance between two 2D functional data objects (surfaces)
+#
+# For 2D functional data, the Lp distance is computed as:
+# d(f, g) = (∫∫ |f(s,t) - g(s,t)|^p ds dt)^(1/p)
+#
+# Data is stored as flattened matrices: n x (m1 * m2) where m1 = len(argvals_s), m2 = len(argvals_t)
+# Data is stored in row-major order for the surface: f(s_i, t_j) is at index i * m2 + j
 metric_lp_2d <- function(fdata1, fdata2, argvals_s, argvals_t, p, w) .Call(wrap__metric_lp_2d, fdata1, fdata2, argvals_s, argvals_t, p, w)
 
-#' Compute Lp self-distance matrix for 2D functional data (symmetric)
+# Compute Lp self-distance matrix for 2D functional data (symmetric)
 metric_lp_self_2d <- function(fdata, argvals_s, argvals_t, p, w) .Call(wrap__metric_lp_self_2d, fdata, argvals_s, argvals_t, p, w)
 
-#' Compute Hausdorff distance for 2D functional data (surfaces)
-#'
-#' For surfaces, each sample is treated as a point cloud in 3D space:
-#' {(s_i, t_j, f(s_i, t_j)) : for all grid points}
-#'
-#' The Hausdorff distance measures how far apart two such point clouds are.
+# Compute Hausdorff distance for 2D functional data (surfaces)
+#
+# For surfaces, each sample is treated as a point cloud in 3D space:
+# {(s_i, t_j, f(s_i, t_j)) : for all grid points}
+#
+# The Hausdorff distance measures how far apart two such point clouds are.
 metric_hausdorff_2d <- function(fdata, argvals_s, argvals_t) .Call(wrap__metric_hausdorff_2d, fdata, argvals_s, argvals_t)
 
-#' Compute Hausdorff cross-distances for 2D functional data
+# Compute Hausdorff cross-distances for 2D functional data
 metric_hausdorff_cross_2d <- function(fdata1, fdata2, argvals_s, argvals_t) .Call(wrap__metric_hausdorff_cross_2d, fdata1, fdata2, argvals_s, argvals_t)
 
-#' Compute the Adot matrix (parallelized)
+# Compute the Adot matrix (parallelized)
 compute_adot <- function(n, inprod) .Call(wrap__compute_adot, n, inprod)
 
-#' Compute the PCvM statistic
+# Compute the PCvM statistic
 pcvm_statistic <- function(adot_vec, residuals) .Call(wrap__pcvm_statistic, adot_vec, residuals)
 
-#' Compute random projection statistics (parallelized over projections)
+# Compute random projection statistics (parallelized over projections)
 rp_stat <- function(proj_x_ord, residuals, n_proj) .Call(wrap__rp_stat, proj_x_ord, residuals, n_proj)
 
-#' Compute semimetric based on Fourier coefficients for self-distances (symmetric)
-#' Uses FFT to compute Fourier coefficients and then L2 distance on coefficients
+# Compute semimetric based on Fourier coefficients for self-distances (symmetric)
+# Uses FFT to compute Fourier coefficients and then L2 distance on coefficients
 semimetric_fourier_self_1d <- function(fdata, nfreq) .Call(wrap__semimetric_fourier_self_1d, fdata, nfreq)
 
-#' Compute semimetric based on Fourier coefficients for cross-distances
+# Compute semimetric based on Fourier coefficients for cross-distances
 semimetric_fourier_cross_1d <- function(fdata1, fdata2, nfreq) .Call(wrap__semimetric_fourier_cross_1d, fdata1, fdata2, nfreq)
 
-#' Compute semimetric based on horizontal shift for self-distances (symmetric)
-#' This finds the minimum L2 distance after optimally shifting one curve horizontally
+# Compute semimetric based on horizontal shift for self-distances (symmetric)
+# This finds the minimum L2 distance after optimally shifting one curve horizontally
 semimetric_hshift_self_1d <- function(fdata, argvals, max_shift) .Call(wrap__semimetric_hshift_self_1d, fdata, argvals, max_shift)
 
-#' Compute semimetric based on horizontal shift for cross-distances
+# Compute semimetric based on horizontal shift for cross-distances
 semimetric_hshift_cross_1d <- function(fdata1, fdata2, argvals, max_shift) .Call(wrap__semimetric_hshift_cross_1d, fdata1, fdata2, argvals, max_shift)
 
-#' Compute symmetric KL divergence matrix for self-distances (1D)
-#' Curves are first normalized to be valid probability distributions
+# Compute symmetric KL divergence matrix for self-distances (1D)
+# Curves are first normalized to be valid probability distributions
 metric_kl_self_1d <- function(fdata, argvals, eps, normalize) .Call(wrap__metric_kl_self_1d, fdata, argvals, eps, normalize)
 
-#' Compute symmetric KL divergence matrix for cross-distances (1D)
+# Compute symmetric KL divergence matrix for cross-distances (1D)
 metric_kl_cross_1d <- function(fdata1, fdata2, argvals, eps, normalize) .Call(wrap__metric_kl_cross_1d, fdata1, fdata2, argvals, eps, normalize)
 
-#' Perform functional PCA via SVD on centered data
-#' Returns: singular values, rotation matrix (loadings), scores, mean
+# Perform functional PCA via SVD on centered data
+# Returns: singular values, rotation matrix (loadings), scores, mean
 fdata2pc_1d <- function(data, ncomp, `_lambda`) .Call(wrap__fdata2pc_1d, data, ncomp, `_lambda`)
 
-#' Perform PLS via NIPALS algorithm
-#' Returns: weights, scores, loadings
+# Perform PLS via NIPALS algorithm
+# Returns: weights, scores, loadings
 fdata2pls_1d <- function(data, y, ncomp, `_lambda`) .Call(wrap__fdata2pls_1d, data, y, ncomp, `_lambda`)
 
-#' Convert functional data to basis coefficients
-#' type: 0 = bspline, 1 = fourier
+# Convert functional data to basis coefficients
+# type: 0 = bspline, 1 = fourier
 fdata2basis_1d <- function(data, argvals, nbasis, basis_type) .Call(wrap__fdata2basis_1d, data, argvals, nbasis, basis_type)
 
-#' Reconstruct functional data from basis coefficients
-#' Returns data matrix (n x m)
+# Reconstruct functional data from basis coefficients
+# Returns data matrix (n x m)
 basis2fdata_1d <- function(coefs, argvals, nbasis, basis_type) .Call(wrap__basis2fdata_1d, coefs, argvals, nbasis, basis_type)
 
-#' Compute GCV score for basis fit
-#' GCV = RSS/n / (1 - edf/n)^2
-#' When pooled=true: compute single GCV across all curves
-#' When pooled=false: compute per-curve GCV and return mean
+# Compute GCV score for basis fit
+# GCV = RSS/n / (1 - edf/n)^2
+# When pooled=true: compute single GCV across all curves
+# When pooled=false: compute per-curve GCV and return mean
 basis_gcv_1d <- function(data, argvals, nbasis, basis_type, lambda, pooled) .Call(wrap__basis_gcv_1d, data, argvals, nbasis, basis_type, lambda, pooled)
 
-#' Compute AIC for basis fit
-#' AIC = n * log(RSS/n) + 2 * total_edf
-#' Where total_edf = n_curves * edf (each curve has edf parameters)
-#' When pooled=true: compute single AIC across all curves
-#' When pooled=false: compute per-curve AIC and return mean
+# Compute AIC for basis fit
+# AIC = n * log(RSS/n) + 2 * total_edf
+# Where total_edf = n_curves * edf (each curve has edf parameters)
+# When pooled=true: compute single AIC across all curves
+# When pooled=false: compute per-curve AIC and return mean
 basis_aic_1d <- function(data, argvals, nbasis, basis_type, lambda, pooled) .Call(wrap__basis_aic_1d, data, argvals, nbasis, basis_type, lambda, pooled)
 
-#' Compute BIC for basis fit
-#' BIC = n * log(RSS/n) + log(n) * total_edf
-#' Where total_edf = n_curves * edf (each curve has edf parameters)
-#' When pooled=true: compute single BIC across all curves
-#' When pooled=false: compute per-curve BIC and return mean
+# Compute BIC for basis fit
+# BIC = n * log(RSS/n) + log(n) * total_edf
+# Where total_edf = n_curves * edf (each curve has edf parameters)
+# When pooled=true: compute single BIC across all curves
+# When pooled=false: compute per-curve BIC and return mean
 basis_bic_1d <- function(data, argvals, nbasis, basis_type, lambda, pooled) .Call(wrap__basis_bic_1d, data, argvals, nbasis, basis_type, lambda, pooled)
 
-#' P-spline fitting: returns coefficients, fitted values, and diagnostics
+# P-spline fitting: returns coefficients, fitted values, and diagnostics
 pspline_fit_1d <- function(data, argvals, nbasis, lambda, order) .Call(wrap__pspline_fit_1d, data, argvals, nbasis, lambda, order)
 
-#' Project 2D functional data to tensor product basis coefficients
-fdata2basis_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+# Project 2D functional data to tensor product basis coefficients
+# @keywords internal
+.fdata2basis_2d_raw <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
-#' Reconstruct 2D functional data from tensor product basis coefficients
-basis2fdata_2d <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+# Reconstruct 2D functional data from tensor product basis coefficients
+.basis2fdata_2d_raw <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
-#' 2D P-spline fitting with anisotropic penalties
+# 2D P-spline fitting with anisotropic penalties
 pspline_fit_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order) .Call(wrap__pspline_fit_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order)
 
-#' Automatic basis selection for each curve individually.
-#'
-#' This function compares Fourier and P-spline bases for each curve,
-#' selecting the optimal basis type and number of basis functions using
-#' model selection criteria (GCV, AIC, or BIC).
-#'
-#' # Arguments
-#' * `data` - Functional data matrix (n x m)
-#' * `argvals` - Evaluation points
-#' * `criterion` - Model selection criterion: 0=GCV (default), 1=AIC, 2=BIC
-#' * `nbasis_min` - Minimum number of basis functions (0 for auto)
-#' * `nbasis_max` - Maximum number of basis functions (0 for auto)
-#' * `lambda_pspline` - Smoothing parameter for P-spline (negative for auto-select)
-#' * `use_seasonal_hint` - Whether to use FFT to detect seasonality
-#'
-#' # Returns
-#' Named list with:
-#' - basis_type: Integer vector (0=pspline, 1=fourier)
-#' - nbasis: Integer vector of selected nbasis per curve
-#' - score: Numeric vector of criterion scores
-#' - coefficients: List of coefficient vectors
-#' - fitted: Fitted values matrix (n x m)
-#' - edf: Numeric vector of effective degrees of freedom
-#' - seasonal_detected: Logical vector
-#' - lambda: Numeric vector of lambda values (NA for Fourier)
-#' - criterion: Character (criterion name used)
+# Automatic basis selection for each curve individually.
+#
+# This function compares Fourier and P-spline bases for each curve,
+# selecting the optimal basis type and number of basis functions using
+# model selection criteria (GCV, AIC, or BIC).
+#
+# # Arguments
+# * `data` - Functional data matrix (n x m)
+# * `argvals` - Evaluation points
+# * `criterion` - Model selection criterion: 0=GCV (default), 1=AIC, 2=BIC
+# * `nbasis_min` - Minimum number of basis functions (0 for auto)
+# * `nbasis_max` - Maximum number of basis functions (0 for auto)
+# * `lambda_pspline` - Smoothing parameter for P-spline (negative for auto-select)
+# * `use_seasonal_hint` - Whether to use FFT to detect seasonality
+#
+# # Returns
+# Named list with:
+# - basis_type: Integer vector (0=pspline, 1=fourier)
+# - nbasis: Integer vector of selected nbasis per curve
+# - score: Numeric vector of criterion scores
+# - coefficients: List of coefficient vectors
+# - fitted: Fitted values matrix (n x m)
+# - edf: Numeric vector of effective degrees of freedom
+# - seasonal_detected: Logical vector
+# - lambda: Numeric vector of lambda values (NA for Fourier)
+# - criterion: Character (criterion name used)
 select_basis_auto <- function(data, argvals, criterion, nbasis_min, nbasis_max, lambda_pspline, use_seasonal_hint) .Call(wrap__select_basis_auto, data, argvals, criterion, nbasis_min, nbasis_max, lambda_pspline, use_seasonal_hint)
 
-#' Compute bootstrap threshold for LRT outlier detection
-#' Highly parallelized across bootstrap iterations
+# Compute bootstrap threshold for LRT outlier detection
+# Highly parallelized across bootstrap iterations
 outliers_thres_lrt <- function(data, argvals, nb, smo, trim, seed, percentile) .Call(wrap__outliers_thres_lrt, data, argvals, nb, smo, trim, seed, percentile)
 
-#' LRT-based outlier detection
-#' Returns indices of detected outliers
+# LRT-based outlier detection
+# Returns indices of detected outliers
 outliers_lrt <- function(data, argvals, nb, smo, trim, seed, percentile) .Call(wrap__outliers_lrt, data, argvals, nb, smo, trim, seed, percentile)
 
-#' Nadaraya-Watson smoother matrix
-#' S_ij = K((t_i - t_j)/h) * w_j / sum_k(K((t_i - t_k)/h) * w_k)
+# Nadaraya-Watson smoother matrix
+# S_ij = K((t_i - t_j)/h) * w_j / sum_k(K((t_i - t_k)/h) * w_k)
 s_nw <- function(argvals, h, kernel_type, weights, cv) .Call(wrap__s_nw, argvals, h, kernel_type, weights, cv)
 
-#' Local Linear Regression smoother matrix
-#' Uses weighted least squares with degree-1 polynomial
+# Local Linear Regression smoother matrix
+# Uses weighted least squares with degree-1 polynomial
 s_llr <- function(argvals, h, kernel_type, weights, cv) .Call(wrap__s_llr, argvals, h, kernel_type, weights, cv)
 
-#' Local Polynomial Regression smoother matrix
-#' Solves (p+1)×(p+1) weighted least squares system for each point
+# Local Polynomial Regression smoother matrix
+# Solves (p+1)×(p+1) weighted least squares system for each point
 s_lpr <- function(argvals, h, p, kernel_type, weights, cv) .Call(wrap__s_lpr, argvals, h, p, kernel_type, weights, cv)
 
-#' K-Nearest Neighbors smoother matrix
+# K-Nearest Neighbors smoother matrix
 s_knn <- function(argvals, k, kernel_type, weights, cv) .Call(wrap__s_knn, argvals, k, kernel_type, weights, cv)
 
-#' Functional k-means clustering
+# Functional k-means clustering
 kmeans_fd <- function(data, argvals, nclusters, max_iter, nstart, metric, seed) .Call(wrap__kmeans_fd, data, argvals, nclusters, max_iter, nstart, metric, seed)
 
-#' Fuzzy C-Means clustering for functional data
-#' m_fuzz is the fuzziness parameter (typically 2)
+# Fuzzy C-Means clustering for functional data
+# m_fuzz is the fuzziness parameter (typically 2)
 fuzzycmeans_fd <- function(data, argvals, nclusters, m_fuzz, max_iter, tol, seed) .Call(wrap__fuzzycmeans_fd, data, argvals, nclusters, m_fuzz, max_iter, tol, seed)
 
-#' Shift registration: find optimal horizontal shift for each curve
-#' to align with a target (usually the mean)
+# Shift registration: find optimal horizontal shift for each curve
+# to align with a target (usually the mean)
 register_shift_1d <- function(data, target, argvals, max_shift) .Call(wrap__register_shift_1d, data, target, argvals, max_shift)
 
-#' Simpson's rule integration for functional data
-#' Integrates each curve over the domain
+# Simpson's rule integration for functional data
+# Integrates each curve over the domain
 int_simpson <- function(data, argvals) .Call(wrap__int_simpson, data, argvals)
 
-#' Inner product of two functional data objects
-#' <f, g> = integral(f(t) * g(t) dt)
+# Inner product of two functional data objects
+# <f, g> = integral(f(t) * g(t) dt)
 inprod_fdata <- function(data1, data2, argvals) .Call(wrap__inprod_fdata, data1, data2, argvals)
 
-#' Kernel prediction with fixed bandwidth for prediction on new data
+# Kernel prediction with fixed bandwidth for prediction on new data
 knn_predict <- function(dist_matrix, response, k, local_k) .Call(wrap__knn_predict, dist_matrix, response, k, local_k)
 
-#' k-NN with Global Cross-Validation
-#' Finds a single optimal k for all observations
+# k-NN with Global Cross-Validation
+# Finds a single optimal k for all observations
 knn_gcv <- function(dist_matrix, response, max_k) .Call(wrap__knn_gcv, dist_matrix, response, max_k)
 
-#' k-NN with Local Cross-Validation
-#' Finds an optimal k for each observation
+# k-NN with Local Cross-Validation
+# Finds an optimal k for each observation
 knn_lcv <- function(dist_matrix, response, max_k) .Call(wrap__knn_lcv, dist_matrix, response, max_k)
 
-#' Compute silhouette score for clustering
-#' Returns the mean silhouette coefficient across all samples
+# Compute silhouette score for clustering
+# Returns the mean silhouette coefficient across all samples
 silhouette_score <- function(dist_matrix, clusters) .Call(wrap__silhouette_score, dist_matrix, clusters)
 
-#' Compute Calinski-Harabasz index (variance ratio criterion)
-#' Higher values indicate better defined clusters
+# Compute Calinski-Harabasz index (variance ratio criterion)
+# Higher values indicate better defined clusters
 calinski_harabasz <- function(data, clusters) .Call(wrap__calinski_harabasz, data, clusters)
 
-#' Estimate period using FFT periodogram
+# Estimate period using FFT periodogram
 seasonal_estimate_period_fft <- function(data, argvals) .Call(wrap__seasonal_estimate_period_fft, data, argvals)
 
-#' Estimate period using autocorrelation
+# Estimate period using autocorrelation
 seasonal_estimate_period_acf <- function(data, argvals, max_lag) .Call(wrap__seasonal_estimate_period_acf, data, argvals, max_lag)
 
-#' Detect multiple concurrent periodicities using iterative residual subtraction
+# Detect multiple concurrent periodicities using iterative residual subtraction
 seasonal_detect_multiple_periods <- function(data, argvals, max_periods, min_confidence, min_strength) .Call(wrap__seasonal_detect_multiple_periods, data, argvals, max_periods, min_confidence, min_strength)
 
-#' Detect peaks in functional data using Fourier basis smoothing
+# Detect peaks in functional data using Fourier basis smoothing
 seasonal_detect_peaks <- function(data, argvals, min_distance, min_prominence, smooth_first, smooth_nbasis) .Call(wrap__seasonal_detect_peaks, data, argvals, min_distance, min_prominence, smooth_first, smooth_nbasis)
 
-#' Measure seasonal strength using variance decomposition
+# Measure seasonal strength using variance decomposition
 seasonal_strength_variance <- function(data, argvals, period, n_harmonics) .Call(wrap__seasonal_strength_variance, data, argvals, period, n_harmonics)
 
-#' Measure seasonal strength using spectral method
+# Measure seasonal strength using spectral method
 seasonal_strength_spectral <- function(data, argvals, period) .Call(wrap__seasonal_strength_spectral, data, argvals, period)
 
-#' Measure seasonal strength using wavelet (Morlet) method
-#'
-#' Uses Continuous Wavelet Transform with Morlet wavelet to measure
-#' power at the specified seasonal period.
-#'
-#' @param data Matrix of functional data (n x m)
-#' @param argvals Vector of evaluation points (length m)
-#' @param period Seasonal period in argvals units
-#' @return Seasonal strength as ratio of wavelet power to total variance (0 to 1)
+# Measure seasonal strength using wavelet (Morlet) method
+#
+# Uses Continuous Wavelet Transform with Morlet wavelet to measure
+# power at the specified seasonal period.
+#
+# @param data Matrix of functional data (n x m)
+# @param argvals Vector of evaluation points (length m)
+# @param period Seasonal period in argvals units
+# @return Seasonal strength as ratio of wavelet power to total variance (0 to 1)
 seasonal_strength_wavelet <- function(data, argvals, period) .Call(wrap__seasonal_strength_wavelet, data, argvals, period)
 
-#' Time-varying seasonal strength using sliding windows
+# Time-varying seasonal strength using sliding windows
 seasonal_strength_windowed <- function(data, argvals, period, window_size, method) .Call(wrap__seasonal_strength_windowed, data, argvals, period, window_size, method)
 
-#' Detect seasonality changes (onset/cessation)
+# Detect seasonality changes (onset/cessation)
 seasonal_detect_changes <- function(data, argvals, period, threshold, window_size, min_duration) .Call(wrap__seasonal_detect_changes, data, argvals, period, threshold, window_size, min_duration)
 
-#' Estimate instantaneous period using Hilbert transform
+# Estimate instantaneous period using Hilbert transform
 seasonal_instantaneous_period <- function(data, argvals) .Call(wrap__seasonal_instantaneous_period, data, argvals)
 
-#' Analyze peak timing variability across cycles (uses Fourier smoothing)
+# Analyze peak timing variability across cycles (uses Fourier smoothing)
 seasonal_analyze_peak_timing <- function(data, argvals, period, smooth_nbasis) .Call(wrap__seasonal_analyze_peak_timing, data, argvals, period, smooth_nbasis)
 
-#' Classify seasonality type
+# Classify seasonality type
 seasonal_classify_seasonality <- function(data, argvals, period, strength_threshold, timing_threshold) .Call(wrap__seasonal_classify_seasonality, data, argvals, period, strength_threshold, timing_threshold)
 
-#' Detect seasonality changes with automatic threshold
+# Detect seasonality changes with automatic threshold
 seasonal_detect_changes_auto <- function(data, argvals, period, threshold_method, threshold_value, window_size, min_duration) .Call(wrap__seasonal_detect_changes_auto, data, argvals, period, threshold_method, threshold_value, window_size, min_duration)
 
-#' Detect amplitude modulation in seasonal time series using Hilbert transform
-#'
-#' @param data Matrix of functional data (n x m)
-#' @param argvals Vector of evaluation points (length m)
-#' @param period Seasonal period in argvals units
-#' @param modulation_threshold CV threshold for detecting modulation (default: 0.15)
-#' @param seasonality_threshold Strength threshold for seasonality (default: 0.3)
-#' @return List with detection results
+# Detect amplitude modulation in seasonal time series using Hilbert transform
+#
+# @param data Matrix of functional data (n x m)
+# @param argvals Vector of evaluation points (length m)
+# @param period Seasonal period in argvals units
+# @param modulation_threshold CV threshold for detecting modulation (default: 0.15)
+# @param seasonality_threshold Strength threshold for seasonality (default: 0.3)
+# @return List with detection results
 seasonal_detect_amplitude_modulation <- function(data, argvals, period, modulation_threshold, seasonality_threshold) .Call(wrap__seasonal_detect_amplitude_modulation, data, argvals, period, modulation_threshold, seasonality_threshold)
 
-#' Detect amplitude modulation using wavelet transform (Morlet wavelet)
-#'
-#' @param data Matrix of functional data (n x m)
-#' @param argvals Vector of evaluation points (length m)
-#' @param period Seasonal period in argvals units
-#' @param modulation_threshold CV threshold for detecting modulation (default: 0.15)
-#' @param seasonality_threshold Strength threshold for seasonality (default: 0.3)
-#' @return List with detection results including wavelet amplitude
+# Detect amplitude modulation using wavelet transform (Morlet wavelet)
+#
+# @param data Matrix of functional data (n x m)
+# @param argvals Vector of evaluation points (length m)
+# @param period Seasonal period in argvals units
+# @param modulation_threshold CV threshold for detecting modulation (default: 0.15)
+# @param seasonality_threshold Strength threshold for seasonality (default: 0.3)
+# @return List with detection results including wavelet amplitude
 seasonal_detect_amplitude_modulation_wavelet <- function(data, argvals, period, modulation_threshold, seasonality_threshold) .Call(wrap__seasonal_detect_amplitude_modulation_wavelet, data, argvals, period, modulation_threshold, seasonality_threshold)
 
-#' CFDAutoperiod: Clustered Filtered Detrended Autoperiod
-#' Uses differencing for detrending and clustering for robust period detection
+# CFDAutoperiod: Clustered Filtered Detrended Autoperiod
+# Uses differencing for detrending and clustering for robust period detection
 seasonal_cfd_autoperiod <- function(data, argvals, cluster_tolerance, min_cluster_size) .Call(wrap__seasonal_cfd_autoperiod, data, argvals, cluster_tolerance, min_cluster_size)
 
-#' Autoperiod: Hybrid FFT + ACF period detection with gradient ascent refinement
-#' Returns period, confidence, FFT power, ACF validation score, and candidates
+# Autoperiod: Hybrid FFT + ACF period detection with gradient ascent refinement
+# Returns period, confidence, FFT power, ACF validation score, and candidates
 seasonal_autoperiod <- function(data, argvals, n_candidates, gradient_steps) .Call(wrap__seasonal_autoperiod, data, argvals, n_candidates, gradient_steps)
 
-#' SAZED: Spectral-ACF Zero-crossing Ensemble Detection
-#' A parameter-free ensemble method for robust period detection
-#' Returns period, confidence, component periods, and agreeing component count
+# SAZED: Spectral-ACF Zero-crossing Ensemble Detection
+# A parameter-free ensemble method for robust period detection
+# Returns period, confidence, component periods, and agreeing component count
 seasonal_sazed <- function(data, argvals, tolerance) .Call(wrap__seasonal_sazed, data, argvals, tolerance)
 
-#' Lomb-Scargle periodogram for irregularly sampled data
-#' Computes the power spectrum and significance for period detection
+# Lomb-Scargle periodogram for irregularly sampled data
+# Computes the power spectrum and significance for period detection
 seasonal_lomb_scargle <- function(data, argvals, oversampling, nyquist_factor) .Call(wrap__seasonal_lomb_scargle, data, argvals, oversampling, nyquist_factor)
 
-#' Matrix Profile for motif discovery and period detection
-#' Uses STOMP algorithm for efficient computation
+# Matrix Profile for motif discovery and period detection
+# Uses STOMP algorithm for efficient computation
 seasonal_matrix_profile <- function(data, subsequence_length, exclusion_zone) .Call(wrap__seasonal_matrix_profile, data, subsequence_length, exclusion_zone)
 
-#' Singular Spectrum Analysis for time series decomposition
-#' Extracts trend, seasonal, and noise components via SVD
+# Singular Spectrum Analysis for time series decomposition
+# Extracts trend, seasonal, and noise components via SVD
 seasonal_ssa <- function(data, window_length, n_components) .Call(wrap__seasonal_ssa, data, window_length, n_components)
 
-#' STL (Seasonal and Trend decomposition using LOESS)
-#' Implements Cleveland et al. 1990 algorithm
+# STL (Seasonal and Trend decomposition using LOESS)
+# Implements Cleveland et al. 1990 algorithm
 seasonal_stl <- function(data, period, s_window, t_window, robust) .Call(wrap__seasonal_stl, data, period, s_window, t_window, robust)
 
-#' Detrend functional data using specified method
-#' Returns trend, detrended data, method used, RSS per curve, and number of parameters
+# Detrend functional data using specified method
+# Returns trend, detrended data, method used, RSS per curve, and number of parameters
 seasonal_detrend <- function(data, argvals, method, degree, bandwidth) .Call(wrap__seasonal_detrend, data, argvals, method, degree, bandwidth)
 
-#' Decompose functional data into trend, seasonal, and remainder components
+# Decompose functional data into trend, seasonal, and remainder components
 seasonal_decompose <- function(data, argvals, period, method, trend_method, bandwidth, n_harmonics) .Call(wrap__seasonal_decompose, data, argvals, period, method, trend_method, bandwidth, n_harmonics)
 
-#' Compute eigenfunction basis values
-#' efun_type: 0 = Fourier, 1 = Poly, 2 = PolyHigh, 3 = Wiener
+# Compute eigenfunction basis values
+# efun_type: 0 = Fourier, 1 = Poly, 2 = PolyHigh, 3 = Wiener
 eigenfunctions_1d <- function(argvals, m, efun_type) .Call(wrap__eigenfunctions_1d, argvals, m, efun_type)
 
-#' Generate eigenvalue sequence
-#' eval_type: 0 = linear, 1 = exponential, 2 = wiener
+# Generate eigenvalue sequence
+# eval_type: 0 = linear, 1 = exponential, 2 = wiener
 eigenvalues_1d <- function(m, eval_type) .Call(wrap__eigenvalues_1d, m, eval_type)
 
-#' Simulate functional data via Karhunen-Loève expansion
+# Simulate functional data via Karhunen-Loève expansion
 sim_kl_1d <- function(n, phi, lambda, seed) .Call(wrap__sim_kl_1d, n, phi, lambda, seed)
 
-#' Add pointwise Gaussian noise to functional data
+# Add pointwise Gaussian noise to functional data
 add_error_pointwise_1d <- function(data, sd, seed) .Call(wrap__add_error_pointwise_1d, data, sd, seed)
 
-#' Add curve-level Gaussian noise to functional data
+# Add curve-level Gaussian noise to functional data
 add_error_curve_1d <- function(data, sd, seed) .Call(wrap__add_error_curve_1d, data, sd, seed)
 
-#' Compute integral for each curve in irregular functional data
+# Compute integral for each curve in irregular functional data
 irreg_integrate <- function(offsets, argvals, values) .Call(wrap__irreg_integrate, offsets, argvals, values)
 
-#' Compute Lp norm for each curve in irregular functional data
+# Compute Lp norm for each curve in irregular functional data
 irreg_norm_lp <- function(offsets, argvals, values, p) .Call(wrap__irreg_norm_lp, offsets, argvals, values, p)
 
-#' Estimate mean function for irregular data using kernel smoothing
+# Estimate mean function for irregular data using kernel smoothing
 irreg_mean_kernel <- function(offsets, argvals, values, target_argvals, bandwidth, kernel_type) .Call(wrap__irreg_mean_kernel, offsets, argvals, values, target_argvals, bandwidth, kernel_type)
 
-#' Compute pairwise Lp distances for irregular functional data
+# Compute pairwise Lp distances for irregular functional data
 irreg_metric_lp <- function(offsets, argvals, values, p) .Call(wrap__irreg_metric_lp, offsets, argvals, values, p)
 
-#' Convert irregular data to regular grid via interpolation
+# Convert irregular data to regular grid via interpolation
 irreg_to_regular <- function(offsets, argvals, values, target_grid) .Call(wrap__irreg_to_regular, offsets, argvals, values, target_grid)
 
-#' Fit basis functions to irregular functional data
-#' Each curve is individually fitted via least squares at its own observation points
-#' basis_type: 0 = bspline, 1 = fourier
+# Fit basis functions to irregular functional data
+# Each curve is individually fitted via least squares at its own observation points
+# basis_type: 0 = bspline, 1 = fourier
 irreg_fdata2basis <- function(offsets, argvals, values, nbasis, basis_type) .Call(wrap__irreg_fdata2basis, offsets, argvals, values, nbasis, basis_type)
 
-#' SRSF transform of functional data
+# SRSF transform of functional data
 alignment_srsf_transform <- function(data, argvals) .Call(wrap__alignment_srsf_transform, data, argvals)
 
-#' Inverse SRSF: reconstruct curve from SRSF representation
+# Inverse SRSF: reconstruct curve from SRSF representation
 alignment_srsf_inverse <- function(q, argvals, f0) .Call(wrap__alignment_srsf_inverse, q, argvals, f0)
 
-#' Apply warping function to reparameterize a curve
+# Apply warping function to reparameterize a curve
 alignment_reparameterize <- function(f, argvals, gamma) .Call(wrap__alignment_reparameterize, f, argvals, gamma)
 
-#' Compose two warping functions
+# Compose two warping functions
 alignment_compose_warps <- function(gamma1, gamma2, argvals) .Call(wrap__alignment_compose_warps, gamma1, gamma2, argvals)
 
-#' Elastic alignment of one curve to another
+# Elastic alignment of one curve to another
 alignment_elastic_pair <- function(f1, f2, argvals) .Call(wrap__alignment_elastic_pair, f1, f2, argvals)
 
-#' Elastic (Fisher-Rao) distance between two curves
+# Elastic (Fisher-Rao) distance between two curves
 alignment_elastic_distance <- function(f1, f2, argvals) .Call(wrap__alignment_elastic_distance, f1, f2, argvals)
 
-#' Align all curves to a target curve
+# Align all curves to a target curve
 alignment_align_to_target <- function(data, target, argvals) .Call(wrap__alignment_align_to_target, data, target, argvals)
 
-#' Elastic self-distance matrix
+# Elastic self-distance matrix
 alignment_self_dist <- function(data, argvals) .Call(wrap__alignment_self_dist, data, argvals)
 
-#' Elastic cross-distance matrix
+# Elastic cross-distance matrix
 alignment_cross_dist <- function(data1, data2, argvals) .Call(wrap__alignment_cross_dist, data1, data2, argvals)
 
-#' Karcher (Fréchet) mean in elastic metric
+# Karcher (Fréchet) mean in elastic metric
 alignment_karcher_mean <- function(data, argvals, max_iter, tol) .Call(wrap__alignment_karcher_mean, data, argvals, max_iter, tol)
 
-#' Soft-DTW self-distance matrix
+# Soft-DTW self-distance matrix
 metric_soft_dtw_self_1d <- function(fdata, gamma) .Call(wrap__metric_soft_dtw_self_1d, fdata, gamma)
 
-#' Soft-DTW cross-distance matrix
+# Soft-DTW cross-distance matrix
 metric_soft_dtw_cross_1d <- function(fdata1, fdata2, gamma) .Call(wrap__metric_soft_dtw_cross_1d, fdata1, fdata2, gamma)
 
-#' Soft-DTW divergence self-distance matrix
+# Soft-DTW divergence self-distance matrix
 metric_soft_dtw_div_self_1d <- function(fdata, gamma) .Call(wrap__metric_soft_dtw_div_self_1d, fdata, gamma)
 
-#' Soft-DTW divergence cross-distance matrix
+# Soft-DTW divergence cross-distance matrix
 metric_soft_dtw_div_cross_1d <- function(fdata1, fdata2, gamma) .Call(wrap__metric_soft_dtw_div_cross_1d, fdata1, fdata2, gamma)
 
-#' Soft-DTW barycenter computation
+# Soft-DTW barycenter computation
 metric_soft_dtw_barycenter <- function(fdata, gamma, max_iter, tol) .Call(wrap__metric_soft_dtw_barycenter, fdata, gamma, max_iter, tol)
 
-#' Detect landmarks in a single curve
+# Detect landmarks in a single curve
 landmark_detect <- function(curve, argvals, kind, min_prominence) .Call(wrap__landmark_detect, curve, argvals, kind, min_prominence)
 
-#' Detect landmarks and register curves
+# Detect landmarks and register curves
 landmark_register_curves <- function(data, argvals, kind, min_prominence, expected_count) .Call(wrap__landmark_register_curves, data, argvals, kind, min_prominence, expected_count)
 
-#' Full TSRVF transform: compute Karcher mean + transport to tangent space
+# Full TSRVF transform: compute Karcher mean + transport to tangent space
 alignment_tsrvf_transform <- function(data, argvals, max_iter, tol, lambda) .Call(wrap__alignment_tsrvf_transform, data, argvals, max_iter, tol, lambda)
 
-#' Compute TSRVF from a pre-computed Karcher mean
+# Compute TSRVF from a pre-computed Karcher mean
 alignment_tsrvf_from_karcher <- function(mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged) .Call(wrap__alignment_tsrvf_from_karcher, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged)
 
-#' Inverse TSRVF: reconstruct curves from tangent vectors
+# Inverse TSRVF: reconstruct curves from tangent vectors
 alignment_tsrvf_inverse <- function(tangent_vectors, mean, mean_srsf, mean_srsf_norm, srsf_norms, gammas, argvals, converged) .Call(wrap__alignment_tsrvf_inverse, tangent_vectors, mean, mean_srsf, mean_srsf_norm, srsf_norms, gammas, argvals, converged)
 
-#' Compute alignment quality metrics
+# Compute alignment quality metrics
 alignment_quality_compute <- function(data, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged) .Call(wrap__alignment_quality_compute, data, mean, mean_srsf, gammas, aligned_data, argvals, n_iter, converged)
 
-#' Compute warp complexity (geodesic distance from identity)
+# Compute warp complexity (geodesic distance from identity)
 alignment_warp_complexity <- function(gamma, argvals) .Call(wrap__alignment_warp_complexity, gamma, argvals)
 
-#' Compute warp smoothness (bending energy)
+# Compute warp smoothness (bending energy)
 alignment_warp_smoothness <- function(gamma, argvals) .Call(wrap__alignment_warp_smoothness, gamma, argvals)
 
-#' Elastic phase-amplitude decomposition
+# Elastic phase-amplitude decomposition
 alignment_decomposition <- function(f1, f2, argvals, lambda) .Call(wrap__alignment_decomposition, f1, f2, argvals, lambda)
 
-#' Amplitude self-distance matrix
+# Amplitude self-distance matrix
 alignment_amplitude_dist <- function(data, argvals, lambda) .Call(wrap__alignment_amplitude_dist, data, argvals, lambda)
 
-#' Phase self-distance matrix
+# Phase self-distance matrix
 alignment_phase_dist <- function(data, argvals, lambda) .Call(wrap__alignment_phase_dist, data, argvals, lambda)
 
-#' Pairwise alignment consistency
+# Pairwise alignment consistency
 alignment_pairwise_consistency <- function(data, argvals, lambda, max_triplets) .Call(wrap__alignment_pairwise_consistency, data, argvals, lambda, max_triplets)
 
-#' Elastic alignment with explicit landmark constraints
+# Elastic alignment with explicit landmark constraints
 alignment_constrained <- function(f1, f2, argvals, landmark_targets, landmark_sources, lambda) .Call(wrap__alignment_constrained, f1, f2, argvals, landmark_targets, landmark_sources, lambda)
 
-#' Elastic alignment with automatic landmark detection
+# Elastic alignment with automatic landmark detection
 alignment_with_landmarks <- function(f1, f2, argvals, kind, min_prominence, expected_count, lambda) .Call(wrap__alignment_with_landmarks, f1, f2, argvals, kind, min_prominence, expected_count, lambda)
 
-#' FPCA-based tolerance band
+# FPCA-based tolerance band
 tolerance_fpca <- function(data, ncomp, nb, coverage, band_type, seed) .Call(wrap__tolerance_fpca, data, ncomp, nb, coverage, band_type, seed)
 
-#' Conformal prediction band
+# Conformal prediction band
 tolerance_conformal <- function(data, cal_fraction, coverage, score_type, seed) .Call(wrap__tolerance_conformal, data, cal_fraction, coverage, score_type, seed)
 
-#' SCB mean confidence band (Degras method)
+# SCB mean confidence band (Degras method)
 tolerance_scb_degras <- function(data, argvals, bandwidth, nb, confidence, multiplier) .Call(wrap__tolerance_scb_degras, data, argvals, bandwidth, nb, confidence, multiplier)
 
-#' Exponential family tolerance band
+# Exponential family tolerance band
 tolerance_exponential <- function(data, family, ncomp, nb, coverage, seed) .Call(wrap__tolerance_exponential, data, family, ncomp, nb, coverage, seed)
 
-#' Elastic tolerance band (alignment + FPCA)
+# Elastic tolerance band (alignment + FPCA)
 tolerance_elastic <- function(data, argvals, ncomp, nb, coverage, band_type, max_iter, seed) .Call(wrap__tolerance_elastic, data, argvals, ncomp, nb, coverage, band_type, max_iter, seed)
 
-#' Streaming depth: batch self-depth computation
+# Streaming depth: batch self-depth computation
 streaming_depth_batch <- function(data, method) .Call(wrap__streaming_depth_batch, data, method)
 
-#' Streaming depth: new data against reference
+# Streaming depth: new data against reference
 streaming_depth_vs_ref <- function(ref_data, new_data, method) .Call(wrap__streaming_depth_vs_ref, ref_data, new_data, method)
 
-#' Streaming depth: single curve against reference
+# Streaming depth: single curve against reference
 streaming_depth_one <- function(ref_data, curve, method) .Call(wrap__streaming_depth_one, ref_data, curve, method)
 
-#' Functional linear model (FPC-based)
+# Functional linear model (FPC-based)
 fregre_lm_rust <- function(data, y, scalar_covariates, ncomp) .Call(wrap__fregre_lm_rust, data, y, scalar_covariates, ncomp)
 
-#' Nonparametric functional regression with mixed predictors
+# Nonparametric functional regression with mixed predictors
 fregre_np_mixed_rust <- function(data, y, argvals, scalar_covariates, h_func, h_scalar) .Call(wrap__fregre_np_mixed_rust, data, y, argvals, scalar_covariates, h_func, h_scalar)
 
-#' Functional logistic regression
+# Functional logistic regression
 functional_logistic_rust <- function(data, y, scalar_covariates, ncomp, max_iter, tol) .Call(wrap__functional_logistic_rust, data, y, scalar_covariates, ncomp, max_iter, tol)
 
-#' Cross-validation for FPC component selection
+# Cross-validation for FPC component selection
 fregre_cv_rust <- function(data, y, scalar_covariates, k_min, k_max, n_folds) .Call(wrap__fregre_cv_rust, data, y, scalar_covariates, k_min, k_max, n_folds)
 
-#' Function-on-scalar regression (penalized)
+# Function-on-scalar regression (penalized)
 fosr_rust <- function(data, predictors, lambda) .Call(wrap__fosr_rust, data, predictors, lambda)
 
-#' FPC-based function-on-scalar regression
+# FPC-based function-on-scalar regression
 fosr_fpc_rust <- function(data, predictors, ncomp) .Call(wrap__fosr_fpc_rust, data, predictors, ncomp)
 
-#' Functional ANOVA
+# Functional ANOVA
 fanova_rust <- function(data, groups, n_perm) .Call(wrap__fanova_rust, data, groups, n_perm)
 
-#' Predict from function-on-scalar regression
+# Predict from function-on-scalar regression
 predict_fosr_rust <- function(intercept, beta_data, new_predictors, lambda) .Call(wrap__predict_fosr_rust, intercept, beta_data, new_predictors, lambda)
 
-#' LDA classification
+# LDA classification
 fclassif_lda_rust <- function(data, y, covariates, ncomp) .Call(wrap__fclassif_lda_rust, data, y, covariates, ncomp)
 
-#' QDA classification
+# QDA classification
 fclassif_qda_rust <- function(data, y, covariates, ncomp) .Call(wrap__fclassif_qda_rust, data, y, covariates, ncomp)
 
-#' kNN classification
+# kNN classification
 fclassif_knn_rust <- function(data, y, covariates, ncomp, k_nn) .Call(wrap__fclassif_knn_rust, data, y, covariates, ncomp, k_nn)
 
-#' Kernel classification
+# Kernel classification
 fclassif_kernel_rust <- function(data, argvals, y, covariates, h_func, h_scalar) .Call(wrap__fclassif_kernel_rust, data, argvals, y, covariates, h_func, h_scalar)
 
-#' DD-plot classification
+# DD-plot classification
 fclassif_dd_rust <- function(data, y, covariates) .Call(wrap__fclassif_dd_rust, data, y, covariates)
 
-#' Cross-validated classification
+# Cross-validated classification
 fclassif_cv_rust <- function(data, argvals, y, covariates, method, ncomp, nfold, seed) .Call(wrap__fclassif_cv_rust, data, argvals, y, covariates, method, ncomp, nfold, seed)
 
-#' GMM clustering with automatic K selection
+# GMM clustering with automatic K selection
 gmm_cluster_rust <- function(data, argvals, covariates, k_range, nbasis, basis_type, cov_type, cov_weight, max_iter, tol, n_init, seed, use_icl) .Call(wrap__gmm_cluster_rust, data, argvals, covariates, k_range, nbasis, basis_type, cov_type, cov_weight, max_iter, tol, n_init, seed, use_icl)
 
-#' Raw GMM EM on feature matrix
+# Raw GMM EM on feature matrix
 gmm_em_rust <- function(features, k, cov_type, max_iter, tol, seed) .Call(wrap__gmm_em_rust, features, k, cov_type, max_iter, tol, seed)
 
-#' Predict from GMM
+# Predict from GMM
 predict_gmm_rust <- function(new_data, argvals, new_covariates, means_data, covariances, weights, k, d, nbasis, basis_type, cov_weight, cov_type) .Call(wrap__predict_gmm_rust, new_data, argvals, new_covariates, means_data, covariances, weights, k, d, nbasis, basis_type, cov_weight, cov_type)
 
-#' Functional mixed model
+# Functional mixed model
 fmm_rust <- function(data, subject_ids, covariates, ncomp) .Call(wrap__fmm_rust, data, subject_ids, covariates, ncomp)
 
-#' Predict from functional mixed model
+# Predict from functional mixed model
 fmm_predict_rust <- function(mean_function, beta_data, new_covariates) .Call(wrap__fmm_predict_rust, mean_function, beta_data, new_covariates)
 
-#' Permutation test for fixed effects in FMM
+# Permutation test for fixed effects in FMM
 fmm_test_fixed_rust <- function(data, subject_ids, covariates, ncomp, n_perm, seed) .Call(wrap__fmm_test_fixed_rust, data, subject_ids, covariates, ncomp, n_perm, seed)
 
-#' Random projection depth with optional seed
+# Random projection depth with optional seed
 depth_rp_1d_seeded <- function(data_obj, data_ori, nproj, seed) .Call(wrap__depth_rp_1d_seeded, data_obj, data_ori, nproj, seed)
 
-#' Random Tukey depth with optional seed
+# Random Tukey depth with optional seed
 depth_rt_1d_seeded <- function(data_obj, data_ori, nproj, seed) .Call(wrap__depth_rt_1d_seeded, data_obj, data_ori, nproj, seed)
 
 

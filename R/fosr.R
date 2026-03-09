@@ -6,7 +6,7 @@
 #' Function-on-Scalar Regression (Penalized)
 #'
 #' Fits a penalized function-on-scalar regression model where the response
-#' is a function Y_i(t) and predictors are scalar: Y_i(t) = mu(t) + sum_j x_{ij} beta_j(t) + eps_i(t).
+#' is a function Y_i(t) and predictors are scalar: \code{Y_i(t) = mu(t) + sum_j x_ij beta_j(t) + eps_i(t)}.
 #'
 #' @param fdataobj An object of class 'fdata' (functional response).
 #' @param predictors A matrix of scalar predictors (n x p).

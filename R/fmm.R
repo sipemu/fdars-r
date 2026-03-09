@@ -5,7 +5,7 @@
 #' Functional Mixed Model
 #'
 #' Fits a functional mixed model for repeated measures data:
-#' Y_{ij}(t) = mu(t) + sum_k x_{ij,k} beta_k(t) + b_i(t) + eps_{ij}(t)
+#' \code{Y_ij(t) = mu(t) + sum_k x_ijk beta_k(t) + b_i(t) + eps_ij(t)}
 #' where b_i(t) are subject-level random effects.
 #'
 #' @param fdataobj An object of class 'fdata'. All observations stacked

@@ -31,7 +31,7 @@ Function-on-Scalar Regression (Penalized)
 }
 \details{
 Fits a penalized function-on-scalar regression model where the response
-is a function Y_i(t) and predictors are scalar: Y_i(t) = mu(t) + sum_j x_{ij} beta_j(t) + eps_i(t).
+is a function Y_i(t) and predictors are scalar: \code{Y_i(t) = mu(t) + sum_j x_ij beta_j(t) + eps_i(t)}.
 }
 \seealso{
 \code{\link{fosr.fpc}} for FPC-based FOSR,

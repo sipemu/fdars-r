@@ -1,0 +1,67 @@
+---
+title: "Examples"
+output: rmarkdown::html_vignette
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{=html}
+<div class="fdars-gallery">
+
+  <a class="fdars-gallery-item" href="example-berkeley-growth.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-berkeley-growth.svg" alt="Berkeley Growth"></div>
+    <div class="fdars-gallery-title">Berkeley Growth Study</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-align">Alignment</span>
+      <span class="fdars-tag fdars-tag-represent">FPCA</span>
+      <span class="fdars-tag fdars-tag-analyze">Equivalence</span>
+    </div>
+  </a>
+
+  <a class="fdars-gallery-item" href="example-andrews-wine-intro.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-andrews-wine-intro.svg" alt="Andrews Wine: Intro"></div>
+    <div class="fdars-gallery-title">Andrews Wine: Why Andrews Curves?</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-represent">Andrews</span>
+      <span class="fdars-tag fdars-tag-represent">Fourier</span>
+      <span class="fdars-tag fdars-tag-analyze">Distance</span>
+    </div>
+  </a>
+
+  <a class="fdars-gallery-item" href="example-andrews-wine.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-andrews-wine.svg" alt="Andrews Wine: Outliers"></div>
+    <div class="fdars-gallery-title">Andrews Wine: Outlier Detection</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-analyze">Outliers</span>
+      <span class="fdars-tag fdars-tag-analyze">Depth</span>
+      <span class="fdars-tag fdars-tag-analyze">MS-plot</span>
+    </div>
+  </a>
+
+  <a class="fdars-gallery-item" href="example-andrews-wine-clustering.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-andrews-wine-clustering.svg" alt="Andrews Wine: Clustering"></div>
+    <div class="fdars-gallery-title">Andrews Wine: Clustering & Variable Importance</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-analyze">Clustering</span>
+      <span class="fdars-tag fdars-tag-represent">FPCA</span>
+      <span class="fdars-tag fdars-tag-analyze">Testing</span>
+    </div>
+  </a>
+
+  <a class="fdars-gallery-item" href="example-andrews-wine-qc.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-andrews-wine-qc.svg" alt="Andrews Wine: QC"></div>
+    <div class="fdars-gallery-title">Andrews Wine: Quality Control</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-analyze">Boxplot</span>
+      <span class="fdars-tag fdars-tag-analyze">Monitoring</span>
+      <span class="fdars-tag fdars-tag-analyze">Bands</span>
+    </div>
+  </a>
+
+</div>
+```

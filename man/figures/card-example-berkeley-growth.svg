@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Growth velocity curves (blurred peaks at different ages) -->
+  <path d="M20 90 Q30 88, 40 85 Q55 50, 70 30 Q80 50, 90 70 Q100 82, 110 85" stroke="#56B4E9" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M20 92 Q30 90, 38 82 Q50 45, 62 28 Q72 48, 85 72 Q95 85, 110 88" stroke="#E69F00" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M20 88 Q30 85, 45 78 Q60 40, 75 25 Q85 45, 95 68 Q105 80, 110 83" stroke="#56B4E9" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Arrow -->
+  <line x1="118" y1="55" x2="132" y2="55" stroke="#333" stroke-width="1.5" opacity="0.4"/>
+  <polygon points="130,51 137,55 130,59" fill="#333" opacity="0.4"/>
+  <!-- Aligned curves (peaks lined up) -->
+  <path d="M142 85 Q152 80, 158 60 Q165 30, 172 28 Q178 55, 185 75 Q190 83, 195 85" stroke="#56B4E9" stroke-width="2" stroke-linecap="round"/>
+  <path d="M142 87 Q152 82, 158 62 Q165 32, 172 30 Q178 57, 185 77 Q190 85, 195 87" stroke="#E69F00" stroke-width="2" stroke-linecap="round"/>
+</svg>
