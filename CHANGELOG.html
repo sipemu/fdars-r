@@ -37,11 +37,196 @@
 
 <p>All notable changes to fdars are documented in this file.</p>
 <div class="section level2">
-<h2 id="id_052---2025-01-09">[0.5.2] - 2025-01-09<a class="anchor" aria-label="anchor" href="#id_052---2025-01-09"></a></h2>
+<h2 id="id_050---2025-03-09">[0.5.0] - 2025-03-09<a class="anchor" aria-label="anchor" href="#id_050---2025-03-09"></a></h2>
+<div class="section level3">
+<h3 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a></h3>
+<ul><li>
+<strong>Elastic alignment</strong> (Fisher-Rao framework):
+<ul><li>
+<code><a href="reference/srsf.transform.html">srsf.transform()</a></code>, <code><a href="reference/srsf.inverse.html">srsf.inverse()</a></code> — Square-Root Slope Function</li>
+<li>
+<code><a href="reference/elastic.align.html">elastic.align()</a></code> — align curves via dynamic programming</li>
+<li>
+<code><a href="reference/elastic.align.constrained.html">elastic.align.constrained()</a></code> — alignment with landmark constraints</li>
+<li>
+<code><a href="reference/elastic.distance.html">elastic.distance()</a></code> — Fisher-Rao distance between curves</li>
+<li>
+<code><a href="reference/elastic.decomposition.html">elastic.decomposition()</a></code> — amplitude/phase decomposition</li>
+<li>
+<code><a href="reference/karcher.mean.html">karcher.mean()</a></code> — Fréchet mean in the elastic metric</li>
+<li>
+<code><a href="reference/amplitude.distance.html">amplitude.distance()</a></code>, <code><a href="reference/phase.distance.html">phase.distance()</a></code> — component distance matrices</li>
+<li>
+<code><a href="reference/alignment.quality.html">alignment.quality()</a></code> — diagnostic metrics for alignment results</li>
+<li>
+<code><a href="reference/alignment.pairwise.consistency.html">alignment.pairwise.consistency()</a></code> — transitivity checks</li>
+<li>
+<code><a href="reference/periodic.rotate.html">periodic.rotate()</a></code> — rotate periodic curves with methods: peak, xcorr, landmark, iterative</li>
+</ul></li>
+<li>
+<strong>Landmark registration</strong>:
+<ul><li>
+<code><a href="reference/detect.landmarks.html">detect.landmarks()</a></code> — detect peaks, valleys, zero-crossings, inflection points</li>
+<li>
+<code><a href="reference/landmark.register.html">landmark.register()</a></code> — register curves by aligning detected landmarks</li>
+</ul></li>
+<li>
+<strong>TSRVF</strong> (Transported Square-Root Velocity Function):
+<ul><li>
+<code><a href="reference/tsrvf.transform.html">tsrvf.transform()</a></code> — compute tangent-space representation via Karcher mean</li>
+<li>
+<code><a href="reference/tsrvf.from.alignment.html">tsrvf.from.alignment()</a></code> — build TSRVF from pre-computed alignment</li>
+<li>
+<code><a href="reference/tsrvf.inverse.html">tsrvf.inverse()</a></code> — reconstruct curves from tangent vectors</li>
+</ul></li>
+<li>
+<strong>Tolerance bands</strong>:
+<ul><li>
+<code><a href="reference/tolerance.band.html">tolerance.band()</a></code> — functional tolerance/prediction bands with methods: fpca, conformal, scb (Degras), exponential, elastic</li>
+</ul></li>
+<li>
+<strong>Streaming depth</strong>:
+<ul><li>
+<code><a href="reference/streaming.depth.html">streaming.depth()</a></code> — fast depth computation against pre-sorted reference data</li>
+</ul></li>
+<li>
+<strong>Soft-DTW distance</strong>:
+<ul><li>
+<code><a href="reference/metric.softDTW.html">metric.softDTW()</a></code> — differentiable Dynamic Time Warping</li>
+<li>
+<code><a href="reference/softdtw.barycenter.html">softdtw.barycenter()</a></code> — Soft-DTW barycenter computation</li>
+</ul></li>
+<li>
+<strong>Function-on-scalar regression</strong>:
+<ul><li>
+<code><a href="reference/fosr.html">fosr()</a></code> — penalized function-on-scalar regression</li>
+<li>
+<code><a href="reference/fosr.fpc.html">fosr.fpc()</a></code> — FPC-based function-on-scalar regression</li>
+</ul></li>
+<li>
+<strong>Functional ANOVA</strong>:
+<ul><li>
+<code><a href="reference/fanova.html">fanova()</a></code> — one-way functional ANOVA with permutation testing</li>
+</ul></li>
+<li>
+<strong>Functional classification</strong>:
+<ul><li>
+<code><a href="reference/fclassif.html">fclassif()</a></code> — supervised classification (LDA, QDA, kNN, kernel, DD-plot)</li>
+<li>
+<code><a href="reference/fclassif.cv.html">fclassif.cv()</a></code> — cross-validated classification error</li>
+</ul></li>
+<li>
+<strong>Functional mixed models</strong>:
+<ul><li>
+<code><a href="reference/fmm.html">fmm()</a></code> — functional mixed models with subject-level random effects</li>
+<li>
+<code><a href="reference/fmm.predict.html">fmm.predict()</a></code> — prediction from fitted FMM</li>
+<li>
+<code><a href="reference/fmm.test.fixed.html">fmm.test.fixed()</a></code> — permutation test for fixed effects</li>
+</ul></li>
+<li>
+<strong>GMM clustering</strong>:
+<ul><li>
+<code><a href="reference/cluster.gmm.html">cluster.gmm()</a></code> — Gaussian Mixture Model clustering with automatic K selection</li>
+<li>
+<code><a href="reference/cluster.init.html">cluster.init()</a></code> — k-means++ initialization</li>
+</ul></li>
+<li>
+<strong>Andrews transformation</strong>:
+<ul><li>
+<code><a href="reference/andrews_transform.html">andrews_transform()</a></code> — Fourier expansion of multivariate data to functional curves</li>
+<li>
+<code><a href="reference/andrews_loadings.html">andrews_loadings()</a></code> — project FPCA eigenfunctions back to original variable space</li>
+</ul></li>
+<li>
+<strong>Seasonal analysis</strong> (comprehensive module):
+<ul><li>Period detection: <code><a href="reference/detect.period.html">detect.period()</a></code>, <code><a href="reference/estimate.period.html">estimate.period()</a></code>, <code><a href="reference/detect.periods.html">detect.periods()</a></code>
+</li>
+<li>Ensemble methods: <code><a href="reference/autoperiod.html">autoperiod()</a></code>, <code><a href="reference/cfd.autoperiod.html">cfd.autoperiod()</a></code>, <code><a href="reference/sazed.html">sazed()</a></code>
+</li>
+<li>Spectral: <code><a href="reference/lomb.scargle.html">lomb.scargle()</a></code>, <code><a href="reference/matrix.profile.html">matrix.profile()</a></code>
+</li>
+<li>Decomposition: <code><a href="reference/stl.fd.html">stl.fd()</a></code>, <code><a href="reference/ssa.fd.html">ssa.fd()</a></code>, <code><a href="reference/detrend.html">detrend()</a></code>, <code><a href="reference/decompose.html">decompose()</a></code>
+</li>
+<li>Diagnostics: <code><a href="reference/seasonal.strength.html">seasonal.strength()</a></code>, <code><a href="reference/seasonal.strength.curve.html">seasonal.strength.curve()</a></code>, <code><a href="reference/classify.seasonality.html">classify.seasonality()</a></code>
+</li>
+<li>Change detection: <code><a href="reference/detect.seasonality.changes.html">detect.seasonality.changes()</a></code>, <code><a href="reference/detect.seasonality.changes.auto.html">detect.seasonality.changes.auto()</a></code>
+</li>
+<li>
+<code><a href="reference/detect_amplitude_modulation.html">detect_amplitude_modulation()</a></code>, <code><a href="reference/instantaneous.period.html">instantaneous.period()</a></code>, <code><a href="reference/analyze.peak.timing.html">analyze.peak.timing()</a></code>
+</li>
+</ul></li>
+<li>
+<strong>Equivalence testing</strong>:
+<ul><li>
+<code><a href="reference/fequiv.test.html">fequiv.test()</a></code> — functional equivalence test</li>
+</ul></li>
+<li>
+<strong>Functional linear model</strong>:
+<ul><li>
+<code><a href="reference/fregre.lm.html">fregre.lm()</a></code>, <code><a href="reference/fregre.lm.cv.html">fregre.lm.cv()</a></code> — FPC-based functional linear regression</li>
+<li>
+<code><a href="reference/functional.logistic.html">functional.logistic()</a></code> — functional logistic regression</li>
+</ul></li>
+<li>
+<strong>Simulation toolbox</strong>:
+<ul><li>
+<code><a href="reference/simFunData.html">simFunData()</a></code>, <code><a href="reference/simMultiFunData.html">simMultiFunData()</a></code> — simulate functional data via Karhunen-Loève</li>
+<li>
+<code><a href="reference/eFun.html">eFun()</a></code>, <code><a href="reference/eVal.html">eVal()</a></code> — eigenfunction/eigenvalue generators</li>
+<li>
+<code><a href="reference/addError.html">addError()</a></code> — add measurement noise</li>
+<li>
+<code><a href="reference/irregFdata.html">irregFdata()</a></code>, <code><a href="reference/sparsify.html">sparsify()</a></code> — irregular/sparse functional data</li>
+</ul></li>
+<li>
+<strong>Irregular functional data</strong>:
+<ul><li>
+<code><a href="reference/irregFdata.html">irregFdata()</a></code> — irregular functional data objects</li>
+<li>
+<code><a href="reference/as.fdata.irregFdata.html">as.fdata()</a></code> — convert irregular to regular grid</li>
+<li>
+<code><a href="reference/mean.irregFdata.html">mean.irregFdata()</a></code>, <code><a href="reference/summary.irregFdata.html">summary.irregFdata()</a></code>, <code><a href="reference/plot.irregFdata.html">plot.irregFdata()</a></code>
+</li>
+</ul></li>
+<li>
+<strong>Unified dispatch interfaces</strong>:
+<ul><li>
+<code><a href="reference/depth.html">depth()</a></code> — dispatches to FM, mode, RP, RT, BD, MBD, MEI, FSD, KFSD, RPD</li>
+<li>
+<code><a href="reference/metric.html">metric()</a></code> — dispatches to lp, hausdorff, dtw, softdtw, kl, elastic, amplitude, phase, pca, deriv, basis, fourier, hshift</li>
+</ul></li>
+<li>
+<strong>Plot methods</strong> for all new object types:
+<ul><li>
+<code><a href="reference/plot.elastic.align.html">plot.elastic.align()</a></code>, <code><a href="reference/plot.karcher.mean.html">plot.karcher.mean()</a></code>, <code><a href="reference/plot.alignment.quality.html">plot.alignment.quality()</a></code>
+</li>
+<li>
+<code><a href="reference/plot.landmark.register.html">plot.landmark.register()</a></code>, <code><a href="reference/plot.tsrvf.html">plot.tsrvf()</a></code>
+</li>
+<li><code><a href="reference/plot.tolerance.band.html">plot.tolerance.band()</a></code></li>
+<li>
+<code><a href="reference/plot.fclassif.html">plot.fclassif()</a></code>, <code><a href="reference/plot.fmm.html">plot.fmm()</a></code>, <code><a href="reference/plot.fosr.html">plot.fosr()</a></code>, <code><a href="reference/plot.fanova.html">plot.fanova()</a></code>
+</li>
+<li><code><a href="reference/plot.cluster.gmm.html">plot.cluster.gmm()</a></code></li>
+</ul></li>
+<li>
+<strong>Vignettes/articles</strong> (17 articles covering all major features):
+<ul><li>Elastic alignment, landmark registration, TSRVF, alignment comparison</li>
+<li>Tolerance bands, streaming depth, distance metrics</li>
+<li>Functional regression, classification, mixed models, GMM clustering</li>
+<li>Andrews transformation, seasonal analysis</li>
+<li>Example analyses: Berkeley growth study, wine dataset (4 articles)</li>
+</ul></li>
+<li>
+<strong>Pre-built binary packages</strong> for macOS (.tgz) and Windows (.zip) attached to GitHub Releases — install without Rust toolchain</li>
+</ul></div>
 <div class="section level3">
 <h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
-<ul><li>
-<strong>Breaking</strong>: Renamed functions to avoid S3 method dispatch conflicts:
+<ul><li>Upgraded Rust backend (fdars-core) to v0.7.2</li>
+<li>All plots use ggplot2; respects <code>theme_set()</code>
+</li>
+<li>Renamed functions to avoid S3 dispatch conflicts:
 <ul><li>
 <code>fdata2basis.cv()</code> → <code><a href="reference/fdata2basis_cv.html">fdata2basis_cv()</a></code>
 </li>
@@ -51,157 +236,72 @@
 <li>
 <code>basis2fdata.2d()</code> → <code><a href="reference/basis2fdata_2d.html">basis2fdata_2d()</a></code>
 </li>
+<li>
+<code><a href="reference/norm.html">norm.fdata()</a></code> → <code><a href="reference/norm.html">norm()</a></code>
+</li>
+<li>
+<code>cov.*()</code> → <code>kernel.*()</code> (covariance kernel functions)</li>
 </ul></li>
-</ul></div>
-</div>
-<div class="section level2">
-<h2 id="id_051---2024-12-16">[0.5.1] - 2024-12-16<a class="anchor" aria-label="anchor" href="#id_051---2024-12-16"></a></h2>
-<div class="section level3">
-<h3 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a></h3>
-<ul><li>
-<code><a href="reference/normalize.html">normalize()</a></code> function to scale curves to unit Lp norm</li>
-<li>Vignette on basis representation and optimal basis selection</li>
-</ul></div>
-<div class="section level3">
-<h3 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a></h3>
-<ul><li>Renamed <code><a href="reference/norm.html">norm.fdata()</a></code> to <code><a href="reference/norm.html">norm()</a></code> for cleaner API</li>
-<li>Renamed covariance kernel functions from <code>cov.*</code> to <code>kernel_*</code> to avoid S3 dispatch conflicts</li>
+<li>Internal Rust wrapper functions no longer generate man pages (CRAN compliance)</li>
+<li>Portable Makefiles: removed GNU extensions (<code>export</code>, <code>:=</code>)</li>
+<li>Vendored Rust crates cleaned of hidden files and long paths</li>
 </ul></div>
 <div class="section level3">
 <h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
-<ul><li>Plot functions now display when called directly (<code>plot(fd)</code> shows plot, <code>p &lt;- plot(fd)</code> does not)</li>
-<li>S3 method dispatch conflict with <code><a href="reference/cov.html">cov()</a></code> generic function</li>
-</ul></div>
-</div>
-<div class="section level2">
-<h2 id="id_050---2024-12-14">[0.5.0] - 2024-12-14<a class="anchor" aria-label="anchor" href="#id_050---2024-12-14"></a></h2>
-<div class="section level3">
-<h3 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a></h3>
 <ul><li>
-<strong>Basis representation module</strong> with Rust backend:
-<ul><li>
-<code><a href="reference/basis2fdata.html">basis2fdata()</a></code> - reconstruct functional data from basis coefficients</li>
+<code>fdata2basis_2d</code> example error caused by extendr wrapper name collision</li>
 <li>
-<code><a href="reference/basis.gcv.html">basis.gcv()</a></code>, <code><a href="reference/basis.aic.html">basis.aic()</a></code>, <code><a href="reference/basis.bic.html">basis.bic()</a></code> - goodness-of-fit metrics</li>
-<li>
-<code><a href="reference/fdata2basis_cv.html">fdata2basis_cv()</a></code> - cross-validation for optimal nbasis selection</li>
-<li>
-<code><a href="reference/pspline.html">pspline()</a></code> - P-spline smoothing with automatic lambda selection</li>
-<li>
-<code><a href="reference/fdata2basis_2d.html">fdata2basis_2d()</a></code>, <code><a href="reference/basis2fdata_2d.html">basis2fdata_2d()</a></code> - 2D tensor product basis support</li>
-<li>
-<code><a href="reference/pspline.2d.html">pspline.2d()</a></code> - 2D P-spline with anisotropic penalties</li>
-</ul></li>
-</ul></div>
-<div class="section level3">
-<h3 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a></h3>
-<ul><li>Plot functions now return ggplot objects without auto-printing (use <code>print(p)</code> to display)</li>
-<li>Removed hardcoded <code>theme_minimal()</code> from all plots - respects <code><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">ggplot2::theme_set()</a></code>
-</li>
-<li>Fixed white lines in 2D surface plots when using facets</li>
-</ul></div>
-<div class="section level3">
-<h3 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a></h3>
-<ul><li>Windows binary now built with R 4.2.2 for compatibility with older R versions</li>
+<code>mean(fd)</code> now returns fdata object (was returning matrix)</li>
+<li>TSRVF inverse initial values</li>
+<li>Regression article cross-references and See Also sections</li>
 </ul></div>
 </div>
 <div class="section level2">
 <h2 id="id_040---2024-12-13">[0.4.0] - 2024-12-13<a class="anchor" aria-label="anchor" href="#id_040---2024-12-13"></a></h2>
 <div class="section level3">
-<h3 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a></h3>
+<h3 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a></h3>
 <ul><li>
 <code>id</code> and <code>metadata</code> slots in fdata objects for storing curve identifiers and associated data</li>
 <li>Outlier plot labeling: <code>plot(outliergram, label = "id")</code> or <code>label = "column_name"</code>
 </li>
 <li>
 <code><a href="reference/magnitudeshape.html">magnitudeshape()</a></code> labeling support (renamed from MS.plot)</li>
-</ul></div>
-<div class="section level3">
-<h3 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a></h3>
-<ul><li>Auto-reduce alpha when <code>show.mean = TRUE</code> in <code><a href="reference/plot.fdata.html">plot.fdata()</a></code>
-</li>
-</ul></div>
-<div class="section level3">
-<h3 id="fixed-2">Fixed<a class="anchor" aria-label="anchor" href="#fixed-2"></a></h3>
-<ul><li>Vignette error: extract data from mean fdata object correctly</li>
-</ul></div>
-</div>
-<div class="section level2">
-<h2 id="id_034---2024-12-13">[0.3.4] - 2024-12-13<a class="anchor" aria-label="anchor" href="#id_034---2024-12-13"></a></h2>
-<div class="section level3">
-<h3 id="added-3">Added<a class="anchor" aria-label="anchor" href="#added-3"></a></h3>
-<ul><li>
+<li>
 <code><a href="reference/fregre.np.multi.html">fregre.np.multi()</a></code> for regression with multiple functional predictors</li>
-</ul></div>
-<div class="section level3">
-<h3 id="fixed-3">Fixed<a class="anchor" aria-label="anchor" href="#fixed-3"></a></h3>
-<ul><li>
-<code><a href="reference/plot.group.distance.html">plot.group.distance()</a></code> error handling</li>
-<li>Missing depth wrapper functions</li>
-</ul></div>
-<div class="section level3">
-<h3 id="changed-4">Changed<a class="anchor" aria-label="anchor" href="#changed-4"></a></h3>
-<ul><li>Documented null hypothesis for <code><a href="reference/group.test.html">group.test()</a></code>
-</li>
-</ul></div>
-</div>
-<div class="section level2">
-<h2 id="id_033---2024-12-12">[0.3.3] - 2024-12-12<a class="anchor" aria-label="anchor" href="#id_033---2024-12-12"></a></h2>
-<div class="section level3">
-<h3 id="added-4">Added<a class="anchor" aria-label="anchor" href="#added-4"></a></h3>
-<ul><li>Enhanced <code><a href="reference/plot.fdata.html">plot.fdata()</a></code> with group coloring, mean curves, and confidence intervals</li>
+<li>Enhanced <code><a href="reference/plot.fdata.html">plot.fdata()</a></code> with group coloring, mean curves, and confidence intervals</li>
 <li>
 <code><a href="reference/group.distance.html">group.distance()</a></code> for measuring distances between groups of curves</li>
 <li>
 <code><a href="reference/group.test.html">group.test()</a></code> permutation test for group differences</li>
-</ul></div>
-<div class="section level3">
-<h3 id="fixed-4">Fixed<a class="anchor" aria-label="anchor" href="#fixed-4"></a></h3>
-<ul><li>Release workflow now generates documentation before building</li>
-</ul></div>
-</div>
-<div class="section level2">
-<h2 id="id_032---2024-12-12">[0.3.2] - 2024-12-12<a class="anchor" aria-label="anchor" href="#id_032---2024-12-12"></a></h2>
-<div class="section level3">
-<h3 id="fixed-5">Fixed<a class="anchor" aria-label="anchor" href="#fixed-5"></a></h3>
-<ul><li>
-<code>mean(fd)</code> now returns fdata object (was returning matrix)</li>
-<li>Missing <code>%||%</code> operator definition</li>
-</ul></div>
-</div>
-<div class="section level2">
-<h2 id="id_031---2024-12-12">[0.3.1] - 2024-12-12<a class="anchor" aria-label="anchor" href="#id_031---2024-12-12"></a></h2>
-<div class="section level3">
-<h3 id="added-5">Added<a class="anchor" aria-label="anchor" href="#added-5"></a></h3>
-<ul><li>
+<li>
 <code><a href="reference/outliergram.html">outliergram()</a></code> visualization (MEI vs MBD plot)</li>
 <li>
 <code><a href="reference/plot.fdata2pc.html">plot.fdata2pc()</a></code> for FPCA visualization (components, variance, scores)</li>
 </ul></div>
 <div class="section level3">
-<h3 id="changed-5">Changed<a class="anchor" aria-label="anchor" href="#changed-5"></a></h3>
-<ul><li>Renamed <code>fdata.deriv()</code> to <code><a href="reference/deriv.html">deriv()</a></code> for consistency</li>
+<h3 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a></h3>
+<ul><li>Auto-reduce alpha when <code>show.mean = TRUE</code> in <code><a href="reference/plot.fdata.html">plot.fdata()</a></code>
+</li>
+<li>Renamed <code>fdata.deriv()</code> to <code><a href="reference/deriv.html">deriv()</a></code> for consistency</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a></h3>
+<ul><li>
+<code><a href="reference/plot.group.distance.html">plot.group.distance()</a></code> error handling</li>
+<li>Release workflow now generates documentation before building</li>
+<li>Missing <code>%||%</code> operator definition</li>
 </ul></div>
 </div>
 <div class="section level2">
 <h2 id="id_030---2024-12-11">[0.3.0] - 2024-12-11<a class="anchor" aria-label="anchor" href="#id_030---2024-12-11"></a></h2>
 <div class="section level3">
-<h3 id="added-6">Added<a class="anchor" aria-label="anchor" href="#added-6"></a></h3>
-<ul><li>Covariance kernel functions: <code>cov.Exponential()</code>, <code>cov.Matern()</code>, <code>cov.Gaussian()</code>, etc.</li>
+<h3 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a></h3>
+<ul><li>Covariance kernel functions: <code><a href="reference/kernel.exponential.html">kernel.exponential()</a></code>, <code><a href="reference/kernel.matern.html">kernel.matern()</a></code>, <code><a href="reference/kernel.gaussian.html">kernel.gaussian()</a></code>, etc.</li>
 <li>
-<code>make_gaussian_process()</code> for simulating Gaussian process realizations</li>
+<code><a href="reference/make.gaussian.process.html">make.gaussian.process()</a></code> for simulating Gaussian process realizations</li>
 <li>2D functional data support for most functions</li>
 <li>Unified API: <code><a href="reference/depth.html">depth()</a></code>, <code><a href="reference/median.html">median()</a></code>, <code><a href="reference/trimmed.html">trimmed()</a></code>, <code><a href="reference/trimvar.html">trimvar()</a></code> with method parameter</li>
-</ul></div>
-<div class="section level3">
-<h3 id="changed-6">Changed<a class="anchor" aria-label="anchor" href="#changed-6"></a></h3>
-<ul><li>Cleaned up API: removed backward compatibility shims</li>
-<li>Renamed functions for consistency (e.g., <code>fdata.mean</code> -&gt; <code>mean.fdata</code>)</li>
-<li>All plots now use ggplot2 instead of base R graphics</li>
-</ul></div>
-<div class="section level3">
-<h3 id="added-from-02x-development">Added (from 0.2.x development)<a class="anchor" aria-label="anchor" href="#added-from-02x-development"></a></h3>
-<ul><li>Band depth (<code>depth.BD</code>, <code>depth.MBD</code>, <code>depth.MEI</code>)</li>
+<li>Band depth (<code>depth.BD</code>, <code>depth.MBD</code>, <code>depth.MEI</code>)</li>
 <li>Functional boxplot (<code>boxplot.fdata</code>)</li>
 <li>MS-plot for outlier detection</li>
 <li>Fuzzy c-means clustering (<code>cluster.fcm</code>)</li>
@@ -210,6 +310,31 @@
 <li>Local averages feature extraction (<code>localavg.fdata</code>)</li>
 <li>Optimal k selection for k-means (<code>cluster.optim</code>)</li>
 <li>k-NN bandwidth selection for nonparametric regression</li>
+<li>
+<strong>Basis representation module</strong> with Rust backend:
+<ul><li>
+<code><a href="reference/fdata2basis.html">fdata2basis()</a></code>, <code><a href="reference/basis2fdata.html">basis2fdata()</a></code> — convert between data and basis coefficients</li>
+<li>
+<code><a href="reference/basis.gcv.html">basis.gcv()</a></code>, <code><a href="reference/basis.aic.html">basis.aic()</a></code>, <code><a href="reference/basis.bic.html">basis.bic()</a></code> — goodness-of-fit metrics</li>
+<li>
+<code><a href="reference/fdata2basis_cv.html">fdata2basis_cv()</a></code> — cross-validation for optimal nbasis selection</li>
+<li>
+<code><a href="reference/pspline.html">pspline()</a></code> — P-spline smoothing with automatic lambda selection</li>
+<li>
+<code><a href="reference/fdata2basis_2d.html">fdata2basis_2d()</a></code>, <code><a href="reference/basis2fdata_2d.html">basis2fdata_2d()</a></code> — 2D tensor product basis support</li>
+<li>
+<code><a href="reference/pspline.2d.html">pspline.2d()</a></code> — 2D P-spline with anisotropic penalties</li>
+<li>
+<code><a href="reference/select.basis.auto.html">select.basis.auto()</a></code> — automatic basis selection per curve</li>
+<li>
+<code><a href="reference/normalize.html">normalize()</a></code> — scale curves to unit Lp norm</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a></h3>
+<ul><li>Cleaned up API: removed backward compatibility shims</li>
+<li>Renamed functions for consistency (e.g., <code>fdata.mean</code> → <code>mean.fdata</code>)</li>
+<li>All plots now use ggplot2 instead of base R graphics</li>
 </ul></div>
 </div>
 <div class="section level2">
