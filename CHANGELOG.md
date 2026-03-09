@@ -2,7 +2,7 @@
 
 All notable changes to fdars are documented in this file.
 
-## \[0.5.0\] - 2025-03-09
+## \[0.5.0\] - 2026-03-09
 
 ### Added
 
@@ -195,7 +195,7 @@ All notable changes to fdars are documented in this file.
 - TSRVF inverse initial values
 - Regression article cross-references and See Also sections
 
-## \[0.4.0\] - 2024-12-13
+## \[0.4.0\] - 2026-03-04
 
 ### Added
 
@@ -234,7 +234,7 @@ All notable changes to fdars are documented in this file.
 - Release workflow now generates documentation before building
 - Missing `%||%` operator definition
 
-## \[0.3.0\] - 2024-12-11
+## \[0.3.0\] - 2026-02-19
 
 ### Added
 
@@ -289,7 +289,7 @@ All notable changes to fdars are documented in this file.
 - Renamed functions for consistency (e.g., `fdata.mean` → `mean.fdata`)
 - All plots now use ggplot2 instead of base R graphics
 
-## \[0.1.0\] - 2024-12-10
+## \[0.1.0\] - 2026-02-13
 
 ### Initial Release
 
