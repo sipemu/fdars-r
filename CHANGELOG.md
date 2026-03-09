@@ -2,46 +2,131 @@
 
 All notable changes to fdars are documented in this file.
 
-## [0.5.2] - 2025-01-09
+## [0.5.0] - 2025-03-09
+
+### Added
+
+- **Elastic alignment** (Fisher-Rao framework):
+  - `srsf.transform()`, `srsf.inverse()` — Square-Root Slope Function
+  - `elastic.align()` — align curves via dynamic programming
+  - `elastic.align.constrained()` — alignment with landmark constraints
+  - `elastic.distance()` — Fisher-Rao distance between curves
+  - `elastic.decomposition()` — amplitude/phase decomposition
+  - `karcher.mean()` — Fréchet mean in the elastic metric
+  - `amplitude.distance()`, `phase.distance()` — component distance matrices
+  - `alignment.quality()` — diagnostic metrics for alignment results
+  - `alignment.pairwise.consistency()` — transitivity checks
+  - `periodic.rotate()` — rotate periodic curves with methods: peak, xcorr, landmark, iterative
+
+- **Landmark registration**:
+  - `detect.landmarks()` — detect peaks, valleys, zero-crossings, inflection points
+  - `landmark.register()` — register curves by aligning detected landmarks
+
+- **TSRVF** (Transported Square-Root Velocity Function):
+  - `tsrvf.transform()` — compute tangent-space representation via Karcher mean
+  - `tsrvf.from.alignment()` — build TSRVF from pre-computed alignment
+  - `tsrvf.inverse()` — reconstruct curves from tangent vectors
+
+- **Tolerance bands**:
+  - `tolerance.band()` — functional tolerance/prediction bands with methods: fpca, conformal, scb (Degras), exponential, elastic
+
+- **Streaming depth**:
+  - `streaming.depth()` — fast depth computation against pre-sorted reference data
+
+- **Soft-DTW distance**:
+  - `metric.softDTW()` — differentiable Dynamic Time Warping
+  - `softdtw.barycenter()` — Soft-DTW barycenter computation
+
+- **Function-on-scalar regression**:
+  - `fosr()` — penalized function-on-scalar regression
+  - `fosr.fpc()` — FPC-based function-on-scalar regression
+
+- **Functional ANOVA**:
+  - `fanova()` — one-way functional ANOVA with permutation testing
+
+- **Functional classification**:
+  - `fclassif()` — supervised classification (LDA, QDA, kNN, kernel, DD-plot)
+  - `fclassif.cv()` — cross-validated classification error
+
+- **Functional mixed models**:
+  - `fmm()` — functional mixed models with subject-level random effects
+  - `fmm.predict()` — prediction from fitted FMM
+  - `fmm.test.fixed()` — permutation test for fixed effects
+
+- **GMM clustering**:
+  - `cluster.gmm()` — Gaussian Mixture Model clustering with automatic K selection
+  - `cluster.init()` — k-means++ initialization
+
+- **Andrews transformation**:
+  - `andrews_transform()` — Fourier expansion of multivariate data to functional curves
+  - `andrews_loadings()` — project FPCA eigenfunctions back to original variable space
+
+- **Seasonal analysis** (comprehensive module):
+  - Period detection: `detect.period()`, `estimate.period()`, `detect.periods()`
+  - Ensemble methods: `autoperiod()`, `cfd.autoperiod()`, `sazed()`
+  - Spectral: `lomb.scargle()`, `matrix.profile()`
+  - Decomposition: `stl.fd()`, `ssa.fd()`, `detrend()`, `decompose()`
+  - Diagnostics: `seasonal.strength()`, `seasonal.strength.curve()`, `classify.seasonality()`
+  - Change detection: `detect.seasonality.changes()`, `detect.seasonality.changes.auto()`
+  - `detect_amplitude_modulation()`, `instantaneous.period()`, `analyze.peak.timing()`
+
+- **Equivalence testing**:
+  - `fequiv.test()` — functional equivalence test
+
+- **Functional linear model**:
+  - `fregre.lm()`, `fregre.lm.cv()` — FPC-based functional linear regression
+  - `functional.logistic()` — functional logistic regression
+
+- **Simulation toolbox**:
+  - `simFunData()`, `simMultiFunData()` — simulate functional data via Karhunen-Loève
+  - `eFun()`, `eVal()` — eigenfunction/eigenvalue generators
+  - `addError()` — add measurement noise
+  - `irregFdata()`, `sparsify()` — irregular/sparse functional data
+
+- **Irregular functional data**:
+  - `irregFdata()` — irregular functional data objects
+  - `as.fdata()` — convert irregular to regular grid
+  - `mean.irregFdata()`, `summary.irregFdata()`, `plot.irregFdata()`
+
+- **Unified dispatch interfaces**:
+  - `depth()` — dispatches to FM, mode, RP, RT, BD, MBD, MEI, FSD, KFSD, RPD
+  - `metric()` — dispatches to lp, hausdorff, dtw, softdtw, kl, elastic, amplitude, phase, pca, deriv, basis, fourier, hshift
+
+- **Plot methods** for all new object types:
+  - `plot.elastic.align()`, `plot.karcher.mean()`, `plot.alignment.quality()`
+  - `plot.landmark.register()`, `plot.tsrvf()`
+  - `plot.tolerance.band()`
+  - `plot.fclassif()`, `plot.fmm()`, `plot.fosr()`, `plot.fanova()`
+  - `plot.cluster.gmm()`
+
+- **Vignettes/articles** (17 articles covering all major features):
+  - Elastic alignment, landmark registration, TSRVF, alignment comparison
+  - Tolerance bands, streaming depth, distance metrics
+  - Functional regression, classification, mixed models, GMM clustering
+  - Andrews transformation, seasonal analysis
+  - Example analyses: Berkeley growth study, wine dataset (4 articles)
+
+- **Pre-built binary packages** for macOS (.tgz) and Windows (.zip) attached to
+  GitHub Releases — install without Rust toolchain
 
 ### Changed
-- **Breaking**: Renamed functions to avoid S3 method dispatch conflicts:
+- Upgraded Rust backend (fdars-core) to v0.7.2
+- All plots use ggplot2; respects `theme_set()`
+- Renamed functions to avoid S3 dispatch conflicts:
   - `fdata2basis.cv()` → `fdata2basis_cv()`
   - `fdata2basis.2d()` → `fdata2basis_2d()`
   - `basis2fdata.2d()` → `basis2fdata_2d()`
-
-## [0.5.1] - 2024-12-16
-
-### Added
-- `normalize()` function to scale curves to unit Lp norm
-- Vignette on basis representation and optimal basis selection
-
-### Changed
-- Renamed `norm.fdata()` to `norm()` for cleaner API
-- Renamed covariance kernel functions from `cov.*` to `kernel_*` to avoid S3 dispatch conflicts
+  - `norm.fdata()` → `norm()`
+  - `cov.*()` → `kernel.*()` (covariance kernel functions)
+- Internal Rust wrapper functions no longer generate man pages (CRAN compliance)
+- Portable Makefiles: removed GNU extensions (`export`, `:=`)
+- Vendored Rust crates cleaned of hidden files and long paths
 
 ### Fixed
-- Plot functions now display when called directly (`plot(fd)` shows plot, `p <- plot(fd)` does not)
-- S3 method dispatch conflict with `cov()` generic function
-
-## [0.5.0] - 2024-12-14
-
-### Added
-- **Basis representation module** with Rust backend:
-  - `basis2fdata()` - reconstruct functional data from basis coefficients
-  - `basis.gcv()`, `basis.aic()`, `basis.bic()` - goodness-of-fit metrics
-  - `fdata2basis_cv()` - cross-validation for optimal nbasis selection
-  - `pspline()` - P-spline smoothing with automatic lambda selection
-  - `fdata2basis_2d()`, `basis2fdata_2d()` - 2D tensor product basis support
-  - `pspline.2d()` - 2D P-spline with anisotropic penalties
-
-### Changed
-- Plot functions now return ggplot objects without auto-printing (use `print(p)` to display)
-- Removed hardcoded `theme_minimal()` from all plots - respects `ggplot2::theme_set()`
-- Fixed white lines in 2D surface plots when using facets
-
-### Fixed
-- Windows binary now built with R 4.2.2 for compatibility with older R versions
+- `fdata2basis_2d` example error caused by extendr wrapper name collision
+- `mean(fd)` now returns fdata object (was returning matrix)
+- TSRVF inverse initial values
+- Regression article cross-references and See Also sections
 
 ## [0.4.0] - 2024-12-13
 
@@ -49,64 +134,29 @@ All notable changes to fdars are documented in this file.
 - `id` and `metadata` slots in fdata objects for storing curve identifiers and associated data
 - Outlier plot labeling: `plot(outliergram, label = "id")` or `label = "column_name"`
 - `magnitudeshape()` labeling support (renamed from MS.plot)
-
-### Changed
-- Auto-reduce alpha when `show.mean = TRUE` in `plot.fdata()`
-
-### Fixed
-- Vignette error: extract data from mean fdata object correctly
-
-## [0.3.4] - 2024-12-13
-
-### Added
 - `fregre.np.multi()` for regression with multiple functional predictors
-
-### Fixed
-- `plot.group.distance()` error handling
-- Missing depth wrapper functions
-
-### Changed
-- Documented null hypothesis for `group.test()`
-
-## [0.3.3] - 2024-12-12
-
-### Added
 - Enhanced `plot.fdata()` with group coloring, mean curves, and confidence intervals
 - `group.distance()` for measuring distances between groups of curves
 - `group.test()` permutation test for group differences
-
-### Fixed
-- Release workflow now generates documentation before building
-
-## [0.3.2] - 2024-12-12
-
-### Fixed
-- `mean(fd)` now returns fdata object (was returning matrix)
-- Missing `%||%` operator definition
-
-## [0.3.1] - 2024-12-12
-
-### Added
 - `outliergram()` visualization (MEI vs MBD plot)
 - `plot.fdata2pc()` for FPCA visualization (components, variance, scores)
 
 ### Changed
+- Auto-reduce alpha when `show.mean = TRUE` in `plot.fdata()`
 - Renamed `fdata.deriv()` to `deriv()` for consistency
+
+### Fixed
+- `plot.group.distance()` error handling
+- Release workflow now generates documentation before building
+- Missing `%||%` operator definition
 
 ## [0.3.0] - 2024-12-11
 
 ### Added
-- Covariance kernel functions: `cov.Exponential()`, `cov.Matern()`, `cov.Gaussian()`, etc.
-- `make_gaussian_process()` for simulating Gaussian process realizations
+- Covariance kernel functions: `kernel.exponential()`, `kernel.matern()`, `kernel.gaussian()`, etc.
+- `make.gaussian.process()` for simulating Gaussian process realizations
 - 2D functional data support for most functions
 - Unified API: `depth()`, `median()`, `trimmed()`, `trimvar()` with method parameter
-
-### Changed
-- Cleaned up API: removed backward compatibility shims
-- Renamed functions for consistency (e.g., `fdata.mean` -> `mean.fdata`)
-- All plots now use ggplot2 instead of base R graphics
-
-### Added (from 0.2.x development)
 - Band depth (`depth.BD`, `depth.MBD`, `depth.MEI`)
 - Functional boxplot (`boxplot.fdata`)
 - MS-plot for outlier detection
@@ -116,6 +166,20 @@ All notable changes to fdars are documented in this file.
 - Local averages feature extraction (`localavg.fdata`)
 - Optimal k selection for k-means (`cluster.optim`)
 - k-NN bandwidth selection for nonparametric regression
+- **Basis representation module** with Rust backend:
+  - `fdata2basis()`, `basis2fdata()` — convert between data and basis coefficients
+  - `basis.gcv()`, `basis.aic()`, `basis.bic()` — goodness-of-fit metrics
+  - `fdata2basis_cv()` — cross-validation for optimal nbasis selection
+  - `pspline()` — P-spline smoothing with automatic lambda selection
+  - `fdata2basis_2d()`, `basis2fdata_2d()` — 2D tensor product basis support
+  - `pspline.2d()` — 2D P-spline with anisotropic penalties
+  - `select.basis.auto()` — automatic basis selection per curve
+  - `normalize()` — scale curves to unit Lp norm
+
+### Changed
+- Cleaned up API: removed backward compatibility shims
+- Renamed functions for consistency (e.g., `fdata.mean` → `mean.fdata`)
+- All plots now use ggplot2 instead of base R graphics
 
 ## [0.1.0] - 2024-12-10
 
