@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Clustering: 3 distinct curve groups with center curves -->
+  <!-- Barolo cluster (dark red) -->
+  <path d="M15 60 Q30 30, 50 25 Q70 20, 85 55 Q100 85, 120 90 Q140 80, 160 45 Q175 25, 190 35" stroke="#8B0000" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 58 Q30 32, 50 28 Q70 23, 85 52 Q100 82, 120 85 Q140 78, 160 48 Q175 28, 190 38" stroke="#8B0000" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 59 Q30 31, 50 26 Q70 21, 85 53 Q100 83, 120 87 Q140 79, 160 46 Q175 26, 190 36" stroke="#8B0000" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <!-- Grignolino cluster (gold) -->
+  <path d="M15 65 Q30 55, 50 60 Q70 70, 85 65 Q100 50, 120 45 Q140 55, 160 70 Q175 75, 190 68" stroke="#DAA520" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 62 Q30 52, 50 57 Q70 68, 85 62 Q100 48, 120 42 Q140 52, 160 67 Q175 72, 190 65" stroke="#DAA520" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 63 Q30 53, 50 58 Q70 69, 85 63 Q100 49, 120 43 Q140 53, 160 68 Q175 73, 190 66" stroke="#DAA520" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <!-- Barbera cluster (green) -->
+  <path d="M15 55 Q30 70, 50 80 Q70 85, 85 75 Q100 55, 120 40 Q140 35, 160 50 Q175 65, 190 70" stroke="#2E8B57" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 52 Q30 68, 50 78 Q70 82, 85 72 Q100 52, 120 38 Q140 32, 160 48 Q175 62, 190 67" stroke="#2E8B57" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <path d="M15 53 Q30 69, 50 79 Q70 83, 85 73 Q100 53, 120 39 Q140 33, 160 49 Q175 63, 190 68" stroke="#2E8B57" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+</svg>

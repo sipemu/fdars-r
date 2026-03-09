@@ -5,9 +5,13 @@ Reconstructs 2D surfaces from tensor product basis coefficients.
 ## Usage
 
 ``` r
-basis2fdata_2d(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
-
-basis2fdata_2d(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+basis2fdata_2d(
+  coefs,
+  argvals,
+  nbasis.s,
+  nbasis.t,
+  type = c("bspline", "fourier")
+)
 ```
 
 ## Arguments

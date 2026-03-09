@@ -1,5 +1,22 @@
 # Articles
 
+### Navigation
+
+- [Examples](https://sipemu.github.io/fdars-r/articles/examples.md):
+
+### Examples
+
+- [Berkeley Growth Study: Elastic Alignment of Growth
+  Velocity](https://sipemu.github.io/fdars-r/articles/example-berkeley-growth.md):
+- [Andrews Wine: Why Andrews
+  Curves?](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-intro.md):
+- [Andrews Wine: Outlier
+  Detection](https://sipemu.github.io/fdars-r/articles/example-andrews-wine.md):
+- [Andrews Wine: Clustering & Variable
+  Importance](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-clustering.md):
+- [Andrews Wine: Quality
+  Control](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-qc.md):
+
 ### Learn
 
 - [Introduction to

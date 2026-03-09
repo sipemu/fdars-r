@@ -62,8 +62,8 @@ An object of class 'fosr' with components:
 ## Details
 
 Fits a penalized function-on-scalar regression model where the response
-is a function Y_i(t) and predictors are scalar: Y_i(t) = mu(t) + sum_j
-x_ij beta_j(t) + eps_i(t).
+is a function Y_i(t) and predictors are scalar:
+`Y_i(t) = mu(t) + sum_j x_ij beta_j(t) + eps_i(t)`.
 
 ## See also
 

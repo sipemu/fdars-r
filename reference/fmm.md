@@ -66,6 +66,6 @@ An object of class 'fmm' with components:
 
 ## Details
 
-Fits a functional mixed model for repeated measures data: Y_ij(t) =
-mu(t) + sum_k x_ij,k beta_k(t) + b_i(t) + eps_ij(t) where b_i(t) are
-subject-level random effects.
+Fits a functional mixed model for repeated measures data:
+`Y_ij(t) = mu(t) + sum_k x_ijk beta_k(t) + b_i(t) + eps_ij(t)` where
+b_i(t) are subject-level random effects.

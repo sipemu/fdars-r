@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- QC: functional boxplot with envelope and test curve -->
+  <!-- Prediction band (outer, light gray) -->
+  <path d="M15 30 Q50 20, 85 25 Q120 30, 155 22 Q175 18, 190 25" stroke="none" fill="#ddd" opacity="0.5"/>
+  <path d="M15 90 Q50 100, 85 95 Q120 88, 155 98 Q175 102, 190 95" stroke="none" fill="#ddd" opacity="0.5"/>
+  <rect x="15" y="30" width="175" height="60" rx="0" fill="#eee" opacity="0.4"/>
+  <!-- Central envelope (magenta) -->
+  <path d="M15 45 Q50 38, 85 42 Q120 48, 155 40 Q175 35, 190 42" stroke="none"/>
+  <path d="M15 75 Q50 82, 85 78 Q120 72, 155 80 Q175 85, 190 78" stroke="none"/>
+  <rect x="15" y="45" width="175" height="30" rx="0" fill="#c850c0" opacity="0.2"/>
+  <!-- Median curve (black, bold) -->
+  <path d="M15 60 Q50 55, 85 58 Q120 62, 155 57 Q175 54, 190 58" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <!-- Passing wine (green) -->
+  <path d="M15 55 Q50 50, 85 53 Q120 58, 155 52 Q175 48, 190 53" stroke="#2E8B57" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+  <!-- Failing wine (red, dashed) -->
+  <path d="M15 38 Q50 28, 85 32 Q120 45, 155 30 Q175 22, 190 35" stroke="red" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 3" opacity="0.8"/>
+</svg>

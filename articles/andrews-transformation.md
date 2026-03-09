@@ -60,33 +60,15 @@ F-statistic or variance) makes the plots more informative. However, the
 distance preservation property holds regardless of ordering, so
 analytical results are invariant.
 
-## The `andrews_transform()` Helper
+## The `andrews_transform()` Function
 
-We define a simple helper function that builds the Fourier basis matrix
-and returns an `fdata` object:
-
-``` r
-andrews_transform <- function(X, m = 200) {
-  if (is.data.frame(X)) X <- as.matrix(X)
-  n <- nrow(X)
-  p <- ncol(X)
-  t_grid <- seq(-pi, pi, length.out = m)
-
-  # Build Fourier basis matrix [m x p]
-  basis <- matrix(0, m, p)
-  basis[, 1] <- 1 / sqrt(2)
-  for (j in 2:p) {
-    k <- ceiling((j - 1) / 2)
-    if (j %% 2 == 0) {
-      basis[, j] <- sin(k * t_grid)
-    } else {
-      basis[, j] <- cos(k * t_grid)
-    }
-  }
-
-  fdata(X %*% t(basis), argvals = t_grid)
-}
-```
+The package provides
+[`andrews_transform()`](https://sipemu.github.io/fdars-r/reference/andrews_transform.md),
+which builds the Fourier basis matrix and returns an `fdata` object. The
+basis matrix and variable names are stored as attributes so that
+[`andrews_loadings()`](https://sipemu.github.io/fdars-r/reference/andrews_loadings.md)
+can later project FPCA eigenfunctions back to the original variable
+space.
 
 ## Iris Dataset and Visualization
 
@@ -612,6 +594,59 @@ ggplot(df_dist, aes(x = euclidean, y = andrews)) +
 
 The points fall exactly on the $\sqrt{\pi}$ line, confirming the
 distance preservation theorem.
+
+## When Does FDA Add Value?
+
+The Andrews transformation is isometric: $L^{2}$ distances between
+curves equal $\sqrt{\pi}$ times Euclidean distances between the original
+vectors. This means that for methods whose only input is a distance
+matrix — PCA, k-means, basic outlier detection by Mahalanobis distance —
+**classical multivariate statistics and FDA on Andrews curves give the
+same numerical answers.** FPCA on Andrews curves and
+[`prcomp()`](https://rdrr.io/r/stats/prcomp.html) on the raw matrix
+produce scores that correlate at $\pm 1$. K-means produces identical
+clusters.
+
+So why bother? The value comes not from the transformation itself, but
+from what you can do *afterward* in function space:
+
+1.  **Functional tools with no tabular equivalent.** Functional depth
+    (Fraiman–Muniz, modified band depth), the functional boxplot, the
+    outliergram, and tolerance bands are inherently functional concepts.
+    They classify outliers by *type* (magnitude vs shape), provide
+    simultaneous monitoring of all variables in a single chart, and
+    define nonparametric tolerance regions. There is no direct
+    multivariate equivalent of
+    [`outliergram()`](https://sipemu.github.io/fdars-r/reference/outliergram.md)
+    or
+    [`tolerance.band()`](https://sipemu.github.io/fdars-r/reference/tolerance.band.md).
+
+2.  **Smoothing as structured regularization.** When $p$ is large or
+    variables are noisy, you can smooth the Andrews curves (e.g., via
+    basis expansion or penalized splines) before analysis. This damps
+    high-frequency Fourier terms — corresponding to less important
+    variables — while preserving low-frequency structure. Standard PCA
+    has no natural way to impose this frequency-aware regularization.
+
+3.  **Unified pipeline.** With Andrews curves, depth, outlier detection,
+    clustering, FPCA, and the functional boxplot all operate on the same
+    `fdata` object with the same distance semantics. In a classical
+    workflow, each of these is a separate analysis step with its own
+    data format and assumptions.
+
+4.  **Communication.** Eigenfunctions, mean curves, and cluster
+    centroids are visual objects. A continuous curve showing the
+    dominant mode of variation communicates structure more intuitively
+    than a table of 13 signed loadings, especially in reports and
+    presentations.
+
+> **Rule of thumb:** If your analysis stops at PCA + k-means on a clean,
+> moderate-$p$ matrix, [`prcomp()`](https://rdrr.io/r/stats/prcomp.html)
+> and [`kmeans()`](https://rdrr.io/r/stats/kmeans.html) are simpler and
+> give you the same answer. Use Andrews curves when you want the full
+> functional toolbox — depth-based outlier detection, tolerance bands,
+> simultaneous monitoring — or when you’re building a pipeline where
+> multiple FDA methods feed into each other.
 
 ## Best Practices
 

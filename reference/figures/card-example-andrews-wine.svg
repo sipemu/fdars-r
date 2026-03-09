@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Andrews curves: sinusoidal fingerprints for 3 cultivars -->
+  <!-- Barolo (dark red) -->
+  <path d="M15 60 Q30 30, 50 25 Q70 20, 85 55 Q100 85, 120 90 Q140 80, 160 45 Q175 25, 190 35" stroke="#8B0000" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <path d="M15 58 Q30 32, 50 28 Q70 23, 85 52 Q100 82, 120 85 Q140 78, 160 48 Q175 28, 190 38" stroke="#8B0000" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Grignolino (gold) -->
+  <path d="M15 65 Q30 55, 50 60 Q70 70, 85 65 Q100 50, 120 45 Q140 55, 160 70 Q175 75, 190 68" stroke="#DAA520" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <path d="M15 62 Q30 52, 50 57 Q70 68, 85 62 Q100 48, 120 42 Q140 52, 160 67 Q175 72, 190 65" stroke="#DAA520" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Barbera (green) -->
+  <path d="M15 55 Q30 70, 50 80 Q70 85, 85 75 Q100 55, 120 40 Q140 35, 160 50 Q175 65, 190 70" stroke="#2E8B57" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <path d="M15 52 Q30 68, 50 78 Q70 82, 85 72 Q100 52, 120 38 Q140 32, 160 48 Q175 62, 190 67" stroke="#2E8B57" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Median curve (black, bold) -->
+  <path d="M15 60 Q30 50, 50 55 Q70 60, 85 62 Q100 60, 120 55 Q140 55, 160 55 Q175 55, 190 55" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+</svg>
