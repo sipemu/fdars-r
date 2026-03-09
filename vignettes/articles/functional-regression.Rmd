@@ -31,14 +31,80 @@ library(ggplot2)
 theme_set(theme_minimal())
 ```
 
+## Why Functional Regression?
+
+Classical regression assumes that predictors live in $\mathbb{R}^p$ with $p$
+finite and fixed. When the predictor is a curve $X_i(t)$ observed on a
+continuum, we face a fundamentally different problem: the regression coefficient
+$\beta(t)$ is itself a function, and the "design matrix" is infinite-dimensional.
+
+This creates two immediate challenges:
+
+1. **Ill-posedness.** The functional linear model
+   $y_i = \alpha + \int X_i(t)\beta(t)\,dt + \varepsilon_i$ has infinitely many
+   solutions because the integral operator is compact. Without regularization,
+   the least-squares estimate of $\beta(t)$ does not exist or is wildly unstable.
+
+2. **Curse of dimensionality.** Naively discretizing $X_i(t)$ at $m$ grid
+   points and running OLS gives $m$ parameters from $n$ observations. When
+   $m \gg n$ (the typical FDA setting), the model is massively overparameterized.
+
+Two strategies resolve these issues:
+
+- **Dimension reduction**: project $X_i(t)$ onto its leading functional
+  principal components (FPCs) and regress on the scores. This is the approach
+  taken by `fregre.lm()` and `fregre.pc()`.
+- **Penalization**: estimate $\beta(t)$ directly but penalize its roughness via
+  a second-derivative penalty. This is the approach taken by `fosr()` for the
+  function-on-scalar direction.
+
+Both approaches replace the ill-posed infinite-dimensional problem with a
+well-conditioned finite-dimensional one.
+
 ## Scalar-on-Function Regression
 
-### FPC-Based Functional Linear Model
+### Mathematical Framework
 
-The functional linear model relates a scalar response $y_i$ to a functional
+The **functional linear model** relates a scalar response $y_i$ to a functional
 predictor $X_i(t)$ via:
 
-$$y_i = \alpha + \int X_i(t) \beta(t) \, dt + \varepsilon_i$$
+$$y_i = \alpha + \int_0^1 X_i(t)\,\beta(t)\,dt + \varepsilon_i, \quad \varepsilon_i \overset{\text{iid}}{\sim} (0, \sigma^2)$$
+
+The coefficient function $\beta(t)$ describes *how* the predictor curve at time
+$t$ influences the response. A positive $\beta(t)$ in some interval means that
+curves with higher values there tend to have higher $y_i$.
+
+#### FPC-Based Estimation
+
+Let $\phi_1(t), \phi_2(t), \ldots$ be the eigenfunctions of the covariance
+operator of $X$, and let $\xi_{ik} = \int (X_i(t) - \bar{X}(t))\phi_k(t)\,dt$
+be the FPC scores. Expanding $\beta(t) = \sum_{k=1}^\infty \gamma_k \phi_k(t)$
+and substituting gives:
+
+$$y_i \approx \alpha + \sum_{k=1}^K \gamma_k \xi_{ik} + \varepsilon_i$$
+
+This reduces the functional regression to an ordinary multiple regression on
+$K$ FPC scores. The coefficient function is recovered as:
+
+$$\hat\beta(t) = \sum_{k=1}^K \hat\gamma_k \phi_k(t)$$
+
+The number of components $K$ controls the bias--variance trade-off: too few
+components oversimplify $\beta(t)$; too many introduce noise. Cross-validation
+selects $K$ in a data-driven way.
+
+#### Standard Errors and GCV
+
+With the FPC scores as predictors, standard OLS inference applies. The variance
+of $\hat\gamma$ is $\sigma^2 (\Xi^T\Xi)^{-1}$ where $\Xi$ is the $n \times K$
+score matrix. Generalized cross-validation provides a computationally efficient
+alternative to leave-one-out CV:
+
+$$\text{GCV} = \frac{1}{n}\sum_{i=1}^n \left(\frac{y_i - \hat{y}_i}{1 - h_{ii}}\right)^2$$
+
+where $h_{ii}$ are the diagonal elements of the hat matrix
+$H = \Xi(\Xi^T\Xi)^{-1}\Xi^T$.
+
+### FPC-Based Functional Linear Model
 
 `fregre.lm()` estimates $\beta(t)$ by projecting onto functional principal
 components.
@@ -66,16 +132,24 @@ fit <- fregre.lm(fd, y, ncomp = 3)
 print(fit)
 ```
 
+The R-squared tells us how much scalar variance is explained by the leading
+FPC directions of the predictor curves. The estimated $\hat\beta(t)$ should
+approximate the true $\beta(t) = \sin(2\pi t)$ used in the simulation.
+
 ### Cross-Validation for Component Selection
 
 `fregre.lm.cv()` selects the optimal number of FPC components via k-fold
-cross-validation.
+cross-validation. This is the data-driven way to choose $K$, balancing
+approximation accuracy against overfitting.
 
 ```{r fregre-lm-cv}
 cv_result <- fregre.lm.cv(fd, y, k.range = 1:8, nfold = 10)
 cat("Optimal ncomp:", cv_result$optimal.k, "\n")
 cat("CV errors:", round(cv_result$cv.errors, 4), "\n")
 ```
+
+The CV error typically decreases as components are added (capturing more signal),
+then plateaus or increases (adding noise). The optimal $K$ sits at the elbow.
 
 ### Comparison with fregre.pc
 
@@ -94,6 +168,25 @@ cat("fregre.lm residual MSE:", round(mean(fit$residuals^2), 4), "\n")
 For binary classification, `functional.logistic()` fits a logistic model
 with FPC features.
 
+#### The IRLS Algorithm
+
+The functional logistic model uses the logit link on FPC scores:
+
+$$\log\frac{P(Y_i = 1)}{1 - P(Y_i = 1)} = \alpha + \sum_{k=1}^K \gamma_k \xi_{ik}$$
+
+This is estimated via **Iteratively Reweighted Least Squares (IRLS)**, which
+alternates between:
+
+1. **Working response**: $z_i = \hat\eta_i + (y_i - \hat{p}_i) / [\hat{p}_i(1 - \hat{p}_i)]$
+2. **Working weights**: $w_i = \hat{p}_i(1 - \hat{p}_i)$
+3. **Weighted least squares**: update $\hat\gamma$ by regressing $z$ on $\Xi$ with weights $w$
+
+Convergence is monitored via the log-likelihood:
+
+$$\ell(\gamma) = \sum_{i=1}^n \bigl[y_i \log p_i + (1 - y_i)\log(1 - p_i)\bigr]$$
+
+where $p_i = \text{logit}^{-1}(\alpha + \xi_i^T\gamma)$.
+
 ```{r logistic}
 # Create binary response (0/1)
 y_bin <- as.numeric(y > median(y))
@@ -104,13 +197,51 @@ print(logit_fit)
 cat("Probabilities range:", range(logit_fit$probabilities), "\n")
 ```
 
+The estimated probabilities near 0 or 1 indicate confident classification;
+values near 0.5 indicate curves in the overlap region where the predictor's
+FPC scores do not clearly separate the two classes.
+
 ## Function-on-Scalar Regression
 
+### Mathematical Framework
+
+When the *response* is a function and the predictors are scalar, the model is:
+
+$$Y_i(t) = \mu(t) + \sum_{j=1}^p x_{ij}\,\beta_j(t) + \varepsilon_i(t)$$
+
+Each coefficient $\beta_j(t)$ is a function describing how predictor $j$
+modifies the response curve at each time point $t$. The intercept $\mu(t)$
+is the mean response when all predictors are zero.
+
+#### Penalized Estimation
+
+Direct pointwise OLS at each $t$ would produce coefficient estimates that are
+noisy and discontinuous across the time domain. `fosr()` imposes smoothness
+via a second-difference roughness penalty. The penalized objective is:
+
+$$\sum_{i=1}^n \|Y_i - \mu - X_i\beta\|^2 + \lambda \sum_{j=1}^p \int [\beta_j''(t)]^2\,dt$$
+
+where $\lambda > 0$ controls the trade-off between fidelity to the data and
+smoothness. In matrix form, the penalty uses the second-difference matrix $D$:
+
+$$\hat\beta = \arg\min_\beta \|Y - X\beta\|_F^2 + \lambda\,\text{tr}(\beta^T D^T D\,\beta)$$
+
+The solution at each grid point is a ridge-type estimator:
+
+$$\hat\beta(\cdot) = (X^TX + \lambda D^TD)^{-1} X^T Y(\cdot)$$
+
+#### Pointwise R-squared
+
+The goodness of fit is measured by the **pointwise R-squared**:
+
+$$R^2(t) = 1 - \frac{\sum_i [Y_i(t) - \hat{Y}_i(t)]^2}{\sum_i [Y_i(t) - \bar{Y}(t)]^2}$$
+
+The overall (mean) R-squared averages this across the domain. Values near 1
+everywhere indicate the scalar predictors explain the functional response well
+at all time points; regions with low $R^2(t)$ suggest additional predictors or
+nonlinear effects may be needed.
+
 ### Penalized FOSR
-
-When the response is a function and predictors are scalar, we have:
-
-$$Y_i(t) = \mu(t) + \sum_j x_{ij} \beta_j(t) + \varepsilon_i(t)$$
 
 `fosr()` estimates the coefficient functions $\beta_j(t)$ with optional
 ridge penalty.
@@ -140,11 +271,18 @@ fosr_fit <- fosr(fd_y, predictors, lambda = 0.1)
 print(fosr_fit)
 ```
 
+The treatment coefficient $\hat\beta_1(t)$ should recover the simulated
+$0.5\cos(2\pi t)$ pattern, while the age coefficient $\hat\beta_2(t)$ should
+approximate the linear $0.2t$ trend.
+
 ### Visualizing Coefficient Functions
 
 ```{r fosr-plot, fig.height = 4}
 plot(fosr_fit)
 ```
+
+Each panel shows one coefficient function $\hat\beta_j(t)$. The shape reveals
+*when* during the functional domain each predictor has its strongest effect.
 
 ### FPC-Based FOSR
 
@@ -154,6 +292,10 @@ plot(fosr_fit)
 fosr_fpc_fit <- fosr.fpc(fd_y, predictors, ncomp = 5)
 cat("FPC-based R-squared:", round(fosr_fpc_fit$r.squared, 4), "\n")
 ```
+
+The FPC-based approach avoids choosing $\lambda$ but requires selecting the
+number of components. When the response curves have strong low-rank structure
+(most variance in a few FPCs), this approach is efficient and stable.
 
 ### Prediction
 
@@ -165,6 +307,38 @@ pred <- predict(fosr_fit, new_pred)
 ```
 
 ## Functional ANOVA
+
+### Mathematical Framework
+
+Functional ANOVA tests whether the mean functions of $G$ groups are equal:
+
+$$H_0: \mu_1(t) = \mu_2(t) = \cdots = \mu_G(t) \quad \text{for all } t$$
+
+At each grid point $t$, a pointwise F-statistic is computed:
+
+$$F(t) = \frac{\sum_{g=1}^G n_g [\bar{Y}_g(t) - \bar{Y}(t)]^2 / (G - 1)}{\sum_{g=1}^G \sum_{i \in g} [Y_i(t) - \bar{Y}_g(t)]^2 / (N - G)}$$
+
+These are summarized into a **global test statistic** by integration:
+
+$$F_{\text{global}} = \int F(t)\,dt$$
+
+#### Permutation Testing
+
+Because the null distribution of $F_{\text{global}}$ is intractable, `fanova()`
+uses a permutation approach:
+
+1. Compute the observed $F_{\text{obs}}$ from the original data.
+2. For $b = 1, \ldots, B$: randomly permute group labels and compute $F_b^*$.
+3. The p-value is:
+
+$$p = \frac{1 + \#\{F_b^* \geq F_{\text{obs}}\}}{B + 1}$$
+
+The $+1$ in numerator and denominator ensures the p-value is never exactly zero
+and accounts for the observed statistic being one of the $B + 1$ values under
+consideration. This makes the test exact (valid at any sample size) and
+assumption-free regarding the distribution of $\varepsilon_i(t)$.
+
+### Permutation F-Test
 
 `fanova()` tests whether mean functions differ across groups using a
 permutation-based F-test.
@@ -190,11 +364,49 @@ anova_result <- fanova(fd_anova, groups, n.perm = 500)
 print(anova_result)
 ```
 
+A small p-value rejects the null hypothesis that all groups share the same mean
+function. In this simulation, the three groups have clearly different shapes
+(sine, sine + cosine, linear), so we expect strong rejection.
+
 ### Visualizing Group Means
 
 ```{r fanova-plot, fig.height = 4}
 plot(anova_result)
 ```
+
+The group mean curves show the estimated $\hat\mu_g(t)$ for each group. Where
+the curves separate most, the pointwise F-statistic is largest.
+
+## Assumptions and Diagnostics
+
+### When FPC-Based Regression Works Well
+
+- **Low intrinsic dimensionality**: most predictor variability is captured by
+  a few leading FPCs. This is common when curves are smooth.
+- **Linear relationship**: the link between FPC scores and response is
+  approximately linear. For nonlinear relationships, consider kernel regression
+  (see `vignette("articles/regression")`).
+- **Adequate sample size**: $n$ should be substantially larger than $K$ to
+  avoid overfitting.
+
+### When to Be Cautious
+
+- **Local effects**: if $\beta(t)$ is nonzero only on a small interval, the
+  FPC basis (which captures *global* variance modes) may need many components
+  to represent it, defeating the purpose of dimension reduction.
+- **Non-Gaussian errors**: the permutation tests in `fanova()` and
+  `fmm.test.fixed()` are distribution-free, but the confidence intervals from
+  `fregre.lm()` assume normality.
+- **Phase variability**: if curves are misaligned, FPCs mix amplitude and phase
+  variation. Consider elastic alignment first
+  (see `vignette("articles/elastic-alignment")`).
+
+## References
+
+- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Reiss, P.T. and Ogden, R.T. (2007). Functional Principal Component Regression and Functional Partial Least Squares. *Journal of the American Statistical Association*, 102(479), 984--996.
+- Ferraty, F. and Vieu, P. (2006). *Nonparametric Functional Data Analysis: Theory and Practice*. Springer.
+- Cuevas, A., Febrero, M., and Fraiman, R. (2004). An anova test for functional data. *Computational Statistics & Data Analysis*, 47(1), 111--122.
 
 ## See Also
 

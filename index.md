@@ -14,11 +14,6 @@ output: github_document
 
 **fdars** is a comprehensive R toolkit for functional data analysis powered by a high-performance Rust backend. Treat entire curves, spectra, and trajectories as single observations — then smooth, align, decompose, and analyze them with a consistent, pipe-friendly API.
 
-<p style="margin-top:0.5rem;">
-<a class="btn btn-primary" href="articles/introduction.html" role="button">Get started</a>
-<a class="btn btn-outline-secondary" href="reference/index.html" role="button">Reference</a>
-</p>
-
 ---
 
 ```{=html}
