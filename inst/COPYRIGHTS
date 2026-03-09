@@ -1,5 +1,5 @@
-Authors of the Rust code included in the fdars package
-=======================================================
+Copyright notices for the Rust code included in the fdars package
+=================================================================
 
 The fdars package includes Rust source code from the following crates,
 bundled via cargo vendor for offline CRAN builds.
