@@ -37,6 +37,7 @@ articles:
   - articles/example-andrews-wine-clustering
   - articles/example-andrews-wine-qc
   - articles/example-sonar-tsrvf
+  - articles/example-cross-validation
 - title: Learn
   contents:
   - introduction
@@ -65,6 +66,7 @@ articles:
   - articles/functional-regression
   - articles/functional-classification
   - articles/functional-mixed-models
+  - articles/cross-validation
 - title: Analyze
   contents:
   - articles/tolerance-bands
@@ -238,6 +240,12 @@ reference:
   contents:
   - fclassif
   - fclassif.cv
+
+- title: Cross-Validation
+  contents:
+  - cv.fdata
+  - plot.cv.fdata
+  - print.cv.fdata
 
 - title: Functional Mixed Models
   contents:
