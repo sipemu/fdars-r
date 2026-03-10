@@ -380,6 +380,8 @@ reference:
   - plot.amplitude_modulation
   - plot.lomb_scargle_result
   - plot.matrix_profile_result
+  - plot.peak_detection
+  - plot.peak_timing
   - plot.ssa_result
   - plot.stl_result
 
