@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- NIR spectra (overlapping smooth curves) -->
+  <path d="M15 70 Q30 65, 45 55 Q55 48, 65 50 Q75 52, 85 45 Q95 40, 105 50" stroke="#0072B2" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 75 Q30 70, 45 60 Q55 52, 65 54 Q75 56, 85 48 Q95 43, 105 55" stroke="#0072B2" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 65 Q30 60, 45 50 Q55 44, 65 46 Q75 48, 85 42 Q95 37, 105 47" stroke="#0072B2" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 80 Q30 75, 45 65 Q55 58, 65 60 Q75 62, 85 55 Q95 50, 105 60" stroke="#D55E00" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 60 Q30 55, 45 45 Q55 38, 65 40 Q75 42, 85 36 Q95 32, 105 42" stroke="#D55E00" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Arrow -->
+  <line x1="112" y1="55" x2="126" y2="55" stroke="#333" stroke-width="1.5" opacity="0.4"/>
+  <polygon points="124,51 131,55 124,59" fill="#333" opacity="0.4"/>
+  <!-- Beta(t) coefficient function with highlighted region -->
+  <rect x="133" y="45" width="20" height="40" fill="#E69F00" opacity="0.1" rx="2"/>
+  <path d="M130 70 Q137 72, 142 40 Q148 25, 155 35 Q162 50, 170 55 Q178 58, 185 60" stroke="#0072B2" stroke-width="2" stroke-linecap="round"/>
+  <line x1="130" y1="70" x2="185" y2="70" stroke="#999" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <!-- Response dots (scatter) -->
+  <circle cx="140" cy="95" r="1.5" fill="#0072B2" opacity="0.5"/>
+  <circle cx="150" cy="90" r="1.5" fill="#0072B2" opacity="0.5"/>
+  <circle cx="160" cy="92" r="1.5" fill="#0072B2" opacity="0.5"/>
+  <circle cx="170" cy="88" r="1.5" fill="#0072B2" opacity="0.5"/>
+  <line x1="135" y1="100" x2="180" y2="85" stroke="#D55E00" stroke-width="1" opacity="0.5"/>
+</svg>

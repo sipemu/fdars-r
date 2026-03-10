@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" fill="none">
+  <style>
+    text { font-family: sans-serif; }
+    .title { font-size: 14px; font-weight: bold; fill: #333; }
+    .label { font-size: 11px; fill: #333; }
+    .small { font-size: 9px; fill: #666; }
+    .acc { font-size: 10px; font-weight: bold; }
+    .box { rx: 6; ry: 6; }
+  </style>
+
+  <!-- Title -->
+  <text x="350" y="25" text-anchor="middle" class="title">Validation-First Framework: Three Analysis Paths</text>
+
+  <!-- Phase 1: Elasticity Check -->
+  <rect x="250" y="40" width="200" height="44" class="box" fill="#F0F0F0" stroke="#999" stroke-width="1.5"/>
+  <text x="350" y="58" text-anchor="middle" class="label" font-weight="bold">Phase Elasticity Check</text>
+  <text x="350" y="73" text-anchor="middle" class="small">Phase/Total ratio = 0.31 | Warpings near identity</text>
+
+  <!-- Arrow down to conditioning -->
+  <line x1="350" y1="84" x2="350" y2="104" stroke="#666" stroke-width="1.5"/>
+  <polygon points="346,100 350,108 354,100" fill="#666"/>
+
+  <!-- Phase 2: Signal Conditioning -->
+  <rect x="220" y="108" width="260" height="44" class="box" fill="#F5F5F5" stroke="#999" stroke-width="1.5"/>
+  <text x="350" y="126" text-anchor="middle" class="label" font-weight="bold">Signal Conditioning</text>
+  <text x="350" y="141" text-anchor="middle" class="small">Standardize (scale) + B-spline smooth (25 basis) + Derivatives</text>
+
+  <!-- Three branching arrows -->
+  <line x1="270" y1="152" x2="120" y2="190" stroke="#0072B2" stroke-width="2"/>
+  <polygon points="118,185 116,194 125,190" fill="#0072B2"/>
+
+  <line x1="350" y1="152" x2="350" y2="190" stroke="#56B4E9" stroke-width="2"/>
+  <polygon points="346,186 350,194 354,186" fill="#56B4E9"/>
+
+  <line x1="430" y1="152" x2="580" y2="190" stroke="#D55E00" stroke-width="2"/>
+  <polygon points="575,186 584,190 582,181" fill="#D55E00"/>
+
+  <!-- Path A: Simple -->
+  <rect x="30" y="194" width="180" height="80" class="box" fill="#E8F4FD" stroke="#0072B2" stroke-width="2"/>
+  <text x="120" y="214" text-anchor="middle" class="label" font-weight="bold" fill="#0072B2">Path A: Simple</text>
+  <text x="120" y="232" text-anchor="middle" class="small">Raw (scaled) or Smoothed</text>
+  <text x="120" y="246" text-anchor="middle" class="small">→ FPCA (10 PCs)</text>
+  <text x="120" y="260" text-anchor="middle" class="small">→ kNN / LDA / QDA</text>
+
+  <!-- Path B: Derivative -->
+  <rect x="260" y="194" width="180" height="80" class="box" fill="#EEF7FC" stroke="#56B4E9" stroke-width="2"/>
+  <text x="350" y="214" text-anchor="middle" class="label" font-weight="bold" fill="#56B4E9">Path B: Derivative</text>
+  <text x="350" y="232" text-anchor="middle" class="small">1st or 2nd derivative</text>
+  <text x="350" y="246" text-anchor="middle" class="small">→ FPCA (15 PCs)</text>
+  <text x="350" y="260" text-anchor="middle" class="small">→ kNN / LDA / QDA</text>
+
+  <!-- Path C: Elastic -->
+  <rect x="490" y="194" width="180" height="80" class="box" fill="#FDE8E0" stroke="#D55E00" stroke-width="2"/>
+  <text x="580" y="214" text-anchor="middle" class="label" font-weight="bold" fill="#D55E00">Path C: Elastic</text>
+  <text x="580" y="232" text-anchor="middle" class="small">SRSF → Karcher Mean</text>
+  <text x="580" y="246" text-anchor="middle" class="small">→ TSRVF → Amp + Phase PCA</text>
+  <text x="580" y="260" text-anchor="middle" class="small">→ kNN / LDA / QDA</text>
+
+  <!-- Arrows down to results -->
+  <line x1="120" y1="274" x2="120" y2="310" stroke="#0072B2" stroke-width="1.5"/>
+  <polygon points="116,306 120,314 124,306" fill="#0072B2"/>
+
+  <line x1="350" y1="274" x2="350" y2="310" stroke="#56B4E9" stroke-width="1.5"/>
+  <polygon points="346,306 350,314 354,306" fill="#56B4E9"/>
+
+  <line x1="580" y1="274" x2="580" y2="310" stroke="#D55E00" stroke-width="1.5"/>
+  <polygon points="576,306 580,314 584,306" fill="#D55E00"/>
+
+  <!-- Results boxes -->
+  <rect x="45" y="314" width="150" height="40" class="box" fill="#0072B2" stroke="none"/>
+  <text x="120" y="332" text-anchor="middle" class="acc" fill="white">Smoothed + kNN</text>
+  <text x="120" y="346" text-anchor="middle" class="acc" fill="#FFD700">87.0% ★ BEST</text>
+
+  <rect x="275" y="314" width="150" height="40" class="box" fill="#56B4E9" stroke="none"/>
+  <text x="350" y="332" text-anchor="middle" class="acc" fill="white">D1 + kNN</text>
+  <text x="350" y="346" text-anchor="middle" class="acc" fill="white">77.7%</text>
+
+  <rect x="505" y="314" width="150" height="40" class="box" fill="#D55E00" stroke="none"/>
+  <text x="580" y="332" text-anchor="middle" class="acc" fill="white">Full elastic + LDA</text>
+  <text x="580" y="346" text-anchor="middle" class="acc" fill="white">66.2%</text>
+
+  <!-- Bottom annotation -->
+  <text x="350" y="380" text-anchor="middle" class="small">Phase-rigid data: elastic alignment distorts the physically meaningful frequency axis → accuracy drops 20+ points</text>
+</svg>

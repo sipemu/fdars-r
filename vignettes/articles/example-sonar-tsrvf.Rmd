@@ -45,6 +45,10 @@ library(patchwork)
 theme_set(theme_minimal())
 ```
 
+```{=html}
+<img src="../reference/figures/sonar-validation-framework.svg" alt="Validation-First Framework: Three Analysis Paths" style="width:100%; max-width:700px;">
+```
+
 ## 1. Data Preparation
 
 The Sonar dataset contains 208 observations: 111 mines (M) and 97 rocks (R).

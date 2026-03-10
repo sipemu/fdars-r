@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- 8-year annual temperature cycles with growing amplitude + warming trend -->
+  <!-- Year 1-2 (smaller amplitude) -->
+  <path d="M15 55 Q22 30, 35 35 Q42 55, 48 58" stroke="#4682B4" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <path d="M48 58 Q55 28, 68 33 Q75 55, 81 57" stroke="#4682B4" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <!-- Year 3-4 (medium amplitude) -->
+  <path d="M81 57 Q88 25, 101 30 Q108 54, 114 55" stroke="#4682B4" stroke-width="1.5" fill="none" opacity="0.8"/>
+  <path d="M114 55 Q121 22, 134 27 Q141 52, 147 53" stroke="#4682B4" stroke-width="1.5" fill="none" opacity="0.8"/>
+  <!-- Year 5-8 (larger amplitude, shifted up by trend) -->
+  <path d="M147 53 Q154 18, 167 23 Q174 50, 180 50" stroke="#4682B4" stroke-width="1.5" fill="none" opacity="0.9"/>
+  <path d="M180 50 Q185 15, 190 20" stroke="#4682B4" stroke-width="1.5" fill="none" opacity="0.9"/>
+  <!-- Warming trend line (upward) -->
+  <line x1="15" y1="52" x2="190" y2="42" stroke="#D55E00" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+  <!-- Amplitude annotation on year 6 -->
+  <line x1="160" y1="20" x2="160" y2="78" stroke="#E69F00" stroke-width="1" opacity="0.6"/>
+  <polygon points="160,20 157,26 163,26" fill="#E69F00" opacity="0.6"/>
+  <polygon points="160,78 157,72 163,72" fill="#E69F00" opacity="0.6"/>
+  <text x="168" y="50" font-size="6" fill="#E69F00" font-family="sans-serif">A↑</text>
+  <!-- Axis -->
+  <line x1="15" y1="95" x2="190" y2="95" stroke="#ddd" stroke-width="0.5"/>
+  <!-- Year labels -->
+  <text x="32" y="105" font-size="4.5" fill="#888" font-family="sans-serif" text-anchor="middle">Yr 1</text>
+  <text x="65" y="105" font-size="4.5" fill="#888" font-family="sans-serif" text-anchor="middle">Yr 2</text>
+  <text x="98" y="105" font-size="4.5" fill="#888" font-family="sans-serif" text-anchor="middle">Yr 3</text>
+  <text x="131" y="105" font-size="4.5" fill="#888" font-family="sans-serif" text-anchor="middle">Yr 5</text>
+  <text x="170" y="105" font-size="4.5" fill="#888" font-family="sans-serif" text-anchor="middle">Yr 8</text>
+</svg>
