@@ -7,7 +7,7 @@
 fclassif(
   fdataobj,
   y,
-  method = c("lda", "qda", "knn", "kernel", "dd"),
+  method = c("lda", "qda", "knn", "kernel", "dd", "svm"),
   covariates = NULL,
   ncomp = 3,
   ...
@@ -18,17 +18,22 @@ fclassif(
 
 \item{y}{Integer vector of class labels (1-indexed).}
 
-\item{method}{Classification method: "lda", "qda", "knn", "kernel", or "dd".}
+\item{method}{Classification method: "lda", "qda", "knn", "kernel", "dd",
+or "svm".}
 
 \item{covariates}{Optional matrix of scalar covariates.}
 
-\item{ncomp}{Number of FPC components (default 3). Used by lda, qda, knn.}
+\item{ncomp}{Number of FPC components (default 3). Used by lda, qda, knn, svm.}
 
 \item{...}{Additional arguments:
 \describe{
 \item{k}{Number of neighbors for kNN (default 5).}
 \item{h.func}{Bandwidth for functional kernel (default auto).}
 \item{h.scalar}{Bandwidth for scalar kernel (default auto).}
+\item{kernel}{SVM kernel type: "radial" (default), "linear", "polynomial",
+"sigmoid".}
+\item{cost}{SVM cost parameter (default 1).}
+\item{gamma}{SVM kernel parameter (default 1/ncomp).}
 }}
 }
 \value{
@@ -46,5 +51,5 @@ Functional Classification
 }
 \details{
 Classifies functional data using one of several methods: LDA, QDA, kNN,
-kernel, or DD-plot (depth-vs-depth).
+kernel, DD-plot (depth-vs-depth), or SVM (support vector machine).
 }

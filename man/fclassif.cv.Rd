@@ -11,7 +11,8 @@ fclassif.cv(
   covariates = NULL,
   ncomp = 3,
   nfold = 10,
-  seed = NULL
+  seed = NULL,
+  ...
 )
 }
 \arguments{
@@ -28,6 +29,14 @@ fclassif.cv(
 \item{nfold}{Number of CV folds (default 10).}
 
 \item{seed}{Random seed for fold assignment.}
+
+\item{...}{Additional arguments passed to the classifier. For SVM:
+\describe{
+\item{kernel}{SVM kernel: "radial" (default), "linear", "polynomial",
+"sigmoid".}
+\item{cost}{SVM cost parameter (default 1).}
+\item{gamma}{SVM kernel parameter (default 1/ncomp).}
+}}
 }
 \value{
 An object of class 'fclassif.cv' with components:

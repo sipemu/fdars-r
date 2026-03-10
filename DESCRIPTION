@@ -28,6 +28,7 @@ Suggests:
     fda.usc,
     fda,
     fdasrvf,
+    e1071,
     knitr,
     rmarkdown,
     dplyr,

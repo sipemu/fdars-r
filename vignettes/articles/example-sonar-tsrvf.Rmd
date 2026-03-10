@@ -33,7 +33,7 @@ alignment helps or hurts classification.
 **Key finding:** The phase/total variance ratio suggests moderate phase
 variability, but the warping functions reveal this is an artifact — sonar
 frequency bands are fixed physical measurements without genuine timing
-shifts. Column standardization + smoothed kNN at 10 FPCs achieves **87% CV
+shifts. Column standardization + kNN or SVM at 10 FPCs achieves **~87% CV
 accuracy**, matching the original neural network benchmark. The elastic
 pipeline drops to ~66%, demonstrating that elastic alignment can *degrade*
 performance on phase-rigid data.
@@ -243,7 +243,7 @@ dimensions, favoring kNN over LDA.
 ## 5. Competitive Ablation Study
 
 Three parallel paths, each with the best `ncomp` selected from
-{5, 8, 10, 15, 20}, evaluated with LDA, QDA, and kNN via 10-fold CV.
+{5, 8, 10, 15, 20}, evaluated with LDA, QDA, kNN, and SVM via 10-fold CV.
 
 - **Path A (Simple):** Standardized raw or smoothed spectra
 - **Path B (Derivative):** 1st and 2nd derivatives of smoothed spectra
@@ -263,7 +263,7 @@ feature_sets <- list(
   "Full elastic"     = fd_combined
 )
 
-methods <- c("lda", "qda", "knn")
+methods <- c("lda", "qda", "knn", "svm")
 ncomp_grid <- c(5, 8, 10, 15, 20)
 
 # For each feature × method: find the best ncomp
@@ -313,7 +313,7 @@ knitr::kable(ablation[order(-ablation$CV_Accuracy), ],
 ggplot(ablation, aes(x = Features, y = CV_Accuracy, fill = Method)) +
   geom_col(position = "dodge", width = 0.6) +
   scale_fill_manual(values = c("LDA" = "#0072B2", "QDA" = "#56B4E9",
-                                "KNN" = "#D55E00")) +
+                                "KNN" = "#D55E00", "SVM" = "#009E73")) +
   geom_hline(yintercept = 0.827, linetype = "dashed", color = "grey40",
              linewidth = 0.5) +
   annotate("text", x = 0.8, y = 0.835, label = "Gorman & Sejnowski\nk-NN baseline",
@@ -425,8 +425,9 @@ depending on the measurement domain.**
   gain than any method change.
 
 - **Match the method to the data structure.** When class separation is spread
-  across many FPCs, nonparametric classifiers (kNN) outperform parametric
-  ones (LDA, QDA).
+  across many FPCs, nonparametric classifiers (kNN, SVM) outperform parametric
+  ones (LDA, QDA). SVM with an RBF kernel performs comparably to kNN on these
+  FPC features.
 
 - **Negative results are informative.** The 20+ percentage point gap between
   Euclidean and elastic analysis on this dataset clearly demonstrates the
@@ -436,8 +437,8 @@ depending on the measurement domain.**
 
 - `vignette("articles/tsrvf")` — TSRVF theory (where it *does* work)
 - `vignette("articles/elastic-alignment")` — elastic alignment and Karcher mean
-- `vignette("articles/functional-classification")` — all five classification
-  methods (LDA, QDA, kNN, kernel, DD)
+- `vignette("articles/functional-classification")` — all six classification
+  methods (LDA, QDA, kNN, SVM, kernel, DD)
 - `vignette("articles/example-tecator-regression")` — Tecator NIR spectra:
   another spectral dataset where derivatives improve regression
 
