@@ -321,7 +321,7 @@ ggplot(ablation, aes(x = Features, y = CV_Accuracy, fill = Method)) +
   labs(title = "Classification Accuracy by Feature Representation",
        subtitle = "Best ncomp selected per feature × method combination",
        x = "", y = "10-Fold CV Accuracy") +
-  ylim(0.5, 1) +
+  coord_cartesian(ylim = c(0.5, 1)) +
   theme(axis.text.x = element_text(angle = 30, hjust = 1))
 ```
 
@@ -336,11 +336,10 @@ ggplot(path_best, aes(x = reorder(Path, CV_Accuracy), y = CV_Accuracy,
   scale_fill_manual(values = c("A: Simple" = "#0072B2",
                                 "B: Derivative" = "#56B4E9",
                                 "C: Elastic" = "#D55E00")) +
-  coord_flip() +
+  coord_flip(ylim = c(0.5, 1)) +
   labs(title = "Best Accuracy by Analysis Path",
        x = "", y = "Best 10-Fold CV Accuracy") +
-  guides(fill = "none") +
-  ylim(0.5, 1)
+  guides(fill = "none")
 ```
 
 ## 6. Best Model Deep Dive
