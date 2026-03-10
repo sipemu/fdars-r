@@ -16,7 +16,7 @@ navbar:
       href: reference/index.html
     learn:
       text: Learn
-      href: articles/learn.html
+      href: index.html
     examples:
       text: Examples
       href: articles/examples.html
@@ -24,15 +24,10 @@ navbar:
 articles:
 - title: Navigation
   contents:
-  - articles/learn
   - articles/examples
 - title: Examples
   contents:
   - articles/example-berkeley-growth
-  - articles/example-tecator-regression
-  - articles/example-cross-validation
-  - articles/example-canadian-weather
-  - articles/example-canadian-seasonal
   - articles/example-andrews-wine-intro
   - articles/example-andrews-wine
   - articles/example-andrews-wine-clustering
@@ -66,8 +61,6 @@ articles:
   - articles/functional-regression
   - articles/functional-classification
   - articles/functional-mixed-models
-  - articles/cross-validation
-  - articles/example-cross-validation
 - title: Analyze
   contents:
   - articles/tolerance-bands
@@ -213,7 +206,6 @@ reference:
 
 - title: Regression
   contents:
-  - cv.fdata
   - fregre.basis
   - fregre.basis.cv
   - fregre.lm
