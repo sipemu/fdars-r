@@ -44,3 +44,12 @@ QC](../reference/figures/card-example-andrews-wine-qc.svg)
 Andrews Wine: Quality Control
 
 Boxplot Monitoring Bands
+
+[](https://sipemu.github.io/fdars-r/articles/example-sonar-tsrvf.md)
+
+![Sonar TSRVF
+Classification](../reference/figures/card-example-sonar-tsrvf.svg)
+
+Sonar: Mine vs Rock via Elastic TSRVF
+
+TSRVF Alignment Classification

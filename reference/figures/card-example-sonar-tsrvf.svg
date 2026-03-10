@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Left: overlapping sonar waveforms -->
+  <!-- Mine curves (blue) -->
+  <path d="M10 65 Q20 50, 30 45 Q40 40, 50 55 Q60 65, 70 50 Q80 40, 90 55" stroke="#0072B2" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 60 Q20 48, 30 42 Q40 38, 50 50 Q60 60, 70 48 Q80 38, 90 50" stroke="#0072B2" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 70 Q20 55, 30 48 Q40 44, 50 58 Q60 68, 70 54 Q80 44, 90 58" stroke="#0072B2" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <!-- Rock curves (orange) -->
+  <path d="M10 72 Q20 62, 30 58 Q40 65, 50 70 Q60 58, 70 62 Q80 68, 90 60" stroke="#D55E00" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 75 Q20 65, 30 60 Q40 68, 50 72 Q60 62, 70 65 Q80 70, 90 63" stroke="#D55E00" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 68 Q20 58, 30 55 Q40 62, 50 68 Q60 56, 70 60 Q80 65, 90 58" stroke="#D55E00" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <!-- Arrow -->
+  <line x1="97" y1="60" x2="113" y2="60" stroke="#333" stroke-width="1.5" opacity="0.4"/>
+  <polygon points="111,56 118,60 111,64" fill="#333" opacity="0.4"/>
+  <!-- Right: tangent-space scatter with two clusters -->
+  <!-- Mine cluster (blue dots, upper-left) -->
+  <circle cx="135" cy="42" r="2" fill="#0072B2" opacity="0.5"/>
+  <circle cx="140" cy="38" r="2" fill="#0072B2" opacity="0.5"/>
+  <circle cx="132" cy="45" r="2" fill="#0072B2" opacity="0.5"/>
+  <circle cx="138" cy="35" r="2" fill="#0072B2" opacity="0.5"/>
+  <circle cx="143" cy="40" r="2" fill="#0072B2" opacity="0.5"/>
+  <circle cx="130" cy="40" r="2" fill="#0072B2" opacity="0.5"/>
+  <circle cx="137" cy="48" r="2" fill="#0072B2" opacity="0.5"/>
+  <!-- Rock cluster (orange dots, lower-right) -->
+  <circle cx="160" cy="72" r="2" fill="#D55E00" opacity="0.5"/>
+  <circle cx="165" cy="68" r="2" fill="#D55E00" opacity="0.5"/>
+  <circle cx="158" cy="75" r="2" fill="#D55E00" opacity="0.5"/>
+  <circle cx="170" cy="70" r="2" fill="#D55E00" opacity="0.5"/>
+  <circle cx="163" cy="78" r="2" fill="#D55E00" opacity="0.5"/>
+  <circle cx="167" cy="65" r="2" fill="#D55E00" opacity="0.5"/>
+  <circle cx="155" cy="70" r="2" fill="#D55E00" opacity="0.5"/>
+  <!-- Dashed decision boundary -->
+  <line x1="122" y1="85" x2="180" y2="25" stroke="#666" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+</svg>

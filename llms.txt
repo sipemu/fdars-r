@@ -893,6 +893,8 @@ Covariance Functions
   Importance](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-clustering.md):
 - [Andrews Wine: Quality
   Control](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-qc.md):
+- [Sonar: Mine vs Rock Classification via Elastic
+  TSRVF](https://sipemu.github.io/fdars-r/articles/example-sonar-tsrvf.md):
 
 ### Learn
 
