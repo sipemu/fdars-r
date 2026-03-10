@@ -16,7 +16,7 @@ navbar:
       href: reference/index.html
     learn:
       text: Learn
-      href: index.html
+      href: articles/learn.html
     examples:
       text: Examples
       href: articles/examples.html
@@ -24,6 +24,7 @@ navbar:
 articles:
 - title: Navigation
   contents:
+  - articles/learn
   - articles/examples
 - title: Examples
   contents:

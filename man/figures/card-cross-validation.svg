@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- 5-fold blocks across the top -->
+  <rect x="12" y="10" width="32" height="14" rx="2" fill="#4A90D9" opacity="0.25"/>
+  <rect x="48" y="10" width="32" height="14" rx="2" fill="#4A90D9" opacity="0.25"/>
+  <rect x="84" y="10" width="32" height="14" rx="2" fill="#D55E00" opacity="0.35"/>
+  <rect x="120" y="10" width="32" height="14" rx="2" fill="#4A90D9" opacity="0.25"/>
+  <rect x="156" y="10" width="32" height="14" rx="2" fill="#4A90D9" opacity="0.25"/>
+  <!-- Fold labels -->
+  <text x="28" y="20" text-anchor="middle" font-size="6" fill="#4A90D9" font-family="sans-serif" font-weight="bold">train</text>
+  <text x="64" y="20" text-anchor="middle" font-size="6" fill="#4A90D9" font-family="sans-serif" font-weight="bold">train</text>
+  <text x="100" y="20" text-anchor="middle" font-size="6" fill="#D55E00" font-family="sans-serif" font-weight="bold">test</text>
+  <text x="136" y="20" text-anchor="middle" font-size="6" fill="#4A90D9" font-family="sans-serif" font-weight="bold">train</text>
+  <text x="172" y="20" text-anchor="middle" font-size="6" fill="#4A90D9" font-family="sans-serif" font-weight="bold">train</text>
+  <!-- Arrow from folds to scatter -->
+  <path d="M100 28 L100 38" stroke="#666" stroke-width="1" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+    <path d="M0,0 L6,2 L0,4" fill="#666"/></marker></defs>
+  <!-- Observed vs Predicted scatter -->
+  <line x1="30" y1="105" x2="170" y2="105" stroke="#ccc" stroke-width="0.8"/>
+  <line x1="30" y1="105" x2="30" y2="42" stroke="#ccc" stroke-width="0.8"/>
+  <!-- Blue confidence band around 1:1 line -->
+  <path d="M30 105 L170 42" stroke="none"/>
+  <polygon points="35,105 170,47 170,37 35,95" fill="steelblue" opacity="0.12"/>
+  <polygon points="33,105 170,50 170,34 33,89" fill="#B0C4DE" opacity="0.1"/>
+  <!-- 1:1 line -->
+  <line x1="30" y1="105" x2="170" y2="42" stroke="navy" stroke-width="1.2" opacity="0.5"/>
+  <!-- Scatter points (OOF predictions) -->
+  <circle cx="42" cy="98" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="50" cy="92" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="58" cy="88" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="65" cy="82" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="75" cy="78" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="82" cy="72" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="90" cy="70" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="100" cy="68" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="108" cy="62" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="118" cy="58" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="128" cy="55" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="138" cy="50" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="148" cy="48" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="160" cy="44" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <!-- Slight noise on some points -->
+  <circle cx="55" cy="84" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="95" cy="74" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="125" cy="60" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <circle cx="145" cy="52" r="2.5" fill="#0072B2" opacity="0.55"/>
+  <!-- Axis labels -->
+  <text x="100" y="114" text-anchor="middle" font-size="6" fill="#666" font-family="sans-serif">Observed</text>
+  <text x="18" y="72" text-anchor="middle" font-size="6" fill="#666" font-family="sans-serif" transform="rotate(-90 18 72)">Predicted</text>
+</svg>
