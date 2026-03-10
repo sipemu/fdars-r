@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrowD2" markerWidth="6" markerHeight="8" refX="3" refY="7" orient="auto">
+      <path d="M0,0 L3,8 L6,0" fill="#888"/>
+    </marker>
+    <!-- Gradient for y values -->
+    <linearGradient id="yGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2166AC"/>
+      <stop offset="50%" stop-color="#F7F7F7"/>
+      <stop offset="100%" stop-color="#B2182B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===== LEFT: RANDOM FOLDS ===== -->
+  <text x="150" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="#666">Random Folds</text>
+
+  <!-- Y-axis label -->
+  <text x="14" y="30" font-size="9" fill="#888">low y</text>
+  <text x="14" y="130" font-size="9" fill="#888">high y</text>
+  <line x1="30" y1="34" x2="30" y2="128" stroke="#ccc" stroke-width="0.8"/>
+  <path d="M30 34 L27 40 M30 34 L33 40" stroke="#ccc" stroke-width="0.8"/>
+  <path d="M30 128 L27 122 M30 128 L33 122" stroke="#ccc" stroke-width="0.8"/>
+
+  <!-- 20 data points, sorted by y, randomly assigned to 4 folds -->
+  <!-- Row 1-5: low y (blue) -->
+  <circle cx="60" cy="38" r="5" fill="#2166AC" opacity="0.8"/><text x="60" y="41" text-anchor="middle" font-size="6" fill="white" font-weight="bold">1</text>
+  <circle cx="80" cy="38" r="5" fill="#2166AC" opacity="0.8"/><text x="80" y="41" text-anchor="middle" font-size="6" fill="white" font-weight="bold">1</text>
+  <circle cx="100" cy="38" r="5" fill="#2166AC" opacity="0.8"/><text x="100" y="41" text-anchor="middle" font-size="6" fill="white" font-weight="bold">3</text>
+  <circle cx="120" cy="38" r="5" fill="#2166AC" opacity="0.8"/><text x="120" y="41" text-anchor="middle" font-size="6" fill="white" font-weight="bold">3</text>
+  <circle cx="140" cy="38" r="5" fill="#2166AC" opacity="0.8"/><text x="140" y="41" text-anchor="middle" font-size="6" fill="white" font-weight="bold">4</text>
+  <!-- Row 6-10: low-mid y (light blue) -->
+  <circle cx="60" cy="58" r="5" fill="#67A9CF" opacity="0.8"/><text x="60" y="61" text-anchor="middle" font-size="6" fill="white" font-weight="bold">2</text>
+  <circle cx="80" cy="58" r="5" fill="#67A9CF" opacity="0.8"/><text x="80" y="61" text-anchor="middle" font-size="6" fill="white" font-weight="bold">2</text>
+  <circle cx="100" cy="58" r="5" fill="#67A9CF" opacity="0.8"/><text x="100" y="61" text-anchor="middle" font-size="6" fill="white" font-weight="bold">4</text>
+  <circle cx="120" cy="58" r="5" fill="#67A9CF" opacity="0.8"/><text x="120" y="61" text-anchor="middle" font-size="6" fill="white" font-weight="bold">1</text>
+  <circle cx="140" cy="58" r="5" fill="#67A9CF" opacity="0.8"/><text x="140" y="61" text-anchor="middle" font-size="6" fill="white" font-weight="bold">3</text>
+  <!-- Row 11-15: mid-high y (light red) -->
+  <circle cx="60" cy="78" r="5" fill="#EF8A62" opacity="0.8"/><text x="60" y="81" text-anchor="middle" font-size="6" fill="white" font-weight="bold">4</text>
+  <circle cx="80" cy="78" r="5" fill="#EF8A62" opacity="0.8"/><text x="80" y="81" text-anchor="middle" font-size="6" fill="white" font-weight="bold">4</text>
+  <circle cx="100" cy="78" r="5" fill="#EF8A62" opacity="0.8"/><text x="100" y="81" text-anchor="middle" font-size="6" fill="white" font-weight="bold">2</text>
+  <circle cx="120" cy="78" r="5" fill="#EF8A62" opacity="0.8"/><text x="120" y="81" text-anchor="middle" font-size="6" fill="white" font-weight="bold">1</text>
+  <circle cx="140" cy="78" r="5" fill="#EF8A62" opacity="0.8"/><text x="140" y="81" text-anchor="middle" font-size="6" fill="white" font-weight="bold">2</text>
+  <!-- Row 16-20: high y (red) -->
+  <circle cx="60" cy="98" r="5" fill="#B2182B" opacity="0.8"/><text x="60" y="101" text-anchor="middle" font-size="6" fill="white" font-weight="bold">3</text>
+  <circle cx="80" cy="98" r="5" fill="#B2182B" opacity="0.8"/><text x="80" y="101" text-anchor="middle" font-size="6" fill="white" font-weight="bold">3</text>
+  <circle cx="100" cy="98" r="5" fill="#B2182B" opacity="0.8"/><text x="100" y="101" text-anchor="middle" font-size="6" fill="white" font-weight="bold">4</text>
+  <circle cx="120" cy="98" r="5" fill="#B2182B" opacity="0.8"/><text x="120" y="101" text-anchor="middle" font-size="6" fill="white" font-weight="bold">1</text>
+  <circle cx="140" cy="98" r="5" fill="#B2182B" opacity="0.8"/><text x="140" y="101" text-anchor="middle" font-size="6" fill="white" font-weight="bold">2</text>
+
+  <!-- Arrows down -->
+  <line x1="100" y1="112" x2="100" y2="132" stroke="#888" stroke-width="1" marker-end="url(#arrowD2)"/>
+
+  <!-- Resulting random folds: unbalanced stacked bars -->
+  <text x="150" y="148" text-anchor="middle" font-size="10" fill="#888">Resulting fold distributions</text>
+
+  <!-- Fold 1: 2 blue, 1 lightblue, 1 lightred, 1 red = skewed low -->
+  <text x="52" y="168" text-anchor="middle" font-size="8" fill="#555">Fold 1</text>
+  <rect x="40" y="172" width="24" height="10" fill="#2166AC" opacity="0.8"/>
+  <rect x="40" y="182" width="24" height="10" fill="#2166AC" opacity="0.8"/>
+  <rect x="40" y="192" width="24" height="5" fill="#67A9CF" opacity="0.8"/>
+  <rect x="40" y="197" width="24" height="5" fill="#EF8A62" opacity="0.8"/>
+  <rect x="40" y="202" width="24" height="5" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Fold 2: 0 blue, 2 lightblue, 2 lightred, 1 red = skewed high -->
+  <text x="92" y="168" text-anchor="middle" font-size="8" fill="#555">Fold 2</text>
+  <rect x="80" y="182" width="24" height="10" fill="#67A9CF" opacity="0.8"/>
+  <rect x="80" y="192" width="24" height="5" fill="#EF8A62" opacity="0.8"/>
+  <rect x="80" y="197" width="24" height="5" fill="#EF8A62" opacity="0.8"/>
+  <rect x="80" y="202" width="24" height="5" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Fold 3: 2 blue, 1 lightblue, 0 lightred, 2 red = bimodal -->
+  <text x="132" y="168" text-anchor="middle" font-size="8" fill="#555">Fold 3</text>
+  <rect x="120" y="172" width="24" height="10" fill="#2166AC" opacity="0.8"/>
+  <rect x="120" y="182" width="24" height="10" fill="#2166AC" opacity="0.8"/>
+  <rect x="120" y="192" width="24" height="5" fill="#67A9CF" opacity="0.8"/>
+  <rect x="120" y="197" width="24" height="10" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Fold 4: 1 blue, 1 lightblue, 2 lightred, 1 red = skewed high -->
+  <text x="172" y="168" text-anchor="middle" font-size="8" fill="#555">Fold 4</text>
+  <rect x="160" y="177" width="24" height="5" fill="#2166AC" opacity="0.8"/>
+  <rect x="160" y="182" width="24" height="5" fill="#67A9CF" opacity="0.8"/>
+  <rect x="160" y="187" width="24" height="10" fill="#EF8A62" opacity="0.8"/>
+  <rect x="160" y="197" width="24" height="10" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Warning icon -->
+  <text x="150" y="226" text-anchor="middle" font-size="9" fill="#D55E00" font-weight="bold">Uneven y distributions per fold</text>
+
+  <!-- ===== DIVIDER ===== -->
+  <line x1="300" y1="14" x2="300" y2="230" stroke="#ddd" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- ===== RIGHT: STRATIFIED FOLDS ===== -->
+  <text x="450" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">Stratified Folds</text>
+
+  <!-- Step 1: Bin by quantile -->
+  <text x="450" y="36" text-anchor="middle" font-size="9" fill="#888">Step 1: Bin y into quantile groups</text>
+
+  <!-- Quantile bins with brackets -->
+  <!-- Bin 1 (low, blue) -->
+  <rect x="320" y="44" width="260" height="18" rx="2" fill="#2166AC" opacity="0.08" stroke="#2166AC" stroke-width="0.8"/>
+  <text x="326" y="56" font-size="8" fill="#2166AC" font-weight="bold">Q1</text>
+  <circle cx="360" cy="53" r="5" fill="#2166AC" opacity="0.8"/>
+  <circle cx="380" cy="53" r="5" fill="#2166AC" opacity="0.8"/>
+  <circle cx="400" cy="53" r="5" fill="#2166AC" opacity="0.8"/>
+  <circle cx="420" cy="53" r="5" fill="#2166AC" opacity="0.8"/>
+  <circle cx="440" cy="53" r="5" fill="#2166AC" opacity="0.8"/>
+
+  <!-- Bin 2 (light blue) -->
+  <rect x="320" y="66" width="260" height="18" rx="2" fill="#67A9CF" opacity="0.08" stroke="#67A9CF" stroke-width="0.8"/>
+  <text x="326" y="78" font-size="8" fill="#67A9CF" font-weight="bold">Q2</text>
+  <circle cx="360" cy="75" r="5" fill="#67A9CF" opacity="0.8"/>
+  <circle cx="380" cy="75" r="5" fill="#67A9CF" opacity="0.8"/>
+  <circle cx="400" cy="75" r="5" fill="#67A9CF" opacity="0.8"/>
+  <circle cx="420" cy="75" r="5" fill="#67A9CF" opacity="0.8"/>
+  <circle cx="440" cy="75" r="5" fill="#67A9CF" opacity="0.8"/>
+
+  <!-- Bin 3 (light red) -->
+  <rect x="320" y="88" width="260" height="18" rx="2" fill="#EF8A62" opacity="0.08" stroke="#EF8A62" stroke-width="0.8"/>
+  <text x="326" y="100" font-size="8" fill="#EF8A62" font-weight="bold">Q3</text>
+  <circle cx="360" cy="97" r="5" fill="#EF8A62" opacity="0.8"/>
+  <circle cx="380" cy="97" r="5" fill="#EF8A62" opacity="0.8"/>
+  <circle cx="400" cy="97" r="5" fill="#EF8A62" opacity="0.8"/>
+  <circle cx="420" cy="97" r="5" fill="#EF8A62" opacity="0.8"/>
+  <circle cx="440" cy="97" r="5" fill="#EF8A62" opacity="0.8"/>
+
+  <!-- Bin 4 (red) -->
+  <rect x="320" y="110" width="260" height="18" rx="2" fill="#B2182B" opacity="0.08" stroke="#B2182B" stroke-width="0.8"/>
+  <text x="326" y="122" font-size="8" fill="#B2182B" font-weight="bold">Q4</text>
+  <circle cx="360" cy="119" r="5" fill="#B2182B" opacity="0.8"/>
+  <circle cx="380" cy="119" r="5" fill="#B2182B" opacity="0.8"/>
+  <circle cx="400" cy="119" r="5" fill="#B2182B" opacity="0.8"/>
+  <circle cx="420" cy="119" r="5" fill="#B2182B" opacity="0.8"/>
+  <circle cx="440" cy="119" r="5" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Step 2 label -->
+  <text x="450" y="142" text-anchor="middle" font-size="9" fill="#888">Step 2: Sample within each bin to folds</text>
+
+  <!-- Arrows: from bins to fold assignments -->
+  <!-- Thin lines from each bin distributing 1 per fold -->
+  <line x1="360" y1="53" x2="352" y2="160" stroke="#2166AC" stroke-width="0.5" opacity="0.4"/>
+  <line x1="380" y1="53" x2="392" y2="160" stroke="#2166AC" stroke-width="0.5" opacity="0.4"/>
+  <line x1="400" y1="53" x2="432" y2="160" stroke="#2166AC" stroke-width="0.5" opacity="0.4"/>
+  <line x1="420" y1="53" x2="472" y2="160" stroke="#2166AC" stroke-width="0.5" opacity="0.4"/>
+  <line x1="440" y1="53" x2="512" y2="160" stroke="#2166AC" stroke-width="0.5" opacity="0.4"/>
+
+  <line x1="360" y1="75" x2="352" y2="160" stroke="#67A9CF" stroke-width="0.5" opacity="0.4"/>
+  <line x1="380" y1="75" x2="392" y2="160" stroke="#67A9CF" stroke-width="0.5" opacity="0.4"/>
+  <line x1="400" y1="75" x2="432" y2="160" stroke="#67A9CF" stroke-width="0.5" opacity="0.4"/>
+  <line x1="420" y1="75" x2="472" y2="160" stroke="#67A9CF" stroke-width="0.5" opacity="0.4"/>
+  <line x1="440" y1="75" x2="512" y2="160" stroke="#67A9CF" stroke-width="0.5" opacity="0.4"/>
+
+  <line x1="360" y1="97" x2="352" y2="160" stroke="#EF8A62" stroke-width="0.5" opacity="0.4"/>
+  <line x1="380" y1="97" x2="392" y2="160" stroke="#EF8A62" stroke-width="0.5" opacity="0.4"/>
+  <line x1="400" y1="97" x2="432" y2="160" stroke="#EF8A62" stroke-width="0.5" opacity="0.4"/>
+  <line x1="420" y1="97" x2="472" y2="160" stroke="#EF8A62" stroke-width="0.5" opacity="0.4"/>
+  <line x1="440" y1="97" x2="512" y2="160" stroke="#EF8A62" stroke-width="0.5" opacity="0.4"/>
+
+  <line x1="360" y1="119" x2="352" y2="160" stroke="#B2182B" stroke-width="0.5" opacity="0.4"/>
+  <line x1="380" y1="119" x2="392" y2="160" stroke="#B2182B" stroke-width="0.5" opacity="0.4"/>
+  <line x1="400" y1="119" x2="432" y2="160" stroke="#B2182B" stroke-width="0.5" opacity="0.4"/>
+  <line x1="420" y1="119" x2="472" y2="160" stroke="#B2182B" stroke-width="0.5" opacity="0.4"/>
+  <line x1="440" y1="119" x2="512" y2="160" stroke="#B2182B" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- Resulting stratified folds: balanced stacked bars -->
+  <text x="450" y="172" text-anchor="middle" font-size="10" fill="#2C5F8A">Each fold has the same y distribution</text>
+
+  <!-- Fold 1: 1 of each color -->
+  <text x="352" y="188" text-anchor="middle" font-size="8" fill="#555">Fold 1</text>
+  <rect x="340" y="192" width="24" height="8" fill="#2166AC" opacity="0.8"/>
+  <rect x="340" y="200" width="24" height="8" fill="#67A9CF" opacity="0.8"/>
+  <rect x="340" y="208" width="24" height="8" fill="#EF8A62" opacity="0.8"/>
+  <rect x="340" y="216" width="24" height="8" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Fold 2 -->
+  <text x="392" y="188" text-anchor="middle" font-size="8" fill="#555">Fold 2</text>
+  <rect x="380" y="192" width="24" height="8" fill="#2166AC" opacity="0.8"/>
+  <rect x="380" y="200" width="24" height="8" fill="#67A9CF" opacity="0.8"/>
+  <rect x="380" y="208" width="24" height="8" fill="#EF8A62" opacity="0.8"/>
+  <rect x="380" y="216" width="24" height="8" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Fold 3 -->
+  <text x="432" y="188" text-anchor="middle" font-size="8" fill="#555">Fold 3</text>
+  <rect x="420" y="192" width="24" height="8" fill="#2166AC" opacity="0.8"/>
+  <rect x="420" y="200" width="24" height="8" fill="#67A9CF" opacity="0.8"/>
+  <rect x="420" y="208" width="24" height="8" fill="#EF8A62" opacity="0.8"/>
+  <rect x="420" y="216" width="24" height="8" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Fold 4 -->
+  <text x="472" y="188" text-anchor="middle" font-size="8" fill="#555">Fold 4</text>
+  <rect x="460" y="192" width="24" height="8" fill="#2166AC" opacity="0.8"/>
+  <rect x="460" y="200" width="24" height="8" fill="#67A9CF" opacity="0.8"/>
+  <rect x="460" y="208" width="24" height="8" fill="#EF8A62" opacity="0.8"/>
+  <rect x="460" y="216" width="24" height="8" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Fold 5 -->
+  <text x="512" y="188" text-anchor="middle" font-size="8" fill="#555">Fold 5</text>
+  <rect x="500" y="192" width="24" height="8" fill="#2166AC" opacity="0.8"/>
+  <rect x="500" y="200" width="24" height="8" fill="#67A9CF" opacity="0.8"/>
+  <rect x="500" y="208" width="24" height="8" fill="#EF8A62" opacity="0.8"/>
+  <rect x="500" y="216" width="24" height="8" fill="#B2182B" opacity="0.8"/>
+
+  <!-- Check mark -->
+  <text x="450" y="240" text-anchor="middle" font-size="9" fill="#2E8B57" font-weight="bold">Balanced y distributions per fold</text>
+
+  <!-- ===== BOTTOM: Legend ===== -->
+  <line x1="10" y1="260" x2="590" y2="260" stroke="#eee" stroke-width="1"/>
+  <text x="300" y="280" text-anchor="middle" font-size="11" font-weight="bold" fill="#555">Response value (y)</text>
+  <rect x="100" y="290" width="400" height="14" rx="4" fill="url(#yGrad)" opacity="0.7"/>
+  <text x="100" y="318" font-size="9" fill="#2166AC">low</text>
+  <text x="290" y="318" text-anchor="middle" font-size="9" fill="#888">median</text>
+  <text x="500" y="318" text-anchor="end" font-size="9" fill="#B2182B">high</text>
+
+  <!-- Explanation -->
+  <text x="300" y="338" text-anchor="middle" font-size="9" fill="#888">Numbers in circles = fold assignment. Stratification bins y into quantile groups, then samples within each bin.</text>
+</svg>

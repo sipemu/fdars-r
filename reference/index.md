@@ -285,6 +285,15 @@
 - [`fclassif.cv()`](https://sipemu.github.io/fdars-r/reference/fclassif.cv.md)
   : Cross-Validated Functional Classification
 
+## Cross-Validation
+
+- [`cv.fdata()`](https://sipemu.github.io/fdars-r/reference/cv.fdata.md)
+  : Unified K-Fold Cross-Validation for Functional Data
+- [`plot(`*`<cv.fdata>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.cv.fdata.md)
+  : Plot Method for cv.fdata
+- [`print(`*`<cv.fdata>`*`)`](https://sipemu.github.io/fdars-r/reference/print.cv.fdata.md)
+  : Print Method for cv.fdata
+
 ## Functional Mixed Models
 
 - [`fmm()`](https://sipemu.github.io/fdars-r/reference/fmm.md) :

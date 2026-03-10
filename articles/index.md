@@ -25,6 +25,8 @@
   Control](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-qc.md):
 - [Sonar: Mine vs Rock — When Does Elastic Alignment
   Help?](https://sipemu.github.io/fdars-r/articles/example-sonar-tsrvf.md):
+- [Cross-Validation: Honest Model Comparison with OOF
+  Predictions](https://sipemu.github.io/fdars-r/articles/example-cross-validation.md):
 
 ### Learn
 
@@ -77,6 +79,8 @@
   Data](https://sipemu.github.io/fdars-r/articles/functional-classification.md):
 - [Functional Mixed Models for Repeated
   Measures](https://sipemu.github.io/fdars-r/articles/functional-mixed-models.md):
+- [Cross-Validation for Functional
+  Data](https://sipemu.github.io/fdars-r/articles/cross-validation.md):
 
 ### Analyze
 

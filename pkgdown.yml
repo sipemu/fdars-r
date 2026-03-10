@@ -7,6 +7,7 @@ articles:
   articles/basis-representation: basis-representation.html
   articles/clustering: clustering.html
   articles/covariance-functions: covariance-functions.html
+  articles/cross-validation: cross-validation.html
   articles/custom-plotting: custom-plotting.html
   depth-functions: depth-functions.html
   articles/distance-metrics: distance-metrics.html
@@ -19,6 +20,7 @@ articles:
   articles/example-berkeley-growth: example-berkeley-growth.html
   articles/example-canadian-seasonal: example-canadian-seasonal.html
   articles/example-canadian-weather: example-canadian-weather.html
+  articles/example-cross-validation: example-cross-validation.html
   articles/example-sonar-tsrvf: example-sonar-tsrvf.html
   articles/example-tecator-regression: example-tecator-regression.html
   articles/examples: examples.html
@@ -40,7 +42,7 @@ articles:
   articles/tolerance-bands: tolerance-bands.html
   articles/tsrvf: tsrvf.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-10T15:50Z
+last_built: 2026-03-10T16:26Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

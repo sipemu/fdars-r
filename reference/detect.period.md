@@ -136,7 +136,7 @@ fd <- fdata(X, argvals = t)
 # Default (SAZED) - most robust
 result <- detect.period(fd)
 print(result$period)
-#> [1] 2.003733
+#> [1] 2.003604
 
 # Autoperiod with custom settings
 result <- detect.period(fd, method = "autoperiod", n_candidates = 10)

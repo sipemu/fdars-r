@@ -7,6 +7,7 @@
 <url><loc>https://sipemu.github.io/fdars-r/articles/basis-representation.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/clustering.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/covariance-functions.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/articles/cross-validation.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/custom-plotting.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/depth-functions.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/distance-metrics.html</loc></url>
@@ -19,6 +20,7 @@
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-berkeley-growth.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-canadian-seasonal.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-canadian-weather.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/articles/example-cross-validation.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-sonar-tsrvf.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-tecator-regression.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/examples.html</loc></url>
@@ -98,6 +100,7 @@
 <url><loc>https://sipemu.github.io/fdars-r/reference/cluster.kmeans.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/cluster.optim.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/cov.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/cv.fdata.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/decompose.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/depth.BD.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/depth.FM.html</loc></url>
@@ -121,7 +124,13 @@
 <url><loc>https://sipemu.github.io/fdars-r/reference/detect_amplitude_modulation.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/detrend.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/df_to_fdata2d.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/dot-compute_cv_metrics.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/dot-compute_fold_metrics.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/dot-compute_metrics_summary.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/dot-compute_rep_metrics.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/dot-create_folds.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/dot-onLoad.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/dot-run_one_cv.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/eFun.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/eVal.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/elastic.align.constrained.html</loc></url>
@@ -219,6 +228,7 @@
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.cluster.gmm.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.cluster.kmeans.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.cluster.optim.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/plot.cv.fdata.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.elastic.align.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.fanova.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.fclassif.html</loc></url>
@@ -264,6 +274,7 @@
 <url><loc>https://sipemu.github.io/fdars-r/reference/print.cluster.gmm.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/print.cluster.kmeans.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/print.cluster.optim.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/print.cv.fdata.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/print.decomposition.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/print.fanova.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/print.fbplot.html</loc></url>
