@@ -29,7 +29,6 @@ articles:
   contents:
   - articles/example-berkeley-growth
   - articles/example-tecator-regression
-  - articles/example-cross-validation
   - articles/example-canadian-weather
   - articles/example-canadian-seasonal
   - articles/example-andrews-wine-intro
