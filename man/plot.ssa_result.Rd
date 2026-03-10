@@ -11,12 +11,12 @@
 
 \item{type}{Plot type: "decomposition" or "spectrum".}
 
-\item{curves}{Indices of curves to plot.}
+\item{curves}{Index of curve to plot (default: 1).}
 
 \item{...}{Additional arguments (ignored).}
 }
 \value{
-Invisibly returns \code{NULL}.
+A ggplot object.
 }
 \description{
 Plot method for ssa_result objects

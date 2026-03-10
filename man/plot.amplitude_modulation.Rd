@@ -12,7 +12,7 @@
 \item{...}{Additional arguments (ignored).}
 }
 \value{
-Invisibly returns the input object \code{x}.
+A ggplot object.
 }
 \description{
 Plot method for amplitude_modulation objects

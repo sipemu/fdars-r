@@ -11,9 +11,9 @@
   depth.func = depth.MBD,
   show.outliers = TRUE,
   col.median = "black",
-  col.envelope = "magenta",
-  col.fence = "pink",
-  col.outliers = "red",
+  col.envelope = "steelblue",
+  col.fence = "#B0C4DE",
+  col.outliers = "#D55E00",
   ...
 )
 }
@@ -30,11 +30,11 @@
 
 \item{col.median}{Color for median curve (default "black").}
 
-\item{col.envelope}{Color for central envelope (default "magenta").}
+\item{col.envelope}{Color for central envelope (default "steelblue").}
 
-\item{col.fence}{Color for fence region (default "pink").}
+\item{col.fence}{Color for fence region (default "#B0C4DE").}
 
-\item{col.outliers}{Color for outlier curves (default "red").}
+\item{col.outliers}{Color for outlier curves (default "#D55E00").}
 
 \item{...}{Additional arguments passed to depth function.}
 }

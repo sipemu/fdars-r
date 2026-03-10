@@ -11,10 +11,10 @@
 
 \item{type}{Plot type: "profile", "arcs", or "both".}
 
-\item{...}{Additional arguments passed to \code{plot}.}
+\item{...}{Additional arguments (ignored).}
 }
 \value{
-Invisibly returns \code{NULL}.
+A ggplot object.
 }
 \description{
 Plot method for matrix_profile_result objects

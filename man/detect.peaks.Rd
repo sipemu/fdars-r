@@ -8,7 +8,7 @@ detect.peaks(
   fdataobj,
   min_distance = NULL,
   min_prominence = NULL,
-  smooth_first = FALSE,
+  smooth_first = TRUE,
   smooth_nbasis = NULL,
   detrend_method = c("none", "linear", "auto")
 )
@@ -22,7 +22,7 @@ detect.peaks(
 lower prominence are filtered out. Default: NULL (no filter).}
 
 \item{smooth_first}{Logical. If TRUE, apply Fourier basis smoothing before
-peak detection. Recommended for noisy data. Default: FALSE.}
+peak detection to remove noise. Default: TRUE.}
 
 \item{smooth_nbasis}{Number of Fourier basis functions for smoothing.
 If NULL and smooth_first=TRUE, uses GCV to automatically select

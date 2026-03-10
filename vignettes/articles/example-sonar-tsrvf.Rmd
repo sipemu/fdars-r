@@ -45,8 +45,8 @@ library(patchwork)
 theme_set(theme_minimal())
 ```
 
-```{=html}
-<img src="../reference/figures/sonar-validation-framework.svg" alt="Validation-First Framework: Three Analysis Paths" style="width:100%; max-width:700px;">
+```{r framework-diagram, echo=FALSE, out.width="100%"}
+knitr::include_graphics("../../man/figures/sonar-validation-framework.svg")
 ```
 
 ## 1. Data Preparation

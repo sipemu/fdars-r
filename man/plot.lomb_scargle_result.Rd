@@ -9,10 +9,10 @@
 \arguments{
 \item{x}{A lomb_scargle_result object.}
 
-\item{...}{Additional arguments passed to \code{plot}.}
+\item{...}{Additional arguments (ignored).}
 }
 \value{
-Invisibly returns \code{NULL}.
+A ggplot object.
 }
 \description{
 Plot method for lomb_scargle_result objects

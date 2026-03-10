@@ -678,17 +678,22 @@ print.lomb_scargle_result <- function(x, ...) {
 
 #' Plot method for lomb_scargle_result objects
 #' @param x A lomb_scargle_result object.
-#' @param ... Additional arguments passed to \code{plot}.
-#' @return Invisibly returns \code{NULL}.
+#' @param ... Additional arguments (ignored).
+#' @return A ggplot object.
 #' @export
 plot.lomb_scargle_result <- function(x, ...) {
-  plot(x$frequencies, x$power, type = "l",
-       xlab = "Frequency", ylab = "Power",
-       main = "Lomb-Scargle Periodogram", ...)
-  abline(v = x$peak_frequency, col = "red", lty = 2)
-  legend("topright",
-         legend = sprintf("Peak: period=%.4f", x$peak_period),
-         col = "red", lty = 2, bty = "n")
+  df <- data.frame(Period = x$periods, Power = x$power)
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$Period, y = .data$Power)) +
+    ggplot2::geom_line(color = "steelblue", linewidth = 0.4) +
+    ggplot2::geom_vline(xintercept = x$peak_period, linetype = "dashed",
+                        color = "red", alpha = 0.6) +
+    ggplot2::annotate("text", x = x$peak_period, y = max(df$Power) * 0.9,
+                      label = sprintf("%.1f", x$peak_period),
+                      color = "red", hjust = -0.2, size = 3.5) +
+    ggplot2::scale_x_log10() +
+    ggplot2::labs(title = "Lomb-Scargle Periodogram",
+                  x = "Period (log scale)", y = "Power")
+  p
 }
 
 # ==============================================================================
@@ -806,39 +811,62 @@ print.matrix_profile_result <- function(x, ...) {
 #' Plot method for matrix_profile_result objects
 #' @param x A matrix_profile_result object.
 #' @param type Plot type: "profile", "arcs", or "both".
-#' @param ... Additional arguments passed to \code{plot}.
-#' @return Invisibly returns \code{NULL}.
+#' @param ... Additional arguments (ignored).
+#' @return A ggplot object.
 #' @export
 plot.matrix_profile_result <- function(x, type = c("profile", "arcs", "both"), ...) {
   type <- match.arg(type)
 
-  if (type == "both") {
-    old_par <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))
-    on.exit(par(old_par))
-  }
+  p_prof <- NULL
+  p_arcs <- NULL
+
+  # Shared x-axis range for alignment
+  n_prof <- length(x$profile)
+  n_arcs <- length(x$arc_counts)
+  x_max <- max(n_prof, n_arcs)
 
   if (type %in% c("profile", "both")) {
-    plot(seq_along(x$profile), x$profile, type = "l",
-         xlab = "Position", ylab = "Distance",
-         main = "Matrix Profile", col = "steelblue", ...)
+    df_prof <- data.frame(Position = seq_along(x$profile), Distance = x$profile)
+    p_prof <- ggplot2::ggplot(df_prof, ggplot2::aes(x = .data$Position, y = .data$Distance)) +
+      ggplot2::geom_line(color = "steelblue", linewidth = 0.3) +
+      ggplot2::scale_x_continuous(limits = c(0, x_max)) +
+      ggplot2::labs(title = "Matrix Profile", x = NULL, y = "Distance")
   }
 
   if (type %in% c("arcs", "both")) {
-    n <- length(x$arc_counts)
-    # Skip very small distances (exclusion zone artifacts)
     start_idx <- max(1, x$subsequence_length %/% 2)
-    if (start_idx < n) {
-      plot(start_idx:n, x$arc_counts[start_idx:n], type = "h",
-           xlab = "Index Distance", ylab = "Arc Count",
-           main = "Arc Counts (for Period Detection)", col = "darkgreen", ...)
+    if (start_idx < n_arcs) {
+      df_arcs <- data.frame(
+        Distance = start_idx:n_arcs,
+        Count = x$arc_counts[start_idx:n_arcs]
+      )
+      p_arcs <- ggplot2::ggplot(df_arcs, ggplot2::aes(x = .data$Distance, y = .data$Count)) +
+        ggplot2::geom_segment(ggplot2::aes(xend = .data$Distance, yend = 0),
+                              color = "darkgreen", linewidth = 0.3) +
+        ggplot2::scale_x_continuous(limits = c(0, x_max)) +
+        ggplot2::labs(title = "Arc Counts (Period Detection)",
+                      x = "Index", y = "Count")
       if (!is.na(x$primary_period) && x$primary_period > 0) {
-        abline(v = x$primary_period, col = "red", lty = 2, lwd = 2)
-        legend("topright",
-               legend = sprintf("Primary period: %.2f", x$primary_period),
-               col = "red", lty = 2, lwd = 2, bty = "n")
+        p_arcs <- p_arcs +
+          ggplot2::geom_vline(xintercept = x$primary_period, linetype = "dashed",
+                              color = "red", linewidth = 0.8) +
+          ggplot2::annotate("text", x = x$primary_period,
+                            y = max(df_arcs$Count) * 0.9,
+                            label = sprintf("%d", as.integer(x$primary_period)),
+                            color = "red", hjust = -0.2, size = 3.5)
       }
     }
   }
+
+  if (type == "both" && !is.null(p_prof) && !is.null(p_arcs)) {
+    if (requireNamespace("patchwork", quietly = TRUE)) {
+      return(p_prof / p_arcs)
+    }
+    # Fallback: return profile only
+    return(p_prof)
+  }
+  if (!is.null(p_prof)) return(p_prof)
+  if (!is.null(p_arcs)) return(p_arcs)
 }
 
 # ==============================================================================
@@ -994,39 +1022,28 @@ print.stl_result <- function(x, ...) {
 
 #' Plot method for stl_result objects
 #' @param x An stl_result object.
-#' @param curves Indices of curves to plot.
+#' @param curves Index of curve to plot (default: 1).
 #' @param ... Additional arguments (ignored).
-#' @return Invisibly returns \code{NULL}.
+#' @return A ggplot object.
 #' @export
 plot.stl_result <- function(x, curves = 1, ...) {
-  n_curves <- min(length(curves), nrow(x$trend$data))
-  curves <- curves[1:n_curves]
-
-  old_par <- par(mfrow = c(4, 1), mar = c(2, 4, 2, 1), oma = c(2, 0, 2, 0))
-  on.exit(par(old_par))
-
-  argvals <- x$trend$argvals
-
-  for (i in seq_along(curves)) {
-    curve_idx <- curves[i]
-
-    # Original (reconstructed)
-    original <- x$trend$data[curve_idx, ] + x$seasonal$data[curve_idx, ] + x$remainder$data[curve_idx, ]
-    plot(argvals, original, type = "l", ylab = "Data",
-         main = if (i == 1) paste("STL Decomposition - Curve", curve_idx) else "", ...)
-
-    # Trend
-    plot(argvals, x$trend$data[curve_idx, ], type = "l", ylab = "Trend", col = "blue", ...)
-
-    # Seasonal
-    plot(argvals, x$seasonal$data[curve_idx, ], type = "l", ylab = "Seasonal", col = "darkgreen", ...)
-
-    # Remainder
-    plot(argvals, x$remainder$data[curve_idx, ], type = "l", ylab = "Remainder", col = "gray50", ...)
-    abline(h = 0, lty = 2)
-  }
-
-  mtext("Time", side = 1, outer = TRUE)
+  curve_idx <- curves[1]
+  argvals <- as.numeric(x$trend$argvals)
+  original <- as.numeric(x$trend$data[curve_idx, ] + x$seasonal$data[curve_idx, ] +
+                           x$remainder$data[curve_idx, ])
+  df <- data.frame(
+    Time = rep(argvals, 4),
+    Value = c(original,
+              as.numeric(x$trend$data[curve_idx, ]),
+              as.numeric(x$seasonal$data[curve_idx, ]),
+              as.numeric(x$remainder$data[curve_idx, ])),
+    Component = factor(rep(c("Data", "Trend", "Seasonal", "Remainder"), each = length(argvals)),
+                       levels = c("Data", "Trend", "Seasonal", "Remainder"))
+  )
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$Time, y = .data$Value)) +
+    ggplot2::geom_line(color = "steelblue", linewidth = 0.3) +
+    ggplot2::facet_wrap(~Component, ncol = 1, scales = "free_y") +
+    ggplot2::labs(title = "STL Decomposition", x = "Time", y = NULL)
 }
 
 # ==============================================================================
@@ -1187,66 +1204,50 @@ print.ssa_result <- function(x, ...) {
 #' Plot method for ssa_result objects
 #' @param x An ssa_result object.
 #' @param type Plot type: "decomposition" or "spectrum".
-#' @param curves Indices of curves to plot.
+#' @param curves Index of curve to plot (default: 1).
 #' @param ... Additional arguments (ignored).
-#' @return Invisibly returns \code{NULL}.
+#' @return A ggplot object.
 #' @export
 plot.ssa_result <- function(x, type = c("decomposition", "spectrum"), curves = 1, ...) {
   type <- match.arg(type)
 
   if (type == "spectrum") {
-    # Scree plot of singular values
     sv <- x$singular.values
     if (length(sv) == 0) {
       warning("No singular values available")
-      return(invisible(x))
+      return(invisible(NULL))
     }
-
-    old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
-    on.exit(par(old_par))
-
-    # Singular value spectrum
-    plot(seq_along(sv), sv, type = "b", pch = 19,
-         xlab = "Component", ylab = "Singular Value",
-         main = "Singular Value Spectrum", col = "steelblue", ...)
-
-    # Cumulative contribution
     cum_contrib <- cumsum(x$contributions)
-    plot(seq_along(cum_contrib), 100 * cum_contrib, type = "b", pch = 19,
-         xlab = "Component", ylab = "Cumulative Variance (%)",
-         main = "Explained Variance", col = "darkgreen", ylim = c(0, 100), ...)
-    abline(h = 90, lty = 2, col = "gray50")
-
+    df <- data.frame(
+      Component = rep(seq_along(sv), 2),
+      Value = c(sv, 100 * cum_contrib),
+      Panel = factor(rep(c("Singular Value Spectrum", "Cumulative Variance (%)"),
+                         each = length(sv)),
+                     levels = c("Singular Value Spectrum", "Cumulative Variance (%)"))
+    )
+    ggplot2::ggplot(df, ggplot2::aes(x = .data$Component, y = .data$Value)) +
+      ggplot2::geom_point(color = "steelblue", size = 2) +
+      ggplot2::geom_line(color = "steelblue") +
+      ggplot2::facet_wrap(~Panel, scales = "free_y") +
+      ggplot2::labs(title = "SSA Spectrum", x = "Component", y = NULL)
   } else {
-    # Decomposition plot
-    n_curves <- min(length(curves), nrow(x$trend$data))
-    curves <- curves[1:n_curves]
-
-    old_par <- par(mfrow = c(4, 1), mar = c(2, 4, 2, 1), oma = c(2, 0, 2, 0))
-    on.exit(par(old_par))
-
-    argvals <- x$trend$argvals
-
-    for (i in seq_along(curves)) {
-      curve_idx <- curves[i]
-
-      # Original (reconstructed)
-      original <- x$trend$data[curve_idx, ] + x$seasonal$data[curve_idx, ] + x$noise$data[curve_idx, ]
-      plot(argvals, original, type = "l", ylab = "Data",
-           main = if (i == 1) paste("SSA Decomposition - Curve", curve_idx) else "", ...)
-
-      # Trend
-      plot(argvals, x$trend$data[curve_idx, ], type = "l", ylab = "Trend", col = "blue", ...)
-
-      # Seasonal
-      plot(argvals, x$seasonal$data[curve_idx, ], type = "l", ylab = "Seasonal", col = "darkgreen", ...)
-
-      # Noise
-      plot(argvals, x$noise$data[curve_idx, ], type = "l", ylab = "Noise", col = "gray50", ...)
-      abline(h = 0, lty = 2)
-    }
-
-    mtext("Time", side = 1, outer = TRUE)
+    curve_idx <- curves[1]
+    argvals <- as.numeric(x$trend$argvals)
+    original <- as.numeric(x$trend$data[curve_idx, ] + x$seasonal$data[curve_idx, ] +
+                             x$noise$data[curve_idx, ])
+    df <- data.frame(
+      Time = rep(argvals, 4),
+      Value = c(original,
+                as.numeric(x$trend$data[curve_idx, ]),
+                as.numeric(x$seasonal$data[curve_idx, ]),
+                as.numeric(x$noise$data[curve_idx, ])),
+      Component = factor(rep(c("Data", "Trend", "Seasonal", "Noise"), each = length(argvals)),
+                         levels = c("Data", "Trend", "Seasonal", "Noise"))
+    )
+    ggplot2::ggplot(df, ggplot2::aes(x = .data$Time, y = .data$Value)) +
+      ggplot2::geom_line(color = "steelblue", linewidth = 0.3) +
+      ggplot2::facet_wrap(~Component, ncol = 1, scales = "free_y") +
+      ggplot2::labs(title = "SSA Decomposition", x = "Time", y = NULL)
   }
 }
 
@@ -1418,7 +1419,7 @@ print.multiple_periods <- function(x, ...) {
 #' @param min_prominence Minimum prominence for a peak (0-1 scale). Peaks with
 #'   lower prominence are filtered out. Default: NULL (no filter).
 #' @param smooth_first Logical. If TRUE, apply Fourier basis smoothing before
-#'   peak detection. Recommended for noisy data. Default: FALSE.
+#'   peak detection to remove noise. Default: TRUE.
 #' @param smooth_nbasis Number of Fourier basis functions for smoothing.
 #'   If NULL and smooth_first=TRUE, uses GCV to automatically select
 #'   optimal nbasis (range 5-25). Default: NULL (auto).
@@ -1467,7 +1468,7 @@ print.multiple_periods <- function(x, ...) {
 #' fd_trend <- fdata(X_trend, argvals = t)
 #' peaks_det <- detect.peaks(fd_trend, detrend_method = "linear")
 detect.peaks <- function(fdataobj, min_distance = NULL, min_prominence = NULL,
-                         smooth_first = FALSE, smooth_nbasis = NULL,
+                         smooth_first = TRUE, smooth_nbasis = NULL,
                          detrend_method = c("none", "linear", "auto")) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
@@ -1504,6 +1505,8 @@ detect.peaks <- function(fdataobj, min_distance = NULL, min_prominence = NULL,
     }
   })
 
+  result$fdata <- fdataobj
+
   class(result) <- "peak_detection"
   result
 }
@@ -1522,6 +1525,40 @@ print.peak_detection <- function(x, ...) {
   cat(sprintf("Total peaks found: %d\n", total_peaks))
   cat(sprintf("Mean period:       %.4f\n", x$mean_period))
   invisible(x)
+}
+
+#' Plot method for peak_detection objects
+#'
+#' Plots the original functional data with detected peaks overlaid as red points.
+#'
+#' @param x A peak_detection object (from \code{\link{detect.peaks}}).
+#' @param curves Index of curve to plot (default: 1).
+#' @param ... Additional arguments (ignored).
+#' @return A ggplot object.
+#' @export
+plot.peak_detection <- function(x, curves = 1, ...) {
+  curve_idx <- curves[1]
+  if (is.null(x$fdata)) {
+    stop("No fdata stored in peak_detection result; cannot plot")
+  }
+  argvals <- as.numeric(x$fdata$argvals)
+  values <- as.numeric(x$fdata$data[curve_idx, ])
+  df <- data.frame(Time = argvals, Value = values)
+  pk <- x$peaks[[curve_idx]]
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$Time, y = .data$Value)) +
+    ggplot2::geom_line(color = "steelblue", linewidth = 0.3) +
+    ggplot2::labs(title = sprintf("Peak Detection (%d peaks)", nrow(pk)),
+                  x = "Time", y = "Value")
+
+  if (nrow(pk) > 0) {
+    p <- p + ggplot2::geom_point(
+      data = pk,
+      ggplot2::aes(x = .data$time, y = .data$value),
+      color = "red", size = 3
+    )
+  }
+  p
 }
 
 # ==============================================================================
@@ -1928,6 +1965,46 @@ print.peak_timing <- function(x, ...) {
   }
   cat(sprintf("Timing trend:    %.4f\n", x$timing_trend))
   invisible(x)
+}
+
+#' Plot method for peak_timing objects
+#'
+#' Plots peak timing (day within cycle) and peak value across cycles, with a
+#' linear trend line showing whether peaks shift earlier or later.
+#'
+#' @param x A peak_timing object (from \code{\link{analyze.peak.timing}}).
+#' @param period The period used for analysis (for computing day-of-cycle).
+#' @param ... Additional arguments (ignored).
+#' @return A ggplot object.
+#' @export
+plot.peak_timing <- function(x, period = NULL, ...) {
+  n <- length(x$peak_times)
+  cycle <- x$cycle_indices
+
+  # Compute day within cycle
+  if (!is.null(period)) {
+    day_of_cycle <- x$peak_times %% period
+    ylab <- "Peak day within cycle"
+  } else {
+    day_of_cycle <- x$normalized_timing
+    ylab <- "Normalized timing (0\u20131)"
+  }
+
+  df <- data.frame(Cycle = cycle, DayOfCycle = day_of_cycle, Value = x$peak_values)
+
+  trend_label <- if (x$timing_trend > 0) "later" else "earlier"
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$Cycle, y = .data$DayOfCycle)) +
+    ggplot2::geom_point(color = "red", size = 3) +
+    ggplot2::geom_smooth(method = "lm", se = TRUE, alpha = 0.15,
+                         color = "grey40", linetype = "dashed", linewidth = 0.5) +
+    ggplot2::labs(
+      title = "Peak Timing Across Cycles",
+      subtitle = sprintf("Trend: %.3f/cycle (%s) | Variability: %.3f",
+                         x$timing_trend, trend_label, x$variability_score),
+      x = "Cycle", y = ylab
+    )
+  p
 }
 
 # ==============================================================================
@@ -2507,18 +2584,18 @@ print.amplitude_modulation <- function(x, ...) {
 #' Plot method for amplitude_modulation objects
 #' @param x An amplitude_modulation object.
 #' @param ... Additional arguments (ignored).
-#' @return Invisibly returns the input object \code{x}.
+#' @return A ggplot object.
 #' @export
 plot.amplitude_modulation <- function(x, ...) {
   if (is.null(x$amplitude_curve)) {
     message("No amplitude curve available to plot")
-    return(invisible(x))
+    return(invisible(NULL))
   }
-
-  plot(x$amplitude_curve,
-       main = sprintf("Amplitude Envelope (%s)", x$modulation_type),
-       ylab = "Amplitude",
-       ...)
-
-  invisible(x)
+  argvals <- as.numeric(x$amplitude_curve$argvals)
+  values <- as.numeric(x$amplitude_curve$data[1, ])
+  df <- data.frame(Time = argvals, Amplitude = values)
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$Time, y = .data$Amplitude)) +
+    ggplot2::geom_line(color = "#D55E00", linewidth = 0.5) +
+    ggplot2::labs(title = sprintf("Amplitude Envelope (%s)", x$modulation_type),
+                  x = "Time", y = "Amplitude")
 }
