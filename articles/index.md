@@ -2,6 +2,7 @@
 
 ### Navigation
 
+- [Learn](https://sipemu.github.io/fdars-r/articles/learn.md):
 - [Examples](https://sipemu.github.io/fdars-r/articles/examples.md):
 
 ### Examples

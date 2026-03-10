@@ -31,6 +31,7 @@ articles:
   introduction: introduction.html
   articles/irregular-sampling: irregular-sampling.html
   articles/landmark-registration: landmark-registration.html
+  articles/learn: learn.html
   articles/outlier-detection: outlier-detection.html
   articles/regression: regression.html
   articles/seasonal-analysis: seasonal-analysis.html
@@ -39,7 +40,7 @@ articles:
   articles/tolerance-bands: tolerance-bands.html
   articles/tsrvf: tsrvf.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-10T15:23Z
+last_built: 2026-03-10T15:50Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles
