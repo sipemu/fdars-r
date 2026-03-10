@@ -21,7 +21,7 @@ plot(x, type = c("decomposition", "spectrum"), curves = 1, ...)
 
 - curves:
 
-  Indices of curves to plot.
+  Index of curve to plot (default: 1).
 
 - ...:
 
@@ -29,4 +29,4 @@ plot(x, type = c("decomposition", "spectrum"), curves = 1, ...)
 
 ## Value
 
-Invisibly returns `NULL`.
+A ggplot object.

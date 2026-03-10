@@ -10,7 +10,7 @@ detect.peaks(
   fdataobj,
   min_distance = NULL,
   min_prominence = NULL,
-  smooth_first = FALSE,
+  smooth_first = TRUE,
   smooth_nbasis = NULL,
   detrend_method = c("none", "linear", "auto")
 )
@@ -33,8 +33,8 @@ detect.peaks(
 
 - smooth_first:
 
-  Logical. If TRUE, apply Fourier basis smoothing before peak detection.
-  Recommended for noisy data. Default: FALSE.
+  Logical. If TRUE, apply Fourier basis smoothing before peak detection
+  to remove noise. Default: TRUE.
 
 - smooth_nbasis:
 

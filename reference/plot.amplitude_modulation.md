@@ -21,4 +21,4 @@ plot(x, ...)
 
 ## Value
 
-Invisibly returns the input object `x`.
+A ggplot object.

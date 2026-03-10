@@ -740,6 +740,10 @@ Covariance Functions
   : Plot method for lomb_scargle_result objects
 - [`plot(`*`<matrix_profile_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.matrix_profile_result.md)
   : Plot method for matrix_profile_result objects
+- [`plot(`*`<peak_detection>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.peak_detection.md)
+  : Plot method for peak_detection objects
+- [`plot(`*`<peak_timing>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.peak_timing.md)
+  : Plot method for peak_timing objects
 - [`plot(`*`<ssa_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.ssa_result.md)
   : Plot method for ssa_result objects
 - [`plot(`*`<stl_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.stl_result.md)
@@ -885,6 +889,12 @@ Covariance Functions
 
 - [Berkeley Growth Study: Elastic Alignment of Growth
   Velocity](https://sipemu.github.io/fdars-r/articles/example-berkeley-growth.md):
+- [Tecator: Predicting Fat Content from NIR
+  Spectra](https://sipemu.github.io/fdars-r/articles/example-tecator-regression.md):
+- [Canadian Weather: Regional Climate
+  Patterns](https://sipemu.github.io/fdars-r/articles/example-canadian-weather.md):
+- [Canadian Temperature: Annual Cycle Detection and
+  Decomposition](https://sipemu.github.io/fdars-r/articles/example-canadian-seasonal.md):
 - [Andrews Wine: Why Andrews
   Curves?](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-intro.md):
 - [Andrews Wine: Outlier

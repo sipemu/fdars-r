@@ -691,14 +691,14 @@ data will find the true peaks, not noise spikes.</p>
 <code class="sourceCode R"><span><span class="co"># Default parameters - often too many peaks</span></span>
 <span><span class="va">peaks_default</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.peaks.html">detect.peaks</a></span><span class="op">(</span><span class="va">fd_demo</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Default parameters:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">peaks_default</span><span class="op">$</span><span class="va">peaks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"peaks found\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Default parameters: 96 peaks found</span></span>
+<span><span class="co">#&gt; Default parameters: 10 peaks found</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"(Expected:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="op">/</span> <span class="va">period_true</span><span class="op">)</span>, <span class="st">"peaks)\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; (Expected: 10 peaks)</span></span></code></pre></div>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add minimum distance constraint</span></span>
 <span><span class="va">peaks_distance</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.peaks.html">detect.peaks</a></span><span class="op">(</span><span class="va">fd_demo</span>, min_distance <span class="op">=</span> <span class="va">period_true</span> <span class="op">*</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"With min_distance:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">peaks_distance</span><span class="op">$</span><span class="va">peaks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"peaks found\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; With min_distance: 12 peaks found</span></span></code></pre></div>
+<span><span class="co">#&gt; With min_distance: 10 peaks found</span></span></code></pre></div>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add Fourier smoothing for best results (GCV auto-selects nbasis)</span></span>
 <span><span class="va">peaks_smooth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.peaks.html">detect.peaks</a></span><span class="op">(</span><span class="va">fd_demo</span>, min_distance <span class="op">=</span> <span class="va">period_true</span> <span class="op">*</span> <span class="fl">0.8</span>,</span>
@@ -769,9 +769,9 @@ combine prominence filtering with smoothing.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Without smoothing:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Without smoothing:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Low prominence (0.1):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">peaks_low_prom_raw</span><span class="op">$</span><span class="va">peaks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"peaks\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Low prominence (0.1): 7 peaks</span></span>
+<span><span class="co">#&gt;   Low prominence (0.1): 4 peaks</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  High prominence (0.5):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">peaks_high_prom_raw</span><span class="op">$</span><span class="va">peaks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"peaks\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   High prominence (0.5): 1 peaks</span></span>
+<span><span class="co">#&gt;   High prominence (0.5): 4 peaks</span></span>
 <span></span>
 <span><span class="co"># With smoothing - more reliable results</span></span>
 <span><span class="va">peaks_low_prom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.peaks.html">detect.peaks</a></span><span class="op">(</span><span class="va">fd_demo</span>, min_distance <span class="op">=</span> <span class="fl">1.5</span>, min_prominence <span class="op">=</span> <span class="fl">0.1</span>,</span>
@@ -1474,7 +1474,7 @@ noisy short series.</p>
 <span><span class="va">peaks_curves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.peaks.html">detect.peaks</a></span><span class="op">(</span><span class="va">fd_curves</span>, min_distance <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nMean period from peaks:"</span>, <span class="va">peaks_curves</span><span class="op">$</span><span class="va">mean_period</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Mean period from peaks: 1.730653</span></span>
+<span><span class="co">#&gt; Mean period from peaks: 1.968936</span></span>
 <span></span>
 <span><span class="co"># Seasonal strength (aggregated)</span></span>
 <span><span class="va">ss_curves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/seasonal.strength.html">seasonal.strength</a></span><span class="op">(</span><span class="va">fd_curves</span>, period <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>

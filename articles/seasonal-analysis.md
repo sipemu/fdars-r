@@ -602,7 +602,7 @@ data will find the true peaks, not noise spikes.
 # Default parameters - often too many peaks
 peaks_default <- detect.peaks(fd_demo)
 cat("Default parameters:", nrow(peaks_default$peaks[[1]]), "peaks found\n")
-#> Default parameters: 96 peaks found
+#> Default parameters: 10 peaks found
 cat("(Expected:", floor(max(t) / period_true), "peaks)\n")
 #> (Expected: 10 peaks)
 ```
@@ -611,7 +611,7 @@ cat("(Expected:", floor(max(t) / period_true), "peaks)\n")
 # Add minimum distance constraint
 peaks_distance <- detect.peaks(fd_demo, min_distance = period_true * 0.8)
 cat("With min_distance:", nrow(peaks_distance$peaks[[1]]), "peaks found\n")
-#> With min_distance: 12 peaks found
+#> With min_distance: 10 peaks found
 ```
 
 ``` r
@@ -687,9 +687,9 @@ peaks_high_prom_raw <- detect.peaks(fd_demo, min_distance = 1.5, min_prominence 
 cat("Without smoothing:\n")
 #> Without smoothing:
 cat("  Low prominence (0.1):", nrow(peaks_low_prom_raw$peaks[[1]]), "peaks\n")
-#>   Low prominence (0.1): 7 peaks
+#>   Low prominence (0.1): 4 peaks
 cat("  High prominence (0.5):", nrow(peaks_high_prom_raw$peaks[[1]]), "peaks\n")
-#>   High prominence (0.5): 1 peaks
+#>   High prominence (0.5): 4 peaks
 
 # With smoothing - more reliable results
 peaks_low_prom <- detect.peaks(fd_demo, min_distance = 1.5, min_prominence = 0.1,
@@ -1400,7 +1400,7 @@ cat("True mean period:", mean(periods), "\n")
 peaks_curves <- detect.peaks(fd_curves, min_distance = 1.5)
 cat("\nMean period from peaks:", peaks_curves$mean_period, "\n")
 #> 
-#> Mean period from peaks: 1.730653
+#> Mean period from peaks: 1.968936
 
 # Seasonal strength (aggregated)
 ss_curves <- seasonal.strength(fd_curves, period = 2)

@@ -9,6 +9,41 @@ Berkeley Growth Study
 
 Alignment FPCA Equivalence
 
+[](https://sipemu.github.io/fdars-r/articles/example-tecator-regression.md)
+
+![Tecator
+Regression](../reference/figures/card-example-tecator-regression.svg)
+
+Tecator: NIR Spectra → Fat Prediction
+
+Regression Beta(t) Diagnostics
+
+[](https://sipemu.github.io/fdars-r/articles/example-cross-validation.md)
+
+![Cross-Validation](../reference/figures/card-example-cross-validation.svg)
+
+Cross-Validation: OOF Model Comparison
+
+CV Regression Nested CV
+
+[](https://sipemu.github.io/fdars-r/articles/example-canadian-weather.md)
+
+![Canadian
+Weather](../reference/figures/card-example-canadian-weather.svg)
+
+Canadian Weather: Regional Climate Patterns
+
+FANOVA FOSR Classification
+
+[](https://sipemu.github.io/fdars-r/articles/example-canadian-seasonal.md)
+
+![Canadian
+Seasonal](../reference/figures/card-example-canadian-seasonal.svg)
+
+Canadian Temperature: Annual Cycle Detection
+
+Seasonal Decompose Peaks
+
 [](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-intro.md)
 
 ![Andrews Wine:

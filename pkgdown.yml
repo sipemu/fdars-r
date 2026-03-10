@@ -17,7 +17,10 @@ articles:
   articles/example-andrews-wine-qc: example-andrews-wine-qc.html
   articles/example-andrews-wine: example-andrews-wine.html
   articles/example-berkeley-growth: example-berkeley-growth.html
+  articles/example-canadian-seasonal: example-canadian-seasonal.html
+  articles/example-canadian-weather: example-canadian-weather.html
   articles/example-sonar-tsrvf: example-sonar-tsrvf.html
+  articles/example-tecator-regression: example-tecator-regression.html
   articles/examples: examples.html
   articles/fpca: fpca.html
   articles/functional-classification: functional-classification.html
@@ -36,7 +39,7 @@ articles:
   articles/tolerance-bands: tolerance-bands.html
   articles/tsrvf: tsrvf.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-10T13:49Z
+last_built: 2026-03-10T15:23Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

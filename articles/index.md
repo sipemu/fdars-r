@@ -8,6 +8,12 @@
 
 - [Berkeley Growth Study: Elastic Alignment of Growth
   Velocity](https://sipemu.github.io/fdars-r/articles/example-berkeley-growth.md):
+- [Tecator: Predicting Fat Content from NIR
+  Spectra](https://sipemu.github.io/fdars-r/articles/example-tecator-regression.md):
+- [Canadian Weather: Regional Climate
+  Patterns](https://sipemu.github.io/fdars-r/articles/example-canadian-weather.md):
+- [Canadian Temperature: Annual Cycle Detection and
+  Decomposition](https://sipemu.github.io/fdars-r/articles/example-canadian-seasonal.md):
 - [Andrews Wine: Why Andrews
   Curves?](https://sipemu.github.io/fdars-r/articles/example-andrews-wine-intro.md):
 - [Andrews Wine: Outlier

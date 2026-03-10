@@ -47,7 +47,8 @@
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncomp <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  nfold <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -81,6 +82,21 @@
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed for fold assignment.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to the classifier. For SVM:</p><dl><dt>kernel</dt>
+<dd><p>SVM kernel: "radial" (default), "linear", "polynomial",
+"sigmoid".</p></dd>
+
+<dt>cost</dt>
+<dd><p>SVM cost parameter (default 1).</p></dd>
+
+<dt>gamma</dt>
+<dd><p>SVM kernel parameter (default 1/ncomp).</p></dd>
+
+
+</dl></dd>
 
 </dl></div>
     <div class="section level2">

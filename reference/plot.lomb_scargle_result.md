@@ -17,8 +17,8 @@ plot(x, ...)
 
 - ...:
 
-  Additional arguments passed to `plot`.
+  Additional arguments (ignored).
 
 ## Value
 
-Invisibly returns `NULL`.
+A ggplot object.

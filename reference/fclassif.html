@@ -46,7 +46,7 @@ Functional Classification</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fclassif</span><span class="op">(</span></span>
 <span>  <span class="va">fdataobj</span>,</span>
 <span>  <span class="va">y</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lda"</span>, <span class="st">"qda"</span>, <span class="st">"knn"</span>, <span class="st">"kernel"</span>, <span class="st">"dd"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lda"</span>, <span class="st">"qda"</span>, <span class="st">"knn"</span>, <span class="st">"kernel"</span>, <span class="st">"dd"</span>, <span class="st">"svm"</span><span class="op">)</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncomp <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -66,7 +66,8 @@ Functional Classification</p>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>Classification method: "lda", "qda", "knn", "kernel", or "dd".</p></dd>
+<dd><p>Classification method: "lda", "qda", "knn", "kernel", "dd",
+or "svm".</p></dd>
 
 
 <dt id="arg-covariates">covariates<a class="anchor" aria-label="anchor" href="#arg-covariates"></a></dt>
@@ -74,7 +75,7 @@ Functional Classification</p>
 
 
 <dt id="arg-ncomp">ncomp<a class="anchor" aria-label="anchor" href="#arg-ncomp"></a></dt>
-<dd><p>Number of FPC components (default 3). Used by lda, qda, knn.</p></dd>
+<dd><p>Number of FPC components (default 3). Used by lda, qda, knn, svm.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -86,6 +87,16 @@ Functional Classification</p>
 
 <dt>h.scalar</dt>
 <dd><p>Bandwidth for scalar kernel (default auto).</p></dd>
+
+<dt>kernel</dt>
+<dd><p>SVM kernel type: "radial" (default), "linear", "polynomial",
+"sigmoid".</p></dd>
+
+<dt>cost</dt>
+<dd><p>SVM cost parameter (default 1).</p></dd>
+
+<dt>gamma</dt>
+<dd><p>SVM kernel parameter (default 1/ncomp).</p></dd>
 
 
 </dl></dd>
@@ -116,7 +127,7 @@ Functional Classification</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Classifies functional data using one of several methods: LDA, QDA, kNN,
-kernel, or DD-plot (depth-vs-depth).</p>
+kernel, DD-plot (depth-vs-depth), or SVM (support vector machine).</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

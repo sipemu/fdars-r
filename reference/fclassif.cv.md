@@ -12,7 +12,8 @@ fclassif.cv(
   covariates = NULL,
   ncomp = 3,
   nfold = 10,
-  seed = NULL
+  seed = NULL,
+  ...
 )
 ```
 
@@ -45,6 +46,22 @@ fclassif.cv(
 - seed:
 
   Random seed for fold assignment.
+
+- ...:
+
+  Additional arguments passed to the classifier. For SVM:
+
+  kernel
+
+  :   SVM kernel: "radial" (default), "linear", "polynomial", "sigmoid".
+
+  cost
+
+  :   SVM cost parameter (default 1).
+
+  gamma
+
+  :   SVM kernel parameter (default 1/ncomp).
 
 ## Value
 

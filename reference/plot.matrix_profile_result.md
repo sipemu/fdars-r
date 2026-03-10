@@ -21,8 +21,8 @@ plot(x, type = c("profile", "arcs", "both"), ...)
 
 - ...:
 
-  Additional arguments passed to `plot`.
+  Additional arguments (ignored).
 
 ## Value
 
-Invisibly returns `NULL`.
+A ggplot object.

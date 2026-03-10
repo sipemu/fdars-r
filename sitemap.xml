@@ -17,7 +17,10 @@
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-andrews-wine-qc.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-andrews-wine.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-berkeley-growth.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/articles/example-canadian-seasonal.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/articles/example-canadian-weather.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/example-sonar-tsrvf.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/articles/example-tecator-regression.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/examples.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/fpca.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/articles/functional-classification.html</loc></url>
@@ -232,6 +235,8 @@
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.matrix_profile_result.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.outliergram.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.outliers.fdata.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/plot.peak_detection.html</loc></url>
+<url><loc>https://sipemu.github.io/fdars-r/reference/plot.peak_timing.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.pspline.2d.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.pspline.html</loc></url>
 <url><loc>https://sipemu.github.io/fdars-r/reference/plot.register.fd.html</loc></url>

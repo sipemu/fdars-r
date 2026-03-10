@@ -538,6 +538,10 @@
   : Plot method for lomb_scargle_result objects
 - [`plot(`*`<matrix_profile_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.matrix_profile_result.md)
   : Plot method for matrix_profile_result objects
+- [`plot(`*`<peak_detection>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.peak_detection.md)
+  : Plot method for peak_detection objects
+- [`plot(`*`<peak_timing>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.peak_timing.md)
+  : Plot method for peak_timing objects
 - [`plot(`*`<ssa_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.ssa_result.md)
   : Plot method for ssa_result objects
 - [`plot(`*`<stl_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.stl_result.md)

@@ -9,7 +9,7 @@ Functional Classification
 fclassif(
   fdataobj,
   y,
-  method = c("lda", "qda", "knn", "kernel", "dd"),
+  method = c("lda", "qda", "knn", "kernel", "dd", "svm"),
   covariates = NULL,
   ncomp = 3,
   ...
@@ -28,7 +28,7 @@ fclassif(
 
 - method:
 
-  Classification method: "lda", "qda", "knn", "kernel", or "dd".
+  Classification method: "lda", "qda", "knn", "kernel", "dd", or "svm".
 
 - covariates:
 
@@ -36,7 +36,7 @@ fclassif(
 
 - ncomp:
 
-  Number of FPC components (default 3). Used by lda, qda, knn.
+  Number of FPC components (default 3). Used by lda, qda, knn, svm.
 
 - ...:
 
@@ -53,6 +53,19 @@ fclassif(
   h.scalar
 
   :   Bandwidth for scalar kernel (default auto).
+
+  kernel
+
+  :   SVM kernel type: "radial" (default), "linear", "polynomial",
+      "sigmoid".
+
+  cost
+
+  :   SVM cost parameter (default 1).
+
+  gamma
+
+  :   SVM kernel parameter (default 1/ncomp).
 
 ## Value
 
@@ -85,4 +98,4 @@ An object of class 'fclassif' with components:
 ## Details
 
 Classifies functional data using one of several methods: LDA, QDA, kNN,
-kernel, or DD-plot (depth-vs-depth).
+kernel, DD-plot (depth-vs-depth), or SVM (support vector machine).

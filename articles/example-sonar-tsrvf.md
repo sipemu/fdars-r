@@ -21,10 +21,10 @@ determines whether elastic alignment helps or hurts classification.
 **Key finding:** The phase/total variance ratio suggests moderate phase
 variability, but the warping functions reveal this is an artifact —
 sonar frequency bands are fixed physical measurements without genuine
-timing shifts. Column standardization + smoothed kNN at 10 FPCs achieves
-**87% CV accuracy**, matching the original neural network benchmark. The
-elastic pipeline drops to ~66%, demonstrating that elastic alignment can
-*degrade* performance on phase-rigid data.
+timing shifts. Column standardization + kNN or SVM at 10 FPCs achieves
+**~87% CV accuracy**, matching the original neural network benchmark.
+The elastic pipeline drops to ~66%, demonstrating that elastic alignment
+can *degrade* performance on phase-rigid data.
 
 ``` r
 library(fdars)
@@ -40,6 +40,8 @@ library(ggplot2)
 library(patchwork)
 theme_set(theme_minimal())
 ```
+
+![](../../reference/figures/sonar-validation-framework.svg)
 
 ## 1. Data Preparation
 
@@ -256,7 +258,7 @@ many dimensions, favoring kNN over LDA.
 ## 5. Competitive Ablation Study
 
 Three parallel paths, each with the best `ncomp` selected from {5, 8,
-10, 15, 20}, evaluated with LDA, QDA, and kNN via 10-fold CV.
+10, 15, 20}, evaluated with LDA, QDA, kNN, and SVM via 10-fold CV.
 
 - **Path A (Simple):** Standardized raw or smoothed spectra
 - **Path B (Derivative):** 1st and 2nd derivatives of smoothed spectra
@@ -276,7 +278,7 @@ feature_sets <- list(
   "Full elastic"     = fd_combined
 )
 
-methods <- c("lda", "qda", "knn")
+methods <- c("lda", "qda", "knn", "svm")
 ncomp_grid <- c(5, 8, 10, 15, 20)
 
 # For each feature × method: find the best ncomp
@@ -326,11 +328,16 @@ knitr::kable(ablation[order(-ablation$CV_Accuracy), ],
 |:---------------|:--------------|:-------|-----------:|------------:|
 | Smoothed       | A: Simple     | KNN    |         10 |       0.870 |
 | Raw (scaled)   | A: Simple     | KNN    |         10 |       0.865 |
+| Smoothed       | A: Simple     | SVM    |         10 |       0.856 |
+| Raw (scaled)   | A: Simple     | SVM    |         10 |       0.837 |
 | Smoothed       | A: Simple     | QDA    |         15 |       0.806 |
 | Raw (scaled)   | A: Simple     | QDA    |         20 |       0.797 |
 | Smoothed       | A: Simple     | LDA    |         20 |       0.788 |
 | 1st derivative | B: Derivative | KNN    |         20 |       0.777 |
 | Raw (scaled)   | A: Simple     | LDA    |         10 |       0.773 |
+| 1st derivative | B: Derivative | SVM    |         20 |       0.756 |
+| 2nd derivative | B: Derivative | SVM    |         20 |       0.756 |
+| Aligned        | C: Elastic    | SVM    |          5 |       0.751 |
 | Aligned        | C: Elastic    | KNN    |         10 |       0.730 |
 | 1st derivative | B: Derivative | QDA    |         20 |       0.716 |
 | 2nd derivative | B: Derivative | LDA    |         20 |       0.711 |
@@ -343,6 +350,8 @@ knitr::kable(ablation[order(-ablation$CV_Accuracy), ],
 | Full elastic   | C: Elastic    | KNN    |          8 |       0.655 |
 | TSRVF (amp)    | C: Elastic    | LDA    |         15 |       0.653 |
 | Full elastic   | C: Elastic    | QDA    |         10 |       0.640 |
+| TSRVF (amp)    | C: Elastic    | SVM    |          8 |       0.635 |
+| Full elastic   | C: Elastic    | SVM    |          8 |       0.635 |
 | Full elastic   | C: Elastic    | LDA    |          8 |       0.623 |
 | TSRVF (amp)    | C: Elastic    | QDA    |          8 |       0.610 |
 
@@ -352,7 +361,7 @@ knitr::kable(ablation[order(-ablation$CV_Accuracy), ],
 ggplot(ablation, aes(x = Features, y = CV_Accuracy, fill = Method)) +
   geom_col(position = "dodge", width = 0.6) +
   scale_fill_manual(values = c("LDA" = "#0072B2", "QDA" = "#56B4E9",
-                                "KNN" = "#D55E00")) +
+                                "KNN" = "#D55E00", "SVM" = "#009E73")) +
   geom_hline(yintercept = 0.827, linetype = "dashed", color = "grey40",
              linewidth = 0.5) +
   annotate("text", x = 0.8, y = 0.835, label = "Gorman & Sejnowski\nk-NN baseline",
@@ -360,10 +369,8 @@ ggplot(ablation, aes(x = Features, y = CV_Accuracy, fill = Method)) +
   labs(title = "Classification Accuracy by Feature Representation",
        subtitle = "Best ncomp selected per feature × method combination",
        x = "", y = "10-Fold CV Accuracy") +
-  ylim(0.5, 1) +
+  coord_cartesian(ylim = c(0.5, 1)) +
   theme(axis.text.x = element_text(angle = 30, hjust = 1))
-#> Warning: Removed 21 rows containing missing values or values outside the scale range
-#> (`geom_col()`).
 ```
 
 ![](example-sonar-tsrvf_files/figure-html/ablation-plot-1.png)
@@ -379,13 +386,10 @@ ggplot(path_best, aes(x = reorder(Path, CV_Accuracy), y = CV_Accuracy,
   scale_fill_manual(values = c("A: Simple" = "#0072B2",
                                 "B: Derivative" = "#56B4E9",
                                 "C: Elastic" = "#D55E00")) +
-  coord_flip() +
+  coord_flip(ylim = c(0.5, 1)) +
   labs(title = "Best Accuracy by Analysis Path",
        x = "", y = "Best 10-Fold CV Accuracy") +
-  guides(fill = "none") +
-  ylim(0.5, 1)
-#> Warning: Removed 3 rows containing missing values or values outside the scale range
-#> (`geom_col()`).
+  guides(fill = "none")
 ```
 
 ![](example-sonar-tsrvf_files/figure-html/path-summary-1.png)
@@ -481,8 +485,9 @@ elastic analysis depending on the measurement domain.**
   ~87% — a larger gain than any method change.
 
 - **Match the method to the data structure.** When class separation is
-  spread across many FPCs, nonparametric classifiers (kNN) outperform
-  parametric ones (LDA, QDA).
+  spread across many FPCs, nonparametric classifiers (kNN, SVM)
+  outperform parametric ones (LDA, QDA). SVM with an RBF kernel performs
+  comparably to kNN on these FPC features.
 
 - **Negative results are informative.** The 20+ percentage point gap
   between Euclidean and elastic analysis on this dataset clearly
@@ -495,9 +500,10 @@ elastic analysis depending on the measurement domain.**
 - [`vignette("articles/elastic-alignment")`](https://sipemu.github.io/fdars-r/articles/elastic-alignment.md)
   — elastic alignment and Karcher mean
 - [`vignette("articles/functional-classification")`](https://sipemu.github.io/fdars-r/articles/functional-classification.md)
-  — all five classification methods (LDA, QDA, kNN, kernel, DD)
-- `vignette("articles/example-tecator-regression")` — Tecator NIR
-  spectra: another spectral dataset where derivatives improve regression
+  — all six classification methods (LDA, QDA, kNN, SVM, kernel, DD)
+- [`vignette("articles/example-tecator-regression")`](https://sipemu.github.io/fdars-r/articles/example-tecator-regression.md)
+  — Tecator NIR spectra: another spectral dataset where derivatives
+  improve regression
 
 ## References
 

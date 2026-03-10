@@ -47,7 +47,7 @@ zero-crossings. Returns peak times, values, and prominence measures.</p>
 <span>  <span class="va">fdataobj</span>,</span>
 <span>  min_distance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  min_prominence <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  smooth_first <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  smooth_first <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  smooth_nbasis <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  detrend_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"linear"</span>, <span class="st">"auto"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -72,7 +72,7 @@ lower prominence are filtered out. Default: NULL (no filter).</p></dd>
 
 <dt id="arg-smooth-first">smooth_first<a class="anchor" aria-label="anchor" href="#arg-smooth-first"></a></dt>
 <dd><p>Logical. If TRUE, apply Fourier basis smoothing before
-peak detection. Recommended for noisy data. Default: FALSE.</p></dd>
+peak detection to remove noise. Default: TRUE.</p></dd>
 
 
 <dt id="arg-smooth-nbasis">smooth_nbasis<a class="anchor" aria-label="anchor" href="#arg-smooth-nbasis"></a></dt>

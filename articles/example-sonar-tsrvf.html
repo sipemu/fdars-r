@@ -108,8 +108,8 @@ classification.</p>
 <p><strong>Key finding:</strong> The phase/total variance ratio suggests
 moderate phase variability, but the warping functions reveal this is an
 artifact — sonar frequency bands are fixed physical measurements without
-genuine timing shifts. Column standardization + smoothed kNN at 10 FPCs
-achieves <strong>87% CV accuracy</strong>, matching the original neural
+genuine timing shifts. Column standardization + kNN or SVM at 10 FPCs
+achieves <strong>~87% CV accuracy</strong>, matching the original neural
 network benchmark. The elastic pipeline drops to ~66%, demonstrating
 that elastic alignment can <em>degrade</em> performance on phase-rigid
 data.</p>
@@ -126,6 +126,7 @@ data.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="../../reference/figures/sonar-validation-framework.svg" class="r-plt" alt="" width="100%"></p>
 <div class="section level2">
 <h2 id="data-preparation">1. Data Preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
 </h2>
@@ -318,8 +319,8 @@ across many dimensions, favoring kNN over LDA.</p>
 <h2 id="competitive-ablation-study">5. Competitive Ablation Study<a class="anchor" aria-label="anchor" href="#competitive-ablation-study"></a>
 </h2>
 <p>Three parallel paths, each with the best <code>ncomp</code> selected
-from {5, 8, 10, 15, 20}, evaluated with LDA, QDA, and kNN via 10-fold
-CV.</p>
+from {5, 8, 10, 15, 20}, evaluated with LDA, QDA, kNN, and SVM via
+10-fold CV.</p>
 <ul>
 <li>
 <strong>Path A (Simple):</strong> Standardized raw or smoothed
@@ -344,7 +345,7 @@ vectors, combined amplitude + phase features</li>
 <span>  <span class="st">"Full elastic"</span>     <span class="op">=</span> <span class="va">fd_combined</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lda"</span>, <span class="st">"qda"</span>, <span class="st">"knn"</span><span class="op">)</span></span>
+<span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lda"</span>, <span class="st">"qda"</span>, <span class="st">"knn"</span>, <span class="st">"svm"</span><span class="op">)</span></span>
 <span><span class="va">ncomp_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">8</span>, <span class="fl">10</span>, <span class="fl">15</span>, <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># For each feature × method: find the best ncomp</span></span>
@@ -415,6 +416,20 @@ vectors, combined amplitude + phase features</li>
 <tr class="odd">
 <td align="left">Smoothed</td>
 <td align="left">A: Simple</td>
+<td align="left">SVM</td>
+<td align="right">10</td>
+<td align="right">0.856</td>
+</tr>
+<tr class="even">
+<td align="left">Raw (scaled)</td>
+<td align="left">A: Simple</td>
+<td align="left">SVM</td>
+<td align="right">10</td>
+<td align="right">0.837</td>
+</tr>
+<tr class="odd">
+<td align="left">Smoothed</td>
+<td align="left">A: Simple</td>
 <td align="left">QDA</td>
 <td align="right">15</td>
 <td align="right">0.806</td>
@@ -448,97 +463,132 @@ vectors, combined amplitude + phase features</li>
 <td align="right">0.773</td>
 </tr>
 <tr class="even">
+<td align="left">1st derivative</td>
+<td align="left">B: Derivative</td>
+<td align="left">SVM</td>
+<td align="right">20</td>
+<td align="right">0.756</td>
+</tr>
+<tr class="odd">
+<td align="left">2nd derivative</td>
+<td align="left">B: Derivative</td>
+<td align="left">SVM</td>
+<td align="right">20</td>
+<td align="right">0.756</td>
+</tr>
+<tr class="even">
+<td align="left">Aligned</td>
+<td align="left">C: Elastic</td>
+<td align="left">SVM</td>
+<td align="right">5</td>
+<td align="right">0.751</td>
+</tr>
+<tr class="odd">
 <td align="left">Aligned</td>
 <td align="left">C: Elastic</td>
 <td align="left">KNN</td>
 <td align="right">10</td>
 <td align="right">0.730</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">1st derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">QDA</td>
 <td align="right">20</td>
 <td align="right">0.716</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">2nd derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">LDA</td>
 <td align="right">20</td>
 <td align="right">0.711</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">2nd derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">QDA</td>
 <td align="right">20</td>
 <td align="right">0.711</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">1st derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">LDA</td>
 <td align="right">15</td>
 <td align="right">0.697</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">2nd derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">KNN</td>
 <td align="right">10</td>
 <td align="right">0.691</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Aligned</td>
 <td align="left">C: Elastic</td>
 <td align="left">LDA</td>
 <td align="right">20</td>
 <td align="right">0.681</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">TSRVF (amp)</td>
 <td align="left">C: Elastic</td>
 <td align="left">KNN</td>
 <td align="right">15</td>
 <td align="right">0.658</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Aligned</td>
 <td align="left">C: Elastic</td>
 <td align="left">QDA</td>
 <td align="right">15</td>
 <td align="right">0.657</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
 <td align="left">KNN</td>
 <td align="right">8</td>
 <td align="right">0.655</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">TSRVF (amp)</td>
 <td align="left">C: Elastic</td>
 <td align="left">LDA</td>
 <td align="right">15</td>
 <td align="right">0.653</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
 <td align="left">QDA</td>
 <td align="right">10</td>
 <td align="right">0.640</td>
 </tr>
+<tr class="odd">
+<td align="left">TSRVF (amp)</td>
+<td align="left">C: Elastic</td>
+<td align="left">SVM</td>
+<td align="right">8</td>
+<td align="right">0.635</td>
+</tr>
 <tr class="even">
+<td align="left">Full elastic</td>
+<td align="left">C: Elastic</td>
+<td align="left">SVM</td>
+<td align="right">8</td>
+<td align="right">0.635</td>
+</tr>
+<tr class="odd">
 <td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
 <td align="left">LDA</td>
 <td align="right">8</td>
 <td align="right">0.623</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">TSRVF (amp)</td>
 <td align="left">C: Elastic</td>
 <td align="left">QDA</td>
@@ -551,7 +601,7 @@ vectors, combined amplitude + phase features</li>
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">ablation</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Features</span>, y <span class="op">=</span> <span class="va">CV_Accuracy</span>, fill <span class="op">=</span> <span class="va">Method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span>, width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LDA"</span> <span class="op">=</span> <span class="st">"#0072B2"</span>, <span class="st">"QDA"</span> <span class="op">=</span> <span class="st">"#56B4E9"</span>,</span>
-<span>                                <span class="st">"KNN"</span> <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                                <span class="st">"KNN"</span> <span class="op">=</span> <span class="st">"#D55E00"</span>, <span class="st">"SVM"</span> <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.827</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey40"</span>,</span>
 <span>             linewidth <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">0.8</span>, y <span class="op">=</span> <span class="fl">0.835</span>, label <span class="op">=</span> <span class="st">"Gorman &amp; Sejnowski\nk-NN baseline"</span>,</span>
@@ -559,10 +609,8 @@ vectors, combined amplitude + phase features</li>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Classification Accuracy by Feature Representation"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Best ncomp selected per feature × method combination"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">"10-Fold CV Accuracy"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">30</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Removed 21 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_col()`).</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">30</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-sonar-tsrvf_files/figure-html/ablation-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Summarize by path: best accuracy per path</span></span>
@@ -575,13 +623,10 @@ vectors, combined amplitude + phase features</li>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A: Simple"</span> <span class="op">=</span> <span class="st">"#0072B2"</span>,</span>
 <span>                                <span class="st">"B: Derivative"</span> <span class="op">=</span> <span class="st">"#56B4E9"</span>,</span>
 <span>                                <span class="st">"C: Elastic"</span> <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span>ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Best Accuracy by Analysis Path"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">"Best 10-Fold CV Accuracy"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Removed 3 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_col()`).</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-sonar-tsrvf_files/figure-html/path-summary-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
@@ -701,7 +746,8 @@ accuracy from ~80% to ~87% — a larger gain than any method
 change.</p></li>
 <li><p><strong>Match the method to the data structure.</strong> When
 class separation is spread across many FPCs, nonparametric classifiers
-(kNN) outperform parametric ones (LDA, QDA).</p></li>
+(kNN, SVM) outperform parametric ones (LDA, QDA). SVM with an RBF kernel
+performs comparably to kNN on these FPC features.</p></li>
 <li><p><strong>Negative results are informative.</strong> The 20+
 percentage point gap between Euclidean and elastic analysis on this
 dataset clearly demonstrates the cost of misapplying alignment to
@@ -720,9 +766,9 @@ phase-rigid data.</p></li>
 alignment and Karcher mean</li>
 <li>
 <code><a href="../articles/functional-classification.html">vignette("articles/functional-classification")</a></code> — all
-five classification methods (LDA, QDA, kNN, kernel, DD)</li>
+six classification methods (LDA, QDA, kNN, SVM, kernel, DD)</li>
 <li>
-<code>vignette("articles/example-tecator-regression")</code> —
+<code><a href="../articles/example-tecator-regression.html">vignette("articles/example-tecator-regression")</a></code> —
 Tecator NIR spectra: another spectral dataset where derivatives improve
 regression</li>
 </ul>
