@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.81"
 name = "fdars-core"
-version = "0.7.2"
+version = "0.8.1"
 authors = ["Simon Muller"]
 build = false
 autolib = false
@@ -85,8 +85,16 @@ name = "elastic_alignment"
 path = "examples/16_elastic_alignment/main.rs"
 
 [[example]]
+name = "elastic_analysis"
+path = "examples/26_elastic_analysis/main.rs"
+
+[[example]]
 name = "equivalence_test"
 path = "examples/17_equivalence_test/main.rs"
+
+[[example]]
+name = "explainability"
+path = "examples/25_explainability/main.rs"
 
 [[example]]
 name = "function_on_scalar"
@@ -151,6 +159,46 @@ path = "examples/19_tsrvf/main.rs"
 [[test]]
 name = "validate_against_r"
 path = "tests/validate_against_r.rs"
+
+[[test]]
+name = "validate_explain_deep"
+path = "tests/validate_explain_deep.rs"
+
+[[test]]
+name = "validate_explain_final"
+path = "tests/validate_explain_final.rs"
+
+[[test]]
+name = "validate_explainability"
+path = "tests/validate_explainability.rs"
+
+[[test]]
+name = "validate_explainability_v2"
+path = "tests/validate_explainability_v2.rs"
+
+[[test]]
+name = "validate_explainability_v2_deep"
+path = "tests/validate_explainability_v2_deep.rs"
+
+[[test]]
+name = "validate_explainability_v3"
+path = "tests/validate_explainability_v3.rs"
+
+[[test]]
+name = "validate_explainability_v3_deep"
+path = "tests/validate_explainability_v3_deep.rs"
+
+[[test]]
+name = "validate_explainability_v4"
+path = "tests/validate_explainability_v4.rs"
+
+[[test]]
+name = "validate_explainability_v4_deep"
+path = "tests/validate_explainability_v4_deep.rs"
+
+[[test]]
+name = "validate_explainability_v5"
+path = "tests/validate_explainability_v5.rs"
 
 [[test]]
 name = "validate_new_modules"

@@ -36,7 +36,7 @@ regional differences (p < 0.002).
 The Canadian Weather dataset is a classic benchmark in functional data analysis
 (Ramsay and Silverman, 2005).
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -277,8 +277,8 @@ Atlantic and Continental stations, whose summer temperatures overlap.
 
 ## See Also
 
-- `vignette("articles/functional-regression")` — FOSR and FANOVA methodology
-- `vignette("articles/regression")` — scalar-on-function regression methods
+- `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
+- `vignette("articles/function-on-scalar")` — FOSR and FANOVA methodology
 - `vignette("articles/example-tecator-regression")` — real-data regression:
   NIR spectra → fat content
 - `vignette("articles/clustering")` — alternative approach: unsupervised

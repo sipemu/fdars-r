@@ -26,7 +26,11 @@ mathematical framework uses the **Square-Root Slope Function (SRSF)** representa
 which makes the Fisher-Rao metric equivalent to the $L^2$ metric -- enabling efficient
 dynamic programming alignment.
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/elastic-alignment-diagram.svg" alt="Elastic Alignment Diagram" style="width:100%; max-width:700px;">
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 library(patchwork)

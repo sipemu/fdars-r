@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">The Bias-Variance Tradeoff in Smoothing</text>
+  <text x="350" y="54" text-anchor="middle" font-size="14" fill="#888">Smoothing parameter &#955; controls the balance between fidelity and roughness</text>
+
+  <!-- ===== LEFT: Undersmoothed ===== -->
+  <rect x="16" y="76" width="210" height="200" rx="8" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.5"/>
+  <text x="121" y="100" text-anchor="middle" font-size="16" font-weight="bold" fill="#D55E00">Undersmoothed</text>
+  <text x="121" y="120" text-anchor="middle" font-size="13" fill="#888">&#955; too small</text>
+
+  <!-- Data points -->
+  <circle cx="34" cy="180" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="50" cy="164" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="66" cy="190" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="82" cy="156" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="98" cy="198" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="114" cy="148" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="130" cy="184" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="146" cy="162" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="162" cy="194" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="178" cy="152" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="194" cy="176" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="210" cy="192" r="3" fill="#999" opacity="0.5"/>
+  <!-- Wiggly fit chasing every point -->
+  <path d="M34 180 Q42 164 50 164 Q58 184 66 190 Q74 158 82 156 Q90 196 98 198 Q106 152 114 148 Q122 180 130 184 Q138 164 146 162 Q154 192 162 194 Q170 154 178 152 Q186 174 194 176 Q202 190 210 192" stroke="#D55E00" stroke-width="2.2" fill="none"/>
+  <!-- True signal (dashed) -->
+  <path d="M34 176 Q74 156 114 170 Q154 184 194 166 Q210 158 220 168" stroke="#2E8B57" stroke-width="1.5" fill="none" stroke-dasharray="5,4" opacity="0.6"/>
+
+  <text x="121" y="232" text-anchor="middle" font-size="13" fill="#D55E00" font-weight="bold">Low bias, high variance</text>
+  <text x="121" y="252" text-anchor="middle" font-size="12" fill="#888">Fits noise, not just signal</text>
+
+  <!-- ===== CENTER: Just right ===== -->
+  <rect x="245" y="76" width="210" height="200" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="350" y="100" text-anchor="middle" font-size="16" font-weight="bold" fill="#2E8B57">Optimal Smoothing</text>
+  <text x="350" y="120" text-anchor="middle" font-size="13" fill="#888">&#955; just right</text>
+
+  <!-- Data points -->
+  <circle cx="263" cy="180" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="279" cy="164" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="295" cy="190" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="311" cy="156" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="327" cy="198" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="343" cy="148" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="359" cy="184" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="375" cy="162" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="391" cy="194" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="407" cy="152" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="423" cy="176" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="439" cy="192" r="3" fill="#999" opacity="0.5"/>
+  <!-- Good smooth fit -->
+  <path d="M263 176 Q303 156 343 170 Q383 184 423 166 Q443 158 449 168" stroke="#2E8B57" stroke-width="2.5" fill="none"/>
+
+  <text x="350" y="232" text-anchor="middle" font-size="13" fill="#2E8B57" font-weight="bold">Balanced bias and variance</text>
+  <text x="350" y="252" text-anchor="middle" font-size="12" fill="#888">Captures signal, ignores noise</text>
+
+  <!-- ===== RIGHT: Oversmoothed ===== -->
+  <rect x="474" y="76" width="210" height="200" rx="8" fill="#E8E0F0" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="579" y="100" text-anchor="middle" font-size="16" font-weight="bold" fill="#7B2D8E">Oversmoothed</text>
+  <text x="579" y="120" text-anchor="middle" font-size="13" fill="#888">&#955; too large</text>
+
+  <!-- Data points -->
+  <circle cx="492" cy="180" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="508" cy="164" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="524" cy="190" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="540" cy="156" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="556" cy="198" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="572" cy="148" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="588" cy="184" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="604" cy="162" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="620" cy="194" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="636" cy="152" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="652" cy="176" r="3" fill="#999" opacity="0.5"/>
+  <circle cx="668" cy="192" r="3" fill="#999" opacity="0.5"/>
+  <!-- Nearly flat line -->
+  <path d="M492 176 Q540 172 579 174 Q620 174 668 174" stroke="#7B2D8E" stroke-width="2.5" fill="none"/>
+  <!-- True signal (dashed) -->
+  <path d="M492 176 Q532 156 572 170 Q612 184 652 166 Q668 158 678 168" stroke="#2E8B57" stroke-width="1.5" fill="none" stroke-dasharray="5,4" opacity="0.6"/>
+
+  <text x="579" y="232" text-anchor="middle" font-size="13" fill="#7B2D8E" font-weight="bold">High bias, low variance</text>
+  <text x="579" y="252" text-anchor="middle" font-size="12" fill="#888">Washes out real features</text>
+
+  <!-- ===== BOTTOM: Scale ===== -->
+  <line x1="10" y1="296" x2="690" y2="296" stroke="#eee" stroke-width="1.5"/>
+
+  <!-- Lambda arrow -->
+  <text x="350" y="322" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Smoothing parameter &#955;</text>
+
+  <line x1="70" y1="344" x2="630" y2="344" stroke="#888" stroke-width="2"/>
+  <line x1="70" y1="338" x2="70" y2="350" stroke="#888" stroke-width="2"/>
+  <line x1="630" y1="338" x2="630" y2="350" stroke="#888" stroke-width="2"/>
+  <text x="70" y="368" text-anchor="middle" font-size="13" fill="#D55E00" font-weight="bold">&#955; &#8594; 0</text>
+  <text x="70" y="386" text-anchor="middle" font-size="12" fill="#888">interpolation</text>
+  <text x="350" y="368" text-anchor="middle" font-size="13" fill="#2E8B57" font-weight="bold">&#955; optimal (GCV)</text>
+  <text x="350" y="386" text-anchor="middle" font-size="12" fill="#888">best prediction</text>
+  <text x="630" y="368" text-anchor="middle" font-size="13" fill="#7B2D8E" font-weight="bold">&#955; &#8594; &#8734;</text>
+  <text x="630" y="386" text-anchor="middle" font-size="12" fill="#888">straight line</text>
+
+  <!-- Tick mark -->
+  <circle cx="350" cy="344" r="5" fill="#2E8B57" opacity="0.5"/>
+
+  <!-- Legend -->
+  <line x1="10" y1="404" x2="690" y2="404" stroke="#eee" stroke-width="1.5"/>
+  <circle cx="100" cy="424" r="3" fill="#999" opacity="0.5"/>
+  <text x="110" y="428" font-size="13" fill="#555">Observations</text>
+  <line x1="230" y1="424" x2="256" y2="424" stroke="#2E8B57" stroke-width="1.8" stroke-dasharray="5,4" opacity="0.6"/>
+  <text x="264" y="428" font-size="13" fill="#555">True signal</text>
+  <line x1="380" y1="424" x2="406" y2="424" stroke="#555" stroke-width="2.5"/>
+  <text x="414" y="428" font-size="13" fill="#555">Smoothed estimate</text>
+</svg>

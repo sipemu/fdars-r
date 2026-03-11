@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 425" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="300" y="22" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Covariance Functions: Shape &#8594; Sample Path Smoothness</text>
+
+  <!-- ===== Row 1: Gaussian ===== -->
+  <rect x="14" y="42" width="130" height="90" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="79" y="58" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">Gaussian</text>
+  <text x="79" y="70" text-anchor="middle" font-size="8.8" fill="#888">exp(-|s-t|&#178;/2&#8467;&#178;)</text>
+  <!-- Bell curve kernel shape -->
+  <path d="M24 120 Q34 118 44 108 Q54 84 64 78 Q74 74 79 74 Q84 74 94 78 Q104 84 114 108 Q124 118 134 120" stroke="#4A90D9" stroke-width="1.5" fill="none"/>
+  <text x="79" y="130" text-anchor="middle" font-size="8.8" fill="#888">C&#8734; smooth</text>
+
+  <!-- Arrow -->
+  <text x="158" y="90" text-anchor="middle" font-size="10" fill="#555">&#8594;</text>
+
+  <!-- Sample paths: very smooth -->
+  <rect x="172" y="42" width="130" height="90" rx="6" fill="#F8F8F8" stroke="#ccc" stroke-width="0.8"/>
+  <text x="237" y="56" text-anchor="middle" font-size="10" fill="#555">Sample Paths</text>
+  <path d="M182 90 Q197 72 212 78 Q227 84 242 70 Q257 56 272 74 Q287 90 292 84" stroke="#4A90D9" stroke-width="1.3" fill="none"/>
+  <path d="M182 94 Q197 78 212 82 Q227 88 242 76 Q257 64 272 80 Q287 94 292 88" stroke="#4A90D9" stroke-width="1.0" fill="none" opacity="0.5"/>
+  <text x="237" y="122" text-anchor="middle" font-size="8.8" fill="#2E8B57">Very smooth, differentiable</text>
+
+  <!-- ===== Row 1: Exponential ===== -->
+  <rect x="322" y="42" width="130" height="90" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="387" y="58" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">Exponential</text>
+  <text x="387" y="70" text-anchor="middle" font-size="8.8" fill="#888">exp(-|s-t|/&#8467;)</text>
+  <!-- V-shape kernel -->
+  <path d="M332 120 L362 96 L387 74 L412 96 L442 120" stroke="#E6A020" stroke-width="1.5" fill="none"/>
+  <text x="387" y="130" text-anchor="middle" font-size="8.8" fill="#888">C&#8304; continuous only</text>
+
+  <!-- Arrow -->
+  <text x="466" y="90" text-anchor="middle" font-size="10" fill="#555">&#8594;</text>
+
+  <!-- Sample paths: rough -->
+  <rect x="480" y="42" width="106" height="90" rx="6" fill="#F8F8F8" stroke="#ccc" stroke-width="0.8"/>
+  <text x="533" y="56" text-anchor="middle" font-size="10" fill="#555">Sample Paths</text>
+  <path d="M490 90 Q494 80 498 86 Q502 92 506 78 Q510 64 514 72 Q518 80 522 70 Q526 60 530 74 Q534 88 538 76 Q542 64 546 78 Q550 88 554 82 Q558 76 562 84 Q566 92 570 80 Q574 68 576 78" stroke="#E6A020" stroke-width="1.3" fill="none"/>
+  <path d="M490 94 Q494 86 498 90 Q502 96 506 84 Q510 72 514 80 Q518 88 522 76 Q526 66 530 80 Q534 92 538 82 Q542 72 546 84 Q550 92 554 86 Q558 80 562 88 Q566 96 570 86 Q574 76 576 82" stroke="#E6A020" stroke-width="1.0" fill="none" opacity="0.5"/>
+  <text x="533" y="122" text-anchor="middle" font-size="8.8" fill="#d62728">Rough, jagged</text>
+
+  <!-- ===== Row 2: Matern ===== -->
+  <rect x="14" y="150" width="130" height="90" rx="6" fill="#F3E8FD" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="79" y="166" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#7B2D8E">Mat&#233;rn</text>
+  <text x="79" y="178" text-anchor="middle" font-size="8.8" fill="#888">&#957; controls smoothness</text>
+  <!-- Three kernel curves at different nu -->
+  <path d="M24 228 Q44 218 54 204 Q64 188 74 184 Q79 182 84 184 Q94 188 104 204 Q114 218 134 228" stroke="#7B2D8E" stroke-width="1.0" fill="none" opacity="0.4"/>
+  <path d="M28 228 Q48 214 58 198 Q68 186 74 184 Q80 182 86 186 Q96 198 106 214 Q126 228 130 228" stroke="#7B2D8E" stroke-width="1.3" fill="none" opacity="0.7"/>
+  <path d="M32 228 Q52 210 62 192 Q72 184 79 182 Q86 184 96 192 Q106 210 126 228" stroke="#7B2D8E" stroke-width="1.5" fill="none"/>
+  <text x="44" y="216" font-size="7.5" fill="#7B2D8E">&#957;=0.5</text>
+  <text x="79" y="198" text-anchor="middle" font-size="7.5" fill="#7B2D8E">1.5</text>
+  <text x="107" y="216" text-anchor="end" font-size="7.5" fill="#7B2D8E">2.5</text>
+
+  <!-- Arrow -->
+  <text x="158" y="198" text-anchor="middle" font-size="10" fill="#555">&#8594;</text>
+
+  <!-- Matern sample paths: intermediate -->
+  <rect x="172" y="150" width="130" height="90" rx="6" fill="#F8F8F8" stroke="#ccc" stroke-width="0.8"/>
+  <text x="237" y="164" text-anchor="middle" font-size="10" fill="#555">&#957;=1.5 Paths</text>
+  <path d="M182 200 Q192 186 202 192 Q212 198 222 184 Q232 172 242 182 Q252 192 262 180 Q272 170 282 186 Q292 198 292 192" stroke="#7B2D8E" stroke-width="1.3" fill="none"/>
+  <path d="M182 204 Q192 192 202 196 Q212 202 222 190 Q232 178 242 188 Q252 196 262 186 Q272 178 282 192 Q292 202 292 196" stroke="#7B2D8E" stroke-width="1.0" fill="none" opacity="0.5"/>
+  <text x="237" y="230" text-anchor="middle" font-size="8.8" fill="#7B2D8E">Tunable: rough &#8594; smooth</text>
+
+  <!-- ===== Row 2: Periodic ===== -->
+  <rect x="322" y="150" width="130" height="90" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="387" y="166" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2E8B57">Periodic</text>
+  <text x="387" y="178" text-anchor="middle" font-size="8.8" fill="#888">period p, length &#8467;</text>
+  <!-- Repeating kernel shape -->
+  <path d="M332 216 Q342 210 352 198 Q362 186 372 182 Q382 180 387 180 Q392 180 402 182 Q412 186 422 198 Q432 210 442 216" stroke="#2E8B57" stroke-width="1.2" fill="none"/>
+  <path d="M332 228 Q342 224 352 216 Q362 206 372 202 Q382 200 387 200 Q392 200 402 202 Q412 206 422 216 Q432 224 442 228" stroke="#2E8B57" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <text x="387" y="236" text-anchor="middle" font-size="8.8" fill="#888">Repeating correlation</text>
+
+  <!-- Arrow -->
+  <text x="466" y="198" text-anchor="middle" font-size="10" fill="#555">&#8594;</text>
+
+  <!-- Periodic sample paths -->
+  <rect x="480" y="150" width="106" height="90" rx="6" fill="#F8F8F8" stroke="#ccc" stroke-width="0.8"/>
+  <text x="533" y="164" text-anchor="middle" font-size="10" fill="#555">Sample Paths</text>
+  <path d="M490 200 Q498 186 506 190 Q514 194 522 184 Q530 174 538 184 Q546 194 554 190 Q562 186 570 200" stroke="#2E8B57" stroke-width="1.3" fill="none"/>
+  <path d="M490 204 Q498 192 506 196 Q514 200 522 190 Q530 180 538 190 Q546 200 554 196 Q562 192 570 204" stroke="#2E8B57" stroke-width="1.0" fill="none" opacity="0.5"/>
+  <text x="533" y="230" text-anchor="middle" font-size="8.8" fill="#2E8B57">Cyclic patterns</text>
+
+  <!-- ===== BOTTOM: Summary ===== -->
+  <line x1="10" y1="254" x2="590" y2="254" stroke="#eee" stroke-width="1"/>
+  <text x="300" y="274" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#555">Smoothness Spectrum</text>
+
+  <!-- Gradient bar -->
+  <rect x="60" y="284" width="480" height="18" rx="3" fill="url(#smoothGrad)" stroke="#ccc" stroke-width="0.5"/>
+  <defs>
+    <linearGradient id="smoothGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E6A020;stop-opacity:0.4"/>
+      <stop offset="50%" style="stop-color:#7B2D8E;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#4A90D9;stop-opacity:0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Labels along spectrum -->
+  <text x="80" y="370" font-size="10" fill="#B37700" font-weight="bold">Rough</text>
+  <text x="160" y="370" font-size="8.8" fill="#555">Exponential</text>
+  <text x="260" y="370" font-size="8.8" fill="#555">Mat&#233;rn &#957;=1.5</text>
+  <text x="360" y="370" font-size="8.8" fill="#555">Mat&#233;rn &#957;=2.5</text>
+  <text x="470" y="370" font-size="8.8" fill="#555">Gaussian</text>
+  <text x="520" y="370" font-size="10" fill="#2C5F8A" font-weight="bold">Smooth</text>
+
+  <text x="300" y="407.5" text-anchor="middle" font-size="11.2" fill="#888">Kernel shape determines sample path regularity: peaked &#8594; rough, rounded &#8594; smooth</text>
+</svg>

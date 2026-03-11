@@ -40,6 +40,10 @@ in the estimated *mean function*. Tolerance bands are always wider than
 confidence bands because individual curve variability exceeds mean estimation
 uncertainty.
 
+```{=html}
+<img src="../reference/figures/tolerance-bands-diagram.svg" alt="Confidence vs Tolerance Bands Diagram" style="width:100%; max-width:700px;">
+```
+
 ## How It Works (Intuition)
 
 Imagine you have a collection of temperature curves measured over a year. A
@@ -172,7 +176,7 @@ the amplitude component, reducing the effective variance at each grid point.
 
 ## Generate Sample Data
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 set.seed(42)
 

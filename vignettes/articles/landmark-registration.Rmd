@@ -30,11 +30,15 @@ This approach is particularly useful when:
 - You want alignment to respect **domain knowledge** about which features should
   coincide
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 library(patchwork)
 theme_set(theme_minimal())
+```
+
+```{=html}
+<img src="../reference/figures/landmark-registration-diagram.svg" alt="Landmark Registration Diagram" style="width:100%; max-width:700px;">
 ```
 
 ## How It Works (Intuition)

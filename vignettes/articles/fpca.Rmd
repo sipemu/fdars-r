@@ -20,7 +20,7 @@ data analysis. It extends classical PCA to infinite-dimensional function spaces,
 providing a powerful tool for dimension reduction, visualization, and feature extraction
 from functional data.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -38,6 +38,10 @@ When working with functional data, we face several challenges:
 
 FPCA addresses these challenges by finding the **principal modes of variation** in the
 data—orthogonal functions that capture how curves differ from each other.
+
+```{=html}
+<img src="../reference/figures/fpca-diagram.svg" alt="Karhunen-Loève Decomposition Diagram" style="width:100%; max-width:700px;">
+```
 
 ## Mathematical Background
 
@@ -448,7 +452,7 @@ matrix, but the functional interpretation adds value:
 
 ## See Also
 
-- `vignette("regression", package = "fdars")` — scalar-on-function regression methods
+- `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
 - `vignette("clustering", package = "fdars")` — functional data clustering
 - `vignette("basis-representation", package = "fdars")` — basis function representations (B-spline, Fourier)
 

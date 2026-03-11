@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">The fdars Toolkit</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">Functional Data Analysis in R, powered by Rust</text>
+
+  <!-- ===== Top: Input ===== -->
+  <rect x="250" y="74" width="220" height="56" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="360" y="98" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Raw Observations</text>
+  <text x="360" y="118" text-anchor="middle" font-size="12" fill="#888">curves, spectra, time series, surfaces</text>
+
+  <!-- Arrow down -->
+  <line x1="360" y1="130" x2="360" y2="150" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
+
+  <!-- ===== fdata object ===== -->
+  <rect x="220" y="150" width="280" height="40" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="360" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">fdata(X, argvals, id, metadata)</text>
+
+  <!-- Arrow fan out -->
+  <line x1="260" y1="190" x2="110" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
+  <line x1="360" y1="190" x2="360" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
+  <line x1="460" y1="190" x2="610" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
+
+  <!-- ===== Column 1: Explore ===== -->
+  <rect x="16" y="220" width="200" height="140" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="116" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Explore</text>
+  <text x="36" y="266" font-size="12" fill="#555">depth()  &#x2014; centrality ranking</text>
+  <text x="36" y="286" font-size="12" fill="#555">metric.lp() &#x2014; distances</text>
+  <text x="36" y="306" font-size="12" fill="#555">metric.DTW() &#x2014; warping</text>
+  <text x="36" y="326" font-size="12" fill="#555">outliers() &#x2014; anomalies</text>
+  <text x="36" y="346" font-size="12" fill="#555">autoplot() &#x2014; visualization</text>
+
+  <!-- ===== Column 2: Transform ===== -->
+  <rect x="232" y="220" width="256" height="140" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="360" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Transform</text>
+  <text x="252" y="266" font-size="12" fill="#555">smooth() &#x2014; remove noise</text>
+  <text x="252" y="286" font-size="12" fill="#555">fdata2basis() &#x2014; basis expansion</text>
+  <text x="252" y="306" font-size="12" fill="#555">fdata2pc() &#x2014; FPCA scores</text>
+  <text x="252" y="326" font-size="12" fill="#555">deriv() &#x2014; derivatives</text>
+  <text x="252" y="346" font-size="12" fill="#555">elastic.align() &#x2014; alignment</text>
+
+  <!-- ===== Column 3: Model ===== -->
+  <rect x="504" y="220" width="200" height="140" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="604" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Model</text>
+  <text x="524" y="266" font-size="12" fill="#555">fregre.pc() &#x2014; regression</text>
+  <text x="524" y="286" font-size="12" fill="#555">fregre.lm() &#x2014; linear model</text>
+  <text x="524" y="306" font-size="12" fill="#555">fregre.np() &#x2014; nonparametric</text>
+  <text x="524" y="326" font-size="12" fill="#555">cluster.kmeans() &#x2014; clustering</text>
+  <text x="524" y="346" font-size="12" fill="#555">fclassif() &#x2014; classification</text>
+
+  <!-- ===== Bottom: Rust backend ===== -->
+  <line x1="16" y1="382" x2="704" y2="382" stroke="#eee" stroke-width="1.5"/>
+
+  <rect x="80" y="400" width="560" height="64" rx="8" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.5"/>
+  <text x="360" y="424" text-anchor="middle" font-size="15" font-weight="bold" fill="#D55E00">Rust Backend (extendr)</text>
+  <text x="360" y="448" text-anchor="middle" font-size="13" fill="#555">10&#x2013;200x speedups  &#x2022;  nalgebra linear algebra  &#x2022;  rayon parallelism  &#x2022;  zero-copy R &#x2194; Rust</text>
+
+  <defs>
+    <marker id="arrIntro" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

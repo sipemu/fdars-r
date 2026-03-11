@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 425" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrFC" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="300" y="27.5" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Functional Classification Pipeline</text>
+
+  <!-- ===== STEP 1: Labeled curves ===== -->
+  <rect x="14" y="52.5" width="140" height="162.5" rx="6" fill="#F8F8F8" stroke="#888" stroke-width="1.1"/>
+  <text x="84" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#555">Labeled Curves</text>
+  <text x="84" y="87.5" text-anchor="middle" font-size="10" fill="#888">X&#7522;(t), g&#7522; &#8712; {1,...,G}</text>
+
+  <!-- Class 1 curves (blue) -->
+  <path d="M 24 135.0 Q 44 110.0 64 120.0 Q 84 130.0 104 112.5 Q 124 95.0 144 125.0" stroke="#4A90D9" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M 24 140.0 Q 44 115.0 64 125.0 Q 84 135.0 104 117.5 Q 124 100.0 144 130.0" stroke="#4A90D9" stroke-width="1.4" fill="none" opacity="0.5"/>
+
+  <!-- Class 2 curves (orange) -->
+  <path d="M 24 162.5 Q 44 175.0 64 170.0 Q 84 165.0 104 177.5 Q 124 190.0 144 175.0" stroke="#D55E00" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M 24 167.5 Q 44 180.0 64 175.0 Q 84 170.0 104 182.5 Q 124 195.0 144 180.0" stroke="#D55E00" stroke-width="1.4" fill="none" opacity="0.5"/>
+
+  <!-- Class 3 curves (green) -->
+  <path d="M 24 150.0 Q 44 145.0 64 147.5 Q 84 150.0 104 147.5 Q 124 145.0 144 150.0" stroke="#2E8B57" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M 24 155.0 Q 44 150.0 64 152.5 Q 84 155.0 104 152.5 Q 124 150.0 144 155.0" stroke="#2E8B57" stroke-width="1.4" fill="none" opacity="0.5"/>
+
+  <!-- Legend -->
+  <line x1="24" y1="197.5" x2="38" y2="197.5" stroke="#4A90D9" stroke-width="2.1"/>
+  <text x="42" y="202.5" font-size="8.8" fill="#555">Class 1</text>
+  <line x1="76" y1="197.5" x2="90" y2="197.5" stroke="#D55E00" stroke-width="2.1"/>
+  <text x="94" y="202.5" font-size="8.8" fill="#555">Class 2</text>
+  <line x1="128" y1="197.5" x2="142" y2="197.5" stroke="#2E8B57" stroke-width="2.1"/>
+  <text x="146" y="202.5" font-size="8.8" fill="#555">3</text>
+
+  <!-- Arrow -->
+  <line x1="158" y1="131.2" x2="178" y2="131.2" stroke="#555" stroke-width="1.3" marker-end="u r l a r r F C"/>
+  <text x="168" y="120" text-anchor="middle" font-size="8.8" fill="#888">FPCA</text>
+
+  <!-- ===== STEP 2: FPC Scores ===== -->
+  <rect x="184" y="52.5" width="140" height="162.5" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="254" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">FPC Scores</text>
+  <text x="254" y="87.5" text-anchor="middle" font-size="10" fill="#888">&#958;&#7522; = (&#958;&#8321;,...,&#958;&#8346;)</text>
+
+  <!-- Scatter plot of PC1 vs PC2 -->
+  <line x1="200" y1="193.8" x2="310" y2="193.8" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="200" y1="193.8" x2="200" y2="100" stroke="#ccc" stroke-width="0.6"/>
+  <text x="260" y="207.5" text-anchor="middle" font-size="8.8" fill="#888">PC1</text>
+  <text x="196" y="147.5" text-anchor="middle" font-size="8.8" fill="#888" transform="rotate(-90, 196, 118)">PC2</text>
+
+  <!-- Class 1 points (blue) - top-left cluster -->
+  <circle cx="218" cy="122.5" r="3" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="226" cy="115" r="3" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="222" cy="130" r="3" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="214" cy="120" r="3" fill="#4A90D9" opacity="0.7"/>
+
+  <!-- Class 2 points (orange) - right cluster -->
+  <circle cx="280" cy="150" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="288" cy="160" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="284" cy="142.5" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="292" cy="152.5" r="3" fill="#D55E00" opacity="0.7"/>
+
+  <!-- Class 3 points (green) - center cluster -->
+  <circle cx="250" cy="170" r="3" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="258" cy="177.5" r="3" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="244" cy="175" r="3" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="254" cy="185" r="3" fill="#2E8B57" opacity="0.7"/>
+
+  <!-- Arrow -->
+  <line x1="328" y1="131.2" x2="348" y2="131.2" stroke="#555" stroke-width="1.3" marker-end="u r l a r r F C"/>
+  <text x="338" y="120" text-anchor="middle" font-size="8.8" fill="#888">classify</text>
+
+  <!-- ===== STEP 3: Decision boundary ===== -->
+  <rect x="354" y="52.5" width="140" height="162.5" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="424" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#B37700">Decision Boundary</text>
+  <text x="424" y="87.5" text-anchor="middle" font-size="10" fill="#888">LDA / QDA / kNN</text>
+
+  <!-- Score space with decision boundary -->
+  <line x1="370" y1="193.8" x2="480" y2="193.8" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="370" y1="193.8" x2="370" y2="100" stroke="#ccc" stroke-width="0.6"/>
+
+  <!-- Decision boundaries -->
+  <path d="M 370 110.0 Q 400 135.0 430 160.0 Q 450 175.0 480 187.5" stroke="#888" stroke-width="1.1" stroke-dasharray="4,2" fill="none"/>
+  <path d="M 400 100.0 Q 420 137.5 440 175.0 Q 450 190.0 458 193.8" stroke="#888" stroke-width="1.1" stroke-dasharray="4,2" fill="none"/>
+
+  <!-- Points with boundaries -->
+  <circle cx="388" cy="122.5" r="3" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="396" cy="115" r="3" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="384" cy="130" r="3" fill="#4A90D9" opacity="0.7"/>
+
+  <circle cx="452" cy="150" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="460" cy="160" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="456" cy="142.5" r="3" fill="#D55E00" opacity="0.7"/>
+
+  <circle cx="420" cy="172.5" r="3" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="428" cy="177.5" r="3" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="414" cy="182.5" r="3" fill="#2E8B57" opacity="0.7"/>
+
+  <!-- ===== RIGHT: Prediction ===== -->
+  <line x1="498" y1="110" x2="518" y2="110" stroke="#555" stroke-width="1.3" marker-end="u r l a r r F C"/>
+  <rect x="524" y="75" width="62" height="75" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.6"/>
+  <text x="555" y="97.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2E8B57">Predict</text>
+  <text x="555" y="115" text-anchor="middle" font-size="10" fill="#555">&#285; = argmax</text>
+  <text x="555" y="132.5" text-anchor="middle" font-size="10" fill="#555">&#948;&#7501;(&#958;)</text>
+
+  <!-- ===== BOTTOM: 5 Methods ===== -->
+  <line x1="10" y1="232.5" x2="590" y2="232.5" stroke="#eee" stroke-width="1.1"/>
+  <text x="300" y="257.5" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#555">Five Classification Methods</text>
+
+  <!-- LDA -->
+  <rect x="14" y="272.5" width="104" height="72.5" rx="5" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.1"/>
+  <text x="66" y="295" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">LDA</text>
+  <text x="66" y="312.5" text-anchor="middle" font-size="8.8" fill="#555">Linear boundaries</text>
+  <text x="66" y="327.5" text-anchor="middle" font-size="8.8" fill="#888">Common covariance</text>
+
+  <!-- QDA -->
+  <rect x="128" y="272.5" width="104" height="72.5" rx="5" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.1"/>
+  <text x="180" y="295" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">QDA</text>
+  <text x="180" y="312.5" text-anchor="middle" font-size="8.8" fill="#555">Quadratic boundaries</text>
+  <text x="180" y="327.5" text-anchor="middle" font-size="8.8" fill="#888">Class-specific &#931;</text>
+
+  <!-- kNN -->
+  <rect x="242" y="272.5" width="104" height="72.5" rx="5" fill="#F3E8FD" stroke="#7B2D8E" stroke-width="1.1"/>
+  <text x="294" y="295" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#7B2D8E">kNN</text>
+  <text x="294" y="312.5" text-anchor="middle" font-size="8.8" fill="#555">Flexible boundaries</text>
+  <text x="294" y="327.5" text-anchor="middle" font-size="8.8" fill="#888">Nonparametric</text>
+
+  <!-- Kernel -->
+  <rect x="356" y="272.5" width="104" height="72.5" rx="5" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.1"/>
+  <text x="408" y="295" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2E8B57">Kernel</text>
+  <text x="408" y="312.5" text-anchor="middle" font-size="8.8" fill="#555">L&#178; functional distance</text>
+  <text x="408" y="327.5" text-anchor="middle" font-size="8.8" fill="#888">No dim. reduction</text>
+
+  <!-- DD -->
+  <rect x="470" y="272.5" width="116" height="72.5" rx="5" fill="#FFE8E8" stroke="#d62728" stroke-width="1.1"/>
+  <text x="528" y="295" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#d62728">DD-Classifier</text>
+  <text x="528" y="312.5" text-anchor="middle" font-size="8.8" fill="#555">Depth-based</text>
+  <text x="528" y="327.5" text-anchor="middle" font-size="8.8" fill="#888">Robust to outliers</text>
+
+  <!-- Bottom note -->
+  <text x="300" y="375" text-anchor="middle" font-size="11.2" fill="#555">Curves &#8594; low-dimensional FPC scores &#8594; classification avoids the curse of dimensionality</text>
+  <text x="300" y="395" text-anchor="middle" font-size="10" fill="#888">Kernel and DD classifiers work directly in function space without FPCA</text>
+</svg>

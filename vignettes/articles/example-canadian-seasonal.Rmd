@@ -39,7 +39,7 @@ is detected as the annual temperature swing gradually increases over the
 The Canadian Weather dataset is a classic benchmark in functional data analysis
 (Ramsay and Silverman, 2005).
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())

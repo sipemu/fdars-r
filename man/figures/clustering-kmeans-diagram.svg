@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="24" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C5F8A">K-Means Clustering</text>
+  <text x="350" y="46" text-anchor="middle" font-size="13" fill="#888">Iterative centroid refinement with hard assignment</text>
+
+  <!-- Step 1: Initialize -->
+  <rect x="16" y="66" width="155" height="100" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="93" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">1. Initialize</text>
+  <text x="36" y="110" font-size="12" fill="#555">k-means++ selects</text>
+  <text x="36" y="128" font-size="12" fill="#555">k spread-out centers</text>
+  <!-- dots -->
+  <circle cx="50" cy="152" r="4" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="100" cy="148" r="4" fill="#E6A020" opacity="0.7"/>
+  <circle cx="140" cy="154" r="4" fill="#2E8B57" opacity="0.7"/>
+
+  <!-- Arrow -->
+  <line x1="175" y1="116" x2="195" y2="116" stroke="#555" stroke-width="1.2" marker-end="url(#arrKM)"/>
+
+  <!-- Step 2: Assign -->
+  <rect x="200" y="66" width="155" height="100" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="277" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">2. Assign</text>
+  <text x="220" y="110" font-size="12" fill="#555">Each curve &#x2192; nearest</text>
+  <text x="220" y="128" font-size="12" fill="#555">centroid by d(f, c&#x2096;)</text>
+  <!-- colored dots assigned -->
+  <circle cx="222" cy="152" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="236" cy="148" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="264" cy="150" r="3" fill="#E6A020" opacity="0.5"/>
+  <circle cx="278" cy="154" r="3" fill="#E6A020" opacity="0.5"/>
+  <circle cx="310" cy="148" r="3" fill="#2E8B57" opacity="0.5"/>
+  <circle cx="324" cy="152" r="3" fill="#2E8B57" opacity="0.5"/>
+
+  <!-- Arrow -->
+  <line x1="359" y1="116" x2="379" y2="116" stroke="#555" stroke-width="1.2" marker-end="url(#arrKM)"/>
+
+  <!-- Step 3: Update -->
+  <rect x="384" y="66" width="155" height="100" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="461" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">3. Update</text>
+  <text x="404" y="110" font-size="12" fill="#555">Recompute centroids</text>
+  <text x="404" y="128" font-size="12" fill="#555">as cluster means</text>
+  <!-- centroid curves -->
+  <path d="M404 150 Q420 140 436 145 Q452 150 468 142 Q484 138 500 140" stroke="#4A90D9" stroke-width="2" fill="none"/>
+  <path d="M404 158 Q420 165 436 158 Q452 150 468 158 Q484 165 500 158" stroke="#E6A020" stroke-width="2" fill="none"/>
+
+  <!-- Arrow -->
+  <line x1="543" y1="116" x2="563" y2="116" stroke="#555" stroke-width="1.2" marker-end="url(#arrKM)"/>
+
+  <!-- Step 4: Converge -->
+  <rect x="568" y="66" width="116" height="100" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="626" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">4. Repeat</text>
+  <text x="588" y="110" font-size="12" fill="#555">Until centroids</text>
+  <text x="588" y="128" font-size="12" fill="#555">stabilize</text>
+  <!-- loop arrow -->
+  <path d="M626 148 Q660 148 660 116 Q660 84 640 76" stroke="#7B2D8E" stroke-width="1.2" fill="none" marker-end="url(#arrKM)"/>
+
+  <!-- Bottom: key parameters -->
+  <line x1="16" y1="186" x2="684" y2="186" stroke="#eee" stroke-width="1.5"/>
+
+  <rect x="24" y="202" width="200" height="60" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="124" y="222" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">Parameters</text>
+  <text x="44" y="242" font-size="12" fill="#555">ncl, metric, nstart, seed</text>
+
+  <rect x="244" y="202" width="200" height="60" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="344" y="222" text-anchor="middle" font-size="13" font-weight="bold" fill="#B37700">Output</text>
+  <text x="264" y="242" font-size="12" fill="#555">cluster, centers, withinss</text>
+
+  <rect x="464" y="202" width="220" height="60" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="574" y="222" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">Metrics</text>
+  <text x="484" y="242" font-size="12" fill="#555">"L2", "L1", metric.DTW, ...</text>
+
+  <defs>
+    <marker id="arrKM" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

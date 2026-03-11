@@ -40,6 +40,10 @@ for FDA with a high-performance Rust backend. Key features include:
 - **Flexible metrics**: Multiple distance measures including DTW
 - **2D support**: Analysis of surfaces in addition to curves
 
+```{=html}
+<img src="../reference/figures/introduction-diagram.svg" alt="The fdars Toolkit" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
 ## Installation
 
 ```{r eval=FALSE}
@@ -49,7 +53,7 @@ remotes::install_github("sipemu/fdars")
 
 ## Getting Started
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())

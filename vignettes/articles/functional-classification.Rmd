@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ## Introduction
 
 Supervised classification assigns functional observations to discrete groups.
-**fdars** provides five methods through a unified `fclassif()` interface:
+**fdars** provides seven methods:
 
 | Method | Description | Strengths |
 |--------|-------------|-----------|
@@ -25,13 +25,21 @@ Supervised classification assigns functional observations to discrete groups.
 | **kNN** | k-nearest neighbors in FPC space | Nonparametric, flexible |
 | **Kernel** | Kernel classifier with functional bandwidth | Fully nonparametric |
 | **DD** | Depth-vs-depth classification | Robust to outliers |
+| **Logistic** | FPC-based logistic regression | Calibrated probabilities |
+| **Elastic logistic** | Phase-invariant logistic | Handles misalignment |
 
-All methods support optional scalar covariates alongside functional predictors.
+The first five methods are available through the unified `fclassif()` interface
+and support optional scalar covariates. Logistic regression uses
+`functional.logistic()`, and elastic logistic uses `elastic.logistic()`.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
+```
+
+```{=html}
+<img src="../reference/figures/functional-classification-diagram.svg" alt="Functional Classification Pipeline" style="width:100%; max-width:700px;">
 ```
 
 ## Why Functional Classification?
@@ -298,18 +306,79 @@ captures the dominant modes of between-class variation, improving discrimination
 Adding later components brings in directions that are mainly within-class noise,
 diluting the signal.
 
+## Functional Logistic Regression
+
+For binary classification, `functional.logistic()` fits a logistic regression
+model using FPC scores as features. Unlike the discriminative methods above,
+this produces **calibrated probabilities** --- useful when you need confidence
+in the classification, not just a label.
+
+### The IRLS Algorithm
+
+The functional logistic model uses the logit link on FPC scores:
+
+$$\log\frac{P(Y_i = 1)}{1 - P(Y_i = 1)} = \alpha + \sum_{k=1}^K \gamma_k \xi_{ik}$$
+
+This is estimated via **Iteratively Reweighted Least Squares (IRLS)**, which
+alternates between:
+
+1. **Working response**: $z_i = \hat\eta_i + (y_i - \hat{p}_i) / [\hat{p}_i(1 - \hat{p}_i)]$
+2. **Working weights**: $w_i = \hat{p}_i(1 - \hat{p}_i)$
+3. **Weighted least squares**: update $\hat\gamma$ by regressing $z$ on $\Xi$ with weights $w$
+
+Convergence is monitored via the log-likelihood:
+
+$$\ell(\gamma) = \sum_{i=1}^n \bigl[y_i \log p_i + (1 - y_i)\log(1 - p_i)\bigr]$$
+
+### Binary Classification Example
+
+```{r logistic}
+# Create binary response from iris species (setosa vs rest)
+y_bin <- as.numeric(y == 1)  # 1 = setosa, 0 = versicolor/virginica
+
+logit_fit <- functional.logistic(fd, y_bin, ncomp = 3)
+print(logit_fit)
+
+cat("Probabilities range:", range(logit_fit$probabilities), "\n")
+```
+
+Estimated probabilities near 0 or 1 indicate confident classification; values
+near 0.5 indicate curves in the overlap region where the predictor's FPC scores
+do not clearly separate the two classes.
+
+### Probability Interpretation
+
+Unlike discriminant methods (LDA/QDA), functional logistic regression directly
+models $P(Y = 1 | X)$. This makes it natural for:
+
+- **Risk scoring**: rank observations by predicted probability
+- **Threshold tuning**: adjust the decision boundary beyond 0.5
+- **Calibration**: the predicted probabilities approximate true class
+  frequencies
+
+## Elastic Logistic Regression
+
+When curves exhibit **phase variability** (timing differences), standard
+logistic regression on FPC scores may confound amplitude and phase effects.
+`elastic.logistic()` jointly estimates alignment warping functions and
+logistic regression coefficients in the SRSF domain.
+
+See `vignette("articles/elastic-regression")` for the full elastic regression
+framework, including `elastic.logistic()` and `elastic.pcr()`.
+
 ## Choosing a Classifier
 
 The table below summarizes practical considerations:
 
-| Criterion | LDA | QDA | kNN | Kernel | DD |
-|-----------|-----|-----|-----|--------|-----|
-| **Assumptions** | Common covariance | Class-specific covariance | None | None | None |
-| **Min. $n_g$** | $> K$ | $> K(K+1)/2$ | $> k$ | $> 20$ | $> 20$ |
-| **Boundaries** | Linear | Quadratic | Flexible | Flexible | Depth-based |
-| **Tuning** | $K$ only | $K$ only | $K$, $k$ | $h$ | $K$ |
-| **Speed** | Fast | Fast | Moderate | Slow | Moderate |
-| **Robustness** | Low | Low | Moderate | Moderate | High |
+| Criterion | LDA | QDA | kNN | Kernel | DD | Logistic |
+|-----------|-----|-----|-----|--------|-----|----------|
+| **Assumptions** | Common cov. | Class-specific cov. | None | None | None | Linear in FPC space |
+| **Min. $n_g$** | $> K$ | $> K(K+1)/2$ | $> k$ | $> 20$ | $> 20$ | $> K$ |
+| **Boundaries** | Linear | Quadratic | Flexible | Flexible | Depth-based | Linear |
+| **Tuning** | $K$ only | $K$ only | $K$, $k$ | $h$ | $K$ | $K$ |
+| **Speed** | Fast | Fast | Moderate | Slow | Moderate | Fast |
+| **Robustness** | Low | Low | Moderate | Moderate | High | Low |
+| **Probabilities** | Posterior | Posterior | No | No | No | Calibrated |
 
 **Rules of thumb:**
 
@@ -323,6 +392,8 @@ The table below summarizes practical considerations:
   to avoid the FPC projection step entirely.
 - Use **DD** when robustness to outliers is paramount or distributional
   assumptions are suspect.
+- Use **logistic regression** when you need calibrated probabilities or want
+  to interpret coefficients as log-odds.
 
 ## References
 
@@ -335,7 +406,7 @@ The table below summarizes practical considerations:
 
 - `vignette("articles/andrews-transformation")` for more on the Andrews
   transform and its distance-preservation property
-- `vignette("articles/functional-regression")` for scalar-on-function
-  regression including `functional.logistic()`
+- `vignette("articles/scalar-on-function")` for scalar-on-function regression
+- `vignette("articles/elastic-regression")` for elastic logistic and elastic PCR
 - `vignette("articles/clustering")` for unsupervised functional clustering
 - `vignette("articles/fpca")` for functional PCA, which underlies LDA/QDA/kNN

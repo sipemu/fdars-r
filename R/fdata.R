@@ -1098,9 +1098,9 @@ plot.fdata <- function(x, color = NULL, alpha = NULL, show.mean = FALSE,
 #' @param depth.func Depth function to use. Default is depth.MBD.
 #' @param show.outliers Logical. If TRUE (default), show outlier curves.
 #' @param col.median Color for median curve (default "black").
-#' @param col.envelope Color for central envelope (default "magenta").
-#' @param col.fence Color for fence region (default "pink").
-#' @param col.outliers Color for outlier curves (default "red").
+#' @param col.envelope Color for central envelope (default "steelblue").
+#' @param col.fence Color for fence region (default "#B0C4DE").
+#' @param col.outliers Color for outlier curves (default "#D55E00").
 #' @param ... Additional arguments passed to depth function.
 #'
 #' @return A list of class 'fbplot' with components:
@@ -1147,9 +1147,9 @@ boxplot.fdata <- function(x, prob = 0.5, factor = 1.5,
                           depth.func = depth.MBD,
                           show.outliers = TRUE,
                           col.median = "black",
-                          col.envelope = "magenta",
-                          col.fence = "pink",
-                          col.outliers = "red", ...) {
+                          col.envelope = "steelblue",
+                          col.fence = "#B0C4DE",
+                          col.outliers = "#D55E00", ...) {
   if (!inherits(x, "fdata")) {
     stop("x must be of class 'fdata'")
   }

@@ -34,11 +34,15 @@ The four methods are:
    linearization of elastic alignment for downstream analysis.
    See `vignette("tsrvf", package = "fdars")` for full details.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 library(patchwork)
 theme_set(theme_minimal())
+```
+
+```{=html}
+<img src="../reference/figures/alignment-comparison-diagram.svg" alt="Comparing Alignment Methods: Elastic, Landmark, and Constrained" style="width:100%; max-width:700px;">
 ```
 
 ## Test Data

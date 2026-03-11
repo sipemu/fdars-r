@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="24" text-anchor="middle" font-size="18" font-weight="bold" fill="#7B2D8E">Change Detection &amp; Varying Period</text>
+  <text x="350" y="46" text-anchor="middle" font-size="13" fill="#888">Detect when seasonality shifts and track instantaneous period</text>
+
+  <!-- ===== Left: Change detection ===== -->
+  <rect x="16" y="66" width="330" height="120" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="181" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Change Detection</text>
+
+  <!-- Signal with change point -->
+  <path d="M36 130 Q52 110 68 130 Q84 150 100 130 Q116 110 132 130" stroke="#4A90D9" stroke-width="1.5" fill="none"/>
+  <line x1="145" y1="98" x2="145" y2="170" stroke="#D55E00" stroke-width="2" stroke-dasharray="4"/>
+  <path d="M158 130 Q166 120 174 130 Q182 140 190 130 Q198 120 206 130 Q214 140 222 130 Q230 120 238 130" stroke="#E6A020" stroke-width="1.5" fill="none"/>
+  <text x="145" y="94" text-anchor="middle" font-size="10" fill="#D55E00">change!</text>
+
+  <text x="36" y="160" font-size="11" fill="#555">seasonal.detect.changes()</text>
+  <text x="36" y="176" font-size="11" fill="#555">seasonal.detect.changes.auto()</text>
+
+  <!-- ===== Right: Instantaneous period ===== -->
+  <rect x="362" y="66" width="322" height="120" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="523" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Instantaneous Period</text>
+
+  <!-- Chirp-like signal -->
+  <path d="M382 130 Q394 110 406 130 Q418 150 430 130 Q438 118 446 130 Q454 142 462 130 Q468 122 474 130 Q480 138 486 130 Q490 126 494 130" stroke="#E6A020" stroke-width="1.5" fill="none"/>
+  <text x="523" y="158" text-anchor="middle" font-size="12" fill="#555">seasonal.instantaneous.period()</text>
+  <text x="523" y="176" text-anchor="middle" font-size="11" fill="#888">Hilbert transform &#x2192; analytic signal &#x2192; T(t)</text>
+
+  <!-- ===== Bottom: Matrix profile ===== -->
+  <rect x="16" y="204" width="330" height="60" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="181" y="228" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Matrix Profile</text>
+  <text x="36" y="250" font-size="12" fill="#555">seasonal.matrix.profile()  &#x2014;  motif discovery</text>
+
+  <!-- ===== Bottom right: Lomb-Scargle ===== -->
+  <rect x="362" y="204" width="322" height="60" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="523" y="228" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Lomb-Scargle</text>
+  <text x="382" y="250" font-size="12" fill="#555">seasonal.lomb.scargle()  &#x2014;  irregular sampling</text>
+
+  <defs>
+    <marker id="arrSC" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

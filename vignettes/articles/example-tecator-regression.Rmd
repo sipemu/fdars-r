@@ -34,7 +34,7 @@ viable replacement for wet chemistry.
 This dataset is a standard benchmark in chemometrics and functional data
 analysis (Ferraty and Vieu, 2006; Febrero-Bande and Oviedo de la Fuente, 2012).
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -500,8 +500,8 @@ significantly to the classification decision.
 
 ## See Also
 
-- `vignette("articles/regression")` — regression methods overview
-- `vignette("articles/functional-regression")` — FPC regression, FOSR, and FANOVA
+- `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
+- `vignette("articles/function-on-scalar")` — FOSR and FANOVA
 - `vignette("articles/example-canadian-weather")` — regional climate patterns
   with FANOVA and FOSR
 

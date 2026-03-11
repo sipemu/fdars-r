@@ -31,6 +31,14 @@ use fdars_core::gmm;
 use fdars_core::famm;
 use fdars_core::depth as core_depth;
 
+// New modules from fdars-core 0.8.1
+use fdars_core::explain;
+use fdars_core::elastic_regression;
+use fdars_core::elastic_fpca;
+use fdars_core::elastic_changepoint;
+use fdars_core::elastic_explain;
+use fdars_core::smooth_basis;
+
 // =============================================================================
 // Helper functions
 // =============================================================================
@@ -4553,6 +4561,112 @@ fn outliers_thres_lrt(
     sorted_dists.get(idx).copied().unwrap_or(0.0)
 }
 
+/// Internal helper: compute threshold AND bootstrap distribution
+fn outliers_thres_lrt_with_dist(
+    data_slice: &[f64],
+    n: usize,
+    m: usize,
+    nb: usize,
+    smo: f64,
+    trim: f64,
+    seed: u64,
+    percentile: f64,
+) -> (f64, Vec<f64>) {
+    if n < 3 || m == 0 {
+        return (0.0, vec![]);
+    }
+    let n_keep = ((1.0 - trim) * n as f64).ceil().max(1.0) as usize;
+    let n_keep = n_keep.min(n);
+
+    let orig_depths = compute_fm_depth_internal(data_slice, n, m);
+    let mut orig_depth_idx: Vec<(usize, f64)> = orig_depths
+        .iter()
+        .enumerate()
+        .map(|(i, &d)| (i, d))
+        .collect();
+    orig_depth_idx
+        .sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    let clean_idx: Vec<usize> = orig_depth_idx
+        .iter()
+        .take(n_keep)
+        .map(|(i, _)| *i)
+        .collect();
+    let n_clean = clean_idx.len();
+
+    let col_vars: Vec<f64> = (0..m)
+        .map(|j| {
+            let mut sum = 0.0;
+            let mut sum_sq = 0.0;
+            for &i in &clean_idx {
+                let val = data_slice[i + j * n];
+                sum += val;
+                sum_sq += val * val;
+            }
+            let mean = sum / n_clean as f64;
+            let var = sum_sq / n_clean as f64 - mean * mean;
+            var.max(0.0).sqrt()
+        })
+        .collect();
+
+    let max_dists: Vec<f64> = (0..nb)
+        .into_par_iter()
+        .map(|b| {
+            let mut rng = StdRng::seed_from_u64(seed + b as u64);
+            let indices: Vec<usize> =
+                (0..n_clean).map(|_| clean_idx[rng.gen_range(0..n_clean)]).collect();
+            let mut boot_data = vec![0.0; n_clean * m];
+            for (new_i, &old_i) in indices.iter().enumerate() {
+                for j in 0..m {
+                    let noise: f64 = rng.sample::<f64, _>(StandardNormal) * smo * col_vars[j];
+                    boot_data[new_i + j * n_clean] = data_slice[old_i + j * n] + noise;
+                }
+            }
+            let depths = compute_fm_depth_internal(&boot_data, n_clean, m);
+            let n_keep_boot = ((1.0 - trim) * n_clean as f64).ceil().max(1.0) as usize;
+            let n_keep_boot = n_keep_boot.min(n_clean);
+            let mut depth_idx: Vec<(usize, f64)> =
+                depths.iter().enumerate().map(|(i, &d)| (i, d)).collect();
+            depth_idx.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+            let keep_idx: Vec<usize> = depth_idx.iter().take(n_keep_boot).map(|(i, _)| *i).collect();
+            let mut trimmed_mean = vec![0.0; m];
+            for j in 0..m {
+                for &i in &keep_idx {
+                    trimmed_mean[j] += boot_data[i + j * n_clean];
+                }
+                trimmed_mean[j] /= n_keep_boot as f64;
+            }
+            let mut trimmed_var = vec![0.0; m];
+            for j in 0..m {
+                for &i in &keep_idx {
+                    let diff = boot_data[i + j * n_clean] - trimmed_mean[j];
+                    trimmed_var[j] += diff * diff;
+                }
+                trimmed_var[j] /= n_keep_boot as f64;
+                trimmed_var[j] = trimmed_var[j].max(1e-10);
+            }
+            let mut max_dist = 0.0;
+            for i in 0..n_clean {
+                let mut dist = 0.0;
+                for j in 0..m {
+                    let diff = boot_data[i + j * n_clean] - trimmed_mean[j];
+                    dist += diff * diff / trimmed_var[j];
+                }
+                dist = (dist / m as f64).sqrt();
+                if dist > max_dist {
+                    max_dist = dist;
+                }
+            }
+            max_dist
+        })
+        .collect();
+
+    let mut sorted_dists = max_dists;
+    sorted_dists.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let idx = ((nb as f64 * percentile) as usize).min(nb.saturating_sub(1));
+    let threshold = sorted_dists.get(idx).copied().unwrap_or(0.0);
+    (threshold, sorted_dists)
+}
+
 /// Helper to compute FM depth internally
 fn compute_fm_depth_internal(data: &[f64], n: usize, m: usize) -> Vec<f64> {
     // Compute FM depth for each curve
@@ -4610,8 +4724,8 @@ fn outliers_lrt(
     let data_slice = data.as_real_slice().unwrap().to_vec();
     let _n_keep = ((1.0 - trim) * n as f64).ceil() as usize;
 
-    // Compute threshold
-    let threshold = outliers_thres_lrt(data, argvals.clone(), nb, smo, trim, seed, percentile);
+    // Compute threshold and bootstrap null distribution
+    let (threshold, boot_dist) = outliers_thres_lrt_with_dist(&data_slice, n, m, nb as usize, smo, trim, seed, percentile);
 
     // Iterative outlier detection (up to 5 iterations)
     let mut current_mask = vec![true; n];
@@ -4707,7 +4821,8 @@ fn outliers_lrt(
                 .map(|&i| (i + 1) as i32)
                 .collect::<Vec<_>>(),
             distances = vec![0.0; n],
-            threshold = threshold
+            threshold = threshold,
+            boot_dist = boot_dist
         )
         .into();
     }
@@ -4769,7 +4884,8 @@ fn outliers_lrt(
     list!(
         outliers = outlier_indices,
         distances = distances,
-        threshold = threshold
+        threshold = threshold,
+        boot_dist = boot_dist
     )
     .into()
 }
@@ -8798,6 +8914,7 @@ fn alignment_tsrvf_from_karcher(
         aligned_data: a_fd,
         n_iter: n_iter as usize,
         converged,
+        aligned_srsfs: None,
     };
     let res = alignment::tsrvf_from_alignment(&karcher, &argvals);
     let tv_s = res.tangent_vectors.as_slice();
@@ -8886,6 +9003,7 @@ fn alignment_quality_compute(
         aligned_data: a_fd,
         n_iter: n_iter as usize,
         converged,
+        aligned_srsfs: None,
     };
     let q = alignment::alignment_quality(&fd, &karcher, &argvals);
     list!(
@@ -9270,11 +9388,14 @@ fn fregre_lm_rust(
                 coefficients = coefs,
                 residual_se = r.residual_se,
                 gcv = r.gcv,
-                // FPCA fields for prediction
+                // FPCA fields for prediction and explainability
                 fpca_mean = Robj::from(r.fpca.mean.clone()),
                 fpca_rotation_data = Robj::from(r.fpca.rotation.as_slice().to_vec()),
                 fpca_rotation_nrow = r.fpca.rotation.nrows() as i32,
-                fpca_rotation_ncol = r.fpca.rotation.ncols() as i32
+                fpca_rotation_ncol = r.fpca.rotation.ncols() as i32,
+                fpca_scores_data = Robj::from(r.fpca.scores.as_slice().to_vec()),
+                fpca_scores_nrow = r.fpca.scores.nrows() as i32,
+                fpca_scores_ncol = r.fpca.scores.ncols() as i32
             ))
         }
         None => r!(NULL),
@@ -9363,7 +9484,12 @@ fn functional_logistic_rust(
                 fpca_mean = Robj::from(r.fpca.mean.clone()),
                 fpca_rotation_data = Robj::from(r.fpca.rotation.as_slice().to_vec()),
                 fpca_rotation_nrow = r.fpca.rotation.nrows() as i32,
-                fpca_rotation_ncol = r.fpca.rotation.ncols() as i32
+                fpca_rotation_ncol = r.fpca.rotation.ncols() as i32,
+                fpca_scores_data = Robj::from(r.fpca.scores.as_slice().to_vec()),
+                fpca_scores_nrow = r.fpca.scores.nrows() as i32,
+                fpca_scores_ncol = r.fpca.scores.ncols() as i32,
+                beta_se = Robj::from(r.beta_se),
+                std_errors = Robj::from(r.std_errors)
             ))
         }
         None => r!(NULL),
@@ -9404,6 +9530,93 @@ fn fregre_cv_rust(
                 cv_errors = Robj::from(r.cv_errors),
                 optimal_k = r.optimal_k as i32,
                 min_cv_error = r.min_cv_error
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Bootstrap confidence intervals for β(t) in functional linear model
+#[extendr]
+fn bootstrap_ci_fregre_lm_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    scalar_covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+    n_boot: i32,
+    alpha: f64,
+    seed: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+
+    let scov = match scalar_covariates {
+        Nullable::NotNull(sc) => {
+            let sc_s = sc.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(sc_s, sc.nrows(), sc.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let result = scalar_on_function::bootstrap_ci_fregre_lm(
+        &fd, &y, scov.as_ref(), ncomp as usize, n_boot as usize, alpha, seed as u64,
+    );
+    match result {
+        Some(r) => {
+            r!(list!(
+                lower = Robj::from(r.lower),
+                upper = Robj::from(r.upper),
+                center = Robj::from(r.center),
+                sim_lower = Robj::from(r.sim_lower),
+                sim_upper = Robj::from(r.sim_upper),
+                n_boot_success = r.n_boot_success as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Bootstrap confidence intervals for β(t) in functional logistic model
+#[extendr]
+fn bootstrap_ci_functional_logistic_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    scalar_covariates: Nullable<RMatrix<f64>>,
+    ncomp: i32,
+    n_boot: i32,
+    alpha: f64,
+    seed: i32,
+    max_iter: i32,
+    tol: f64,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+
+    let scov = match scalar_covariates {
+        Nullable::NotNull(sc) => {
+            let sc_s = sc.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(sc_s, sc.nrows(), sc.ncols()).expect("Invalid covariates"))
+        }
+        Nullable::Null => None,
+    };
+
+    let result = scalar_on_function::bootstrap_ci_functional_logistic(
+        &fd, &y, scov.as_ref(), ncomp as usize, n_boot as usize, alpha, seed as u64,
+        max_iter as usize, tol,
+    );
+    match result {
+        Some(r) => {
+            r!(list!(
+                lower = Robj::from(r.lower),
+                upper = Robj::from(r.upper),
+                center = Robj::from(r.center),
+                sim_lower = Robj::from(r.sim_lower),
+                sim_upper = Robj::from(r.sim_upper),
+                n_boot_success = r.n_boot_success as i32
             ))
         }
         None => r!(NULL),
@@ -10142,6 +10355,2396 @@ fn depth_rt_1d_seeded(
 }
 
 // =============================================================================
+// Helper: Reconstruct FregreLmResult from flattened R parameters
+// =============================================================================
+
+/// Reconstruct a FregreLmResult from the 20 flattened parameters that .explain_call() sends.
+fn reconstruct_fregre_lm(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+) -> fdars_core::scalar_on_function::FregreLmResult {
+    let rotation = FdMatrix::from_slice(
+        &fpca_rotation_data,
+        fpca_rotation_nrow as usize,
+        fpca_rotation_ncol as usize,
+    )
+    .unwrap_or_else(|| FdMatrix::zeros(0, 0));
+
+    let scores = FdMatrix::from_slice(
+        &fpca_scores_data,
+        fpca_scores_nrow as usize,
+        fpca_scores_ncol as usize,
+    )
+    .unwrap_or_else(|| FdMatrix::zeros(0, 0));
+
+    let n = scores.nrows();
+    let m = rotation.nrows();
+
+    fdars_core::scalar_on_function::FregreLmResult {
+        intercept,
+        beta_t,
+        beta_se,
+        gamma,
+        fitted_values,
+        residuals,
+        r_squared,
+        r_squared_adj,
+        std_errors,
+        ncomp: ncomp as usize,
+        coefficients,
+        residual_se,
+        gcv,
+        fpca: fdars_core::regression::FpcaResult {
+            singular_values: vec![],
+            rotation,
+            scores,
+            mean: fpca_mean,
+            centered: FdMatrix::zeros(n, m),
+        },
+    }
+}
+
+/// Reconstruct a FunctionalLogisticResult from the 19 flattened parameters.
+fn reconstruct_functional_logistic(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    probabilities: Vec<f64>,
+    predicted_classes: Vec<f64>,
+    ncomp: i32,
+    accuracy: f64,
+    std_errors: Vec<f64>,
+    coefficients: Vec<f64>,
+    log_likelihood: f64,
+    iterations: i32,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+) -> fdars_core::scalar_on_function::FunctionalLogisticResult {
+    let rotation = FdMatrix::from_slice(
+        &fpca_rotation_data,
+        fpca_rotation_nrow as usize,
+        fpca_rotation_ncol as usize,
+    )
+    .unwrap_or_else(|| FdMatrix::zeros(0, 0));
+
+    let scores = FdMatrix::from_slice(
+        &fpca_scores_data,
+        fpca_scores_nrow as usize,
+        fpca_scores_ncol as usize,
+    )
+    .unwrap_or_else(|| FdMatrix::zeros(0, 0));
+
+    let n = scores.nrows();
+    let m = rotation.nrows();
+
+    fdars_core::scalar_on_function::FunctionalLogisticResult {
+        intercept,
+        beta_t,
+        beta_se,
+        gamma,
+        probabilities,
+        predicted_classes: predicted_classes.iter().map(|&x| x as u8).collect(),
+        ncomp: ncomp as usize,
+        accuracy,
+        std_errors,
+        coefficients,
+        log_likelihood,
+        iterations: iterations as usize,
+        fpca: fdars_core::regression::FpcaResult {
+            singular_values: vec![],
+            rotation,
+            scores,
+            mean: fpca_mean,
+            centered: FdMatrix::zeros(n, m),
+        },
+    }
+}
+
+/// Reconstruct a KarcherMeanResult from flattened R parameters.
+fn reconstruct_karcher_mean(
+    aligned_data: RMatrix<f64>,
+    gammas_data: RMatrix<f64>,
+    mean_curve: Vec<f64>,
+    mean_srsf: Vec<f64>,
+    _aligned_srsfs: Nullable<RMatrix<f64>>,
+    _argvals: Vec<f64>,
+) -> fdars_core::alignment::KarcherMeanResult {
+    let n = aligned_data.nrows();
+    let m = aligned_data.ncols();
+    let ad_s = aligned_data.as_real_slice().unwrap();
+    let fd_aligned = FdMatrix::from_slice(ad_s, n, m).expect("Invalid aligned_data");
+
+    let gd_s = gammas_data.as_real_slice().unwrap();
+    let fd_gammas = FdMatrix::from_slice(gd_s, gammas_data.nrows(), gammas_data.ncols())
+        .expect("Invalid gammas");
+
+    let aligned_srsfs = match _aligned_srsfs {
+        Nullable::NotNull(s) => {
+            let ss = s.as_real_slice().unwrap();
+            Some(FdMatrix::from_slice(ss, s.nrows(), s.ncols()).expect("Invalid aligned_srsfs"))
+        }
+        Nullable::Null => None,
+    };
+
+    fdars_core::alignment::KarcherMeanResult {
+        mean: mean_curve,
+        mean_srsf,
+        gammas: fd_gammas,
+        aligned_data: fd_aligned,
+        n_iter: 0,
+        converged: true,
+        aligned_srsfs,
+    }
+}
+
+// =============================================================================
+// Explain wrappers (27 functions)
+// =============================================================================
+
+/// Partial dependence plot for a single FPC component
+#[extendr]
+fn explain_pdp_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    component: i32,
+    n_grid: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::functional_pdp(&fit, &fd, None, component as usize, n_grid as usize) {
+        Some(r) => r!(list!(
+            grid_values = Robj::from(r.grid_values),
+            pdp_curve = Robj::from(r.pdp_curve),
+            ice_curves = fdmatrix_to_robj(&r.ice_curves),
+            component = r.component as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Beta decomposition by FPC components
+#[extendr]
+fn explain_beta_decomposition_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    match explain::beta_decomposition(&fit) {
+        Some(r) => {
+            // Convert Vec<Vec<f64>> to an R matrix (ncomp x m)
+            let nc = r.components.len();
+            let m = if nc > 0 { r.components[0].len() } else { 0 };
+            let mut flat = vec![0.0; nc * m];
+            for i in 0..nc {
+                for j in 0..m {
+                    flat[j * nc + i] = r.components[i][j]; // column-major
+                }
+            }
+            let comp_mat = RMatrix::new_matrix(nc, m, |i, j| flat[j * nc + i]);
+            r!(list!(
+                components = Robj::from(comp_mat),
+                coefficients = Robj::from(r.coefficients),
+                variance_proportion = Robj::from(r.variance_proportion)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Pointwise importance of beta(t)
+#[extendr]
+fn explain_pointwise_importance_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    match explain::pointwise_importance(&fit) {
+        Some(r) => r!(list!(
+            importance = Robj::from(r.importance),
+            importance_normalized = Robj::from(r.importance_normalized),
+            component_importance = fdmatrix_to_robj(&r.component_importance),
+            score_variance = Robj::from(r.score_variance)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Significant regions from beta(t) and its standard errors
+#[extendr]
+fn explain_significant_regions_rust(
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    z_alpha: f64,
+) -> Robj {
+    match explain::significant_regions_from_se(&beta_t, &beta_se, z_alpha) {
+        Some(regions) => {
+            let starts: Vec<i32> = regions.iter().map(|r| r.start_idx as i32).collect();
+            let ends: Vec<i32> = regions.iter().map(|r| r.end_idx as i32).collect();
+            let dirs: Vec<String> = regions
+                .iter()
+                .map(|r| match r.direction {
+                    fdars_core::explain::SignificanceDirection::Positive => "positive".to_string(),
+                    fdars_core::explain::SignificanceDirection::Negative => "negative".to_string(),
+                })
+                .collect();
+            r!(list!(
+                start_idx = Robj::from(starts),
+                end_idx = Robj::from(ends),
+                direction = Robj::from(dirs)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// SHAP values for FPC scores
+#[extendr]
+fn explain_shap_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::fpc_shap_values(&fit, &fd, None) {
+        Some(r) => r!(list!(
+            values = fdmatrix_to_robj(&r.values),
+            base_value = r.base_value,
+            mean_scores = Robj::from(r.mean_scores)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Influence diagnostics (leverage, Cook's distance)
+#[extendr]
+fn explain_influence_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::influence_diagnostics(&fit, &fd, None) {
+        Some(r) => r!(list!(
+            leverage = Robj::from(r.leverage),
+            cooks_distance = Robj::from(r.cooks_distance),
+            p = r.p as i32,
+            mse = r.mse
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Variance inflation factors for FPC scores
+#[extendr]
+fn explain_vif_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::fpc_vif(&fit, &fd, None) {
+        Some(r) => r!(list!(
+            vif = Robj::from(r.vif),
+            labels = Robj::from(r.labels),
+            mean_vif = r.mean_vif,
+            n_moderate = r.n_moderate as i32,
+            n_severe = r.n_severe as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// DFBETAS and DFFITS diagnostics
+#[extendr]
+fn explain_dfbetas_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::dfbetas_dffits(&fit, &fd, None) {
+        Some(r) => r!(list!(
+            dfbetas = fdmatrix_to_robj(&r.dfbetas),
+            dffits = Robj::from(r.dffits),
+            studentized_residuals = Robj::from(r.studentized_residuals),
+            p = r.p as i32,
+            dfbetas_cutoff = r.dfbetas_cutoff,
+            dffits_cutoff = r.dffits_cutoff
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Functional saliency map
+#[extendr]
+fn explain_saliency_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::functional_saliency(&fit, &fd, None) {
+        Some(r) => r!(list!(
+            saliency_map = fdmatrix_to_robj(&r.saliency_map),
+            mean_absolute_saliency = Robj::from(r.mean_absolute_saliency)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// FPC permutation importance
+#[extendr]
+fn explain_importance_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    n_perm: i32,
+    seed: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::fpc_permutation_importance(&fit, &fd, &y, n_perm as usize, seed as u64) {
+        Some(r) => r!(list!(
+            importance = Robj::from(r.importance),
+            baseline_metric = r.baseline_metric,
+            permuted_metric = Robj::from(r.permuted_metric)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Leave-one-out cross-validation and PRESS
+#[extendr]
+fn explain_loo_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::loo_cv_press(&fit, &fd, &y, None) {
+        Some(r) => r!(list!(
+            loo_residuals = Robj::from(r.loo_residuals),
+            press = r.press,
+            loo_r_squared = r.loo_r_squared,
+            leverage = Robj::from(r.leverage),
+            tss = r.tss
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Sobol sensitivity indices
+#[extendr]
+fn explain_sobol_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::sobol_indices(&fit, &fd, &y, None) {
+        Some(r) => r!(list!(
+            first_order = Robj::from(r.first_order),
+            total_order = Robj::from(r.total_order),
+            var_y = r.var_y,
+            component_variance = Robj::from(r.component_variance)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Accumulated Local Effects
+#[extendr]
+fn explain_ale_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    component: i32,
+    n_bins: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::fpc_ale(&fit, &fd, None, component as usize, n_bins as usize) {
+        Some(r) => {
+            let bin_counts: Vec<i32> = r.bin_counts.iter().map(|&x| x as i32).collect();
+            r!(list!(
+                bin_midpoints = Robj::from(r.bin_midpoints),
+                ale_values = Robj::from(r.ale_values),
+                bin_edges = Robj::from(r.bin_edges),
+                bin_counts = Robj::from(bin_counts),
+                component = r.component as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Domain selection (important intervals)
+#[extendr]
+fn explain_domain_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    window_width: i32,
+    threshold: f64,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+
+    match explain::domain_selection(&fit, window_width as usize, threshold) {
+        Some(r) => {
+            let starts: Vec<i32> = r.intervals.iter().map(|iv| iv.start_idx as i32).collect();
+            let ends: Vec<i32> = r.intervals.iter().map(|iv| iv.end_idx as i32).collect();
+            let importances: Vec<f64> = r.intervals.iter().map(|iv| iv.importance).collect();
+            r!(list!(
+                pointwise_importance = Robj::from(r.pointwise_importance),
+                interval_starts = Robj::from(starts),
+                interval_ends = Robj::from(ends),
+                interval_importances = Robj::from(importances),
+                window_width = r.window_width as i32,
+                threshold = r.threshold
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Prediction intervals for new observations
+#[extendr]
+fn explain_prediction_intervals_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    train_data: RMatrix<f64>,
+    new_data: RMatrix<f64>,
+    confidence: f64,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let td_s = train_data.as_real_slice().unwrap();
+    let fd_train = FdMatrix::from_slice(td_s, train_data.nrows(), train_data.ncols())
+        .expect("Invalid train_data");
+    let nd_s = new_data.as_real_slice().unwrap();
+    let fd_new = FdMatrix::from_slice(nd_s, new_data.nrows(), new_data.ncols())
+        .expect("Invalid new_data");
+
+    match explain::prediction_intervals(&fit, &fd_train, None, &fd_new, None, confidence) {
+        Some(r) => r!(list!(
+            predictions = Robj::from(r.predictions),
+            lower = Robj::from(r.lower),
+            upper = Robj::from(r.upper),
+            prediction_se = Robj::from(r.prediction_se),
+            confidence_level = r.confidence_level,
+            t_critical = r.t_critical,
+            residual_se = r.residual_se
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// LIME local explanation
+#[extendr]
+fn explain_lime_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    observation: i32,
+    n_samples: i32,
+    kernel_width: f64,
+    seed: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::lime_explanation(
+        &fit, &fd, None, observation as usize, n_samples as usize, kernel_width, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            observation = r.observation as i32,
+            attributions = Robj::from(r.attributions),
+            local_intercept = r.local_intercept,
+            local_r_squared = r.local_r_squared,
+            kernel_width = r.kernel_width
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Counterfactual explanation
+#[extendr]
+fn explain_counterfactual_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    observation: i32,
+    target_value: f64,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::counterfactual_regression(&fit, &fd, None, observation as usize, target_value) {
+        Some(r) => r!(list!(
+            observation = r.observation as i32,
+            original_scores = Robj::from(r.original_scores),
+            counterfactual_scores = Robj::from(r.counterfactual_scores),
+            delta_scores = Robj::from(r.delta_scores),
+            delta_function = Robj::from(r.delta_function),
+            distance = r.distance,
+            original_prediction = r.original_prediction,
+            counterfactual_prediction = r.counterfactual_prediction,
+            found = r.found
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Anchor explanation
+#[extendr]
+fn explain_anchor_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    observation: i32,
+    precision: f64,
+    n_bins: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::anchor_explanation(&fit, &fd, None, observation as usize, precision, n_bins as usize) {
+        Some(r) => {
+            let components: Vec<i32> = r.rule.conditions.iter().map(|c| c.component as i32).collect();
+            let lower_bounds: Vec<f64> = r.rule.conditions.iter().map(|c| c.lower_bound).collect();
+            let upper_bounds: Vec<f64> = r.rule.conditions.iter().map(|c| c.upper_bound).collect();
+            r!(list!(
+                observation = r.observation as i32,
+                predicted_value = r.predicted_value,
+                precision = r.rule.precision,
+                coverage = r.rule.coverage,
+                n_matching = r.rule.n_matching as i32,
+                condition_components = Robj::from(components),
+                condition_lower = Robj::from(lower_bounds),
+                condition_upper = Robj::from(upper_bounds)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Conformal prediction intervals
+#[extendr]
+fn explain_conformal_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    train_data: RMatrix<f64>,
+    train_y: Vec<f64>,
+    test_data: RMatrix<f64>,
+    cal_fraction: f64,
+    alpha: f64,
+    seed: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let td_s = train_data.as_real_slice().unwrap();
+    let fd_train = FdMatrix::from_slice(td_s, train_data.nrows(), train_data.ncols())
+        .expect("Invalid train_data");
+    let ts_s = test_data.as_real_slice().unwrap();
+    let fd_test = FdMatrix::from_slice(ts_s, test_data.nrows(), test_data.ncols())
+        .expect("Invalid test_data");
+
+    match explain::conformal_prediction_residuals(
+        &fit, &fd_train, &train_y, &fd_test, None, None, cal_fraction, alpha, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            predictions = Robj::from(r.predictions),
+            lower = Robj::from(r.lower),
+            upper = Robj::from(r.upper),
+            residual_quantile = r.residual_quantile,
+            coverage = r.coverage,
+            calibration_scores = Robj::from(r.calibration_scores)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Explanation stability via bootstrap
+#[extendr]
+fn explain_stability_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    ncomp: i32,
+    n_boot: i32,
+    seed: i32,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::explanation_stability(&fd, &y, None, ncomp as usize, n_boot as usize, seed as u64) {
+        Some(r) => r!(list!(
+            beta_t_std = Robj::from(r.beta_t_std),
+            coefficient_std = Robj::from(r.coefficient_std),
+            metric_std = r.metric_std,
+            beta_t_cv = Robj::from(r.beta_t_cv),
+            importance_stability = r.importance_stability,
+            n_boot_success = r.n_boot_success as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Friedman H-statistic for interaction detection
+#[extendr]
+fn explain_friedman_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    component_j: i32,
+    component_k: i32,
+    n_grid: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::friedman_h_statistic(&fit, &fd, component_j as usize, component_k as usize, n_grid as usize) {
+        Some(r) => r!(list!(
+            component_j = r.component_j as i32,
+            component_k = r.component_k as i32,
+            h_squared = r.h_squared,
+            grid_j = Robj::from(r.grid_j),
+            grid_k = Robj::from(r.grid_k),
+            pdp_2d = fdmatrix_to_robj(&r.pdp_2d)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Regression depth
+#[extendr]
+fn explain_regression_depth_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    n_boot: i32,
+    seed: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::regression_depth(
+        &fit, &fd, &y, None, n_boot as usize,
+        fdars_core::explain::DepthType::FraimanMuniz, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            beta_depth = r.beta_depth,
+            score_depths = Robj::from(r.score_depths),
+            mean_score_depth = r.mean_score_depth,
+            n_boot_success = r.n_boot_success as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Prototype and criticism selection
+#[extendr]
+fn explain_prototype_rust(
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    ncomp: i32,
+    n_prototypes: i32,
+    n_criticisms: i32,
+) -> Robj {
+    let scores = FdMatrix::from_slice(
+        &fpca_scores_data,
+        fpca_scores_nrow as usize,
+        fpca_scores_ncol as usize,
+    )
+    .unwrap_or_else(|| FdMatrix::zeros(0, 0));
+
+    // Build a minimal FpcaResult with just the scores
+    let fpca = fdars_core::regression::FpcaResult {
+        singular_values: vec![],
+        rotation: FdMatrix::zeros(0, 0),
+        scores,
+        mean: vec![],
+        centered: FdMatrix::zeros(0, 0),
+    };
+
+    match explain::prototype_criticism(&fpca, ncomp as usize, n_prototypes as usize, n_criticisms as usize) {
+        Some(r) => {
+            let proto_idx: Vec<i32> = r.prototype_indices.iter().map(|&x| x as i32).collect();
+            let crit_idx: Vec<i32> = r.criticism_indices.iter().map(|&x| x as i32).collect();
+            r!(list!(
+                prototype_indices = Robj::from(proto_idx),
+                prototype_witness = Robj::from(r.prototype_witness),
+                criticism_indices = Robj::from(crit_idx),
+                criticism_witness = Robj::from(r.criticism_witness),
+                bandwidth = r.bandwidth
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Calibration diagnostics for logistic model
+#[extendr]
+fn explain_calibration_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    probabilities: Vec<f64>,
+    predicted_classes: Vec<f64>,
+    ncomp: i32,
+    accuracy: f64,
+    std_errors: Vec<f64>,
+    coefficients: Vec<f64>,
+    log_likelihood: f64,
+    iterations: i32,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    y: Vec<f64>,
+    n_groups: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+
+    match explain::calibration_diagnostics(&fit, &y, n_groups as usize) {
+        Some(r) => {
+            let rel_predicted: Vec<f64> = r.reliability_bins.iter().map(|b| b.0).collect();
+            let rel_observed: Vec<f64> = r.reliability_bins.iter().map(|b| b.1).collect();
+            let bin_counts: Vec<i32> = r.bin_counts.iter().map(|&x| x as i32).collect();
+            r!(list!(
+                brier_score = r.brier_score,
+                log_loss = r.log_loss,
+                hosmer_lemeshow_chi2 = r.hosmer_lemeshow_chi2,
+                hosmer_lemeshow_df = r.hosmer_lemeshow_df as i32,
+                n_groups = r.n_groups as i32,
+                reliability_predicted = Robj::from(rel_predicted),
+                reliability_observed = Robj::from(rel_observed),
+                bin_counts = Robj::from(bin_counts)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Expected Calibration Error for logistic model
+#[extendr]
+fn explain_ece_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    probabilities: Vec<f64>,
+    predicted_classes: Vec<f64>,
+    ncomp: i32,
+    accuracy: f64,
+    std_errors: Vec<f64>,
+    coefficients: Vec<f64>,
+    log_likelihood: f64,
+    iterations: i32,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    y: Vec<f64>,
+    n_bins: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+
+    match explain::expected_calibration_error(&fit, &y, n_bins as usize) {
+        Some(r) => r!(list!(
+            ece = r.ece,
+            mce = r.mce,
+            ace = r.ace,
+            n_bins = r.n_bins as i32,
+            bin_ece_contributions = Robj::from(r.bin_ece_contributions)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Conditional permutation importance
+#[extendr]
+fn explain_conditional_importance_rust(
+    intercept: f64,
+    beta_t: Vec<f64>,
+    beta_se: Vec<f64>,
+    gamma: Vec<f64>,
+    fitted_values: Vec<f64>,
+    residuals: Vec<f64>,
+    r_squared: f64,
+    r_squared_adj: f64,
+    std_errors: Vec<f64>,
+    ncomp: i32,
+    coefficients: Vec<f64>,
+    residual_se: f64,
+    gcv: f64,
+    fpca_mean: Vec<f64>,
+    fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32,
+    fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>,
+    fpca_scores_nrow: i32,
+    fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    n_bins: i32,
+    n_perm: i32,
+    seed: i32,
+) -> Robj {
+    let fit = reconstruct_fregre_lm(
+        intercept, beta_t, beta_se, gamma, fitted_values, residuals,
+        r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match explain::conditional_permutation_importance(
+        &fit, &fd, &y, None, n_bins as usize, n_perm as usize, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            importance = Robj::from(r.importance),
+            baseline_metric = r.baseline_metric,
+            permuted_metric = Robj::from(r.permuted_metric),
+            unconditional_importance = Robj::from(r.unconditional_importance)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Elastic PCR attribution (amplitude vs phase importance)
+#[extendr]
+fn elastic_pcr_attribution_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+    pca_method: &str,
+    lambda: f64,
+    max_iter: i32,
+    tol: f64,
+    n_perm: i32,
+    seed: i32,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let method = match pca_method {
+        "vertical" => fdars_core::elastic_regression::PcaMethod::Vertical,
+        "horizontal" => fdars_core::elastic_regression::PcaMethod::Horizontal,
+        _ => fdars_core::elastic_regression::PcaMethod::Joint,
+    };
+
+    // First fit elastic PCR, then do attribution
+    let pcr_result = elastic_regression::elastic_pcr(
+        &fd, &y, &argvals, ncomp as usize, method, lambda, max_iter as usize, tol,
+    );
+
+    match pcr_result {
+        Some(pcr) => {
+            match elastic_explain::elastic_pcr_attribution(&pcr, &y, ncomp as usize, n_perm as usize, seed as u64) {
+                Some(r) => r!(list!(
+                    amplitude_contribution = Robj::from(r.amplitude_contribution),
+                    phase_contribution = Robj::from(r.phase_contribution),
+                    amplitude_importance = r.amplitude_importance,
+                    phase_importance = r.phase_importance
+                )),
+                None => r!(NULL),
+            }
+        }
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Logistic explain wrappers (17 functions)
+// =============================================================================
+
+/// PDP for logistic model
+#[extendr]
+fn explain_pdp_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, component: i32, n_grid: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::functional_pdp_logistic(&fit, &fd, None, component as usize, n_grid as usize) {
+        Some(r) => r!(list!(
+            grid_values = Robj::from(r.grid_values),
+            pdp_curve = Robj::from(r.pdp_curve),
+            ice_curves = fdmatrix_to_robj(&r.ice_curves),
+            component = r.component as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Beta decomposition for logistic model
+#[extendr]
+fn explain_beta_decomposition_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    match explain::beta_decomposition_logistic(&fit) {
+        Some(r) => {
+            let nc = r.components.len();
+            let m = if nc > 0 { r.components[0].len() } else { 0 };
+            let mut flat = vec![0.0; nc * m];
+            for i in 0..nc {
+                for j in 0..m {
+                    flat[j * nc + i] = r.components[i][j];
+                }
+            }
+            let comp_mat = RMatrix::new_matrix(nc, m, |i, j| flat[j * nc + i]);
+            r!(list!(
+                components = Robj::from(comp_mat),
+                coefficients = Robj::from(r.coefficients),
+                variance_proportion = Robj::from(r.variance_proportion)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Pointwise importance for logistic model
+#[extendr]
+fn explain_pointwise_importance_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    match explain::pointwise_importance_logistic(&fit) {
+        Some(r) => r!(list!(
+            importance = Robj::from(r.importance),
+            importance_normalized = Robj::from(r.importance_normalized),
+            component_importance = fdmatrix_to_robj(&r.component_importance),
+            score_variance = Robj::from(r.score_variance)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// SHAP values for logistic model
+#[extendr]
+fn explain_shap_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, n_samples: i32, seed: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::fpc_shap_values_logistic(&fit, &fd, None, n_samples as usize, seed as u64) {
+        Some(r) => r!(list!(
+            values = fdmatrix_to_robj(&r.values),
+            base_value = r.base_value,
+            mean_scores = Robj::from(r.mean_scores)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// VIF for logistic model
+#[extendr]
+fn explain_vif_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::fpc_vif_logistic(&fit, &fd, None) {
+        Some(r) => r!(list!(
+            vif = Robj::from(r.vif),
+            labels = Robj::from(r.labels),
+            mean_vif = r.mean_vif,
+            n_moderate = r.n_moderate as i32,
+            n_severe = r.n_severe as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Permutation importance for logistic model
+#[extendr]
+fn explain_importance_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, y: Vec<f64>, n_perm: i32, seed: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::fpc_permutation_importance_logistic(&fit, &fd, &y, n_perm as usize, seed as u64) {
+        Some(r) => r!(list!(
+            importance = Robj::from(r.importance),
+            baseline_metric = r.baseline_metric,
+            permuted_metric = Robj::from(r.permuted_metric)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Sobol indices for logistic model (no y, uses n_samples/seed)
+#[extendr]
+fn explain_sobol_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, n_samples: i32, seed: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::sobol_indices_logistic(&fit, &fd, None, n_samples as usize, seed as u64) {
+        Some(r) => r!(list!(
+            first_order = Robj::from(r.first_order),
+            total_order = Robj::from(r.total_order),
+            var_y = r.var_y,
+            component_variance = Robj::from(r.component_variance)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// ALE for logistic model
+#[extendr]
+fn explain_ale_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, component: i32, n_bins: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::fpc_ale_logistic(&fit, &fd, None, component as usize, n_bins as usize) {
+        Some(r) => {
+            let bin_counts: Vec<i32> = r.bin_counts.iter().map(|&x| x as i32).collect();
+            r!(list!(
+                bin_midpoints = Robj::from(r.bin_midpoints),
+                ale_values = Robj::from(r.ale_values),
+                bin_edges = Robj::from(r.bin_edges),
+                bin_counts = Robj::from(bin_counts),
+                component = r.component as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Domain selection for logistic model
+#[extendr]
+fn explain_domain_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    window_width: i32, threshold: f64,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    match explain::domain_selection_logistic(&fit, window_width as usize, threshold) {
+        Some(r) => {
+            let starts: Vec<i32> = r.intervals.iter().map(|iv| iv.start_idx as i32).collect();
+            let ends: Vec<i32> = r.intervals.iter().map(|iv| iv.end_idx as i32).collect();
+            let importances: Vec<f64> = r.intervals.iter().map(|iv| iv.importance).collect();
+            r!(list!(
+                pointwise_importance = Robj::from(r.pointwise_importance),
+                interval_starts = Robj::from(starts),
+                interval_ends = Robj::from(ends),
+                interval_importances = Robj::from(importances),
+                window_width = r.window_width as i32,
+                threshold = r.threshold
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Saliency map for logistic model (fit-only, no data)
+#[extendr]
+fn explain_saliency_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    match explain::functional_saliency_logistic(&fit) {
+        Some(r) => r!(list!(
+            saliency_map = fdmatrix_to_robj(&r.saliency_map),
+            mean_absolute_saliency = Robj::from(r.mean_absolute_saliency)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// LIME for logistic model
+#[extendr]
+fn explain_lime_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, observation: i32, n_samples: i32, kernel_width: f64, seed: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::lime_explanation_logistic(
+        &fit, &fd, None, observation as usize, n_samples as usize, kernel_width, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            observation = r.observation as i32,
+            attributions = Robj::from(r.attributions),
+            local_intercept = r.local_intercept,
+            local_r_squared = r.local_r_squared,
+            kernel_width = r.kernel_width
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Counterfactual for logistic model (max_iter/step_size instead of target_value)
+#[extendr]
+fn explain_counterfactual_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, observation: i32, max_iter: i32, step_size: f64,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::counterfactual_logistic(
+        &fit, &fd, None, observation as usize, max_iter as usize, step_size,
+    ) {
+        Some(r) => r!(list!(
+            observation = r.observation as i32,
+            original_scores = Robj::from(r.original_scores),
+            counterfactual_scores = Robj::from(r.counterfactual_scores),
+            delta_scores = Robj::from(r.delta_scores),
+            delta_function = Robj::from(r.delta_function),
+            distance = r.distance,
+            original_prediction = r.original_prediction,
+            counterfactual_prediction = r.counterfactual_prediction,
+            found = r.found
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Anchor for logistic model
+#[extendr]
+fn explain_anchor_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, observation: i32, precision: f64, n_bins: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::anchor_explanation_logistic(
+        &fit, &fd, None, observation as usize, precision, n_bins as usize,
+    ) {
+        Some(r) => {
+            let components: Vec<i32> = r.rule.conditions.iter().map(|c| c.component as i32).collect();
+            let lower_bounds: Vec<f64> = r.rule.conditions.iter().map(|c| c.lower_bound).collect();
+            let upper_bounds: Vec<f64> = r.rule.conditions.iter().map(|c| c.upper_bound).collect();
+            r!(list!(
+                observation = r.observation as i32,
+                predicted_value = r.predicted_value,
+                precision = r.rule.precision,
+                coverage = r.rule.coverage,
+                n_matching = r.rule.n_matching as i32,
+                condition_components = Robj::from(components),
+                condition_lower = Robj::from(lower_bounds),
+                condition_upper = Robj::from(upper_bounds)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Stability for logistic model (no fit param)
+#[extendr]
+fn explain_stability_logistic_rust(
+    data: RMatrix<f64>, y: Vec<f64>,
+    ncomp: i32, n_boot: i32, seed: i32,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::explanation_stability_logistic(&fd, &y, None, ncomp as usize, n_boot as usize, seed as u64) {
+        Some(r) => r!(list!(
+            beta_t_std = Robj::from(r.beta_t_std),
+            coefficient_std = Robj::from(r.coefficient_std),
+            metric_std = r.metric_std,
+            beta_t_cv = Robj::from(r.beta_t_cv),
+            importance_stability = r.importance_stability,
+            n_boot_success = r.n_boot_success as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Friedman H-statistic for logistic model
+#[extendr]
+fn explain_friedman_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, component_j: i32, component_k: i32, n_grid: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::friedman_h_statistic_logistic(
+        &fit, &fd, None, component_j as usize, component_k as usize, n_grid as usize,
+    ) {
+        Some(r) => r!(list!(
+            component_j = r.component_j as i32,
+            component_k = r.component_k as i32,
+            h_squared = r.h_squared,
+            grid_j = Robj::from(r.grid_j),
+            grid_k = Robj::from(r.grid_k),
+            pdp_2d = fdmatrix_to_robj(&r.pdp_2d)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Regression depth for logistic model
+#[extendr]
+fn explain_regression_depth_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, y: Vec<f64>, n_boot: i32, seed: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::regression_depth_logistic(
+        &fit, &fd, &y, None, n_boot as usize,
+        fdars_core::explain::DepthType::FraimanMuniz, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            beta_depth = r.beta_depth,
+            score_depths = Robj::from(r.score_depths),
+            mean_score_depth = r.mean_score_depth,
+            n_boot_success = r.n_boot_success as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Conditional permutation importance for logistic model
+#[extendr]
+fn explain_conditional_importance_logistic_rust(
+    intercept: f64, beta_t: Vec<f64>, beta_se: Vec<f64>, gamma: Vec<f64>,
+    probabilities: Vec<f64>, predicted_classes: Vec<f64>,
+    ncomp: i32, accuracy: f64, std_errors: Vec<f64>,
+    coefficients: Vec<f64>, log_likelihood: f64, iterations: i32,
+    fpca_mean: Vec<f64>, fpca_rotation_data: Vec<f64>,
+    fpca_rotation_nrow: i32, fpca_rotation_ncol: i32,
+    fpca_scores_data: Vec<f64>, fpca_scores_nrow: i32, fpca_scores_ncol: i32,
+    data: RMatrix<f64>, y: Vec<f64>, n_bins: i32, n_perm: i32, seed: i32,
+) -> Robj {
+    let fit = reconstruct_functional_logistic(
+        intercept, beta_t, beta_se, gamma, probabilities, predicted_classes,
+        ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations,
+        fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol,
+        fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol,
+    );
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+    match explain::conditional_permutation_importance_logistic(
+        &fit, &fd, &y, None, n_bins as usize, n_perm as usize, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            importance = Robj::from(r.importance),
+            baseline_metric = r.baseline_metric,
+            permuted_metric = Robj::from(r.permuted_metric),
+            unconditional_importance = Robj::from(r.unconditional_importance)
+        )),
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Elastic regression wrappers (3 functions)
+// =============================================================================
+
+/// Elastic regression (function-on-scalar with alignment)
+#[extendr]
+fn elastic_regression_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    argvals: Vec<f64>,
+    ncomp_beta: i32,
+    lambda: f64,
+    max_iter: i32,
+    tol: f64,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    match elastic_regression::elastic_regression(&fd, &y, &argvals, ncomp_beta as usize, lambda, max_iter as usize, tol) {
+        Some(r) => r!(list!(
+            alpha = r.alpha,
+            beta = Robj::from(r.beta),
+            fitted_values = Robj::from(r.fitted_values),
+            residuals = Robj::from(r.residuals),
+            sse = r.sse,
+            r_squared = r.r_squared,
+            gammas = fdmatrix_to_robj(&r.gammas),
+            aligned_srsfs = fdmatrix_to_robj(&r.aligned_srsfs),
+            n_iter = r.n_iter as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Elastic logistic regression
+#[extendr]
+fn elastic_logistic_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    argvals: Vec<f64>,
+    ncomp_beta: i32,
+    lambda: f64,
+    max_iter: i32,
+    tol: f64,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let y_i8: Vec<i8> = y.iter().map(|&v| v as i8).collect();
+
+    match elastic_regression::elastic_logistic(&fd, &y_i8, &argvals, ncomp_beta as usize, lambda, max_iter as usize, tol) {
+        Some(r) => {
+            let pred_classes: Vec<i32> = r.predicted_classes.iter().map(|&x| x as i32).collect();
+            r!(list!(
+                alpha = r.alpha,
+                beta = Robj::from(r.beta),
+                probabilities = Robj::from(r.probabilities),
+                predicted_classes = Robj::from(pred_classes),
+                accuracy = r.accuracy,
+                loss = r.loss,
+                gammas = fdmatrix_to_robj(&r.gammas),
+                aligned_srsfs = fdmatrix_to_robj(&r.aligned_srsfs),
+                n_iter = r.n_iter as i32
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+/// Elastic principal component regression
+#[extendr]
+fn elastic_pcr_rust(
+    data: RMatrix<f64>,
+    y: Vec<f64>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+    pca_method: &str,
+    lambda: f64,
+    max_iter: i32,
+    tol: f64,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let method = match pca_method {
+        "vertical" => fdars_core::elastic_regression::PcaMethod::Vertical,
+        "horizontal" => fdars_core::elastic_regression::PcaMethod::Horizontal,
+        _ => fdars_core::elastic_regression::PcaMethod::Joint,
+    };
+
+    match elastic_regression::elastic_pcr(&fd, &y, &argvals, ncomp as usize, method, lambda, max_iter as usize, tol) {
+        Some(r) => {
+            // Return core results; FPCA sub-results are complex so return key summary fields
+            r!(list!(
+                alpha = r.alpha,
+                coefficients = Robj::from(r.coefficients),
+                fitted_values = Robj::from(r.fitted_values),
+                sse = r.sse,
+                r_squared = r.r_squared,
+                karcher_mean = Robj::from(r.karcher.mean.clone()),
+                karcher_mean_srsf = Robj::from(r.karcher.mean_srsf.clone()),
+                karcher_gammas = fdmatrix_to_robj(&r.karcher.gammas),
+                karcher_aligned = fdmatrix_to_robj(&r.karcher.aligned_data)
+            ))
+        }
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Elastic FPCA wrappers (3 functions)
+// =============================================================================
+
+/// Vertical FPCA on elastic-aligned data
+#[extendr]
+fn elastic_vert_fpca_rust(
+    aligned_data: RMatrix<f64>,
+    gammas_data: RMatrix<f64>,
+    mean_curve: Vec<f64>,
+    mean_srsf: Vec<f64>,
+    aligned_srsfs: Nullable<RMatrix<f64>>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+) -> Robj {
+    let karcher = reconstruct_karcher_mean(aligned_data, gammas_data, mean_curve, mean_srsf, aligned_srsfs, argvals.clone());
+
+    match elastic_fpca::vert_fpca(&karcher, &argvals, ncomp as usize) {
+        Some(r) => r!(list!(
+            scores = fdmatrix_to_robj(&r.scores),
+            eigenfunctions_q = fdmatrix_to_robj(&r.eigenfunctions_q),
+            eigenfunctions_f = fdmatrix_to_robj(&r.eigenfunctions_f),
+            eigenvalues = Robj::from(r.eigenvalues),
+            cumulative_variance = Robj::from(r.cumulative_variance),
+            mean_q = Robj::from(r.mean_q)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Horizontal FPCA on warping functions
+#[extendr]
+fn elastic_horiz_fpca_rust(
+    aligned_data: RMatrix<f64>,
+    gammas_data: RMatrix<f64>,
+    mean_curve: Vec<f64>,
+    mean_srsf: Vec<f64>,
+    aligned_srsfs: Nullable<RMatrix<f64>>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+) -> Robj {
+    let karcher = reconstruct_karcher_mean(aligned_data, gammas_data, mean_curve, mean_srsf, aligned_srsfs, argvals.clone());
+
+    match elastic_fpca::horiz_fpca(&karcher, &argvals, ncomp as usize) {
+        Some(r) => r!(list!(
+            scores = fdmatrix_to_robj(&r.scores),
+            eigenfunctions_psi = fdmatrix_to_robj(&r.eigenfunctions_psi),
+            eigenfunctions_gam = fdmatrix_to_robj(&r.eigenfunctions_gam),
+            eigenvalues = Robj::from(r.eigenvalues),
+            cumulative_variance = Robj::from(r.cumulative_variance),
+            mean_psi = Robj::from(r.mean_psi),
+            shooting_vectors = fdmatrix_to_robj(&r.shooting_vectors)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Joint FPCA (amplitude + phase)
+#[extendr]
+fn elastic_joint_fpca_rust(
+    aligned_data: RMatrix<f64>,
+    gammas_data: RMatrix<f64>,
+    mean_curve: Vec<f64>,
+    mean_srsf: Vec<f64>,
+    aligned_srsfs: Nullable<RMatrix<f64>>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+) -> Robj {
+    let karcher = reconstruct_karcher_mean(aligned_data, gammas_data, mean_curve, mean_srsf, aligned_srsfs, argvals.clone());
+
+    match elastic_fpca::joint_fpca(&karcher, &argvals, ncomp as usize, None) {
+        Some(r) => r!(list!(
+            scores = fdmatrix_to_robj(&r.scores),
+            eigenvalues = Robj::from(r.eigenvalues),
+            cumulative_variance = Robj::from(r.cumulative_variance),
+            balance_c = r.balance_c,
+            vert_component = fdmatrix_to_robj(&r.vert_component),
+            horiz_component = fdmatrix_to_robj(&r.horiz_component)
+        )),
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Elastic changepoint wrappers (3 functions)
+// =============================================================================
+
+/// Amplitude changepoint detection
+#[extendr]
+fn elastic_amp_changepoint_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    lambda: f64,
+    max_iter: i32,
+    n_mc: i32,
+    cov_kernel: &str,
+    cov_bandwidth: i32,
+    seed: i32,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let kernel = match cov_kernel {
+        "parzen" => fdars_core::elastic_changepoint::CovKernel::Parzen,
+        "flat_top" => fdars_core::elastic_changepoint::CovKernel::FlatTop,
+        "simple" => fdars_core::elastic_changepoint::CovKernel::Simple,
+        _ => fdars_core::elastic_changepoint::CovKernel::Bartlett,
+    };
+    let bw = if cov_bandwidth > 0 { Some(cov_bandwidth as usize) } else { None };
+
+    match elastic_changepoint::elastic_amp_changepoint(
+        &fd, &argvals, lambda, max_iter as usize, n_mc as usize, kernel, bw, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            changepoint = r.changepoint as i32,
+            test_statistic = r.test_statistic,
+            p_value = r.p_value,
+            cusum_values = Robj::from(r.cusum_values)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Phase changepoint detection
+#[extendr]
+fn elastic_ph_changepoint_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    lambda: f64,
+    max_iter: i32,
+    n_mc: i32,
+    cov_kernel: &str,
+    cov_bandwidth: i32,
+    seed: i32,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let kernel = match cov_kernel {
+        "parzen" => fdars_core::elastic_changepoint::CovKernel::Parzen,
+        "flat_top" => fdars_core::elastic_changepoint::CovKernel::FlatTop,
+        "simple" => fdars_core::elastic_changepoint::CovKernel::Simple,
+        _ => fdars_core::elastic_changepoint::CovKernel::Bartlett,
+    };
+    let bw = if cov_bandwidth > 0 { Some(cov_bandwidth as usize) } else { None };
+
+    match elastic_changepoint::elastic_ph_changepoint(
+        &fd, &argvals, lambda, max_iter as usize, n_mc as usize, kernel, bw, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            changepoint = r.changepoint as i32,
+            test_statistic = r.test_statistic,
+            p_value = r.p_value,
+            cusum_values = Robj::from(r.cusum_values)
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// FPCA-based changepoint detection
+#[extendr]
+fn elastic_fpca_changepoint_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    pca_method: &str,
+    ncomp: i32,
+    lambda: f64,
+    max_iter: i32,
+    n_mc: i32,
+    seed: i32,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let method = match pca_method {
+        "horizontal" => fdars_core::elastic_changepoint::FpcaChangepointMethod::Horizontal,
+        "joint" => fdars_core::elastic_changepoint::FpcaChangepointMethod::Joint,
+        _ => fdars_core::elastic_changepoint::FpcaChangepointMethod::Vertical,
+    };
+
+    match elastic_changepoint::elastic_fpca_changepoint(
+        &fd, &argvals, method, ncomp as usize, lambda, max_iter as usize, n_mc as usize, seed as u64,
+    ) {
+        Some(r) => r!(list!(
+            changepoint = r.changepoint as i32,
+            test_statistic = r.test_statistic,
+            p_value = r.p_value,
+            cusum_values = Robj::from(r.cusum_values)
+        )),
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
+// Smooth basis wrappers (2 functions)
+// =============================================================================
+
+/// Smooth functional data using B-spline or Fourier basis with fixed penalty
+#[extendr]
+fn smooth_basis_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    basis_type: &str,
+    nbasis: i32,
+    lambda: f64,
+    lfd_order: i32,
+    period: f64,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let bt = match basis_type {
+        "fourier" => smooth_basis::BasisType::Fourier { period },
+        _ => smooth_basis::BasisType::Bspline { order: 4 },
+    };
+
+    let pen = match &bt {
+        smooth_basis::BasisType::Bspline { order } => {
+            smooth_basis::bspline_penalty_matrix(&argvals, nbasis as usize, *order, lfd_order as usize)
+        }
+        smooth_basis::BasisType::Fourier { period } => {
+            smooth_basis::fourier_penalty_matrix(nbasis as usize, *period, lfd_order as usize)
+        }
+    };
+
+    let fdpar = smooth_basis::FdPar {
+        basis_type: bt,
+        nbasis: nbasis as usize,
+        lambda,
+        lfd_order: lfd_order as usize,
+        penalty_matrix: pen,
+    };
+
+    match smooth_basis::smooth_basis(&fd, &argvals, &fdpar) {
+        Some(r) => r!(list!(
+            coefficients = fdmatrix_to_robj(&r.coefficients),
+            fitted = fdmatrix_to_robj(&r.fitted),
+            edf = r.edf,
+            gcv = r.gcv,
+            aic = r.aic,
+            bic = r.bic,
+            nbasis = r.nbasis as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+/// Smooth functional data with GCV-selected penalty
+#[extendr]
+fn smooth_basis_gcv_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    basis_type: &str,
+    nbasis: i32,
+    lfd_order: i32,
+    log_lambda_min: f64,
+    log_lambda_max: f64,
+    n_grid: i32,
+    period: f64,
+) -> Robj {
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, data.nrows(), data.ncols()).expect("Invalid data");
+
+    let bt = match basis_type {
+        "fourier" => smooth_basis::BasisType::Fourier { period },
+        _ => smooth_basis::BasisType::Bspline { order: 4 },
+    };
+
+    match smooth_basis::smooth_basis_gcv(
+        &fd, &argvals, &bt, nbasis as usize, lfd_order as usize,
+        (log_lambda_min, log_lambda_max), n_grid as usize,
+    ) {
+        Some(r) => r!(list!(
+            coefficients = fdmatrix_to_robj(&r.coefficients),
+            fitted = fdmatrix_to_robj(&r.fitted),
+            edf = r.edf,
+            gcv = r.gcv,
+            aic = r.aic,
+            bic = r.bic,
+            nbasis = r.nbasis as i32
+        )),
+        None => r!(NULL),
+    }
+}
+
+// =============================================================================
 // Module exports
 // =============================================================================
 
@@ -10348,6 +12951,8 @@ extendr_module! {
     fn fregre_np_mixed_rust;
     fn functional_logistic_rust;
     fn fregre_cv_rust;
+    fn bootstrap_ci_fregre_lm_rust;
+    fn bootstrap_ci_functional_logistic_rust;
 
     // Function-on-scalar regression
     fn fosr_rust;
@@ -10376,4 +12981,71 @@ extendr_module! {
     // Seeded depth variants
     fn depth_rp_1d_seeded;
     fn depth_rt_1d_seeded;
+
+    // Explainability wrappers
+    fn explain_pdp_rust;
+    fn explain_beta_decomposition_rust;
+    fn explain_pointwise_importance_rust;
+    fn explain_significant_regions_rust;
+    fn explain_shap_rust;
+    fn explain_influence_rust;
+    fn explain_vif_rust;
+    fn explain_dfbetas_rust;
+    fn explain_saliency_rust;
+    fn explain_importance_rust;
+    fn explain_loo_rust;
+    fn explain_sobol_rust;
+    fn explain_ale_rust;
+    fn explain_domain_rust;
+    fn explain_prediction_intervals_rust;
+    fn explain_lime_rust;
+    fn explain_counterfactual_rust;
+    fn explain_anchor_rust;
+    fn explain_conformal_rust;
+    fn explain_stability_rust;
+    fn explain_friedman_rust;
+    fn explain_regression_depth_rust;
+    fn explain_prototype_rust;
+    fn explain_calibration_rust;
+    fn explain_ece_rust;
+    fn explain_conditional_importance_rust;
+    fn elastic_pcr_attribution_rust;
+
+    // Logistic explainability wrappers
+    fn explain_pdp_logistic_rust;
+    fn explain_beta_decomposition_logistic_rust;
+    fn explain_pointwise_importance_logistic_rust;
+    fn explain_shap_logistic_rust;
+    fn explain_vif_logistic_rust;
+    fn explain_importance_logistic_rust;
+    fn explain_sobol_logistic_rust;
+    fn explain_ale_logistic_rust;
+    fn explain_domain_logistic_rust;
+    fn explain_saliency_logistic_rust;
+    fn explain_lime_logistic_rust;
+    fn explain_counterfactual_logistic_rust;
+    fn explain_anchor_logistic_rust;
+    fn explain_stability_logistic_rust;
+    fn explain_friedman_logistic_rust;
+    fn explain_regression_depth_logistic_rust;
+    fn explain_conditional_importance_logistic_rust;
+
+    // Elastic regression wrappers
+    fn elastic_regression_rust;
+    fn elastic_logistic_rust;
+    fn elastic_pcr_rust;
+
+    // Elastic FPCA wrappers
+    fn elastic_vert_fpca_rust;
+    fn elastic_horiz_fpca_rust;
+    fn elastic_joint_fpca_rust;
+
+    // Elastic changepoint wrappers
+    fn elastic_amp_changepoint_rust;
+    fn elastic_ph_changepoint_rust;
+    fn elastic_fpca_changepoint_rust;
+
+    // Smooth basis wrappers
+    fn smooth_basis_rust;
+    fn smooth_basis_gcv_rust;
 }

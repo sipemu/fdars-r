@@ -1365,6 +1365,7 @@ fregre.lm <- function(fdataobj, y, scalar.covariates = NULL, ncomp = NULL) {
     list(
       intercept = result$intercept,
       beta.t = beta_fd,
+      beta.se = result$beta_se,
       gamma = result$gamma,
       coefficients = result$coefficients,
       fitted.values = result$fitted_values,
@@ -1382,6 +1383,13 @@ fregre.lm <- function(fdataobj, y, scalar.covariates = NULL, ncomp = NULL) {
       .fpca_rotation = matrix(result$fpca_rotation_data,
                               nrow = result$fpca_rotation_nrow,
                               ncol = result$fpca_rotation_ncol),
+      .fpca_scores = if (!is.null(result$fpca_scores_data) && length(result$fpca_scores_data) > 0) {
+        matrix(result$fpca_scores_data,
+               nrow = result$fpca_scores_nrow,
+               ncol = result$fpca_scores_ncol)
+      } else {
+        matrix(0, nrow = 0, ncol = 0)
+      },
       call = match.call()
     ),
     class = "fregre.lm"
@@ -1490,11 +1498,13 @@ functional.logistic <- function(fdataobj, y, scalar.covariates = NULL,
     list(
       intercept = result$intercept,
       beta.t = beta_fd,
+      beta.se = result$beta_se,
       gamma = result$gamma,
       probabilities = result$probabilities,
       predicted.classes = result$predicted_classes,
       ncomp = result$ncomp,
       accuracy = result$accuracy,
+      std.errors = result$std_errors,
       coefficients = result$coefficients,
       log.likelihood = result$log_likelihood,
       iterations = result$iterations,
@@ -1505,6 +1515,9 @@ functional.logistic <- function(fdataobj, y, scalar.covariates = NULL,
       .fpca_rotation = matrix(result$fpca_rotation_data,
                               nrow = result$fpca_rotation_nrow,
                               ncol = result$fpca_rotation_ncol),
+      .fpca_scores = matrix(result$fpca_scores_data,
+                            nrow = result$fpca_scores_nrow,
+                            ncol = result$fpca_scores_ncol),
       call = match.call()
     ),
     class = "fregre.logistic"
@@ -1617,9 +1630,11 @@ predict.fregre.lm <- function(object, newdata = NULL, new.scalar = NULL, ...) {
 
   ncomp <- object$ncomp
   coefs <- object$coefficients
+  # coefficients[1] is the intercept; FPC coefficients start at index 2
+  fpc_coefs <- coefs[seq_len(ncomp) + 1L]
   y_pred <- rep(object$intercept, nrow(newdata$data))
   y_pred <- y_pred + as.vector(scores[, seq_len(ncomp), drop = FALSE] %*%
-                                 coefs[seq_len(ncomp)])
+                                 fpc_coefs)
 
   if (!is.null(new.scalar) && length(object$gamma) > 0) {
     new.scalar <- as.matrix(new.scalar)
@@ -1627,4 +1642,147 @@ predict.fregre.lm <- function(object, newdata = NULL, new.scalar = NULL, ...) {
   }
 
   y_pred
+}
+
+#' Bootstrap Confidence Intervals for Functional Coefficient
+#'
+#' Computes pointwise and simultaneous bootstrap confidence intervals for
+#' the functional coefficient beta(t) in a functional linear or logistic model.
+#'
+#' @param model A fitted object of class 'fregre.lm' or 'fregre.logistic'.
+#' @param n.boot Number of bootstrap replicates (default 200).
+#' @param alpha Significance level (default 0.05 for 95\% CI).
+#' @param seed Random seed for reproducibility.
+#'
+#' @return An object of class 'fregre.bootstrap.ci' with components:
+#' \itemize{
+#'   \item \code{lower}, \code{upper} — Pointwise CI bounds.
+#'   \item \code{center} — Original beta(t) estimate.
+#'   \item \code{sim.lower}, \code{sim.upper} — Simultaneous CI bands.
+#'   \item \code{n.boot.success} — Number of successful bootstrap replicates.
+#'   \item \code{argvals} — Grid points.
+#'   \item \code{alpha} — Significance level used.
+#'   \item \code{model.class} — Class of the original model.
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' fit <- fregre.lm(fdataobj, y, ncomp = 3)
+#' ci <- fregre.bootstrap.ci(fit, n.boot = 200)
+#' plot(ci)
+#' }
+#'
+#' @export
+fregre.bootstrap.ci <- function(model, n.boot = 200, alpha = 0.05, seed = 42) {
+  is_logistic <- inherits(model, "fregre.logistic")
+  is_lm <- inherits(model, "fregre.lm")
+  if (!is_logistic && !is_lm) {
+    stop("model must be of class 'fregre.lm' or 'fregre.logistic'")
+  }
+
+  fdataobj <- model$fdataobj
+  y <- model$y
+  ncomp <- model$ncomp
+  data_mat <- fdataobj$data
+
+  sc <- model$scalar.covariates
+  if (!is.null(sc)) {
+    sc <- as.matrix(sc)
+  }
+
+  if (is_logistic) {
+    max_iter <- if (!is.null(model$iterations)) model$iterations * 2L else 100L
+    tol <- 1e-6
+    result <- bootstrap_ci_functional_logistic_rust(
+      data_mat, y, sc, as.integer(ncomp), as.integer(n.boot),
+      alpha, as.integer(seed), as.integer(max_iter), tol
+    )
+  } else {
+    result <- bootstrap_ci_fregre_lm_rust(
+      data_mat, y, sc, as.integer(ncomp), as.integer(n.boot),
+      alpha, as.integer(seed)
+    )
+  }
+
+  if (is.null(result)) {
+    stop("Bootstrap CI computation failed")
+  }
+
+  structure(
+    list(
+      lower = result$lower,
+      upper = result$upper,
+      center = result$center,
+      sim.lower = result$sim_lower,
+      sim.upper = result$sim_upper,
+      n.boot.success = result$n_boot_success,
+      argvals = fdataobj$argvals,
+      alpha = alpha,
+      n.boot = n.boot,
+      model.class = if (is_logistic) "fregre.logistic" else "fregre.lm"
+    ),
+    class = "fregre.bootstrap.ci"
+  )
+}
+
+#' @export
+print.fregre.bootstrap.ci <- function(x, ...) {
+  cat("Bootstrap Confidence Intervals for beta(t)\n")
+  cat("  Model type:", x$model.class, "\n")
+  cat("  Alpha:", x$alpha, "\n")
+  cat("  Bootstrap replicates:", x$n.boot.success, "/", x$n.boot, "succeeded\n")
+  cat("  Grid points:", length(x$argvals), "\n")
+  invisible(x)
+}
+
+#' @export
+plot.fregre.bootstrap.ci <- function(x, simultaneous = FALSE, ...) {
+  argvals <- x$argvals
+  center <- x$center
+  if (simultaneous) {
+    lower <- x$sim.lower
+    upper <- x$sim.upper
+    band_label <- "Simultaneous"
+  } else {
+    lower <- x$lower
+    upper <- x$upper
+    band_label <- "Pointwise"
+  }
+
+  df <- data.frame(
+    t = argvals,
+    beta = center,
+    lower = lower,
+    upper = upper
+  )
+
+  ci_pct <- paste0(round((1 - x$alpha) * 100), "%")
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$t)) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
+                         fill = "steelblue", alpha = 0.3) +
+    ggplot2::geom_line(ggplot2::aes(y = .data$beta), linewidth = 0.8) +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
+    ggplot2::labs(
+      x = "t", y = expression(beta(t)),
+      title = paste(band_label, ci_pct, "CI for", expression(beta(t)))
+    ) +
+    ggplot2::theme_minimal()
+}
+
+#' Random Projection Statistic
+#'
+#' Computes Cramer-von Mises and Kolmogorov-Smirnov statistics for
+#' random projection goodness-of-fit testing.
+#'
+#' @param proj.x.ord Integer vector of projection orderings.
+#' @param residuals Numeric vector of residuals.
+#' @param n.proj Number of random projections.
+#'
+#' @return A list with \code{cvm} and \code{ks} vectors of test statistics.
+#'
+#' @export
+rp.stat <- function(proj.x.ord, residuals, n.proj) {
+  result <- rp_stat(as.integer(proj.x.ord), as.double(residuals),
+                    as.integer(n.proj))
+  list(cvm = result$cvm, ks = result$ks)
 }

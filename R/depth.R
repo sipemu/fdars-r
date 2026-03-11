@@ -1110,7 +1110,12 @@ streaming.depth <- function(fdataobj, fdataori = NULL,
     if (!inherits(fdataori, "fdata")) {
       stop("fdataori must be of class 'fdata'")
     }
-    streaming_depth_vs_ref(fdataori$data, fdataobj$data, method)
+    # Single curve vs reference set
+    if (nrow(fdataobj$data) == 1) {
+      streaming_depth_one(fdataori$data, as.numeric(fdataobj$data[1, ]), method)
+    } else {
+      streaming_depth_vs_ref(fdataori$data, fdataobj$data, method)
+    }
   }
 }
 

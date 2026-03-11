@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- SHAP-like bar chart (left) -->
+  <rect x="15" y="15" width="45" height="8" fill="#4169E1" opacity="0.7" rx="1"/>
+  <rect x="15" y="28" width="32" height="8" fill="#4169E1" opacity="0.5" rx="1"/>
+  <rect x="15" y="41" width="20" height="8" fill="#4169E1" opacity="0.35" rx="1"/>
+  <rect x="15" y="54" width="12" height="8" fill="#D55E00" opacity="0.4" rx="1"/>
+  <text x="10" y="22" font-size="6" fill="#666" font-family="sans-serif" text-anchor="end">PC1</text>
+  <text x="10" y="35" font-size="6" fill="#666" font-family="sans-serif" text-anchor="end">PC2</text>
+  <text x="10" y="48" font-size="6" fill="#666" font-family="sans-serif" text-anchor="end">PC3</text>
+  <text x="10" y="61" font-size="6" fill="#666" font-family="sans-serif" text-anchor="end">PC4</text>
+  <!-- Saliency map (right) - heatmap-like -->
+  <rect x="85" y="15" width="12" height="50" fill="#4169E1" opacity="0.15" rx="1"/>
+  <rect x="99" y="15" width="12" height="50" fill="#4169E1" opacity="0.3" rx="1"/>
+  <rect x="113" y="15" width="12" height="50" fill="#4169E1" opacity="0.7" rx="1"/>
+  <rect x="127" y="15" width="12" height="50" fill="#D55E00" opacity="0.8" rx="1"/>
+  <rect x="141" y="15" width="12" height="50" fill="#D55E00" opacity="0.6" rx="1"/>
+  <rect x="155" y="15" width="12" height="50" fill="#4169E1" opacity="0.4" rx="1"/>
+  <rect x="169" y="15" width="12" height="50" fill="#4169E1" opacity="0.2" rx="1"/>
+  <rect x="183" y="15" width="12" height="50" fill="#4169E1" opacity="0.1" rx="1"/>
+  <!-- Prediction interval (bottom) -->
+  <path d="M85 88 Q110 82, 130 78 Q155 80, 180 85 Q190 88, 195 90" stroke="#4169E1" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <path d="M85 78 Q110 72, 130 68 Q155 70, 180 75 Q190 78, 195 80" stroke="#4169E1" stroke-width="0.8" stroke-linecap="round" stroke-dasharray="2,2" opacity="0.4"/>
+  <path d="M85 98 Q110 92, 130 88 Q155 90, 180 95 Q190 98, 195 100" stroke="#4169E1" stroke-width="0.8" stroke-linecap="round" stroke-dasharray="2,2" opacity="0.4"/>
+  <!-- Labels -->
+  <text x="30" y="75" font-size="7" fill="#333" font-family="sans-serif" opacity="0.6">SHAP</text>
+  <text x="120" y="75" font-size="7" fill="#333" font-family="sans-serif" opacity="0.6">saliency</text>
+  <text x="120" y="110" font-size="7" fill="#4169E1" font-family="sans-serif" opacity="0.6">conformal</text>
+</svg>

@@ -35,7 +35,11 @@ A **metric** $d$ on a space $\mathcal{X}$ satisfies:
 
 A **semimetric** satisfies only conditions 1-3.
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/distance-metrics-diagram.svg" alt="Distance Metrics and Semimetrics" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -626,7 +630,7 @@ fit_np <- fregre.np(fd_large, y, metric = metric.lp)
 
 - `vignette("clustering", package = "fdars")` — functional data clustering
 - `vignette("elastic-alignment", package = "fdars")` — elastic curve alignment using SRVF
-- `vignette("regression", package = "fdars")` — scalar-on-function regression methods
+- `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
 
 ## References
 

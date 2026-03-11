@@ -23,6 +23,10 @@ functional data objects. However, for publication-quality figures or specialized
 visualizations, you may need more control. This vignette shows how to create
 fully customizable plots using ggplot2 directly.
 
+```{=html}
+<img src="../reference/figures/custom-plotting-diagram.svg" alt="Custom Plotting with ggplot2" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
 ```{r check-deps, eval=!has_suggested, echo=FALSE, results='asis'}
 cat("
 > **Note:** This vignette requires the `dplyr` and `tidyr` packages.
@@ -30,7 +34,7 @@ cat("
 ")
 ```
 
-```{r setup, message=FALSE}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 library(dplyr)

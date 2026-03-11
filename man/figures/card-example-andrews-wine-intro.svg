@@ -1,23 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
-  <!-- Andrews intro: Fourier basis functions fanning out -->
-  <!-- 1/sqrt(2) constant -->
-  <path d="M15 60 L190 60" stroke="#666" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-  <!-- sin(t) -->
-  <path d="M15 60 Q50 25, 100 60 Q150 95, 190 60" stroke="#4A90D9" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-  <!-- cos(t) -->
-  <path d="M15 30 Q50 45, 100 60 Q150 75, 190 90" stroke="#D94A4A" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-  <!-- sin(2t) -->
-  <path d="M15 60 Q35 30, 55 60 Q75 90, 100 60 Q125 30, 145 60 Q165 90, 190 60" stroke="#4AD98A" stroke-width="1.2" stroke-linecap="round" opacity="0.45"/>
-  <!-- cos(2t) -->
-  <path d="M15 30 Q35 50, 55 60 Q75 50, 100 30 Q125 50, 145 60 Q165 50, 190 30" stroke="#D9A54A" stroke-width="1.2" stroke-linecap="round" opacity="0.45"/>
-  <!-- Arrow from row to curve -->
-  <rect x="20" y="100" width="6" height="6" rx="1" fill="#333" opacity="0.6"/>
-  <rect x="30" y="100" width="6" height="6" rx="1" fill="#333" opacity="0.6"/>
-  <rect x="40" y="100" width="6" height="6" rx="1" fill="#333" opacity="0.6"/>
-  <path d="M55 103 L70 103" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-  <defs>
-    <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
-      <polygon points="0 0, 6 2, 0 4" fill="#333"/>
-    </marker>
-  </defs>
+  <!-- Data table (left side) -->
+  <!-- Header row -->
+  <rect x="10" y="28" width="22" height="14" rx="2" fill="#e8e8e8" stroke="#bbb" stroke-width="0.5"/>
+  <rect x="32" y="28" width="22" height="14" rx="2" fill="#e8e8e8" stroke="#bbb" stroke-width="0.5"/>
+  <rect x="54" y="28" width="22" height="14" rx="2" fill="#e8e8e8" stroke="#bbb" stroke-width="0.5"/>
+  <rect x="76" y="28" width="22" height="14" rx="2" fill="#e8e8e8" stroke="#bbb" stroke-width="0.5"/>
+  <text x="21" y="38" text-anchor="middle" font-size="6" fill="#555" font-family="sans-serif">x1</text>
+  <text x="43" y="38" text-anchor="middle" font-size="6" fill="#555" font-family="sans-serif">x2</text>
+  <text x="65" y="38" text-anchor="middle" font-size="6" fill="#555" font-family="sans-serif">x3</text>
+  <text x="87" y="38" text-anchor="middle" font-size="6" fill="#555" font-family="sans-serif">x4</text>
+  <!-- Data row 1 (Barolo) -->
+  <rect x="10" y="42" width="22" height="14" rx="2" fill="#8B0000" opacity="0.15" stroke="#8B0000" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="32" y="42" width="22" height="14" rx="2" fill="#8B0000" opacity="0.25" stroke="#8B0000" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="54" y="42" width="22" height="14" rx="2" fill="#8B0000" opacity="0.35" stroke="#8B0000" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="76" y="42" width="22" height="14" rx="2" fill="#8B0000" opacity="0.2" stroke="#8B0000" stroke-width="0.5" stroke-opacity="0.3"/>
+  <!-- Data row 2 (Gold) -->
+  <rect x="10" y="56" width="22" height="14" rx="2" fill="#DAA520" opacity="0.3" stroke="#DAA520" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="32" y="56" width="22" height="14" rx="2" fill="#DAA520" opacity="0.15" stroke="#DAA520" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="54" y="56" width="22" height="14" rx="2" fill="#DAA520" opacity="0.2" stroke="#DAA520" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="76" y="56" width="22" height="14" rx="2" fill="#DAA520" opacity="0.35" stroke="#DAA520" stroke-width="0.5" stroke-opacity="0.3"/>
+  <!-- Data row 3 (Green) -->
+  <rect x="10" y="70" width="22" height="14" rx="2" fill="#2E8B57" opacity="0.2" stroke="#2E8B57" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="32" y="70" width="22" height="14" rx="2" fill="#2E8B57" opacity="0.35" stroke="#2E8B57" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="54" y="70" width="22" height="14" rx="2" fill="#2E8B57" opacity="0.15" stroke="#2E8B57" stroke-width="0.5" stroke-opacity="0.3"/>
+  <rect x="76" y="70" width="22" height="14" rx="2" fill="#2E8B57" opacity="0.25" stroke="#2E8B57" stroke-width="0.5" stroke-opacity="0.3"/>
+
+  <!-- Arrow -->
+  <line x1="104" y1="56" x2="118" y2="56" stroke="#555" stroke-width="1.5" opacity="0.5"/>
+  <polygon points="116,52 123,56 116,60" fill="#555" opacity="0.5"/>
+
+  <!-- Andrews curves (right side) -->
+  <!-- Barolo curve -->
+  <path d="M128 55 Q138 30, 148 28 Q158 30, 165 50 Q172 70, 178 72 Q184 68, 192 55" stroke="#8B0000" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Gold curve -->
+  <path d="M128 62 Q138 72, 148 75 Q158 70, 165 52 Q172 38, 178 35 Q184 40, 192 50" stroke="#DAA520" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Green curve -->
+  <path d="M128 48 Q138 55, 148 60 Q158 58, 165 42 Q172 30, 178 32 Q184 42, 192 52" stroke="#2E8B57" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Subtle axis -->
+  <line x1="128" y1="90" x2="192" y2="90" stroke="#ccc" stroke-width="0.5"/>
+  <text x="160" y="98" text-anchor="middle" font-size="6" fill="#999" font-family="sans-serif">t</text>
 </svg>

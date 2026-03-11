@@ -37,9 +37,13 @@ equivalence margin $[-\delta, \delta]$.
 - $H_0$: $\sup_t |\mu_1(t) - \mu_2(t)| \geq \delta$ (NOT equivalent)
 - $H_1$: $\sup_t |\mu_1(t) - \mu_2(t)| < \delta$ (equivalent)
 
+```{=html}
+<img src="../reference/figures/equivalence-testing-diagram.svg" alt="Functional Equivalence Testing Diagram" style="width:100%; max-width:700px;">
+```
+
 ## Setup
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())

@@ -26,10 +26,14 @@ $\sqrt{\pi}$ times the Euclidean distance between the original observations ---
 so all distance-based FDA methods produce results that are directly
 interpretable in the original multivariate space.
 
+```{=html}
+<img src="../reference/figures/andrews-transformation-diagram.svg" alt="Andrews Transformation: From Tables to Curves" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
 This article demonstrates the full fdars pipeline --- depth, outlier detection,
 clustering, and FPCA --- applied to Andrews-transformed iris data.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())

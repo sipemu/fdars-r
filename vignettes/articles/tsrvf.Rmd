@@ -25,11 +25,15 @@ aligned curves to a **tangent space** at the Karcher mean, where the geometry is
 locally Euclidean. In this tangent space, standard multivariate methods apply
 directly, giving a rigorous framework for **elastic functional data analysis**.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 library(patchwork)
 theme_set(theme_minimal())
+```
+
+```{=html}
+<img src="../reference/figures/tsrvf-diagram.svg" alt="TSRVF: From Curved Manifold to Flat Tangent Space" style="width:100%; max-width:700px;">
 ```
 
 ## How It Works (Intuition)

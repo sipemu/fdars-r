@@ -35,7 +35,7 @@ and returns OOF predictions for the entire dataset.
 data used to select hyperparameters, giving realistic out-of-sample error
 estimates.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -313,6 +313,6 @@ cat("Custom predict RMSE:", round(cv_custom$metrics$RMSE, 3), "\n")
 
 ## See Also
 
-- `vignette("articles/regression")` — regression methods overview (PC, basis, NP)
+- `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
 - `vignette("articles/example-tecator-regression")` — Tecator regression in depth
 - `vignette("articles/functional-classification")` — classification methods

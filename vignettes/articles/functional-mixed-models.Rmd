@@ -31,7 +31,11 @@ where:
 **fdars** provides `fmm()` for fitting, `fmm.predict()` for prediction, and
 `fmm.test.fixed()` for testing fixed effects via permutation.
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/functional-mixed-models-diagram.svg" alt="Functional Mixed Model Decomposition" style="width:100%; max-width:700px;">
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -366,7 +370,8 @@ are too noisy to estimate a reliable individual effect.
 
 ## See Also
 
-- `vignette("articles/functional-regression")` for scalar-on-function and
-  function-on-scalar regression
+- `vignette("articles/scalar-on-function")` for scalar-on-function regression
+- `vignette("articles/function-on-scalar")` for function-on-scalar regression
+  (FOSR, FANOVA)
 - `vignette("articles/fpca")` for the FPC decomposition underlying the
   random effects

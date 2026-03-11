@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 250" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#2C5F8A">Importance, Robustness &amp; Stability</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">Which FPC scores matter? Is the model stable? (fregre.lm + functional.logistic)</text>
+
+  <!-- ===== Panel 1: Permutation Importance ===== -->
+  <rect x="10" y="50" width="165" height="137" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="92" y="70" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2C5F8A">Permutation Importance</text>
+  <text x="92" y="85" text-anchor="middle" font-size="11.0" fill="#888">shuffle score → measure MSE increase</text>
+
+  <!-- Horizontal bars -->
+  <rect x="60" y="97" width="64" height="12" rx="1" fill="#4A90D9" opacity="0.6"/>
+  <text x="56" y="107" text-anchor="end" font-size="9.4" fill="#888">PC1</text>
+  <rect x="60" y="115" width="44" height="12" rx="1" fill="#4A90D9" opacity="0.45"/>
+  <text x="56" y="125" text-anchor="end" font-size="9.4" fill="#888">PC2</text>
+  <rect x="60" y="132" width="22" height="12" rx="1" fill="#4A90D9" opacity="0.3"/>
+  <text x="56" y="142" text-anchor="end" font-size="9.4" fill="#888">PC3</text>
+  <rect x="60" y="150" width="10" height="12" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <text x="56" y="160" text-anchor="end" font-size="9.4" fill="#888">PC4</text>
+  <text x="92" y="185" text-anchor="middle" font-size="10.1" fill="#888">fregre.importance</text>
+
+  <!-- ===== Panel 2: Conditional Importance ===== -->
+  <rect x="185" y="50" width="165" height="137" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="267" y="70" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2C5F8A">Conditional Importance</text>
+  <text x="267" y="85" text-anchor="middle" font-size="11.0" fill="#888">permute within bins → debiased</text>
+
+  <!-- Grouped bars: conditional (blue) + unconditional (orange) -->
+  <rect x="212" y="100" width="14" height="52" rx="1" fill="#4A90D9" opacity="0.5"/>
+  <rect x="228" y="107" width="14" height="45" rx="1" fill="#D55E00" opacity="0.4"/>
+  <rect x="252" y="120" width="14" height="32" rx="1" fill="#4A90D9" opacity="0.5"/>
+  <rect x="268" y="117" width="14" height="35" rx="1" fill="#D55E00" opacity="0.4"/>
+  <rect x="292" y="135" width="14" height="17" rx="1" fill="#4A90D9" opacity="0.5"/>
+  <rect x="308" y="132" width="14" height="20" rx="1" fill="#D55E00" opacity="0.4"/>
+  <text x="225" y="165" font-size="8.6" fill="#888">PC1</text>
+  <text x="265" y="165" font-size="8.6" fill="#888">PC2</text>
+  <text x="305" y="165" font-size="8.6" fill="#888">PC3</text>
+  <!-- Legend -->
+  <rect x="204" y="172" width="6" height="7" rx="1" fill="#4A90D9" opacity="0.5"/>
+  <text x="213" y="180" font-size="7.8" fill="#888">cond.</text>
+  <rect x="234" y="172" width="6" height="7" rx="1" fill="#D55E00" opacity="0.4"/>
+  <text x="243" y="180" font-size="7.8" fill="#888">uncond.</text>
+  <text x="267" y="195" text-anchor="middle" font-size="10.1" fill="#888">fregre.conditional.importance</text>
+
+  <!-- ===== Panel 3: Regression Depth ===== -->
+  <rect x="360" y="50" width="155" height="137" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="437" y="70" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2C5F8A">Regression Depth</text>
+  <text x="437" y="85" text-anchor="middle" font-size="11.0" fill="#888">centrality among bootstrap β̂'s</text>
+
+  <!-- Concentric ellipses = depth contours -->
+  <ellipse cx="437" cy="135" rx="56" ry="40" fill="none" stroke="#4A90D9" stroke-width="0.4" opacity="0.25"/>
+  <ellipse cx="437" cy="135" rx="40" ry="27" fill="none" stroke="#4A90D9" stroke-width="0.5" opacity="0.4"/>
+  <ellipse cx="437" cy="135" rx="24" ry="17" fill="#4A90D9" opacity="0.06" stroke="#4A90D9" stroke-width="0.6" opacity="0.6"/>
+  <ellipse cx="437" cy="135" rx="10" ry="7" fill="#4A90D9" opacity="0.1" stroke="#2C5F8A" stroke-width="0.8"/>
+  <!-- β̂ estimate at center -->
+  <circle cx="437" cy="135" r="3" fill="#2C5F8A" opacity="0.8"/>
+  <text x="444" y="132" font-size="8.6" fill="#2C5F8A" font-weight="bold">β̂</text>
+  <!-- Bootstrap replicates scattered -->
+  <circle cx="420" cy="125" r="1.2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="450" cy="142" r="1.2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="430" cy="145" r="1.2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="446" cy="122" r="1.2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="424" cy="137" r="1.2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="454" cy="130" r="1.2" fill="#4A90D9" opacity="0.3"/>
+  <text x="437" y="185" text-anchor="middle" font-size="10.1" fill="#888">fregre.depth</text>
+
+  <!-- ===== Panel 4: Stability ===== -->
+  <rect x="525" y="50" width="167" height="137" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="608" y="70" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2C5F8A">Explanation Stability</text>
+  <text x="608" y="85" text-anchor="middle" font-size="11.0" fill="#888">bootstrap CV of β(t) — model-free</text>
+
+  <!-- Axes -->
+  <line x1="540" y1="172" x2="678" y2="172" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="540" y1="92" x2="540" y2="172" stroke="#ccc" stroke-width="0.5"/>
+  <text x="609" y="185" text-anchor="middle" font-size="9.4" fill="#888">t</text>
+  <!-- CV curve with varying stability -->
+  <path d="M546 125Q570 115 590 110Q610 107 630 117Q650 127 672 132" stroke="#C0392B" stroke-width="1.5" fill="none"/>
+  <path d="M546 125Q570 115 590 110Q610 107 630 117Q650 127 672 132L672 172L546 172Z" fill="#C0392B" opacity="0.08"/>
+  <!-- Stable region annotation -->
+  <rect x="580" y="102" width="36" height="15" rx="2" fill="#2E8B57" opacity="0.08" stroke="#2E8B57" stroke-width="0.4"/>
+  <text x="598" y="112" text-anchor="middle" font-size="7.8" fill="#2E8B57">stable</text>
+  <!-- Unstable region annotation -->
+  <rect x="644" y="122" width="30" height="15" rx="2" fill="#D55E00" opacity="0.08" stroke="#D55E00" stroke-width="0.4"/>
+  <text x="659" y="132" text-anchor="middle" font-size="7.8" fill="#D55E00">unstable</text>
+  <text x="608" y="195" text-anchor="middle" font-size="10.1" fill="#888">fregre.stability</text>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Curves being aligned (left) -->
+  <path d="M10 80 Q25 45, 40 35 Q55 28, 70 50" stroke="#999" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 85 Q30 50, 45 40 Q60 35, 70 55" stroke="#999" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 75 Q20 42, 35 30 Q50 24, 70 48" stroke="#999" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+  <!-- Arrow -->
+  <path d="M75 55 L90 55" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+  <!-- Beta coefficient (right) -->
+  <path d="M95 75 Q110 45, 125 30 Q140 20, 155 25 Q170 35, 185 55" stroke="#4169E1" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+  <!-- Zero line -->
+  <line x1="95" y1="60" x2="190" y2="60" stroke="#999" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.4"/>
+  <!-- Scatter plot of y vs fitted (bottom right) -->
+  <circle cx="110" cy="95" r="2" fill="#E8913A" opacity="0.5"/>
+  <circle cx="125" cy="88" r="2" fill="#E8913A" opacity="0.5"/>
+  <circle cx="140" cy="82" r="2" fill="#E8913A" opacity="0.5"/>
+  <circle cx="155" cy="78" r="2" fill="#E8913A" opacity="0.5"/>
+  <circle cx="170" cy="92" r="2" fill="#E8913A" opacity="0.5"/>
+  <!-- Fit line -->
+  <line x1="105" y1="98" x2="175" y2="75" stroke="#E8913A" stroke-width="1" opacity="0.6"/>
+  <!-- Labels -->
+  <text x="15" y="15" font-size="8" fill="#4169E1" font-family="sans-serif" opacity="0.7">align</text>
+  <text x="120" y="15" font-size="8" fill="#4169E1" font-family="sans-serif" opacity="0.7">beta(t)</text>
+</svg>

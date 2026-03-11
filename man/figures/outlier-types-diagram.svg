@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 350" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="300" y="22" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Three Types of Functional Outliers</text>
+  <text x="300" y="40" text-anchor="middle" font-size="12.5" fill="#888">Atypical curves detected by depth and likelihood methods</text>
+
+  <!-- ===== TYPE 1: Magnitude ===== -->
+  <rect x="14" y="54" width="180" height="150" rx="6" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="104" y="72" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#D55E00">Magnitude Outlier</text>
+  <text x="104" y="86" text-anchor="middle" font-size="10" fill="#888">shifted up or down</text>
+
+  <!-- Normal curves (grey) -->
+  <path d="M28 156 Q52 132 76 140 Q100 148 124 134 Q148 120 172 138 Q184 146 186 142" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M28 160 Q52 136 76 144 Q100 152 124 138 Q148 124 172 142 Q184 150 186 146" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M28 164 Q52 140 76 148 Q100 156 124 142 Q148 128 172 146 Q184 154 186 150" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M28 152 Q52 128 76 136 Q100 144 124 130 Q148 116 172 134 Q184 142 186 138" stroke="#999" stroke-width="1" fill="none" opacity="0.25"/>
+
+  <!-- Outlier: same shape, shifted way up -->
+  <path d="M28 120 Q52 96 76 104 Q100 112 124 98 Q148 84 172 102 Q184 110 186 106" stroke="#D55E00" stroke-width="2" fill="none"/>
+
+  <!-- Shift arrow -->
+  <line x1="46" y1="154" x2="46" y2="124" stroke="#D55E00" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="54" y="140" font-size="10" fill="#D55E00">&#8593; shift</text>
+
+  <text x="104" y="194" text-anchor="middle" font-size="10" fill="#555">Same shape, different level</text>
+
+  <!-- ===== TYPE 2: Shape ===== -->
+  <rect x="210" y="54" width="180" height="150" rx="6" fill="#E0E8FF" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="300" y="72" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">Shape Outlier</text>
+  <text x="300" y="86" text-anchor="middle" font-size="10" fill="#888">different pattern</text>
+
+  <!-- Normal curves (grey) -->
+  <path d="M224 156 Q248 132 272 140 Q296 148 320 134 Q344 120 368 138 Q380 146 382 142" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M224 160 Q248 136 272 144 Q296 152 320 138 Q344 124 368 142 Q380 150 382 146" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M224 164 Q248 140 272 148 Q296 156 320 142 Q344 128 368 146 Q380 154 382 150" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M224 152 Q248 128 272 136 Q296 144 320 130 Q344 116 368 134 Q380 142 382 138" stroke="#999" stroke-width="1" fill="none" opacity="0.25"/>
+
+  <!-- Outlier: inverted shape -->
+  <path d="M224 140 Q248 164 272 156 Q296 148 320 162 Q344 176 368 158 Q380 150 382 154" stroke="#4A90D9" stroke-width="2" fill="none"/>
+
+  <text x="300" y="194" text-anchor="middle" font-size="10" fill="#555">Inverted or different form</text>
+
+  <!-- ===== TYPE 3: Amplitude ===== -->
+  <rect x="406" y="54" width="180" height="150" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="496" y="72" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#7B2D8E">Amplitude Outlier</text>
+  <text x="496" y="86" text-anchor="middle" font-size="10" fill="#888">exaggerated scale</text>
+
+  <!-- Normal curves (grey) -->
+  <path d="M420 156 Q444 142 468 146 Q492 152 516 142 Q540 132 564 144 Q576 150 578 148" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M420 160 Q444 146 468 150 Q492 156 516 146 Q540 136 564 148 Q576 154 578 152" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M420 164 Q444 150 468 154 Q492 160 516 150 Q540 140 564 152 Q576 158 578 156" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M420 152 Q444 138 468 142 Q492 148 516 138 Q540 128 564 140 Q576 146 578 144" stroke="#999" stroke-width="1" fill="none" opacity="0.25"/>
+
+  <!-- Outlier: same shape, much larger amplitude (3x) -->
+  <path d="M420 160 Q444 108 468 128 Q492 148 516 108 Q540 68 564 120 Q576 144 578 136" stroke="#7B2D8E" stroke-width="2" fill="none"/>
+
+  <!-- Scale annotation -->
+  <line x1="540" y1="68" x2="540" y2="130" stroke="#7B2D8E" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="548" y="100" font-size="10" fill="#7B2D8E">3&#215;</text>
+
+  <text x="496" y="194" text-anchor="middle" font-size="10" fill="#555">Same shape, larger swings</text>
+
+  <!-- ===== BOTTOM: Detection methods ===== -->
+  <line x1="10" y1="218" x2="590" y2="218" stroke="#eee" stroke-width="1"/>
+
+  <text x="300" y="238" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#555">Detection Methods</text>
+
+  <rect x="20" y="248" width="170" height="24" rx="4" fill="#FFF3E0" stroke="#E6A020" stroke-width="0.8"/>
+  <text x="105" y="264" text-anchor="middle" font-size="10" fill="#B37700" font-weight="bold">depth() &#8594; low depth = outlier</text>
+
+  <rect x="215" y="248" width="170" height="24" rx="4" fill="#F0FAF0" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="300" y="264" text-anchor="middle" font-size="10" fill="#2E8B57" font-weight="bold">outlier.lrt() &#8594; likelihood test</text>
+
+  <rect x="410" y="248" width="170" height="24" rx="4" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="495" y="264" text-anchor="middle" font-size="10" fill="#7B2D8E" font-weight="bold">outlier.conformal() &#8594; dist-free</text>
+</svg>

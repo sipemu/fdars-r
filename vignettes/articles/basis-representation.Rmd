@@ -31,7 +31,11 @@ This approach provides:
 
 **fdars** provides tools to find the optimal basis representation for your data.
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/basis-representation-diagram.svg" alt="Basis Representation Comparison Diagram" style="width:100%; max-width:700px;">
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -514,7 +518,7 @@ ggplot(df_comp, aes(x = t, y = value, color = method, linetype = method, linewid
 
 - `vignette("fpca", package = "fdars")` — functional principal component analysis
 - `vignette("intro-to-smoothing", package = "fdars")` — smoothing techniques for functional data
-- `vignette("regression", package = "fdars")` — scalar-on-function regression methods
+- `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
 
 ## References
 

@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrSim" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Karhunen-Lo&#232;ve Simulation Framework</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">X(t) = &#956;(t) + &#931; &#958;&#7096; &#966;&#7096;(t) + &#949;(t)</text>
+
+  <!-- ===== Column 1: Ingredients ===== -->
+
+  <!-- Eigenfunction basis -->
+  <rect x="16" y="84" width="190" height="100" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="111" y="108" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">Eigenfunctions &#966;&#7096;(t)</text>
+  <text x="111" y="128" text-anchor="middle" font-size="13" fill="#555">eFun()</text>
+  <!-- 3 basis function shapes -->
+  <path d="M30 158 Q60 142 90 158 Q120 174 150 158 Q170 148 190 158" stroke="#4A90D9" stroke-width="1.8" fill="none" opacity="0.6"/>
+  <path d="M30 162 Q50 148 70 168 Q90 148 110 162 Q130 176 150 154 Q170 142 190 162" stroke="#4A90D9" stroke-width="1.3" fill="none" opacity="0.4"/>
+  <path d="M30 166 Q70 180 110 150 Q150 170 190 156" stroke="#4A90D9" stroke-width="1.3" fill="none" opacity="0.3"/>
+
+  <!-- Eigenvalue decay -->
+  <rect x="16" y="204" width="190" height="100" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="111" y="228" text-anchor="middle" font-size="15" font-weight="bold" fill="#B37700">Eigenvalues &#955;&#7096;</text>
+  <text x="111" y="248" text-anchor="middle" font-size="13" fill="#555">eVal()</text>
+  <!-- Decaying bars -->
+  <rect x="40" y="264" width="20" height="30" rx="2" fill="#E6A020" opacity="0.7"/>
+  <rect x="68" y="274" width="20" height="20" rx="2" fill="#E6A020" opacity="0.6"/>
+  <rect x="96" y="280" width="20" height="14" rx="2" fill="#E6A020" opacity="0.5"/>
+  <rect x="124" y="284" width="20" height="10" rx="2" fill="#E6A020" opacity="0.4"/>
+  <rect x="152" y="287" width="20" height="7" rx="2" fill="#E6A020" opacity="0.3"/>
+
+  <!-- Scores -->
+  <rect x="16" y="324" width="190" height="80" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="111" y="348" text-anchor="middle" font-size="15" font-weight="bold" fill="#2E8B57">Scores &#958;&#7096;</text>
+  <text x="111" y="370" text-anchor="middle" font-size="13" fill="#555">&#958;&#7096; ~ N(0, &#955;&#7096;)</text>
+  <text x="111" y="392" text-anchor="middle" font-size="12" fill="#888">random coefficients</text>
+
+  <!-- ===== Arrows to combiner ===== -->
+  <line x1="210" y1="134" x2="260" y2="200" stroke="#555" stroke-width="1.2" marker-end="url(#arrSim)"/>
+  <line x1="210" y1="254" x2="260" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrSim)"/>
+  <line x1="210" y1="364" x2="260" y2="240" stroke="#555" stroke-width="1.2" marker-end="url(#arrSim)"/>
+
+  <!-- ===== Column 2: simFunData ===== -->
+  <rect x="266" y="170" width="160" height="86" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="2"/>
+  <text x="346" y="200" text-anchor="middle" font-size="16" font-weight="bold" fill="#7B2D8E">simFunData()</text>
+  <text x="346" y="222" text-anchor="middle" font-size="13" fill="#555">KL expansion</text>
+  <text x="346" y="242" text-anchor="middle" font-size="12" fill="#888">&#956;(t) + &#931; &#958;&#7096; &#966;&#7096;(t)</text>
+
+  <!-- Arrow to post-processing -->
+  <line x1="430" y1="213" x2="480" y2="213" stroke="#555" stroke-width="1.2" marker-end="url(#arrSim)"/>
+
+  <!-- ===== Column 3: Post-processing ===== -->
+  <rect x="486" y="84" width="210" height="280" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.2"/>
+  <text x="591" y="110" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Post-Processing</text>
+
+  <!-- Add noise -->
+  <rect x="502" y="126" width="178" height="52" rx="6" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="591" y="148" text-anchor="middle" font-size="14" font-weight="bold" fill="#D55E00">+ Noise</text>
+  <text x="591" y="166" text-anchor="middle" font-size="12" fill="#555">addError()</text>
+
+  <!-- Sparsify -->
+  <rect x="502" y="192" width="178" height="52" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="591" y="214" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Sparsify</text>
+  <text x="591" y="232" text-anchor="middle" font-size="12" fill="#555">sparsify()</text>
+
+  <!-- Multivariate -->
+  <rect x="502" y="258" width="178" height="52" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="591" y="280" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Multivariate</text>
+  <text x="591" y="298" text-anchor="middle" font-size="12" fill="#555">simMultiFunData()</text>
+
+  <!-- Mean function -->
+  <rect x="502" y="324" width="178" height="52" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="591" y="346" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">+ Mean &#956;(t)</text>
+  <text x="591" y="364" text-anchor="middle" font-size="12" fill="#555">custom mean function</text>
+
+  <!-- ===== Bottom: basis types ===== -->
+  <line x1="16" y1="424" x2="700" y2="424" stroke="#eee" stroke-width="1.5"/>
+
+  <text x="70" y="450" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A90D9">Fourier</text>
+  <text x="70" y="468" text-anchor="middle" font-size="12" fill="#888">periodic</text>
+
+  <text x="220" y="450" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A90D9">Legendre</text>
+  <text x="220" y="468" text-anchor="middle" font-size="12" fill="#888">polynomials</text>
+
+  <text x="380" y="450" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A90D9">Wiener</text>
+  <text x="380" y="468" text-anchor="middle" font-size="12" fill="#888">Brownian paths</text>
+
+  <text x="540" y="450" text-anchor="middle" font-size="14" font-weight="bold" fill="#E6A020">linear / exp</text>
+  <text x="540" y="468" text-anchor="middle" font-size="12" fill="#888">eigenvalue decay</text>
+
+  <text x="665" y="450" text-anchor="middle" font-size="14" font-weight="bold" fill="#E6A020">wiener</text>
+  <text x="665" y="468" text-anchor="middle" font-size="12" fill="#888">1/k&#178; decay</text>
+</svg>

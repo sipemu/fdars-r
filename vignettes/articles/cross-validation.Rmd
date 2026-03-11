@@ -32,7 +32,11 @@ The existing `*.cv` functions in **fdars** (`fregre.pc.cv`, `fregre.basis.cv`,
 unified framework for both, producing **out-of-fold (OOF) predictions** where
 every observation is predicted exactly once.
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/cross-validation-diagram.svg" alt="Cross-Validation for Functional Data" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -385,6 +389,6 @@ Use `*.cv` functions *inside* `cv.fdata`'s `fit.fn` for proper nested CV.
 
 ## See Also
 
-- `vignette("articles/regression")` — regression methods overview
+- `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
 - `vignette("articles/example-cross-validation")` — real-data example with Tecator NIR spectra
 - `vignette("articles/functional-classification")` — classification methods

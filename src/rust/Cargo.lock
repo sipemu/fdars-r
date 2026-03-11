@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "fdars-core"
-version = "0.7.2"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ddec6321a058478880f5e514ea2f16c80e00ec2a103575c01c1c7248d4227999"
 dependencies = [

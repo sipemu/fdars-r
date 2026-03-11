@@ -22,7 +22,11 @@ Functional clustering groups curves into clusters based on their similarity.
 - k-means++ initialization
 - Automatic optimal k selection
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/clustering-diagram.svg" alt="Functional Clustering" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -59,6 +63,10 @@ plot(fd)
 ```
 
 ## K-Means Clustering
+
+```{=html}
+<img src="../reference/figures/clustering-kmeans-diagram.svg" alt="K-Means Clustering" style="width:100%; max-width:700px; display:block; margin:1em auto;" />
+```
 
 ### Basic Usage
 
@@ -194,6 +202,10 @@ plot(init_centers)
 ```
 
 ## Fuzzy C-Means Clustering
+
+```{=html}
+<img src="../reference/figures/clustering-fcm-diagram.svg" alt="Fuzzy C-Means Clustering" style="width:100%; max-width:700px; display:block; margin:1em auto;" />
+```
 
 Unlike hard k-means where each curve belongs to exactly one cluster, fuzzy
 c-means (FCM) assigns membership degrees to each cluster. This is useful when

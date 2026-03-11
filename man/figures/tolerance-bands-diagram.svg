@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 375" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="300" y="22" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Confidence Bands vs Tolerance Bands</text>
+  <text x="300" y="40" text-anchor="middle" font-size="12.5" fill="#888">Two different questions about functional data</text>
+
+  <!-- ===== DIVIDER ===== -->
+  <line x1="300" y1="50" x2="300" y2="240" stroke="#ddd" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- ===== LEFT: Confidence Band ===== -->
+  <text x="150" y="62" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">Confidence Band (SCB)</text>
+  <text x="150" y="76" text-anchor="middle" font-size="11.2" fill="#888">"Where is the true mean?"</text>
+
+  <rect x="20" y="86" width="260" height="130" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.0"/>
+
+  <!-- Narrow confidence band (shaded) -->
+  <path d="M36 158 Q76 140 116 148 Q156 156 196 142 Q236 128 264 140" stroke="none" fill="#4A90D9" opacity="0.15"/>
+  <path d="M36 170 Q76 156 116 162 Q156 170 196 158 Q236 146 264 156" stroke="none" fill="#4A90D9" opacity="0.15"/>
+  <!-- Fill between -->
+  <path d="M36 158 Q76 140 116 148 Q156 156 196 142 Q236 128 264 140 L264 156 Q236 146 196 158 Q156 170 116 162 Q76 156 36 170 Z" fill="#4A90D9" opacity="0.12"/>
+
+  <!-- Upper band -->
+  <path d="M36 158 Q76 140 116 148 Q156 156 196 142 Q236 128 264 140" stroke="#4A90D9" stroke-width="1" fill="none" stroke-dasharray="4,2"/>
+  <!-- Lower band -->
+  <path d="M36 170 Q76 156 116 162 Q156 170 196 158 Q236 146 264 156" stroke="#4A90D9" stroke-width="1" fill="none" stroke-dasharray="4,2"/>
+
+  <!-- Mean curve -->
+  <path d="M36 164 Q76 148 116 155 Q156 163 196 150 Q236 137 264 148" stroke="#2C5F8A" stroke-width="2" fill="none"/>
+
+  <!-- Individual curves (light, showing they go outside band) -->
+  <path d="M36 140 Q76 122 116 130 Q156 140 196 126 Q236 112 264 122" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M36 186 Q76 172 116 178 Q156 184 196 170 Q236 158 264 168" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M36 148 Q76 130 116 138 Q156 146 196 132 Q236 118 264 130" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M36 180 Q76 166 116 172 Q156 178 196 164 Q236 152 264 162" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+  <!-- Label -->
+  <text x="150" y="110" text-anchor="middle" font-size="10" fill="#2C5F8A" font-weight="bold">narrow band</text>
+  <text x="150" y="198" text-anchor="middle" font-size="10" fill="#888">individual curves escape the band</text>
+  <text x="150" y="210" text-anchor="middle" font-size="10" fill="#888">(that's expected!)</text>
+
+  <!-- ===== RIGHT: Tolerance Band ===== -->
+  <text x="450" y="62" text-anchor="middle" font-size="15" font-weight="bold" fill="#2E8B57">Tolerance Band</text>
+  <text x="450" y="76" text-anchor="middle" font-size="11.2" fill="#888">"Where will the next curve fall?"</text>
+
+  <rect x="320" y="86" width="260" height="130" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.0"/>
+
+  <!-- Wide tolerance band (shaded) -->
+  <path d="M336 128 Q376 108 416 116 Q456 124 496 110 Q536 96 564 108 L564 188 Q536 178 496 190 Q456 200 416 194 Q376 188 336 200 Z" fill="#2E8B57" opacity="0.10"/>
+
+  <!-- Upper band -->
+  <path d="M336 128 Q376 108 416 116 Q456 124 496 110 Q536 96 564 108" stroke="#2E8B57" stroke-width="1.2" fill="none" stroke-dasharray="4,2"/>
+  <!-- Lower band -->
+  <path d="M336 200 Q376 188 416 194 Q456 200 496 190 Q536 178 564 188" stroke="#2E8B57" stroke-width="1.2" fill="none" stroke-dasharray="4,2"/>
+
+  <!-- Mean curve -->
+  <path d="M336 164 Q376 148 416 155 Q456 163 496 150 Q536 137 564 148" stroke="#2E8B57" stroke-width="2" fill="none"/>
+
+  <!-- Individual curves (mostly inside band) -->
+  <path d="M336 140 Q376 122 416 130 Q456 140 496 126 Q536 112 564 122" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M336 186 Q376 172 416 178 Q456 184 496 170 Q536 158 564 168" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M336 148 Q376 130 416 138 Q456 146 496 132 Q536 118 564 130" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M336 180 Q376 166 416 172 Q456 178 496 164 Q536 152 564 162" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+  <!-- Label -->
+  <text x="450" y="104" text-anchor="middle" font-size="10" fill="#2E8B57" font-weight="bold">wide band</text>
+  <text x="450" y="198" text-anchor="middle" font-size="10" fill="#888">individual curves contained</text>
+  <text x="450" y="210" text-anchor="middle" font-size="10" fill="#888">(95% coverage target)</text>
+
+  <!-- ===== BOTTOM: Summary ===== -->
+  <line x1="10" y1="230" x2="590" y2="230" stroke="#eee" stroke-width="1"/>
+
+  <rect x="30" y="242" width="240" height="46" rx="5" fill="#E8F0FE" opacity="0.4" stroke="#4A90D9" stroke-width="0.8"/>
+  <text x="150" y="258" text-anchor="middle" font-size="11.2" fill="#2C5F8A" font-weight="bold">scb.mean(): Confidence for &#956;(t)</text>
+  <text x="150" y="272" text-anchor="middle" font-size="10" fill="#555">Narrows with more data (1/&#8730;n rate)</text>
+  <text x="150" y="284" text-anchor="middle" font-size="10" fill="#555">Targets the population mean function</text>
+
+  <rect x="330" y="242" width="240" height="46" rx="5" fill="#F0FAF0" opacity="0.4" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="450" y="258" text-anchor="middle" font-size="11.2" fill="#2E8B57" font-weight="bold">tol.band(): Tolerance for X&#7522;(t)</text>
+  <text x="450" y="272" text-anchor="middle" font-size="10" fill="#555">Stays wide (captures individual spread)</text>
+  <text x="450" y="284" text-anchor="middle" font-size="10" fill="#555">Targets future individual observations</text>
+</svg>

@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrEF" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="300" y="27.5" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Elastic FPCA: Separating Amplitude and Phase Variation</text>
+  <text x="300" y="50" text-anchor="middle" font-size="12.5" fill="#888">FPCA after elastic alignment decomposes curves into shape (amplitude) and timing (phase) modes</text>
+
+  <!-- ===== STEP 1: Karcher mean alignment ===== -->
+  <rect x="14" y="70" width="130" height="125" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="79" y="90" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">Original Curves</text>
+  <!-- Misaligned curves -->
+  <path d="M 24 150.0 Q 40 107.5 56 125.0 Q 72 142.5 88 117.5 Q 104 92.5 120 125.0 Q 130 142.5 134 135.0" stroke="#4A90D9" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M 24 147.5 Q 36 110.0 48 120.0 Q 60 130.0 76 110.0 Q 92 90.0 108 120.0 Q 120 140.0 134 132.5" stroke="#D55E00" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M 24 152.5 Q 44 112.5 60 130.0 Q 76 147.5 92 120.0 Q 108 92.5 124 130.0 Q 134 147.5 134 140.0" stroke="#7B2D8E" stroke-width="1.3" fill="none" opacity="0.4"/>
+  <path d="M 24 145.0 Q 32 115.0 44 125.0 Q 56 135.0 72 112.5 Q 88 90.0 104 122.5 Q 120 155.0 134 137.5" stroke="#2E8B57" stroke-width="1.3" fill="none" opacity="0.4"/>
+
+  <!-- Arrow -->
+  <line x1="148" y1="132.5" x2="168" y2="132.5" stroke="#555" stroke-width="1.3" marker-end="u r l a r r E F"/>
+  <text x="158" y="120" text-anchor="middle" font-size="8.8" fill="#888">karcher</text>
+  <text x="158" y="150" text-anchor="middle" font-size="8.8" fill="#888">mean</text>
+
+  <!-- Aligned + warps -->
+  <rect x="174" y="70" width="100" height="125" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.3"/>
+  <text x="224" y="90" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2E8B57">Aligned</text>
+  <!-- Aligned curves (in phase) -->
+  <path d="M 184 142.5 Q 200 107.5 216 122.5 Q 232 137.5 248 112.5 Q 258 97.5 264 120.0" stroke="#4A90D9" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M 184 150.0 Q 200 120.0 216 132.5 Q 232 145.0 248 122.5 Q 258 107.5 264 130.0" stroke="#D55E00" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M 184 137.5 Q 200 102.5 216 117.5 Q 232 132.5 248 107.5 Q 258 92.5 264 112.5" stroke="#7B2D8E" stroke-width="1.3" fill="none" opacity="0.4"/>
+  <path d="M 184 145.0 Q 200 112.5 216 127.5 Q 232 142.5 248 117.5 Q 258 102.5 264 122.5" stroke="#2E8B57" stroke-width="1.3" fill="none" opacity="0.4"/>
+
+  <!-- Decomposition arrows -->
+  <line x1="278" y1="107.5" x2="298" y2="95" stroke="#555" stroke-width="1.1" marker-end="u r l a r r E F"/>
+  <line x1="278" y1="157.5" x2="298" y2="170" stroke="#555" stroke-width="1.1" marker-end="u r l a r r E F"/>
+  <text x="298" y="135" text-anchor="middle" font-size="8.8" fill="#888">decompose</text>
+
+  <!-- ===== Vertical (Amplitude) FPCA ===== -->
+  <rect x="304" y="62.5" width="282" height="75" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.6"/>
+  <text x="445" y="85" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">Vertical (Amplitude) FPCA</text>
+
+  <!-- Amplitude eigenfunction 1 -->
+  <path d="M 316 115.0 Q 332 90.0 348 102.5 Q 364 115.0 380 97.5" stroke="#4A90D9" stroke-width="2.1" fill="none"/>
+  <text x="348" y="130" text-anchor="middle" font-size="8.8" fill="#888">&#966;&#8321;(t)</text>
+
+  <!-- Mean &#177; eigenfunction -->
+  <path d="M 400 107.5 L 410 107.5" stroke="#2E8B57" stroke-width="1.6"/>
+  <text x="428" y="112.5" text-anchor="middle" font-size="8.8" fill="#2E8B57">&#956; &#177; &#966;&#8342;</text>
+
+  <!-- Score scatter -->
+  <circle cx="460" cy="95" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="468" cy="102.5" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="478" cy="90" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="486" cy="110" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="474" cy="100" r="2" fill="#4A90D9" opacity="0.6"/>
+  <text x="510" y="102.5" font-size="8.8" fill="#888">amplitude</text>
+  <text x="510" y="115" font-size="8.8" fill="#888">scores</text>
+
+  <!-- Variance bars -->
+  <rect x="540" y="80" width="36" height="10" rx="2" fill="#4A90D9" opacity="0.6"/>
+  <rect x="540" y="95" width="20" height="10" rx="2" fill="#4A90D9" opacity="0.4"/>
+  <rect x="540" y="110" width="10" height="10" rx="2" fill="#4A90D9" opacity="0.3"/>
+
+  <!-- ===== Horizontal (Phase) FPCA ===== -->
+  <rect x="304" y="150" width="282" height="75" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.6"/>
+  <text x="445" y="172.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#B37700">Horizontal (Phase) FPCA</text>
+
+  <!-- Warping eigenfunctions -->
+  <line x1="316" y1="212.5" x2="380" y2="185" stroke="#ccc" stroke-width="0.6" stroke-dasharray="2,2"/>
+  <path d="M 316 212.5 Q 340 197.5 356 190.0 Q 368 185.0 380 185.0" stroke="#E6A020" stroke-width="1.6" fill="none"/>
+  <path d="M 316 212.5 Q 334 205.0 348 200.0 Q 364 192.5 380 187.5" stroke="#E6A020" stroke-width="1.1" fill="none" opacity="0.5"/>
+  <text x="350" y="217.5" text-anchor="middle" font-size="8.8" fill="#888">warps &#947;(t)</text>
+
+  <!-- Phase score scatter -->
+  <circle cx="460" cy="182.5" r="2" fill="#E6A020" opacity="0.6"/>
+  <circle cx="468" cy="190" r="2" fill="#E6A020" opacity="0.6"/>
+  <circle cx="478" cy="177.5" r="2" fill="#E6A020" opacity="0.6"/>
+  <circle cx="486" cy="197.5" r="2" fill="#E6A020" opacity="0.6"/>
+  <circle cx="474" cy="187.5" r="2" fill="#E6A020" opacity="0.6"/>
+  <text x="510" y="190" font-size="8.8" fill="#888">phase</text>
+  <text x="510" y="202.5" font-size="8.8" fill="#888">scores</text>
+
+  <!-- Variance bars -->
+  <rect x="540" y="167.5" width="30" height="10" rx="2" fill="#E6A020" opacity="0.6"/>
+  <rect x="540" y="182.5" width="18" height="10" rx="2" fill="#E6A020" opacity="0.4"/>
+  <rect x="540" y="197.5" width="8" height="10" rx="2" fill="#E6A020" opacity="0.3"/>
+
+  <!-- ===== Joint FPCA ===== -->
+  <line x1="10" y1="245" x2="590" y2="245" stroke="#eee" stroke-width="1.1"/>
+
+  <text x="300" y="270" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#555">Joint FPCA: Combined Amplitude + Phase</text>
+
+  <!-- Joint diagram -->
+  <rect x="40" y="285" width="220" height="75" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.3"/>
+  <text x="150" y="307.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#7B2D8E">Joint Eigenvectors</text>
+
+  <!-- Stacked bar: amplitude portion + phase portion -->
+  <text x="60" y="332.5" font-size="10" fill="#888">PC1:</text>
+  <rect x="82" y="322.5" width="80" height="12.5" rx="2" fill="#4A90D9" opacity="0.5"/>
+  <rect x="162" y="322.5" width="30" height="12.5" rx="2" fill="#E6A020" opacity="0.5"/>
+  <text x="210" y="332.5" font-size="8.8" fill="#888">amp+phase</text>
+
+  <text x="60" y="352.5" font-size="10" fill="#888">PC2:</text>
+  <rect x="82" y="342.5" width="40" height="12.5" rx="2" fill="#4A90D9" opacity="0.5"/>
+  <rect x="122" y="342.5" width="60" height="12.5" rx="2" fill="#E6A020" opacity="0.5"/>
+  <text x="200" y="352.5" font-size="8.8" fill="#888">more phase</text>
+
+  <!-- Balance parameter -->
+  <rect x="300" y="285" width="270" height="75" rx="6" fill="#7B2D8E" opacity="0.06" stroke="#7B2D8E" stroke-width="1.1"/>
+  <text x="435" y="307.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#7B2D8E">Balance Parameter c</text>
+  <text x="435" y="327.5" text-anchor="middle" font-size="10" fill="#555">Controls relative weighting of amplitude vs phase</text>
+  <text x="435" y="347.5" text-anchor="middle" font-size="10" fill="#888">c &#8594; 0: amplitude only &#160;&#160; c &#8594; &#8734;: phase only</text>
+
+  <!-- ===== BOTTOM: Key insight ===== -->
+  <line x1="10" y1="375" x2="590" y2="375" stroke="#eee" stroke-width="1.1"/>
+  <rect x="40" y="387.5" width="10" height="12.5" rx="2" fill="#4A90D9" opacity="0.5"/>
+  <text x="56" y="400" font-size="11.2" fill="#555">Amplitude (shape variation)</text>
+  <rect x="210" y="387.5" width="10" height="12.5" rx="2" fill="#E6A020" opacity="0.5"/>
+  <text x="226" y="400" font-size="11.2" fill="#555">Phase (timing variation)</text>
+  <rect x="380" y="387.5" width="10" height="12.5" rx="2" fill="#7B2D8E" opacity="0.4"/>
+  <text x="396" y="400" font-size="11.2" fill="#555">Joint (combined, balanced by c)</text>
+</svg>

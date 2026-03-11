@@ -30,7 +30,7 @@ child and can be correlated with other variables (adult height, BMI, etc.).
 This dataset is a standard benchmark in elastic FDA literature (Tucker et al.,
 2013; Srivastava and Klassen, 2016). It is available in the `fdasrvf` package.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())

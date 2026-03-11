@@ -1334,42 +1334,22 @@ detect.periods <- function(fdataobj, max_periods = 3,
     fdataobj <- detrend(fdataobj, method = detrend_method)
   }
 
-  # Pure R implementation using iterative residual subtraction
-  periods <- numeric(0)
-  confidence <- numeric(0)
-  strength <- numeric(0)
-  amplitude <- numeric(0)
+  # Use Rust backend for multi-period detection
+  raw <- seasonal_detect_multiple_periods(
+    fdataobj$data, as.numeric(fdataobj$argvals),
+    as.integer(max_periods), min_confidence, min_strength
+  )
 
-  residual <- fdataobj
-  tt <- fdataobj$argvals
-
-  for (i in seq_len(max_periods)) {
-    # Estimate dominant period
-    est <- estimate.period(residual, method = "fft")
-    if (est$confidence < min_confidence) break
-
-    # Check seasonal strength
-    ss <- seasonal.strength(residual, period = est$period)
-    if (ss < min_strength) break
-
-    # Compute amplitude via Fourier coefficients
-    omega <- 2 * pi / est$period
-    cos_comp <- cos(omega * tt)
-    sin_comp <- sin(omega * tt)
-    y <- residual$data[1, ]
-    a <- 2 * mean(y * cos_comp)
-    b <- 2 * mean(y * sin_comp)
-    amp <- sqrt(a^2 + b^2)
-
-    # Store results
-    periods <- c(periods, est$period)
-    confidence <- c(confidence, est$confidence)
-    strength <- c(strength, ss)
-    amplitude <- c(amplitude, amp)
-
-    # Subtract fitted sinusoid from residual
-    fitted <- a * cos_comp + b * sin_comp
-    residual$data <- residual$data - matrix(fitted, nrow = 1)
+  if (is.null(raw) || length(raw$period) == 0) {
+    periods <- numeric(0)
+    confidence <- numeric(0)
+    strength <- numeric(0)
+    amplitude <- numeric(0)
+  } else {
+    periods <- raw$period
+    confidence <- raw$confidence
+    strength <- raw$strength
+    amplitude <- raw$amplitude
   }
 
   result <- list(

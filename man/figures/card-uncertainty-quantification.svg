@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Prediction interval band -->
+  <path d="M15 75 Q50 60, 85 55 Q120 50, 155 52 Q175 55, 190 60"
+        fill="#4A90D9" opacity="0.15"/>
+  <path d="M15 35 Q50 42, 85 45 Q120 48, 155 46 Q175 43, 190 38"
+        fill="#4A90D9" opacity="0.15"/>
+  <!-- Fill between upper and lower -->
+  <path d="M15 35 Q50 42, 85 45 Q120 48, 155 46 Q175 43, 190 38 L190 60 Q175 55, 155 52 Q120 50, 85 55 Q50 60, 15 75 Z"
+        fill="#4A90D9" opacity="0.12"/>
+  <!-- Fitted line -->
+  <path d="M15 55 Q50 50, 85 49 Q120 48, 155 49 Q175 49, 190 48"
+        stroke="#4A90D9" stroke-width="2" stroke-linecap="round"/>
+  <!-- Upper bound -->
+  <path d="M15 35 Q50 42, 85 45 Q120 48, 155 46 Q175 43, 190 38"
+        stroke="#4A90D9" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+  <!-- Lower bound -->
+  <path d="M15 75 Q50 60, 85 55 Q120 50, 155 52 Q175 55, 190 60"
+        stroke="#4A90D9" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+  <!-- Observed points -->
+  <circle cx="25" cy="52" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="50" cy="48" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="75" cy="50" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="100" cy="46" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="125" cy="51" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="150" cy="47" r="3" fill="#D55E00" opacity="0.7"/>
+  <circle cx="175" cy="50" r="3" fill="#D55E00" opacity="0.7"/>
+  <!-- LOO-CV text -->
+  <text x="30" y="95" font-size="8" fill="#7B2D8E" font-family="sans-serif" opacity="0.5">LOO-CV</text>
+  <!-- Coverage badge -->
+  <rect x="120" y="85" width="55" height="16" rx="8" fill="#4A90D9" opacity="0.15"/>
+  <text x="147" y="96" font-size="7" fill="#4A90D9" font-family="sans-serif" text-anchor="middle">95% coverage</text>
+</svg>

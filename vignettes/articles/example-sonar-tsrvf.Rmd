@@ -38,7 +38,7 @@ accuracy**, matching the original neural network benchmark. The elastic
 pipeline drops to ~66%, demonstrating that elastic alignment can *degrade*
 performance on phase-rigid data.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 library(patchwork)

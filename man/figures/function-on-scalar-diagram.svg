@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrF" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="340" y="34" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Function-on-Scalar Regression</text>
+  <text x="340" y="58" text-anchor="middle" font-size="14" fill="#888">Y&#7522;(t) = &#956;(t) + x&#7522;&#946;(t) + &#949;&#7522;(t)</text>
+
+  <!-- Scalar predictors -->
+  <rect x="24" y="90" width="140" height="150" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="94" y="118" text-anchor="middle" font-size="15" font-weight="bold" fill="#B37700">Scalar predictors</text>
+  <text x="94" y="144" text-anchor="middle" font-size="14" fill="#555">x&#8321; = treatment</text>
+  <text x="94" y="168" text-anchor="middle" font-size="14" fill="#555">x&#8322; = age</text>
+  <text x="94" y="192" text-anchor="middle" font-size="14" fill="#555">x&#8323; = dose</text>
+  <text x="94" y="220" text-anchor="middle" font-size="13" fill="#888">...</text>
+
+  <!-- Arrow to FOSR -->
+  <line x1="168" y1="140" x2="218" y2="140" stroke="#555" stroke-width="1.2" marker-end="url(#arrF)"/>
+  <line x1="168" y1="210" x2="218" y2="280" stroke="#555" stroke-width="1.2" marker-end="url(#arrF)"/>
+
+  <!-- FOSR box -->
+  <rect x="224" y="96" width="180" height="96" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="314" y="124" text-anchor="middle" font-size="15" font-weight="bold" fill="#7B2D8E">Penalized FOSR</text>
+  <text x="314" y="148" text-anchor="middle" font-size="13" fill="#555">fosr() / fosr.fpc()</text>
+  <text x="314" y="172" text-anchor="middle" font-size="12" fill="#888">Estimate &#946;&#8321;(t), &#946;&#8322;(t), ...</text>
+
+  <!-- FANOVA box -->
+  <rect x="224" y="240" width="180" height="96" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="314" y="268" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">Functional ANOVA</text>
+  <text x="314" y="292" text-anchor="middle" font-size="13" fill="#555">fanova()</text>
+  <text x="314" y="316" text-anchor="middle" font-size="12" fill="#888">Test &#956;&#8321;(t) = &#956;&#8322;(t) = ...</text>
+
+  <!-- Arrow from FOSR to beta(t) -->
+  <line x1="408" y1="144" x2="458" y2="144" stroke="#555" stroke-width="1.2" marker-end="url(#arrF)"/>
+
+  <!-- Beta(t) coefficient functions -->
+  <rect x="464" y="96" width="120" height="96" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="524" y="122" text-anchor="middle" font-size="15" font-weight="bold" fill="#7B2D8E">&#946;&#8321;(t), &#946;&#8322;(t)</text>
+  <text x="524" y="146" text-anchor="middle" font-size="13" fill="#888">coefficient</text>
+  <text x="524" y="166" text-anchor="middle" font-size="13" fill="#888">functions</text>
+  <path d="M478 178 Q496 164 514 172 Q532 180 550 166 Q564 154 574 168" stroke="#7B2D8E" stroke-width="1.5" fill="none" opacity="0.5"/>
+
+  <!-- Arrow to Y(t) -->
+  <line x1="588" y1="144" x2="608" y2="190" stroke="#555" stroke-width="1.2" marker-end="url(#arrF)"/>
+
+  <!-- Arrow from FANOVA to p-value -->
+  <line x1="408" y1="288" x2="458" y2="288" stroke="#555" stroke-width="1.2" marker-end="url(#arrF)"/>
+
+  <!-- p-value box -->
+  <rect x="464" y="256" width="120" height="64" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="524" y="284" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">p-value</text>
+  <text x="524" y="306" text-anchor="middle" font-size="13" fill="#888">permutation test</text>
+
+  <!-- Functional response Y(t) -->
+  <rect x="596" y="182" width="76" height="100" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="634" y="210" text-anchor="middle" font-size="16" font-weight="bold" fill="#2E8B57">Y&#7522;(t)</text>
+  <text x="634" y="232" text-anchor="middle" font-size="12" fill="#888">functional</text>
+  <text x="634" y="248" text-anchor="middle" font-size="12" fill="#888">response</text>
+  <path d="M606 262 Q618 250 630 256 Q642 262 654 252 Q664 244 668 254" stroke="#2E8B57" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M606 268 Q618 256 630 262 Q642 268 654 258 Q664 250 668 260" stroke="#2E8B57" stroke-width="1.5" fill="none" opacity="0.3"/>
+
+  <!-- Bottom summary -->
+  <line x1="24" y1="360" x2="660" y2="360" stroke="#eee" stroke-width="1.5"/>
+  <text x="340" y="388" text-anchor="middle" font-size="14" fill="#555">"My response is a curve, my predictors are scalars."</text>
+  <text x="340" y="410" text-anchor="middle" font-size="13" fill="#888">How does each predictor shift the response shape?</text>
+</svg>

@@ -49,9 +49,10 @@ articles:
 - title: Represent
   contents:
   - articles/fpca
+  - articles/elastic-fpca
   - articles/basis-representation
   - articles/andrews-transformation
-  - depth-functions
+  - articles/depth-functions
   - articles/streaming-depth
   - articles/distance-metrics
 - title: Align
@@ -62,11 +63,15 @@ articles:
   - articles/alignment-comparison
 - title: Regression
   contents:
-  - articles/regression
-  - articles/functional-regression
+  - articles/scalar-on-function
+  - articles/elastic-regression
+  - articles/function-on-scalar
   - articles/functional-classification
   - articles/functional-mixed-models
   - articles/cross-validation
+  - articles/explainability
+  - articles/regression-diagnostics
+  - articles/uncertainty-quantification
 - title: Analyze
   contents:
   - articles/tolerance-bands
@@ -76,6 +81,7 @@ articles:
   - articles/outlier-detection
   - articles/seasonal-analysis
   - articles/covariance-functions
+  - articles/elastic-changepoint
 
 reference:
 - title: Functional Data Objects
@@ -277,6 +283,57 @@ reference:
   - detrend
   - decompose
 
+- title: Penalized Basis Smoothing
+  contents:
+  - smooth.basis.fd
+  - smooth.basis.gcv
+
+- title: Elastic FPCA
+  contents:
+  - vert.fpca
+  - horiz.fpca
+  - joint.fpca
+
+- title: Elastic Regression
+  contents:
+  - elastic.regression
+  - elastic.logistic
+  - elastic.pcr
+
+- title: Elastic Changepoint
+  contents:
+  - elastic.changepoint
+
+- title: Explainability
+  contents:
+  - fregre.pdp
+  - fregre.shap
+  - fregre.ale
+  - fregre.lime
+  - fregre.anchor
+  - fregre.counterfactual
+  - fregre.saliency
+  - fregre.importance
+  - fregre.conditional.importance
+  - fregre.influence
+  - fregre.vif
+  - fregre.dfbetas
+  - fregre.loo
+  - fregre.sobol
+  - fregre.friedman
+  - fregre.conformal
+  - fregre.stability
+  - fregre.depth
+  - fregre.domain
+  - fregre.prediction.interval
+  - fregre.prototype
+  - fregre.beta.decomp
+  - fregre.pointwise
+  - fregre.significant.regions
+  - fregre.calibration
+  - fregre.ece
+  - elastic.attribution
+
 - title: Smoothing
   contents:
   - S.KNN
@@ -462,4 +519,32 @@ reference:
   - Ops.fdata
   - kernels
   - fdars-package
+
+- title: Internal
+  desc: Low-level Rust wrappers and internal functions
+  contents:
+  - starts_with("explain_")
+  - starts_with("elastic_")
+  - starts_with("smooth_basis")
+  - matches("_rust$")
+  - starts_with("dot-")
+  - matches("^[a-z].*_[a-z]")
+  - ".fit_args"
+  - basis2fdata_1d
+  - eigenfunctions_1d
+  - eigenvalues_1d
+  - fdata2basis_1d
+  - fdata2pc_1d
+  - fdata2pls_1d
+  - -smooth.basis.fd
+  - -smooth.basis.gcv
+  - -elastic.regression
+  - -elastic.logistic
+  - -elastic.pcr
+  - -elastic.changepoint
+  - -elastic.attribution
+  - -elastic.align
+  - -elastic.distance
+  - -elastic.decomposition
+  - -elastic.align.constrained
 

@@ -135,6 +135,12 @@ outliers.depth.pond <- function(fdataobj, nb = 200, dfunc = depth.mode,
   # Identify outliers (curves with depth below cutoff)
   outliers <- which(depths < cutoff)
 
+  # P-values: rank-based (lower depth = smaller p-value = more outlying)
+  p.value <- rank(weighted_depths) / (n + 1)
+
+  # Outlierness score: 1 - normalized rank (higher = more outlying)
+  outlierness <- 1 - rank(weighted_depths) / (n + 1)
+
   structure(
     list(
       outliers = outliers,
@@ -142,6 +148,8 @@ outliers.depth.pond <- function(fdataobj, nb = 200, dfunc = depth.mode,
       weighted_depths = weighted_depths,
       cutoff = unname(cutoff),
       threshold_method = threshold_method,
+      p.value = p.value,
+      outlierness = outlierness,
       fdataobj = fdataobj
     ),
     class = "outliers.fdata"
@@ -189,12 +197,20 @@ outliers.depth.trim <- function(fdataobj, trim = 0.1, dfunc = depth.mode, ...) {
   # Identify outliers
   outliers <- which(depths <= cutoff)
 
+  # P-values: rank-based (lower depth = smaller p-value = more outlying)
+  p.value <- rank(depths) / (n + 1)
+
+  # Outlierness score: 1 - normalized rank (higher = more outlying)
+  outlierness <- 1 - rank(depths) / (n + 1)
+
   structure(
     list(
       outliers = outliers,
       depths = depths,
       cutoff = cutoff,
       trim = trim,
+      p.value = p.value,
+      outlierness = outlierness,
       fdataobj = fdataobj
     ),
     class = "outliers.fdata"
@@ -234,6 +250,11 @@ print.outliers.fdata <- function(x, ...) {
       ""
     }
     cat("  LRT threshold:", round(x$threshold, 4), percentile_str, "\n")
+  }
+
+  # Show p-value summary if available
+  if (!is.null(x$p.value) && length(x$outliers) > 0) {
+    cat("  Outlier p-values:", paste(round(x$p.value[x$outliers], 4), collapse = ", "), "\n")
   }
 
   invisible(x)
@@ -354,6 +375,8 @@ outliers.thres.lrt <- function(fdataobj, nb = 200, smo = 0.05, trim = 0.1,
 #'   \item{distances}{Normalized distances for all curves}
 #'   \item{threshold}{Bootstrap threshold used}
 #'   \item{percentile}{Percentile used for threshold}
+#'   \item{p.value}{Bootstrap-calibrated p-values for each curve}
+#'   \item{boot_dist}{Sorted bootstrap null distribution of max distances}
 #'   \item{fdataobj}{Original fdata object}
 #' }
 #'
@@ -392,12 +415,33 @@ outliers.lrt <- function(fdataobj, nb = 200, smo = 0.05, trim = 0.1,
                   as.numeric(smo), as.numeric(trim), as.numeric(seed),
                   as.numeric(percentile))
 
+  distances <- result$distances
+  threshold <- result$threshold
+  boot_dist <- result$boot_dist
+  n <- length(distances)
+  B <- length(boot_dist)
+
+  # P-values: bootstrap-calibrated
+  # p_i = P(max_dist >= d_i under H0) estimated from the bootstrap null distribution
+  if (B > 0) {
+    p.value <- sapply(distances, function(d) (sum(boot_dist >= d) + 1) / (B + 1))
+  } else {
+    # Fallback to rank-based if no bootstrap distribution
+    p.value <- sapply(distances, function(d) (sum(distances >= d) + 1) / (n + 1))
+  }
+
+  # Outlierness score: distance / threshold (> 1 means outlier)
+  outlierness <- distances / max(threshold, 1e-10)
+
   structure(
     list(
       outliers = result$outliers,
-      distances = result$distances,
-      threshold = result$threshold,
+      distances = distances,
+      threshold = threshold,
       percentile = percentile,
+      p.value = p.value,
+      outlierness = outlierness,
+      boot_dist = boot_dist,
       fdataobj = fdataobj
     ),
     class = "outliers.fdata"
@@ -469,14 +513,25 @@ outliers.boxplot <- function(fdataobj, prob = 0.5, factor = 1.5,
   fence_min <- env_min - factor * env_width
   fence_max <- env_max + factor * env_width
 
-  # Identify outliers: curves that exceed the fence at any point
-  outlier_idx <- integer(0)
+  # Compute per-curve maximum exceedance beyond fence
+  exceedance <- numeric(n)
   for (i in seq_len(n)) {
     curve <- fdataobj$data[i, ]
-    if (any(curve < fence_min) || any(curve > fence_max)) {
-      outlier_idx <- c(outlier_idx, i)
-    }
+    below <- pmax(fence_min - curve, 0)
+    above <- pmax(curve - fence_max, 0)
+    exceedance[i] <- max(c(below, above))
   }
+
+  # Identify outliers: curves that exceed the fence at any point
+  outlier_idx <- which(exceedance > 0)
+
+  # Outlierness score: exceedance / max fence width (scaled to be interpretable)
+  fence_width <- max(env_width, 1e-10)
+  outlierness <- exceedance / fence_width
+
+  # P-values: rank-based on exceedance (higher exceedance = smaller p-value)
+  # Curves inside fence all get exceedance=0; rank them by depth
+  p.value <- 1 - rank(exceedance, ties.method = "average") / (n + 1)
 
   structure(
     list(
@@ -485,6 +540,9 @@ outliers.boxplot <- function(fdataobj, prob = 0.5, factor = 1.5,
       cutoff = NA,
       envelope = list(min = env_min, max = env_max),
       fence = list(min = fence_min, max = fence_max),
+      exceedance = exceedance,
+      p.value = p.value,
+      outlierness = outlierness,
       fdataobj = fdataobj
     ),
     class = "outliers.fdata"
@@ -700,6 +758,12 @@ magnitudeshape <- function(fdataobj, depth.func = depth.MBD,
     }
   }
 
+  # P-values: chi-squared(df=2) since dist_sq is sum of two squared standardized variables
+  p.value <- 1 - stats::pchisq(dist_sq, df = 2)
+
+  # Outlierness score: normalized distance (higher = more outlying)
+  outlierness <- dist_sq / max(dist_sq, 1e-10)
+
   # Return result
   result <- structure(
     list(
@@ -708,6 +772,8 @@ magnitudeshape <- function(fdataobj, depth.func = depth.MBD,
       outliers = outliers,
       cutoff = cutoff,
       dist_sq = dist_sq,
+      p.value = p.value,
+      outlierness = outlierness,
       fdataobj = fdataobj,
       plot = p
     ),
@@ -731,6 +797,9 @@ print.magnitudeshape <- function(x, ...) {
   cat("Outliers detected:", length(x$outliers), "\n")
   if (length(x$outliers) > 0) {
     cat("Outlier indices:", paste(x$outliers, collapse = ", "), "\n")
+    if (!is.null(x$p.value)) {
+      cat("Outlier p-values:", paste(round(x$p.value[x$outliers], 4), collapse = ", "), "\n")
+    }
   }
   cat("Chi-squared cutoff:", round(x$cutoff, 3), "\n")
   invisible(x)
@@ -857,6 +926,12 @@ outliergram <- function(fdataobj, factor = 1.5, mei_threshold = 0.25, ...) {
 
   outliers <- all_outliers
 
+  # P-values: conformal (proportion of curves with distance >= this curve's distance)
+  p.value <- sapply(dist_to_parabola, function(d) (sum(dist_to_parabola >= d) + 1) / (n + 1))
+
+  # Outlierness score: normalized distance to parabola (clamp negatives to 0)
+  outlierness <- pmin(pmax(dist_to_parabola, 0) / max(dist_to_parabola, 1e-10), 1)
+
   structure(
     list(
       fdataobj = fdataobj,
@@ -869,7 +944,9 @@ outliergram <- function(fdataobj, factor = 1.5, mei_threshold = 0.25, ...) {
       mei_threshold = mei_threshold,
       parabola = c(a0 = a0, a1 = a1, a2 = a2),
       threshold = threshold,
-      dist_to_parabola = dist_to_parabola
+      dist_to_parabola = dist_to_parabola,
+      p.value = p.value,
+      outlierness = outlierness
     ),
     class = "outliergram"
   )
@@ -1057,8 +1134,69 @@ print.outliergram <- function(x, ...) {
     }
   }
 
+  if (!is.null(x$p.value) && length(x$outliers) > 0) {
+    cat("\nOutlier p-values:", paste(round(x$p.value[x$outliers], 4), collapse = ", "), "\n")
+  }
+
   cat("\nParameters:\n")
   cat("  Factor:", x$factor, "\n")
-  cat("  MEI threshold:", x$mei_threshold, "\n")
   invisible(x)
+}
+
+#' Unified Outlier Summary
+#'
+#' Produces a ranked data frame from any outlier detection result, showing
+#' the outlierness score, p-value, and outlier status for each curve.
+#'
+#' @param x An outlier detection result: an object of class \code{"outliers.fdata"},
+#'   \code{"magnitudeshape"}, or \code{"outliergram"}.
+#'
+#' @return A \code{data.frame} with columns:
+#' \describe{
+#'   \item{index}{Curve index (1-based)}
+#'   \item{outlierness}{Continuous outlierness score (higher = more outlying)}
+#'   \item{p.value}{P-value for the outlier test}
+#'   \item{is_outlier}{Logical indicating whether the curve was flagged}
+#' }
+#' Rows are sorted by outlierness score in descending order.
+#'
+#' @export
+#' @examples
+#' set.seed(42)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 30, 50)
+#' for (i in 1:28) X[i, ] <- sin(2*pi*t) + rnorm(50, sd = 0.2)
+#' X[29, ] <- sin(2*pi*t) + 3
+#' X[30, ] <- -sin(2*pi*t)
+#' fd <- fdata(X, argvals = t)
+#'
+#' out <- outliers.depth.pond(fd, nb = 100)
+#' outlier_summary(out)
+outlier_summary <- function(x) {
+  if (!inherits(x, c("outliers.fdata", "magnitudeshape", "outliergram"))) {
+    stop("x must be an outlier detection result (outliers.fdata, magnitudeshape, or outliergram)")
+  }
+
+  # Extract outlierness and p.value
+  outlierness <- x$outlierness
+  p.value <- x$p.value
+
+  if (is.null(outlierness) || is.null(p.value)) {
+    stop("Outlier result does not contain outlierness/p.value fields. ",
+         "Rerun with a recent version of fdars.")
+  }
+
+  n <- length(outlierness)
+  is_outlier <- rep(FALSE, n)
+  is_outlier[x$outliers] <- TRUE
+
+  df <- data.frame(
+    index = seq_len(n),
+    outlierness = outlierness,
+    p.value = p.value,
+    is_outlier = is_outlier
+  )
+
+  # Sort by outlierness descending
+  df[order(-df$outlierness), ]
 }

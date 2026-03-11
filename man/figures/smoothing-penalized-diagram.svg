@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrPB" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#7B2D8E">Penalized Basis Smoothing</text>
+  <text x="350" y="50" text-anchor="middle" font-size="13" fill="#888">Minimize ||y - Xc||&#178; + &#955; c&#7488;D&#7488;Dc  &#8212;  many basis + roughness penalty</text>
+
+  <!-- Left: Rich basis -->
+  <rect x="16" y="72" width="200" height="180" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="116" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Rich Basis (K=25)</text>
+  <text x="116" y="114" text-anchor="middle" font-size="12" fill="#555">Overfit without penalty</text>
+
+  <!-- Many dense B-spline curves -->
+  <path d="M28 190 Q36 190 40 174 Q44 158 52 158 Q60 158 64 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.25"/>
+  <path d="M44 190 Q52 190 56 170 Q60 150 68 150 Q76 150 80 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.25"/>
+  <path d="M60 190 Q68 190 72 166 Q76 142 84 142 Q92 142 96 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.30"/>
+  <path d="M76 190 Q84 190 88 162 Q92 134 100 134 Q108 134 112 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.30"/>
+  <path d="M92 190 Q100 190 104 158 Q108 126 116 126 Q124 126 128 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.35"/>
+  <path d="M108 190 Q116 190 120 154 Q124 118 132 118 Q140 118 144 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.35"/>
+  <path d="M124 190 Q132 190 136 150 Q140 110 148 110 Q156 110 160 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.30"/>
+  <path d="M140 190 Q148 190 152 146 Q156 102 164 102 Q172 102 176 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.25"/>
+  <path d="M156 190 Q164 190 168 142 Q172 94 180 94 Q188 94 192 190" stroke="#7B2D8E" stroke-width="1" fill="none" opacity="0.25"/>
+
+  <text x="116" y="228" text-anchor="middle" font-size="12" fill="#888">smooth.basis.fd()</text>
+
+  <!-- Arrow with + penalty -->
+  <line x1="220" y1="140" x2="268" y2="140" stroke="#555" stroke-width="1.5" marker-end="url(#arrPB)"/>
+  <text x="244" y="132" text-anchor="middle" font-size="12" font-weight="bold" fill="#7B2D8E">+ &#955;</text>
+
+  <!-- Middle: Penalty effect -->
+  <rect x="276" y="72" width="160" height="180" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="356" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Roughness Penalty</text>
+
+  <!-- Under-smooth (wiggly) -->
+  <text x="296" y="124" font-size="11" fill="#D55E00">Small &#955;:</text>
+  <path d="M296 142 Q308 128 320 136 Q332 144 344 132 Q356 120 368 130 Q380 140 392 128 Q404 116 416 124" stroke="#D55E00" stroke-width="1.5" fill="none" opacity="0.6"/>
+
+  <!-- Just right -->
+  <text x="296" y="168" font-size="11" fill="#2E8B57">Optimal &#955;:</text>
+  <path d="M296 186 Q320 174 344 168 Q368 162 392 158 Q404 156 416 158" stroke="#2E8B57" stroke-width="2" fill="none"/>
+
+  <!-- Over-smooth (flat) -->
+  <text x="296" y="210" font-size="11" fill="#4A90D9">Large &#955;:</text>
+  <path d="M296 226 Q332 222 368 218 Q404 214 416 214" stroke="#4A90D9" stroke-width="1.5" fill="none" opacity="0.6"/>
+
+  <text x="356" y="248" text-anchor="middle" font-size="11" fill="#888">GCV selects optimal</text>
+
+  <!-- Arrow -->
+  <line x1="440" y1="162" x2="488" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#arrPB)"/>
+
+  <!-- Right: Result -->
+  <rect x="496" y="72" width="188" height="180" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="590" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Smooth Result</text>
+  <text x="590" y="114" text-anchor="middle" font-size="12" fill="#555">smooth.basis.gcv()</text>
+
+  <!-- Smooth penalized curve -->
+  <path d="M516 180 Q534 166 552 154 Q570 144 588 136 Q606 130 624 128 Q642 130 660 134 Q672 138 674 140" stroke="#2E8B57" stroke-width="2.5" fill="none"/>
+  <!-- Faded dots -->
+  <circle cx="520" cy="184" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="538" cy="168" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="556" cy="158" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="574" cy="142" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="592" cy="140" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="610" cy="130" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="628" cy="132" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="646" cy="130" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="664" cy="138" r="2.5" fill="#999" opacity="0.3"/>
+  <text x="590" y="180" text-anchor="middle" font-size="12" fill="#888">edf, GCV, AIC, BIC</text>
+  <text x="590" y="232" text-anchor="middle" font-size="12" fill="#888">B-spline or Fourier</text>
+
+  <!-- Bottom: Key properties -->
+  <text x="120" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#7B2D8E">Many basis functions</text>
+  <text x="350" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#7B2D8E">&#955; controls smoothness</text>
+  <text x="580" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#7B2D8E">Automatic via GCV</text>
+</svg>

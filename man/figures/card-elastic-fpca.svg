@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Amplitude variation (left half) -->
+  <path d="M10 70 Q25 30, 45 25 Q60 22, 75 55" stroke="#4169E1" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M10 75 Q25 45, 45 40 Q60 38, 75 60" stroke="#4169E1" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M10 65 Q25 20, 45 15 Q60 12, 75 50" stroke="#4169E1" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Mean (bold) -->
+  <path d="M10 70 Q25 35, 45 30 Q60 28, 75 55" stroke="#4169E1" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+  <!-- Double arrow -->
+  <text x="80" y="48" font-size="14" fill="#666" font-family="sans-serif" opacity="0.5">+</text>
+  <!-- Phase variation (right half) - warped identity -->
+  <path d="M105 95 Q125 82, 140 55 Q155 28, 175 15 Q185 12, 195 10" stroke="#E8913A" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M105 95 Q120 78, 135 65 Q155 42, 175 22 Q185 15, 195 10" stroke="#E8913A" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M105 95 Q130 88, 148 60 Q160 32, 175 18 Q185 13, 195 10" stroke="#E8913A" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Identity line -->
+  <path d="M105 95 L195 10" stroke="#E8913A" stroke-width="2" stroke-linecap="round" stroke-dasharray="3,3" opacity="0.3"/>
+  <!-- Labels -->
+  <text x="20" y="110" font-size="8" fill="#4169E1" font-family="sans-serif" opacity="0.7">amplitude</text>
+  <text x="130" y="110" font-size="8" fill="#E8913A" font-family="sans-serif" opacity="0.7">phase</text>
+</svg>

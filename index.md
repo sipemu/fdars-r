@@ -143,6 +143,11 @@ output: github_document
     <div class="fdars-gallery-title">Mixed Models</div>
   </a>
 
+  <a class="fdars-gallery-item" href="articles/cross-validation.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-cross-validation.svg" alt="Cross-Validation"></div>
+    <div class="fdars-gallery-title">Cross-Validation</div>
+  </a>
+
 </div>
 
 <!-- ===== ANALYZE ===== -->

@@ -23,10 +23,14 @@ periodicity.
 **fdars** provides a comprehensive set of covariance functions for generating
 synthetic functional data from Gaussian processes.
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
+```
+
+```{=html}
+<img src="../reference/figures/covariance-kernels-diagram.svg" alt="Covariance Functions: Shape Controls Sample Path Smoothness" style="width:100%; max-width:700px;">
 ```
 
 ## Available Covariance Functions

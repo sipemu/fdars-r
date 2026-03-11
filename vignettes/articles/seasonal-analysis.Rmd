@@ -28,14 +28,22 @@ complex signals.
 - When to use instantaneous period estimation (and when not to)
 - How to analyze short series with only 3-5 cycles
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
 set.seed(42)
 ```
 
+```{=html}
+<img src="../reference/figures/seasonal-analysis-diagram.svg" alt="Seasonal Analysis Overview" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
 ## Estimating Seasonal Period
+
+```{=html}
+<img src="../reference/figures/seasonal-period-diagram.svg" alt="Estimating Seasonal Period" style="width:100%; max-width:700px; display:block; margin:1em auto;" />
+```
 
 The first step in seasonal analysis is often determining the period. fdars provides two
 methods: FFT (frequency domain) and ACF (autocorrelation).
@@ -223,6 +231,10 @@ cycle will be detected first regardless of which period is longer. Very weak per
 (< 20% of the dominant amplitude) may require lower thresholds but risk false positives.
 
 ## Handling Non-Stationary Data
+
+```{=html}
+<img src="../reference/figures/seasonal-decompose-diagram.svg" alt="Handling Non-Stationary Data" style="width:100%; max-width:700px; display:block; margin:1em auto;" />
+```
 
 Real-world time series often have trends that can mask or distort seasonal patterns.
 fdars provides comprehensive detrending and decomposition functions to handle this.
@@ -462,6 +474,10 @@ Detrending is especially important when:
 Use `"loess"` for complex trends that polynomial methods cannot capture.
 
 ## Peak Detection
+
+```{=html}
+<img src="../reference/figures/seasonal-peaks-diagram.svg" alt="Peak Detection and Seasonal Strength" style="width:100%; max-width:700px; display:block; margin:1em auto;" />
+```
 
 Peak detection identifies local maxima in seasonal signals. This is useful for
 characterizing seasonal patterns and estimating period from peak-to-peak distances.
@@ -804,6 +820,10 @@ ggplot(df_combined, aes(x = t, y = y)) +
 ```
 
 ## Change Detection
+
+```{=html}
+<img src="../reference/figures/seasonal-change-diagram.svg" alt="Change Detection and Varying Period" style="width:100%; max-width:700px; display:block; margin:1em auto;" />
+```
 
 Automatically detect when seasonality starts or stops.
 
@@ -1329,5 +1349,7 @@ results <- mclapply(series_list, function(fd) {
 
 ## See Also
 
+- `vignette("articles/example-canadian-seasonal")` — real-data example: Canadian
+  temperature seasonal analysis with all detection and decomposition methods
 - `vignette("working-with-derivatives", package = "fdars")` — estimating and analyzing functional derivatives
 - `vignette("simulation-toolbox", package = "fdars")` — simulating functional data

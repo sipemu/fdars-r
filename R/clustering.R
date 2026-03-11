@@ -1002,3 +1002,49 @@ plot.cluster.gmm <- function(x, type = c("bic", "membership"), ...) {
                   title = "GMM Cluster Membership",
                   fill = "Cluster")
 }
+
+#' Gaussian Mixture Model EM on Feature Matrix
+#'
+#' Fits a GMM directly to a feature matrix using the EM algorithm.
+#' Unlike \code{\link{cluster.gmm}} which operates on functional data,
+#' this function works on arbitrary numeric feature matrices.
+#'
+#' @param features Numeric matrix of features (n x d).
+#' @param k Number of mixture components.
+#' @param cov.type Covariance type: "full", "diagonal", or "spherical".
+#' @param max.iter Maximum EM iterations (default 100).
+#' @param tol Convergence tolerance (default 1e-6).
+#' @param seed Random seed.
+#'
+#' @return A list with components:
+#' \itemize{
+#'   \item \code{cluster} — Integer vector of hard cluster assignments.
+#'   \item \code{membership} — Posterior membership probability matrix (n x k).
+#'   \item \code{means} — List of component mean vectors.
+#'   \item \code{weights} — Mixing proportions.
+#'   \item \code{log.likelihood} — Final log-likelihood.
+#'   \item \code{bic}, \code{icl} — Model selection criteria.
+#'   \item \code{iterations} — Number of EM iterations.
+#' }
+#'
+#' @export
+gmm.em <- function(features, k, cov.type = c("full", "diagonal", "spherical"),
+                   max.iter = 100, tol = 1e-6, seed = 42) {
+  cov.type <- match.arg(cov.type)
+  features <- as.matrix(features)
+  result <- gmm_em_rust(features, as.integer(k), cov.type,
+                        as.integer(max.iter), tol, as.integer(seed))
+  if (is.null(result)) {
+    stop("GMM EM failed to converge")
+  }
+  list(
+    cluster = result$cluster + 1L,
+    membership = result$membership,
+    means = result$means,
+    weights = result$weights,
+    log.likelihood = result$log_likelihood,
+    bic = result$bic,
+    icl = result$icl,
+    iterations = result$iterations
+  )
+}

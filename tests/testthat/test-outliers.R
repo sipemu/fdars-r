@@ -418,3 +418,158 @@ test_that("print.outliergram works", {
 
   expect_output(print(result), "Outliergram")
 })
+
+# ============== p-value and outlierness tests ==============
+
+test_that("outliers.depth.pond returns p.value and outlierness", {
+  fd <- create_fdata_with_outliers(n = 30, n_outliers = 2)
+  out <- outliers.depth.pond(fd, nb = 200)
+
+  expect_true(!is.null(out$p.value))
+  expect_true(!is.null(out$outlierness))
+  expect_length(out$p.value, 30)
+  expect_length(out$outlierness, 30)
+  expect_true(all(out$p.value > 0 & out$p.value < 1))
+  expect_true(all(out$outlierness >= 0 & out$outlierness <= 1))
+
+  # Known outliers (29, 30) should have small p-values relative to normals
+  normal_median_p <- median(out$p.value[1:28])
+  expect_true(out$p.value[29] < normal_median_p)
+  expect_true(out$p.value[30] < normal_median_p)
+})
+
+test_that("outliers.depth.trim returns p.value and outlierness", {
+  fd <- create_fdata_with_outliers(n = 20, n_outliers = 2)
+  out <- outliers.depth.trim(fd, trim = 0.1)
+
+  expect_true(!is.null(out$p.value))
+  expect_true(!is.null(out$outlierness))
+  expect_length(out$p.value, 20)
+  expect_length(out$outlierness, 20)
+  expect_true(all(out$p.value > 0 & out$p.value < 1))
+})
+
+test_that("outliers.lrt returns p.value and outlierness", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 50)
+  X <- matrix(0, 30, 50)
+  for (i in 1:28) X[i, ] <- sin(2 * pi * t) + rnorm(50, sd = 0.1)
+  X[29, ] <- sin(2 * pi * t) + 5
+  X[30, ] <- sin(2 * pi * t) - 5
+  fd <- fdata(X, argvals = t)
+
+  out <- outliers.lrt(fd, nb = 200, seed = 123)
+
+  expect_true(!is.null(out$p.value))
+  expect_true(!is.null(out$outlierness))
+  expect_length(out$p.value, 30)
+  expect_length(out$outlierness, 30)
+  expect_true(all(out$p.value > 0 & out$p.value <= 1))
+
+  # Outliers should have outlierness > 1 (distance exceeds threshold)
+  if (length(out$outliers) > 0) {
+    expect_true(all(out$outlierness[out$outliers] > 1))
+  }
+})
+
+test_that("outliers.boxplot returns p.value, outlierness, and exceedance", {
+  fd <- create_fdata_with_outliers(n = 30, n_outliers = 2)
+  out <- outliers.boxplot(fd)
+
+  expect_true(!is.null(out$p.value))
+  expect_true(!is.null(out$outlierness))
+  expect_true(!is.null(out$exceedance))
+  expect_length(out$p.value, 30)
+  expect_length(out$outlierness, 30)
+  expect_length(out$exceedance, 30)
+
+  # Non-outlier curves should have exceedance = 0
+  non_outliers <- setdiff(1:30, out$outliers)
+  if (length(non_outliers) > 0) {
+    expect_true(all(out$exceedance[non_outliers] == 0))
+  }
+})
+
+test_that("magnitudeshape returns p.value and outlierness", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 50)
+  X <- matrix(0, 30, 50)
+  for (i in 1:28) X[i, ] <- sin(2 * pi * t) + rnorm(50, sd = 0.2)
+  X[29, ] <- sin(2 * pi * t) + 3
+  X[30, ] <- sin(4 * pi * t)
+  fd <- fdata(X, argvals = t)
+
+  ms <- magnitudeshape(fd)
+
+  expect_true(!is.null(ms$p.value))
+  expect_true(!is.null(ms$outlierness))
+  expect_length(ms$p.value, 30)
+  expect_length(ms$outlierness, 30)
+  expect_true(all(ms$p.value >= 0 & ms$p.value <= 1))
+  expect_true(all(ms$outlierness >= 0 & ms$outlierness <= 1))
+
+  # Chi-squared p-values: outliers should have small p-values
+  if (length(ms$outliers) > 0) {
+    expect_true(all(ms$p.value[ms$outliers] < 0.05))
+  }
+})
+
+test_that("outliergram returns p.value and outlierness", {
+  set.seed(42)
+  t <- seq(0, 1, length.out = 50)
+  X <- matrix(0, 30, 50)
+  for (i in 1:28) X[i, ] <- sin(2 * pi * t) + rnorm(50, sd = 0.2)
+  X[29, ] <- sin(2 * pi * t) + 2
+  X[30, ] <- sin(4 * pi * t)
+  fd <- fdata(X, argvals = t)
+
+  og <- outliergram(fd)
+
+  expect_true(!is.null(og$p.value))
+  expect_true(!is.null(og$outlierness))
+  expect_length(og$p.value, 30)
+  expect_length(og$outlierness, 30)
+  expect_true(all(og$p.value > 0 & og$p.value <= 1))
+  expect_true(all(og$outlierness >= 0 & og$outlierness <= 1))
+})
+
+# ============== outlier_summary tests ==============
+
+test_that("outlier_summary returns correct data.frame for outliers.fdata", {
+  fd <- create_fdata_with_outliers(n = 20, n_outliers = 2)
+  out <- outliers.depth.pond(fd, nb = 200)
+  summary_df <- outlier_summary(out)
+
+  expect_s3_class(summary_df, "data.frame")
+  expect_true(all(c("index", "outlierness", "p.value", "is_outlier") %in% names(summary_df)))
+  expect_equal(nrow(summary_df), 20)
+
+  # Sorted by outlierness descending
+  expect_true(all(diff(summary_df$outlierness) <= 1e-10))
+
+  # is_outlier matches detected outliers
+  expect_equal(sum(summary_df$is_outlier), length(out$outliers))
+})
+
+test_that("outlier_summary works for magnitudeshape", {
+  fd <- create_fdata_with_outliers(n = 20, n_outliers = 2)
+  ms <- magnitudeshape(fd)
+  summary_df <- outlier_summary(ms)
+
+  expect_s3_class(summary_df, "data.frame")
+  expect_equal(nrow(summary_df), 20)
+  expect_true(all(diff(summary_df$outlierness) <= 1e-10))
+})
+
+test_that("outlier_summary works for outliergram", {
+  fd <- create_fdata_with_outliers(n = 20, n_outliers = 2)
+  og <- outliergram(fd)
+  summary_df <- outlier_summary(og)
+
+  expect_s3_class(summary_df, "data.frame")
+  expect_equal(nrow(summary_df), 20)
+})
+
+test_that("outlier_summary rejects invalid input", {
+  expect_error(outlier_summary(list(a = 1)), "must be an outlier detection result")
+})

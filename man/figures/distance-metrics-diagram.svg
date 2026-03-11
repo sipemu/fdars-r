@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Distance Metrics and Semimetrics</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">How to measure "how different" two curves are</text>
+
+  <!-- ===== Left: Two curves being compared ===== -->
+  <rect x="16" y="80" width="200" height="160" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="116" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Two Curves</text>
+  <!-- Curve f (blue) -->
+  <path d="M32 160 Q56 130 80 140 Q104 150 128 136 Q152 122 176 132 Q192 140 200 138" stroke="#4A90D9" stroke-width="2" fill="none"/>
+  <text x="36" y="152" font-size="11" fill="#4A90D9">f(t)</text>
+  <!-- Curve g (orange) -->
+  <path d="M32 180 Q56 156 80 168 Q104 180 128 170 Q152 160 176 168 Q192 174 200 172" stroke="#E6A020" stroke-width="2" fill="none"/>
+  <text x="36" y="192" font-size="11" fill="#E6A020">g(t)</text>
+  <!-- Vertical difference arrows -->
+  <line x1="80" y1="140" x2="80" y2="168" stroke="#D55E00" stroke-width="1" stroke-dasharray="3"/>
+  <line x1="128" y1="136" x2="128" y2="170" stroke="#D55E00" stroke-width="1" stroke-dasharray="3"/>
+  <text x="116" y="224" text-anchor="middle" font-size="12" fill="#888">d(f, g) = ?</text>
+
+  <!-- ===== Right: Method categories ===== -->
+
+  <!-- Category 1: Pointwise (Lp) -->
+  <rect x="250" y="72" width="210" height="88" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="355" y="94" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Pointwise Metrics</text>
+  <text x="270" y="114" font-size="12" fill="#555">L&#178; (Euclidean): metric.lp()</text>
+  <text x="270" y="132" font-size="12" fill="#555">L&#185;, L&#8734;: metric.lp(lp=1/Inf)</text>
+  <text x="270" y="150" font-size="12" fill="#555">Hausdorff: metric.hausdorff()</text>
+
+  <!-- Category 2: Warping (DTW) -->
+  <rect x="250" y="172" width="210" height="88" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="355" y="194" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Warping Metrics</text>
+  <text x="270" y="214" font-size="12" fill="#555">DTW: metric.DTW()</text>
+  <text x="270" y="232" font-size="12" fill="#555">Soft-DTW: metric.softDTW()</text>
+  <text x="270" y="250" font-size="12" fill="#555">Elastic: metric.elastic()</text>
+
+  <!-- Category 3: Distribution -->
+  <rect x="250" y="272" width="210" height="68" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="355" y="294" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Distribution Metric</text>
+  <text x="270" y="314" font-size="12" fill="#555">KL divergence: metric.kl()</text>
+  <text x="270" y="332" font-size="12" fill="#555">Treats curves as densities</text>
+
+  <!-- Category 4: Semimetrics -->
+  <rect x="490" y="72" width="214" height="128" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="597" y="94" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Semimetrics</text>
+  <text x="510" y="114" font-size="12" fill="#555">Fourier: semimetric.fourier()</text>
+  <text x="510" y="132" font-size="12" fill="#555">Derivatives: semimetric.deriv()</text>
+  <text x="510" y="150" font-size="12" fill="#555">PCA: semimetric.pca()</text>
+  <text x="510" y="168" font-size="12" fill="#555">H-shift: semimetric.hshift()</text>
+  <text x="510" y="186" font-size="12" fill="#555">Basis: semimetric.basis()</text>
+
+  <!-- Category 5: Group -->
+  <rect x="490" y="212" width="214" height="68" rx="8" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.5"/>
+  <text x="597" y="234" text-anchor="middle" font-size="14" font-weight="bold" fill="#D55E00">Group Distances</text>
+  <text x="510" y="254" font-size="12" fill="#555">group.distance()</text>
+  <text x="510" y="272" font-size="12" fill="#555">Between-group comparisons</text>
+
+  <!-- Arrows from curves to methods -->
+  <line x1="220" y1="130" x2="246" y2="116" stroke="#555" stroke-width="1.2" marker-end="url(#arrDM)"/>
+  <line x1="220" y1="160" x2="246" y2="216" stroke="#555" stroke-width="1.2" marker-end="url(#arrDM)"/>
+  <line x1="220" y1="180" x2="246" y2="306" stroke="#555" stroke-width="1.2" marker-end="url(#arrDM)"/>
+  <defs>
+    <marker id="arrDM" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Bottom: Decision guide ===== -->
+  <line x1="16" y1="360" x2="704" y2="360" stroke="#eee" stroke-width="1.5"/>
+  <text x="360" y="388" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">When to Use What</text>
+
+  <rect x="24" y="404" width="160" height="56" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="104" y="424" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">General Purpose</text>
+  <text x="104" y="444" text-anchor="middle" font-size="12" fill="#555">L&#178; metric.lp()</text>
+
+  <rect x="200" y="404" width="160" height="56" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="280" y="424" text-anchor="middle" font-size="13" font-weight="bold" fill="#B37700">Phase Differences</text>
+  <text x="280" y="444" text-anchor="middle" font-size="12" fill="#555">DTW / elastic</text>
+
+  <rect x="376" y="404" width="160" height="56" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="456" y="424" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">Shape / Frequency</text>
+  <text x="456" y="444" text-anchor="middle" font-size="12" fill="#555">Fourier / deriv semi</text>
+
+  <rect x="552" y="404" width="152" height="56" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="628" y="424" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">Differentiable</text>
+  <text x="628" y="444" text-anchor="middle" font-size="12" fill="#555">Soft-DTW (&#947;)</text>
+</svg>

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="34" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Scalar-on-Function Regression</text>
+  <text x="360" y="58" text-anchor="middle" font-size="14" fill="#888">Four estimation paradigms</text>
+
+  <!-- Input: functional predictor X(t) -->
+  <rect x="16" y="85" width="140" height="120" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="86" y="112" text-anchor="middle" font-size="16" font-weight="bold" fill="#2C5F8A">X&#7522;(t)</text>
+  <text x="86" y="132" text-anchor="middle" font-size="13" fill="#888">functional</text>
+  <text x="86" y="148" text-anchor="middle" font-size="13" fill="#888">predictor</text>
+  <path d="M30 174 Q54 152 78 164 Q102 176 126 160 Q140 148 148 164" stroke="#4A90D9" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M30 182 Q54 160 78 172 Q102 184 126 168 Q140 156 148 172" stroke="#4A90D9" stroke-width="1.5" fill="none" opacity="0.3"/>
+
+  <!-- Four arrows from X(t) to methods -->
+  <line x1="160" y1="115" x2="220" y2="115" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="160" y1="130" x2="220" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="160" y1="150" x2="220" y2="330" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="160" y1="170" x2="220" y2="440" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- Method 1: FPC Regression -->
+  <rect x="226" y="80" width="230" height="76" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="341" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">FPC Regression</text>
+  <text x="341" y="124" text-anchor="middle" font-size="13" fill="#555">fregre.lm() / fregre.pc()</text>
+  <text x="341" y="144" text-anchor="middle" font-size="12" fill="#888">Project onto eigenfunctions, regress scores</text>
+
+  <!-- Method 2: Basis Expansion -->
+  <rect x="226" y="188" width="230" height="76" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="341" y="212" text-anchor="middle" font-size="15" font-weight="bold" fill="#B37700">Basis Expansion</text>
+  <text x="341" y="232" text-anchor="middle" font-size="13" fill="#555">fregre.basis()</text>
+  <text x="341" y="252" text-anchor="middle" font-size="12" fill="#888">B-spline / Fourier + ridge penalty</text>
+
+  <!-- Method 3: Nonparametric -->
+  <rect x="226" y="296" width="230" height="76" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="341" y="320" text-anchor="middle" font-size="15" font-weight="bold" fill="#2E8B57">Nonparametric</text>
+  <text x="341" y="340" text-anchor="middle" font-size="13" fill="#555">fregre.np()</text>
+  <text x="341" y="360" text-anchor="middle" font-size="12" fill="#888">Nadaraya-Watson / k-NN</text>
+
+  <!-- Method 4: Elastic -->
+  <rect x="226" y="404" width="230" height="76" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="341" y="428" text-anchor="middle" font-size="15" font-weight="bold" fill="#7B2D8E">Elastic Regression</text>
+  <text x="341" y="448" text-anchor="middle" font-size="13" fill="#555">elastic.regression()</text>
+  <text x="341" y="468" text-anchor="middle" font-size="12" fill="#888">Joint alignment + prediction</text>
+
+  <!-- Arrows to beta(t) -->
+  <line x1="460" y1="118" x2="510" y2="248" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="460" y1="226" x2="510" y2="255" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="460" y1="334" x2="510" y2="272" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="460" y1="442" x2="510" y2="285" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- Beta(t) / m(X) -->
+  <rect x="516" y="224" width="116" height="86" rx="8" fill="#FFF8E1" stroke="#C0A030" stroke-width="1.5"/>
+  <text x="574" y="252" text-anchor="middle" font-size="16" font-weight="bold" fill="#8B7500">&#946;(t) / m(X)</text>
+  <text x="574" y="274" text-anchor="middle" font-size="13" fill="#888">coefficient</text>
+  <text x="574" y="294" text-anchor="middle" font-size="13" fill="#888">function</text>
+
+  <!-- Arrow to scalar y -->
+  <line x1="636" y1="267" x2="660" y2="267" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- Scalar response y -->
+  <rect x="666" y="232" width="44" height="70" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="688" y="264" text-anchor="middle" font-size="20" font-weight="bold" fill="#2E8B57">y&#7522;</text>
+  <text x="688" y="286" text-anchor="middle" font-size="12" fill="#888">scalar</text>
+</svg>

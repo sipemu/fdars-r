@@ -26,7 +26,11 @@ original curves may hide:
 Many real-world questions are about *when* and *how fast* things change, not
 just *what* values are observed.
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/derivatives-diagram.svg" alt="Working with Derivatives" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -70,6 +74,10 @@ if (requireNamespace("fda", quietly = TRUE)) {
 
 fd <- fdata(heights, argvals = age)
 cat("Loaded", n, "growth curves from ages", min(age), "to", max(age), "\n")
+```
+
+```{=html}
+<img src="../reference/figures/derivatives-diagram.svg" alt="Noise Amplification with Differentiation Diagram" style="width:100%; max-width:700px;">
 ```
 
 ## The Problem: Noise Amplifies with Differentiation

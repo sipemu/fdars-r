@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 250" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#0D7377">Coefficient Uncertainty: Bootstrap CI for β(t)</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">Where is the functional coefficient significantly different from zero?</text>
+
+  <!-- ===== Left: Pointwise Bands ===== -->
+  <rect x="10" y="50" width="330" height="137" rx="6" fill="#E6F5F5" stroke="#0D7377" stroke-width="1.2"/>
+  <text x="175" y="70" text-anchor="middle" font-size="15.6" font-weight="bold" fill="#0D7377">Pointwise Confidence Bands</text>
+  <text x="175" y="85" text-anchor="middle" font-size="11.0" fill="#888">[β̂*(α/2)(t), β̂*(1−α/2)(t)] — independent at each t</text>
+
+  <!-- Axes -->
+  <line x1="24" y1="172" x2="326" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="24" y1="92" x2="24" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <text x="175" y="185" text-anchor="middle" font-size="9.4" fill="#888">t</text>
+  <text x="18" y="132" text-anchor="middle" font-size="9.4" fill="#888" transform="rotate(-90, 18,132)">β(t)</text>
+
+  <!-- Zero line -->
+  <line x1="24" y1="135" x2="326" y2="135" stroke="#999" stroke-width="0.4" stroke-dasharray="4,2"/>
+  <text x="30" y="132" font-size="7.8" fill="#999">0</text>
+
+  <!-- Pointwise CI band -->
+  <path d="M34 104 Q80 80 130 76 Q175 74 220 82 Q270 94 318 102
+           L318 118 Q270 116 220 110 Q175 106 130 104 Q80 106 34 116 Z"
+        fill="#0D7377" opacity="0.15"/>
+  <path d="M34 130Q80 100 130 95Q175 92 220 102Q270 117 318 127"
+        stroke="#0D7377" stroke-width="0.7" fill="none" stroke-dasharray="2,1"/>
+  <path d="M34 145Q80 132 130 130Q175 132 220 137Q270 145 318 147"
+        stroke="#0D7377" stroke-width="0.7" fill="none" stroke-dasharray="2,1"/>
+  <!-- β(t) estimate -->
+  <path d="M34 137Q80 115 130 110Q175 107 220 117Q270 130 318 137"
+        stroke="#0D7377" stroke-width="2" fill="none"/>
+
+  <!-- Highlight where band excludes zero -->
+  <rect x="60" y="90" width="110" height="45" rx="2" fill="#D55E00" opacity="0.06"/>
+  <text x="115" y="102" text-anchor="middle" font-size="8.6" fill="#D55E00">β(t) ≠ 0</text>
+
+  <!-- Label -->
+  <text x="260" y="100" font-size="9.4" fill="#0D7377">narrower</text>
+  <text x="260" y="110" font-size="8.6" fill="#888">no simultaneous</text>
+  <text x="260" y="120" font-size="8.6" fill="#888">coverage guarantee</text>
+
+  <!-- ===== Right: Simultaneous Bands ===== -->
+  <rect x="360" y="50" width="330" height="137" rx="6" fill="#E6F5F5" stroke="#0D7377" stroke-width="1.2"/>
+  <text x="525" y="70" text-anchor="middle" font-size="15.6" font-weight="bold" fill="#0D7377">Simultaneous Confidence Bands</text>
+  <text x="525" y="85" text-anchor="middle" font-size="11.0" fill="#888">β̂(t) ± c_α · SE_boot(t) — sup-norm adjustment</text>
+
+  <!-- Axes -->
+  <line x1="374" y1="172" x2="676" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="374" y1="92" x2="374" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <text x="525" y="185" text-anchor="middle" font-size="9.4" fill="#888">t</text>
+  <text x="368" y="132" text-anchor="middle" font-size="9.4" fill="#888" transform="rotate(-90, 368,132)">β(t)</text>
+
+  <!-- Zero line -->
+  <line x1="374" y1="135" x2="676" y2="135" stroke="#999" stroke-width="0.4" stroke-dasharray="4,2"/>
+  <text x="380" y="132" font-size="7.8" fill="#999">0</text>
+
+  <!-- Simultaneous CI band (wider) -->
+  <path d="M384 100 Q430 72 480 66 Q525 62 570 74 Q620 90 668 98
+           L668 124 Q620 122 570 118 Q525 116 480 112 Q430 112 384 120 Z"
+        fill="#0D7377" opacity="0.1"/>
+  <path d="M384 125Q430 90 480 82Q525 77 570 92Q620 112 668 122"
+        stroke="#0D7377" stroke-width="0.7" fill="none" stroke-dasharray="3,2"/>
+  <path d="M384 150Q430 140 480 140Q525 145 570 147Q620 152 668 155"
+        stroke="#0D7377" stroke-width="0.7" fill="none" stroke-dasharray="3,2"/>
+  <!-- β(t) estimate -->
+  <path d="M384 137Q430 115 480 110Q525 107 570 117Q620 130 668 137"
+        stroke="#0D7377" stroke-width="2" fill="none"/>
+
+  <!-- Highlight where band excludes zero -->
+  <rect x="410" y="77" width="100" height="57" rx="2" fill="#D55E00" opacity="0.06"/>
+  <text x="460" y="90" text-anchor="middle" font-size="8.6" fill="#D55E00">β(t) ≠ 0</text>
+
+  <!-- Label -->
+  <text x="610" y="100" font-size="9.4" fill="#0D7377">wider</text>
+  <text x="610" y="110" font-size="8.6" fill="#888">valid for inference:</text>
+  <text x="610" y="120" font-size="8.6" fill="#888">P(β(t) ∈ band ∀t)</text>
+
+  <!-- Width comparison callout -->
+  <line x1="384" y1="127" x2="384" y2="147" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="382" y1="127" x2="386" y2="127" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="382" y1="147" x2="386" y2="147" stroke="#7B2D8E" stroke-width="0.5"/>
+</svg>

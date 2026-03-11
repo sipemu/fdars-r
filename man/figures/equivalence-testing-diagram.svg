@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="300" y="22" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Functional Equivalence Testing (TOST)</text>
+  <text x="300" y="40" text-anchor="middle" font-size="12.5" fill="#888">Is the entire mean difference within the equivalence margin?</text>
+
+  <!-- ===== LEFT: Not Equivalent ===== -->
+  <rect x="14" y="54" width="270" height="160" rx="6" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="149" y="72" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#D55E00">Not Equivalent</text>
+  <text x="149" y="86" text-anchor="middle" font-size="10" fill="#888">SCB exceeds margin &#8594; fail to reject H&#8320;</text>
+
+  <!-- Axes -->
+  <line x1="34" y1="196" x2="268" y2="196" stroke="#ccc" stroke-width="0.8"/>
+  <line x1="34" y1="100" x2="34" y2="196" stroke="#ccc" stroke-width="0.8"/>
+  <text x="151" y="208" text-anchor="middle" font-size="10" fill="#888">t</text>
+  <text x="28" y="148" text-anchor="middle" font-size="8.8" fill="#888" transform="rotate(-90, 28, 148)">&#956;&#8321;(t) &#8722; &#956;&#8322;(t)</text>
+
+  <!-- Zero line -->
+  <line x1="34" y1="148" x2="268" y2="148" stroke="#999" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <text x="270" y="151" font-size="8.8" fill="#999">0</text>
+
+  <!-- Equivalence margins +/- delta -->
+  <line x1="34" y1="118" x2="268" y2="118" stroke="#D55E00" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <text x="272" y="121" font-size="8.8" fill="#D55E00">+&#948;</text>
+  <line x1="34" y1="178" x2="268" y2="178" stroke="#D55E00" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <text x="272" y="181" font-size="8.8" fill="#D55E00">&#8722;&#948;</text>
+
+  <!-- SCB (band that crosses the margin) -->
+  <path d="M50 140 Q90 128 130 106 Q170 100 210 120 Q240 130 256 136" stroke="#4A90D9" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+  <path d="M50 162 Q90 150 130 138 Q170 132 210 148 Q240 158 256 160" stroke="#4A90D9" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+  <path d="M50 140 Q90 128 130 106 Q170 100 210 120 Q240 130 256 136 L256 160 Q240 158 210 148 Q170 132 130 138 Q90 150 50 162 Z" fill="#4A90D9" opacity="0.12"/>
+
+  <!-- Mean difference -->
+  <path d="M50 151 Q90 139 130 122 Q170 116 210 134 Q240 144 256 148" stroke="#2C5F8A" stroke-width="2" fill="none"/>
+
+  <!-- Breach indicator -->
+  <line x1="130" y1="106" x2="130" y2="96" stroke="#D55E00" stroke-width="1.5"/>
+  <text x="130" y="94" text-anchor="middle" font-size="10" fill="#D55E00" font-weight="bold">breach!</text>
+
+  <!-- ===== RIGHT: Equivalent ===== -->
+  <rect x="316" y="54" width="270" height="160" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="451" y="72" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#2E8B57">Equivalent</text>
+  <text x="451" y="86" text-anchor="middle" font-size="10" fill="#888">Entire SCB within margin &#8594; reject H&#8320;</text>
+
+  <!-- Axes -->
+  <line x1="336" y1="196" x2="570" y2="196" stroke="#ccc" stroke-width="0.8"/>
+  <line x1="336" y1="100" x2="336" y2="196" stroke="#ccc" stroke-width="0.8"/>
+  <text x="453" y="208" text-anchor="middle" font-size="10" fill="#888">t</text>
+
+  <!-- Zero line -->
+  <line x1="336" y1="148" x2="570" y2="148" stroke="#999" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <text x="572" y="151" font-size="8.8" fill="#999">0</text>
+
+  <!-- Equivalence margins +/- delta -->
+  <line x1="336" y1="118" x2="570" y2="118" stroke="#2E8B57" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <text x="574" y="121" font-size="8.8" fill="#2E8B57">+&#948;</text>
+  <line x1="336" y1="178" x2="570" y2="178" stroke="#2E8B57" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <text x="574" y="181" font-size="8.8" fill="#2E8B57">&#8722;&#948;</text>
+
+  <!-- SCB (band entirely within margins) -->
+  <path d="M352 140 Q392 136 432 132 Q472 130 512 136 Q542 140 558 142" stroke="#2E8B57" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+  <path d="M352 160 Q392 156 432 152 Q472 150 512 156 Q542 160 558 162" stroke="#2E8B57" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+  <path d="M352 140 Q392 136 432 132 Q472 130 512 136 Q542 140 558 142 L558 162 Q542 160 512 156 Q472 150 432 152 Q392 156 352 160 Z" fill="#2E8B57" opacity="0.12"/>
+
+  <!-- Mean difference (close to zero) -->
+  <path d="M352 150 Q392 146 432 142 Q472 140 512 146 Q542 150 558 152" stroke="#2E8B57" stroke-width="2" fill="none"/>
+
+  <!-- Containment check marks -->
+  <text x="451" y="128" text-anchor="middle" font-size="11.2" fill="#2E8B57">contained</text>
+
+  <!-- ===== BOTTOM: Logic ===== -->
+  <line x1="10" y1="228" x2="590" y2="228" stroke="#eee" stroke-width="1"/>
+
+  <text x="300" y="248" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#555">Decision Rule</text>
+
+  <rect x="40" y="258" width="520" height="46" rx="5" fill="#F8F8F8" stroke="#ccc" stroke-width="1"/>
+  <text x="300" y="276" text-anchor="middle" font-size="11.2" fill="#555">If the <tspan font-weight="bold" fill="#4A90D9">simultaneous confidence band</tspan> for &#956;&#8321;(t) &#8722; &#956;&#8322;(t) lies entirely within</text>
+  <text x="300" y="292" text-anchor="middle" font-size="11.2" fill="#555">the <tspan font-weight="bold" fill="#D55E00">equivalence margin</tspan> [&#8722;&#948;, +&#948;] at all t, then declare <tspan font-weight="bold" fill="#2E8B57">equivalence</tspan></text>
+</svg>

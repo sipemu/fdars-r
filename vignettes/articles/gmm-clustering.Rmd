@@ -28,7 +28,11 @@ advantages over k-means:
 **fdars** implements GMM clustering through `cluster.gmm()`, which projects
 functional data onto a B-spline basis before fitting the mixture model.
 
-```{r setup}
+```{=html}
+<img src="../reference/figures/gmm-clustering-diagram.svg" alt="Model-Based Clustering with Gaussian Mixtures" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())

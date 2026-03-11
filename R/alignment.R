@@ -1103,3 +1103,108 @@ elastic.align.constrained <- function(fdataobj, target = NULL,
   class(result) <- "elastic.align"
   result
 }
+
+#' Apply Warping Function to a Curve
+#'
+#' Reparameterizes a curve f by composing it with a warping function gamma:
+#' f(gamma(t)).
+#'
+#' @param fdataobj An fdata object (single curve, first row used).
+#' @param gamma Numeric vector of warping function values on the same grid.
+#'
+#' @return An fdata object containing the reparameterized curve.
+#'
+#' @export
+srsf.reparameterize <- function(fdataobj, gamma) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+  f <- as.numeric(fdataobj$data[1, ])
+  argvals <- fdataobj$argvals
+  gamma <- as.numeric(gamma)
+  result <- alignment_reparameterize(f, argvals, gamma)
+  fdata(matrix(result, nrow = 1), argvals = argvals, names = fdataobj$names)
+}
+
+#' Compose Two Warping Functions
+#'
+#' Computes the composition (gamma1 o gamma2)(t) = gamma1(gamma2(t)).
+#'
+#' @param gamma1 Numeric vector — outer warping function.
+#' @param gamma2 Numeric vector — inner warping function.
+#' @param fdataobj An fdata object providing the grid (argvals).
+#'
+#' @return Numeric vector of the composed warping function.
+#'
+#' @export
+warp.compose <- function(gamma1, gamma2, fdataobj) {
+  if (inherits(fdataobj, "fdata")) {
+    argvals <- fdataobj$argvals
+  } else {
+    argvals <- as.numeric(fdataobj)
+  }
+  as.numeric(alignment_compose_warps(as.numeric(gamma1),
+                                     as.numeric(gamma2),
+                                     argvals))
+}
+
+#' Elastic Pairwise Alignment
+#'
+#' Aligns curve f2 to curve f1 using elastic (Fisher-Rao) alignment.
+#' Returns the aligned curve, warping function, and elastic distance.
+#'
+#' @param f1 An fdata object (reference curve, first row used).
+#' @param f2 An fdata object (curve to align, first row used).
+#'
+#' @return A list with components:
+#' \itemize{
+#'   \item \code{f.aligned} — fdata of the aligned curve.
+#'   \item \code{gamma} — Numeric warping function.
+#'   \item \code{distance} — Elastic distance after alignment.
+#' }
+#'
+#' @export
+elastic.pair <- function(f1, f2) {
+  if (!inherits(f1, "fdata") || !inherits(f2, "fdata")) {
+    stop("f1 and f2 must be of class 'fdata'")
+  }
+  argvals <- f1$argvals
+  res <- alignment_elastic_pair(as.numeric(f1$data[1, ]),
+                                as.numeric(f2$data[1, ]),
+                                as.numeric(argvals))
+  list(
+    f.aligned = fdata(matrix(res$f_aligned, nrow = 1), argvals = argvals,
+                      names = f2$names),
+    gamma = res$gamma,
+    distance = res$distance
+  )
+}
+
+#' Warping Complexity
+#'
+#' Computes the geodesic distance of a warping function from the identity,
+#' measuring how much phase variability the warp introduces.
+#'
+#' @param gamma Numeric vector of warping function values.
+#' @param argvals Numeric vector of grid points.
+#'
+#' @return A scalar complexity value (0 = identity warp).
+#'
+#' @export
+warp.complexity <- function(gamma, argvals) {
+  alignment_warp_complexity(as.numeric(gamma), as.numeric(argvals))
+}
+
+#' Warping Smoothness
+#'
+#' Computes the bending energy of a warping function, measuring its roughness.
+#'
+#' @param gamma Numeric vector of warping function values.
+#' @param argvals Numeric vector of grid points.
+#'
+#' @return A scalar smoothness (bending energy) value.
+#'
+#' @export
+warp.smoothness <- function(gamma, argvals) {
+  alignment_warp_smoothness(as.numeric(gamma), as.numeric(argvals))
+}

@@ -13,12 +13,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(fdars)
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Introduction
 
 The `fdars` package provides comprehensive tools for simulating functional data. This is useful for:
@@ -29,6 +23,16 @@ The `fdars` package provides comprehensive tools for simulating functional data.
 - **Benchmarking**: Comparing algorithm performance
 
 This vignette covers the Karhunen-Loeve simulation framework and related tools.
+
+```{=html}
+<img src="../reference/figures/simulation-toolbox-diagram.svg" alt="Karhunen-Loève Simulation Framework" style="width:100%; max-width:720px; display:block; margin:1em auto;" />
+```
+
+```{r setup, include = FALSE}
+library(fdars)
+library(ggplot2)
+theme_set(theme_minimal())
+```
 
 ## Karhunen-Loeve Simulation
 

@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrR" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="300" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">Two Directions of Functional Regression</text>
+
+  <!-- ===== DIVIDER ===== -->
+  <line x1="300" y1="36" x2="300" y2="260" stroke="#ddd" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- ===== LEFT: Scalar-on-Function ===== -->
+  <text x="150" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#2C5F8A">Scalar-on-Function</text>
+  <text x="150" y="66" text-anchor="middle" font-size="9" fill="#888">y&#7522; = &#945; + &#8747;X&#7522;(t)&#946;(t)dt + &#949;&#7522;</text>
+
+  <!-- Functional predictor X(t) -->
+  <rect x="20" y="80" width="100" height="70" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="70" y="96" text-anchor="middle" font-size="9" font-weight="bold" fill="#2C5F8A">X&#7522;(t)</text>
+  <text x="70" y="108" text-anchor="middle" font-size="8" fill="#888">functional</text>
+  <text x="70" y="118" text-anchor="middle" font-size="8" fill="#888">predictor</text>
+  <!-- Mini curves -->
+  <path d="M32 138 Q44 126 56 132 Q68 138 80 128 Q92 118 108 130" stroke="#4A90D9" stroke-width="1.2" fill="none" opacity="0.6"/>
+  <path d="M32 142 Q44 130 56 136 Q68 142 80 132 Q92 122 108 134" stroke="#4A90D9" stroke-width="1.2" fill="none" opacity="0.3"/>
+
+  <!-- Arrow through beta(t) -->
+  <line x1="124" y1="115" x2="148" y2="115" stroke="#555" stroke-width="1" marker-end="url(#arrR)"/>
+
+  <!-- Beta(t) coefficient function -->
+  <rect x="152" y="86" width="70" height="58" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="187" y="102" text-anchor="middle" font-size="9" font-weight="bold" fill="#B37700">&#946;(t)</text>
+  <text x="187" y="114" text-anchor="middle" font-size="8" fill="#888">coefficient</text>
+  <text x="187" y="124" text-anchor="middle" font-size="8" fill="#888">function</text>
+  <!-- Curve shape for beta -->
+  <path d="M160 136 Q170 128 180 132 Q190 136 200 124 Q210 112 214 126" stroke="#E6A020" stroke-width="1.5" fill="none"/>
+
+  <!-- Arrow to scalar y -->
+  <line x1="226" y1="115" x2="250" y2="115" stroke="#555" stroke-width="1" marker-end="url(#arrR)"/>
+
+  <!-- Scalar response y -->
+  <rect x="254" y="92" width="36" height="46" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="272" y="112" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E8B57">y&#7522;</text>
+  <text x="272" y="126" text-anchor="middle" font-size="8" fill="#888">scalar</text>
+
+  <!-- Functions used -->
+  <rect x="20" y="164" width="270" height="40" rx="4" fill="#E8F0FE" opacity="0.4" stroke="#4A90D9" stroke-width="0.8"/>
+  <text x="155" y="180" text-anchor="middle" font-size="9" fill="#2C5F8A" font-weight="bold">fregre.pc() / fregre.basis() / fregre.lm()</text>
+  <text x="155" y="194" text-anchor="middle" font-size="8" fill="#888">FPC scores or basis coefficients as predictors</text>
+
+  <!-- ===== RIGHT: Function-on-Scalar ===== -->
+  <text x="450" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#7B2D8E">Function-on-Scalar</text>
+  <text x="450" y="66" text-anchor="middle" font-size="9" fill="#888">Y&#7522;(t) = &#946;&#8320;(t) + x&#7522;&#946;&#8321;(t) + &#949;&#7522;(t)</text>
+
+  <!-- Scalar predictor x -->
+  <rect x="314" y="92" width="36" height="46" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="332" y="112" text-anchor="middle" font-size="11" font-weight="bold" fill="#B37700">x&#7522;</text>
+  <text x="332" y="126" text-anchor="middle" font-size="8" fill="#888">scalar</text>
+
+  <!-- Arrow through beta(t) -->
+  <line x1="354" y1="115" x2="378" y2="115" stroke="#555" stroke-width="1" marker-end="url(#arrR)"/>
+
+  <!-- Beta(t) coefficient function -->
+  <rect x="382" y="86" width="70" height="58" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="417" y="102" text-anchor="middle" font-size="9" font-weight="bold" fill="#7B2D8E">&#946;(t)</text>
+  <text x="417" y="114" text-anchor="middle" font-size="8" fill="#888">coefficient</text>
+  <text x="417" y="124" text-anchor="middle" font-size="8" fill="#888">function</text>
+  <path d="M390 136 Q400 128 410 132 Q420 136 430 124 Q440 112 444 126" stroke="#7B2D8E" stroke-width="1.5" fill="none"/>
+
+  <!-- Arrow to functional Y(t) -->
+  <line x1="456" y1="115" x2="480" y2="115" stroke="#555" stroke-width="1" marker-end="url(#arrR)"/>
+
+  <!-- Functional response Y(t) -->
+  <rect x="484" y="80" width="100" height="70" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="534" y="96" text-anchor="middle" font-size="9" font-weight="bold" fill="#2E8B57">Y&#7522;(t)</text>
+  <text x="534" y="108" text-anchor="middle" font-size="8" fill="#888">functional</text>
+  <text x="534" y="118" text-anchor="middle" font-size="8" fill="#888">response</text>
+  <path d="M496 138 Q508 126 520 132 Q532 138 544 128 Q556 118 572 130" stroke="#2E8B57" stroke-width="1.2" fill="none" opacity="0.6"/>
+  <path d="M496 142 Q508 130 520 136 Q532 142 544 132 Q556 122 572 134" stroke="#2E8B57" stroke-width="1.2" fill="none" opacity="0.3"/>
+
+  <!-- Functions used -->
+  <rect x="310" y="164" width="280" height="40" rx="4" fill="#F3E8FF" opacity="0.4" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="450" y="180" text-anchor="middle" font-size="9" fill="#7B2D8E" font-weight="bold">fosr() / fosr.fpc() / fanova()</text>
+  <text x="450" y="194" text-anchor="middle" font-size="8" fill="#888">Penalized estimation of &#946;(t) coefficient functions</text>
+
+  <!-- ===== BOTTOM: Key difference ===== -->
+  <line x1="10" y1="218" x2="590" y2="218" stroke="#eee" stroke-width="1"/>
+
+  <rect x="30" y="228" width="240" height="60" rx="5" fill="#E8F0FE" opacity="0.3" stroke="#4A90D9" stroke-width="1"/>
+  <text x="150" y="248" text-anchor="middle" font-size="9" font-weight="bold" fill="#2C5F8A">Scalar-on-function</text>
+  <text x="150" y="262" text-anchor="middle" font-size="8" fill="#555">"Which parts of the curve predict y?"</text>
+  <text x="150" y="276" text-anchor="middle" font-size="8" fill="#555">&#946;(t) shows predictor importance over t</text>
+
+  <rect x="330" y="228" width="240" height="60" rx="5" fill="#F3E8FF" opacity="0.3" stroke="#7B2D8E" stroke-width="1"/>
+  <text x="450" y="248" text-anchor="middle" font-size="9" font-weight="bold" fill="#7B2D8E">Function-on-scalar</text>
+  <text x="450" y="262" text-anchor="middle" font-size="8" fill="#555">"How does x shift the whole curve?"</text>
+  <text x="450" y="276" text-anchor="middle" font-size="8" fill="#555">&#946;(t) shows group effect at each t</text>
+</svg>

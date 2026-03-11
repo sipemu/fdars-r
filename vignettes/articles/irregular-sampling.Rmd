@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())
@@ -35,6 +35,10 @@ The `fdars` package provides the `irregFdata` class to handle such data naturall
 - **Sensor data**: Measurements with gaps or varying frequency
 - **Environmental monitoring**: Non-uniform temporal sampling
 - **Financial data**: Trades occurring at irregular intervals
+
+```{=html}
+<img src="../reference/figures/irregular-sampling-diagram.svg" alt="Irregular Functional Data Pipeline" style="width:100%; max-width:700px;">
+```
 
 ## The irregFdata Class
 

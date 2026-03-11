@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrTS" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="300" y="27.5" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">TSRVF: From Curved Manifold to Flat Tangent Space</text>
+
+  <!-- ===== LEFT: Manifold (globe) ===== -->
+  <rect x="14" y="52.5" width="160" height="225" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="94" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">Shape Manifold</text>
+  <text x="94" y="87.5" text-anchor="middle" font-size="10" fill="#888">curved space (nonlinear)</text>
+
+  <!-- Globe-like curved surface -->
+  <ellipse cx="94" cy="181.2" rx="55" ry="42" fill="none" stroke="#4A90D9" stroke-width="1.1" opacity="0.3"/>
+  <path d="M 39 181.2 Q 66 156.2 94 181.2 Q 122 206.2 149 181.2" fill="none" stroke="#4A90D9" stroke-width="0.9" opacity="0.3"/>
+  <path d="M 94 128.8 Q 104 156.2 94 181.2 Q 84 206.2 94 233.8" fill="none" stroke="#4A90D9" stroke-width="0.9" opacity="0.3"/>
+
+  <!-- Points on the manifold -->
+  <circle cx="70" cy="156.2" r="4" fill="#D55E00"/>
+  <circle cx="110" cy="150" r="4" fill="#7B2D8E"/>
+  <circle cx="85" cy="193.8" r="4" fill="#2E8B57"/>
+
+  <!-- Karcher mean point -->
+  <circle cx="94" cy="172.5" r="5" fill="#4A90D9" stroke="#2C5F8A" stroke-width="1.6"/>
+  <text x="94" y="250" text-anchor="middle" font-size="10" fill="#4A90D9" font-weight="bold">&#956; (Karcher mean)</text>
+  <text x="94" y="265" text-anchor="middle" font-size="10" fill="#888">Geodesic distances</text>
+
+  <!-- Arrow: log map -->
+  <line x1="178" y1="175" x2="218" y2="175" stroke="#555" stroke-width="1.3" marker-end="u r l a r r T S"/>
+  <text x="198" y="162.5" text-anchor="middle" font-size="10" fill="#888">log map</text>
+  <text x="198" y="195" text-anchor="middle" font-size="10" fill="#888">v&#7522; = log&#7524;([f&#7522;])</text>
+
+  <!-- ===== MIDDLE: Tangent space (flat plane) ===== -->
+  <rect x="224" y="52.5" width="160" height="225" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="304" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#B37700">Tangent Space</text>
+  <text x="304" y="87.5" text-anchor="middle" font-size="10" fill="#888">flat space (Euclidean)</text>
+
+  <!-- Flat grid -->
+  <line x1="254" y1="125" x2="354" y2="125" stroke="#E6A020" stroke-width="0.5" opacity="0.3"/>
+  <line x1="254" y1="162.5" x2="354" y2="162.5" stroke="#E6A020" stroke-width="0.5" opacity="0.3"/>
+  <line x1="254" y1="200" x2="354" y2="200" stroke="#E6A020" stroke-width="0.5" opacity="0.3"/>
+  <line x1="274" y1="106.2" x2="274" y2="231.2" stroke="#E6A020" stroke-width="0.5" opacity="0.3"/>
+  <line x1="304" y1="106.2" x2="304" y2="231.2" stroke="#E6A020" stroke-width="0.5" opacity="0.3"/>
+  <line x1="334" y1="106.2" x2="334" y2="231.2" stroke="#E6A020" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- Origin (mean maps to zero) -->
+  <circle cx="304" cy="175" r="5" fill="#4A90D9" stroke="#2C5F8A" stroke-width="1.6"/>
+  <text x="318" y="180" font-size="8.8" fill="#4A90D9">0 (mean)</text>
+
+  <!-- Tangent vectors from origin -->
+  <line x1="304" y1="175" x2="275" y2="137.5" stroke="#D55E00" stroke-width="1.6" marker-end="u r l a r r T S"/>
+  <circle cx="275" cy="137.5" r="3" fill="#D55E00"/>
+  <text x="266" y="131.2" text-anchor="end" font-size="8.8" fill="#D55E00">v&#8321;</text>
+
+  <line x1="304" y1="175" x2="340" y2="135" stroke="#7B2D8E" stroke-width="1.6" marker-end="u r l a r r T S"/>
+  <circle cx="340" cy="135" r="3" fill="#7B2D8E"/>
+  <text x="348" y="132.5" font-size="8.8" fill="#7B2D8E">v&#8322;</text>
+
+  <line x1="304" y1="175" x2="290" y2="206.2" stroke="#2E8B57" stroke-width="1.6" marker-end="u r l a r r T S"/>
+  <circle cx="290" cy="206.2" r="3" fill="#2E8B57"/>
+  <text x="282" y="218.8" text-anchor="end" font-size="8.8" fill="#2E8B57">v&#8323;</text>
+
+  <text x="304" y="250" text-anchor="middle" font-size="10" fill="#B37700" font-weight="bold">TSRVF vectors</text>
+  <text x="304" y="265" text-anchor="middle" font-size="10" fill="#888">Euclidean distances</text>
+
+  <!-- Arrow: standard methods -->
+  <line x1="388" y1="175" x2="428" y2="175" stroke="#555" stroke-width="1.3" marker-end="u r l a r r T S"/>
+  <text x="408" y="162.5" text-anchor="middle" font-size="10" fill="#888">standard</text>
+  <text x="408" y="195" text-anchor="middle" font-size="10" fill="#888">methods</text>
+
+  <!-- ===== RIGHT: Applications ===== -->
+  <rect x="434" y="52.5" width="152" height="225" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.3"/>
+  <text x="510" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2E8B57">Linear Methods</text>
+  <text x="510" y="87.5" text-anchor="middle" font-size="10" fill="#888">now valid!</text>
+
+  <!-- Application boxes -->
+  <rect x="448" y="105" width="124" height="35" rx="4" fill="#2E8B57" opacity="0.12" stroke="#2E8B57" stroke-width="0.9"/>
+  <text x="510" y="127.5" text-anchor="middle" font-size="11.2" fill="#2E8B57">PCA (shape modes)</text>
+
+  <rect x="448" y="150" width="124" height="35" rx="4" fill="#2E8B57" opacity="0.12" stroke="#2E8B57" stroke-width="0.9"/>
+  <text x="510" y="172.5" text-anchor="middle" font-size="11.2" fill="#2E8B57">Regression</text>
+
+  <rect x="448" y="195" width="124" height="35" rx="4" fill="#2E8B57" opacity="0.12" stroke="#2E8B57" stroke-width="0.9"/>
+  <text x="510" y="217.5" text-anchor="middle" font-size="11.2" fill="#2E8B57">Clustering</text>
+
+  <rect x="448" y="240" width="124" height="25" rx="4" fill="#2E8B57" opacity="0.12" stroke="#2E8B57" stroke-width="0.9"/>
+  <text x="510" y="257.5" text-anchor="middle" font-size="11.2" fill="#2E8B57">Classification</text>
+
+  <!-- Bottom: inverse arrow -->
+  <line x1="10" y1="297.5" x2="590" y2="297.5" stroke="#eee" stroke-width="1.1"/>
+
+  <text x="300" y="322.5" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#555">Key Insight</text>
+
+  <rect x="30" y="335" width="250" height="50" rx="5" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.1"/>
+  <text x="155" y="355" text-anchor="middle" font-size="11.2" fill="#2C5F8A">Shapes live on a curved surface</text>
+  <text x="155" y="372.5" text-anchor="middle" font-size="10" fill="#888">&#8594; linear methods introduce distortion</text>
+
+  <rect x="320" y="335" width="250" height="50" rx="5" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.1"/>
+  <text x="445" y="355" text-anchor="middle" font-size="11.2" fill="#B37700">TSRVF maps to a flat tangent plane</text>
+  <text x="445" y="372.5" text-anchor="middle" font-size="10" fill="#888">&#8594; Euclidean &#8776; geodesic near the mean</text>
+</svg>

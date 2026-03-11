@@ -22,11 +22,15 @@ This is particularly useful for:
 - **Online monitoring**: Evaluating new curves as they arrive against a fixed reference
 - **Large reference samples**: When $N$ is large, the $O(\log N)$ lookup is much faster than $O(N)$
 
+```{=html}
+<img src="../reference/figures/streaming-depth-diagram.svg" alt="Streaming Depth: O(T log N) Per Query Curve" style="width:100%; max-width:700px;">
+```
+
 ## Self-Depth (Batch)
 
 The simplest use case computes the depth of each curve relative to the full dataset:
 
-```{r batch}
+```{r batch, include = FALSE}
 library(fdars)
 library(ggplot2)
 theme_set(theme_minimal())

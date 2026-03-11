@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 200" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrLOC" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="15" font-weight="bold" fill="#B37700">Local Explanations</text>
+  <text x="350" y="37.5" text-anchor="middle" font-size="10" fill="#888">Why did the model predict this value for observation i?</text>
+
+  <!-- SHAP -->
+  <rect x="10" y="52.5" width="105" height="135" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="62" y="72.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">SHAP Values</text>
+  <text x="62" y="87.5" text-anchor="middle" font-size="8.8" fill="#888">Shapley attribution</text>
+  <!-- Horizontal bars -->
+  <rect x="42" y="100" width="48" height="10" rx="1" fill="#4A90D9" opacity="0.6"/>
+  <rect x="42" y="115" width="32" height="10" rx="1" fill="#4A90D9" opacity="0.4"/>
+  <rect x="26" y="130" width="16" height="10" rx="1" fill="#D55E00" opacity="0.5"/>
+  <rect x="30" y="145" width="12" height="10" rx="1" fill="#D55E00" opacity="0.3"/>
+  <line x1="42" y1="95" x2="42" y2="162.5" stroke="#999" stroke-width="0.4" stroke-dasharray="2,1"/>
+  <text x="22" y="110" font-size="7.5" fill="#888">PC1</text>
+  <text x="22" y="125" font-size="7.5" fill="#888">PC2</text>
+  <text x="22" y="140" font-size="7.5" fill="#888">PC3</text>
+  <text x="22" y="155" font-size="7.5" fill="#888">PC4</text>
+  <text x="62" y="185" text-anchor="middle" font-size="8.8" fill="#888">fregre.shap</text>
+
+  <!-- LIME -->
+  <rect x="125" y="52.5" width="105" height="135" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="177" y="72.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">LIME</text>
+  <text x="177" y="87.5" text-anchor="middle" font-size="8.8" fill="#888">local surrogate</text>
+  <!-- Scatter with local fit -->
+  <circle cx="142" cy="147.5" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="150" cy="142.5" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="156" cy="135" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="164" cy="132.5" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="170" cy="125" r="2.5" fill="#D55E00" opacity="0.8"/>
+  <circle cx="178" cy="122.5" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="186" cy="117.5" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="194" cy="112.5" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="200" cy="107.5" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <circle cx="208" cy="105" r="1.5" fill="#E6A020" opacity="0.35"/>
+  <!-- Local linear fit -->
+  <line x1="138" y1="150" x2="212" y2="102.5" stroke="#B37700" stroke-width="1.3" opacity="0.6"/>
+  <text x="177" y="185" text-anchor="middle" font-size="8.8" fill="#888">fregre.lime</text>
+
+  <!-- Counterfactual -->
+  <rect x="240" y="52.5" width="105" height="135" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="292" y="72.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">Counterfactual</text>
+  <text x="292" y="87.5" text-anchor="middle" font-size="8.8" fill="#888">minimal change</text>
+  <!-- Two curves: original + counterfactual -->
+  <path d="M 254 137.5 Q 270 117.5 292 122.5 Q 314 127.5 330 110.0" stroke="#D55E00" stroke-width="1.6" fill="none"/>
+  <path d="M 254 132.5 Q 270 112.5 292 115.0 Q 314 117.5 330 100.0" stroke="#2E8B57" stroke-width="1.6" fill="none" stroke-dasharray="4,2"/>
+  <!-- Arrow between them -->
+  <line x1="280" y1="120" x2="280" y2="112.5" stroke="#555" stroke-width="0.9" marker-end="u r l a r r L O C" opacity="0.5"/>
+  <text x="262" y="157.5" font-size="7.5" fill="#D55E00">original</text>
+  <text x="262" y="170" font-size="7.5" fill="#2E8B57">target</text>
+  <text x="292" y="185" text-anchor="middle" font-size="8.8" fill="#888">fregre.counterfactual</text>
+
+  <!-- Anchor -->
+  <rect x="355" y="52.5" width="105" height="135" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="407" y="72.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">Anchor</text>
+  <text x="407" y="87.5" text-anchor="middle" font-size="8.8" fill="#888">sufficient rules</text>
+  <!-- Rule boxes -->
+  <rect x="365" y="100" width="84" height="22.5" rx="3" fill="#E6A020" opacity="0.1" stroke="#E6A020" stroke-width="0.6"/>
+  <text x="407" y="115" text-anchor="middle" font-size="8.8" fill="#B37700">IF PC1 &#8712; [a, b]</text>
+  <rect x="365" y="127.5" width="84" height="22.5" rx="3" fill="#E6A020" opacity="0.1" stroke="#E6A020" stroke-width="0.6"/>
+  <text x="407" y="142.5" text-anchor="middle" font-size="8.8" fill="#B37700">AND PC2 &#8712; [c, d]</text>
+  <text x="407" y="165" text-anchor="middle" font-size="8.8" fill="#2E8B57">precision: 95%</text>
+  <text x="407" y="185" text-anchor="middle" font-size="8.8" fill="#888">fregre.anchor</text>
+
+  <!-- Prototype -->
+  <rect x="470" y="52.5" width="105" height="135" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="522" y="72.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">Prototypes</text>
+  <text x="522" y="87.5" text-anchor="middle" font-size="8.8" fill="#888">representative + atypical</text>
+  <!-- Cluster visualization -->
+  <circle cx="494" cy="125" r="4" fill="#4A90D9" opacity="0.5" stroke="#4A90D9" stroke-width="0.6"/>
+  <circle cx="506" cy="120" r="4" fill="#4A90D9" opacity="0.5" stroke="#4A90D9" stroke-width="0.6"/>
+  <circle cx="500" cy="135" r="4" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="512" cy="130" r="4" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="540" cy="112.5" r="4" fill="#D55E00" opacity="0.5" stroke="#D55E00" stroke-width="0.6"/>
+  <circle cx="550" cy="137.5" r="4" fill="#D55E00" opacity="0.5" stroke="#D55E00" stroke-width="0.6"/>
+  <text x="500" y="157.5" font-size="7.5" fill="#4A90D9">prototypes</text>
+  <text x="545" y="157.5" font-size="7.5" fill="#D55E00">criticisms</text>
+  <text x="522" y="185" text-anchor="middle" font-size="8.8" fill="#888">fregre.prototype</text>
+
+  <!-- Calibration -->
+  <rect x="585" y="52.5" width="105" height="135" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="637" y="72.5" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">Calibration</text>
+  <text x="637" y="87.5" text-anchor="middle" font-size="8.8" fill="#888">probability reliability</text>
+  <!-- Calibration curve -->
+  <line x1="599" y1="167.5" x2="677" y2="167.5" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="599" y1="95" x2="599" y2="167.5" stroke="#ccc" stroke-width="0.6"/>
+  <!-- Perfect calibration (diagonal) -->
+  <line x1="599" y1="167.5" x2="677" y2="95" stroke="#999" stroke-width="0.5" stroke-dasharray="3,2"/>
+  <!-- Actual calibration curve -->
+  <path d="M 599 165.0 Q 620 155.0 637 137.5 Q 654 120.0 677 102.5" stroke="#E6A020" stroke-width="1.6" fill="none"/>
+  <circle cx="614" cy="157.5" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="630" cy="145" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="648" cy="127.5" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="668" cy="107.5" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <text x="637" y="185" text-anchor="middle" font-size="8.8" fill="#888">ECE + Brier score</text>
+</svg>

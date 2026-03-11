@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Functional predictor (left) -->
+  <path d="M12 62 Q28 26, 48 44 Q64 56, 74 38" stroke="#4A90D9" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M12 70 Q30 34, 50 50 Q66 60, 74 46" stroke="#4A90D9" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M12 56 Q26 24, 46 40 Q62 52, 74 34" stroke="#4A90D9" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Arrow -->
+  <line x1="82" y1="52" x2="104" y2="52" stroke="#4A90D9" stroke-width="2" opacity="0.6"/>
+  <polygon points="102,47 110,52 102,57" fill="#4A90D9" opacity="0.6"/>
+  <!-- Beta function (dashed) -->
+  <path d="M112 72 Q130 26, 148 52 Q162 68, 170 42" stroke="#E6A020" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6,4" opacity="0.6"/>
+  <!-- Arrow -->
+  <line x1="174" y1="52" x2="186" y2="52" stroke="#E6A020" stroke-width="2" opacity="0.6"/>
+  <polygon points="184,47 192,52 184,57" fill="#E6A020" opacity="0.6"/>
+  <!-- Scalar response (y) -->
+  <text x="194" y="58" font-family="serif" font-style="italic" font-size="18" fill="#2E8B57">y</text>
+</svg>
