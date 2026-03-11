@@ -72,6 +72,7 @@ articles:
   - articles/explainability
   - articles/regression-diagnostics
   - articles/uncertainty-quantification
+  - articles/smooth-basis
 - title: Analyze
   contents:
   - articles/tolerance-bands
@@ -143,6 +144,11 @@ reference:
   - phase.distance
   - elastic.align.constrained
   - alignment.pairwise.consistency
+  - elastic.pair
+  - srsf.reparameterize
+  - warp.complexity
+  - warp.compose
+  - warp.smoothness
   - plot.elastic.align
   - plot.karcher.mean
   - plot.alignment.quality
@@ -176,6 +182,7 @@ reference:
   - depth.MEI
   - depth.mode
   - depth.RP
+  - rp.stat
   - depth.RPD
   - depth.RT
   - streaming.depth
@@ -202,6 +209,7 @@ reference:
   contents:
   - cluster.fcm
   - cluster.gmm
+  - gmm.em
   - cluster.init
   - cluster.kmeans
   - cluster.optim
@@ -222,6 +230,7 @@ reference:
   - fregre.basis.cv
   - fregre.lm
   - fregre.lm.cv
+  - fregre.bootstrap.ci
   - fregre.np
   - fregre.np.cv
   - fregre.np.mixed

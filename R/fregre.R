@@ -1656,13 +1656,13 @@ predict.fregre.lm <- function(object, newdata = NULL, new.scalar = NULL, ...) {
 #'
 #' @return An object of class 'fregre.bootstrap.ci' with components:
 #' \itemize{
-#'   \item \code{lower}, \code{upper} — Pointwise CI bounds.
-#'   \item \code{center} — Original beta(t) estimate.
-#'   \item \code{sim.lower}, \code{sim.upper} — Simultaneous CI bands.
-#'   \item \code{n.boot.success} — Number of successful bootstrap replicates.
-#'   \item \code{argvals} — Grid points.
-#'   \item \code{alpha} — Significance level used.
-#'   \item \code{model.class} — Class of the original model.
+#'   \item \code{lower}, \code{upper}: Pointwise CI bounds.
+#'   \item \code{center}: Original beta(t) estimate.
+#'   \item \code{sim.lower}, \code{sim.upper}: Simultaneous CI bands.
+#'   \item \code{n.boot.success}: Number of successful bootstrap replicates.
+#'   \item \code{argvals}: Grid points.
+#'   \item \code{alpha}: Significance level used.
+#'   \item \code{model.class}: Class of the original model.
 #' }
 #'
 #' @examples
