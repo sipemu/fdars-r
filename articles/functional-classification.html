@@ -65,8 +65,7 @@
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>Supervised classification assigns functional observations to discrete
-groups. <strong>fdars</strong> provides five methods through a unified
-<code><a href="../reference/fclassif.html">fclassif()</a></code> interface:</p>
+groups. <strong>fdars</strong> provides seven methods:</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -104,22 +103,23 @@ groups. <strong>fdars</strong> provides five methods through a unified
 <td>Depth-vs-depth classification</td>
 <td>Robust to outliers</td>
 </tr>
+<tr class="even">
+<td><strong>Logistic</strong></td>
+<td>FPC-based logistic regression</td>
+<td>Calibrated probabilities</td>
+</tr>
+<tr class="odd">
+<td><strong>Elastic logistic</strong></td>
+<td>Phase-invariant logistic</td>
+<td>Handles misalignment</td>
+</tr>
 </tbody>
 </table>
-<p>All methods support optional scalar covariates alongside functional
-predictors.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The first five methods are available through the unified
+<code><a href="../reference/fclassif.html">fclassif()</a></code> interface and support optional scalar
+covariates. Logistic regression uses <code><a href="../reference/functional.logistic.html">functional.logistic()</a></code>,
+and elastic logistic uses <code><a href="../reference/elastic.logistic.html">elastic.logistic()</a></code>.</p>
+<img src="../reference/figures/functional-classification-diagram.svg" alt="Functional Classification Pipeline" style="width:100%; max-width:700px;">
 </div>
 <div class="section level2">
 <h2 id="why-functional-classification">Why Functional Classification?<a class="anchor" aria-label="anchor" href="#why-functional-classification"></a>
@@ -292,7 +292,7 @@ constant factor.</p>
 <em>virginica</em>) are the classes. Crucially, <em>versicolor</em> and
 <em>virginica</em> overlap substantially, making this a non-trivial
 classification task.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">andrews_transform</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span>, <span class="va">m</span> <span class="op">=</span> <span class="fl">200</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">is.data.frame</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
 <span>  <span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
@@ -312,14 +312,14 @@ classification task.</p>
 <span></span>
 <span>  <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">basis</span><span class="op">)</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">X_raw</span><span class="op">)</span></span>
 <span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>  <span class="co"># 1 = setosa, 2 = versicolor, 3 = virginica</span></span>
 <span></span>
 <span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/andrews_transform.html">andrews_transform</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span>, color <span class="op">=</span> <span class="va">species</span>, alpha <span class="op">=</span> <span class="fl">0.35</span>, show.mean <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>     palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"setosa"</span> <span class="op">=</span> <span class="st">"#E69F00"</span>, <span class="st">"versicolor"</span> <span class="op">=</span> <span class="st">"#56B4E9"</span>,</span>
 <span>                 <span class="st">"virginica"</span> <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -332,7 +332,7 @@ exactly the kind of challenge where classifier choice matters.</p>
 <div class="section level2">
 <h2 id="comparing-all-five-methods">Comparing All Five Methods<a class="anchor" aria-label="anchor" href="#comparing-all-five-methods"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lda"</span>, <span class="st">"qda"</span>, <span class="st">"knn"</span>, <span class="st">"kernel"</span>, <span class="st">"dd"</span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -362,7 +362,7 @@ Cross-validation gives a fairer picture (see below).</p>
 <h2 id="confusion-matrix">Confusion Matrix<a class="anchor" aria-label="anchor" href="#confusion-matrix"></a>
 </h2>
 <p>The LDA confusion matrix reveals where errors concentrate:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">results</span><span class="op">[[</span><span class="st">"lda"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p><img src="functional-classification_files/figure-html/confusion-1.png" class="r-plt" alt="" width="100%"></p>
 <p>Most errors are between versicolor and virginica, as expected from
@@ -376,7 +376,7 @@ its curves are well separated in the FPC score space.</p>
 cross-validation. This gives the most honest estimate of how each
 classifier would perform on new data, guarding against the optimism of
 training accuracy.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">cv_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">meth</span> <span class="kw">in</span> <span class="va">methods</span><span class="op">)</span> <span class="op">{</span></span>
@@ -407,7 +407,7 @@ relative to the number of parameters.</p>
 <p>Cross-validation can also help select the optimal number of FPC
 components. Too few loses discriminative information; too many
 introduces noise.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ncomp_range</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span></span>
 <span><span class="va">cv_by_ncomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">ncomp_range</span>, <span class="kw">function</span><span class="op">(</span><span class="va">k</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/fclassif.cv.html">fclassif.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, method <span class="op">=</span> <span class="st">"lda"</span>, ncomp <span class="op">=</span> <span class="va">k</span>, nfold <span class="op">=</span> <span class="fl">10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span><span class="op">$</span><span class="va">error.rate</span></span>
@@ -427,17 +427,112 @@ improving discrimination. Adding later components brings in directions
 that are mainly within-class noise, diluting the signal.</p>
 </div>
 <div class="section level2">
+<h2 id="functional-logistic-regression">Functional Logistic Regression<a class="anchor" aria-label="anchor" href="#functional-logistic-regression"></a>
+</h2>
+<p>For binary classification, <code><a href="../reference/functional.logistic.html">functional.logistic()</a></code> fits a
+logistic regression model using FPC scores as features. Unlike the
+discriminative methods above, this produces <strong>calibrated
+probabilities</strong> — useful when you need confidence in the
+classification, not just a label.</p>
+<div class="section level3">
+<h3 id="the-irls-algorithm">The IRLS Algorithm<a class="anchor" aria-label="anchor" href="#the-irls-algorithm"></a>
+</h3>
+<p>The functional logistic model uses the logit link on FPC scores:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mfrac><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>1</mn><mo>−</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo>=</mo><mi>α</mi><mo>+</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>γ</mi><mi>k</mi></msub><msub><mi>ξ</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\log\frac{P(Y_i = 1)}{1 - P(Y_i = 1)} = \alpha + \sum_{k=1}^K \gamma_k \xi_{ik}</annotation></semantics></math></p>
+<p>This is estimated via <strong>Iteratively Reweighted Least Squares
+(IRLS)</strong>, which alternates between:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Working response</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mi>i</mi></msub><mo>=</mo><msub><mover><mi>η</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">z_i = \hat\eta_i + (y_i - \hat{p}_i) / [\hat{p}_i(1 - \hat{p}_i)]</annotation></semantics></math>
+</li>
+<li>
+<strong>Working weights</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w_i = \hat{p}_i(1 - \hat{p}_i)</annotation></semantics></math>
+</li>
+<li>
+<strong>Weighted least squares</strong>: update
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>γ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\gamma</annotation></semantics></math>
+by regressing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Ξ</mi><annotation encoding="application/x-tex">\Xi</annotation></semantics></math>
+with weights
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+</li>
+</ol>
+<p>Convergence is monitored via the log-likelihood:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>γ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">[</mo><msub><mi>y</mi><mi>i</mi></msub><mo>log</mo><msub><mi>p</mi><mi>i</mi></msub><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\ell(\gamma) = \sum_{i=1}^n \bigl[y_i \log p_i + (1 - y_i)\log(1 - p_i)\bigr]</annotation></semantics></math></p>
+</div>
+<div class="section level3">
+<h3 id="binary-classification-example">Binary Classification Example<a class="anchor" aria-label="anchor" href="#binary-classification-example"></a>
+</h3>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create binary response from iris species (setosa vs rest)</span></span>
+<span><span class="va">y_bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">y</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>  <span class="co"># 1 = setosa, 0 = versicolor/virginica</span></span>
+<span></span>
+<span><span class="va">logit_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/functional.logistic.html">functional.logistic</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_bin</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">logit_fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Functional Logistic Regression</span></span>
+<span><span class="co">#&gt; ==============================</span></span>
+<span><span class="co">#&gt;   Number of observations: 150 </span></span>
+<span><span class="co">#&gt;   Number of FPC components: 3 </span></span>
+<span><span class="co">#&gt;   Accuracy: 1 </span></span>
+<span><span class="co">#&gt;   Log-likelihood: 0 </span></span>
+<span><span class="co">#&gt;   Iterations: 100</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Probabilities range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">logit_fit</span><span class="op">$</span><span class="va">probabilities</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Probabilities range: 2.385465e-45 1</span></span></code></pre></div>
+<p>Estimated probabilities near 0 or 1 indicate confident
+classification; values near 0.5 indicate curves in the overlap region
+where the predictor’s FPC scores do not clearly separate the two
+classes.</p>
+</div>
+<div class="section level3">
+<h3 id="probability-interpretation">Probability Interpretation<a class="anchor" aria-label="anchor" href="#probability-interpretation"></a>
+</h3>
+<p>Unlike discriminant methods (LDA/QDA), functional logistic regression
+directly models
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(Y = 1 | X)</annotation></semantics></math>.
+This makes it natural for:</p>
+<ul>
+<li>
+<strong>Risk scoring</strong>: rank observations by predicted
+probability</li>
+<li>
+<strong>Threshold tuning</strong>: adjust the decision boundary
+beyond 0.5</li>
+<li>
+<strong>Calibration</strong>: the predicted probabilities
+approximate true class frequencies</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="elastic-logistic-regression">Elastic Logistic Regression<a class="anchor" aria-label="anchor" href="#elastic-logistic-regression"></a>
+</h2>
+<p>When curves exhibit <strong>phase variability</strong> (timing
+differences), standard logistic regression on FPC scores may confound
+amplitude and phase effects. <code><a href="../reference/elastic.logistic.html">elastic.logistic()</a></code> jointly
+estimates alignment warping functions and logistic regression
+coefficients in the SRSF domain.</p>
+<p>See <code><a href="../articles/elastic-regression.html">vignette("articles/elastic-regression")</a></code> for the full
+elastic regression framework, including <code><a href="../reference/elastic.logistic.html">elastic.logistic()</a></code>
+and <code><a href="../reference/elastic.pcr.html">elastic.pcr()</a></code>.</p>
+</div>
+<div class="section level2">
 <h2 id="choosing-a-classifier">Choosing a Classifier<a class="anchor" aria-label="anchor" href="#choosing-a-classifier"></a>
 </h2>
 <p>The table below summarizes practical considerations:</p>
 <table class="table">
 <colgroup>
-<col width="28%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
+<col width="22%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="16%">
+<col width="10%">
 <col width="20%">
-<col width="12%">
 </colgroup>
 <thead><tr class="header">
 <th>Criterion</th>
@@ -446,15 +541,17 @@ that are mainly within-class noise, diluting the signal.</p>
 <th>kNN</th>
 <th>Kernel</th>
 <th>DD</th>
+<th>Logistic</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td><strong>Assumptions</strong></td>
-<td>Common covariance</td>
-<td>Class-specific covariance</td>
+<td>Common cov.</td>
+<td>Class-specific cov.</td>
 <td>None</td>
 <td>None</td>
 <td>None</td>
+<td>Linear in FPC space</td>
 </tr>
 <tr class="even">
 <td><strong>Min.
@@ -464,6 +561,7 @@ that are mainly within-class noise, diluting the signal.</p>
 <td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">&gt; k</annotation></semantics></math></td>
 <td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">&gt; 20</annotation></semantics></math></td>
 <td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">&gt; 20</annotation></semantics></math></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">&gt; K</annotation></semantics></math></td>
 </tr>
 <tr class="odd">
 <td><strong>Boundaries</strong></td>
@@ -472,6 +570,7 @@ that are mainly within-class noise, diluting the signal.</p>
 <td>Flexible</td>
 <td>Flexible</td>
 <td>Depth-based</td>
+<td>Linear</td>
 </tr>
 <tr class="even">
 <td><strong>Tuning</strong></td>
@@ -487,6 +586,7 @@ only</td>
 </td>
 <td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math></td>
 <td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math></td>
 </tr>
 <tr class="odd">
 <td><strong>Speed</strong></td>
@@ -495,6 +595,7 @@ only</td>
 <td>Moderate</td>
 <td>Slow</td>
 <td>Moderate</td>
+<td>Fast</td>
 </tr>
 <tr class="even">
 <td><strong>Robustness</strong></td>
@@ -503,6 +604,16 @@ only</td>
 <td>Moderate</td>
 <td>Moderate</td>
 <td>High</td>
+<td>Low</td>
+</tr>
+<tr class="odd">
+<td><strong>Probabilities</strong></td>
+<td>Posterior</td>
+<td>Posterior</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Calibrated</td>
 </tr>
 </tbody>
 </table>
@@ -518,6 +629,8 @@ and you have enough data per class.</li>
 datasets where you want to avoid the FPC projection step entirely.</li>
 <li>Use <strong>DD</strong> when robustness to outliers is paramount or
 distributional assumptions are suspect.</li>
+<li>Use <strong>logistic regression</strong> when you need calibrated
+probabilities or want to interpret coefficients as log-odds.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -546,10 +659,11 @@ Association</em>, 104(486), 718–734.</li>
 <code><a href="../articles/andrews-transformation.html">vignette("articles/andrews-transformation")</a></code> for more on
 the Andrews transform and its distance-preservation property</li>
 <li>
-<code><a href="../articles/functional-regression.html">vignette("articles/functional-regression")</a></code> for
-scalar-on-function regression including
-<code><a href="../reference/functional.logistic.html">functional.logistic()</a></code>
-</li>
+<code><a href="../articles/scalar-on-function.html">vignette("articles/scalar-on-function")</a></code> for
+scalar-on-function regression</li>
+<li>
+<code><a href="../articles/elastic-regression.html">vignette("articles/elastic-regression")</a></code> for elastic
+logistic and elastic PCR</li>
 <li>
 <code><a href="../articles/clustering.html">vignette("articles/clustering")</a></code> for unsupervised
 functional clustering</li>

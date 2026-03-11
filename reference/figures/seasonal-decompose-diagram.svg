@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="24" text-anchor="middle" font-size="18" font-weight="bold" fill="#B37700">Handling Non-Stationary Data</text>
+  <text x="350" y="46" text-anchor="middle" font-size="13" fill="#888">Decompose, detrend, and analyze modulated signals</text>
+
+  <!-- Left: Original signal -->
+  <rect x="16" y="66" width="160" height="100" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="96" y="86" text-anchor="middle" font-size="13" font-weight="bold" fill="#555">Non-Stationary</text>
+  <!-- Signal with trend -->
+  <path d="M32 140 Q48 118 64 132 Q80 148 96 120 Q112 96 128 118 Q144 140 160 108" stroke="#888" stroke-width="1.5" fill="none"/>
+  <path d="M32 142 Q80 130 128 118 Q160 108 160 108" stroke="#D55E00" stroke-width="1" fill="none" stroke-dasharray="3"/>
+  <text x="96" y="158" text-anchor="middle" font-size="10" fill="#D55E00">trend</text>
+
+  <!-- Arrow -->
+  <line x1="180" y1="116" x2="208" y2="116" stroke="#555" stroke-width="1.2" marker-end="url(#arrSD)"/>
+
+  <!-- Method boxes -->
+  <rect x="212" y="60" width="230" height="56" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="327" y="82" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">STL Decomposition</text>
+  <text x="232" y="102" font-size="12" fill="#555">seasonal.stl() &#x2192; trend + season + resid</text>
+
+  <rect x="212" y="126" width="230" height="56" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="327" y="148" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">SSA Decomposition</text>
+  <text x="232" y="168" font-size="12" fill="#555">seasonal.ssa() &#x2192; data-adaptive components</text>
+
+  <rect x="212" y="192" width="230" height="56" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="327" y="214" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Detrending</text>
+  <text x="232" y="234" font-size="12" fill="#555">seasonal.detrend() &#x2192; remove trend</text>
+
+  <!-- Right: Results -->
+  <rect x="462" y="60" width="222" height="188" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="573" y="82" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Components</text>
+  <!-- Trend -->
+  <path d="M482 108 Q530 104 578 100 Q626 96 664 94" stroke="#D55E00" stroke-width="1.5" fill="none"/>
+  <text x="668" y="98" font-size="10" fill="#D55E00">trend</text>
+  <!-- Seasonal -->
+  <path d="M482 142 Q498 130 514 142 Q530 154 546 142 Q562 130 578 142 Q594 154 610 142 Q626 130 642 142 Q658 154 664 148" stroke="#4A90D9" stroke-width="1.5" fill="none"/>
+  <text x="668" y="148" font-size="10" fill="#4A90D9">season</text>
+  <!-- Residual -->
+  <path d="M482 186 Q490 182 498 188 Q506 180 514 186 Q522 190 530 184 Q538 180 546 186 Q554 190 562 184" stroke="#888" stroke-width="1" fill="none"/>
+  <text x="668" y="188" font-size="10" fill="#888">residual</text>
+
+  <text x="573" y="232" text-anchor="middle" font-size="11" fill="#888">Amplitude modulation:</text>
+  <text x="573" y="244" text-anchor="middle" font-size="11" fill="#7B2D8E">seasonal.detect.amplitude.modulation()</text>
+
+  <!-- Arrows -->
+  <line x1="446" y1="88" x2="458" y2="140" stroke="#555" stroke-width="1.2" marker-end="url(#arrSD)"/>
+  <line x1="446" y1="154" x2="458" y2="154" stroke="#555" stroke-width="1.2" marker-end="url(#arrSD)"/>
+  <line x1="446" y1="220" x2="458" y2="168" stroke="#555" stroke-width="1.2" marker-end="url(#arrSD)"/>
+
+  <!-- Bottom -->
+  <text x="350" y="272" text-anchor="middle" font-size="12" fill="#888">All decompositions return S3 objects with plot() methods</text>
+
+  <defs>
+    <marker id="arrSD" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

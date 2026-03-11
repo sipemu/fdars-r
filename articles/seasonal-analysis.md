@@ -15,22 +15,13 @@ basic period estimation to advanced techniques for complex signals.
 - When to use instantaneous period estimation (and when not to)
 - How to analyze short series with only 3-5 cycles
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-set.seed(42)
-```
+![Seasonal Analysis
+Overview](../reference/figures/seasonal-analysis-diagram.svg)
 
 ## Estimating Seasonal Period
+
+![Estimating Seasonal
+Period](../reference/figures/seasonal-period-diagram.svg)
 
 The first step in seasonal analysis is often determining the period.
 fdars provides two methods: FFT (frequency domain) and ACF
@@ -256,6 +247,9 @@ longer. Very weak periodicities (\< 20% of the dominant amplitude) may
 require lower thresholds but risk false positives.
 
 ## Handling Non-Stationary Data
+
+![Handling Non-Stationary
+Data](../reference/figures/seasonal-decompose-diagram.svg)
 
 Real-world time series often have trends that can mask or distort
 seasonal patterns. fdars provides comprehensive detrending and
@@ -536,6 +530,9 @@ if unsure. Use `"loess"` for complex trends that polynomial methods
 cannot capture.
 
 ## Peak Detection
+
+![Peak Detection and Seasonal
+Strength](../reference/figures/seasonal-peaks-diagram.svg)
 
 Peak detection identifies local maxima in seasonal signals. This is
 useful for characterizing seasonal patterns and estimating period from
@@ -922,6 +919,9 @@ ggplot(df_combined, aes(x = t, y = y)) +
 ![](seasonal-analysis_files/figure-html/time-varying-strength-1.png)
 
 ## Change Detection
+
+![Change Detection and Varying
+Period](../reference/figures/seasonal-change-diagram.svg)
 
 Automatically detect when seasonality starts or stops.
 
@@ -1533,6 +1533,9 @@ results <- mclapply(series_list, function(fd) {
 
 ## See Also
 
+- [`vignette("articles/example-canadian-seasonal")`](https://sipemu.github.io/fdars-r/articles/example-canadian-seasonal.md)
+  — real-data example: Canadian temperature seasonal analysis with all
+  detection and decomposition methods
 - `vignette("working-with-derivatives", package = "fdars")` — estimating
   and analyzing functional derivatives
 - `vignette("simulation-toolbox", package = "fdars")` — simulating

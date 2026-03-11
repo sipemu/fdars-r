@@ -79,22 +79,9 @@ distance between Andrews curves equals
 times the Euclidean distance between the original observations — so all
 distance-based FDA methods produce results that are directly
 interpretable in the original multivariate space.</p>
-<p>This article demonstrates the full fdars pipeline — depth, outlier
+<img src="../reference/figures/andrews-transformation-diagram.svg" alt="Andrews Transformation: From Tables to Curves" style="width:100%; max-width:720px; display:block; margin:1em auto;"><p>This article demonstrates the full fdars pipeline — depth, outlier
 detection, clustering, and FPCA — applied to Andrews-transformed iris
 data.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="mathematical-background">Mathematical Background<a class="anchor" aria-label="anchor" href="#mathematical-background"></a>
@@ -146,7 +133,7 @@ back to the original variable space.</p>
 <p>The iris dataset has 150 observations with 4 numeric variables. We
 standardize before transforming so that no single variable dominates due
 to scale:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">X_raw</span><span class="op">)</span></span>
 <span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span></span>
@@ -155,7 +142,7 @@ to scale:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Andrews curves:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="st">"observations,"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="st">"grid points\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Andrews curves: 150 observations, 200 grid points</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot Andrews curves colored by species</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
@@ -183,7 +170,7 @@ space.</p>
 <div class="section level3">
 <h3 id="group-means">Group Means<a class="anchor" aria-label="anchor" href="#group-means"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute mean curve per species</span></span>
 <span><span class="va">species_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span></span>
 <span><span class="va">df_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">species_levels</span>, <span class="kw">function</span><span class="op">(</span><span class="va">sp</span><span class="op">)</span> <span class="op">{</span></span>
@@ -209,13 +196,13 @@ space.</p>
 <p>Functional depth measures how “central” each curve is relative to the
 sample. Deeper curves are more typical; shallow curves are potential
 outliers.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fraiman-Muniz depth</span></span>
 <span><span class="va">depth_fm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/depth.FM.html">depth.FM</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Modified Band Depth</span></span>
 <span><span class="va">depth_mbd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/depth.MBD.html">depth.MBD</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_depth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  FM <span class="op">=</span> <span class="va">depth_fm</span>,</span>
 <span>  MBD <span class="op">=</span> <span class="va">depth_mbd</span>,</span>
@@ -241,7 +228,7 @@ outliers.</p>
 <div class="section level3">
 <h3 id="functional-median-and-trimmed-mean">Functional Median and Trimmed Mean<a class="anchor" aria-label="anchor" href="#functional-median-and-trimmed-mean"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Functional median (deepest curve)</span></span>
 <span><span class="va">fd_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/median.html">median</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">)</span></span>
 <span></span>
@@ -270,7 +257,7 @@ outliers.</p>
 <div class="section level3">
 <h3 id="depth-ponderation">Depth-Ponderation<a class="anchor" aria-label="anchor" href="#depth-ponderation"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_pond</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd_iris</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Depth-ponderation outliers:"</span>, <span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Depth-ponderation outliers: 16 34 42 61 110 118 119 132</span></span>
@@ -283,7 +270,7 @@ outliers.</p>
 <p>The outliergram plots Modified Epigraph Index against Modified Band
 Depth, flagging curves that fall outside the expected parabolic
 relationship:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">og</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliergram.html">outliergram</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">og</span><span class="op">)</span></span></code></pre></div>
 <p><img src="andrews-transformation_files/figure-html/outliergram-1.png" class="r-plt" alt="" width="100%"></p>
@@ -294,7 +281,7 @@ relationship:</p>
 <p>The magnitude-shape plot separates outliers into those that differ in
 magnitude (shifted up/down) from those that differ in shape (different
 pattern):</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/magnitudeshape.html">magnitudeshape</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ms</span><span class="op">)</span></span></code></pre></div>
 <p><img src="andrews-transformation_files/figure-html/magnitudeshape-1.png" class="r-plt" alt="" width="100%"></p>
@@ -302,7 +289,7 @@ pattern):</p>
 <div class="section level3">
 <h3 id="cross-referencing-with-original-data">Cross-Referencing with Original Data<a class="anchor" aria-label="anchor" href="#cross-referencing-with-original-data"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Collect all flagged observations</span></span>
 <span><span class="va">all_outliers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span>, <span class="va">og</span><span class="op">$</span><span class="va">outliers</span>, <span class="va">ms</span><span class="op">$</span><span class="va">outliers</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"All flagged observations:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">all_outliers</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -336,7 +323,7 @@ pattern):</p>
 <div class="section level3">
 <h3 id="k-means-with-k-3">K-Means with k = 3<a class="anchor" aria-label="anchor" href="#k-means-with-k-3"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.kmeans.html">cluster.kmeans</a></span><span class="op">(</span><span class="va">fd_iris</span>, ncl <span class="op">=</span> <span class="fl">3</span>, nstart <span class="op">=</span> <span class="fl">20</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Confusion matrix</span></span>
@@ -356,7 +343,7 @@ pattern):</p>
 <span><span class="op">}</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Best matching accuracy:"</span>, <span class="va">max_matches</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Best matching accuracy: 0.8333333</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="va">n</span><span class="op">)</span>,</span>
 <span>  value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">$</span><span class="va">data</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -375,7 +362,7 @@ pattern):</p>
 <div class="section level3">
 <h3 id="automatic-number-of-clusters">Automatic Number of Clusters<a class="anchor" aria-label="anchor" href="#automatic-number-of-clusters"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">opt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.optim.html">cluster.optim</a></span><span class="op">(</span><span class="va">fd_iris</span>, ncl.range <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, criterion <span class="op">=</span> <span class="st">"silhouette"</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal number of clusters (silhouette):"</span>, <span class="va">opt</span><span class="op">$</span><span class="va">best.model</span><span class="op">$</span><span class="va">ncl</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Optimal number of clusters (silhouette):</span></span></code></pre></div>
@@ -385,7 +372,7 @@ pattern):</p>
 </h3>
 <p>Fuzzy clustering captures the overlap between versicolor and
 virginica:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fcm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.fcm.html">cluster.fcm</a></span><span class="op">(</span><span class="va">fd_iris</span>, ncl <span class="op">=</span> <span class="fl">3</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Find versicolor observations with high membership uncertainty</span></span>
@@ -418,7 +405,7 @@ overlap between these species.</p>
 </h2>
 <p>Functional PCA on Andrews curves reveals the dominant modes of
 variation:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fpca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2pc.html">fdata2pc</a></span><span class="op">(</span><span class="va">fd_iris</span>, ncomp <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Variance explained</span></span>
@@ -437,14 +424,14 @@ variation:</p>
 <div class="section level3">
 <h3 id="variance-plot">Variance Plot<a class="anchor" aria-label="anchor" href="#variance-plot"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fpca</span>, type <span class="op">=</span> <span class="st">"variance"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="andrews-transformation_files/figure-html/fpca-variance-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="score-plot">Score Plot<a class="anchor" aria-label="anchor" href="#score-plot"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  PC1 <span class="op">=</span> <span class="va">fpca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
 <span>  PC2 <span class="op">=</span> <span class="va">fpca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>,</span>
@@ -465,7 +452,7 @@ variation:</p>
 <div class="section level3">
 <h3 id="component-functions">Component Functions<a class="anchor" aria-label="anchor" href="#component-functions"></a>
 </h3>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_components</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  loading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fpca</span><span class="op">$</span><span class="va">rotation</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, <span class="va">fpca</span><span class="op">$</span><span class="va">rotation</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>,</span>
@@ -493,7 +480,7 @@ term, the second to
 and so on. Because lower-frequency Fourier terms dominate visually,
 placing important variables first produces more informative plots.</p>
 <p>We rank the iris variables by ANOVA F-statistic:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Rank variables by ANOVA F-statistic</span></span>
 <span><span class="va">f_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="kw">function</span><span class="op">(</span><span class="va">j</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aov.html" class="external-link">aov</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span>, <span class="va">j</span><span class="op">]</span> <span class="op">~</span> <span class="va">species</span><span class="op">)</span></span>
@@ -511,7 +498,7 @@ placing important variables first produces more informative plots.</p>
 <span><span class="co">#&gt;   Petal.Width: F = 960.0</span></span>
 <span><span class="co">#&gt;   Sepal.Length: F = 119.3</span></span>
 <span><span class="co">#&gt;   Sepal.Width: F = 49.2</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Transform with original and reordered variables</span></span>
 <span><span class="va">fd_original</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/andrews_transform.html">andrews_transform</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
 <span><span class="va">fd_reordered</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/andrews_transform.html">andrews_transform</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span>, <span class="va">var_order</span><span class="op">]</span><span class="op">)</span></span>
@@ -567,7 +554,7 @@ low-frequency component.</p>
 </h3>
 <p>The distance preservation theorem guarantees that analytical results
 are identical regardless of variable ordering:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">km_original</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.kmeans.html">cluster.kmeans</a></span><span class="op">(</span><span class="va">fd_original</span>, ncl <span class="op">=</span> <span class="fl">3</span>, nstart <span class="op">=</span> <span class="fl">20</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">km_reordered</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.kmeans.html">cluster.kmeans</a></span><span class="op">(</span><span class="va">fd_reordered</span>, ncl <span class="op">=</span> <span class="fl">3</span>, nstart <span class="op">=</span> <span class="fl">20</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
@@ -591,7 +578,7 @@ are identical regardless of variable ordering:</p>
 </h2>
 <p>We verify the theoretical result:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><msub><mi>f</mi><mi>𝐱</mi></msub><mo>−</mo><msub><mi>f</mi><mi>𝐲</mi></msub><msub><mo stretchy="false" form="postfix">∥</mo><msup><mi>L</mi><mn>2</mn></msup></msub><mo>=</mo><msqrt><mi>π</mi></msqrt><mo>⋅</mo><mo stretchy="false" form="postfix">∥</mo><mi>𝐱</mi><mo>−</mo><mi>𝐲</mi><msub><mo stretchy="false" form="postfix">∥</mo><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\|f_{\mathbf{x}} - f_{\mathbf{y}}\|_{L^2} = \sqrt{\pi} \cdot \|\mathbf{x} - \mathbf{y}\|_2</annotation></semantics></math>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute pairwise Andrews (L2) distances</span></span>
 <span><span class="va">dist_andrews</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.lp.html">metric.lp</a></span><span class="op">(</span><span class="va">fd_iris</span><span class="op">)</span></span>
 <span></span>
@@ -616,7 +603,7 @@ are identical regardless of variable ordering:</p>
 <span><span class="co">#&gt;   SD:     3.91e-16</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"  sqrt(pi) = %.4f\n"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">pi</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   sqrt(pi) = 1.7725</span></span></code></pre></div>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  euclidean <span class="op">=</span> <span class="va">d_e</span><span class="op">[</span><span class="va">nonzero</span><span class="op">]</span>,</span>
 <span>  andrews <span class="op">=</span> <span class="va">d_a</span><span class="op">[</span><span class="va">nonzero</span><span class="op">]</span></span>
@@ -783,7 +770,7 @@ Euclidean distance</td>
 </h2>
 <ul>
 <li>
-<code><a href="../articles/depth-functions.html">vignette("depth-functions", package = "fdars")</a></code> —
+<code><a href="https://sipemu.github.io/fdars-r/articles/depth-functions.html">vignette("depth-functions", package = "fdars")</a></code> —
 functional depth measures and ranking</li>
 <li>
 <code>vignette("clustering", package = "fdars")</code> — functional

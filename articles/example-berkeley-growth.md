@@ -20,20 +20,6 @@ This dataset is a standard benchmark in elastic FDA literature (Tucker
 et al., 2013; Srivastava and Klassen, 2016). It is available in the
 `fdasrvf` package.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Data Preparation
 
 ``` r

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrKS" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#B37700">Kernel Smoothers</text>
+  <text x="350" y="50" text-anchor="middle" font-size="13" fill="#888">f&#770;(t) = &#931; w&#7522;(t) y&#7522;  &#8212;  weighted local average</text>
+
+  <!-- Left: Point with kernel window -->
+  <rect x="16" y="72" width="210" height="180" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="121" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Local Neighborhood</text>
+
+  <!-- Data points -->
+  <circle cx="36" cy="170" r="3" fill="#999" opacity="0.3"/>
+  <circle cx="56" cy="154" r="3" fill="#999" opacity="0.3"/>
+  <circle cx="76" cy="162" r="3.5" fill="#E6A020" opacity="0.5"/>
+  <circle cx="96" cy="140" r="4" fill="#E6A020" opacity="0.7"/>
+  <circle cx="116" cy="130" r="5" fill="#E6A020" opacity="0.9"/>
+  <circle cx="136" cy="142" r="4" fill="#E6A020" opacity="0.7"/>
+  <circle cx="156" cy="158" r="3.5" fill="#E6A020" opacity="0.5"/>
+  <circle cx="176" cy="148" r="3" fill="#999" opacity="0.3"/>
+  <circle cx="196" cy="166" r="3" fill="#999" opacity="0.3"/>
+  <!-- Target point marker -->
+  <line x1="116" y1="120" x2="116" y2="176" stroke="#E6A020" stroke-width="1" stroke-dasharray="3"/>
+  <text x="116" y="190" text-anchor="middle" font-size="11" fill="#B37700">target t</text>
+  <!-- Bandwidth arrows -->
+  <line x1="66" y1="200" x2="166" y2="200" stroke="#B37700" stroke-width="1.2"/>
+  <line x1="66" y1="196" x2="66" y2="204" stroke="#B37700" stroke-width="1.2"/>
+  <line x1="166" y1="196" x2="166" y2="204" stroke="#B37700" stroke-width="1.2"/>
+  <text x="116" y="218" text-anchor="middle" font-size="12" fill="#B37700">bandwidth h</text>
+  <text x="121" y="240" text-anchor="middle" font-size="11" fill="#888">Bigger dots = higher weight</text>
+
+  <!-- Arrow -->
+  <line x1="230" y1="162" x2="278" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#arrKS)"/>
+
+  <!-- Middle: Two methods -->
+  <rect x="286" y="72" width="160" height="80" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="366" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Nadaraya-Watson</text>
+  <text x="366" y="114" text-anchor="middle" font-size="12" fill="#555">S.NW()</text>
+  <text x="366" y="134" text-anchor="middle" font-size="11" fill="#888">weighted average</text>
+
+  <rect x="286" y="168" width="160" height="80" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="366" y="192" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Local Linear</text>
+  <text x="366" y="210" text-anchor="middle" font-size="12" fill="#555">S.LLR()</text>
+  <text x="366" y="230" text-anchor="middle" font-size="11" fill="#888">better at boundaries</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="162" x2="498" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#arrKS)"/>
+
+  <!-- Right: Smooth result -->
+  <rect x="506" y="72" width="178" height="180" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="595" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Smooth Curve</text>
+  <!-- Smooth kernel-fitted curve -->
+  <path d="M526 178 Q544 164 562 152 Q580 142 598 134 Q616 128 634 126 Q652 128 664 132" stroke="#2E8B57" stroke-width="2.5" fill="none"/>
+  <!-- Faded dots -->
+  <circle cx="530" cy="180" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="548" cy="166" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="566" cy="158" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="584" cy="140" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="602" cy="138" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="620" cy="128" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="638" cy="126" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="656" cy="134" r="2.5" fill="#999" opacity="0.3"/>
+  <text x="595" y="232" text-anchor="middle" font-size="12" fill="#888">Nonparametric estimate</text>
+
+  <!-- Bottom: Key properties -->
+  <text x="120" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#E6A020">No parametric model</text>
+  <text x="350" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#E6A020">Local adaptation</text>
+  <text x="580" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#E6A020">Bandwidth h controls smoothness</text>
+</svg>

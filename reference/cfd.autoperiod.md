@@ -104,8 +104,8 @@ result <- cfd.autoperiod(fd)
 print(result)
 #> CFDAutoperiod Detection
 #> -----------------------
-#> Primary Period: 2.0000
-#> Confidence:     0.8939
+#> Primary Period: 2.0050
+#> Confidence:     0.8866
 #> ACF Validation: 0.8939
 #> Periods Found:  1
 
@@ -114,5 +114,5 @@ X2 <- matrix(sin(2 * pi * t / 2) + 0.5 * sin(2 * pi * t / 5), nrow = 1)
 fd2 <- fdata(X2, argvals = t)
 result2 <- cfd.autoperiod(fd2)
 print(result2$periods)  # All detected periods
-#> [1] 2
+#> [1] 2.005013
 ```

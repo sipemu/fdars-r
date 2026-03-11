@@ -10,19 +10,8 @@ smoothness and periodicity.
 **fdars** provides a comprehensive set of covariance functions for
 generating synthetic functional data from Gaussian processes.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
+![Covariance Functions: Shape Controls Sample Path
+Smoothness](../reference/figures/covariance-kernels-diagram.svg)
 
 ## Available Covariance Functions
 

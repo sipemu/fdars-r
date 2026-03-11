@@ -86,19 +86,82 @@ essential for:</p>
 <li>Interpretable visualizations</li>
 <li>Reliable statistical inference</li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span></code></pre></div>
+<img src="../reference/figures/smoothing-diagram.svg" alt="Bias-Variance Tradeoff in Smoothing Diagram" style="width:100%; max-width:700px;"><div class="section level3">
+<h3 id="available-smoothing-methods">Available Smoothing Methods<a class="anchor" aria-label="anchor" href="#available-smoothing-methods"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="15%">
+<col width="18%">
+<col width="18%">
+<col width="28%">
+<col width="18%">
+</colgroup>
+<thead><tr class="header">
+<th>Method</th>
+<th>Function</th>
+<th>Approach</th>
+<th>Key Parameter</th>
+<th>Best For</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>P-spline</strong></td>
+<td><code><a href="../reference/pspline.html">pspline()</a></code></td>
+<td>Penalized B-spline fit with automatic GCV</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+(penalty)</td>
+<td>General purpose, works out of the box</td>
+</tr>
+<tr class="even">
+<td><strong>Nadaraya-Watson</strong></td>
+<td><code><a href="../reference/S.NW.html">S.NW()</a></code></td>
+<td>Kernel-weighted local average</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
+(bandwidth)</td>
+<td>Simple nonparametric smoothing</td>
+</tr>
+<tr class="odd">
+<td><strong>Local Linear</strong></td>
+<td><code><a href="../reference/S.LLR.html">S.LLR()</a></code></td>
+<td>Local linear regression with kernel weights</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
+(bandwidth)</td>
+<td>Better boundary behavior than NW</td>
+</tr>
+<tr class="even">
+<td><strong>Basis Expansion</strong></td>
+<td><code><a href="../reference/fdata2basis.html">fdata2basis()</a></code></td>
+<td>Project onto B-spline or Fourier basis</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+(number of basis)</td>
+<td>Dimensionality reduction + smoothing</td>
+</tr>
+<tr class="odd">
+<td><strong>Penalized Basis (fixed)</strong></td>
+<td><code><a href="../reference/smooth.basis.fd.html">smooth.basis.fd()</a></code></td>
+<td>Many basis functions + roughness penalty</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+(penalty)</td>
+<td>When you want explicit control</td>
+</tr>
+<tr class="even">
+<td><strong>Penalized Basis (auto)</strong></td>
+<td><code><a href="../reference/smooth.basis.gcv.html">smooth.basis.gcv()</a></code></td>
+<td>Penalized basis with GCV/AIC/BIC selection</td>
+<td>data-driven
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+</td>
+<td>Automatic tuning, multiple criteria</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level2">
 <h2 id="loading-real-data-the-berkeley-growth-study">Loading Real Data: The Berkeley Growth Study<a class="anchor" aria-label="anchor" href="#loading-real-data-the-berkeley-growth-study"></a>
@@ -106,7 +169,7 @@ essential for:</p>
 <p>The Berkeley Growth Study tracked the heights of 54 girls and 39 boys
 from ages 1 to 18. This classic dataset is available in the
 <code>fda</code> package.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check if fda package is available</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"fda"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Install 'fda' package for real data examples: install.packages('fda')"</span><span class="op">)</span></span>
@@ -135,14 +198,14 @@ from ages 1 to 18. This classic dataset is available in the
 <div class="section level3">
 <h3 id="visualizing-the-raw-data">Visualizing the Raw Data<a class="anchor" aria-label="anchor" href="#visualizing-the-raw-data"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd_raw</span>, main <span class="op">=</span> <span class="st">"Berkeley Growth Study: Girls' Heights"</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Age (years)"</span>, ylab <span class="op">=</span> <span class="st">"Height (cm)"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="intro-to-smoothing_files/figure-html/plot-raw-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The data appears relatively smooth because height was carefully
 measured. Let’s add some realistic measurement noise to demonstrate
 smoothing techniques:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add measurement noise to simulate less precise instruments</span></span>
 <span><span class="va">noise_sd</span> <span class="op">&lt;-</span> <span class="fl">2.0</span>  <span class="co"># cm of measurement error</span></span>
 <span><span class="va">heights_noisy</span> <span class="op">&lt;-</span> <span class="va">heights</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">heights</span><span class="op">)</span>, sd <span class="op">=</span> <span class="va">noise_sd</span><span class="op">)</span>,</span>
@@ -178,7 +241,7 @@ smoothing techniques:</p>
 <div class="section level2">
 <h2 id="method-1-p-spline-smoothing">Method 1: P-spline Smoothing<a class="anchor" aria-label="anchor" href="#method-1-p-spline-smoothing"></a>
 </h2>
-<p>Penalized splines (P-splines) are a powerful and flexible smoothing
+<img src="../reference/figures/smoothing-pspline-diagram.svg" alt="P-spline Smoothing" style="width:100%; max-width:700px; display:block; margin:1em auto;"><p>Penalized splines (P-splines) are a powerful and flexible smoothing
 method. They balance two objectives:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -196,7 +259,7 @@ Very smooth, may miss real features</p>
 <div class="section level3">
 <h3 id="automatic-smoothing-with-p-splines">Automatic Smoothing with P-splines<a class="anchor" aria-label="anchor" href="#automatic-smoothing-with-p-splines"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># pspline() automatically selects optimal lambda via GCV</span></span>
 <span><span class="va">fd_pspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pspline.html">pspline</a></span><span class="op">(</span><span class="va">fd_noisy</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fd_pspline</span><span class="op">)</span></span>
@@ -212,7 +275,7 @@ Very smooth, may miss real features</p>
 <div class="section level3">
 <h3 id="visualizing-the-result">Visualizing the Result<a class="anchor" aria-label="anchor" href="#visualizing-the-result"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare noisy vs smoothed for first curve</span></span>
 <span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
 <span><span class="va">df_pspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -239,7 +302,7 @@ Very smooth, may miss real features</p>
 <div class="section level3">
 <h3 id="effect-of-smoothing-parameter">Effect of Smoothing Parameter<a class="anchor" aria-label="anchor" href="#effect-of-smoothing-parameter"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Different smoothing levels</span></span>
 <span><span class="va">fd_less</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pspline.html">pspline</a></span><span class="op">(</span><span class="va">fd_noisy</span>, lambda <span class="op">=</span> <span class="fl">0.001</span><span class="op">)</span>   <span class="co"># Less smoothing</span></span>
 <span><span class="va">fd_more</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pspline.html">pspline</a></span><span class="op">(</span><span class="va">fd_noisy</span>, lambda <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>     <span class="co"># More smoothing</span></span>
@@ -275,14 +338,14 @@ Very smooth, may miss real features</p>
 <div class="section level2">
 <h2 id="method-2-kernel-smoothers">Method 2: Kernel Smoothers<a class="anchor" aria-label="anchor" href="#method-2-kernel-smoothers"></a>
 </h2>
-<p>Kernel smoothers estimate the value at each point using a weighted
+<img src="../reference/figures/smoothing-kernel-diagram.svg" alt="Kernel Smoothers" style="width:100%; max-width:700px; display:block; margin:1em auto;"><p>Kernel smoothers estimate the value at each point using a weighted
 average of nearby observations. The bandwidth
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
 controls the neighborhood size.</p>
 <div class="section level3">
 <h3 id="nadaraya-watson-smoother">Nadaraya-Watson Smoother<a class="anchor" aria-label="anchor" href="#nadaraya-watson-smoother"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute smoother matrix with Nadaraya-Watson</span></span>
 <span><span class="co"># S.NW takes evaluation points (tt) as first argument</span></span>
 <span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/h.default.html">h.default</a></span><span class="op">(</span><span class="va">fd_noisy</span><span class="op">)</span>  <span class="co"># Default bandwidth based on data</span></span>
@@ -299,7 +362,7 @@ controls the neighborhood size.</p>
 <h3 id="local-linear-regression">Local Linear Regression<a class="anchor" aria-label="anchor" href="#local-linear-regression"></a>
 </h3>
 <p>Local linear regression often performs better at boundaries:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">S_llr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/S.LLR.html">S.LLR</a></span><span class="op">(</span>tt <span class="op">=</span> <span class="va">age</span>, h <span class="op">=</span> <span class="va">h</span><span class="op">)</span></span>
 <span><span class="va">fd_llr</span> <span class="op">&lt;-</span> <span class="va">fd_noisy</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fd_llr</span><span class="op">$</span><span class="va">data</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -309,7 +372,7 @@ controls the neighborhood size.</p>
 <div class="section level3">
 <h3 id="comparing-kernel-methods">Comparing Kernel Methods<a class="anchor" aria-label="anchor" href="#comparing-kernel-methods"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
 <span><span class="va">df_kernels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">age</span>, <span class="fl">4</span><span class="op">)</span>,</span>
@@ -338,7 +401,7 @@ controls the neighborhood size.</p>
 </h3>
 <p>The default bandwidth from <code><a href="../reference/h.default.html">h.default()</a></code> is based on the
 data:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Default bandwidth:"</span>, <span class="va">h</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Default bandwidth: 1.5</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"This is computed as the 15th percentile of pairwise distances.\n"</span><span class="op">)</span></span>
@@ -348,12 +411,12 @@ data:</p>
 <div class="section level2">
 <h2 id="method-3-basis-expansion">Method 3: Basis Expansion<a class="anchor" aria-label="anchor" href="#method-3-basis-expansion"></a>
 </h2>
-<p>Represent curves as linear combinations of basis functions. This
+<img src="../reference/figures/smoothing-basis-diagram.svg" alt="Basis Expansion" style="width:100%; max-width:700px; display:block; margin:1em auto;"><p>Represent curves as linear combinations of basis functions. This
 provides dimensionality reduction along with smoothing.</p>
 <div class="section level3">
 <h3 id="b-spline-basis">B-spline Basis<a class="anchor" aria-label="anchor" href="#b-spline-basis"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Project to B-spline basis</span></span>
 <span><span class="va">coefs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2basis.html">fdata2basis</a></span><span class="op">(</span><span class="va">fd_noisy</span>, nbasis <span class="op">=</span> <span class="fl">12</span>, type <span class="op">=</span> <span class="st">"bspline"</span><span class="op">)</span></span>
 <span><span class="va">fd_basis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis2fdata.html">basis2fdata</a></span><span class="op">(</span><span class="va">coefs</span>, argvals <span class="op">=</span> <span class="va">age</span>, type <span class="op">=</span> <span class="st">"bspline"</span><span class="op">)</span></span>
@@ -385,7 +448,7 @@ provides dimensionality reduction along with smoothing.</p>
 </h3>
 <p>How many basis functions? Cross-validation finds the optimal
 number:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Cross-validation for optimal number of basis functions</span></span>
 <span><span class="va">cv_basis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2basis_cv.html">fdata2basis_cv</a></span><span class="op">(</span><span class="va">fd_noisy</span>, type <span class="op">=</span> <span class="st">"bspline"</span>,</span>
 <span>                           nbasis.range <span class="op">=</span> <span class="fl">5</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span>
@@ -407,7 +470,7 @@ number:</p>
 <strong>CV</strong>: Leave-one-out Cross-Validation -
 <strong>AIC</strong>: Akaike Information Criterion -
 <strong>BIC</strong>: Bayesian Information Criterion</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get optimal basis from our CV result</span></span>
 <span><span class="va">optimal_nbasis</span> <span class="op">&lt;-</span> <span class="va">cv_basis</span><span class="op">$</span><span class="va">optimal.nbasis</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal number of basis functions (GCV):"</span>, <span class="va">optimal_nbasis</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -415,9 +478,121 @@ number:</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="method-4-penalized-basis-smoothing">Method 4: Penalized Basis Smoothing<a class="anchor" aria-label="anchor" href="#method-4-penalized-basis-smoothing"></a>
+</h2>
+<img src="../reference/figures/smoothing-penalized-diagram.svg" alt="Penalized Basis Smoothing" style="width:100%; max-width:700px; display:block; margin:1em auto;"><p>Penalized basis smoothing combines basis expansion (like Method 3)
+with a roughness penalty. Instead of controlling smoothness by choosing
+the number of basis functions, use many basis functions but add a
+penalty term that discourages roughness:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">minimize</mtext><mspace width="1.0em"></mspace><mo stretchy="false" form="postfix">∥</mo><mi>y</mi><mo>−</mo><mi>X</mi><mi>c</mi><msup><mo stretchy="false" form="postfix">∥</mo><mn>2</mn></msup><mo>+</mo><mi>λ</mi><mspace width="0.167em"></mspace><msup><mi>c</mi><mi>T</mi></msup><msup><mi>D</mi><mi>T</mi></msup><mi>D</mi><mspace width="0.167em"></mspace><mi>c</mi></mrow><annotation encoding="application/x-tex">\text{minimize} \quad \|y - X c\|^2 + \lambda\, c^T D^T D\, c</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
+is a difference matrix encoding roughness.</p>
+<div class="section level3">
+<h3 id="fixed-lambda-with-smooth-basis-fd">Fixed Lambda with smooth.basis.fd()<a class="anchor" aria-label="anchor" href="#fixed-lambda-with-smooth-basis-fd"></a>
+</h3>
+<p>When you know or want to control the smoothing parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+directly:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Smooth with penalized B-spline basis, fixed lambda</span></span>
+<span><span class="va">result_pen</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth.basis.fd.html">smooth.basis.fd</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_noisy</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"bspline"</span>,</span>
+<span>  nbasis <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  lambda <span class="op">=</span> <span class="fl">1.0</span>,</span>
+<span>  lfd.order <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_pen</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Penalized Basis Smoothing</span></span>
+<span><span class="co">#&gt;   Basis type: bspline </span></span>
+<span><span class="co">#&gt;   Number of basis functions: 25 </span></span>
+<span><span class="co">#&gt;   Lambda: 1 </span></span>
+<span><span class="co">#&gt;   EDF: 7.9 </span></span>
+<span><span class="co">#&gt;   GCV: 5.60632</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Effective degrees of freedom:"</span>, <span class="va">result_pen</span><span class="op">$</span><span class="va">edf</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Effective degrees of freedom: 7.895361</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="automatic-lambda-via-gcv-with-smooth-basis-gcv">Automatic Lambda via GCV with smooth.basis.gcv()<a class="anchor" aria-label="anchor" href="#automatic-lambda-via-gcv-with-smooth-basis-gcv"></a>
+</h3>
+<p>GCV automatically selects the optimal smoothing parameter without
+manual tuning:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">GCV</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mtext mathvariant="normal">RSS</mtext><mi>/</mi><mi>n</mi></mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mtext mathvariant="normal">edf</mtext><mi>/</mi><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">\text{GCV}(\lambda) = \frac{\text{RSS}/n}{(1 - \text{edf}/n)^2}</annotation></semantics></math></p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Automatic lambda selection via GCV</span></span>
+<span><span class="va">result_gcv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth.basis.gcv.html">smooth.basis.gcv</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_noisy</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"bspline"</span>,</span>
+<span>  nbasis <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  lfd.order <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  log.lambda.range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  n.grid <span class="op">=</span> <span class="fl">20</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_gcv</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Penalized Basis Smoothing</span></span>
+<span><span class="co">#&gt;   Basis type: bspline </span></span>
+<span><span class="co">#&gt;   Number of basis functions: 25 </span></span>
+<span><span class="co">#&gt;   Lambda: 378605 </span></span>
+<span><span class="co">#&gt;   EDF: 9.2 </span></span>
+<span><span class="co">#&gt;   GCV: 5.57819</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Selected lambda:"</span>, <span class="va">result_gcv</span><span class="op">$</span><span class="va">lambda</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Selected lambda: 378604.5</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"GCV:"</span>, <span class="va">result_gcv</span><span class="op">$</span><span class="va">gcv</span>, <span class="st">"  AIC:"</span>, <span class="va">result_gcv</span><span class="op">$</span><span class="va">aic</span>, <span class="st">"  BIC:"</span>, <span class="va">result_gcv</span><span class="op">$</span><span class="va">bic</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; GCV: 5.578186   AIC: 1717.275   BIC: 1767.158</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="fourier-basis-for-periodic-data">Fourier Basis for Periodic Data<a class="anchor" aria-label="anchor" href="#fourier-basis-for-periodic-data"></a>
+</h3>
+<p>For periodic or seasonal data, a Fourier basis is more natural:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create periodic data for demonstration</span></span>
+<span><span class="va">t_per</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">X_per</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_per</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">X_per</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_per</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">4</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_per</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_per</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">fd_per</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_per</span>, argvals <span class="op">=</span> <span class="va">t_per</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fourier smoothing with GCV</span></span>
+<span><span class="va">result_fourier</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth.basis.gcv.html">smooth.basis.gcv</a></span><span class="op">(</span><span class="va">fd_per</span>, type <span class="op">=</span> <span class="st">"fourier"</span>, nbasis <span class="op">=</span> <span class="fl">21</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Fourier GCV:"</span>, <span class="va">result_fourier</span><span class="op">$</span><span class="va">gcv</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Fourier GCV: 0.07151865</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="comparing-fixed-vs-automatic-penalization">Comparing Fixed vs Automatic Penalization<a class="anchor" aria-label="anchor" href="#comparing-fixed-vs-automatic-penalization"></a>
+</h3>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="va">df_pen</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">age</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fd_noisy</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span>, <span class="va">result_pen</span><span class="op">$</span><span class="va">fitted</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span>,</span>
+<span>             <span class="va">result_gcv</span><span class="op">$</span><span class="va">fitted</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span>, <span class="va">fd_raw</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span><span class="op">)</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span>, <span class="st">"Fixed lambda"</span>, <span class="st">"GCV-selected"</span>, <span class="st">"Original"</span><span class="op">)</span>,</span>
+<span>                    each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span>, <span class="st">"Fixed lambda"</span>, <span class="st">"GCV-selected"</span>, <span class="st">"Original"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_pen</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">height</span>, color <span class="op">=</span> <span class="va">type</span>, linetype <span class="op">=</span> <span class="va">type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">df_pen</span>, <span class="va">type</span> <span class="op">==</span> <span class="st">"Noisy data"</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">df_pen</span>, <span class="va">type</span> <span class="op">!=</span> <span class="st">"Noisy data"</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span> <span class="op">=</span> <span class="st">"gray60"</span>, <span class="st">"Fixed lambda"</span> <span class="op">=</span> <span class="st">"purple"</span>,</span>
+<span>                                 <span class="st">"GCV-selected"</span> <span class="op">=</span> <span class="st">"darkgreen"</span>, <span class="st">"Original"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span> <span class="op">=</span> <span class="st">"blank"</span>, <span class="st">"Fixed lambda"</span> <span class="op">=</span> <span class="st">"solid"</span>,</span>
+<span>                                    <span class="st">"GCV-selected"</span> <span class="op">=</span> <span class="st">"solid"</span>, <span class="st">"Original"</span> <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Age (years)"</span>, y <span class="op">=</span> <span class="st">"Height (cm)"</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Penalized Basis Smoothing"</span>, color <span class="op">=</span> <span class="cn">NULL</span>, linetype <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="intro-to-smoothing_files/figure-html/plot-penalized-1.png" class="r-plt" alt="" width="100%"></p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="comparing-all-methods">Comparing All Methods<a class="anchor" aria-label="anchor" href="#comparing-all-methods"></a>
 </h2>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fl">3</span>  <span class="co"># Pick a different curve</span></span>
 <span></span>
 <span><span class="co"># Get smoothed versions</span></span>
@@ -428,15 +603,19 @@ number:</p>
 <span><span class="va">coefs_opt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2basis.html">fdata2basis</a></span><span class="op">(</span><span class="va">fd_noisy</span>, nbasis <span class="op">=</span> <span class="va">optimal_nbasis</span>, type <span class="op">=</span> <span class="st">"bspline"</span><span class="op">)</span></span>
 <span><span class="va">smooth_basis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis2fdata.html">basis2fdata</a></span><span class="op">(</span><span class="va">coefs_opt</span>, argvals <span class="op">=</span> <span class="va">age</span>, type <span class="op">=</span> <span class="st">"bspline"</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span></span>
 <span></span>
+<span><span class="co"># Penalized basis (GCV)</span></span>
+<span><span class="va">smooth_pen</span> <span class="op">&lt;-</span> <span class="va">result_gcv</span><span class="op">$</span><span class="va">fitted</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span></span>
+<span></span>
 <span><span class="co"># Create data frame for plotting</span></span>
 <span><span class="va">df_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">age</span>, <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">age</span>, <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fd_noisy</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span>, <span class="va">smooth_pspline</span>, <span class="va">smooth_kernel</span>,</span>
-<span>             <span class="va">smooth_basis</span>, <span class="va">fd_raw</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span><span class="op">)</span>,</span>
+<span>             <span class="va">smooth_basis</span>, <span class="va">smooth_pen</span>, <span class="va">fd_raw</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span>, <span class="st">"P-spline"</span>, <span class="st">"Local Linear"</span>,</span>
-<span>                        <span class="st">"B-spline basis"</span>, <span class="st">"Original"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                        <span class="st">"B-spline basis"</span>, <span class="st">"Penalized (GCV)"</span>, <span class="st">"Original"</span><span class="op">)</span>,</span>
+<span>                      each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span>, <span class="st">"P-spline"</span>, <span class="st">"Local Linear"</span>,</span>
-<span>                             <span class="st">"B-spline basis"</span>, <span class="st">"Original"</span><span class="op">)</span><span class="op">)</span></span>
+<span>                             <span class="st">"B-spline basis"</span>, <span class="st">"Penalized (GCV)"</span>, <span class="st">"Original"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_all</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">height</span>, color <span class="op">=</span> <span class="va">method</span>, linetype <span class="op">=</span> <span class="va">method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -444,10 +623,10 @@ number:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">df_all</span>, <span class="va">method</span> <span class="op">!=</span> <span class="st">"Noisy data"</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span> <span class="op">=</span> <span class="st">"gray60"</span>, <span class="st">"P-spline"</span> <span class="op">=</span> <span class="st">"blue"</span>,</span>
 <span>                                 <span class="st">"Local Linear"</span> <span class="op">=</span> <span class="st">"darkgreen"</span>, <span class="st">"B-spline basis"</span> <span class="op">=</span> <span class="st">"purple"</span>,</span>
-<span>                                 <span class="st">"Original"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                                 <span class="st">"Penalized (GCV)"</span> <span class="op">=</span> <span class="st">"orange"</span>, <span class="st">"Original"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Noisy data"</span> <span class="op">=</span> <span class="st">"blank"</span>, <span class="st">"P-spline"</span> <span class="op">=</span> <span class="st">"solid"</span>,</span>
 <span>                                    <span class="st">"Local Linear"</span> <span class="op">=</span> <span class="st">"solid"</span>, <span class="st">"B-spline basis"</span> <span class="op">=</span> <span class="st">"solid"</span>,</span>
-<span>                                    <span class="st">"Original"</span> <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                                    <span class="st">"Penalized (GCV)"</span> <span class="op">=</span> <span class="st">"solid"</span>, <span class="st">"Original"</span> <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Age (years)"</span>, y <span class="op">=</span> <span class="st">"Height (cm)"</span>,</span>
 <span>       title <span class="op">=</span> <span class="st">"Smoothing Method Comparison"</span>, color <span class="op">=</span> <span class="cn">NULL</span>, linetype <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -458,7 +637,7 @@ number:</p>
 <h2 id="mean-and-variability">Mean and Variability<a class="anchor" aria-label="anchor" href="#mean-and-variability"></a>
 </h2>
 <p>After smoothing, compute summary statistics:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use P-spline smoothed data</span></span>
 <span><span class="va">fd_smooth</span> <span class="op">&lt;-</span> <span class="va">fd_pspline</span><span class="op">$</span><span class="va">fdata</span></span>
 <span></span>
@@ -490,18 +669,21 @@ number:</p>
 </h2>
 <table class="table">
 <colgroup>
-<col width="24%">
-<col width="30%">
-<col width="45%">
+<col width="18%">
+<col width="23%">
+<col width="23%">
+<col width="34%">
 </colgroup>
 <thead><tr class="header">
 <th>Method</th>
+<th>Function</th>
 <th>Best For</th>
 <th>Key Parameter</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td><strong>P-splines</strong></td>
+<td><code><a href="../reference/pspline.html">pspline()</a></code></td>
 <td>General purpose, automatic tuning</td>
 <td>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
@@ -509,6 +691,9 @@ number:</p>
 </tr>
 <tr class="even">
 <td><strong>Kernel smoothers</strong></td>
+<td>
+<code><a href="../reference/S.NW.html">S.NW()</a></code>, <code><a href="../reference/S.LLR.html">S.LLR()</a></code>
+</td>
 <td>Non-parametric, local adaptation</td>
 <td>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
@@ -516,41 +701,54 @@ number:</p>
 </tr>
 <tr class="odd">
 <td><strong>Basis expansion</strong></td>
-<td>Dimensionality reduction, derivatives</td>
+<td><code><a href="../reference/fdata2basis.html">fdata2basis()</a></code></td>
+<td>Dimensionality reduction</td>
 <td>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
 (number of basis)</td>
+</tr>
+<tr class="even">
+<td><strong>Penalized basis (fixed)</strong></td>
+<td><code><a href="../reference/smooth.basis.fd.html">smooth.basis.fd()</a></code></td>
+<td>Known smoothness, explicit control</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+(penalty)</td>
+</tr>
+<tr class="odd">
+<td><strong>Penalized basis (auto)</strong></td>
+<td><code><a href="../reference/smooth.basis.gcv.html">smooth.basis.gcv()</a></code></td>
+<td>Automatic tuning, GCV/AIC/BIC</td>
+<td>data-driven
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Recommendations:</strong></p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Start with P-splines</strong> - automatic
+<strong>Start with <code><a href="../reference/smooth.basis.gcv.html">smooth.basis.gcv()</a></code></strong> —
+automatic
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
-selection works well in most cases</li>
+selection via GCV works well in most cases</li>
 <li>
-<strong>Use basis expansion</strong> when you need derivatives
-(smoother derivatives)</li>
+<strong>Use <code><a href="../reference/pspline.html">pspline()</a></code></strong> for fast P-spline
+smoothing with GCV</li>
+<li>
+<strong>Use basis expansion</strong> (<code><a href="../reference/fdata2basis.html">fdata2basis()</a></code>)
+when dimensionality reduction is the goal</li>
 <li>
 <strong>Use kernel smoothers</strong> for highly irregular sampling
 or adaptive smoothing</li>
+<li>
+<strong>Use Fourier basis</strong>
+(<code>smooth.basis.gcv(..., type = "fourier")</code>) for
+periodic/seasonal data</li>
 </ol>
 </div>
 <div class="section level2">
 <h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
-</h2>
-<ul>
-<li>
-<code>vignette("basis-representation", package = "fdars")</code> —
-basis function representations (B-spline, Fourier)</li>
-<li>
-<code>vignette("working-with-derivatives", package = "fdars")</code>
-— estimating and analyzing functional derivatives</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="see-also-1">See Also<a class="anchor" aria-label="anchor" href="#see-also-1"></a>
 </h2>
 <ul>
 <li>

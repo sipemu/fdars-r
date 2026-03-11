@@ -28,25 +28,10 @@ an equivalence margin $\lbrack - \delta,\delta\rbrack$.
 - $H_{1}$: $\sup_{t}\left| \mu_{1}(t) - \mu_{2}(t) \right| < \delta$
   (equivalent)
 
+![Functional Equivalence Testing
+Diagram](../reference/figures/equivalence-testing-diagram.svg)
+
 ## Setup
-
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-
-set.seed(42)
-m <- 100
-t_grid <- seq(0, 1, length.out = m)
-```
 
 ## Example 1: Equivalent curves
 

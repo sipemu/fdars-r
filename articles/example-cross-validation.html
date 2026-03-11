@@ -115,18 +115,6 @@ entire dataset.</p>
 <p><strong>Key result:</strong> Nested CV avoids the optimistic bias of
 evaluating on the same data used to select hyperparameters, giving
 realistic out-of-sample error estimates.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="tecator-data">Tecator Data<a class="anchor" aria-label="anchor" href="#tecator-data"></a>
 </h2>
@@ -134,7 +122,7 @@ realistic out-of-sample error estimates.</p>
 absorbance spectrum measured at 100 wavelengths (850–1050 nm) and
 laboratory-measured fat content. This is the same dataset used in the <a href="example-tecator-regression.html">Tecator regression
 example</a>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">tecator</span>, package <span class="op">=</span> <span class="st">"fda.usc"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">absorp_data</span> <span class="op">&lt;-</span> <span class="va">tecator</span><span class="op">$</span><span class="va">absorp.fdata</span><span class="op">$</span><span class="va">data</span></span>
@@ -149,7 +137,7 @@ example</a>.</p>
 <span><span class="co">#&gt; Wavelengths: 100 ( 850 1050 nm)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Fat range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">fat</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fat range: 0.9 49.1 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"NIR Absorbance Spectra (215 meat samples)"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Wavelength (nm)"</span>, y <span class="op">=</span> <span class="st">"Absorbance"</span><span class="op">)</span></span></code></pre></div>
@@ -162,7 +150,7 @@ example</a>.</p>
 B-splines and taking the second derivative removes these effects and
 enhances spectral features — we’ll use both representations for
 cross-validation.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">coefs_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2basis.html">fdata2basis</a></span><span class="op">(</span><span class="va">fd</span>, nbasis <span class="op">=</span> <span class="fl">30</span>, type <span class="op">=</span> <span class="st">"bspline"</span><span class="op">)</span></span>
 <span><span class="va">fd_smooth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis2fdata.html">basis2fdata</a></span><span class="op">(</span><span class="va">coefs_raw</span>, <span class="va">wavelengths</span><span class="op">)</span></span>
 <span></span>
@@ -173,7 +161,7 @@ cross-validation.</p>
 </h2>
 <p>Pass any fitting function to <code>cv.fdata</code> and it handles the
 fold loop. Every observation is predicted exactly once:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd_smooth</span>, <span class="va">fat</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="../reference/fregre.pc.html">fregre.pc</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  kfold <span class="op">=</span> <span class="fl">5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
@@ -189,7 +177,7 @@ fold loop. Every observation is predicted exactly once:</p>
 <span><span class="co">#&gt;   R2:   0.938 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Per-fold RMSE range: [2.785, 3.681]</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"OOF predictions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cv_result</span><span class="op">$</span><span class="va">oof.predictions</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; OOF predictions: 215</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Any missing:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">cv_result</span><span class="op">$</span><span class="va">oof.predictions</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -203,7 +191,7 @@ selection gives an optimistically biased error estimate. <strong>Nested
 CV</strong> fixes this: the outer folds produce OOF predictions while an
 inner CV selects optimal parameters on each training fold
 independently.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_nested</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd_smooth</span>, <span class="va">fat</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">cv_inner</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.pc.cv.html">fregre.pc.cv</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp.range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, kfold <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -224,7 +212,7 @@ independently.</p>
 <span><span class="co">#&gt; Per-fold RMSE range: [2.197, 3.175]</span></span></code></pre></div>
 <p>Inspect which <code>ncomp</code> was selected in each outer fold —
 different training subsets may favour different complexities:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ncomps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">cv_nested</span><span class="op">$</span><span class="va">fold.models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">m</span><span class="op">$</span><span class="va">ncomp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ncomp per fold:"</span>, <span class="va">ncomps</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ncomp per fold: 15 15 15 15 15</span></span></code></pre></div>
@@ -235,7 +223,7 @@ different training subsets may favour different complexities:</p>
 <p>Because <code>cv.fdata</code> accepts any <code>fit.fn</code>, you
 can fairly compare methods by using the same <code>seed</code> (which
 fixes the fold assignments):</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Absorbance-based methods</span></span>
 <span><span class="va">cv_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd_smooth</span>, <span class="va">fat</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="../reference/fregre.pc.html">fregre.pc</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
@@ -322,9 +310,9 @@ fixes the fold assignments):</p>
 </tr>
 <tr class="odd">
 <td align="left">fregre.lm (absorbance)</td>
-<td align="right">87.821</td>
-<td align="right">68.280</td>
-<td align="right">-46.738</td>
+<td align="right">2.716</td>
+<td align="right">2.050</td>
+<td align="right">0.954</td>
 </tr>
 <tr class="even">
 <td align="left">k-NN / L2 (absorbance)</td>
@@ -340,9 +328,9 @@ fixes the fold assignments):</p>
 </tr>
 <tr class="even">
 <td align="left">fregre.lm (2nd derivative)</td>
-<td align="right">13.561</td>
-<td align="right">11.192</td>
-<td align="right">-0.138</td>
+<td align="right">2.322</td>
+<td align="right">1.804</td>
+<td align="right">0.967</td>
 </tr>
 <tr class="odd">
 <td align="left">k-NN / elastic (2nd derivative)</td>
@@ -358,7 +346,7 @@ fixes the fold assignments):</p>
 </h2>
 <p>Observed vs predicted and per-fold residual boxplots for the nested
 CV result:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">valid</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">cv_nested</span><span class="op">$</span><span class="va">oof.predictions</span><span class="op">)</span></span>
 <span><span class="va">df_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Observed <span class="op">=</span> <span class="va">fat</span><span class="op">[</span><span class="va">valid</span><span class="op">]</span>,</span>
@@ -385,7 +373,7 @@ CV result:</p>
 <div class="section level2">
 <h2 id="comparing-oof-predictions-across-methods">Comparing OOF Predictions Across Methods<a class="anchor" aria-label="anchor" href="#comparing-oof-predictions-across-methods"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">method_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PC (absorbance)"</span>, <span class="st">"Basis (absorbance)"</span>,</span>
 <span>                   <span class="st">"fregre.lm (absorbance)"</span>, <span class="st">"k-NN / L2 (absorbance)"</span>,</span>
 <span>                   <span class="st">"PC (2nd deriv)"</span>, <span class="st">"fregre.lm (2nd deriv)"</span>,</span>
@@ -414,7 +402,7 @@ CV result:</p>
 <p>The <code>fold.metrics</code> data frame shows how performance varies
 across folds — large variation can indicate sensitivity to the
 particular train/test split:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">cv_nested</span><span class="op">$</span><span class="va">fold.metrics</span>, digits <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"Per-fold metrics (nested CV)"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -473,7 +461,7 @@ fold assignment: the response is binned into quantile groups and
 observations are sampled within each bin. This ensures every fold has a
 similar distribution of fat content, which matters because the Tecator
 dataset has a right-skewed fat distribution.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">folds_strat</span> <span class="op">&lt;-</span> <span class="fu">fdars</span><span class="fu">:::</span> <span class="fu"><a href="../reference/dot-create_folds.html">.create_folds</a></span><span class="op">(</span><span class="va">fat</span>, kfold <span class="op">=</span> <span class="fl">5</span>, type <span class="op">=</span> <span class="st">"regression"</span>,</span>
 <span>                                       stratified <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">folds_rand</span> <span class="op">&lt;-</span> <span class="fu">fdars</span><span class="fu">:::</span> <span class="fu"><a href="../reference/dot-create_folds.html">.create_folds</a></span><span class="op">(</span><span class="va">fat</span>, kfold <span class="op">=</span> <span class="fl">5</span>, type <span class="op">=</span> <span class="st">"regression"</span>,</span>
@@ -500,7 +488,7 @@ dataset has a right-skewed fat distribution.</p>
 <p>Some models need a custom prediction step. The
 <code>predict.fn</code> argument receives the fitted model and new data,
 and returns predictions:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd_smooth</span>, <span class="va">fat</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="../reference/fregre.basis.html">fregre.basis</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, nbasis <span class="op">=</span> <span class="fl">20</span>, lambda <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
 <span>  predict.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span><span class="op">)</span>,</span>
@@ -562,8 +550,8 @@ and returns predictions:</p>
 </h2>
 <ul>
 <li>
-<code><a href="../articles/regression.html">vignette("articles/regression")</a></code> — regression methods
-overview (PC, basis, NP)</li>
+<code><a href="../articles/scalar-on-function.html">vignette("articles/scalar-on-function")</a></code> —
+scalar-on-function regression methods</li>
 <li>
 <code><a href="../articles/example-tecator-regression.html">vignette("articles/example-tecator-regression")</a></code> —
 Tecator regression in depth</li>

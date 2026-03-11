@@ -1,15 +1,5 @@
 # Andrews Wine: Outlier Detection
 
-``` r
-library(fdars)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(knitr)
-theme_set(theme_minimal(base_size = 13))
-set.seed(42)
-```
-
 This article applies three outlier detection methods to 178 wines
 transformed into Andrews curves. For background on *why* Andrews curves
 and how the transformation works, see [Why Andrews

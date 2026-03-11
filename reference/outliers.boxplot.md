@@ -82,4 +82,5 @@ print(out)
 #>   Number of observations: 30 
 #>   Number of outliers: 2 
 #>   Outlier indices: 29 30
+#>   Outlier p-values: 0.0323, 0.0645 
 ```

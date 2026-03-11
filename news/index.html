@@ -34,6 +34,200 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="fdars-050">fdars 0.5.0<a class="anchor" aria-label="anchor" href="#fdars-050"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-5-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-5-0"></a></h3>
+<div class="section level4">
+<h4 id="elastic-alignment-0-5-0">Elastic Alignment<a class="anchor" aria-label="anchor" href="#elastic-alignment-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/srsf.transform.html">srsf.transform()</a></code>, <code><a href="../reference/srsf.inverse.html">srsf.inverse()</a></code> for Square-Root Slope Function transforms</li>
+<li>Added <code><a href="../reference/elastic.align.html">elastic.align()</a></code> for elastic curve alignment via dynamic programming</li>
+<li>Added <code><a href="../reference/elastic.align.constrained.html">elastic.align.constrained()</a></code> for alignment with landmark constraints</li>
+<li>Added <code><a href="../reference/elastic.distance.html">elastic.distance()</a></code> for Fisher-Rao distance (self and cross)</li>
+<li>Added <code><a href="../reference/elastic.decomposition.html">elastic.decomposition()</a></code> for amplitude/phase decomposition</li>
+<li>Added <code><a href="../reference/karcher.mean.html">karcher.mean()</a></code> for Karcher (Fréchet) mean in the elastic metric</li>
+<li>Added <code><a href="../reference/amplitude.distance.html">amplitude.distance()</a></code>, <code><a href="../reference/phase.distance.html">phase.distance()</a></code> for component distance matrices</li>
+<li>Added <code><a href="../reference/alignment.quality.html">alignment.quality()</a></code> and <code><a href="../reference/alignment.pairwise.consistency.html">alignment.pairwise.consistency()</a></code> diagnostics</li>
+<li>Added <code><a href="../reference/periodic.rotate.html">periodic.rotate()</a></code> with peak, xcorr, landmark, and iterative methods</li>
+</ul></div>
+<div class="section level4">
+<h4 id="elastic-fpca-0-5-0">Elastic FPCA<a class="anchor" aria-label="anchor" href="#elastic-fpca-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/vert.fpca.html">vert.fpca()</a></code> — amplitude (vertical) PCA on aligned curves</li>
+<li>Added <code><a href="../reference/horiz.fpca.html">horiz.fpca()</a></code> — phase (horizontal) PCA on warping functions</li>
+<li>Added <code><a href="../reference/joint.fpca.html">joint.fpca()</a></code> — joint amplitude + phase PCA with balance parameter</li>
+<li>S3 print/plot methods for all three classes</li>
+</ul></div>
+<div class="section level4">
+<h4 id="elastic-regression-0-5-0">Elastic Regression<a class="anchor" aria-label="anchor" href="#elastic-regression-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/elastic.regression.html">elastic.regression()</a></code> — scalar-on-function regression with simultaneous alignment</li>
+<li>Added <code><a href="../reference/elastic.logistic.html">elastic.logistic()</a></code> — elastic logistic regression for binary classification</li>
+<li>Added <code><a href="../reference/elastic.pcr.html">elastic.pcr()</a></code> — principal component regression with elastic FPCA</li>
+<li>Added <code><a href="../reference/elastic.attribution.html">elastic.attribution()</a></code> — amplitude vs phase contribution decomposition</li>
+<li>S3 print/plot methods for all three classes</li>
+</ul></div>
+<div class="section level4">
+<h4 id="elastic-changepoint-detection-0-5-0">Elastic Changepoint Detection<a class="anchor" aria-label="anchor" href="#elastic-changepoint-detection-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/elastic.changepoint.html">elastic.changepoint()</a></code> — detect structural breaks in functional time series</li>
+<li>Three change types: “amplitude” (shape), “phase” (timing), “fpca” (combined)</li>
+<li>CUSUM test statistics with permutation-based p-values</li>
+<li>S3 print/plot methods with statistic and data visualization</li>
+</ul></div>
+<div class="section level4">
+<h4 id="model-explainability--diagnostics-0-5-0">Model Explainability &amp; Diagnostics<a class="anchor" aria-label="anchor" href="#model-explainability--diagnostics-0-5-0"></a></h4>
+<ul><li>22+ explainability methods for <code>fregre.lm</code> and <code>functional.logistic</code> models:
+<ul><li>
+<strong>Global</strong>: <code><a href="../reference/fregre.beta.decomp.html">fregre.beta.decomp()</a></code>, <code><a href="../reference/fregre.pdp.html">fregre.pdp()</a></code>, <code><a href="../reference/fregre.ale.html">fregre.ale()</a></code>, <code><a href="../reference/fregre.sobol.html">fregre.sobol()</a></code>, <code><a href="../reference/fregre.importance.html">fregre.importance()</a></code>, <code><a href="../reference/fregre.friedman.html">fregre.friedman()</a></code>
+</li>
+<li>
+<strong>Local</strong>: <code><a href="../reference/fregre.lime.html">fregre.lime()</a></code>, <code><a href="../reference/fregre.shap.html">fregre.shap()</a></code>, <code><a href="../reference/fregre.counterfactual.html">fregre.counterfactual()</a></code>, <code><a href="../reference/fregre.anchor.html">fregre.anchor()</a></code>, <code><a href="../reference/fregre.saliency.html">fregre.saliency()</a></code>
+</li>
+<li>
+<strong>Diagnostics</strong>: <code><a href="../reference/fregre.influence.html">fregre.influence()</a></code>, <code><a href="../reference/fregre.vif.html">fregre.vif()</a></code>, <code><a href="../reference/fregre.dfbetas.html">fregre.dfbetas()</a></code>, <code><a href="../reference/fregre.loo.html">fregre.loo()</a></code>
+</li>
+<li>
+<strong>Domain</strong>: <code><a href="../reference/fregre.significant.regions.html">fregre.significant.regions()</a></code>, <code><a href="../reference/fregre.domain.html">fregre.domain()</a></code>, <code><a href="../reference/fregre.pointwise.html">fregre.pointwise()</a></code>
+</li>
+<li>
+<strong>Calibration</strong> (logistic): <code><a href="../reference/fregre.calibration.html">fregre.calibration()</a></code>, <code><a href="../reference/fregre.ece.html">fregre.ece()</a></code>
+</li>
+<li>
+<strong>Uncertainty</strong>: <code><a href="../reference/fregre.prediction.interval.html">fregre.prediction.interval()</a></code>, <code><a href="../reference/fregre.conformal.html">fregre.conformal()</a></code>
+</li>
+<li>
+<strong>Meta</strong>: <code><a href="../reference/fregre.stability.html">fregre.stability()</a></code>, <code><a href="../reference/fregre.depth.html">fregre.depth()</a></code>, <code><a href="../reference/fregre.prototype.html">fregre.prototype()</a></code>, <code><a href="../reference/fregre.conditional.importance.html">fregre.conditional.importance()</a></code>
+</li>
+</ul></li>
+</ul></div>
+<div class="section level4">
+<h4 id="penalized-basis-smoothing-0-5-0">Penalized Basis Smoothing<a class="anchor" aria-label="anchor" href="#penalized-basis-smoothing-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/smooth.basis.fd.html">smooth.basis.fd()</a></code> — penalized B-spline/Fourier basis smoothing</li>
+<li>Added <code><a href="../reference/smooth.basis.gcv.html">smooth.basis.gcv()</a></code> — automatic lambda selection via GCV grid search</li>
+<li>S3 print/plot methods for <code>smooth.basis</code> objects</li>
+</ul></div>
+<div class="section level4">
+<h4 id="cross-validation-framework-0-5-0">Cross-Validation Framework<a class="anchor" aria-label="anchor" href="#cross-validation-framework-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/cv.fdata.html">cv.fdata()</a></code> — unified k-fold cross-validation for any fitting function</li>
+<li>Supports regression (RMSE, MAE, R²) and classification (accuracy, confusion matrix)</li>
+<li>Repeated k-fold CV with aggregation (mean/SD for regression, majority voting for classification)</li>
+<li>Stratified folding for balanced class splits</li>
+</ul></div>
+<div class="section level4">
+<h4 id="scalar-on-function-regression-0-5-0">Scalar-on-Function Regression<a class="anchor" aria-label="anchor" href="#scalar-on-function-regression-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code>, <code><a href="../reference/fregre.lm.cv.html">fregre.lm.cv()</a></code> — FPC-based functional linear model with Rust backend</li>
+<li>Added <code><a href="../reference/functional.logistic.html">functional.logistic()</a></code> — functional logistic regression via IRLS</li>
+<li>Added <code><a href="../reference/fregre.np.mixed.html">fregre.np.mixed()</a></code> — mixed scalar + functional nonparametric regression</li>
+</ul></div>
+<div class="section level4">
+<h4 id="function-on-scalar-regression-0-5-0">Function-on-Scalar Regression<a class="anchor" aria-label="anchor" href="#function-on-scalar-regression-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/fosr.html">fosr()</a></code> — penalized function-on-scalar regression</li>
+<li>Added <code><a href="../reference/fosr.fpc.html">fosr.fpc()</a></code> — FPC-based function-on-scalar regression</li>
+<li>Added <code><a href="../reference/fanova.html">fanova()</a></code> — functional ANOVA with permutation F-test</li>
+</ul></div>
+<div class="section level4">
+<h4 id="functional-classification-0-5-0">Functional Classification<a class="anchor" aria-label="anchor" href="#functional-classification-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/fclassif.html">fclassif()</a></code> — supervised classification (LDA, QDA, kNN, kernel, DD-plot, SVM)</li>
+<li>Added <code><a href="../reference/fclassif.cv.html">fclassif.cv()</a></code> — cross-validated classification error</li>
+</ul></div>
+<div class="section level4">
+<h4 id="landmark-registration-0-5-0">Landmark Registration<a class="anchor" aria-label="anchor" href="#landmark-registration-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/detect.landmarks.html">detect.landmarks()</a></code> — detect peaks, valleys, zero-crossings, inflection points</li>
+<li>Added <code><a href="../reference/landmark.register.html">landmark.register()</a></code> — register curves by aligning detected landmarks</li>
+</ul></div>
+<div class="section level4">
+<h4 id="tsrvf-0-5-0">TSRVF<a class="anchor" aria-label="anchor" href="#tsrvf-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/tsrvf.transform.html">tsrvf.transform()</a></code> — tangent-space representation via Karcher mean</li>
+<li>Added <code><a href="../reference/tsrvf.from.alignment.html">tsrvf.from.alignment()</a></code> — build TSRVF from pre-computed alignment</li>
+<li>Added <code><a href="../reference/tsrvf.inverse.html">tsrvf.inverse()</a></code> — reconstruct curves from tangent vectors</li>
+</ul></div>
+<div class="section level4">
+<h4 id="tolerance-bands-0-5-0">Tolerance Bands<a class="anchor" aria-label="anchor" href="#tolerance-bands-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/tolerance.band.html">tolerance.band()</a></code> with methods: fpca, conformal, scb (Degras), exponential, elastic</li>
+</ul></div>
+<div class="section level4">
+<h4 id="streaming-depth-0-5-0">Streaming Depth<a class="anchor" aria-label="anchor" href="#streaming-depth-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/streaming.depth.html">streaming.depth()</a></code> — O(T log N) depth computation against reference data</li>
+</ul></div>
+<div class="section level4">
+<h4 id="soft-dtw-distance-0-5-0">Soft-DTW Distance<a class="anchor" aria-label="anchor" href="#soft-dtw-distance-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/metric.softDTW.html">metric.softDTW()</a></code> — differentiable Dynamic Time Warping</li>
+<li>Added <code><a href="../reference/softdtw.barycenter.html">softdtw.barycenter()</a></code> — Soft-DTW barycenter computation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="functional-mixed-models-0-5-0">Functional Mixed Models<a class="anchor" aria-label="anchor" href="#functional-mixed-models-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/fmm.html">fmm()</a></code> — functional mixed models with random effects</li>
+<li>Added <code><a href="../reference/fmm.predict.html">fmm.predict()</a></code> — prediction from fitted FMM</li>
+<li>Added <code><a href="../reference/fmm.test.fixed.html">fmm.test.fixed()</a></code> — permutation test for fixed effects</li>
+</ul></div>
+<div class="section level4">
+<h4 id="gmm-clustering-0-5-0">GMM Clustering<a class="anchor" aria-label="anchor" href="#gmm-clustering-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/cluster.gmm.html">cluster.gmm()</a></code> — Gaussian Mixture Model clustering with automatic K selection</li>
+</ul></div>
+<div class="section level4">
+<h4 id="andrews-transformation-0-5-0">Andrews Transformation<a class="anchor" aria-label="anchor" href="#andrews-transformation-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/andrews_transform.html">andrews_transform()</a></code> — Fourier expansion of multivariate data to functional curves</li>
+<li>Added <code><a href="../reference/andrews_loadings.html">andrews_loadings()</a></code> — project FPCA eigenfunctions back to original variable space</li>
+</ul></div>
+<div class="section level4">
+<h4 id="seasonal-analysis-0-5-0">Seasonal Analysis<a class="anchor" aria-label="anchor" href="#seasonal-analysis-0-5-0"></a></h4>
+<ul><li>Period detection: <code><a href="../reference/detect.period.html">detect.period()</a></code>, <code><a href="../reference/estimate.period.html">estimate.period()</a></code>, <code><a href="../reference/detect.periods.html">detect.periods()</a></code>
+</li>
+<li>Ensemble methods: <code><a href="../reference/autoperiod.html">autoperiod()</a></code>, <code><a href="../reference/cfd.autoperiod.html">cfd.autoperiod()</a></code>, <code><a href="../reference/sazed.html">sazed()</a></code>
+</li>
+<li>Spectral: <code><a href="../reference/lomb.scargle.html">lomb.scargle()</a></code>, <code><a href="../reference/matrix.profile.html">matrix.profile()</a></code>
+</li>
+<li>Decomposition: <code><a href="../reference/stl.fd.html">stl.fd()</a></code>, <code><a href="../reference/ssa.fd.html">ssa.fd()</a></code>, <code><a href="../reference/detrend.html">detrend()</a></code>, <code><a href="../reference/decompose.html">decompose()</a></code>
+</li>
+<li>Diagnostics: <code><a href="../reference/seasonal.strength.html">seasonal.strength()</a></code>, <code><a href="../reference/seasonal.strength.curve.html">seasonal.strength.curve()</a></code>, <code><a href="../reference/classify.seasonality.html">classify.seasonality()</a></code>
+</li>
+<li>Change detection: <code><a href="../reference/detect.seasonality.changes.html">detect.seasonality.changes()</a></code>, <code><a href="../reference/detect.seasonality.changes.auto.html">detect.seasonality.changes.auto()</a></code>
+</li>
+<li>
+<code><a href="../reference/detect_amplitude_modulation.html">detect_amplitude_modulation()</a></code>, <code><a href="../reference/instantaneous.period.html">instantaneous.period()</a></code>, <code><a href="../reference/analyze.peak.timing.html">analyze.peak.timing()</a></code>
+</li>
+</ul></div>
+<div class="section level4">
+<h4 id="simulation-toolbox-0-5-0">Simulation Toolbox<a class="anchor" aria-label="anchor" href="#simulation-toolbox-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/simFunData.html">simFunData()</a></code>, <code><a href="../reference/simMultiFunData.html">simMultiFunData()</a></code> — simulate via Karhunen-Loève</li>
+<li>Added <code><a href="../reference/eFun.html">eFun()</a></code>, <code><a href="../reference/eVal.html">eVal()</a></code> — eigenfunction/eigenvalue generators</li>
+<li>Added <code><a href="../reference/addError.html">addError()</a></code> — add measurement noise</li>
+<li>Added <code><a href="../reference/irregFdata.html">irregFdata()</a></code>, <code><a href="../reference/sparsify.html">sparsify()</a></code> — irregular/sparse data generation</li>
+</ul></div>
+<div class="section level4">
+<h4 id="equivalence-testing-0-5-0">Equivalence Testing<a class="anchor" aria-label="anchor" href="#equivalence-testing-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/fequiv.test.html">fequiv.test()</a></code> — functional equivalence test</li>
+</ul></div>
+<div class="section level4">
+<h4 id="irregular-functional-data-0-5-0">Irregular Functional Data<a class="anchor" aria-label="anchor" href="#irregular-functional-data-0-5-0"></a></h4>
+<ul><li>Added <code><a href="../reference/irregFdata.html">irregFdata()</a></code> — irregular functional data objects</li>
+<li>Added <code><a href="../reference/as.fdata.irregFdata.html">as.fdata()</a></code> — convert irregular to regular grid</li>
+</ul></div>
+</div>
+<div class="section level3">
+<h3 id="improvements-0-5-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-5-0"></a></h3>
+<ul><li>Upgraded Rust backend (fdars-core) to v0.8.0</li>
+<li>All plots use ggplot2; respects <code><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set()</a></code>
+</li>
+<li>46 pkgdown articles with SVG overview diagrams</li>
+<li>Unified dispatch: <code><a href="../reference/depth.html">depth()</a></code> (10 methods), <code><a href="../reference/metric.html">metric()</a></code> (14 methods)</li>
+<li>Pre-built binary packages for macOS and Windows (no Rust required)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-5-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-5-0"></a></h3>
+<ul><li>Fixed changepoint p-values (normalization mismatch in Brownian bridge simulation)</li>
+<li>Fixed <code><a href="../reference/functional.logistic.html">functional.logistic()</a></code> missing <code>.fpca_scores</code>, <code>beta.se</code>, <code>std.errors</code> fields</li>
+<li>Fixed <code>fdata2basis_2d</code> example error (extendr wrapper name collision)</li>
+<li>Fixed <code>mean(fd)</code> returning matrix instead of fdata</li>
+<li>Fixed TSRVF inverse initial values</li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-0-5-0">Internal<a class="anchor" aria-label="anchor" href="#internal-0-5-0"></a></h3>
+<ul><li>Upgraded Rust backend (fdars-core) to v0.8.0</li>
+<li>200+ new Rust bridge functions</li>
+<li>Vendored Rust crates cleaned for CRAN compliance</li>
+<li>Portable Makefiles (removed GNU extensions)</li>
+<li>GitHub Actions: pinned R version, added Rust toolchain to pkgdown workflow</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="fdars-040">fdars 0.4.0<a class="anchor" aria-label="anchor" href="#fdars-040"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-4-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-4-0"></a></h3>

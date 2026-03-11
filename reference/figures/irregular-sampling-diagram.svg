@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrI" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Irregular Functional Data: From Raw to Analysis</text>
+  <text x="350" y="54" text-anchor="middle" font-size="14" fill="#888">Different curves observed at different time points</text>
+
+  <!-- ===== LEFT: Irregular observations ===== -->
+  <rect x="16" y="76" width="200" height="240" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="116" y="100" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">Irregular Data</text>
+  <text x="116" y="120" text-anchor="middle" font-size="13" fill="#888">irregFdata object</text>
+
+  <!-- Curve 1: dense sampling -->
+  <text x="30" y="148" font-size="12" fill="#4A90D9">Curve 1</text>
+  <circle cx="30" cy="168" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="48" cy="160" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="66" cy="166" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="84" cy="156" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="102" cy="162" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="120" cy="152" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="138" cy="158" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="156" cy="148" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="174" cy="154" r="3.5" fill="#4A90D9" opacity="0.7"/>
+  <circle cx="192" cy="164" r="3.5" fill="#4A90D9" opacity="0.7"/>
+
+  <!-- Curve 2: sparse sampling -->
+  <text x="30" y="200" font-size="12" fill="#E6A020">Curve 2</text>
+  <circle cx="40" cy="220" r="3.5" fill="#E6A020" opacity="0.7"/>
+  <circle cx="100" cy="208" r="3.5" fill="#E6A020" opacity="0.7"/>
+  <circle cx="160" cy="224" r="3.5" fill="#E6A020" opacity="0.7"/>
+  <circle cx="200" cy="212" r="3.5" fill="#E6A020" opacity="0.7"/>
+
+  <!-- Curve 3: medium, offset -->
+  <text x="30" y="254" font-size="12" fill="#2E8B57">Curve 3</text>
+  <circle cx="52" cy="274" r="3.5" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="88" cy="266" r="3.5" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="110" cy="278" r="3.5" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="148" cy="262" r="3.5" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="184" cy="270" r="3.5" fill="#2E8B57" opacity="0.7"/>
+
+  <text x="116" y="300" text-anchor="middle" font-size="12" fill="#888">10, 4, 5 observations</text>
+
+  <!-- ===== MIDDLE: Processing methods ===== -->
+  <line x1="224" y1="150" x2="270" y2="150" stroke="#555" stroke-width="1.2" marker-end="url(#arrI)"/>
+  <line x1="224" y1="220" x2="270" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrI)"/>
+  <line x1="224" y1="268" x2="270" y2="268" stroke="#555" stroke-width="1.2" marker-end="url(#arrI)"/>
+
+  <!-- Method box 1: Direct analysis -->
+  <rect x="278" y="76" width="170" height="100" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="363" y="100" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Direct Analysis</text>
+  <text x="363" y="122" text-anchor="middle" font-size="12" fill="#555">irreg.mean.kernel()</text>
+  <text x="363" y="140" text-anchor="middle" font-size="12" fill="#555">irreg.metric.lp()</text>
+  <text x="363" y="158" text-anchor="middle" font-size="12" fill="#888">Work on raw times</text>
+
+  <!-- Method box 2: Basis fitting -->
+  <rect x="278" y="192" width="170" height="80" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="363" y="216" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Basis Fitting</text>
+  <text x="363" y="238" text-anchor="middle" font-size="12" fill="#555">irreg.fdata2basis()</text>
+  <text x="363" y="256" text-anchor="middle" font-size="12" fill="#888">Fit B-splines directly</text>
+
+  <!-- Method box 3: Regularize -->
+  <rect x="278" y="288" width="170" height="80" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="363" y="312" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Interpolate</text>
+  <text x="363" y="334" text-anchor="middle" font-size="12" fill="#555">irreg.to.regular()</text>
+  <text x="363" y="352" text-anchor="middle" font-size="12" fill="#888">Convert to regular grid</text>
+
+  <!-- Arrows to output -->
+  <line x1="452" y1="126" x2="498" y2="170" stroke="#555" stroke-width="1.2" marker-end="url(#arrI)"/>
+  <line x1="452" y1="232" x2="498" y2="200" stroke="#555" stroke-width="1.2" marker-end="url(#arrI)"/>
+  <line x1="452" y1="328" x2="498" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrI)"/>
+
+  <!-- ===== RIGHT: Regular fdata ===== -->
+  <rect x="504" y="120" width="180" height="180" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="594" y="148" text-anchor="middle" font-size="15" font-weight="bold" fill="#2E8B57">Regular fdata</text>
+  <text x="594" y="168" text-anchor="middle" font-size="13" fill="#888">Ready for analysis</text>
+
+  <!-- Smooth reconstructed curves -->
+  <path d="M520 200 Q540 186 560 194 Q580 202 600 190 Q620 178 640 188 Q660 196 670 192" stroke="#4A90D9" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M520 222 Q540 210 560 218 Q580 226 600 214 Q620 202 640 212 Q660 220 670 216" stroke="#E6A020" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M520 244 Q540 232 560 240 Q580 248 600 236 Q620 224 640 234 Q660 242 670 238" stroke="#2E8B57" stroke-width="2" fill="none" opacity="0.7"/>
+
+  <text x="594" y="278" text-anchor="middle" font-size="12" fill="#888">FPCA, regression,</text>
+  <text x="594" y="294" text-anchor="middle" font-size="12" fill="#888">clustering, ...</text>
+
+  <!-- Bottom: key message -->
+  <line x1="16" y1="380" x2="684" y2="380" stroke="#eee" stroke-width="1.5"/>
+  <text x="350" y="406" text-anchor="middle" font-size="14" fill="#555">irregFdata preserves original sampling times &#8212; no information loss from premature interpolation</text>
+</svg>

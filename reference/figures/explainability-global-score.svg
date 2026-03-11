@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 200" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <!-- Title -->
+  <text x="350" y="16" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">Global Explanations: Score-Level</text>
+  <text x="350" y="30" text-anchor="middle" font-size="10" fill="#888">How much does each FPC score contribute to model predictions?</text>
+
+  <!-- PDP -->
+  <rect x="10" y="42" width="130" height="108" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="75" y="58" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">PDP + ICE</text>
+  <!-- Axes -->
+  <line x1="24" y1="134" x2="126" y2="134" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="24" y1="66" x2="24" y2="134" stroke="#ccc" stroke-width="0.6"/>
+  <!-- ICE curves (gray) -->
+  <path d="M28 120 Q52 110 75 114 Q98 118 122 104" stroke="#ccc" stroke-width="0.6" fill="none"/>
+  <path d="M28 124 Q52 116 75 120 Q98 124 122 112" stroke="#ccc" stroke-width="0.6" fill="none"/>
+  <path d="M28 116 Q52 104 75 108 Q98 112 122 96" stroke="#ccc" stroke-width="0.6" fill="none"/>
+  <!-- PDP mean (blue) -->
+  <path d="M28 120 Q52 110 75 114 Q98 118 122 104" stroke="#4A90D9" stroke-width="2" fill="none"/>
+  <text x="75" y="148" text-anchor="middle" font-size="8.8" fill="#888">fregre.pdp</text>
+
+  <!-- ALE -->
+  <rect x="150" y="42" width="130" height="108" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="215" y="58" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">ALE</text>
+  <line x1="164" y1="134" x2="266" y2="134" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="164" y1="66" x2="164" y2="134" stroke="#ccc" stroke-width="0.6"/>
+  <!-- Step function -->
+  <path d="M168 122 L186 122 L186 112 L204 112 L204 98 L222 98 L222 90 L240 90 L240 100 L258 100" stroke="#4A90D9" stroke-width="1.8" fill="none"/>
+  <line x1="164" y1="106" x2="266" y2="106" stroke="#999" stroke-width="0.4" stroke-dasharray="3,2"/>
+  <text x="215" y="148" text-anchor="middle" font-size="8.8" fill="#888">fregre.ale</text>
+
+  <!-- Sobol -->
+  <rect x="290" y="42" width="130" height="108" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="355" y="58" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">Sobol Indices</text>
+  <!-- Grouped bars: first-order (blue) + total (orange) -->
+  <rect x="306" y="76" width="10" height="52" rx="1" fill="#4A90D9" opacity="0.6"/>
+  <rect x="318" y="84" width="10" height="44" rx="1" fill="#D55E00" opacity="0.5"/>
+  <rect x="336" y="96" width="10" height="32" rx="1" fill="#4A90D9" opacity="0.6"/>
+  <rect x="348" y="100" width="10" height="28" rx="1" fill="#D55E00" opacity="0.5"/>
+  <rect x="366" y="112" width="10" height="16" rx="1" fill="#4A90D9" opacity="0.6"/>
+  <rect x="378" y="114" width="10" height="14" rx="1" fill="#D55E00" opacity="0.5"/>
+  <text x="316" y="138" font-size="7.5" fill="#888">PC1</text>
+  <text x="346" y="138" font-size="7.5" fill="#888">PC2</text>
+  <text x="376" y="138" font-size="7.5" fill="#888">PC3</text>
+  <!-- Legend -->
+  <rect x="394" y="72" width="6" height="6" rx="1" fill="#4A90D9" opacity="0.6"/>
+  <text x="403" y="78" font-size="7.5" fill="#888">1st</text>
+  <rect x="394" y="82" width="6" height="6" rx="1" fill="#D55E00" opacity="0.5"/>
+  <text x="403" y="88" font-size="7.5" fill="#888">total</text>
+  <text x="355" y="148" text-anchor="middle" font-size="8.8" fill="#888">fregre.sobol</text>
+
+  <!-- Beta Decomposition -->
+  <rect x="430" y="42" width="130" height="108" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="495" y="58" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">Beta Decomp</text>
+  <!-- Pie-like decomposition -->
+  <rect x="446" y="72" width="36" height="52" rx="1" fill="#4A90D9" opacity="0.5"/>
+  <rect x="484" y="92" width="24" height="32" rx="1" fill="#4A90D9" opacity="0.35"/>
+  <rect x="510" y="108" width="16" height="16" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <rect x="528" y="114" width="10" height="10" rx="1" fill="#4A90D9" opacity="0.12"/>
+  <text x="464" y="136" font-size="7.5" fill="#888">PC1</text>
+  <text x="496" y="136" font-size="7.5" fill="#888">PC2</text>
+  <text x="518" y="136" font-size="7.5" fill="#888">PC3</text>
+  <text x="495" y="148" text-anchor="middle" font-size="8.8" fill="#888">fregre.beta.decomp + fregre.friedman</text>
+
+  <!-- Importance -->
+  <rect x="570" y="42" width="120" height="108" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="630" y="58" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">Importance</text>
+  <!-- Horizontal bars -->
+  <rect x="584" y="70" width="72" height="10" rx="1" fill="#4A90D9" opacity="0.5"/>
+  <rect x="584" y="84" width="52" height="10" rx="1" fill="#4A90D9" opacity="0.4"/>
+  <rect x="584" y="98" width="30" height="10" rx="1" fill="#4A90D9" opacity="0.3"/>
+  <rect x="584" y="112" width="14" height="10" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <text x="580" y="78" text-anchor="end" font-size="7.5" fill="#888">PC1</text>
+  <text x="580" y="92" text-anchor="end" font-size="7.5" fill="#888">PC2</text>
+  <text x="580" y="106" text-anchor="end" font-size="7.5" fill="#888">PC3</text>
+  <text x="580" y="120" text-anchor="end" font-size="7.5" fill="#888">PC4</text>
+  <text x="630" y="148" text-anchor="middle" font-size="8.8" fill="#888">fregre.importance</text>
+</svg>

@@ -16,43 +16,13 @@ This is particularly useful for:
 - **Large reference samples**: When $N$ is large, the
   $O\left( \log N \right)$ lookup is much faster than $O(N)$
 
+![Streaming Depth: O(T log N) Per Query
+Curve](../reference/figures/streaming-depth-diagram.svg)
+
 ## Self-Depth (Batch)
 
 The simplest use case computes the depth of each curve relative to the
 full dataset:
-
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-set.seed(42)
-
-# Generate functional data
-n <- 50
-m <- 100
-argvals <- seq(0, 1, length.out = m)
-data <- matrix(0, n, m)
-for (i in 1:n) {
-  data[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.3) + rnorm(m, 0, 0.05)
-}
-
-# Add an outlier
-data[1, ] <- 5 * cos(4 * pi * argvals)
-fd <- fdata(data, argvals = argvals)
-
-# Compute streaming FM depth
-d_fm <- streaming.depth(fd, method = "FM")
-head(round(d_fm, 4))
-#> [1] 0.0516 0.3324 0.2760 0.4224 0.6996 0.8992
-```
 
 The outlier (curve 1) has the lowest depth:
 
@@ -418,9 +388,9 @@ for (n_size in sizes) {
   cat(sprintf("  N = %4d: %.4f sec\n", n_size, t_elapsed))
 }
 #>   N =   50: 0.0000 sec
-#>   N =  100: 0.0010 sec
+#>   N =  100: 0.0000 sec
 #>   N =  500: 0.0010 sec
-#>   N = 1000: 0.0020 sec
+#>   N = 1000: 0.0010 sec
 ```
 
 For large reference samples with many incoming queries, the streaming
@@ -451,7 +421,7 @@ all.equal(d, d2)
 
 ## See Also
 
-- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.html)
   — functional depth measures and ranking
 - `vignette("outlier-detection", package = "fdars")` — functional
   outlier detection methods

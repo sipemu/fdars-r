@@ -18,20 +18,19 @@ objects, revealing the true underlying signal. This is essential for:
 - Interpretable visualizations
 - Reliable statistical inference
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-set.seed(42)
-```
+![Bias-Variance Tradeoff in Smoothing
+Diagram](../reference/figures/smoothing-diagram.svg)
+
+### Available Smoothing Methods
+
+| Method                      | Function                                                                               | Approach                                    | Key Parameter         | Best For                              |
+|-----------------------------|----------------------------------------------------------------------------------------|---------------------------------------------|-----------------------|---------------------------------------|
+| **P-spline**                | [`pspline()`](https://sipemu.github.io/fdars-r/reference/pspline.md)                   | Penalized B-spline fit with automatic GCV   | $\lambda$ (penalty)   | General purpose, works out of the box |
+| **Nadaraya-Watson**         | [`S.NW()`](https://sipemu.github.io/fdars-r/reference/S.NW.md)                         | Kernel-weighted local average               | $h$ (bandwidth)       | Simple nonparametric smoothing        |
+| **Local Linear**            | [`S.LLR()`](https://sipemu.github.io/fdars-r/reference/S.LLR.md)                       | Local linear regression with kernel weights | $h$ (bandwidth)       | Better boundary behavior than NW      |
+| **Basis Expansion**         | [`fdata2basis()`](https://sipemu.github.io/fdars-r/reference/fdata2basis.md)           | Project onto B-spline or Fourier basis      | $K$ (number of basis) | Dimensionality reduction + smoothing  |
+| **Penalized Basis (fixed)** | [`smooth.basis.fd()`](https://sipemu.github.io/fdars-r/reference/smooth.basis.fd.md)   | Many basis functions + roughness penalty    | $\lambda$ (penalty)   | When you want explicit control        |
+| **Penalized Basis (auto)**  | [`smooth.basis.gcv()`](https://sipemu.github.io/fdars-r/reference/smooth.basis.gcv.md) | Penalized basis with GCV/AIC/BIC selection  | data-driven $\lambda$ | Automatic tuning, multiple criteria   |
 
 ## Loading Real Data: The Berkeley Growth Study
 
@@ -115,6 +114,9 @@ ggplot(df_compare, aes(x = age, y = height, color = curve)) +
 ![](intro-to-smoothing_files/figure-html/add-noise-1.png)
 
 ## Method 1: P-spline Smoothing
+
+![P-spline
+Smoothing](../reference/figures/smoothing-pspline-diagram.svg)
 
 Penalized splines (P-splines) are a powerful and flexible smoothing
 method. They balance two objectives:
@@ -208,6 +210,8 @@ ggplot(df_lambda, aes(x = age, y = height)) +
 
 ## Method 2: Kernel Smoothers
 
+![Kernel Smoothers](../reference/figures/smoothing-kernel-diagram.svg)
+
 Kernel smoothers estimate the value at each point using a weighted
 average of nearby observations. The bandwidth $h$ controls the
 neighborhood size.
@@ -283,6 +287,8 @@ cat("This is computed as the 15th percentile of pairwise distances.\n")
 
 ## Method 3: Basis Expansion
 
+![Basis Expansion](../reference/figures/smoothing-basis-diagram.svg)
+
 Represent curves as linear combinations of basis functions. This
 provides dimensionality reduction along with smoothing.
 
@@ -351,6 +357,124 @@ cat("Optimal number of basis functions (GCV):", optimal_nbasis, "\n")
 #> Optimal number of basis functions (GCV): 11
 ```
 
+## Method 4: Penalized Basis Smoothing
+
+![Penalized Basis
+Smoothing](../reference/figures/smoothing-penalized-diagram.svg)
+
+Penalized basis smoothing combines basis expansion (like Method 3) with
+a roughness penalty. Instead of controlling smoothness by choosing the
+number of basis functions, use many basis functions but add a penalty
+term that discourages roughness:
+
+$$\text{minimize}\quad \parallel y - Xc \parallel^{2} + \lambda\, c^{T}D^{T}D\, c$$
+
+where $D$ is a difference matrix encoding roughness.
+
+### Fixed Lambda with smooth.basis.fd()
+
+When you know or want to control the smoothing parameter $\lambda$
+directly:
+
+``` r
+# Smooth with penalized B-spline basis, fixed lambda
+result_pen <- smooth.basis.fd(
+  fd_noisy,
+  type = "bspline",
+  nbasis = 25,
+  lambda = 1.0,
+  lfd.order = 2
+)
+print(result_pen)
+#> Penalized Basis Smoothing
+#>   Basis type: bspline 
+#>   Number of basis functions: 25 
+#>   Lambda: 1 
+#>   EDF: 7.9 
+#>   GCV: 5.60632
+cat("Effective degrees of freedom:", result_pen$edf, "\n")
+#> Effective degrees of freedom: 7.895361
+```
+
+### Automatic Lambda via GCV with smooth.basis.gcv()
+
+GCV automatically selects the optimal smoothing parameter without manual
+tuning:
+
+$$\text{GCV}(\lambda) = \frac{\text{RSS}/n}{\left( 1 - \text{edf}/n \right)^{2}}$$
+
+``` r
+# Automatic lambda selection via GCV
+result_gcv <- smooth.basis.gcv(
+  fd_noisy,
+  type = "bspline",
+  nbasis = 25,
+  lfd.order = 2,
+  log.lambda.range = c(-2, 2),
+  n.grid = 20
+)
+
+print(result_gcv)
+#> Penalized Basis Smoothing
+#>   Basis type: bspline 
+#>   Number of basis functions: 25 
+#>   Lambda: 378605 
+#>   EDF: 9.2 
+#>   GCV: 5.57819
+cat("Selected lambda:", result_gcv$lambda, "\n")
+#> Selected lambda: 378604.5
+cat("GCV:", result_gcv$gcv, "  AIC:", result_gcv$aic, "  BIC:", result_gcv$bic, "\n")
+#> GCV: 5.578186   AIC: 1717.275   BIC: 1767.158
+```
+
+### Fourier Basis for Periodic Data
+
+For periodic or seasonal data, a Fourier basis is more natural:
+
+``` r
+# Create periodic data for demonstration
+t_per <- seq(0, 1, length.out = length(age))
+X_per <- matrix(0, 10, length(t_per))
+for (i in 1:10) {
+  X_per[i, ] <- sin(2 * pi * t_per) + 0.3 * cos(4 * pi * t_per) +
+    rnorm(length(t_per), sd = 0.25)
+}
+fd_per <- fdata(X_per, argvals = t_per)
+
+# Fourier smoothing with GCV
+result_fourier <- smooth.basis.gcv(fd_per, type = "fourier", nbasis = 21)
+cat("Fourier GCV:", result_fourier$gcv, "\n")
+#> Fourier GCV: 0.07151865
+```
+
+### Comparing Fixed vs Automatic Penalization
+
+``` r
+idx <- 1
+df_pen <- data.frame(
+  age = rep(age, 4),
+  height = c(fd_noisy$data[idx, ], result_pen$fitted$data[idx, ],
+             result_gcv$fitted$data[idx, ], fd_raw$data[idx, ]),
+  type = factor(rep(c("Noisy data", "Fixed lambda", "GCV-selected", "Original"),
+                    each = length(age)),
+                levels = c("Noisy data", "Fixed lambda", "GCV-selected", "Original"))
+)
+
+ggplot(df_pen, aes(x = age, y = height, color = type, linetype = type)) +
+  geom_point(data = subset(df_pen, type == "Noisy data"), size = 1) +
+  geom_line(data = subset(df_pen, type != "Noisy data"), linewidth = 1) +
+  scale_color_manual(values = c("Noisy data" = "gray60", "Fixed lambda" = "purple",
+                                 "GCV-selected" = "darkgreen", "Original" = "red")) +
+  scale_linetype_manual(values = c("Noisy data" = "blank", "Fixed lambda" = "solid",
+                                    "GCV-selected" = "solid", "Original" = "dashed")) +
+  labs(x = "Age (years)", y = "Height (cm)",
+       title = "Penalized Basis Smoothing", color = NULL, linetype = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+![](intro-to-smoothing_files/figure-html/plot-penalized-1.png)
+
 ## Comparing All Methods
 
 ``` r
@@ -364,15 +488,19 @@ smooth_kernel <- fd_llr$data[idx, ]
 coefs_opt <- fdata2basis(fd_noisy, nbasis = optimal_nbasis, type = "bspline")
 smooth_basis <- basis2fdata(coefs_opt, argvals = age, type = "bspline")$data[idx, ]
 
+# Penalized basis (GCV)
+smooth_pen <- result_gcv$fitted$data[idx, ]
+
 # Create data frame for plotting
 df_all <- data.frame(
-  age = rep(age, 5),
+  age = rep(age, 6),
   height = c(fd_noisy$data[idx, ], smooth_pspline, smooth_kernel,
-             smooth_basis, fd_raw$data[idx, ]),
+             smooth_basis, smooth_pen, fd_raw$data[idx, ]),
   method = factor(rep(c("Noisy data", "P-spline", "Local Linear",
-                        "B-spline basis", "Original"), each = length(age)),
+                        "B-spline basis", "Penalized (GCV)", "Original"),
+                      each = length(age)),
                   levels = c("Noisy data", "P-spline", "Local Linear",
-                             "B-spline basis", "Original"))
+                             "B-spline basis", "Penalized (GCV)", "Original"))
 )
 
 ggplot(df_all, aes(x = age, y = height, color = method, linetype = method)) +
@@ -380,10 +508,10 @@ ggplot(df_all, aes(x = age, y = height, color = method, linetype = method)) +
   geom_line(data = subset(df_all, method != "Noisy data"), linewidth = 1) +
   scale_color_manual(values = c("Noisy data" = "gray60", "P-spline" = "blue",
                                  "Local Linear" = "darkgreen", "B-spline basis" = "purple",
-                                 "Original" = "red")) +
+                                 "Penalized (GCV)" = "orange", "Original" = "red")) +
   scale_linetype_manual(values = c("Noisy data" = "blank", "P-spline" = "solid",
                                     "Local Linear" = "solid", "B-spline basis" = "solid",
-                                    "Original" = "dashed")) +
+                                    "Penalized (GCV)" = "solid", "Original" = "dashed")) +
   labs(x = "Age (years)", y = "Height (cm)",
        title = "Smoothing Method Comparison", color = NULL, linetype = NULL) +
   theme_minimal() +
@@ -427,27 +555,29 @@ ggplot(df_mean, aes(x = age)) +
 
 ## Summary: When to Use Each Method
 
-| Method               | Best For                              | Key Parameter         |
-|----------------------|---------------------------------------|-----------------------|
-| **P-splines**        | General purpose, automatic tuning     | $\lambda$ (smoothing) |
-| **Kernel smoothers** | Non-parametric, local adaptation      | $h$ (bandwidth)       |
-| **Basis expansion**  | Dimensionality reduction, derivatives | $K$ (number of basis) |
+| Method                      | Function                                                                                                                         | Best For                           | Key Parameter         |
+|-----------------------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------------|-----------------------|
+| **P-splines**               | [`pspline()`](https://sipemu.github.io/fdars-r/reference/pspline.md)                                                             | General purpose, automatic tuning  | $\lambda$ (smoothing) |
+| **Kernel smoothers**        | [`S.NW()`](https://sipemu.github.io/fdars-r/reference/S.NW.md), [`S.LLR()`](https://sipemu.github.io/fdars-r/reference/S.LLR.md) | Non-parametric, local adaptation   | $h$ (bandwidth)       |
+| **Basis expansion**         | [`fdata2basis()`](https://sipemu.github.io/fdars-r/reference/fdata2basis.md)                                                     | Dimensionality reduction           | $K$ (number of basis) |
+| **Penalized basis (fixed)** | [`smooth.basis.fd()`](https://sipemu.github.io/fdars-r/reference/smooth.basis.fd.md)                                             | Known smoothness, explicit control | $\lambda$ (penalty)   |
+| **Penalized basis (auto)**  | [`smooth.basis.gcv()`](https://sipemu.github.io/fdars-r/reference/smooth.basis.gcv.md)                                           | Automatic tuning, GCV/AIC/BIC      | data-driven $\lambda$ |
 
 **Recommendations:**
 
-1.  **Start with P-splines** - automatic $\lambda$ selection works well
-    in most cases
-2.  **Use basis expansion** when you need derivatives (smoother
-    derivatives)
-3.  **Use kernel smoothers** for highly irregular sampling or adaptive
+1.  **Start with
+    [`smooth.basis.gcv()`](https://sipemu.github.io/fdars-r/reference/smooth.basis.gcv.md)**
+    — automatic $\lambda$ selection via GCV works well in most cases
+2.  **Use
+    [`pspline()`](https://sipemu.github.io/fdars-r/reference/pspline.md)**
+    for fast P-spline smoothing with GCV
+3.  **Use basis expansion**
+    ([`fdata2basis()`](https://sipemu.github.io/fdars-r/reference/fdata2basis.md))
+    when dimensionality reduction is the goal
+4.  **Use kernel smoothers** for highly irregular sampling or adaptive
     smoothing
-
-## See Also
-
-- `vignette("basis-representation", package = "fdars")` — basis function
-  representations (B-spline, Fourier)
-- `vignette("working-with-derivatives", package = "fdars")` — estimating
-  and analyzing functional derivatives
+5.  **Use Fourier basis** (`smooth.basis.gcv(..., type = "fourier")`)
+    for periodic/seasonal data
 
 ## See Also
 

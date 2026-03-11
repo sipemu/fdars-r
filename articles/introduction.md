@@ -24,6 +24,8 @@ include:
 - **Flexible metrics**: Multiple distance measures including DTW
 - **2D support**: Analysis of surfaces in addition to curves
 
+![The fdars Toolkit](../reference/figures/introduction-diagram.svg)
+
 ## Installation
 
 ``` r
@@ -32,20 +34,6 @@ remotes::install_github("sipemu/fdars")
 ```
 
 ## Getting Started
-
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
 
 ### Creating Functional Data
 

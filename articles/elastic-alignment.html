@@ -78,24 +78,12 @@ uses the <strong>Square-Root Slope Function (SRSF)</strong>
 representation, which makes the Fisher-Rao metric equivalent to the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>L</mi><mn>2</mn></msup><annotation encoding="application/x-tex">L^2</annotation></semantics></math>
 metric – enabling efficient dynamic programming alignment.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<img src="../reference/figures/elastic-alignment-diagram.svg" alt="Elastic Alignment Diagram" style="width:100%; max-width:700px;">
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">argvals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
@@ -114,12 +102,12 @@ metric – enabling efficient dynamic programming alignment.</p>
 <span><span class="co">#&gt; Elastic Alignment</span></span>
 <span><span class="co">#&gt;   Curves: 15 x 100 grid points</span></span>
 <span><span class="co">#&gt;   Mean elastic distance: 0.2025</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/quick-start-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>You can also supply a custom target – as a numeric vector or an
 <code>fdata</code> object:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use the deepest (most central) curve as target</span></span>
 <span><span class="va">depths</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/depth.html">depth</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"FM"</span><span class="op">)</span></span>
 <span><span class="va">res_deep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.align.html">elastic.align</a></span><span class="op">(</span><span class="va">fd</span>, target <span class="op">=</span> <span class="va">fd</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">depths</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
@@ -138,7 +126,7 @@ that maps the <strong>reference time axis</strong> to the
 <strong>original curve’s time axis</strong>. The aligned curve is then
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>γ</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f_i(\gamma_i(t))</annotation></semantics></math>
 – time is reparameterised so that features line up with the target.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"warps"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/warps-1.png" class="r-plt" alt="" width="100%"></p>
 <div class="section level4">
@@ -180,7 +168,7 @@ speeds it up.</li>
 </ul>
 <p>Let’s visualise this for a single curve to make the interpretation
 concrete:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pick the curve with the largest shift</span></span>
 <span><span class="va">i_max</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">shifts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">gamma_i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">gammas</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">i_max</span>, <span class="op">]</span><span class="op">)</span></span>
@@ -383,14 +371,14 @@ and an initial value
 the original function is recovered by:</li>
 </ol>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>f</mi><mn>0</mn></msub><mo>+</mo><msubsup><mo>∫</mo><mn>0</mn><mi>t</mi></msubsup><mi>q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">|</mo><mi>q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">f(t) = f_0 + \int_0^t q(s)|q(s)|\,ds</annotation></semantics></math></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srsf.transform.html">srsf.transform</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Original Curves"</span><span class="op">)</span></span>
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">q</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"SRSF Representation"</span><span class="op">)</span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/srsf-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f_original</span> <span class="op">&lt;-</span> <span class="va">fd</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span>
 <span><span class="va">q_values</span> <span class="op">&lt;-</span> <span class="va">q</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span>
 <span><span class="va">f_reconstructed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/srsf.inverse.html">srsf.inverse</a></span><span class="op">(</span><span class="va">q_values</span>, <span class="va">argvals</span>, <span class="va">f_original</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -497,14 +485,14 @@ typically occurs in 5–20 iterations.</p>
 <div class="section level3">
 <h3 id="karcher-mean-1">Karcher Mean<a class="anchor" aria-label="anchor" href="#karcher-mean-1"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/karcher.mean.html">karcher.mean</a></span><span class="op">(</span><span class="va">fd</span>, max.iter <span class="op">=</span> <span class="fl">20</span>, tol <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">km</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Karcher Mean (Elastic)</span></span>
 <span><span class="co">#&gt;   Curves: 15 x 100 grid points</span></span>
 <span><span class="co">#&gt;   Iterations: 18 </span></span>
 <span><span class="co">#&gt;   Converged: TRUE</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">karcher</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">mean</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span></span>
@@ -525,7 +513,7 @@ typically occurs in 5–20 iterations.</p>
 Karcher mean recovers the true amplitude.</p>
 <p>For complex data, increase <code>max.iter</code> and check
 convergence:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -540,7 +528,7 @@ convergence:</p>
 <span><span class="co">#&gt; Converged: TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">km</span><span class="op">$</span><span class="va">n.iter</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Iterations: 20</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">km</span>, type <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/karcher-custom-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -551,7 +539,7 @@ convergence:</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mi>e</mi></msub><annotation encoding="application/x-tex">d_e</annotation></semantics></math>
 provides a reparameterization-invariant metric for clustering, MDS, and
 other distance-based methods:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.distance.html">elastic.distance</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Metric properties</span></span>
@@ -561,14 +549,14 @@ other distance-based methods:</p>
 <span><span class="co">#&gt; Non-negative:           TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Zero diagonal:         "</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">D</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">1e-10</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Zero diagonal:          TRUE</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">cmdscale</a></span><span class="op">(</span><span class="va">D</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mds</span>, pch <span class="op">=</span> <span class="fl">19</span>, xlab <span class="op">=</span> <span class="st">"MDS 1"</span>, ylab <span class="op">=</span> <span class="st">"MDS 2"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"MDS of Elastic Distances"</span>, col <span class="op">=</span> <span class="st">"steelblue"</span>, cex <span class="op">=</span> <span class="fl">1.3</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/mds-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The elastic distance is also available through the
 <code><a href="../reference/metric.html">metric()</a></code> dispatcher:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">D2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.html">metric</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"elastic"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">D</span>, <span class="va">D2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
@@ -579,7 +567,7 @@ other distance-based methods:</p>
 <p>The elastic framework uniquely decomposes the total distance between
 two curves into <strong>amplitude</strong> (shape) and
 <strong>phase</strong> (timing) components:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">D_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/amplitude.distance.html">amplitude.distance</a></span><span class="op">(</span><span class="va">fd</span>, lambda <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">D_phase</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phase.distance.html">phase.distance</a></span><span class="op">(</span><span class="va">fd</span>, lambda <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
@@ -599,7 +587,7 @@ shapes are similar after alignment).</p>
 </h2>
 <p>After alignment, we can quantify exactly what changed. First, compute
 the Karcher mean and alignment quality:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">km_diag</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/karcher.mean.html">karcher.mean</a></span><span class="op">(</span><span class="va">fd</span>, max.iter <span class="op">=</span> <span class="fl">20</span>, tol <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
 <span><span class="va">aq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alignment.quality.html">alignment.quality</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">km_diag</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">aq</span><span class="op">)</span></span>
@@ -616,7 +604,7 @@ the Karcher mean and alignment quality:</p>
 </h3>
 <p>To see the effect of alignment concretely, we compare key metrics
 computed on the original and aligned curves:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pairwise L2 distances</span></span>
 <span><span class="va">D_before</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="../reference/metric.lp.html">metric.lp</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">D_after</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="../reference/metric.lp.html">metric.lp</a></span><span class="op">(</span><span class="va">km_diag</span><span class="op">$</span><span class="va">aligned</span><span class="op">)</span><span class="op">)</span></span>
@@ -677,7 +665,7 @@ computed on the original and aligned curves:</p>
 <p>The pointwise variance at each time point shows <em>where</em>
 alignment had the greatest effect. The shaded region highlights the
 variance removed:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_var</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">argvals</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  variance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">var_before</span>, <span class="va">var_after</span><span class="op">)</span>,</span>
@@ -706,7 +694,7 @@ variance removed:</p>
 <p>The cross-sectional mean of the original curves is blurred by timing
 differences. The Karcher mean, computed after alignment, recovers a
 sharper representative shape:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fd</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fd</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span></span>
@@ -761,7 +749,7 @@ functions from the identity (higher = more warping needed)</li>
 <strong>Warp smoothness</strong>: measures the regularity of the
 warping functions</li>
 </ul>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">aq</span>, type <span class="op">=</span> <span class="st">"variance"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/quality-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -772,7 +760,7 @@ warping functions</li>
 whether pairwise alignments are consistent – i.e., whether aligning A to
 C directly gives the same result as aligning A to B then B to C. A value
 near 1 indicates high consistency:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alignment.pairwise.consistency.html">alignment.pairwise.consistency</a></span><span class="op">(</span><span class="va">fd</span>, lambda <span class="op">=</span> <span class="fl">0</span>, max.triplets <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Pairwise consistency:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pc</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Pairwise consistency: 0.004</span></span></code></pre></div>
@@ -787,7 +775,7 @@ target.</p>
 <p>For individual curve pairs, <code><a href="../reference/elastic.decomposition.html">elastic.decomposition()</a></code>
 provides the full decomposition of the elastic distance into amplitude
 and phase components:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f1</span> <span class="op">&lt;-</span> <span class="va">fd</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="va">fd</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span></span>
 <span></span>
@@ -796,7 +784,7 @@ and phase components:</p>
 <span><span class="co">#&gt; Amplitude distance: 0.2483</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase distance:    "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">decomp</span><span class="op">$</span><span class="va">d_phase</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Phase distance:     0.0789</span></span></code></pre></div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize the aligned pair</span></span>
 <span><span class="va">f1_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">f1</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">f2_aligned</span> <span class="op">&lt;-</span> <span class="va">decomp</span><span class="op">$</span><span class="va">f_aligned</span></span>
@@ -823,11 +811,11 @@ different timing (phase)?</p>
 constrain the elastic alignment to pass through specific landmark
 positions. This combines the smoothness of elastic warping with
 guaranteed feature correspondence:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Detect peaks and constrain alignment to pass through them</span></span>
 <span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.align.constrained.html">elastic.align.constrained</a></span><span class="op">(</span><span class="va">fd</span>, kind <span class="op">=</span> <span class="st">"peak"</span>, min.prominence <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>                                 expected.count <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"warps"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Elastic Warps"</span><span class="op">)</span></span>
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ec</span>, type <span class="op">=</span> <span class="st">"warps"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Constrained Warps"</span><span class="op">)</span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre></div>
@@ -982,7 +970,7 @@ reported.</p>
 </h3>
 <p>Sharp, localized features with timing differences are the ideal use
 case:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1002,7 +990,7 @@ case:</p>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_ecg</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ECG alignment VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ECG alignment VR: 99.5 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_ecg</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-ecg-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -1011,7 +999,7 @@ case:</p>
 </h3>
 <p>Multiple peaks at varying positions, common in spectroscopy and
 chromatography:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1027,7 +1015,7 @@ chromatography:</p>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_spec</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Spectral alignment VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Spectral alignment VR: 99.4 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_spec</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-spectral-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -1036,7 +1024,7 @@ chromatography:</p>
 </h3>
 <p>Monotone S-shaped curves with timing shifts (e.g., growth curves with
 differing onset times):</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1050,7 +1038,7 @@ differing onset times):</p>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_sig</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Sigmoid alignment VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Sigmoid alignment VR: 100 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_sig</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-sigmoid-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -1060,7 +1048,7 @@ differing onset times):</p>
 <p>When curves differ in both height <em>and</em> timing, alignment
 corrects the phase component but leaves amplitude variability
 untouched:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1075,7 +1063,7 @@ untouched:</p>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_mix</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mixed amplitude+phase VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Mixed amplitude+phase VR: 44.4 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_mix</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-mixed-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>After alignment, curves still differ in amplitude (vertical spread)
@@ -1087,7 +1075,7 @@ real amplitude variability, not a failure of alignment.</p>
 </h3>
 <p>Noise in derivatives overwhelms the SRSF. Pre-smoothing recovers
 alignment:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">dm_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1112,10 +1100,10 @@ alignment:</p>
 <span><span class="co">#&gt; Raw VR:      22.3 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Smoothed VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_sm</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Smoothed VR: 66.3 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_noisy</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-noise-raw-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_sm</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-noise-smooth-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -1124,7 +1112,7 @@ alignment:</p>
 </h3>
 <p>When shifted curves have different values at the domain boundaries,
 alignment is excellent in the interior but constrained at the edges:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">15</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1136,7 +1124,7 @@ alignment is excellent in the interior but constrained at the edges:</p>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_bnd</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Boundary mismatch VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"% — note residual spread at boundaries\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Boundary mismatch VR: 77 % — note residual spread at boundaries</span></span></code></pre></div>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_bnd</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-boundary-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -1145,7 +1133,7 @@ alignment is excellent in the interior but constrained at the edges:</p>
 </h3>
 <p>When curves differ only in height (no phase variability), alignment
 correctly produces identity warps – no benefit, but no harm:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">15</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1159,7 +1147,7 @@ correctly produces identity warps – no benefit, but no harm:</p>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_amp</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Pure amplitude VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"% — identity warps applied\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Pure amplitude VR: 0 % — identity warps applied</span></span></code></pre></div>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_amp</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-amplitude-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -1169,7 +1157,7 @@ correctly produces identity warps – no benefit, but no harm:</p>
 <p>Alignment should <strong>not</strong> be used when curves have
 fundamentally different shapes. Forced warping produces meaningless
 results:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">15</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -1186,7 +1174,7 @@ results:</p>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_diff</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Different shapes VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"% — forced warping of unrelated shapes\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Different shapes VR: 40.7 % — forced warping of unrelated shapes</span></span></code></pre></div>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_diff</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/gallery-different-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>When VR is very low or negative, it indicates the data is not
@@ -1207,7 +1195,7 @@ broaden or narrow) as the number of bumps increases.</p>
 </h3>
 <p>With two bumps, the warping function has enough freedom to
 independently adjust each peak’s position and width:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
 <span><span class="va">argvals_mb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
@@ -1243,10 +1231,10 @@ independently adjust each peak’s position and width:</p>
 <span><span class="co">#&gt; 2 bumps — varying position: VR = 100 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2 bumps — varying width:    VR ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_w</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 2 bumps — varying width:    VR = 98.2 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_pos</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/multi-bump-2-pos-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_w</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/multi-bump-2-width-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>Both cases achieve near-perfect alignment. The warping function
@@ -1260,7 +1248,7 @@ into correspondence.</p>
 harder. A monotone warping function that stretches one region must
 compress another, so with many tightly packed bumps the degrees of
 freedom become insufficient to independently correct each peak.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  bumps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="op">)</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>, VR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -1316,7 +1304,7 @@ freedom become insufficient to independently correct each peak.</p>
 <span>    VR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">vr_pos</span>, <span class="va">vr_w</span>, <span class="va">vr_both</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span></span>
 <span>  <span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Display as a table</span></span>
 <span><span class="va">df_wide</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span><span class="va">results</span>, idvar <span class="op">=</span> <span class="st">"bumps"</span>, timevar <span class="op">=</span> <span class="st">"scenario"</span>,</span>
 <span>                   direction <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span></span>
@@ -1373,7 +1361,7 @@ type</caption>
 <div class="section level3">
 <h3 id="visual-comparison-4-vs-7-bumps">Visual Comparison: 4 vs 7 Bumps<a class="anchor" aria-label="anchor" href="#visual-comparison-4-vs-7-bumps"></a>
 </h3>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 4 bumps — both varying</span></span>
@@ -1410,10 +1398,10 @@ type</caption>
 <span><span class="co">#&gt; 4 bumps (both varying) — VR = 98.9 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"7 bumps (both varying) — VR ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr7</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 7 bumps (both varying) — VR = 62.1 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res4</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/multi-bump-4-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res7</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/multi-bump-7-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>With 4 bumps, alignment still captures most of the variability. With
@@ -1514,7 +1502,7 @@ single point, which can produce degenerate alignments.</p>
 </h3>
 <p>The clearest way to see the differences is on data with localized
 features:</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">m_cmp</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
 <span><span class="va">argvals_cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m_cmp</span><span class="op">)</span></span>
@@ -1532,19 +1520,19 @@ features:</p>
 <span><span class="va">var_orig_cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fd_cmp</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Elastic alignment</strong> finds smooth, local warping for
 each bump independently:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.align.html">elastic.align</a></span><span class="op">(</span><span class="va">fd_cmp</span><span class="op">)</span></span>
 <span><span class="va">vr_elastic</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">res_elastic</span><span class="op">$</span><span class="va">aligned</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">var_orig_cmp</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Elastic VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_elastic</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Elastic VR: 100 %</span></span></code></pre></div>
 <p><strong>Shift registration</strong> applies a single global shift –
 it can center one bump but not both when they move independently:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/register.fd.html">register.fd</a></span><span class="op">(</span><span class="va">fd_cmp</span><span class="op">)</span></span>
 <span><span class="va">vr_shift</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">res_shift</span><span class="op">$</span><span class="va">registered</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">var_orig_cmp</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Shift registration VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_shift</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Shift registration VR: -55.1 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot_curves</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">argvals</span>, <span class="va">title</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span>  <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">argvals</span><span class="op">)</span></span>
@@ -1577,7 +1565,7 @@ residual phase variability when features move independently.</p>
 <p>DTW and elastic distances rank curves differently because DTW can
 absorb amplitude differences into warping while elastic alignment
 separates them:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute both distance matrices</span></span>
 <span><span class="va">D_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.distance.html">elastic.distance</a></span><span class="op">(</span><span class="va">fd_cmp</span><span class="op">)</span></span>
 <span><span class="va">D_dtw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.DTW.html">metric.DTW</a></span><span class="op">(</span><span class="va">fd_cmp</span><span class="op">)</span></span>
@@ -1587,7 +1575,7 @@ separates them:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between elastic and DTW distances:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">D_elastic</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span>, <span class="va">D_dtw</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Correlation between elastic and DTW distances: 0.895</span></span></code></pre></div>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_ed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>elastic <span class="op">=</span> <span class="va">D_elastic</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span>, dtw <span class="op">=</span> <span class="va">D_dtw</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_ed</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">elastic</span>, y <span class="op">=</span> <span class="va">dtw</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"steelblue"</span>, size <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1599,7 +1587,7 @@ separates them:</p>
 <p><img src="elastic-alignment_files/figure-html/comparison-distances-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The distances are correlated but not identical. The key difference
 emerges when amplitude variability is present:</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="co"># Curves with BOTH amplitude and phase variability</span></span>
 <span><span class="va">data_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_cmp</span>, <span class="va">m_cmp</span><span class="op">)</span></span>
@@ -1686,7 +1674,7 @@ with large phase offsets cannot be properly aligned.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>sin</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\sin(t)</annotation></semantics></math>
 shifted by half a period have identical shape but the boundary
 constraints force alignment to fail:</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">argvals_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
@@ -1705,7 +1693,7 @@ constraints force alignment to fail:</p>
 <span><span class="va">vr_std</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">res_std</span><span class="op">$</span><span class="va">aligned</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">var_orig</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Standard alignment on periodic data — VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_std</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Standard alignment on periodic data — VR: 66.6 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_std</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/periodic-problem-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -1735,12 +1723,12 @@ producing inconsistent rotations. In such cases, you may need to supply
 a custom <code>target.pos</code> to <code><a href="../reference/periodic.rotate.html">periodic.rotate()</a></code>, or
 pre-process the data to ensure a consistent landmark is the global
 maximum.</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_per</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.align.html">elastic.align</a></span><span class="op">(</span><span class="va">fd_p</span>, periodic <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">vr_per</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">res_per</span><span class="op">$</span><span class="va">aligned</span><span class="op">$</span><span class="va">data</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">var_orig</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Periodic alignment — VR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_per</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Periodic alignment — VR: 100 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_per</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-alignment_files/figure-html/periodic-solution-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The rotation step removes large circular shifts that the
@@ -1753,7 +1741,7 @@ corrects any remaining timing differences.</p>
 <p>Comparing the warping functions from standard vs periodic alignment
 reveals why the standard approach fails. Let’s look at the warping
 functions side by side, and inspect the warping speed:</p>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_warp_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_std</span>, type <span class="op">=</span> <span class="st">"warps"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Standard: warping functions"</span><span class="op">)</span></span>
 <span><span class="va">p_warp_per</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_per</span>, type <span class="op">=</span> <span class="st">"warps"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1772,7 +1760,7 @@ phase offset.</p>
 <p>We can quantify this by looking at the warping speed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>γ</mi><mo accent="true">̇</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\dot\gamma(t)</annotation></semantics></math>
 via <code><a href="../reference/deriv.html">deriv()</a></code>:</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">speed_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deriv.html">deriv</a></span><span class="op">(</span><span class="va">res_std</span><span class="op">$</span><span class="va">gammas</span><span class="op">)</span></span>
 <span><span class="va">speed_per</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deriv.html">deriv</a></span><span class="op">(</span><span class="va">res_per</span><span class="op">$</span><span class="va">gammas</span><span class="op">)</span></span>
 <span></span>
@@ -1782,7 +1770,7 @@ via <code><a href="../reference/deriv.html">deriv()</a></code>:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Periodic alignment — warping speed range:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">speed_per</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"to"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">speed_per</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Periodic alignment — warping speed range: 1 to 1</span></span></code></pre></div>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">speed_std</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">m_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">speed_std</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">df_speed_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -1821,7 +1809,7 @@ minor residual timing differences for the elastic alignment to
 correct.</p>
 <p>Let’s examine one curve in detail to see the full decomposition – the
 circular rotation followed by the residual elastic warp:</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pick the curve with the largest rotation shift</span></span>
 <span><span class="va">rot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/periodic.rotate.html">periodic.rotate</a></span><span class="op">(</span><span class="va">fd_p</span><span class="op">)</span></span>
 <span><span class="va">i_max</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">rot</span><span class="op">$</span><span class="va">shifts</span><span class="op">)</span><span class="op">)</span></span>
@@ -1929,7 +1917,7 @@ points</li>
 <code>res_per$gammas</code>) – the residual fine-tuning</li>
 </ol>
 <p>You can inspect both:</p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Curve"</span>, <span class="va">i_max</span>, <span class="st">"phase decomposition:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Curve 13 phase decomposition:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Circular rotation:"</span>, <span class="va">res_per</span><span class="op">$</span><span class="va">rotations</span><span class="op">[</span><span class="va">i_max</span><span class="op">]</span>, <span class="st">"grid points ("</span>,</span>
@@ -1964,7 +1952,7 @@ argument to <code><a href="../reference/periodic.rotate.html">periodic.rotate()<
 <p>Cross-correlation finds the circular shift that best aligns each
 curve to a reference, using all features simultaneously rather than a
 single landmark. This is robust to multi-peak shapes:</p>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Multi-peak curves where peak method fails</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">base_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">argvals_p</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.95</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">argvals_p</span> <span class="op">+</span> <span class="fl">0.3</span><span class="op">)</span></span>
@@ -1987,7 +1975,7 @@ single landmark. This is robust to multi-peak shapes:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Multi-peak rotation VR — peak:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_peak</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%,"</span>,</span>
 <span>    <span class="st">"xcorr:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vr_xcorr</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Multi-peak rotation VR — peak: 100 %, xcorr: 100 %</span></span></code></pre></div>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_peak</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rot_peak</span><span class="op">$</span><span class="va">fdataobj</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Peak rotation"</span><span class="op">)</span></span>
 <span><span class="va">p_xcorr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rot_xcorr</span><span class="op">$</span><span class="va">fdataobj</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Cross-correlation rotation"</span><span class="op">)</span></span>
 <span><span class="va">p_peak</span> <span class="op">+</span> <span class="va">p_xcorr</span></span></code></pre></div>
@@ -2004,7 +1992,7 @@ argument; by default it uses the cross-sectional mean.</p>
 <code>which.max</code>, you supply any function that locates a feature
 of interest. For example, a “steepest rise” function finds the point of
 maximum first derivative:</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">steepest_rise</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">curve</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">diffs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">curve</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">diffs</span><span class="op">)</span></span>
@@ -2024,7 +2012,7 @@ etc.</p>
 <p>The iterative method alternates between cross-correlation rotation
 and elastic alignment. This handles cases where the optimal rotation
 depends on the alignment and vice versa:</p>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rot_iter</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/periodic.rotate.html">periodic.rotate</a></span><span class="op">(</span><span class="va">fd_p</span>, method <span class="op">=</span> <span class="st">"iterative"</span>, max.iter <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterative shifts:"</span>, <span class="va">rot_iter</span><span class="op">$</span><span class="va">shifts</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Iterative shifts: 82 66 6 57 31 13 82 84 7 60 31 42 94 11 5</span></span></code></pre></div>
@@ -2072,7 +2060,7 @@ results when curves have complex shapes.</p>
 <p>You can pass the rotation method through to
 <code><a href="../reference/elastic.align.html">elastic.align()</a></code> and <code><a href="../reference/karcher.mean.html">karcher.mean()</a></code> via the
 <code>rotate.method</code> parameter:</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_xcorr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.align.html">elastic.align</a></span><span class="op">(</span><span class="va">fd_multi</span>, periodic <span class="op">=</span> <span class="cn">TRUE</span>, rotate.method <span class="op">=</span> <span class="st">"xcorr"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res_xcorr</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Elastic Alignment</span></span>
@@ -2081,13 +2069,13 @@ results when curves have complex shapes.</p>
 <span><span class="co">#&gt;   Periodic: TRUE (method: xcorr )</span></span></code></pre></div>
 <p>You can also apply the rotation step manually using
 <code><a href="../reference/periodic.rotate.html">periodic.rotate()</a></code>:</p>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/periodic.rotate.html">periodic.rotate</a></span><span class="op">(</span><span class="va">fd_p</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Shifts applied:"</span>, <span class="va">rot</span><span class="op">$</span><span class="va">shifts</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Shifts applied: 53 37 -23 28 2 -16 53 55 -22 31 2 13 65 -18 -24</span></span></code></pre></div>
 <p>The <code><a href="../reference/karcher.mean.html">karcher.mean()</a></code> function also accepts
 <code>periodic = TRUE</code>:</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">km_per</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/karcher.mean.html">karcher.mean</a></span><span class="op">(</span><span class="va">fd_p</span>, max.iter <span class="op">=</span> <span class="fl">15</span>, periodic <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">km_per</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Karcher Mean (Elastic)</span></span>
@@ -2113,7 +2101,7 @@ FPCA, and equivalence testing to the Berkeley Growth Study data, see
 </h3>
 <p>The SRSF transform involves derivatives, so noise gets amplified.
 Always smooth noisy data before alignment:</p>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">noisy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">15</span>, <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">shifts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span></span>
@@ -2144,7 +2132,7 @@ Always smooth noisy data before alignment:</p>
 </h3>
 <p>The dynamic programming alignment operates on the evaluation grid.
 Finer grids yield more accurate warping:</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">m</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">av</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
@@ -2191,7 +2179,7 @@ Finer grids yield more accurate warping:</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">shifts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">15</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -2217,7 +2205,7 @@ Finer grids yield more accurate warping:</p>
 <p>Alignment before FPCA concentrates variance into the first principal
 component by removing phase variability that would otherwise spread
 across components:</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">shifts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">15</span>, <span class="fl">100</span><span class="op">)</span></span>
@@ -2251,7 +2239,7 @@ and
 This means the alignment cannot correct mismatches at the domain
 boundaries. For shifted curves, the residual at the boundary equals the
 value difference:</p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">argvals</span><span class="op">)</span></span>
 <span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="op">(</span><span class="va">argvals</span> <span class="op">-</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -2277,7 +2265,7 @@ vs
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>f</mi></mrow><annotation encoding="application/x-tex">2f</annotation></semantics></math>),
 alignment correctly produces identity warping – no spurious time
 distortion:</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">argvals</span><span class="op">)</span></span>
 <span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">argvals</span><span class="op">)</span></span>
 <span><span class="va">fd_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">f1</span>, <span class="va">f2</span><span class="op">)</span>, argvals <span class="op">=</span> <span class="va">argvals</span><span class="op">)</span></span>
@@ -2297,7 +2285,7 @@ phase and leaves amplitude untouched.</p>
 </h3>
 <p>The alignment works correctly on any domain, not just
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>:</p>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">domain</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">*</span><span class="va">pi</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">av</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="va">domain</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">domain</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span>  <span class="va">range</span> <span class="op">&lt;-</span> <span class="va">domain</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">domain</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>

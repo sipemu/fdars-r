@@ -23,20 +23,6 @@ confirms highly significant regional differences (p \< 0.002).
 The Canadian Weather dataset is a classic benchmark in functional data
 analysis (Ramsay and Silverman, 2005).
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Data Preparation
 
 The dataset contains daily temperature and precipitation averaged over
@@ -337,10 +323,10 @@ overlap.
 
 ## See Also
 
-- [`vignette("articles/functional-regression")`](https://sipemu.github.io/fdars-r/articles/functional-regression.md)
-  — FOSR and FANOVA methodology
-- [`vignette("articles/regression")`](https://sipemu.github.io/fdars-r/articles/regression.md)
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
   — scalar-on-function regression methods
+- [`vignette("articles/function-on-scalar")`](https://sipemu.github.io/fdars-r/articles/function-on-scalar.md)
+  — FOSR and FANOVA methodology
 - [`vignette("articles/example-tecator-regression")`](https://sipemu.github.io/fdars-r/articles/example-tecator-regression.md)
   — real-data regression: NIR spectra → fat content
 - [`vignette("articles/clustering")`](https://sipemu.github.io/fdars-r/articles/clustering.md)

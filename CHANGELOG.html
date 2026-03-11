@@ -37,7 +37,7 @@
 
 <p>All notable changes to fdars are documented in this file.</p>
 <div class="section level2">
-<h2 id="id_050---2026-03-09">[0.5.0] - 2026-03-09<a class="anchor" aria-label="anchor" href="#id_050---2026-03-09"></a></h2>
+<h2 id="id_050---2026-03-11">[0.5.0] - 2026-03-11<a class="anchor" aria-label="anchor" href="#id_050---2026-03-11"></a></h2>
 <div class="section level3">
 <h3 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a></h3>
 <ul><li>
@@ -62,6 +62,69 @@
 <code><a href="reference/alignment.pairwise.consistency.html">alignment.pairwise.consistency()</a></code> — transitivity checks</li>
 <li>
 <code><a href="reference/periodic.rotate.html">periodic.rotate()</a></code> — rotate periodic curves with methods: peak, xcorr, landmark, iterative</li>
+</ul></li>
+<li>
+<strong>Elastic FPCA</strong> (amplitude/phase PCA):
+<ul><li>
+<code><a href="reference/vert.fpca.html">vert.fpca()</a></code> — amplitude (vertical) PCA on aligned curves</li>
+<li>
+<code><a href="reference/horiz.fpca.html">horiz.fpca()</a></code> — phase (horizontal) PCA on warping functions</li>
+<li>
+<code><a href="reference/joint.fpca.html">joint.fpca()</a></code> — joint amplitude + phase PCA with balance parameter</li>
+<li>S3 print/plot methods for all three classes</li>
+</ul></li>
+<li>
+<strong>Elastic regression</strong> (alignment-aware models):
+<ul><li>
+<code><a href="reference/elastic.regression.html">elastic.regression()</a></code> — scalar-on-function regression with simultaneous alignment</li>
+<li>
+<code><a href="reference/elastic.logistic.html">elastic.logistic()</a></code> — elastic logistic regression for binary classification</li>
+<li>
+<code><a href="reference/elastic.pcr.html">elastic.pcr()</a></code> — principal component regression with elastic FPCA</li>
+<li>
+<code><a href="reference/elastic.attribution.html">elastic.attribution()</a></code> — amplitude vs phase contribution decomposition</li>
+<li>S3 print/plot methods for all three classes</li>
+</ul></li>
+<li>
+<strong>Elastic changepoint detection</strong>:
+<ul><li>
+<code><a href="reference/elastic.changepoint.html">elastic.changepoint()</a></code> — detect structural breaks in functional time series</li>
+<li>Three change types: “amplitude” (shape), “phase” (timing), “fpca” (combined)</li>
+<li>CUSUM test statistics with permutation-based p-values</li>
+<li>S3 print/plot methods with statistic and data visualization</li>
+</ul></li>
+<li>
+<strong>Model explainability &amp; diagnostics</strong> (22+ methods for <code>fregre.lm</code> and <code>functional.logistic</code>):
+<ul><li>Global: <code><a href="reference/fregre.beta.decomp.html">fregre.beta.decomp()</a></code>, <code><a href="reference/fregre.pdp.html">fregre.pdp()</a></code>, <code><a href="reference/fregre.ale.html">fregre.ale()</a></code>, <code><a href="reference/fregre.sobol.html">fregre.sobol()</a></code>, <code><a href="reference/fregre.importance.html">fregre.importance()</a></code>, <code><a href="reference/fregre.friedman.html">fregre.friedman()</a></code>
+</li>
+<li>Local: <code><a href="reference/fregre.lime.html">fregre.lime()</a></code>, <code><a href="reference/fregre.shap.html">fregre.shap()</a></code>, <code><a href="reference/fregre.counterfactual.html">fregre.counterfactual()</a></code>, <code><a href="reference/fregre.anchor.html">fregre.anchor()</a></code>, <code><a href="reference/fregre.saliency.html">fregre.saliency()</a></code>
+</li>
+<li>Diagnostics: <code><a href="reference/fregre.influence.html">fregre.influence()</a></code>, <code><a href="reference/fregre.vif.html">fregre.vif()</a></code>, <code><a href="reference/fregre.dfbetas.html">fregre.dfbetas()</a></code>, <code><a href="reference/fregre.loo.html">fregre.loo()</a></code>
+</li>
+<li>Domain: <code><a href="reference/fregre.significant.regions.html">fregre.significant.regions()</a></code>, <code><a href="reference/fregre.domain.html">fregre.domain()</a></code>, <code><a href="reference/fregre.pointwise.html">fregre.pointwise()</a></code>
+</li>
+<li>Calibration (logistic): <code><a href="reference/fregre.calibration.html">fregre.calibration()</a></code>, <code><a href="reference/fregre.ece.html">fregre.ece()</a></code>
+</li>
+<li>Uncertainty: <code><a href="reference/fregre.prediction.interval.html">fregre.prediction.interval()</a></code>, <code><a href="reference/fregre.conformal.html">fregre.conformal()</a></code>
+</li>
+<li>Meta: <code><a href="reference/fregre.stability.html">fregre.stability()</a></code>, <code><a href="reference/fregre.depth.html">fregre.depth()</a></code>, <code><a href="reference/fregre.prototype.html">fregre.prototype()</a></code>, <code><a href="reference/fregre.conditional.importance.html">fregre.conditional.importance()</a></code>
+</li>
+</ul></li>
+<li>
+<strong>Penalized basis smoothing</strong>:
+<ul><li>
+<code><a href="reference/smooth.basis.fd.html">smooth.basis.fd()</a></code> — penalized B-spline/Fourier basis smoothing</li>
+<li>
+<code><a href="reference/smooth.basis.gcv.html">smooth.basis.gcv()</a></code> — automatic lambda selection via GCV grid search</li>
+<li>S3 print/plot methods for <code>smooth.basis</code> objects</li>
+</ul></li>
+<li>
+<strong>Cross-validation framework</strong>:
+<ul><li>
+<code><a href="reference/cv.fdata.html">cv.fdata()</a></code> — unified k-fold cross-validation for any fitting function</li>
+<li>Supports regression (RMSE, MAE, R²) and classification (accuracy, confusion matrix)</li>
+<li>Repeated k-fold CV with aggregation</li>
+<li>Stratified folding for balanced class splits</li>
 </ul></li>
 <li>
 <strong>Landmark registration</strong>:
@@ -111,7 +174,7 @@
 <li>
 <strong>Functional classification</strong>:
 <ul><li>
-<code><a href="reference/fclassif.html">fclassif()</a></code> — supervised classification (LDA, QDA, kNN, kernel, DD-plot)</li>
+<code><a href="reference/fclassif.html">fclassif()</a></code> — supervised classification (LDA, QDA, kNN, kernel, DD-plot, SVM)</li>
 <li>
 <code><a href="reference/fclassif.cv.html">fclassif.cv()</a></code> — cross-validated classification error</li>
 </ul></li>
@@ -130,6 +193,15 @@
 <code><a href="reference/cluster.gmm.html">cluster.gmm()</a></code> — Gaussian Mixture Model clustering with automatic K selection</li>
 <li>
 <code><a href="reference/cluster.init.html">cluster.init()</a></code> — k-means++ initialization</li>
+</ul></li>
+<li>
+<strong>Scalar-on-function regression</strong>:
+<ul><li>
+<code><a href="reference/fregre.lm.html">fregre.lm()</a></code>, <code><a href="reference/fregre.lm.cv.html">fregre.lm.cv()</a></code> — FPC-based functional linear regression with Rust backend</li>
+<li>
+<code><a href="reference/functional.logistic.html">functional.logistic()</a></code> — functional logistic regression via IRLS</li>
+<li>
+<code><a href="reference/fregre.np.mixed.html">fregre.np.mixed()</a></code> — mixed scalar + functional nonparametric regression</li>
 </ul></li>
 <li>
 <strong>Andrews transformation</strong>:
@@ -155,18 +227,13 @@
 <li>
 <code><a href="reference/detect_amplitude_modulation.html">detect_amplitude_modulation()</a></code>, <code><a href="reference/instantaneous.period.html">instantaneous.period()</a></code>, <code><a href="reference/analyze.peak.timing.html">analyze.peak.timing()</a></code>
 </li>
+<li>S3 plot methods: <code><a href="reference/plot.peak_detection.html">plot.peak_detection()</a></code>, <code><a href="reference/plot.peak_timing.html">plot.peak_timing()</a></code>
+</li>
 </ul></li>
 <li>
 <strong>Equivalence testing</strong>:
 <ul><li>
 <code><a href="reference/fequiv.test.html">fequiv.test()</a></code> — functional equivalence test</li>
-</ul></li>
-<li>
-<strong>Functional linear model</strong>:
-<ul><li>
-<code><a href="reference/fregre.lm.html">fregre.lm()</a></code>, <code><a href="reference/fregre.lm.cv.html">fregre.lm.cv()</a></code> — FPC-based functional linear regression</li>
-<li>
-<code><a href="reference/functional.logistic.html">functional.logistic()</a></code> — functional logistic regression</li>
 </ul></li>
 <li>
 <strong>Simulation toolbox</strong>:
@@ -209,21 +276,34 @@
 <code><a href="reference/plot.fclassif.html">plot.fclassif()</a></code>, <code><a href="reference/plot.fmm.html">plot.fmm()</a></code>, <code><a href="reference/plot.fosr.html">plot.fosr()</a></code>, <code><a href="reference/plot.fanova.html">plot.fanova()</a></code>
 </li>
 <li><code><a href="reference/plot.cluster.gmm.html">plot.cluster.gmm()</a></code></li>
+<li>
+<code>plot.elastic.changepoint()</code>, <code>plot.elastic.regression()</code>, <code>plot.elastic.logistic()</code>, <code>plot.elastic.pcr()</code>
+</li>
+<li>
+<code>plot.vert.fpca()</code>, <code>plot.horiz.fpca()</code>, <code>plot.joint.fpca()</code>
+</li>
+<li>
+<code>plot.smooth.basis()</code>, <code><a href="reference/plot.cv.fdata.html">plot.cv.fdata()</a></code>
+</li>
 </ul></li>
 <li>
-<strong>Vignettes/articles</strong> (17 articles covering all major features):
+<strong>Vignettes/articles</strong> (46 articles with SVG overview diagrams):
 <ul><li>Elastic alignment, landmark registration, TSRVF, alignment comparison</li>
+<li>Elastic FPCA, elastic regression, elastic changepoint detection</li>
 <li>Tolerance bands, streaming depth, distance metrics</li>
 <li>Functional regression, classification, mixed models, GMM clustering</li>
+<li>Model explainability, regression diagnostics, uncertainty quantification</li>
+<li>Penalized basis smoothing, cross-validation framework</li>
 <li>Andrews transformation, seasonal analysis</li>
-<li>Example analyses: Berkeley growth study, wine dataset (4 articles)</li>
+<li>Covariance functions, simulation toolbox, custom plotting</li>
+<li>Example analyses: Berkeley growth study, wine dataset, Sonar TSRVF classification</li>
 </ul></li>
 <li>
 <strong>Pre-built binary packages</strong> for macOS (.tgz) and Windows (.zip) attached to GitHub Releases — install without Rust toolchain</li>
 </ul></div>
 <div class="section level3">
 <h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
-<ul><li>Upgraded Rust backend (fdars-core) to v0.7.2</li>
+<ul><li>Upgraded Rust backend (fdars-core) to v0.8.0</li>
 <li>All plots use ggplot2; respects <code>theme_set()</code>
 </li>
 <li>Renamed functions to avoid S3 dispatch conflicts:
@@ -245,14 +325,21 @@
 <li>Internal Rust wrapper functions no longer generate man pages (CRAN compliance)</li>
 <li>Portable Makefiles: removed GNU extensions (<code>export</code>, <code>:=</code>)</li>
 <li>Vendored Rust crates cleaned of hidden files and long paths</li>
+<li>GitHub Actions: pinned R 4.5.2, added Rust toolchain to pkgdown workflow</li>
 </ul></div>
 <div class="section level3">
 <h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
-<ul><li>
+<ul><li>Changepoint p-values always 1.0 (normalization mismatch in Brownian bridge simulation; replaced with permutation testing)</li>
+<li>
+<code><a href="reference/functional.logistic.html">functional.logistic()</a></code> missing <code>.fpca_scores</code>, <code>beta.se</code>, <code>std.errors</code> from Rust</li>
+<li>
+<code><a href="reference/fregre.conformal.html">fregre.conformal()</a></code> wrapper now works correctly</li>
+<li>
 <code>fdata2basis_2d</code> example error caused by extendr wrapper name collision</li>
 <li>
 <code>mean(fd)</code> now returns fdata object (was returning matrix)</li>
 <li>TSRVF inverse initial values</li>
+<li>Empty bar charts in seasonal plots (use <code>coord_cartesian</code> instead of <code>ylim</code>)</li>
 <li>Regression article cross-references and See Also sections</li>
 </ul></div>
 </div>

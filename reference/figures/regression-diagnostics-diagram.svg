@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 281" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="20.2" font-weight="bold" fill="#333">Regression Diagnostics for Functional Models</text>
+
+  <!-- Category ribbons -->
+  <rect x="8" y="32" width="228" height="17" rx="3" fill="#7B2D8E" opacity="0.08"/>
+  <text x="122" y="45" text-anchor="middle" font-size="11.0" font-weight="bold" fill="#7B2D8E">Influence &amp; Case Deletion (lm only)</text>
+  <rect x="244" y="32" width="220" height="17" rx="3" fill="#4A90D9" opacity="0.08"/>
+  <text x="354" y="45" text-anchor="middle" font-size="11.0" font-weight="bold" fill="#2C5F8A">Importance &amp; Robustness (lm + logistic)</text>
+  <rect x="472" y="32" width="220" height="17" rx="3" fill="#2E8B57" opacity="0.08"/>
+  <text x="582" y="45" text-anchor="middle" font-size="11.0" font-weight="bold" fill="#2E8B57">Residual Diagnostics (lm only)</text>
+
+  <!-- ===== Panel 1: Influence ===== -->
+  <rect x="8" y="55" width="110" height="125" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="63" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#7B2D8E">Influence</text>
+  <text x="63" y="85" text-anchor="middle" font-size="11.0" fill="#888">leverage + Cook's D</text>
+  <!-- Scatter with outlier -->
+  <line x1="18" y1="165" x2="108" y2="165" stroke="#ccc" stroke-width="0.4"/>
+  <line x1="18" y1="92" x2="18" y2="165" stroke="#ccc" stroke-width="0.4"/>
+  <circle cx="32" cy="157" r="1.5" fill="#7B2D8E" opacity="0.3"/>
+  <circle cx="40" cy="152" r="1.5" fill="#7B2D8E" opacity="0.3"/>
+  <circle cx="48" cy="155" r="1.5" fill="#7B2D8E" opacity="0.3"/>
+  <circle cx="55" cy="150" r="1.5" fill="#7B2D8E" opacity="0.3"/>
+  <circle cx="62" cy="147" r="1.5" fill="#7B2D8E" opacity="0.3"/>
+  <circle cx="70" cy="152" r="1.5" fill="#7B2D8E" opacity="0.3"/>
+  <circle cx="78" cy="145" r="2" fill="#7B2D8E" opacity="0.3"/>
+  <circle cx="94" cy="102" r="3.5" fill="#D55E00" opacity="0.7" stroke="#D55E00" stroke-width="0.8"/>
+  <text x="88" y="97" font-size="7.8" fill="#D55E00">!</text>
+  <line x1="18" y1="125" x2="108" y2="125" stroke="#7B2D8E" stroke-width="0.4" stroke-dasharray="3,2" opacity="0.4"/>
+  <text x="63" y="185" text-anchor="middle" font-size="10.1" fill="#888">fregre.influence</text>
+
+  <!-- ===== Panel 2: DFBETAS ===== -->
+  <rect x="126" y="55" width="110" height="125" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="181" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#7B2D8E">DFBETAS</text>
+  <text x="181" y="85" text-anchor="middle" font-size="11.0" fill="#888">per-coefficient deletion</text>
+  <!-- Stem plot -->
+  <line x1="136" y1="132" x2="226" y2="132" stroke="#999" stroke-width="0.4" stroke-dasharray="3,2"/>
+  <line x1="142" y1="132" x2="142" y2="122" stroke="#7B2D8E" stroke-width="0.8"/>
+  <circle cx="142" cy="122" r="1.5" fill="#7B2D8E" opacity="0.5"/>
+  <line x1="152" y1="132" x2="152" y2="140" stroke="#7B2D8E" stroke-width="0.8"/>
+  <circle cx="152" cy="140" r="1.5" fill="#7B2D8E" opacity="0.5"/>
+  <line x1="162" y1="132" x2="162" y2="125" stroke="#7B2D8E" stroke-width="0.8"/>
+  <circle cx="162" cy="125" r="1.5" fill="#7B2D8E" opacity="0.5"/>
+  <line x1="172" y1="132" x2="172" y2="102" stroke="#D55E00" stroke-width="1.2"/>
+  <circle cx="172" cy="102" r="2" fill="#D55E00" opacity="0.7"/>
+  <line x1="182" y1="132" x2="182" y2="137" stroke="#7B2D8E" stroke-width="0.8"/>
+  <circle cx="182" cy="137" r="1.5" fill="#7B2D8E" opacity="0.5"/>
+  <line x1="192" y1="132" x2="192" y2="127" stroke="#7B2D8E" stroke-width="0.8"/>
+  <circle cx="192" cy="127" r="1.5" fill="#7B2D8E" opacity="0.5"/>
+  <line x1="202" y1="132" x2="202" y2="142" stroke="#7B2D8E" stroke-width="0.8"/>
+  <circle cx="202" cy="142" r="1.5" fill="#7B2D8E" opacity="0.5"/>
+  <line x1="212" y1="132" x2="212" y2="120" stroke="#7B2D8E" stroke-width="0.8"/>
+  <circle cx="212" cy="120" r="1.5" fill="#7B2D8E" opacity="0.5"/>
+  <!-- Cutoff lines -->
+  <line x1="136" y1="110" x2="226" y2="110" stroke="#D55E00" stroke-width="0.5" stroke-dasharray="2,1" opacity="0.5"/>
+  <line x1="136" y1="155" x2="226" y2="155" stroke="#D55E00" stroke-width="0.5" stroke-dasharray="2,1" opacity="0.5"/>
+  <text x="181" y="185" text-anchor="middle" font-size="10.1" fill="#888">fregre.dfbetas</text>
+
+  <!-- ===== Panel 3: Permutation Importance ===== -->
+  <rect x="244" y="55" width="110" height="125" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="299" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2C5F8A">Importance</text>
+  <text x="299" y="85" text-anchor="middle" font-size="11.0" fill="#888">permutation-based</text>
+  <!-- Horizontal bars -->
+  <rect x="274" y="95" width="42" height="12" rx="1" fill="#4A90D9" opacity="0.6"/>
+  <text x="270" y="105" text-anchor="end" font-size="8.6" fill="#888">PC1</text>
+  <rect x="274" y="112" width="28" height="12" rx="1" fill="#4A90D9" opacity="0.45"/>
+  <text x="270" y="122" text-anchor="end" font-size="8.6" fill="#888">PC2</text>
+  <rect x="274" y="130" width="14" height="12" rx="1" fill="#4A90D9" opacity="0.3"/>
+  <text x="270" y="140" text-anchor="end" font-size="8.6" fill="#888">PC3</text>
+  <rect x="274" y="147" width="6" height="12" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <text x="270" y="157" text-anchor="end" font-size="8.6" fill="#888">PC4</text>
+  <text x="299" y="185" text-anchor="middle" font-size="10.1" fill="#888">fregre.importance</text>
+
+  <!-- ===== Panel 4: Regression Depth ===== -->
+  <rect x="362" y="55" width="102" height="125" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="413" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2C5F8A">Depth</text>
+  <text x="413" y="85" text-anchor="middle" font-size="11.0" fill="#888">robustness measure</text>
+  <!-- Nested contours -->
+  <ellipse cx="413" cy="132" rx="38" ry="32" fill="none" stroke="#4A90D9" stroke-width="0.5" opacity="0.3"/>
+  <ellipse cx="413" cy="132" rx="26" ry="22" fill="none" stroke="#4A90D9" stroke-width="0.6" opacity="0.5"/>
+  <ellipse cx="413" cy="132" rx="14" ry="12" fill="#4A90D9" opacity="0.1" stroke="#4A90D9" stroke-width="0.8"/>
+  <circle cx="413" cy="132" r="3" fill="#2C5F8A" opacity="0.7"/>
+  <text x="413" y="125" text-anchor="middle" font-size="7.8" fill="#2C5F8A">β̂</text>
+  <text x="413" y="185" text-anchor="middle" font-size="10.1" fill="#888">fregre.depth</text>
+
+  <!-- ===== Panel 5: Residuals vs Fitted ===== -->
+  <rect x="472" y="55" width="110" height="125" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="527" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2E8B57">Residuals</text>
+  <text x="527" y="85" text-anchor="middle" font-size="11.0" fill="#888">vs fitted values</text>
+  <!-- Axes + zero line -->
+  <line x1="482" y1="165" x2="572" y2="165" stroke="#ccc" stroke-width="0.4"/>
+  <line x1="482" y1="92" x2="482" y2="165" stroke="#ccc" stroke-width="0.4"/>
+  <line x1="482" y1="132" x2="572" y2="132" stroke="#999" stroke-width="0.3" stroke-dasharray="3,2"/>
+  <!-- Scatter -->
+  <circle cx="490" cy="125" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="498" cy="140" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="506" cy="130" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="514" cy="135" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="522" cy="122" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="530" cy="137" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="538" cy="127" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="546" cy="142" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="554" cy="132" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <circle cx="562" cy="125" r="1.5" fill="#2E8B57" opacity="0.4"/>
+  <text x="527" y="185" text-anchor="middle" font-size="10.1" fill="#888">residuals + Q-Q</text>
+
+  <!-- ===== Panel 6: VIF + Stability ===== -->
+  <rect x="590" y="55" width="102" height="125" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="641" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2E8B57">VIF + Stability</text>
+  <text x="641" y="85" text-anchor="middle" font-size="11.0" fill="#888">collinearity + bootstrap</text>
+  <!-- VIF bars -->
+  <rect x="604" y="100" width="8" height="50" rx="1" fill="#2E8B57" opacity="0.3"/>
+  <rect x="616" y="105" width="8" height="45" rx="1" fill="#2E8B57" opacity="0.3"/>
+  <rect x="628" y="110" width="8" height="40" rx="1" fill="#2E8B57" opacity="0.3"/>
+  <rect x="640" y="115" width="8" height="35" rx="1" fill="#2E8B57" opacity="0.3"/>
+  <rect x="652" y="120" width="8" height="30" rx="1" fill="#2E8B57" opacity="0.3"/>
+  <rect x="664" y="125" width="8" height="25" rx="1" fill="#2E8B57" opacity="0.3"/>
+  <!-- VIF=5 threshold -->
+  <line x1="600" y1="107" x2="678" y2="107" stroke="#D55E00" stroke-width="0.5" stroke-dasharray="2,1" opacity="0.5"/>
+  <text x="680" y="110" font-size="7.8" fill="#D55E00">5</text>
+  <text x="641" y="185" text-anchor="middle" font-size="10.1" fill="#888">fregre.vif + fregre.stability</text>
+
+  <!-- Bottom model support labels -->
+  <text x="122" y="210" text-anchor="middle" font-size="9.4" fill="#7B2D8E">fregre.lm only</text>
+  <text x="354" y="210" text-anchor="middle" font-size="9.4" fill="#2C5F8A">fregre.lm + functional.logistic</text>
+  <text x="582" y="210" text-anchor="middle" font-size="9.4" fill="#2E8B57">fregre.lm (VIF: both)</text>
+</svg>

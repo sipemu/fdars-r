@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Curves before changepoint (blue) -->
+  <path d="M10 55 Q25 35, 45 30 Q60 28, 85 45" stroke="#4169E1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 58 Q25 38, 45 33 Q60 32, 85 48" stroke="#4169E1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 52 Q25 32, 45 27 Q60 25, 85 42" stroke="#4169E1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Curves after changepoint (red) -->
+  <path d="M10 72 Q25 82, 45 85 Q60 82, 85 65" stroke="#D55E00" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 68 Q25 78, 45 82 Q60 80, 85 62" stroke="#D55E00" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 75 Q25 85, 45 88 Q60 85, 85 68" stroke="#D55E00" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Vertical changepoint line -->
+  <line x1="105" y1="10" x2="105" y2="110" stroke="#D55E00" stroke-width="2" stroke-dasharray="4,3" opacity="0.7"/>
+  <!-- CUSUM curve (right) -->
+  <path d="M95 95 Q110 85, 120 60 Q130 30, 140 18 Q150 25, 160 40 Q170 55, 180 65 Q190 72, 195 78" stroke="#333" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Peak marker -->
+  <circle cx="140" cy="18" r="3" fill="none" stroke="#D55E00" stroke-width="1.5" opacity="0.8"/>
+  <!-- Labels -->
+  <text x="25" y="15" font-size="7" fill="#4169E1" font-family="sans-serif" opacity="0.7">before</text>
+  <text x="25" y="100" font-size="7" fill="#D55E00" font-family="sans-serif" opacity="0.7">after</text>
+  <text x="145" y="15" font-size="7" fill="#333" font-family="sans-serif" opacity="0.7">CUSUM</text>
+</svg>

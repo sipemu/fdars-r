@@ -146,18 +146,6 @@ gradually increases over the 8-year period, simulating the effect of
 increasing climate variability.</p>
 <p>The Canadian Weather dataset is a classic benchmark in functional
 data analysis (Ramsay and Silverman, 2005).</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="data-preparation">Data Preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
 </h2>
@@ -166,7 +154,7 @@ data analysis (Ramsay and Silverman, 2005).</p>
 station with a strong annual cycle — as the base pattern, then simulate
 8 years of daily data with a warming trend and gradually increasing
 seasonal amplitude.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">CanadianWeather</span>, package <span class="op">=</span> <span class="st">"fda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 35 stations × 365 daily temperatures</span></span>
@@ -199,7 +187,7 @@ seasonal amplitude.</p>
 <span><span class="co">#&gt; Series length: 2920 days ( 8 years)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Temperature range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">temp_long</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"°C\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Temperature range: -21.6 25.5 °C</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Day <span class="op">=</span> <span class="va">days</span>, Temp <span class="op">=</span> <span class="va">temp_long</span><span class="op">)</span></span>
 <span><span class="va">boundaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_years</span> <span class="op">*</span> <span class="fl">365</span>, by <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></span>
 <span></span>
@@ -219,7 +207,7 @@ winter troughs (~−20°C) and summer peaks (~+20°C). The warming trend
 gradually shifts the curve upward, and the increasing amplitude factor
 makes winters slightly colder and summers slightly warmer in later
 years.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Zoom: first 2 years</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_raw</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">730</span>, <span class="op">]</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Day</span>, y <span class="op">=</span> <span class="va">Temp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">365</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
@@ -244,7 +232,7 @@ to identify the dominant period. SAZED combines 5 sub-methods by voting,
 Autoperiod validates FFT candidates with ACF, CFD-Autoperiod detrends
 and clusters spectral peaks, and the FFT method uses raw periodogram
 peaks.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Method 1: SAZED (ensemble of 5 sub-methods)</span></span>
 <span><span class="va">res_sazed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sazed.html">sazed</a></span><span class="op">(</span><span class="va">fd_temp</span><span class="op">)</span></span>
 <span></span>
@@ -278,22 +266,22 @@ cycle</caption>
 <tr class="odd">
 <td align="left">SAZED</td>
 <td align="right">365.1</td>
-<td align="right">0.40</td>
+<td align="right">0.400</td>
 </tr>
 <tr class="even">
 <td align="left">Autoperiod</td>
 <td align="right">365.0</td>
-<td align="right">0.96</td>
+<td align="right">0.960</td>
 </tr>
 <tr class="odd">
 <td align="left">CFD-Autoperiod</td>
-<td align="right">2.2</td>
-<td align="right">0.11</td>
+<td align="right">365.0</td>
+<td align="right">0.965</td>
 </tr>
 <tr class="even">
 <td align="left">detect.period (FFT)</td>
 <td align="right">365.0</td>
-<td align="right">1402.12</td>
+<td align="right">1402.120</td>
 </tr>
 </tbody>
 </table>
@@ -308,11 +296,11 @@ confidence in the result.</p>
 </h2>
 <p>The Lomb-Scargle periodogram reveals the full frequency content: the
 fundamental annual cycle and its harmonics.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ls_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lomb.scargle.html">lomb.scargle</a></span><span class="op">(</span><span class="va">fd_temp</span>, oversampling <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ls_result</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/lomb-scargle-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Detect multiple concurrent periodicities</span></span>
 <span><span class="va">multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.periods.html">detect.periods</a></span><span class="op">(</span><span class="va">fd_temp</span>, max_periods <span class="op">=</span> <span class="fl">3</span>, min_confidence <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi</span><span class="op">)</span></span>
@@ -334,11 +322,11 @@ peak.</p>
 <p>The matrix profile finds repeating motifs using shape similarity
 rather than spectral decomposition — robust to non-sinusoidal
 waveforms.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/matrix.profile.html">matrix.profile</a></span><span class="op">(</span><span class="va">fd_temp</span>, subsequence_length <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mp</span>, type <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/matrix-profile-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Primary period:"</span>, <span class="va">mp</span><span class="op">$</span><span class="va">primary_period</span>, <span class="st">"days\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Primary period: 365 days</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Top detected periods:"</span>, <span class="va">mp</span><span class="op">$</span><span class="va">detected_periods</span>, <span class="st">"days\n"</span><span class="op">)</span></span>
@@ -370,7 +358,7 @@ profile distance never reaches zero.</p>
 </h2>
 <p>Extract trend, seasonal component, and remainder using three
 complementary approaches.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># First, examine the overall trend</span></span>
 <span><span class="va">fd_detrend</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detrend.html">detrend</a></span><span class="op">(</span><span class="va">fd_temp</span>, method <span class="op">=</span> <span class="st">"loess"</span>, return_trend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Detrending method:"</span>, <span class="va">fd_detrend</span><span class="op">$</span><span class="va">method</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -378,7 +366,7 @@ complementary approaches.</p>
 <div class="section level3">
 <h3 id="stl-seasonal-trend-decomposition-using-loess">STL (Seasonal-Trend Decomposition using Loess)<a class="anchor" aria-label="anchor" href="#stl-seasonal-trend-decomposition-using-loess"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">stl_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stl.fd.html">stl.fd</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span>, s.window <span class="op">=</span> <span class="fl">731</span>, robust <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">stl_result</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/stl-decomp-1.png" class="r-plt" alt="" width="100%"></p>
@@ -389,11 +377,11 @@ complementary approaches.</p>
 <p>SSA decomposes a series into additive components by embedding it in a
 trajectory matrix and performing SVD. The window length should be at
 least one full period.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ssa_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ssa.fd.html">ssa.fd</a></span><span class="op">(</span><span class="va">fd_temp</span>, window.length <span class="op">=</span> <span class="fl">730</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ssa_result</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/ssa-decomp-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ssa_result</span>, type <span class="op">=</span> <span class="st">"spectrum"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/ssa-spectrum-1.png" class="r-plt" alt="" width="100%"></p>
 <p><strong>Interpreting the SSA output:</strong> The first two singular
@@ -402,7 +390,7 @@ the variance. This paired structure is the signature of a periodic
 component — the annual cycle. SSA correctly assigns this oscillation to
 the “seasonal” slot, while the slowly varying warming trend goes to the
 “trend” slot.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Top 5 component contributions:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ssa_result</span><span class="op">$</span><span class="va">contributions</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Top 5 component contributions: 0.4469 0.4453 0.0793 0.004 0.004</span></span>
@@ -413,7 +401,7 @@ the “seasonal” slot, while the slowly varying warming trend goes to the
 <div class="section level3">
 <h3 id="classical-decomposition">Classical Decomposition<a class="anchor" aria-label="anchor" href="#classical-decomposition"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dec_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/decompose.html">decompose</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span>, method <span class="op">=</span> <span class="st">"additive"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dec_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -435,7 +423,7 @@ the “seasonal” slot, while the slowly varying warming trend goes to the
 <div class="section level3">
 <h3 id="comparing-seasonal-components">Comparing Seasonal Components<a class="anchor" aria-label="anchor" href="#comparing-seasonal-components"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Overlay the first 365 days of each method's seasonal component</span></span>
 <span><span class="va">n_show</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
 <span><span class="va">seasonal_compare</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -473,7 +461,7 @@ there are no true outliers.</p>
 <h2 id="seasonal-strength-classification">Seasonal Strength &amp; Classification<a class="anchor" aria-label="anchor" href="#seasonal-strength-classification"></a>
 </h2>
 <p>How strong is the annual seasonality in this 8-year record?</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Three methods for quantifying seasonal strength</span></span>
 <span><span class="va">ss_var</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/seasonal.strength.html">seasonal.strength</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span>, method <span class="op">=</span> <span class="st">"variance"</span><span class="op">)</span></span>
 <span><span class="va">ss_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/seasonal.strength.html">seasonal.strength</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span>, method <span class="op">=</span> <span class="st">"spectral"</span><span class="op">)</span></span>
@@ -505,7 +493,7 @@ there are no true outliers.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Time-varying seasonal strength</span></span>
 <span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/seasonal.strength.curve.html">seasonal.strength.curve</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></span>
 <span><span class="va">sc_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -521,7 +509,7 @@ there are no true outliers.</p>
 <span>       subtitle <span class="op">=</span> <span class="st">"Dotted lines = year boundaries"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Day"</span>, y <span class="op">=</span> <span class="st">"Strength"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/strength-curve-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Classify the seasonality type</span></span>
 <span><span class="va">class_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/classify.seasonality.html">classify.seasonality</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">class_result</span><span class="op">)</span></span>
@@ -545,7 +533,7 @@ years.</p>
 <p>When does the summer temperature peak occur at each station, and does
 it shift with latitude or region? We apply <code><a href="../reference/detect.peaks.html">detect.peaks()</a></code>
 to all 35 individual station curves and extract the summer maximum.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># detect.peaks() smooths by default (smooth_first = TRUE)</span></span>
 <span><span class="va">peaks_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.peaks.html">detect.peaks</a></span><span class="op">(</span><span class="va">fd_temp</span>, min_distance <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">peaks_full</span><span class="op">)</span></span></code></pre></div>
@@ -554,7 +542,7 @@ to all 35 individual station curves and extract the summer maximum.</p>
 letting <code><a href="../reference/detect.peaks.html">detect.peaks()</a></code> reliably find one summer maximum per
 year. Peak temperatures increase across years due to the warming trend
 and growing amplitude.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Detect peaks for each station's 365-day annual curve</span></span>
 <span><span class="va">region</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">CanadianWeather</span><span class="op">$</span><span class="va">region</span><span class="op">)</span></span>
 <span><span class="va">n_stations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">temp_mat</span><span class="op">)</span></span>
@@ -587,7 +575,7 @@ and growing amplitude.</p>
 <span><span class="co">#&gt; Peak day range: 202 221 (day of year)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Peak temp range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">peak_info</span><span class="op">$</span><span class="va">PeakTemp</span><span class="op">)</span>, <span class="st">"°C\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Peak temp range: 4.4 22.6 °C</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">peak_info</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Latitude</span>, y <span class="op">=</span> <span class="va">PeakDay</span>, color <span class="op">=</span> <span class="va">Region</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2.5</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggrepel</span><span class="fu">::</span><span class="fu"><a href="https://ggrepel.slowkow.com/reference/geom_text_repel.html" class="external-link">geom_text_repel</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">Station</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">2.3</span>, max.overlaps <span class="op">=</span> <span class="fl">20</span>,</span>
@@ -599,7 +587,7 @@ and growing amplitude.</p>
 <span>       x <span class="op">=</span> <span class="st">"Latitude (\u00b0N)"</span>, y <span class="op">=</span> <span class="st">"Peak day of year"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/peak-lat-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">peak_info</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Latitude</span>, y <span class="op">=</span> <span class="va">PeakTemp</span>, color <span class="op">=</span> <span class="va">Region</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2.5</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggrepel</span><span class="fu">::</span><span class="fu"><a href="https://ggrepel.slowkow.com/reference/geom_text_repel.html" class="external-link">geom_text_repel</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">Station</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">2.3</span>, max.overlaps <span class="op">=</span> <span class="fl">20</span>,</span>
@@ -611,7 +599,7 @@ and growing amplitude.</p>
 <span>       x <span class="op">=</span> <span class="st">"Latitude (\u00b0N)"</span>, y <span class="op">=</span> <span class="st">"Peak temperature (\u00b0C)"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/peak-temp-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Summarize by region</span></span>
 <span><span class="va">peak_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">PeakDay</span>, <span class="va">PeakTemp</span><span class="op">)</span> <span class="op">~</span> <span class="va">Region</span>,</span>
@@ -649,7 +637,7 @@ peaks are shifting later; negative means earlier.</p>
 <div class="section level3">
 <h3 id="edmonton-8-year-simulated-series">Edmonton (8-year simulated series)<a class="anchor" aria-label="anchor" href="#edmonton-8-year-simulated-series"></a>
 </h3>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pt_edm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyze.peak.timing.html">analyze.peak.timing</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pt_edm</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Peak Timing Variability Analysis</span></span>
@@ -660,12 +648,12 @@ peaks are shifting later; negative means earlier.</p>
 <span><span class="co">#&gt; Range timing:    0.0027</span></span>
 <span><span class="co">#&gt; Variability:     0.0119 (low)</span></span>
 <span><span class="co">#&gt; Timing trend:    0.0000</span></span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pt_edm</span>, period <span class="op">=</span> <span class="fl">365</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Year"</span>, y <span class="op">=</span> <span class="st">"Peak day of year"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/peak-timing-edmonton-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Peak days:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pt_edm</span><span class="op">$</span><span class="va">peak_times</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">365</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Peak days: 196 197 196 196 196 196 197 196</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Peak temps:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pt_edm</span><span class="op">$</span><span class="va">peak_values</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"°C\n"</span><span class="op">)</span></span>
@@ -679,7 +667,7 @@ peaks are shifting later; negative means earlier.</p>
 <p>To see whether peak timing variability differs by region, we simulate
 8 years for one representative station per region and run
 <code><a href="../reference/analyze.peak.timing.html">analyze.peak.timing()</a></code> on each.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Representative stations: one per region</span></span>
 <span><span class="va">representatives</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Halifax"</span>, <span class="st">"Ottawa"</span>, <span class="st">"Edmonton"</span>, <span class="st">"Vancouver"</span>, <span class="st">"Resolute"</span><span class="op">)</span></span>
 <span><span class="va">rep_regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Atlantic"</span>, <span class="st">"Continental"</span>, <span class="st">"Continental"</span>, <span class="st">"Pacific"</span>, <span class="st">"Arctic"</span><span class="op">)</span></span>
@@ -715,7 +703,7 @@ peaks are shifting later; negative means earlier.</p>
 <span>    <span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">timing_comparison</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Year</span>, y <span class="op">=</span> <span class="va">PeakDay</span>,</span>
 <span>                               color <span class="op">=</span> <span class="va">Station</span>, shape <span class="op">=</span> <span class="va">Region</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
@@ -725,7 +713,7 @@ peaks are shifting later; negative means earlier.</p>
 <span>       x <span class="op">=</span> <span class="st">"Year"</span>, y <span class="op">=</span> <span class="st">"Peak day of year"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
 <p><img src="example-canadian-seasonal_files/figure-html/peak-timing-multi-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Summarize timing trend per station</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Peak timing trends (days/year):\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Peak timing trends (days/year):</span></span>
@@ -756,7 +744,7 @@ detectable. <code><a href="../reference/detect_amplitude_modulation.html">detect
 growing seasonal swing, while
 <code><a href="../reference/detect.seasonality.changes.auto.html">detect.seasonality.changes.auto()</a></code> finds transitions in
 local seasonal strength.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">am</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect_amplitude_modulation.html">detect_amplitude_modulation</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">am</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Amplitude Modulation Detection</span></span>
@@ -767,7 +755,7 @@ local seasonal strength.</p>
 <span><span class="co">#&gt; Modulation type: stable</span></span>
 <span><span class="co">#&gt; Modulation score (CV): 0.0483</span></span>
 <span><span class="co">#&gt; Amplitude trend: 0.1657</span></span></code></pre></div>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">am</span><span class="op">$</span><span class="va">amplitude_curve</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">am</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -781,7 +769,7 @@ years. An upward-sloping envelope confirms the +3%/year amplitude
 growth. When the slope exceeds the <code>modulation_threshold</code>
 (default 15%), the function classifies the pattern as
 <code>"emerging"</code> — seasonality is getting stronger.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Modulation type:"</span>, <span class="va">am</span><span class="op">$</span><span class="va">modulation_type</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Modulation type: stable</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude trend:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">am</span><span class="op">$</span><span class="va">amplitude_trend</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -790,7 +778,7 @@ growth. When the slope exceeds the <code>modulation_threshold</code>
 <span><span class="co">#&gt; Modulation score: 0.0483</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">am</span><span class="op">$</span><span class="va">min_strength</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"to"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">am</span><span class="op">$</span><span class="va">max_strength</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Amplitude range: 15.41 to 18.48</span></span></code></pre></div>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">changes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect.seasonality.changes.auto.html">detect.seasonality.changes.auto</a></span><span class="op">(</span><span class="va">fd_temp</span>, period <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Auto threshold:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">changes</span><span class="op">$</span><span class="va">computed_threshold</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Auto threshold: 0.988</span></span>
@@ -830,7 +818,7 @@ growth. When the slope exceeds the <code>modulation_threshold</code>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc_changes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">changes</span><span class="op">$</span><span class="va">strength_curve</span><span class="op">)</span>,</span>
 <span>  Strength <span class="op">=</span> <span class="va">changes</span><span class="op">$</span><span class="va">strength_curve</span></span>

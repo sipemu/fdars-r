@@ -18,20 +18,8 @@ This approach is particularly useful when:
 - You want alignment to respect **domain knowledge** about which
   features should coincide
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-library(patchwork)
-theme_set(theme_minimal())
-```
+![Landmark Registration
+Diagram](../reference/figures/landmark-registration-diagram.svg)
 
 ## How It Works (Intuition)
 

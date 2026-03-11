@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 425" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrCP" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="300" y="27.5" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Elastic Changepoint Detection</text>
+  <text x="300" y="50" text-anchor="middle" font-size="12.5" fill="#888">Detect structural breaks in functional time series via SRVF-based CUSUM statistics</text>
+
+  <!-- ===== TOP: Functional time series ===== -->
+  <rect x="14" y="67.5" width="280" height="150" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="154" y="90" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">Functional Time Series</text>
+
+  <!-- Before changepoint: blue curves -->
+  <path d="M 24 137.5 Q 36 107.5 48 118.8 Q 60 130.0 72 110.0 Q 84 90.0 96 118.8" stroke="#4A90D9" stroke-width="1.1" fill="none" opacity="0.5"/>
+  <path d="M 24 142.5 Q 36 112.5 48 123.8 Q 60 135.0 72 115.0 Q 84 95.0 96 123.8" stroke="#4A90D9" stroke-width="1.1" fill="none" opacity="0.4"/>
+  <path d="M 24 140.0 Q 36 110.0 48 121.2 Q 60 132.5 72 112.5 Q 84 92.5 96 121.2" stroke="#4A90D9" stroke-width="1.1" fill="none" opacity="0.3"/>
+  <path d="M 24 135.0 Q 36 105.0 48 116.2 Q 60 127.5 72 107.5 Q 84 87.5 96 116.2" stroke="#4A90D9" stroke-width="1.1" fill="none" opacity="0.3"/>
+
+  <!-- Changepoint line -->
+  <line x1="150" y1="97.5" x2="150" y2="210" stroke="#D55E00" stroke-width="2.1" stroke-dasharray="5,3"/>
+  <text x="150" y="95" text-anchor="middle" font-size="10" fill="#D55E00" font-weight="bold">&#964;*</text>
+
+  <!-- After changepoint: orange/red curves (different shape) -->
+  <path d="M 200 162.5 Q 212 132.5 224 137.5 Q 236 142.5 248 160.0 Q 260 177.5 272 147.5" stroke="#D55E00" stroke-width="1.1" fill="none" opacity="0.5"/>
+  <path d="M 200 167.5 Q 212 137.5 224 142.5 Q 236 147.5 248 165.0 Q 260 182.5 272 152.5" stroke="#D55E00" stroke-width="1.1" fill="none" opacity="0.4"/>
+  <path d="M 200 157.5 Q 212 127.5 224 132.5 Q 236 137.5 248 155.0 Q 260 172.5 272 142.5" stroke="#D55E00" stroke-width="1.1" fill="none" opacity="0.3"/>
+  <path d="M 200 160.0 Q 212 130.0 224 135.0 Q 236 140.0 248 157.5 Q 260 175.0 272 145.0" stroke="#D55E00" stroke-width="1.1" fill="none" opacity="0.3"/>
+
+  <!-- Labels -->
+  <text x="60" y="202.5" text-anchor="middle" font-size="10" fill="#4A90D9" font-weight="bold">before</text>
+  <text x="240" y="202.5" text-anchor="middle" font-size="10" fill="#D55E00" font-weight="bold">after</text>
+  <text x="154" y="212.5" text-anchor="middle" font-size="8.8" fill="#888">curve index &#8594;</text>
+
+  <!-- ===== RIGHT: CUSUM statistic ===== -->
+  <rect x="310" y="67.5" width="276" height="150" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="448" y="90" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#B37700">CUSUM Statistic</text>
+  <text x="448" y="107.5" text-anchor="middle" font-size="10" fill="#888">T(k) = cumulative divergence measure</text>
+
+  <!-- CUSUM curve -->
+  <path d="M 326 190.0 Q 350 185.0 374 175.0 Q 398 160.0 422 135.0 Q 446 110.0 460 105.0 Q 474 112.5 498 137.5 Q 522 162.5 546 177.5 Q 562 185.0 570 187.5" stroke="#333" stroke-width="2.7" fill="none"/>
+
+  <!-- Peak marker -->
+  <circle cx="460" cy="105" r="5" fill="none" stroke="#D55E00" stroke-width="2.1"/>
+  <line x1="460" y1="115" x2="460" y2="210" stroke="#D55E00" stroke-width="1.1" stroke-dasharray="3,2"/>
+  <text x="460" y="210" text-anchor="middle" font-size="10" fill="#D55E00" font-weight="bold">&#964;* = argmax T(k)</text>
+
+  <!-- ===== BOTTOM: Three test types ===== -->
+  <line x1="10" y1="237.5" x2="590" y2="237.5" stroke="#eee" stroke-width="1.1"/>
+  <text x="300" y="262.5" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#555">Three Types of Elastic Changepoint Tests</text>
+
+  <!-- Amplitude changepoint -->
+  <rect x="14" y="277.5" width="180" height="125" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="104" y="302.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">Amplitude</text>
+  <text x="104" y="322.5" text-anchor="middle" font-size="10" fill="#555">Detects changes in</text>
+  <text x="104" y="337.5" text-anchor="middle" font-size="10" fill="#555">curve shape (SRSF space)</text>
+  <!-- Before/after shapes -->
+  <path d="M 30 370.0 Q 48 347.5 66 357.5 Q 76 362.5 86 352.5" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <path d="M 112 370.0 Q 126 355.0 140 365.0 Q 154 375.0 168 350.0" stroke="#D55E00" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <text x="100" y="380" text-anchor="middle" font-size="8.8" fill="#888">&#8594;</text>
+
+  <!-- Phase changepoint -->
+  <rect x="210" y="277.5" width="180" height="125" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="300" y="302.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#B37700">Phase</text>
+  <text x="300" y="322.5" text-anchor="middle" font-size="10" fill="#555">Detects changes in</text>
+  <text x="300" y="337.5" text-anchor="middle" font-size="10" fill="#555">timing (warping functions)</text>
+  <!-- Before/after warps -->
+  <path d="M 226 370.0 Q 244 357.5 262 370.0" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <path d="M 310 382.5 Q 328 347.5 346 370.0" stroke="#D55E00" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <text x="290" y="380" text-anchor="middle" font-size="8.8" fill="#888">&#8594;</text>
+
+  <!-- FPCA changepoint -->
+  <rect x="406" y="277.5" width="180" height="125" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.3"/>
+  <text x="496" y="302.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#7B2D8E">FPCA-based</text>
+  <text x="496" y="322.5" text-anchor="middle" font-size="10" fill="#555">CUSUM on elastic FPCA</text>
+  <text x="496" y="337.5" text-anchor="middle" font-size="10" fill="#555">scores (vert/horiz/joint)</text>
+  <!-- Score dots shifting -->
+  <circle cx="424" cy="370" r="2.5" fill="#4A90D9" opacity="0.4"/>
+  <circle cx="434" cy="362.5" r="2.5" fill="#4A90D9" opacity="0.4"/>
+  <circle cx="444" cy="372.5" r="2.5" fill="#4A90D9" opacity="0.4"/>
+  <circle cx="540" cy="382.5" r="2.5" fill="#D55E00" opacity="0.4"/>
+  <circle cx="550" cy="375" r="2.5" fill="#D55E00" opacity="0.4"/>
+  <circle cx="560" cy="385" r="2.5" fill="#D55E00" opacity="0.4"/>
+  <text x="496" y="380" text-anchor="middle" font-size="8.8" fill="#888">&#8594;</text>
+
+  <!-- P-value note -->
+  <text x="300" y="420" text-anchor="middle" font-size="11.2" fill="#888">All tests use permutation-based p-values for inference</text>
+</svg>

@@ -10,13 +10,8 @@ figures or specialized visualizations, you may need more control. This
 vignette shows how to create fully customizable plots using ggplot2
 directly.
 
-``` r
-library(fdars)
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-theme_set(theme_minimal())
-```
+![Custom Plotting with
+ggplot2](../reference/figures/custom-plotting-diagram.svg)
 
 ## Understanding the fdata Structure
 
@@ -580,5 +575,5 @@ fd %>%
   techniques for functional data
 - `vignette("fpca", package = "fdars")` — functional principal component
   analysis
-- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.html)
   — functional depth measures and ranking

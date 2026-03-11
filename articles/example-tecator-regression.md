@@ -22,20 +22,6 @@ This dataset is a standard benchmark in chemometrics and functional data
 analysis (Ferraty and Vieu, 2006; Febrero-Bande and Oviedo de la Fuente,
 2012).
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Data Preparation
 
 The Tecator dataset contains 215 meat samples. Each sample has an
@@ -249,15 +235,15 @@ results <- data.frame(
 knitr::kable(results, caption = "Test set performance: fat prediction")
 ```
 
-| Method                          |   RMSE |      R2 |    MAE |
-|:--------------------------------|-------:|--------:|-------:|
-| PC (absorbance)                 |  3.200 |   0.943 |  2.410 |
-| Basis (absorbance)              |  2.975 |   0.950 |  2.253 |
-| fregre.lm (absorbance)          | 94.187 | -48.629 | 75.274 |
-| k-NN / L2 (absorbance)          | 10.135 |   0.425 |  7.434 |
-| PC (2nd derivative)             |  2.606 |   0.962 |  1.960 |
-| fregre.lm (2nd derivative)      | 16.037 |  -0.439 | 12.758 |
-| k-NN / elastic (2nd derivative) |  2.092 |   0.976 |  1.396 |
+| Method                          |   RMSE |    R2 |   MAE |
+|:--------------------------------|-------:|------:|------:|
+| PC (absorbance)                 |  3.200 | 0.943 | 2.410 |
+| Basis (absorbance)              |  2.975 | 0.950 | 2.253 |
+| fregre.lm (absorbance)          |  3.200 | 0.943 | 2.410 |
+| k-NN / L2 (absorbance)          | 10.135 | 0.425 | 7.434 |
+| PC (2nd derivative)             |  2.606 | 0.962 | 1.960 |
+| fregre.lm (2nd derivative)      |  2.593 | 0.962 | 1.912 |
+| k-NN / elastic (2nd derivative) |  2.092 | 0.976 | 1.396 |
 
 Test set performance: fat prediction
 
@@ -546,10 +532,10 @@ decision.
 
 ## See Also
 
-- [`vignette("articles/regression")`](https://sipemu.github.io/fdars-r/articles/regression.md)
-  — regression methods overview
-- [`vignette("articles/functional-regression")`](https://sipemu.github.io/fdars-r/articles/functional-regression.md)
-  — FPC regression, FOSR, and FANOVA
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  — scalar-on-function regression methods
+- [`vignette("articles/function-on-scalar")`](https://sipemu.github.io/fdars-r/articles/function-on-scalar.md)
+  — FOSR and FANOVA
 - [`vignette("articles/example-canadian-weather")`](https://sipemu.github.io/fdars-r/articles/example-canadian-weather.md)
   — regional climate patterns with FANOVA and FOSR
 

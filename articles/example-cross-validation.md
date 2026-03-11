@@ -23,20 +23,6 @@ returns OOF predictions for the entire dataset.
 the same data used to select hyperparameters, giving realistic
 out-of-sample error estimates.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Tecator Data
 
 The Tecator dataset contains 215 meat samples, each with an absorbance
@@ -221,15 +207,15 @@ comparison <- data.frame(
 knitr::kable(comparison, caption = "5-fold OOF performance (same folds)")
 ```
 
-| Method                          |   RMSE |    MAE |      R2 |
-|:--------------------------------|-------:|-------:|--------:|
-| PC (absorbance)                 |  3.164 |  2.466 |   0.938 |
-| Basis (absorbance)              |  2.898 |  2.234 |   0.948 |
-| fregre.lm (absorbance)          | 87.821 | 68.280 | -46.738 |
-| k-NN / L2 (absorbance)          |  8.011 |  5.967 |   0.603 |
-| PC (2nd derivative)             |  2.374 |  1.808 |   0.965 |
-| fregre.lm (2nd derivative)      | 13.561 | 11.192 |  -0.138 |
-| k-NN / elastic (2nd derivative) |  1.737 |  1.178 |   0.981 |
+| Method                          |  RMSE |   MAE |    R2 |
+|:--------------------------------|------:|------:|------:|
+| PC (absorbance)                 | 3.164 | 2.466 | 0.938 |
+| Basis (absorbance)              | 2.898 | 2.234 | 0.948 |
+| fregre.lm (absorbance)          | 2.716 | 2.050 | 0.954 |
+| k-NN / L2 (absorbance)          | 8.011 | 5.967 | 0.603 |
+| PC (2nd derivative)             | 2.374 | 1.808 | 0.965 |
+| fregre.lm (2nd derivative)      | 2.322 | 1.804 | 0.967 |
+| k-NN / elastic (2nd derivative) | 1.737 | 1.178 | 0.981 |
 
 5-fold OOF performance (same folds)
 
@@ -372,8 +358,8 @@ cat("Custom predict RMSE:", round(cv_custom$metrics$RMSE, 3), "\n")
 
 ## See Also
 
-- [`vignette("articles/regression")`](https://sipemu.github.io/fdars-r/articles/regression.md)
-  — regression methods overview (PC, basis, NP)
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  — scalar-on-function regression methods
 - [`vignette("articles/example-tecator-regression")`](https://sipemu.github.io/fdars-r/articles/example-tecator-regression.md)
   — Tecator regression in depth
 - [`vignette("articles/functional-classification")`](https://sipemu.github.io/fdars-r/articles/functional-classification.md)

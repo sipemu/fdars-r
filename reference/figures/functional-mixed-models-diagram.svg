@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrM" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="340" y="34" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Functional Mixed Model for Repeated Measures</text>
+  <text x="340" y="58" text-anchor="middle" font-size="14" fill="#888">Y&#7522;&#11388;(t) = &#956;(t) + x&#7522;&#11388;&#946;(t) + b&#7522;(t) + &#949;&#7522;&#11388;(t)</text>
+
+  <!-- Subjects column -->
+  <text x="80" y="92" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Subjects</text>
+
+  <!-- Subject 1 -->
+  <rect x="16" y="106" width="128" height="72" rx="7" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="80" y="130" text-anchor="middle" font-size="14" fill="#2C5F8A">Subject 1</text>
+  <path d="M28 160 Q50 144 72 152 Q94 160 116 148 Q130 138 138 150" stroke="#4A90D9" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M28 166 Q50 150 72 158 Q94 166 116 154 Q130 144 138 156" stroke="#4A90D9" stroke-width="1.3" fill="none" opacity="0.3"/>
+
+  <!-- Subject 2 -->
+  <rect x="16" y="192" width="128" height="72" rx="7" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="80" y="216" text-anchor="middle" font-size="14" fill="#B37700">Subject 2</text>
+  <path d="M28 246 Q50 230 72 238 Q94 246 116 234 Q130 224 138 236" stroke="#E6A020" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M28 252 Q50 236 72 244 Q94 252 116 240 Q130 230 138 242" stroke="#E6A020" stroke-width="1.3" fill="none" opacity="0.3"/>
+
+  <!-- Subject i -->
+  <rect x="16" y="278" width="128" height="72" rx="7" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="80" y="302" text-anchor="middle" font-size="14" fill="#2E8B57">Subject i</text>
+  <path d="M28 332 Q50 316 72 324 Q94 332 116 320 Q130 310 138 322" stroke="#2E8B57" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M28 338 Q50 322 72 330 Q94 338 116 326 Q130 316 138 328" stroke="#2E8B57" stroke-width="1.3" fill="none" opacity="0.3"/>
+
+  <!-- Arrows to decomposition -->
+  <line x1="148" y1="142" x2="194" y2="185" stroke="#555" stroke-width="1.2" marker-end="url(#arrM)"/>
+  <line x1="148" y1="228" x2="194" y2="210" stroke="#555" stroke-width="1.2" marker-end="url(#arrM)"/>
+  <line x1="148" y1="314" x2="194" y2="230" stroke="#555" stroke-width="1.2" marker-end="url(#arrM)"/>
+
+  <!-- = sign -->
+  <text x="210" y="218" text-anchor="middle" font-size="22" fill="#555">=</text>
+
+  <!-- Fixed effects -->
+  <rect x="230" y="120" width="130" height="80" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="295" y="146" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Fixed Effects</text>
+  <text x="295" y="168" text-anchor="middle" font-size="13" fill="#555">&#956;(t) + x&#946;(t)</text>
+  <text x="295" y="188" text-anchor="middle" font-size="12" fill="#888">population mean</text>
+
+  <!-- + -->
+  <text x="375" y="164" text-anchor="middle" font-size="22" fill="#555">+</text>
+
+  <!-- Random effects -->
+  <rect x="394" y="120" width="130" height="80" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="459" y="146" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Random Effects</text>
+  <text x="459" y="168" text-anchor="middle" font-size="13" fill="#555">b&#7522;(t)</text>
+  <text x="459" y="188" text-anchor="middle" font-size="12" fill="#888">subject deviation</text>
+
+  <!-- + -->
+  <text x="539" y="164" text-anchor="middle" font-size="22" fill="#555">+</text>
+
+  <!-- Error -->
+  <rect x="558" y="120" width="110" height="80" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="613" y="146" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Error</text>
+  <text x="613" y="168" text-anchor="middle" font-size="13" fill="#555">&#949;&#7522;&#11388;(t)</text>
+  <text x="613" y="188" text-anchor="middle" font-size="12" fill="#888">measurement noise</text>
+
+  <!-- Functions row -->
+  <rect x="230" y="228" width="130" height="60" rx="6" fill="#F3E8FF" opacity="0.3" stroke="#7B2D8E" stroke-width="1"/>
+  <text x="295" y="254" text-anchor="middle" font-size="14" fill="#7B2D8E" font-weight="bold">fmm()</text>
+  <text x="295" y="274" text-anchor="middle" font-size="12" fill="#888">fit model</text>
+
+  <rect x="394" y="228" width="130" height="60" rx="6" fill="#E8F0FE" opacity="0.3" stroke="#4A90D9" stroke-width="1"/>
+  <text x="459" y="254" text-anchor="middle" font-size="14" fill="#2C5F8A" font-weight="bold">fmm.predict()</text>
+  <text x="459" y="274" text-anchor="middle" font-size="12" fill="#888">new subjects</text>
+
+  <rect x="558" y="228" width="110" height="60" rx="6" fill="#FFF3E0" opacity="0.3" stroke="#E6A020" stroke-width="1"/>
+  <text x="613" y="254" text-anchor="middle" font-size="14" fill="#B37700" font-weight="bold">fmm.test.fixed()</text>
+  <text x="613" y="274" text-anchor="middle" font-size="12" fill="#888">permutation test</text>
+
+  <!-- Bottom: key insight -->
+  <line x1="24" y1="320" x2="660" y2="320" stroke="#eee" stroke-width="1.5"/>
+  <text x="340" y="350" text-anchor="middle" font-size="14" fill="#555">Each subject contributes multiple curves &#8212; random effects b&#7522;(t)</text>
+  <text x="340" y="372" text-anchor="middle" font-size="14" fill="#555">capture subject-specific deviations, preventing pseudoreplication</text>
+  <text x="340" y="394" text-anchor="middle" font-size="13" fill="#888">and correctly separating within- from between-subject variation.</text>
+</svg>

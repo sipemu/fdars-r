@@ -129,8 +129,9 @@ print(og)
 #>   Index 20 : shape 
 #>   Index 32 : shape 
 #> 
+#> Outlier p-values: 0.1212, 0.0909, 0.0606 
+#> 
 #> Parameters:
 #>   Factor: 1.5 
-#>   MEI threshold: 0.25 
 plot(og, color_by_type = TRUE)
 ```

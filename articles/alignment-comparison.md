@@ -22,20 +22,8 @@ The four methods are:
     a linearization of elastic alignment for downstream analysis. See
     `vignette("tsrvf", package = "fdars")` for full details.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-library(patchwork)
-theme_set(theme_minimal())
-```
+![Comparing Alignment Methods: Elastic, Landmark, and
+Constrained](../reference/figures/alignment-comparison-diagram.svg)
 
 ## Test Data
 

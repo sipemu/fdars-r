@@ -61,14 +61,6 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span></code></pre></div>
 <p>This article applies three outlier detection methods to 178 wines
 transformed into Andrews curves. For background on <em>why</em> Andrews
 curves and how the transformation works, see <a href="example-andrews-wine-intro.html">Why Andrews Curves?</a>.</p>
@@ -114,7 +106,7 @@ specification in one chart</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load wine data</span></span>
 <span><span class="va">wine_url</span> <span class="op">&lt;-</span> <span class="st">"https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"</span></span>
 <span><span class="va">col_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cultivar"</span>, <span class="st">"Alcohol"</span>, <span class="st">"MalicAcid"</span>, <span class="st">"Ash"</span>, <span class="st">"Alkalinity"</span>,</span>
@@ -165,23 +157,23 @@ subsets of the 178 wines, computes depth each time, and averages the
 results. This smoothing prevents a single unlucky sample from distorting
 the picture. Wines whose averaged depth falls below a threshold are
 flagged.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">out_pond</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd_wine</span>, nb <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Depth-ponderation outliers:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Depth-ponderation outliers: 60 70 74 79 96 97 111 122 159</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Cultivars:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">[</span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Cultivars: Grignolino Grignolino Grignolino Grignolino Grignolino Grignolino Grignolino Grignolino Barbera</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">is_pond_outlier</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="va">n</span><span class="op">)</span></span>
 <span><span class="va">is_pond_outlier</span><span class="op">[</span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_pond_outlier</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_pond_outlier</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"gray70"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span>, linewidth <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_pond_outlier</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_pond_outlier</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span>, color <span class="op">=</span> <span class="va">Cultivar</span><span class="op">)</span>,</span>
 <span>            linewidth <span class="op">=</span> <span class="fl">0.7</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Barolo"</span> <span class="op">=</span> <span class="st">"#8B0000"</span>, <span class="st">"Grignolino"</span> <span class="op">=</span> <span class="st">"#DAA520"</span>,</span>
@@ -194,7 +186,7 @@ flagged.</p>
 <p><img src="example-andrews-wine_files/figure-html/pond-highlight-1.png" class="r-plt" alt="" width="100%"></p>
 <p>What makes these wines unusual? Let’s look at which chemicals push
 them to the fringes:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For each flagged wine, identify chemicals with |z-score| &gt; 2</span></span>
 <span><span class="va">extreme_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">extreme_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2</span><span class="op">)</span></span>
@@ -207,7 +199,7 @@ them to the fringes:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Wine <span class="op">=</span> <span class="va">i</span>, Cultivar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>             `Extreme Chemicals` <span class="op">=</span> <span class="va">chems</span>, check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">extreme_list</span><span class="op">)</span>,</span>
+<span><span class="fu">kable</span><span class="op">(</span><span class="fu">bind_rows</span><span class="op">(</span><span class="va">extreme_list</span><span class="op">)</span>,</span>
 <span>      caption <span class="op">=</span> <span class="st">"What makes each depth-ponderation outlier unusual (|z| &gt; 2)"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>What makes each depth-ponderation outlier unusual (|z| &gt;
@@ -302,7 +294,7 @@ or blending with a different cultivar.</p></li>
 and draws a
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>-based
 cutoff ellipse. Wines outside the ellipse are flagged.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/magnitudeshape.html">magnitudeshape</a></span><span class="op">(</span><span class="va">fd_wine</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ms</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-andrews-wine_files/figure-html/ms-plot-1.png" class="r-plt" alt="" width="100%"></p>
@@ -338,11 +330,11 @@ from this expected relationship — wines whose MBD is <em>lower than
 expected</em> given their MEI. These are <strong>shape
 outliers</strong>: wines that weave in and out of the population bundle
 in an unusual way.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">og</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliergram.html">outliergram</a></span><span class="op">(</span><span class="va">fd_wine</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">og</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-andrews-wine_files/figure-html/outliergram-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">og</span><span class="op">$</span><span class="va">outliers</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Outliergram outliers:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">og</span><span class="op">$</span><span class="va">outliers</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Cultivars:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">[</span><span class="va">og</span><span class="op">$</span><span class="va">outliers</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -374,7 +366,7 @@ sensitivity against specificity, and each is blind to certain kinds of
 anomaly. The real power comes from <strong>cross-referencing</strong>:
 wines flagged by multiple methods are the highest-priority cases for
 investigation.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Collect flags per observation</span></span>
 <span><span class="va">outlier_flags</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Wine <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span>,</span>
@@ -386,7 +378,7 @@ investigation.</p>
 <span><span class="va">outlier_flags</span><span class="op">$</span><span class="va">n_methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">outlier_flags</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Show wines flagged by at least one method</span></span>
-<span><span class="va">flagged</span> <span class="op">&lt;-</span> <span class="va">outlier_flags</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_methods</span> <span class="op">&gt;=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">n_methods</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">flagged</span> <span class="op">&lt;-</span> <span class="va">outlier_flags</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_methods</span> <span class="op">&gt;=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n_methods</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">flagged</span><span class="op">)</span>, <span class="st">"wines flagged by at least one method,"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">flagged</span><span class="op">$</span><span class="va">n_methods</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span>, <span class="st">"by two or more\n\n"</span><span class="op">)</span></span>
@@ -394,14 +386,14 @@ investigation.</p>
 <span></span>
 <span><span class="co"># Show flagged wines with their original chemical values</span></span>
 <span><span class="va">flagged_detail</span> <span class="op">&lt;-</span> <span class="va">flagged</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">DepthPond</span>, <span class="va">MagnShape</span>, <span class="va">Outliergram</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">DepthPond</span>, <span class="va">MagnShape</span>, <span class="va">Outliergram</span><span class="op">)</span>,</span>
 <span>                <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">.</span>, <span class="st">"✓"</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span></span>
+<span>  <span class="fu">left_join</span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Wine <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">wine</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    by <span class="op">=</span> <span class="st">"Wine"</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">flagged_detail</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Wine</span>, <span class="va">Cultivar</span>, <span class="va">DepthPond</span>, <span class="va">MagnShape</span>,</span>
+<span><span class="fu">kable</span><span class="op">(</span><span class="va">flagged_detail</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="va">Wine</span>, <span class="va">Cultivar</span>, <span class="va">DepthPond</span>, <span class="va">MagnShape</span>,</span>
 <span>                                <span class="va">Outliergram</span>, <span class="va">n_methods</span>,</span>
 <span>                                <span class="va">Alcohol</span>, <span class="va">Flavanoids</span>, <span class="va">ColorIntensity</span>, <span class="va">Proline</span><span class="op">)</span>,</span>
 <span>      caption <span class="op">=</span> <span class="st">"Flagged wines with key chemical values"</span><span class="op">)</span></span></code></pre></div>
@@ -550,7 +542,7 @@ investigation.</p>
 Eight of nine outliers are Grignolino — zero from Barolo, one from
 Barbera. That asymmetry is itself an important finding. Let’s understand
 what’s driving it.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fda_all_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span>, <span class="va">og</span><span class="op">$</span><span class="va">outliers</span>, <span class="va">ms</span><span class="op">$</span><span class="va">outliers</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Outliers by cultivar:\n"</span><span class="op">)</span></span>
@@ -569,7 +561,7 @@ examine what the flagged wines have in common. For each outlier, we
 compute its deviation from its own cultivar mean (in within-cultivar
 standard deviations) — this tells us how unusual a wine is <em>relative
 to its peer group</em>, not just globally:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute within-cultivar z-scores for each outlier</span></span>
 <span><span class="va">outlier_profiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">fda_all_idx</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">cv</span> <span class="op">&lt;-</span> <span class="va">cultivar</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
@@ -594,7 +586,7 @@ to its peer group</em>, not just globally:</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">outlier_profiles</span><span class="op">)</span>,</span>
+<span><span class="fu">kable</span><span class="op">(</span><span class="fu">bind_rows</span><span class="op">(</span><span class="va">outlier_profiles</span><span class="op">)</span>,</span>
 <span>      caption <span class="op">=</span> <span class="st">"Each outlier's unusual chemicals, measured against its own cultivar"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>Each outlier’s unusual chemicals, measured against its own
@@ -696,7 +688,7 @@ together in the Fourier domain. The curve representation lets us see the
 <p>Wine 122 is the most extreme outlier: it ranks dead last in depth
 among all 71 Grignolinos (rank 71/71). Let’s look at where it sits
 relative to all three cultivar groups:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Distance from Wine 122 to each cultivar median</span></span>
 <span><span class="va">case_wine</span> <span class="op">&lt;-</span> <span class="fl">122</span></span>
 <span></span>
@@ -723,7 +715,7 @@ relative to all three cultivar groups:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"\nClosest to: %s\n"</span>, <span class="va">closest</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Closest to: Barolo</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Highlight Wine 122 against its claimed cultivar and the cultivar it resembles</span></span>
 <span><span class="va">is_case</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="va">n</span><span class="op">)</span></span>
@@ -731,12 +723,12 @@ relative to all three cultivar groups:</p>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="co"># Background: all curves, faded</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="va">Cultivar</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Barolo"</span>, <span class="st">"Grignolino"</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="va">Cultivar</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Barolo"</span>, <span class="st">"Grignolino"</span><span class="op">)</span> <span class="op">&amp;</span></span>
 <span>                            <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_case</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span>, color <span class="op">=</span> <span class="va">Cultivar</span><span class="op">)</span>,</span>
 <span>            alpha <span class="op">=</span> <span class="fl">0.15</span>, linewidth <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="co"># Case wine: bold black</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_case</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_case</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Barolo"</span> <span class="op">=</span> <span class="st">"#8B0000"</span>, <span class="st">"Grignolino"</span> <span class="op">=</span> <span class="st">"#DAA520"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -744,7 +736,7 @@ relative to all three cultivar groups:</p>
 <span>       x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">f</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-andrews-wine_files/figure-html/case-122-profile-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show its chemical profile vs both cultivar means</span></span>
 <span><span class="va">cv_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grignolino"</span>, <span class="st">"Barolo"</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">cv</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">wine</span><span class="op">[</span><span class="va">cultivar</span> <span class="op">==</span> <span class="va">cv</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -763,7 +755,7 @@ relative to all three cultivar groups:</p>
 <span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">compare_122</span>, caption <span class="op">=</span> <span class="st">"Wine 122 vs cultivar means — closer to Barolo on most chemicals"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">kable</span><span class="op">(</span><span class="va">compare_122</span>, caption <span class="op">=</span> <span class="st">"Wine 122 vs cultivar means — closer to Barolo on most chemicals"</span><span class="op">)</span></span></code></pre></div>
 <table style="width:100%;" class="table">
 <caption>Wine 122 vs cultivar means — closer to Barolo on most
 chemicals</caption>
@@ -910,7 +902,7 @@ Microscope<a class="anchor" aria-label="anchor" href="#case-study-wines-70-and-9
 and the outliergram. The outliergram specifically flags <strong>shape
 anomalies</strong> — wines whose curve crosses the population envelope
 in unexpected ways, even if their average level is unremarkable.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">shape_cases</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">96</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Their key chemistry</span></span>
@@ -941,16 +933,16 @@ in unexpected ways, even if their average level is unremarkable.</p>
 <span><span class="co">#&gt;   Proanthocyanins:  3.3       (Grignolino mean: 1.6,  z = +3.0)</span></span>
 <span><span class="co">#&gt;   Ash:              2.2 g/L   (Grignolino mean: 2.2,  z = -0.6)</span></span>
 <span><span class="co">#&gt;   Fuzzy membership: [0.143, 0.312, 0.545] — max = 0.545</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">is_shape_case</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="va">n</span><span class="op">)</span></span>
 <span><span class="va">is_shape_case</span><span class="op">[</span><span class="va">shape_cases</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_shape_case</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_shape_case</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span>, color <span class="op">=</span> <span class="va">Cultivar</span><span class="op">)</span>,</span>
 <span>            alpha <span class="op">=</span> <span class="fl">0.12</span>, linewidth <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_shape_case</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_shape_case</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="fl">1.1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Barolo"</span> <span class="op">=</span> <span class="st">"#8B0000"</span>, <span class="st">"Grignolino"</span> <span class="op">=</span> <span class="st">"#DAA520"</span>,</span>
@@ -981,7 +973,7 @@ growing conditions need review.</p>
 </h3>
 <p>Wine 159 is the only Barbera flagged, and it’s an outlier for very
 different reasons than the Grignolinos:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">i</span> <span class="op">&lt;-</span> <span class="fl">159</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Wine %d (%s)\n"</span>, <span class="va">i</span>, <span class="va">cultivar</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Wine 159 (Barbera)</span></span>
@@ -1008,16 +1000,16 @@ different reasons than the Grignolinos:</p>
 <span>            <span class="va">rank_in_cv</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cv_idx</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Depth rank within Barbera: 48 / 48 (dead last)</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">is_159</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="va">n</span><span class="op">)</span></span>
 <span><span class="va">is_159</span><span class="op">[</span><span class="fl">159</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="va">Cultivar</span> <span class="op">==</span> <span class="st">"Barbera"</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_159</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="va">Cultivar</span> <span class="op">==</span> <span class="st">"Barbera"</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_159</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"#2E8B57"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span>, linewidth <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_159</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">is_159</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Wine 159: The Barbera Outlier"</span>,</span>
@@ -1047,7 +1039,7 @@ unusually productive or concentrated lot, not a quality defect.</p>
 away with — not “these wines are unusual” (a spreadsheet could tell you
 that), but <em>what kind</em> of unusual, <em>why</em>, and <em>what to
 do about it</em>:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">actions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Wine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">122</span>, <span class="st">"70, 96"</span>, <span class="fl">159</span>, <span class="st">"60, 74, 79, 97, 111"</span><span class="op">)</span>,</span>
 <span>  Type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cultivar mismatch"</span>, <span class="st">"Shape outlier (soil/mineral)"</span>,</span>
@@ -1066,7 +1058,7 @@ do about it</em>:</p>
 <span>  <span class="op">)</span>,</span>
 <span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">actions</span>, caption <span class="op">=</span> <span class="st">"Outlier triage: from flag to action"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">kable</span><span class="op">(</span><span class="va">actions</span>, caption <span class="op">=</span> <span class="st">"Outlier triage: from flag to action"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>Outlier triage: from flag to action</caption>
 <colgroup>
@@ -1134,7 +1126,7 @@ measures how far each wine is from the population mean, accounting for
 correlations between chemicals. Wines exceeding a
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>
 critical value are flagged.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Classical Mahalanobis distance outlier detection</span></span>
 <span><span class="va">mahal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/mahalanobis.html" class="external-link">mahalanobis</a></span><span class="op">(</span><span class="va">X</span>, <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="fu"><a href="../reference/cov.html">cov</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">cutoff_chi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="fl">0.975</span>, df <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
@@ -1147,12 +1139,12 @@ critical value are flagged.</p>
 <span><span class="co">#&gt;   Flagged: 14 60 70 72 74 96 97 111 116 122 159 160</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Count:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mahal_outliers</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Count: 12</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare with FDA results</span></span>
 <span><span class="va">fda_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span>, <span class="va">og</span><span class="op">$</span><span class="va">outliers</span>, <span class="va">ms</span><span class="op">$</span><span class="va">outliers</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">overlap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span></span>
-<span><span class="va">fda_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">fda_all</span>, <span class="va">mahal_outliers</span><span class="op">)</span></span>
-<span><span class="va">mahal_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span></span>
+<span><span class="va">overlap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span></span>
+<span><span class="va">fda_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">fda_all</span>, <span class="va">mahal_outliers</span><span class="op">)</span></span>
+<span><span class="va">mahal_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Overlap between methods:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Overlap between methods:</span></span>
@@ -1165,8 +1157,8 @@ critical value are flagged.</p>
 <span></span>
 <span><span class="co"># Show Mahalanobis distances for FDA-flagged wines</span></span>
 <span><span class="va">compare_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Wine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">union</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  Cultivar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">union</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span>  Wine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">union</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  Cultivar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">union</a></span><span class="op">(</span><span class="va">mahal_outliers</span>, <span class="va">fda_all</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">compare_df</span><span class="op">$</span><span class="va">Mahal_Dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mahal</span><span class="op">[</span><span class="va">compare_df</span><span class="op">$</span><span class="va">Wine</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">compare_df</span><span class="op">$</span><span class="va">Mahal_Flag</span> <span class="op">&lt;-</span> <span class="va">compare_df</span><span class="op">$</span><span class="va">Wine</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">mahal_outliers</span></span>
@@ -1179,7 +1171,7 @@ critical value are flagged.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">methods</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">compare_df</span>, caption <span class="op">=</span> <span class="st">"Mahalanobis vs FDA: flagged wines compared"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">kable</span><span class="op">(</span><span class="va">compare_df</span>, caption <span class="op">=</span> <span class="st">"Mahalanobis vs FDA: flagged wines compared"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>Mahalanobis vs FDA: flagged wines compared</caption>
 <colgroup>

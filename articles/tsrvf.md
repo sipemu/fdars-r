@@ -13,20 +13,8 @@ the geometry is locally Euclidean. In this tangent space, standard
 multivariate methods apply directly, giving a rigorous framework for
 **elastic functional data analysis**.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-library(patchwork)
-theme_set(theme_minimal())
-```
+![TSRVF: From Curved Manifold to Flat Tangent
+Space](../reference/figures/tsrvf-diagram.svg)
 
 ## How It Works (Intuition)
 

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Leverage vs Cook's D scatter -->
+  <circle cx="30" cy="50" r="3" fill="#7B2D8E" opacity="0.5"/>
+  <circle cx="42" cy="55" r="3" fill="#7B2D8E" opacity="0.5"/>
+  <circle cx="55" cy="48" r="3" fill="#7B2D8E" opacity="0.5"/>
+  <circle cx="38" cy="60" r="3" fill="#7B2D8E" opacity="0.5"/>
+  <circle cx="50" cy="52" r="3" fill="#7B2D8E" opacity="0.5"/>
+  <circle cx="25" cy="58" r="3" fill="#7B2D8E" opacity="0.5"/>
+  <circle cx="60" cy="45" r="3" fill="#7B2D8E" opacity="0.5"/>
+  <circle cx="75" cy="25" r="5" fill="#D55E00" opacity="0.8"/>
+  <text x="82" y="23" font-size="6" fill="#D55E00" font-family="sans-serif">!</text>
+  <!-- Axes -->
+  <line x1="15" y1="70" x2="90" y2="70" stroke="#999" stroke-width="0.5"/>
+  <line x1="15" y1="70" x2="15" y2="15" stroke="#999" stroke-width="0.5"/>
+  <text x="52" y="80" font-size="6" fill="#666" font-family="sans-serif" text-anchor="middle">leverage</text>
+  <!-- Q-Q plot (right) -->
+  <line x1="110" y1="100" x2="190" y2="20" stroke="#D55E00" stroke-width="1" opacity="0.5"/>
+  <circle cx="118" cy="92" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="125" cy="82" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="132" cy="72" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="140" cy="63" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="148" cy="55" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="155" cy="48" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="163" cy="38" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="170" cy="30" r="2" fill="#4A90D9" opacity="0.6"/>
+  <circle cx="180" cy="22" r="2" fill="#4A90D9" opacity="0.6"/>
+  <!-- Labels -->
+  <text x="45" y="110" font-size="7" fill="#7B2D8E" font-family="sans-serif" opacity="0.6">Cook's D</text>
+  <text x="150" y="110" font-size="7" fill="#4A90D9" font-family="sans-serif" opacity="0.6" text-anchor="middle">Q-Q</text>
+</svg>

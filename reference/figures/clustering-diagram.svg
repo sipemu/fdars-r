@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Functional Clustering</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">Grouping curves by shape similarity</text>
+
+  <!-- ===== Left: Mixed curves ===== -->
+  <rect x="16" y="80" width="200" height="180" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="116" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Unlabeled Curves</text>
+
+  <!-- Mixed curves in grey -->
+  <path d="M32 170 Q56 140 80 155 Q104 170 128 155 Q152 140 176 155 Q192 165 200 160" stroke="#888" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M32 180 Q56 150 80 165 Q104 180 128 165 Q152 150 176 165 Q192 175 200 170" stroke="#888" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <path d="M32 140 Q56 165 80 180 Q104 165 128 140 Q152 165 176 180 Q192 165 200 155" stroke="#888" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M32 220 Q80 200 128 180 Q176 160 200 150" stroke="#888" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <path d="M32 225 Q80 205 128 185 Q176 165 200 155" stroke="#888" stroke-width="1.2" fill="none" opacity="0.3"/>
+  <text x="116" y="248" text-anchor="middle" font-size="12" fill="#888">n curves, k = ?</text>
+
+  <!-- Arrow fan out to methods -->
+  <line x1="220" y1="150" x2="260" y2="120" stroke="#555" stroke-width="1.2" marker-end="url(#arrCL2)"/>
+  <line x1="220" y1="200" x2="260" y2="260" stroke="#555" stroke-width="1.2" marker-end="url(#arrCL2)"/>
+
+  <!-- ===== Right top: K-Means ===== -->
+  <rect x="264" y="80" width="220" height="120" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="374" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">K-Means</text>
+  <text x="284" y="126" font-size="12" fill="#555">cluster.kmeans(fd, ncl)</text>
+  <text x="284" y="146" font-size="12" fill="#555">Hard assignment: each curve</text>
+  <text x="284" y="164" font-size="12" fill="#555">belongs to exactly one cluster</text>
+  <text x="284" y="186" font-size="12" fill="#555">L2, L1, DTW, elastic metrics</text>
+
+  <!-- ===== Right bottom: Fuzzy C-Means ===== -->
+  <rect x="264" y="220" width="220" height="120" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="374" y="244" text-anchor="middle" font-size="15" font-weight="bold" fill="#B37700">Fuzzy C-Means</text>
+  <text x="284" y="266" font-size="12" fill="#555">cluster.fcm(fd, ncl, m)</text>
+  <text x="284" y="286" font-size="12" fill="#555">Soft assignment: membership</text>
+  <text x="284" y="304" font-size="12" fill="#555">degrees &#x03C4;&#x1D62;&#x2096; &#x2208; [0, 1]</text>
+  <text x="284" y="326" font-size="12" fill="#555">Fuzziness parameter m</text>
+
+  <!-- ===== Far right: Model selection ===== -->
+  <rect x="504" y="80" width="200" height="260" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="604" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#2E8B57">Model Selection</text>
+  <text x="524" y="130" font-size="13" font-weight="bold" fill="#2E8B57">Optimal k</text>
+  <text x="524" y="150" font-size="12" fill="#555">cluster.optim()</text>
+  <text x="524" y="174" font-size="12" fill="#555">&#x2022; Silhouette score</text>
+  <text x="524" y="194" font-size="12" fill="#555">&#x2022; Calinski-Harabasz</text>
+  <text x="524" y="214" font-size="12" fill="#555">&#x2022; Elbow method</text>
+
+  <line x1="524" y1="230" x2="684" y2="230" stroke="#2E8B57" stroke-width="0.5" opacity="0.3"/>
+
+  <text x="524" y="254" font-size="13" font-weight="bold" fill="#2E8B57">Initialization</text>
+  <text x="524" y="274" font-size="12" fill="#555">cluster.init()</text>
+  <text x="524" y="294" font-size="12" fill="#555">k-means++ for spread-out</text>
+  <text x="524" y="314" font-size="12" fill="#555">starting centroids</text>
+
+  <!-- Arrows to model selection -->
+  <line x1="484" y1="140" x2="500" y2="140" stroke="#555" stroke-width="1.2" marker-end="url(#arrCL2)"/>
+  <line x1="484" y1="280" x2="500" y2="280" stroke="#555" stroke-width="1.2" marker-end="url(#arrCL2)"/>
+
+  <!-- ===== Bottom: Distance metrics ===== -->
+  <line x1="16" y1="362" x2="704" y2="362" stroke="#eee" stroke-width="1.5"/>
+  <text x="360" y="390" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Available Distance Metrics</text>
+
+  <rect x="24" y="408" width="130" height="56" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="89" y="428" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">Pointwise</text>
+  <text x="89" y="448" text-anchor="middle" font-size="12" fill="#555">L2, L1, L&#x221E;</text>
+
+  <rect x="170" y="408" width="130" height="56" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="235" y="428" text-anchor="middle" font-size="13" font-weight="bold" fill="#B37700">Warping</text>
+  <text x="235" y="448" text-anchor="middle" font-size="12" fill="#555">DTW, elastic</text>
+
+  <rect x="316" y="408" width="130" height="56" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="381" y="428" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">Shape</text>
+  <text x="381" y="448" text-anchor="middle" font-size="12" fill="#555">Hausdorff, PCA</text>
+
+  <rect x="462" y="408" width="130" height="56" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="527" y="428" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">Semimetric</text>
+  <text x="527" y="448" text-anchor="middle" font-size="12" fill="#555">Fourier, deriv</text>
+
+  <rect x="608" y="408" width="96" height="56" rx="6" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="656" y="428" text-anchor="middle" font-size="13" font-weight="bold" fill="#D55E00">Custom</text>
+  <text x="656" y="448" text-anchor="middle" font-size="12" fill="#555">any function</text>
+
+  <defs>
+    <marker id="arrCL2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

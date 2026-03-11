@@ -47,14 +47,25 @@
 
 - [Functional Principal Component Analysis
   (FPCA)](https://sipemu.github.io/fdars-r/articles/fpca.md):
+
+- [Elastic
+  FPCA](https://sipemu.github.io/fdars-r/articles/elastic-fpca.md):
+
+  Separate amplitude and phase variability using vertical, horizontal,
+  and joint FPCA after elastic alignment.
+
 - [Finding the Best Basis
   Representation](https://sipemu.github.io/fdars-r/articles/basis-representation.md):
+
 - [Andrews Transformation: From Tables to
   Curves](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md):
+
 - [Functional Depth
   Functions](https://sipemu.github.io/fdars-r/articles/depth-functions.md):
+
 - [Streaming Depth
   Computation](https://sipemu.github.io/fdars-r/articles/streaming-depth.md):
+
 - [Distance Metrics and
   Semimetrics](https://sipemu.github.io/fdars-r/articles/distance-metrics.md):
 
@@ -71,30 +82,78 @@
 
 ### Regression
 
-- [Functional
-  Regression](https://sipemu.github.io/fdars-r/articles/regression.md):
-- [Functional Regression: Scalar and Function
-  Responses](https://sipemu.github.io/fdars-r/articles/functional-regression.md):
+- [Scalar-on-Function
+  Regression](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md):
+
+- [Elastic
+  Regression](https://sipemu.github.io/fdars-r/articles/elastic-regression.md):
+
+  Joint alignment and regression for functional data using elastic
+  methods. Includes scalar-on-function regression, logistic
+  classification, and PCR.
+
+- [Function-on-Scalar
+  Regression](https://sipemu.github.io/fdars-r/articles/function-on-scalar.md):
+
 - [Supervised Classification of Functional
   Data](https://sipemu.github.io/fdars-r/articles/functional-classification.md):
+
 - [Functional Mixed Models for Repeated
   Measures](https://sipemu.github.io/fdars-r/articles/functional-mixed-models.md):
+
 - [Cross-Validation for Functional
   Data](https://sipemu.github.io/fdars-r/articles/cross-validation.md):
+
+- [Model
+  Explainability](https://sipemu.github.io/fdars-r/articles/explainability.md):
+
+  Comprehensive toolkit for interpreting functional regression models:
+  22 methods across global, domain-level, and local explanations.
+
+- [Regression
+  Diagnostics](https://sipemu.github.io/fdars-r/articles/regression-diagnostics.md):
+
+  Diagnostic tools for functional regression models: influence analysis,
+  DFBETAS, variance inflation, permutation importance, regression depth,
+  and explanation stability.
+
+- [Uncertainty
+  Quantification](https://sipemu.github.io/fdars-r/articles/uncertainty-quantification.md):
+
+  Prediction intervals, LOO cross-validation, conformal prediction, and
+  bootstrap confidence bands for functional regression models.
+
+- [Penalized Basis
+  Smoothing](https://sipemu.github.io/fdars-r/articles/smooth-basis.md):
+
+  Smooth functional data using penalized B-spline and Fourier basis
+  expansion with automatic smoothing parameter selection via GCV.
 
 ### Analyze
 
 - [Functional Tolerance
   Bands](https://sipemu.github.io/fdars-r/articles/tolerance-bands.md):
+
 - [Functional Equivalence
   Testing](https://sipemu.github.io/fdars-r/articles/equivalence-testing.md):
+
 - [Functional
   Clustering](https://sipemu.github.io/fdars-r/articles/clustering.md):
+
 - [Model-Based Clustering with Gaussian
   Mixtures](https://sipemu.github.io/fdars-r/articles/gmm-clustering.md):
+
 - [Outlier
   Detection](https://sipemu.github.io/fdars-r/articles/outlier-detection.md):
+
 - [Seasonal Analysis of Functional
   Data](https://sipemu.github.io/fdars-r/articles/seasonal-analysis.md):
+
 - [Covariance Functions and Gaussian Process
   Generation](https://sipemu.github.io/fdars-r/articles/covariance-functions.md):
+
+- [Elastic Changepoint
+  Detection](https://sipemu.github.io/fdars-r/articles/elastic-changepoint.md):
+
+  Detect structural breaks in functional time series using amplitude,
+  phase, and FPCA-based changepoint tests.

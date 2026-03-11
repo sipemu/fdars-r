@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="24" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C5F8A">Estimating Seasonal Period</text>
+  <text x="350" y="46" text-anchor="middle" font-size="13" fill="#888">Two approaches: frequency domain (FFT) and time domain (ACF)</text>
+
+  <!-- ===== Left: Signal ===== -->
+  <rect x="16" y="66" width="160" height="120" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="96" y="88" text-anchor="middle" font-size="13" font-weight="bold" fill="#555">Signal x(t)</text>
+  <!-- Sinusoidal wave -->
+  <path d="M32 130 Q48 100 64 130 Q80 160 96 130 Q112 100 128 130 Q144 160 160 130" stroke="#4A90D9" stroke-width="2" fill="none"/>
+  <text x="96" y="176" text-anchor="middle" font-size="11" fill="#888">Period T = ?</text>
+
+  <!-- Arrows -->
+  <line x1="180" y1="110" x2="210" y2="96" stroke="#555" stroke-width="1.2" marker-end="url(#arrSP)"/>
+  <line x1="180" y1="140" x2="210" y2="154" stroke="#555" stroke-width="1.2" marker-end="url(#arrSP)"/>
+
+  <!-- ===== Top right: FFT ===== -->
+  <rect x="214" y="60" width="230" height="80" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="329" y="82" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">FFT Method</text>
+  <text x="234" y="102" font-size="12" fill="#555">seasonal.estimate.period.fft()</text>
+  <text x="234" y="120" font-size="12" fill="#555">Peak in power spectrum &#x2192; T</text>
+  <text x="234" y="134" font-size="11" fill="#888">Best for: clean periodic signals</text>
+
+  <!-- ===== Bottom right: ACF ===== -->
+  <rect x="214" y="150" width="230" height="80" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="329" y="172" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">ACF Method</text>
+  <text x="234" y="192" font-size="12" fill="#555">seasonal.estimate.period.acf()</text>
+  <text x="234" y="210" font-size="12" fill="#555">First ACF peak &#x2192; T</text>
+  <text x="234" y="224" font-size="11" fill="#888">Best for: noisy or non-sinusoidal</text>
+
+  <!-- ===== Far right: Auto ===== -->
+  <rect x="464" y="60" width="220" height="170" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="574" y="82" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Automatic Selection</text>
+  <text x="484" y="106" font-size="12" fill="#555">seasonal.autoperiod()</text>
+  <text x="484" y="128" font-size="12" fill="#555">Tries FFT, ACF, SAZED</text>
+  <text x="484" y="148" font-size="12" fill="#555">Returns best estimate</text>
+  <line x1="484" y1="162" x2="664" y2="162" stroke="#2E8B57" stroke-width="0.5" opacity="0.3"/>
+  <text x="484" y="182" font-size="12" fill="#555">seasonal.sazed()</text>
+  <text x="484" y="200" font-size="12" fill="#555">Ensemble of 6 estimators</text>
+  <text x="484" y="218" font-size="11" fill="#888">Most robust approach</text>
+
+  <!-- Arrows to auto -->
+  <line x1="448" y1="100" x2="460" y2="120" stroke="#555" stroke-width="1.2" marker-end="url(#arrSP)"/>
+  <line x1="448" y1="190" x2="460" y2="170" stroke="#555" stroke-width="1.2" marker-end="url(#arrSP)"/>
+
+  <!-- Bottom note -->
+  <text x="350" y="264" text-anchor="middle" font-size="12" fill="#888">All methods return estimated period T in the units of the sampling grid</text>
+
+  <defs>
+    <marker id="arrSP" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

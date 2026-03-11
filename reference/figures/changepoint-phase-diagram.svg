@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 225" fill="none">
+  <defs>
+    <style>text { font-family: 'Segoe UI', system-ui, sans-serif; }</style>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="25" font-size="17.5" fill="#333" text-anchor="middle" font-weight="600">Pure Phase Changepoint: Timing Changes, Shape Stays the Same</text>
+
+  <!-- Before panel -->
+  <rect x="20" y="40" width="280" height="162.5" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.1"/>
+  <text x="160" y="62.5" font-size="13.8" fill="#4A90D9" text-anchor="middle" font-weight="600">Before (i = 1 … 30)</text>
+  <!-- Evenly-spaced sine+cos -->
+  <path d="M 40 112.5 Q 70 75.0 100 100.0 Q 130 125.0 160 93.8 Q 190 68.8 220 112.5 Q 250 150.0 280 118.8" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <path d="M 40 115.0 Q 70 77.5 100 102.5 Q 130 122.5 160 96.2 Q 190 71.2 220 115.0 Q 250 147.5 280 121.2" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.4"/>
+  <path d="M 40 110.0 Q 70 72.5 100 97.5 Q 130 127.5 160 91.2 Q 190 66.2 220 110.0 Q 250 152.5 280 116.2" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.3"/>
+  <!-- Tick marks evenly spaced -->
+  <line x1="100" y1="168.8" x2="100" y2="175" stroke="#4A90D9" stroke-width="1.1"/>
+  <line x1="160" y1="168.8" x2="160" y2="175" stroke="#4A90D9" stroke-width="1.1"/>
+  <line x1="220" y1="168.8" x2="220" y2="175" stroke="#4A90D9" stroke-width="1.1"/>
+  <text x="160" y="193.8" font-size="11.2" fill="#666" text-anchor="middle">features evenly timed</text>
+
+  <!-- Arrow -->
+  <line x1="320" y1="121.2" x2="370" y2="121.2" stroke="#E6A020" stroke-width="2.1" marker-end="u r l a r r o w 2"/>
+  <text x="345" y="110" font-size="12.5" fill="#E6A020" text-anchor="middle" font-weight="600">τ = 30</text>
+  <defs><marker id="a r r o w 2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto"><path d="M 0 0.0 L 10 6.2 L 0 12.5 z" fill="#E6A020"/></marker></defs>
+
+  <!-- After panel -->
+  <rect x="400" y="40" width="280" height="162.5" rx="8" fill="#FFF5E0" stroke="#E6A020" stroke-width="1.1"/>
+  <text x="540" y="62.5" font-size="13.8" fill="#E6A020" text-anchor="middle" font-weight="600">After (i = 31 … 60)</text>
+  <!-- Same shape but compressed left, stretched right (warped) -->
+  <path d="M 420 112.5 Q 435 75.0 455 100.0 Q 475 125.0 500 93.8 Q 540 68.8 590 112.5 Q 630 150.0 660 118.8" stroke="#E6A020" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <path d="M 420 115.0 Q 435 77.5 455 102.5 Q 475 122.5 500 96.2 Q 540 71.2 590 115.0 Q 630 147.5 660 121.2" stroke="#E6A020" stroke-width="1.6" fill="none" opacity="0.4"/>
+  <path d="M 420 110.0 Q 435 72.5 455 97.5 Q 475 127.5 500 91.2 Q 540 66.2 590 110.0 Q 630 152.5 660 116.2" stroke="#E6A020" stroke-width="1.6" fill="none" opacity="0.3"/>
+  <!-- Tick marks unevenly spaced (warped) -->
+  <line x1="455" y1="168.8" x2="455" y2="175" stroke="#E6A020" stroke-width="1.1"/>
+  <line x1="500" y1="168.8" x2="500" y2="175" stroke="#E6A020" stroke-width="1.1"/>
+  <line x1="590" y1="168.8" x2="590" y2="175" stroke="#E6A020" stroke-width="1.1"/>
+  <text x="540" y="193.8" font-size="11.2" fill="#666" text-anchor="middle">same shape, warped timing</text>
+</svg>

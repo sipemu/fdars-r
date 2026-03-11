@@ -28,20 +28,6 @@ increasing climate variability.
 The Canadian Weather dataset is a classic benchmark in functional data
 analysis (Ramsay and Silverman, 2005).
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Data Preparation
 
 The CanadianWeather dataset contains daily temperature averaged over
@@ -162,10 +148,10 @@ knitr::kable(period_results,
 
 | Method              | Period | Confidence |
 |:--------------------|-------:|-----------:|
-| SAZED               |  365.1 |       0.40 |
-| Autoperiod          |  365.0 |       0.96 |
-| CFD-Autoperiod      |    2.2 |       0.11 |
-| detect.period (FFT) |  365.0 |    1402.12 |
+| SAZED               |  365.1 |      0.400 |
+| Autoperiod          |  365.0 |      0.960 |
+| CFD-Autoperiod      |  365.0 |      0.965 |
+| detect.period (FFT) |  365.0 |   1402.120 |
 
 Period detection: convergence on the 365-day annual cycle
 

@@ -1,14 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
-  <!-- Andrews curves: sinusoidal fingerprints for 3 cultivars -->
-  <!-- Barolo (dark red) -->
-  <path d="M15 60 Q30 30, 50 25 Q70 20, 85 55 Q100 85, 120 90 Q140 80, 160 45 Q175 25, 190 35" stroke="#8B0000" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-  <path d="M15 58 Q30 32, 50 28 Q70 23, 85 52 Q100 82, 120 85 Q140 78, 160 48 Q175 28, 190 38" stroke="#8B0000" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
-  <!-- Grignolino (gold) -->
-  <path d="M15 65 Q30 55, 50 60 Q70 70, 85 65 Q100 50, 120 45 Q140 55, 160 70 Q175 75, 190 68" stroke="#DAA520" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-  <path d="M15 62 Q30 52, 50 57 Q70 68, 85 62 Q100 48, 120 42 Q140 52, 160 67 Q175 72, 190 65" stroke="#DAA520" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
-  <!-- Barbera (green) -->
-  <path d="M15 55 Q30 70, 50 80 Q70 85, 85 75 Q100 55, 120 40 Q140 35, 160 50 Q175 65, 190 70" stroke="#2E8B57" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-  <path d="M15 52 Q30 68, 50 78 Q70 82, 85 72 Q100 52, 120 38 Q140 32, 160 48 Q175 62, 190 67" stroke="#2E8B57" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
-  <!-- Median curve (black, bold) -->
-  <path d="M15 60 Q30 50, 50 55 Q70 60, 85 62 Q100 60, 120 55 Q140 55, 160 55 Q175 55, 190 55" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <!-- Andrews curves bundle -->
+  <!-- Barolo curves (dark red) -->
+  <path d="M15 58 Q35 28, 55 25 Q75 22, 90 52 Q110 82, 130 85 Q150 75, 170 45 Q185 28, 195 38" stroke="#8B0000" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 55 Q35 30, 55 28 Q75 26, 90 48 Q110 78, 130 82 Q150 72, 170 48 Q185 32, 195 42" stroke="#8B0000" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 62 Q35 32, 55 22 Q75 18, 90 55 Q110 88, 130 88 Q150 78, 170 42 Q185 25, 195 34" stroke="#8B0000" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Grignolino curves (gold) -->
+  <path d="M15 68 Q35 55, 55 58 Q75 68, 90 62 Q110 48, 130 44 Q150 52, 170 68 Q185 72, 195 65" stroke="#DAA520" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 65 Q35 52, 55 55 Q75 65, 90 60 Q110 45, 130 40 Q150 50, 170 65 Q185 70, 195 62" stroke="#DAA520" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Barbera curves (green) -->
+  <path d="M15 52 Q35 68, 55 78 Q75 82, 90 72 Q110 52, 130 38 Q150 35, 170 48 Q185 62, 195 68" stroke="#2E8B57" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 48 Q35 65, 55 75 Q75 80, 90 68 Q110 50, 130 35 Q150 32, 170 45 Q185 58, 195 65" stroke="#2E8B57" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Outlier curve (bold, stands out) -->
+  <path d="M15 35 Q35 80, 55 95 Q75 90, 90 30 Q110 15, 130 20 Q150 60, 170 85 Q185 90, 195 80" stroke="#D55E00" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+  <!-- Outlier label -->
+  <circle cx="55" cy="95" r="5" fill="none" stroke="#D55E00" stroke-width="1.5" opacity="0.7"/>
+  <text x="65" y="108" font-size="7" fill="#D55E00" font-family="sans-serif" opacity="0.8">outlier</text>
 </svg>

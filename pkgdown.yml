@@ -9,9 +9,12 @@ articles:
   articles/covariance-functions: covariance-functions.html
   articles/cross-validation: cross-validation.html
   articles/custom-plotting: custom-plotting.html
-  depth-functions: depth-functions.html
+  articles/depth-functions: depth-functions.html
   articles/distance-metrics: distance-metrics.html
   articles/elastic-alignment: elastic-alignment.html
+  articles/elastic-changepoint: elastic-changepoint.html
+  articles/elastic-fpca: elastic-fpca.html
+  articles/elastic-regression: elastic-regression.html
   articles/equivalence-testing: equivalence-testing.html
   articles/example-andrews-wine-clustering: example-andrews-wine-clustering.html
   articles/example-andrews-wine-intro: example-andrews-wine-intro.html
@@ -24,10 +27,11 @@ articles:
   articles/example-sonar-tsrvf: example-sonar-tsrvf.html
   articles/example-tecator-regression: example-tecator-regression.html
   articles/examples: examples.html
+  articles/explainability: explainability.html
   articles/fpca: fpca.html
+  articles/function-on-scalar: function-on-scalar.html
   articles/functional-classification: functional-classification.html
   articles/functional-mixed-models: functional-mixed-models.html
-  articles/functional-regression: functional-regression.html
   articles/gmm-clustering: gmm-clustering.html
   articles/intro-to-smoothing: intro-to-smoothing.html
   introduction: introduction.html
@@ -35,14 +39,17 @@ articles:
   articles/landmark-registration: landmark-registration.html
   articles/learn: learn.html
   articles/outlier-detection: outlier-detection.html
-  articles/regression: regression.html
+  articles/regression-diagnostics: regression-diagnostics.html
+  articles/scalar-on-function: scalar-on-function.html
   articles/seasonal-analysis: seasonal-analysis.html
   articles/simulation-toolbox: simulation-toolbox.html
+  articles/smooth-basis: smooth-basis.html
   articles/streaming-depth: streaming-depth.html
   articles/tolerance-bands: tolerance-bands.html
   articles/tsrvf: tsrvf.html
+  articles/uncertainty-quantification: uncertainty-quantification.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-10T16:26Z
+last_built: 2026-03-11T22:52Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

@@ -1,15 +1,5 @@
 # Andrews Wine: Quality Control
 
-``` r
-library(fdars)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(knitr)
-theme_set(theme_minimal(base_size = 13))
-set.seed(42)
-```
-
 This article is part of a four-article series analyzing 178 wines (3
 cultivars, 13 chemicals) with Andrews curves and functional data
 analysis. Each article is self-contained.
@@ -75,10 +65,10 @@ fbp$plot
 ![](example-andrews-wine-qc_files/figure-html/functional-boxplot-1.png)
 
 The median curve (black) is the **most typical wine** — the one with the
-highest functional depth. The magenta band is the **50% central
+highest functional depth. The darker blue band is the **50% central
 region**: half of all wines fall within this envelope at every point.
-The pink band extends to the fences (1.5x the envelope width); any wine
-whose curve escapes the pink band at *any* Fourier frequency is
+The lighter blue band extends to the fences (1.5x the envelope width);
+any wine whose curve escapes the fence at *any* Fourier frequency is
 automatically flagged.
 
 ### Per-Cultivar Specifications
@@ -108,8 +98,8 @@ bp_list[["Barolo"]] / bp_list[["Grignolino"]] / bp_list[["Barbera"]]
 These three boxplots define a **visual specification** for each
 cultivar. A quality controller can now take a new wine, compute its
 Andrews curve, and overlay it on the appropriate cultivar’s boxplot. If
-the curve falls within the magenta band, the wine is typical. If it
-escapes the pink fences, investigate.
+the curve falls within the central blue band, the wine is typical. If it
+escapes the fences, investigate.
 
 ### Incoming Batch Monitoring
 
@@ -141,18 +131,18 @@ df_check <- rbind(
 
 ggplot() +
   geom_ribbon(data = df_envelope, aes(x = t, ymin = fence_min, ymax = fence_max),
-              fill = "pink", alpha = 0.5) +
+              fill = "#B0C4DE", alpha = 0.4) +
   geom_ribbon(data = df_envelope, aes(x = t, ymin = env_min, ymax = env_max),
-              fill = "magenta", alpha = 0.4) +
+              fill = "steelblue", alpha = 0.4) +
   geom_line(data = df_envelope, aes(x = t, y = median_val),
             color = "black", linewidth = 1) +
   geom_line(data = filter(df_check, Wine == "Wine 107 (typical)"),
-            aes(x = t, y = value), color = "steelblue", linewidth = 0.9) +
+            aes(x = t, y = value), color = "#2E8B57", linewidth = 0.9) +
   geom_line(data = filter(df_check, Wine == "Wine 122 (suspect)"),
             aes(x = t, y = value), color = "red", linewidth = 0.9,
             linetype = "dashed") +
   labs(title = "QC Check: New Wine vs Grignolino Specification",
-       subtitle = "Blue = typical (inside envelope), Red dashed = suspect (outside envelope)",
+       subtitle = "Green = typical (inside envelope), Red dashed = suspect (outside envelope)",
        x = expression(t), y = expression(f[x](t)))
 ```
 
@@ -316,153 +306,107 @@ workflow has three phases.
 ### Phase 1: Establish the Reference (Process Validation)
 
 During process validation, you collect a representative set of wines for
-each cultivar and compute the **reference profile**: the trimmed mean
-curve and an envelope that captures the expected range of normal
+each cultivar and compute the **reference profile**: the center curve
+and a **tolerance band** that captures the expected range of normal
 variation.
 
-We use the bootstrap to construct two types of bands:
+#### Why Tolerance Intervals, Not Prediction Intervals?
 
-- A **confidence band** (blue) for the trimmed mean — this quantifies
-  uncertainty about the cultivar’s *average* profile (“where is the
-  center?”).
-- A **prediction band** (gray) for individual wines — this captures the
-  range where a *single new observation* is expected to fall (“is this
-  wine normal?”).
-
-Both are **prediction intervals**: they use the observed sample to
-predict where future observations or statistics will land. This is the
-appropriate tool for *routine monitoring*, where you ask “does this new
-wine look like my reference set?”
-
-For *process transfer* — validating that a new vineyard, lab, or
-fermentation facility produces equivalent wines — the statistically
-correct tool is a **tolerance interval**. A tolerance interval
+A **prediction interval** covers the *next single observation* with a
+given probability (e.g., 95%). A **tolerance interval** is stronger: it
 guarantees that *at least a specified proportion* of the population
 (e.g., 95%) falls within the band, with a given confidence level (e.g.,
-99%). This dual coverage is stricter than a prediction interval, which
-only covers the *next single observation*. Computing functional
-tolerance intervals requires adjustments for simultaneous coverage
-across the entire curve domain, which goes beyond what we demonstrate
-here, but the conceptual framework is the same: replace the bootstrap
-quantiles below with the appropriate tolerance factors (e.g., based on
-non-central $\chi^{2}$ or Bonferroni-corrected normal order statistics).
-For the purposes of this article, we proceed with prediction bands as a
-practical approximation:
+95%). The dual coverage makes tolerance intervals the correct tool for
+quality specifications:
+
+|               | Prediction interval                 | Tolerance interval                                 |
+|---------------|-------------------------------------|----------------------------------------------------|
+| **Covers**    | The next observation                | A fraction of the population                       |
+| **Guarantee** | 95% chance the next point is inside | 95% confident that \$\$95% of population is inside |
+| **Use case**  | “Is this one wine normal?”          | “Does this band define normal?”                    |
+| **QC role**   | Ad hoc checking                     | **Specification limits**                           |
+
+When you define a cultivar specification — “a normal Barolo should fall
+in this band” — you need the tolerance interpretation. A prediction band
+can be too narrow (it only covers one observation, not the population),
+leading to excessive false alarms. Tolerance bands are wider by
+construction, giving a proper acceptance region.
+
+We compute tolerance bands using
+[`tolerance.band()`](https://sipemu.github.io/fdars-r/reference/tolerance.band.md),
+which uses FPCA-based bootstrap to construct bands with the requested
+population coverage:
 
 ``` r
 
-tolerance_plots <- list()
+tol_plots <- list()
 
 for (cv in levels(cultivar)) {
   idx <- which(cultivar == cv)
   fd_cv <- fd_wine[idx]
 
-  # Bootstrap the trimmed mean to get a tolerance band
-  # Using the percentile method on pointwise quantiles of bootstrap curves
-  n_boot <- 500
-  boot_obj <- fdata.bootstrap(fd_cv, n.boot = n_boot, method = "naive",
-                               seed = 42)
+  # Compute tolerance band: 95% coverage, FPCA + bootstrap
 
-  # For each bootstrap sample, compute the trimmed mean
-  boot_means <- matrix(NA, n_boot, m)
-  for (b in seq_len(n_boot)) {
-    boot_means[b, ] <- as.numeric(trimmed(boot_obj$boot.samples[[b]],
-                                           trim = 0.25)$data)
-  }
-
-  # Pointwise 2.5% and 97.5% quantiles of bootstrap trimmed means
-  band_lower <- apply(boot_means, 2, quantile, probs = 0.025)
-  band_upper <- apply(boot_means, 2, quantile, probs = 0.975)
-
-  # Also compute a wider prediction band using the raw bootstrap curves
-  # This captures individual wine variability, not just mean uncertainty
-  boot_curves <- matrix(NA, n_boot, m)
-  for (b in seq_len(n_boot)) {
-    # Pick a random curve from each bootstrap sample
-    boot_curves[b, ] <- boot_obj$boot.samples[[b]]$data[
-      sample(nrow(boot_obj$boot.samples[[b]]$data), 1), ]
-  }
-  pred_lower <- apply(boot_curves, 2, quantile, probs = 0.025)
-  pred_upper <- apply(boot_curves, 2, quantile, probs = 0.975)
-
-  ref_mean <- as.numeric(trimmed(fd_cv, trim = 0.25)$data)
+  tband <- tolerance.band(fd_cv, method = "fpca", coverage = 0.95,
+                          ncomp = 5, nb = 500, seed = 42)
 
   df_band <- data.frame(
     t = t_grid,
-    mean = ref_mean,
-    ci_lower = band_lower, ci_upper = band_upper,
-    pred_lower = pred_lower, pred_upper = pred_upper
+    center = tband$center,
+    lower = tband$lower,
+    upper = tband$upper
   )
 
-  tolerance_plots[[cv]] <- ggplot(df_band, aes(x = t)) +
-    geom_ribbon(aes(ymin = pred_lower, ymax = pred_upper),
-                fill = "gray80", alpha = 0.6) +
-    geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper),
-                fill = "steelblue", alpha = 0.3) +
-    geom_line(aes(y = mean), color = "navy", linewidth = 1) +
+  tol_plots[[cv]] <- ggplot(df_band, aes(x = t)) +
+    geom_ribbon(aes(ymin = lower, ymax = upper),
+                fill = "#B0C4DE", alpha = 0.5) +
+    geom_line(aes(y = center), color = "navy", linewidth = 1) +
     labs(title = sprintf("%s (n = %d)", cv, length(idx)),
-         subtitle = "Navy = trimmed mean, Blue = 95% CI of mean, Gray = 95% prediction band",
+         subtitle = "Navy = FPCA center, Blue = 95% tolerance band",
          x = expression(t), y = expression(f[x](t))) +
     theme_minimal()
 }
 
-tolerance_plots[["Barolo"]] / tolerance_plots[["Grignolino"]] / tolerance_plots[["Barbera"]]
+tol_plots[["Barolo"]] / tol_plots[["Grignolino"]] / tol_plots[["Barbera"]]
 ```
 
 ![](example-andrews-wine-qc_files/figure-html/tolerance-bands-1.png)
 
-The **blue band** (confidence band for the mean) answers: “where does
-the cultivar’s average profile sit?” The **gray band** (prediction band
-for individual wines) answers: “where can a single new wine’s curve fall
-and still be considered normal?” For routine QC, the gray prediction
-band is the operational acceptance criterion: any new wine whose Andrews
-curve stays entirely inside it passes.
-
-For formal process transfer validation, you would replace the gray band
-with a proper tolerance band (wider, to guarantee population coverage
-with confidence). The prediction band shown here is a pragmatic starting
-point that works well for ongoing monitoring.
+The **blue band** is the 95% tolerance band: we are confident that at
+least 95% of all wines from this cultivar will produce Andrews curves
+inside it. This is the operational acceptance criterion: any new wine
+whose curve stays entirely inside the band passes. Because
+[`tolerance.band()`](https://sipemu.github.io/fdars-r/reference/tolerance.band.md)
+accounts for estimation uncertainty through bootstrap, the band is
+appropriately wider than a naive pointwise interval.
 
 ### Phase 2: Process Transfer
 
 When a process is transferred — to a new vineyard, a new fermentation
 facility, or a new analytical lab — you need to verify that the new
-process produces wines within the validated specification. Ideally this
-would use tolerance bands (guaranteeing population coverage); here we
-demonstrate the workflow with prediction bands as a practical
-approximation.
+process produces wines within the validated specification. The tolerance
+band provides the acceptance region: if the new wine’s Andrews curve
+falls inside it, the wine is consistent with the reference population.
 
 The key advantage of the functional approach is that when a wine
 *fails*, you can trace back to **which chemicals** caused the deviation.
 Because the Andrews curve maps each Fourier frequency to specific input
 variables, a violation at a particular region of the curve implicates
-specific chemicals. We can also directly compare the original
-(standardized) chemical values to pinpoint exactly where the new wine
-deviates:
+specific chemicals:
 
 ``` r
 
-# Simulate: take a Barolo wine and check against the Barolo tolerance band
+# Compute the tolerance band for Barolo
 barolo_idx <- which(cultivar == "Barolo")
 fd_barolo <- fd_wine[barolo_idx]
-
-# Compute the prediction band for Barolo
-boot_barolo <- fdata.bootstrap(fd_barolo, n.boot = 500, method = "naive",
-                                seed = 42)
-boot_barolo_curves <- matrix(NA, 500, m)
-for (b in 1:500) {
-  boot_barolo_curves[b, ] <- boot_barolo$boot.samples[[b]]$data[
-    sample(nrow(boot_barolo$boot.samples[[b]]$data), 1), ]
-}
-barolo_pred_lower <- apply(boot_barolo_curves, 2, quantile, probs = 0.025)
-barolo_pred_upper <- apply(boot_barolo_curves, 2, quantile, probs = 0.975)
-barolo_mean <- as.numeric(trimmed(fd_barolo, trim = 0.25)$data)
+tband_barolo <- tolerance.band(fd_barolo, method = "fpca", coverage = 0.95,
+                               ncomp = 5, nb = 500, seed = 42)
 
 df_barolo_band <- data.frame(
   t = t_grid,
-  mean = barolo_mean,
-  pred_lower = barolo_pred_lower,
-  pred_upper = barolo_pred_upper
+  center = tband_barolo$center,
+  lower = tband_barolo$lower,
+  upper = tband_barolo$upper
 )
 
 # Test wines: a true Barolo (wine 36, typical) and a Grignolino (wine 107)
@@ -473,38 +417,38 @@ df_test_wines <- rbind(
              Wine = "Wine 107 (Grignolino)")
 )
 
-# Check which wines stay inside the band
+# Check which wines stay inside the tolerance band
 for (w in c(36, 107)) {
-  inside <- all(fd_wine$data[w, ] >= barolo_pred_lower &
-                fd_wine$data[w, ] <= barolo_pred_upper)
-  cat(sprintf("Wine %d (%s): %s Barolo prediction band\n",
+  inside <- all(fd_wine$data[w, ] >= tband_barolo$lower &
+                fd_wine$data[w, ] <= tband_barolo$upper)
+  cat(sprintf("Wine %d (%s): %s Barolo tolerance band\n",
               w, cultivar[w], ifelse(inside, "INSIDE", "OUTSIDE")))
 }
-#> Wine 36 (Barolo): INSIDE Barolo prediction band
-#> Wine 107 (Grignolino): OUTSIDE Barolo prediction band
+#> Wine 36 (Barolo): INSIDE Barolo tolerance band
+#> Wine 107 (Grignolino): OUTSIDE Barolo tolerance band
 
 ggplot() +
   geom_ribbon(data = df_barolo_band,
-              aes(x = t, ymin = pred_lower, ymax = pred_upper),
-              fill = "gray80", alpha = 0.6) +
-  geom_line(data = df_barolo_band, aes(x = t, y = mean),
+              aes(x = t, ymin = lower, ymax = upper),
+              fill = "#B0C4DE", alpha = 0.5) +
+  geom_line(data = df_barolo_band, aes(x = t, y = center),
             color = "navy", linewidth = 1) +
   geom_line(data = filter(df_test_wines, Wine == "Wine 36 (Barolo — typical)"),
             aes(x = t, y = value), color = "#2E8B57", linewidth = 0.9) +
   geom_line(data = filter(df_test_wines, Wine == "Wine 107 (Grignolino)"),
             aes(x = t, y = value), color = "red", linewidth = 0.9,
             linetype = "dashed") +
-  labs(title = "Process Transfer Check: Barolo Prediction Band",
+  labs(title = "Process Transfer Check: Barolo Tolerance Band (95% coverage)",
        subtitle = "Green = true Barolo (passes), Red dashed = Grignolino (fails)",
        x = expression(t), y = expression(f[x](t)))
 ```
 
 ![](example-andrews-wine-qc_files/figure-html/process-transfer-1.png)
 
-A true Barolo stays inside the gray band; a Grignolino immediately
-violates it. But the critical follow-up question is: **which chemicals
-caused the failure?** Because we preserved the mapping between curve and
-original variables, we can answer this directly:
+A true Barolo stays inside the blue tolerance band; a Grignolino
+immediately violates it. But the critical follow-up question is: **which
+chemicals caused the failure?** Because we preserved the mapping between
+curve and original variables, we can answer this directly:
 
 ``` r
 
@@ -605,9 +549,9 @@ incoming <- rbind(
 
 ggplot() +
   geom_ribbon(data = df_monitor, aes(x = t, ymin = fence_min, ymax = fence_max),
-              fill = "pink", alpha = 0.4) +
+              fill = "#B0C4DE", alpha = 0.4) +
   geom_ribbon(data = df_monitor, aes(x = t, ymin = env_min, ymax = env_max),
-              fill = "magenta", alpha = 0.3) +
+              fill = "steelblue", alpha = 0.3) +
   geom_line(data = df_monitor, aes(x = t, y = median_val),
             color = "black", linewidth = 0.8) +
   geom_line(data = incoming,
@@ -681,7 +625,7 @@ mislabeling hypothesis from the [outlier
 analysis](https://sipemu.github.io/fdars-r/articles/example-andrews-wine.md).
 
 This is the operational payoff of the entire pipeline. The validation
-phase produces the reference profiles, prediction bands, and decision
+phase produces the reference profiles, tolerance bands, and decision
 rules. The monitoring phase applies them to every new batch with a
 single curve overlay *plus* a chemical-level breakdown when something
 goes wrong. The quality controller doesn’t need to understand Fourier
@@ -694,10 +638,9 @@ validation lifecycle** (ICH Q8-Q12, FDA guidance):
 
 - **Stage 1 (Process Design)**: FPCA identifies critical quality
   attributes (which chemicals matter); clustering validates groupings
-- **Stage 2 (Process Qualification)**: prediction bands define
-  acceptance criteria (tolerance bands for formal validation); the
-  permutation test provides statistical evidence of cultivar
-  distinctness
+- **Stage 2 (Process Qualification)**: tolerance bands define acceptance
+  criteria with guaranteed population coverage; the permutation test
+  provides statistical evidence of cultivar distinctness
 - **Stage 3 (Continued Process Verification)**: the functional boxplot
   serves as the ongoing control chart; depth ranking flags drifting
   batches before they exceed limits; chemical-level diagnostics pinpoint

@@ -1,0 +1,36 @@
+# Conformal prediction
+
+Conformal prediction
+
+## Usage
+
+``` r
+explain_conformal_rust(
+  intercept,
+  beta_t,
+  beta_se,
+  gamma,
+  fitted_values,
+  residuals,
+  r_squared,
+  r_squared_adj,
+  std_errors,
+  ncomp,
+  coefficients,
+  residual_se,
+  gcv,
+  fpca_mean,
+  fpca_rotation_data,
+  fpca_rotation_nrow,
+  fpca_rotation_ncol,
+  fpca_scores_data,
+  fpca_scores_nrow,
+  fpca_scores_ncol,
+  train_data,
+  train_y,
+  test_data,
+  cal_fraction,
+  alpha,
+  seed
+)
+```

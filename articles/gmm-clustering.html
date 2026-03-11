@@ -80,18 +80,7 @@ covariance structures adapt to cluster shapes.</li>
 <p><strong>fdars</strong> implements GMM clustering through
 <code><a href="../reference/cluster.gmm.html">cluster.gmm()</a></code>, which projects functional data onto a
 B-spline basis before fitting the mixture model.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<img src="../reference/figures/gmm-clustering-diagram.svg" alt="Model-Based Clustering with Gaussian Mixtures" style="width:100%; max-width:720px; display:block; margin:1em auto;">
 </div>
 <div class="section level2">
 <h2 id="why-model-based-clustering">Why Model-Based Clustering?<a class="anchor" aria-label="anchor" href="#why-model-based-clustering"></a>
@@ -299,7 +288,7 @@ features; too many inflate the dimensionality and slow convergence.</p>
 <div class="section level2">
 <h2 id="simulated-data">Simulated Data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n_per_cluster</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
@@ -340,7 +329,7 @@ scenario for GMM.</p>
 </h2>
 <p><code><a href="../reference/cluster.gmm.html">cluster.gmm()</a></code> searches over a range of k values and
 selects the best model using BIC (default) or ICL.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gmm_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.gmm.html">cluster.gmm</a></span><span class="op">(</span><span class="va">fd</span>, k.range <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gmm_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Gaussian Mixture Model Clustering</span></span>
@@ -370,7 +359,7 @@ will be penalized for unnecessary parameters.</p>
 <h2 id="model-selection-bic-curve">Model Selection: BIC Curve<a class="anchor" aria-label="anchor" href="#model-selection-bic-curve"></a>
 </h2>
 <p>The BIC values across candidate k help visualize model selection:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gmm_fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="gmm-clustering_files/figure-html/bic-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>A clear minimum (or elbow) at
@@ -384,7 +373,7 @@ provide comparably good fits.</p>
 <h2 id="soft-vs-hard-assignment">Soft vs Hard Assignment<a class="anchor" aria-label="anchor" href="#soft-vs-hard-assignment"></a>
 </h2>
 <p>Unlike k-means, GMM provides membership probabilities:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show membership for first 6 curves</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gmm_fit</span><span class="op">$</span><span class="va">membership</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      [,1] [,2] [,3] [,4] [,5] [,6]</span></span>
@@ -408,7 +397,7 @@ curves, outliers, or evidence that the model needs refinement.</p>
 <div class="section level2">
 <h2 id="comparison-with-k-means">Comparison with K-Means<a class="anchor" aria-label="anchor" href="#comparison-with-k-means"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kmeans_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.kmeans.html">cluster.kmeans</a></span><span class="op">(</span><span class="va">fd</span>, ncl <span class="op">=</span> <span class="fl">3</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"K-means WCSS:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kmeans_fit</span><span class="op">$</span><span class="va">tot.withinss</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -435,7 +424,7 @@ covariance matrix.</li>
 <code>"diagonal"</code>: Diagonal covariance (features are
 independent within clusters).</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gmm_diag</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.gmm.html">cluster.gmm</a></span><span class="op">(</span><span class="va">fd</span>, k.range <span class="op">=</span> <span class="fl">3</span>, cov.type <span class="op">=</span> <span class="st">"diagonal"</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Full GMM BIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gmm_fit</span><span class="op">$</span><span class="va">bic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Full GMM BIC: 322.95</span></span>
@@ -449,7 +438,7 @@ simpler model is adequate and will generalize better.</p>
 <h2 id="predicting-new-observations">Predicting New Observations<a class="anchor" aria-label="anchor" href="#predicting-new-observations"></a>
 </h2>
 <p>Assign new curves to clusters using the fitted model:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate new curves</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">99</span><span class="op">)</span></span>
 <span><span class="va">X_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="va">m</span><span class="op">)</span></span>
@@ -480,7 +469,7 @@ than the training data.</p>
 </h2>
 <p>ICL (Integrated Completed Likelihood) penalizes cluster overlap more
 strongly than BIC:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gmm_icl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.gmm.html">cluster.gmm</a></span><span class="op">(</span><span class="va">fd</span>, k.range <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, criterion <span class="op">=</span> <span class="st">"icl"</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"BIC selected k:"</span>, <span class="va">gmm_fit</span><span class="op">$</span><span class="va">k</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; BIC selected k: 6</span></span>

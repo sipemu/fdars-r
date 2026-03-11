@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Custom Plotting with ggplot2</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">From built-in plots to fully customized publication figures</text>
+
+  <!-- ===== Left: Built-in methods ===== -->
+  <rect x="16" y="80" width="220" height="160" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="126" y="104" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Built-in Methods</text>
+  <text x="36" y="128" font-size="12" fill="#555">plot(fd) &#x2014; base R</text>
+  <text x="36" y="150" font-size="12" fill="#555">autoplot(fd) &#x2014; ggplot2</text>
+  <text x="36" y="172" font-size="12" fill="#555">plot(km) &#x2014; S3 dispatch</text>
+  <text x="36" y="194" font-size="12" fill="#555">plot(out) &#x2014; outlier plots</text>
+  <text x="126" y="224" text-anchor="middle" font-size="11" fill="#888">Quick &#x2022; Convenient</text>
+
+  <!-- Arrow -->
+  <text x="260" y="164" text-anchor="middle" font-size="18" fill="#555">&#x2192;</text>
+  <text x="260" y="182" text-anchor="middle" font-size="11" fill="#888">need more</text>
+  <text x="260" y="196" text-anchor="middle" font-size="11" fill="#888">control?</text>
+
+  <!-- ===== Right: Custom ggplot2 pipeline ===== -->
+  <rect x="294" y="80" width="410" height="160" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="499" y="104" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Custom ggplot2 Pipeline</text>
+
+  <!-- Step 1 -->
+  <rect x="314" y="116" width="170" height="48" rx="6" fill="#fff" stroke="#E6A020" stroke-width="1"/>
+  <text x="399" y="136" text-anchor="middle" font-size="12" font-weight="bold" fill="#B37700">1. Extract Data</text>
+  <text x="399" y="154" text-anchor="middle" font-size="11" fill="#555">fd$data, fd$argvals</text>
+
+  <!-- Step 2 -->
+  <rect x="504" y="116" width="180" height="48" rx="6" fill="#fff" stroke="#E6A020" stroke-width="1"/>
+  <text x="594" y="136" text-anchor="middle" font-size="12" font-weight="bold" fill="#B37700">2. Reshape to Long</text>
+  <text x="594" y="154" text-anchor="middle" font-size="11" fill="#555">pivot_longer() &#x2192; tidy df</text>
+
+  <!-- Step 3 -->
+  <rect x="314" y="176" width="170" height="48" rx="6" fill="#fff" stroke="#E6A020" stroke-width="1"/>
+  <text x="399" y="196" text-anchor="middle" font-size="12" font-weight="bold" fill="#B37700">3. Join Metadata</text>
+  <text x="399" y="214" text-anchor="middle" font-size="11" fill="#555">fd$metadata &#x2192; groups</text>
+
+  <!-- Step 4 -->
+  <rect x="504" y="176" width="180" height="48" rx="6" fill="#fff" stroke="#E6A020" stroke-width="1"/>
+  <text x="594" y="196" text-anchor="middle" font-size="12" font-weight="bold" fill="#B37700">4. ggplot + geom_line</text>
+  <text x="594" y="214" text-anchor="middle" font-size="11" fill="#555">facet, color, theme</text>
+
+  <!-- ===== Bottom: Visualization gallery ===== -->
+  <line x1="16" y1="260" x2="704" y2="260" stroke="#eee" stroke-width="1.5"/>
+  <text x="360" y="288" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Visualization Recipes</text>
+
+  <!-- Recipe 1: Spaghetti + mean -->
+  <rect x="16" y="306" width="160" height="156" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="96" y="330" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">Spaghetti Plot</text>
+  <!-- Mini curves -->
+  <path d="M32 360 Q56 348 80 355 Q104 362 128 350 Q148 342 160 346" stroke="#2E8B57" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M32 368 Q56 355 80 362 Q104 370 128 358 Q148 350 160 354" stroke="#2E8B57" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <path d="M32 364 Q56 352 80 358 Q104 366 128 354 Q148 346 160 350" stroke="#2E8B57" stroke-width="2" fill="none"/>
+  <text x="96" y="400" text-anchor="middle" font-size="11" fill="#555">Individual curves</text>
+  <text x="96" y="416" text-anchor="middle" font-size="11" fill="#555">+ bold mean</text>
+  <text x="96" y="444" text-anchor="middle" font-size="10" fill="#888">geom_line(alpha)</text>
+
+  <!-- Recipe 2: Group comparison -->
+  <rect x="192" y="306" width="160" height="156" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="272" y="330" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">Group Means</text>
+  <!-- Two group means -->
+  <path d="M208 368 Q232 348 256 358 Q280 368 304 352 Q324 342 336 346" stroke="#4A90D9" stroke-width="2" fill="none"/>
+  <path d="M208 380 Q232 395 256 388 Q280 378 304 390 Q324 398 336 394" stroke="#E6A020" stroke-width="2" fill="none"/>
+  <!-- CI ribbons (simplified) -->
+  <rect x="208" y="355" width="128" height="8" rx="2" fill="#4A90D9" opacity="0.15"/>
+  <rect x="208" y="385" width="128" height="8" rx="2" fill="#E6A020" opacity="0.15"/>
+  <text x="272" y="418" text-anchor="middle" font-size="11" fill="#555">Mean &#xB1; CI ribbon</text>
+  <text x="272" y="444" text-anchor="middle" font-size="10" fill="#888">geom_ribbon + facet</text>
+
+  <!-- Recipe 3: Heatmap -->
+  <rect x="368" y="306" width="160" height="156" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="448" y="330" text-anchor="middle" font-size="13" font-weight="bold" fill="#B37700">Heatmap</text>
+  <!-- Mini heatmap grid -->
+  <rect x="392" y="348" width="16" height="12" fill="#E8F0FE"/>
+  <rect x="408" y="348" width="16" height="12" fill="#4A90D9"/>
+  <rect x="424" y="348" width="16" height="12" fill="#2C5F8A"/>
+  <rect x="440" y="348" width="16" height="12" fill="#4A90D9"/>
+  <rect x="456" y="348" width="16" height="12" fill="#E8F0FE"/>
+  <rect x="392" y="360" width="16" height="12" fill="#4A90D9"/>
+  <rect x="408" y="360" width="16" height="12" fill="#2C5F8A"/>
+  <rect x="424" y="360" width="16" height="12" fill="#1a3d5c"/>
+  <rect x="440" y="360" width="16" height="12" fill="#2C5F8A"/>
+  <rect x="456" y="360" width="16" height="12" fill="#4A90D9"/>
+  <rect x="392" y="372" width="16" height="12" fill="#E8F0FE"/>
+  <rect x="408" y="372" width="16" height="12" fill="#4A90D9"/>
+  <rect x="424" y="372" width="16" height="12" fill="#2C5F8A"/>
+  <rect x="440" y="372" width="16" height="12" fill="#4A90D9"/>
+  <rect x="456" y="372" width="16" height="12" fill="#E8F0FE"/>
+  <text x="448" y="406" text-anchor="middle" font-size="11" fill="#555">Curves as rows</text>
+  <text x="448" y="422" text-anchor="middle" font-size="11" fill="#555">colored by value</text>
+  <text x="448" y="444" text-anchor="middle" font-size="10" fill="#888">geom_tile + scale</text>
+
+  <!-- Recipe 4: Phase plane -->
+  <rect x="544" y="306" width="160" height="156" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="624" y="330" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">Phase Plane</text>
+  <!-- Mini phase portrait -->
+  <ellipse cx="624" cy="378" rx="48" ry="30" stroke="#7B2D8E" stroke-width="1.5" fill="none"/>
+  <path d="M624 348 Q650 358 672 378 Q650 398 624 408 Q598 398 576 378 Q598 358 624 348" stroke="#7B2D8E" stroke-width="0.8" fill="none" opacity="0.4" stroke-dasharray="3"/>
+  <text x="624" y="422" text-anchor="middle" font-size="11" fill="#555">f(t) vs f&#x2032;(t)</text>
+  <text x="624" y="444" text-anchor="middle" font-size="10" fill="#888">geom_path + deriv</text>
+
+  <defs>
+    <marker id="arrCP" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

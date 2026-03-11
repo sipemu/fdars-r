@@ -15,20 +15,8 @@ Slope Function (SRSF)** representation, which makes the Fisher-Rao
 metric equivalent to the $L^{2}$ metric – enabling efficient dynamic
 programming alignment.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-library(patchwork)
-theme_set(theme_minimal())
-```
+![Elastic Alignment
+Diagram](../reference/figures/elastic-alignment-diagram.svg)
 
 ## Quick Start
 

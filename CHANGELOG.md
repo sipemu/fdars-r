@@ -2,7 +2,7 @@
 
 All notable changes to fdars are documented in this file.
 
-## \[0.5.0\] - 2026-03-09
+## \[0.5.0\] - 2026-03-11
 
 ### Added
 
@@ -30,6 +30,79 @@ All notable changes to fdars are documented in this file.
   - [`periodic.rotate()`](https://sipemu.github.io/fdars-r/reference/periodic.rotate.md)
     — rotate periodic curves with methods: peak, xcorr, landmark,
     iterative
+- **Elastic FPCA** (amplitude/phase PCA):
+  - [`vert.fpca()`](https://sipemu.github.io/fdars-r/reference/vert.fpca.md)
+    — amplitude (vertical) PCA on aligned curves
+  - [`horiz.fpca()`](https://sipemu.github.io/fdars-r/reference/horiz.fpca.md)
+    — phase (horizontal) PCA on warping functions
+  - [`joint.fpca()`](https://sipemu.github.io/fdars-r/reference/joint.fpca.md)
+    — joint amplitude + phase PCA with balance parameter
+  - S3 print/plot methods for all three classes
+- **Elastic regression** (alignment-aware models):
+  - [`elastic.regression()`](https://sipemu.github.io/fdars-r/reference/elastic.regression.md)
+    — scalar-on-function regression with simultaneous alignment
+  - [`elastic.logistic()`](https://sipemu.github.io/fdars-r/reference/elastic.logistic.md)
+    — elastic logistic regression for binary classification
+  - [`elastic.pcr()`](https://sipemu.github.io/fdars-r/reference/elastic.pcr.md)
+    — principal component regression with elastic FPCA
+  - [`elastic.attribution()`](https://sipemu.github.io/fdars-r/reference/elastic.attribution.md)
+    — amplitude vs phase contribution decomposition
+  - S3 print/plot methods for all three classes
+- **Elastic changepoint detection**:
+  - [`elastic.changepoint()`](https://sipemu.github.io/fdars-r/reference/elastic.changepoint.md)
+    — detect structural breaks in functional time series
+  - Three change types: “amplitude” (shape), “phase” (timing), “fpca”
+    (combined)
+  - CUSUM test statistics with permutation-based p-values
+  - S3 print/plot methods with statistic and data visualization
+- **Model explainability & diagnostics** (22+ methods for `fregre.lm`
+  and `functional.logistic`):
+  - Global:
+    [`fregre.beta.decomp()`](https://sipemu.github.io/fdars-r/reference/fregre.beta.decomp.md),
+    [`fregre.pdp()`](https://sipemu.github.io/fdars-r/reference/fregre.pdp.md),
+    [`fregre.ale()`](https://sipemu.github.io/fdars-r/reference/fregre.ale.md),
+    [`fregre.sobol()`](https://sipemu.github.io/fdars-r/reference/fregre.sobol.md),
+    [`fregre.importance()`](https://sipemu.github.io/fdars-r/reference/fregre.importance.md),
+    [`fregre.friedman()`](https://sipemu.github.io/fdars-r/reference/fregre.friedman.md)
+  - Local:
+    [`fregre.lime()`](https://sipemu.github.io/fdars-r/reference/fregre.lime.md),
+    [`fregre.shap()`](https://sipemu.github.io/fdars-r/reference/fregre.shap.md),
+    [`fregre.counterfactual()`](https://sipemu.github.io/fdars-r/reference/fregre.counterfactual.md),
+    [`fregre.anchor()`](https://sipemu.github.io/fdars-r/reference/fregre.anchor.md),
+    [`fregre.saliency()`](https://sipemu.github.io/fdars-r/reference/fregre.saliency.md)
+  - Diagnostics:
+    [`fregre.influence()`](https://sipemu.github.io/fdars-r/reference/fregre.influence.md),
+    [`fregre.vif()`](https://sipemu.github.io/fdars-r/reference/fregre.vif.md),
+    [`fregre.dfbetas()`](https://sipemu.github.io/fdars-r/reference/fregre.dfbetas.md),
+    [`fregre.loo()`](https://sipemu.github.io/fdars-r/reference/fregre.loo.md)
+  - Domain:
+    [`fregre.significant.regions()`](https://sipemu.github.io/fdars-r/reference/fregre.significant.regions.md),
+    [`fregre.domain()`](https://sipemu.github.io/fdars-r/reference/fregre.domain.md),
+    [`fregre.pointwise()`](https://sipemu.github.io/fdars-r/reference/fregre.pointwise.md)
+  - Calibration (logistic):
+    [`fregre.calibration()`](https://sipemu.github.io/fdars-r/reference/fregre.calibration.md),
+    [`fregre.ece()`](https://sipemu.github.io/fdars-r/reference/fregre.ece.md)
+  - Uncertainty:
+    [`fregre.prediction.interval()`](https://sipemu.github.io/fdars-r/reference/fregre.prediction.interval.md),
+    [`fregre.conformal()`](https://sipemu.github.io/fdars-r/reference/fregre.conformal.md)
+  - Meta:
+    [`fregre.stability()`](https://sipemu.github.io/fdars-r/reference/fregre.stability.md),
+    [`fregre.depth()`](https://sipemu.github.io/fdars-r/reference/fregre.depth.md),
+    [`fregre.prototype()`](https://sipemu.github.io/fdars-r/reference/fregre.prototype.md),
+    [`fregre.conditional.importance()`](https://sipemu.github.io/fdars-r/reference/fregre.conditional.importance.md)
+- **Penalized basis smoothing**:
+  - [`smooth.basis.fd()`](https://sipemu.github.io/fdars-r/reference/smooth.basis.fd.md)
+    — penalized B-spline/Fourier basis smoothing
+  - [`smooth.basis.gcv()`](https://sipemu.github.io/fdars-r/reference/smooth.basis.gcv.md)
+    — automatic lambda selection via GCV grid search
+  - S3 print/plot methods for `smooth.basis` objects
+- **Cross-validation framework**:
+  - [`cv.fdata()`](https://sipemu.github.io/fdars-r/reference/cv.fdata.md)
+    — unified k-fold cross-validation for any fitting function
+  - Supports regression (RMSE, MAE, R²) and classification (accuracy,
+    confusion matrix)
+  - Repeated k-fold CV with aggregation
+  - Stratified folding for balanced class splits
 - **Landmark registration**:
   - [`detect.landmarks()`](https://sipemu.github.io/fdars-r/reference/detect.landmarks.md)
     — detect peaks, valleys, zero-crossings, inflection points
@@ -64,7 +137,7 @@ All notable changes to fdars are documented in this file.
     one-way functional ANOVA with permutation testing
 - **Functional classification**:
   - [`fclassif()`](https://sipemu.github.io/fdars-r/reference/fclassif.md)
-    — supervised classification (LDA, QDA, kNN, kernel, DD-plot)
+    — supervised classification (LDA, QDA, kNN, kernel, DD-plot, SVM)
   - [`fclassif.cv()`](https://sipemu.github.io/fdars-r/reference/fclassif.cv.md)
     — cross-validated classification error
 - **Functional mixed models**:
@@ -79,6 +152,14 @@ All notable changes to fdars are documented in this file.
     — Gaussian Mixture Model clustering with automatic K selection
   - [`cluster.init()`](https://sipemu.github.io/fdars-r/reference/cluster.init.md)
     — k-means++ initialization
+- **Scalar-on-function regression**:
+  - [`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md),
+    [`fregre.lm.cv()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.cv.md)
+    — FPC-based functional linear regression with Rust backend
+  - [`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md)
+    — functional logistic regression via IRLS
+  - [`fregre.np.mixed()`](https://sipemu.github.io/fdars-r/reference/fregre.np.mixed.md)
+    — mixed scalar + functional nonparametric regression
 - **Andrews transformation**:
   - [`andrews_transform()`](https://sipemu.github.io/fdars-r/reference/andrews_transform.md)
     — Fourier expansion of multivariate data to functional curves
@@ -111,15 +192,12 @@ All notable changes to fdars are documented in this file.
   - [`detect_amplitude_modulation()`](https://sipemu.github.io/fdars-r/reference/detect_amplitude_modulation.md),
     [`instantaneous.period()`](https://sipemu.github.io/fdars-r/reference/instantaneous.period.md),
     [`analyze.peak.timing()`](https://sipemu.github.io/fdars-r/reference/analyze.peak.timing.md)
+  - S3 plot methods:
+    [`plot.peak_detection()`](https://sipemu.github.io/fdars-r/reference/plot.peak_detection.md),
+    [`plot.peak_timing()`](https://sipemu.github.io/fdars-r/reference/plot.peak_timing.md)
 - **Equivalence testing**:
   - [`fequiv.test()`](https://sipemu.github.io/fdars-r/reference/fequiv.test.md)
     — functional equivalence test
-- **Functional linear model**:
-  - [`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md),
-    [`fregre.lm.cv()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.cv.md)
-    — FPC-based functional linear regression
-  - [`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md)
-    — functional logistic regression
 - **Simulation toolbox**:
   - [`simFunData()`](https://sipemu.github.io/fdars-r/reference/simFunData.md),
     [`simMultiFunData()`](https://sipemu.github.io/fdars-r/reference/simMultiFunData.md)
@@ -158,19 +236,30 @@ All notable changes to fdars are documented in this file.
     [`plot.fosr()`](https://sipemu.github.io/fdars-r/reference/plot.fosr.md),
     [`plot.fanova()`](https://sipemu.github.io/fdars-r/reference/plot.fanova.md)
   - [`plot.cluster.gmm()`](https://sipemu.github.io/fdars-r/reference/plot.cluster.gmm.md)
-- **Vignettes/articles** (17 articles covering all major features):
+  - `plot.elastic.changepoint()`, `plot.elastic.regression()`,
+    `plot.elastic.logistic()`, `plot.elastic.pcr()`
+  - `plot.vert.fpca()`, `plot.horiz.fpca()`, `plot.joint.fpca()`
+  - `plot.smooth.basis()`,
+    [`plot.cv.fdata()`](https://sipemu.github.io/fdars-r/reference/plot.cv.fdata.md)
+- **Vignettes/articles** (46 articles with SVG overview diagrams):
   - Elastic alignment, landmark registration, TSRVF, alignment
     comparison
+  - Elastic FPCA, elastic regression, elastic changepoint detection
   - Tolerance bands, streaming depth, distance metrics
   - Functional regression, classification, mixed models, GMM clustering
+  - Model explainability, regression diagnostics, uncertainty
+    quantification
+  - Penalized basis smoothing, cross-validation framework
   - Andrews transformation, seasonal analysis
-  - Example analyses: Berkeley growth study, wine dataset (4 articles)
+  - Covariance functions, simulation toolbox, custom plotting
+  - Example analyses: Berkeley growth study, wine dataset, Sonar TSRVF
+    classification
 - **Pre-built binary packages** for macOS (.tgz) and Windows (.zip)
   attached to GitHub Releases — install without Rust toolchain
 
 ### Changed
 
-- Upgraded Rust backend (fdars-core) to v0.7.2
+- Upgraded Rust backend (fdars-core) to v0.8.0
 - All plots use ggplot2; respects `theme_set()`
 - Renamed functions to avoid S3 dispatch conflicts:
   - `fdata2basis.cv()` →
@@ -186,13 +275,23 @@ All notable changes to fdars are documented in this file.
   compliance)
 - Portable Makefiles: removed GNU extensions (`export`, `:=`)
 - Vendored Rust crates cleaned of hidden files and long paths
+- GitHub Actions: pinned R 4.5.2, added Rust toolchain to pkgdown
+  workflow
 
 ### Fixed
 
+- Changepoint p-values always 1.0 (normalization mismatch in Brownian
+  bridge simulation; replaced with permutation testing)
+- [`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md)
+  missing `.fpca_scores`, `beta.se`, `std.errors` from Rust
+- [`fregre.conformal()`](https://sipemu.github.io/fdars-r/reference/fregre.conformal.md)
+  wrapper now works correctly
 - `fdata2basis_2d` example error caused by extendr wrapper name
   collision
 - `mean(fd)` now returns fdata object (was returning matrix)
 - TSRVF inverse initial values
+- Empty bar charts in seasonal plots (use `coord_cartesian` instead of
+  `ylim`)
 - Regression article cross-references and See Also sections
 
 ## \[0.4.0\] - 2026-03-04

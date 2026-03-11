@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C5F8A">P-spline Smoothing</text>
+  <text x="350" y="50" text-anchor="middle" font-size="13" fill="#888">Minimize ||y - f||&#178; + &#955; &#8747; f''(t)&#178; dt</text>
+
+  <!-- Left: Noisy data -->
+  <rect x="16" y="72" width="180" height="180" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="106" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#555">Noisy Data</text>
+  <!-- Scattered dots -->
+  <circle cx="36" cy="160" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="50" cy="144" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="64" cy="166" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="78" cy="136" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="92" cy="158" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="106" cy="128" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="120" cy="152" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="134" cy="120" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="148" cy="140" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="162" cy="118" r="3" fill="#999" opacity="0.6"/>
+  <circle cx="176" cy="132" r="3" fill="#999" opacity="0.6"/>
+  <!-- Noisy connecting lines -->
+  <path d="M36 160 L50 144 L64 166 L78 136 L92 158 L106 128 L120 152 L134 120 L148 140 L162 118 L176 132" stroke="#ccc" stroke-width="0.8" fill="none"/>
+  <text x="106" y="232" text-anchor="middle" font-size="12" fill="#888">pspline(fd_noisy)</text>
+
+  <!-- Arrow -->
+  <line x1="200" y1="162" x2="248" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#arrPS)"/>
+  <defs>
+    <marker id="arrPS" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Middle: GCV optimization -->
+  <rect x="256" y="72" width="180" height="180" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="346" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">GCV Selects &#955;</text>
+  <text x="346" y="116" text-anchor="middle" font-size="12" fill="#555">Automatic tuning</text>
+  <!-- GCV curve (U-shape) -->
+  <path d="M276 210 Q296 200 316 180 Q336 164 346 160 Q356 164 376 180 Q396 200 416 210" stroke="#4A90D9" stroke-width="2" fill="none"/>
+  <circle cx="346" cy="160" r="5" fill="#4A90D9"/>
+  <text x="346" y="152" text-anchor="middle" font-size="11" fill="#2C5F8A">optimal</text>
+  <!-- Axis labels -->
+  <text x="276" y="230" font-size="11" fill="#888">under</text>
+  <text x="398" y="230" text-anchor="end" font-size="11" fill="#888">over</text>
+  <text x="346" y="242" text-anchor="middle" font-size="11" fill="#888">&#8592; &#955; &#8594;</text>
+
+  <!-- Arrow -->
+  <line x1="440" y1="162" x2="488" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#arrPS)"/>
+
+  <!-- Right: Smooth result -->
+  <rect x="496" y="72" width="188" height="180" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="590" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Smooth Curve</text>
+  <!-- Smooth curve through data -->
+  <path d="M516 168 Q534 150 552 142 Q570 136 590 126 Q608 118 626 114 Q644 112 664 116" stroke="#2E8B57" stroke-width="2.5" fill="none"/>
+  <!-- Faded dots showing original data -->
+  <circle cx="520" cy="172" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="538" cy="150" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="556" cy="148" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="574" cy="132" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="592" cy="136" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="610" cy="118" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="628" cy="120" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="646" cy="112" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="664" cy="122" r="2.5" fill="#999" opacity="0.3"/>
+  <text x="590" y="232" text-anchor="middle" font-size="12" fill="#888">Ready for derivatives, FPCA</text>
+
+  <!-- Bottom: Key properties -->
+  <text x="120" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#4A90D9">Automatic &#955;</text>
+  <text x="350" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#4A90D9">Works out of the box</text>
+  <text x="580" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#4A90D9">Recommended default</text>
+</svg>

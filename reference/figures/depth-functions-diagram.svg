@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrDF" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Functional Depth: Ranking Curves by Centrality</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">Deep curves are typical; shallow curves are outliers</text>
+
+  <!-- ===== Left: Sample of curves ===== -->
+  <rect x="16" y="80" width="200" height="200" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="116" y="106" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Curve Sample</text>
+
+  <!-- Central curves (darker) -->
+  <path d="M32 180 Q56 158 80 166 Q104 174 128 162 Q152 150 176 160 Q192 166 200 164" stroke="#4A90D9" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M32 186 Q56 164 80 172 Q104 180 128 168 Q152 156 176 166 Q192 172 200 170" stroke="#4A90D9" stroke-width="1.8" fill="none" opacity="0.6"/>
+  <path d="M32 192 Q56 170 80 178 Q104 186 128 174 Q152 162 176 172 Q192 178 200 176" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.5"/>
+  <!-- Peripheral curves (lighter) -->
+  <path d="M32 160 Q56 142 80 148 Q104 154 128 140 Q152 128 176 136 Q192 140 200 138" stroke="#999" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <path d="M32 210 Q56 194 80 200 Q104 206 128 196 Q152 186 176 194 Q192 200 200 198" stroke="#999" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <!-- Outlier (red) -->
+  <path d="M32 130 Q56 120 80 126 Q104 132 128 122 Q152 112 176 118 Q192 124 200 122" stroke="#D55E00" stroke-width="1.5" fill="none" opacity="0.7"/>
+
+  <text x="116" y="240" text-anchor="middle" font-size="12" fill="#4A90D9">deep = central</text>
+  <text x="116" y="258" text-anchor="middle" font-size="12" fill="#D55E00">shallow = outlier</text>
+
+  <!-- Arrow -->
+  <line x1="220" y1="180" x2="268" y2="180" stroke="#555" stroke-width="1.5" marker-end="url(#arrDF)"/>
+
+  <!-- ===== Middle: depth() unified interface ===== -->
+  <rect x="276" y="80" width="180" height="200" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="2"/>
+  <text x="366" y="108" text-anchor="middle" font-size="16" font-weight="bold" fill="#2C5F8A">depth(fd, method)</text>
+  <text x="366" y="130" text-anchor="middle" font-size="13" fill="#555">Unified interface</text>
+
+  <!-- Method list -->
+  <text x="296" y="156" font-size="12" fill="#2C5F8A" font-weight="bold">Pointwise:</text>
+  <text x="300" y="174" font-size="11" fill="#555">FM, MBD, BD, MEI</text>
+  <text x="296" y="198" font-size="12" fill="#2C5F8A" font-weight="bold">Projection:</text>
+  <text x="300" y="216" font-size="11" fill="#555">RP, RT, RPD</text>
+  <text x="296" y="240" font-size="12" fill="#2C5F8A" font-weight="bold">Kernel/Spatial:</text>
+  <text x="300" y="258" font-size="11" fill="#555">mode, FSD, KFSD</text>
+
+  <!-- Arrow -->
+  <line x1="460" y1="180" x2="508" y2="180" stroke="#555" stroke-width="1.5" marker-end="url(#arrDF)"/>
+
+  <!-- ===== Right: Depth values ===== -->
+  <rect x="516" y="80" width="188" height="200" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="610" y="108" text-anchor="middle" font-size="15" font-weight="bold" fill="#2E8B57">Depth Values</text>
+  <text x="610" y="130" text-anchor="middle" font-size="13" fill="#888">[0, 1] per curve</text>
+
+  <!-- Horizontal bar chart showing depth -->
+  <rect x="536" y="148" width="140" height="14" rx="2" fill="#2E8B57" opacity="0.8"/>
+  <text x="534" y="159" text-anchor="end" font-size="10" fill="#555">1</text>
+  <text x="680" y="159" font-size="10" fill="#2E8B57">0.92</text>
+
+  <rect x="536" y="168" width="120" height="14" rx="2" fill="#2E8B57" opacity="0.65"/>
+  <text x="534" y="179" text-anchor="end" font-size="10" fill="#555">2</text>
+  <text x="660" y="179" font-size="10" fill="#2E8B57">0.78</text>
+
+  <rect x="536" y="188" width="100" height="14" rx="2" fill="#2E8B57" opacity="0.5"/>
+  <text x="534" y="199" text-anchor="end" font-size="10" fill="#555">3</text>
+  <text x="640" y="199" font-size="10" fill="#2E8B57">0.65</text>
+
+  <rect x="536" y="208" width="70" height="14" rx="2" fill="#E6A020" opacity="0.5"/>
+  <text x="534" y="219" text-anchor="end" font-size="10" fill="#555">4</text>
+  <text x="610" y="219" font-size="10" fill="#E6A020">0.41</text>
+
+  <rect x="536" y="228" width="30" height="14" rx="2" fill="#D55E00" opacity="0.6"/>
+  <text x="534" y="239" text-anchor="end" font-size="10" fill="#555">5</text>
+  <text x="570" y="239" font-size="10" fill="#D55E00">0.12</text>
+
+  <text x="610" y="266" text-anchor="middle" font-size="12" fill="#888">Rank: central &#8594; outlier</text>
+
+  <!-- ===== Bottom: Applications ===== -->
+  <line x1="16" y1="310" x2="704" y2="310" stroke="#eee" stroke-width="1.5"/>
+  <text x="360" y="338" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Depth-Based Tools</text>
+
+  <!-- Application boxes -->
+  <rect x="24" y="356" width="130" height="72" rx="6" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="89" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#D55E00">Outlier Detection</text>
+  <text x="89" y="398" text-anchor="middle" font-size="11" fill="#555">outliergram()</text>
+  <text x="89" y="414" text-anchor="middle" font-size="11" fill="#555">magnitudeshape()</text>
+
+  <rect x="170" y="356" width="130" height="72" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="235" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">Functional Boxplot</text>
+  <text x="235" y="398" text-anchor="middle" font-size="11" fill="#555">boxplot(fd)</text>
+  <text x="235" y="414" text-anchor="middle" font-size="11" fill="#555">50% central region</text>
+
+  <rect x="316" y="356" width="130" height="72" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="381" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">Robust Statistics</text>
+  <text x="381" y="398" text-anchor="middle" font-size="11" fill="#555">median(fd)</text>
+  <text x="381" y="414" text-anchor="middle" font-size="11" fill="#555">trimmed(fd)</text>
+
+  <rect x="462" y="356" width="130" height="72" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="527" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#B37700">Tolerance Bands</text>
+  <text x="527" y="398" text-anchor="middle" font-size="11" fill="#555">tolerance.band()</text>
+  <text x="527" y="414" text-anchor="middle" font-size="11" fill="#555">central region</text>
+
+  <rect x="608" y="356" width="96" height="72" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="656" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">Streaming</text>
+  <text x="656" y="398" text-anchor="middle" font-size="11" fill="#555">O(T log N)</text>
+  <text x="656" y="414" text-anchor="middle" font-size="11" fill="#555">per query</text>
+
+  <!-- Bottom summary -->
+  <line x1="16" y1="448" x2="704" y2="448" stroke="#eee" stroke-width="1.5"/>
+  <text x="120" y="474" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A90D9">1D curves</text>
+  <text x="120" y="494" text-anchor="middle" font-size="12" fill="#888">all 11 methods</text>
+
+  <text x="360" y="474" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A90D9">2D surfaces</text>
+  <text x="360" y="494" text-anchor="middle" font-size="12" fill="#888">FM, mode, RP, RT, FSD, KFSD</text>
+
+  <text x="600" y="474" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A90D9">Rust backend</text>
+  <text x="600" y="494" text-anchor="middle" font-size="12" fill="#888">fast, parallel</text>
+</svg>

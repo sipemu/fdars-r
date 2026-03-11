@@ -61,14 +61,6 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span></code></pre></div>
 <p>This article is part of a four-article series analyzing 178 wines (3
 cultivars, 13 chemicals) with Andrews curves and functional data
 analysis. Each article is self-contained.</p>
@@ -134,7 +126,7 @@ lifecycle</li>
 back to specific chemicals — not just “investigate” but “<em>which</em>
 assays to re-run”</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load wine data</span></span>
 <span><span class="va">wine_url</span> <span class="op">&lt;-</span> <span class="st">"https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"</span></span>
 <span><span class="va">col_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cultivar"</span>, <span class="st">"Alcohol"</span>, <span class="st">"MalicAcid"</span>, <span class="st">"Ash"</span>, <span class="st">"Alkalinity"</span>,</span>
@@ -164,16 +156,16 @@ chemicals (encoded in the curve), giving you a single visual that says
 <div class="section level3">
 <h3 id="overall-functional-boxplot">Overall Functional Boxplot<a class="anchor" aria-label="anchor" href="#overall-functional-boxplot"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">fbp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">fd_wine</span><span class="op">)</span></span>
 <span><span class="va">fbp</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
 <p><img src="example-andrews-wine-qc_files/figure-html/functional-boxplot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The median curve (black) is the <strong>most typical wine</strong> —
-the one with the highest functional depth. The magenta band is the
+the one with the highest functional depth. The darker blue band is the
 <strong>50% central region</strong>: half of all wines fall within this
-envelope at every point. The pink band extends to the fences (1.5x the
-envelope width); any wine whose curve escapes the pink band at
+envelope at every point. The lighter blue band extends to the fences
+(1.5x the envelope width); any wine whose curve escapes the fence at
 <em>any</em> Fourier frequency is automatically flagged.</p>
 </div>
 <div class="section level3">
@@ -183,7 +175,7 @@ envelope width); any wine whose curve escapes the pink band at
 what you really want is a <strong>cultivar-specific
 specification</strong> — what should a typical Barolo, Grignolino, or
 Barbera look like?</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bp_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">cv</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -201,8 +193,8 @@ Barbera look like?</p>
 <p>These three boxplots define a <strong>visual specification</strong>
 for each cultivar. A quality controller can now take a new wine, compute
 its Andrews curve, and overlay it on the appropriate cultivar’s boxplot.
-If the curve falls within the magenta band, the wine is typical. If it
-escapes the pink fences, investigate.</p>
+If the curve falls within the central blue band, the wine is typical. If
+it escapes the fences, investigate.</p>
 </div>
 <div class="section level3">
 <h3 id="incoming-batch-monitoring">Incoming Batch Monitoring<a class="anchor" aria-label="anchor" href="#incoming-batch-monitoring"></a>
@@ -211,7 +203,7 @@ escapes the pink fences, investigate.</p>
 identified in the <a href="example-andrews-wine.html">outlier
 analysis</a>) and Wine 107 (the most typical Grignolino by depth) and
 check them against the Grignolino specification:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">grig_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="st">"Grignolino"</span><span class="op">)</span></span>
 <span><span class="va">fd_grig</span> <span class="op">&lt;-</span> <span class="va">fd_wine</span><span class="op">[</span><span class="va">grig_idx</span><span class="op">]</span></span>
@@ -233,18 +225,18 @@ check them against the Grignolino specification:</p>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_envelope</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, ymin <span class="op">=</span> <span class="va">fence_min</span>, ymax <span class="op">=</span> <span class="va">fence_max</span><span class="op">)</span>,</span>
-<span>              fill <span class="op">=</span> <span class="st">"pink"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>              fill <span class="op">=</span> <span class="st">"#B0C4DE"</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_envelope</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, ymin <span class="op">=</span> <span class="va">env_min</span>, ymax <span class="op">=</span> <span class="va">env_max</span><span class="op">)</span>,</span>
-<span>              fill <span class="op">=</span> <span class="st">"magenta"</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>              fill <span class="op">=</span> <span class="st">"steelblue"</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_envelope</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">median_val</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_check</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 107 (typical)"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"steelblue"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_check</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 122 (suspect)"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_check</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 107 (typical)"</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"#2E8B57"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_check</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 122 (suspect)"</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>            linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"QC Check: New Wine vs Grignolino Specification"</span>,</span>
-<span>       subtitle <span class="op">=</span> <span class="st">"Blue = typical (inside envelope), Red dashed = suspect (outside envelope)"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Green = typical (inside envelope), Red dashed = suspect (outside envelope)"</span>,</span>
 <span>       x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">f</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-andrews-wine-qc_files/figure-html/qc-monitoring-1.png" class="r-plt" alt="" width="100%"></p>
 <p>No 13-column spreadsheet comparison needed. One glance tells the
@@ -271,7 +263,7 @@ deviates. The functional boxplot does all three.</p>
 score</strong> within its cultivar. This is a concept with no clean
 classical equivalent — it simultaneously accounts for all 13 chemicals
 without requiring a parametric model or covariance matrix inversion.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute within-cultivar depth rankings</span></span>
 <span><span class="va">depth_rankings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">cv</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="va">cv</span><span class="op">)</span></span>
@@ -284,16 +276,16 @@ without requiring a parametric model or covariance matrix inversion.</p>
 <span>    Rank <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rank.html" class="external-link">rank</a></span><span class="op">(</span><span class="op">-</span><span class="va">depths</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="va">df_depths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">depth_rankings</span><span class="op">)</span></span>
+<span><span class="va">df_depths</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">depth_rankings</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Show top 3 and bottom 3 per cultivar</span></span>
 <span><span class="va">top_bottom</span> <span class="op">&lt;-</span> <span class="va">df_depths</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Cultivar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Rank</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">2</span><span class="op">)</span><span class="op">:</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">Rank</span> <span class="op">&lt;=</span> <span class="fl">3</span>, <span class="st">"Most typical"</span>, <span class="st">"Least typical"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Cultivar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">Rank</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">(</span><span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">2</span><span class="op">)</span><span class="op">:</span><span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">Rank</span> <span class="op">&lt;=</span> <span class="fl">3</span>, <span class="st">"Most typical"</span>, <span class="st">"Least typical"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">top_bottom</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Cultivar</span>, <span class="va">Wine</span>, <span class="va">Depth</span>, <span class="va">Rank</span>, <span class="va">Status</span><span class="op">)</span>,</span>
+<span><span class="fu">kable</span><span class="op">(</span><span class="va">top_bottom</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="va">Cultivar</span>, <span class="va">Wine</span>, <span class="va">Depth</span>, <span class="va">Rank</span>, <span class="va">Status</span><span class="op">)</span>,</span>
 <span>      caption <span class="op">=</span> <span class="st">"Most and least typical wines per cultivar (by functional depth)"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>Most and least typical wines per cultivar (by functional
@@ -446,7 +438,7 @@ bottom 10%?</p>
 <p>Depth also enables <strong>robust estimation</strong>. The trimmed
 mean discards the shallowest curves (the most atypical wines) before
 averaging, giving a center estimate that resists contamination:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">fd_grig</span> <span class="op">&lt;-</span> <span class="va">fd_wine</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="st">"Grignolino"</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
@@ -455,7 +447,7 @@ averaging, giving a center estimate that resists contamination:</p>
 <span><span class="va">fn_trimmed_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trimmed.html">trimmed</a></span><span class="op">(</span><span class="va">fd_grig</span>, trim <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Remove 3 most extreme outliers and recompute</span></span>
-<span><span class="va">grig_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="st">"Grignolino"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">96</span>, <span class="fl">122</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">grig_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="st">"Grignolino"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">96</span>, <span class="fl">122</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">fd_grig_clean</span> <span class="op">&lt;-</span> <span class="va">fd_wine</span><span class="op">[</span><span class="va">grig_clean</span><span class="op">]</span></span>
 <span><span class="va">fn_mean_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fd_grig_clean</span><span class="op">)</span></span>
 <span><span class="va">fn_trimmed_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trimmed.html">trimmed</a></span><span class="op">(</span><span class="va">fd_grig_clean</span>, trim <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
@@ -521,147 +513,128 @@ workflow has three phases.</p>
 </h3>
 <p>During process validation, you collect a representative set of wines
 for each cultivar and compute the <strong>reference profile</strong>:
-the trimmed mean curve and an envelope that captures the expected range
-of normal variation.</p>
-<p>We use the bootstrap to construct two types of bands:</p>
-<ul>
-<li>A <strong>confidence band</strong> (blue) for the trimmed mean —
-this quantifies uncertainty about the cultivar’s <em>average</em>
-profile (“where is the center?”).</li>
-<li>A <strong>prediction band</strong> (gray) for individual wines —
-this captures the range where a <em>single new observation</em> is
-expected to fall (“is this wine normal?”).</li>
-</ul>
-<p>Both are <strong>prediction intervals</strong>: they use the observed
-sample to predict where future observations or statistics will land.
-This is the appropriate tool for <em>routine monitoring</em>, where you
-ask “does this new wine look like my reference set?”</p>
-<p>For <em>process transfer</em> — validating that a new vineyard, lab,
-or fermentation facility produces equivalent wines — the statistically
-correct tool is a <strong>tolerance interval</strong>. A tolerance
-interval guarantees that <em>at least a specified proportion</em> of the
-population (e.g., 95%) falls within the band, with a given confidence
-level (e.g., 99%). This dual coverage is stricter than a prediction
-interval, which only covers the <em>next single observation</em>.
-Computing functional tolerance intervals requires adjustments for
-simultaneous coverage across the entire curve domain, which goes beyond
-what we demonstrate here, but the conceptual framework is the same:
-replace the bootstrap quantiles below with the appropriate tolerance
-factors (e.g., based on non-central
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>
-or Bonferroni-corrected normal order statistics). For the purposes of
-this article, we proceed with prediction bands as a practical
-approximation:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+the center curve and a <strong>tolerance band</strong> that captures the
+expected range of normal variation.</p>
+<div class="section level4">
+<h4 id="why-tolerance-intervals-not-prediction-intervals">Why Tolerance Intervals, Not Prediction Intervals?<a class="anchor" aria-label="anchor" href="#why-tolerance-intervals-not-prediction-intervals"></a>
+</h4>
+<p>A <strong>prediction interval</strong> covers the <em>next single
+observation</em> with a given probability (e.g., 95%). A
+<strong>tolerance interval</strong> is stronger: it guarantees that
+<em>at least a specified proportion</em> of the population (e.g., 95%)
+falls within the band, with a given confidence level (e.g., 95%). The
+dual coverage makes tolerance intervals the correct tool for quality
+specifications:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th>Prediction interval</th>
+<th>Tolerance interval</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>Covers</strong></td>
+<td>The next observation</td>
+<td>A fraction of the population</td>
+</tr>
+<tr class="even">
+<td><strong>Guarantee</strong></td>
+<td>95% chance the next point is inside</td>
+<td>95% confident that $$95% of population is inside</td>
+</tr>
+<tr class="odd">
+<td><strong>Use case</strong></td>
+<td>“Is this one wine normal?”</td>
+<td>“Does this band define normal?”</td>
+</tr>
+<tr class="even">
+<td><strong>QC role</strong></td>
+<td>Ad hoc checking</td>
+<td><strong>Specification limits</strong></td>
+</tr>
+</tbody>
+</table>
+<p>When you define a cultivar specification — “a normal Barolo should
+fall in this band” — you need the tolerance interpretation. A prediction
+band can be too narrow (it only covers one observation, not the
+population), leading to excessive false alarms. Tolerance bands are
+wider by construction, giving a proper acceptance region.</p>
+<p>We compute tolerance bands using <code><a href="../reference/tolerance.band.html">tolerance.band()</a></code>, which
+uses FPCA-based bootstrap to construct bands with the requested
+population coverage:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">tolerance_plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">tol_plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">cv</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">cultivar</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="va">cv</span><span class="op">)</span></span>
 <span>  <span class="va">fd_cv</span> <span class="op">&lt;-</span> <span class="va">fd_wine</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span></span>
 <span></span>
-<span>  <span class="co"># Bootstrap the trimmed mean to get a tolerance band</span></span>
-<span>  <span class="co"># Using the percentile method on pointwise quantiles of bootstrap curves</span></span>
-<span>  <span class="va">n_boot</span> <span class="op">&lt;-</span> <span class="fl">500</span></span>
-<span>  <span class="va">boot_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.bootstrap.html">fdata.bootstrap</a></span><span class="op">(</span><span class="va">fd_cv</span>, n.boot <span class="op">=</span> <span class="va">n_boot</span>, method <span class="op">=</span> <span class="st">"naive"</span>,</span>
-<span>                               seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
+<span>  <span class="co"># Compute tolerance band: 95% coverage, FPCA + bootstrap</span></span>
 <span></span>
-<span>  <span class="co"># For each bootstrap sample, compute the trimmed mean</span></span>
-<span>  <span class="va">boot_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="va">n_boot</span>, <span class="va">m</span><span class="op">)</span></span>
-<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_boot</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">boot_means</span><span class="op">[</span><span class="va">b</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="../reference/trimmed.html">trimmed</a></span><span class="op">(</span><span class="va">boot_obj</span><span class="op">$</span><span class="va">boot.samples</span><span class="op">[[</span><span class="va">b</span><span class="op">]</span><span class="op">]</span>,</span>
-<span>                                           trim <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span></span>
-<span>  <span class="co"># Pointwise 2.5% and 97.5% quantiles of bootstrap trimmed means</span></span>
-<span>  <span class="va">band_lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_means</span>, <span class="fl">2</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.025</span><span class="op">)</span></span>
-<span>  <span class="va">band_upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_means</span>, <span class="fl">2</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.975</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Also compute a wider prediction band using the raw bootstrap curves</span></span>
-<span>  <span class="co"># This captures individual wine variability, not just mean uncertainty</span></span>
-<span>  <span class="va">boot_curves</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="va">n_boot</span>, <span class="va">m</span><span class="op">)</span></span>
-<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_boot</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="co"># Pick a random curve from each bootstrap sample</span></span>
-<span>    <span class="va">boot_curves</span><span class="op">[</span><span class="va">b</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">boot_obj</span><span class="op">$</span><span class="va">boot.samples</span><span class="op">[[</span><span class="va">b</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">[</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">boot_obj</span><span class="op">$</span><span class="va">boot.samples</span><span class="op">[[</span><span class="va">b</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="op">]</span></span>
-<span>  <span class="op">}</span></span>
-<span>  <span class="va">pred_lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_curves</span>, <span class="fl">2</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.025</span><span class="op">)</span></span>
-<span>  <span class="va">pred_upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_curves</span>, <span class="fl">2</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.975</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">ref_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="../reference/trimmed.html">trimmed</a></span><span class="op">(</span><span class="va">fd_cv</span>, trim <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
+<span>  <span class="va">tband</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd_cv</span>, method <span class="op">=</span> <span class="st">"fpca"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>                          ncomp <span class="op">=</span> <span class="fl">5</span>, nb <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">df_band</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    t <span class="op">=</span> <span class="va">t_grid</span>,</span>
-<span>    mean <span class="op">=</span> <span class="va">ref_mean</span>,</span>
-<span>    ci_lower <span class="op">=</span> <span class="va">band_lower</span>, ci_upper <span class="op">=</span> <span class="va">band_upper</span>,</span>
-<span>    pred_lower <span class="op">=</span> <span class="va">pred_lower</span>, pred_upper <span class="op">=</span> <span class="va">pred_upper</span></span>
+<span>    center <span class="op">=</span> <span class="va">tband</span><span class="op">$</span><span class="va">center</span>,</span>
+<span>    lower <span class="op">=</span> <span class="va">tband</span><span class="op">$</span><span class="va">lower</span>,</span>
+<span>    upper <span class="op">=</span> <span class="va">tband</span><span class="op">$</span><span class="va">upper</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">tolerance_plots</span><span class="op">[[</span><span class="va">cv</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_band</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">pred_lower</span>, ymax <span class="op">=</span> <span class="va">pred_upper</span><span class="op">)</span>,</span>
-<span>                fill <span class="op">=</span> <span class="st">"gray80"</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">ci_lower</span>, ymax <span class="op">=</span> <span class="va">ci_upper</span><span class="op">)</span>,</span>
-<span>                fill <span class="op">=</span> <span class="st">"steelblue"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"navy"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">tol_plots</span><span class="op">[[</span><span class="va">cv</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_band</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">lower</span>, ymax <span class="op">=</span> <span class="va">upper</span><span class="op">)</span>,</span>
+<span>                fill <span class="op">=</span> <span class="st">"#B0C4DE"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">center</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"navy"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s (n = %d)"</span>, <span class="va">cv</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">idx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>         subtitle <span class="op">=</span> <span class="st">"Navy = trimmed mean, Blue = 95% CI of mean, Gray = 95% prediction band"</span>,</span>
+<span>         subtitle <span class="op">=</span> <span class="st">"Navy = FPCA center, Blue = 95% tolerance band"</span>,</span>
 <span>         x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">f</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">tolerance_plots</span><span class="op">[[</span><span class="st">"Barolo"</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="va">tolerance_plots</span><span class="op">[[</span><span class="st">"Grignolino"</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="va">tolerance_plots</span><span class="op">[[</span><span class="st">"Barbera"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<span><span class="va">tol_plots</span><span class="op">[[</span><span class="st">"Barolo"</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="va">tol_plots</span><span class="op">[[</span><span class="st">"Grignolino"</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="va">tol_plots</span><span class="op">[[</span><span class="st">"Barbera"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <p><img src="example-andrews-wine-qc_files/figure-html/tolerance-bands-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The <strong>blue band</strong> (confidence band for the mean)
-answers: “where does the cultivar’s average profile sit?” The
-<strong>gray band</strong> (prediction band for individual wines)
-answers: “where can a single new wine’s curve fall and still be
-considered normal?” For routine QC, the gray prediction band is the
-operational acceptance criterion: any new wine whose Andrews curve stays
-entirely inside it passes.</p>
-<p>For formal process transfer validation, you would replace the gray
-band with a proper tolerance band (wider, to guarantee population
-coverage with confidence). The prediction band shown here is a pragmatic
-starting point that works well for ongoing monitoring.</p>
+<p>The <strong>blue band</strong> is the 95% tolerance band: we are
+confident that at least 95% of all wines from this cultivar will produce
+Andrews curves inside it. This is the operational acceptance criterion:
+any new wine whose curve stays entirely inside the band passes. Because
+<code><a href="../reference/tolerance.band.html">tolerance.band()</a></code> accounts for estimation uncertainty
+through bootstrap, the band is appropriately wider than a naive
+pointwise interval.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="phase-2-process-transfer">Phase 2: Process Transfer<a class="anchor" aria-label="anchor" href="#phase-2-process-transfer"></a>
 </h3>
 <p>When a process is transferred — to a new vineyard, a new fermentation
 facility, or a new analytical lab — you need to verify that the new
-process produces wines within the validated specification. Ideally this
-would use tolerance bands (guaranteeing population coverage); here we
-demonstrate the workflow with prediction bands as a practical
-approximation.</p>
+process produces wines within the validated specification. The tolerance
+band provides the acceptance region: if the new wine’s Andrews curve
+falls inside it, the wine is consistent with the reference
+population.</p>
 <p>The key advantage of the functional approach is that when a wine
 <em>fails</em>, you can trace back to <strong>which chemicals</strong>
 caused the deviation. Because the Andrews curve maps each Fourier
 frequency to specific input variables, a violation at a particular
-region of the curve implicates specific chemicals. We can also directly
-compare the original (standardized) chemical values to pinpoint exactly
-where the new wine deviates:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+region of the curve implicates specific chemicals:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="co"># Simulate: take a Barolo wine and check against the Barolo tolerance band</span></span>
+<span><span class="co"># Compute the tolerance band for Barolo</span></span>
 <span><span class="va">barolo_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="st">"Barolo"</span><span class="op">)</span></span>
 <span><span class="va">fd_barolo</span> <span class="op">&lt;-</span> <span class="va">fd_wine</span><span class="op">[</span><span class="va">barolo_idx</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># Compute the prediction band for Barolo</span></span>
-<span><span class="va">boot_barolo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.bootstrap.html">fdata.bootstrap</a></span><span class="op">(</span><span class="va">fd_barolo</span>, n.boot <span class="op">=</span> <span class="fl">500</span>, method <span class="op">=</span> <span class="st">"naive"</span>,</span>
-<span>                                seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">boot_barolo_curves</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">500</span>, <span class="va">m</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">500</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">boot_barolo_curves</span><span class="op">[</span><span class="va">b</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">boot_barolo</span><span class="op">$</span><span class="va">boot.samples</span><span class="op">[[</span><span class="va">b</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">[</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">boot_barolo</span><span class="op">$</span><span class="va">boot.samples</span><span class="op">[[</span><span class="va">b</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">barolo_pred_lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_barolo_curves</span>, <span class="fl">2</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.025</span><span class="op">)</span></span>
-<span><span class="va">barolo_pred_upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boot_barolo_curves</span>, <span class="fl">2</span>, <span class="va">quantile</span>, probs <span class="op">=</span> <span class="fl">0.975</span><span class="op">)</span></span>
-<span><span class="va">barolo_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="../reference/trimmed.html">trimmed</a></span><span class="op">(</span><span class="va">fd_barolo</span>, trim <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
+<span><span class="va">tband_barolo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd_barolo</span>, method <span class="op">=</span> <span class="st">"fpca"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>                               ncomp <span class="op">=</span> <span class="fl">5</span>, nb <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">df_barolo_band</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  t <span class="op">=</span> <span class="va">t_grid</span>,</span>
-<span>  mean <span class="op">=</span> <span class="va">barolo_mean</span>,</span>
-<span>  pred_lower <span class="op">=</span> <span class="va">barolo_pred_lower</span>,</span>
-<span>  pred_upper <span class="op">=</span> <span class="va">barolo_pred_upper</span></span>
+<span>  center <span class="op">=</span> <span class="va">tband_barolo</span><span class="op">$</span><span class="va">center</span>,</span>
+<span>  lower <span class="op">=</span> <span class="va">tband_barolo</span><span class="op">$</span><span class="va">lower</span>,</span>
+<span>  upper <span class="op">=</span> <span class="va">tband_barolo</span><span class="op">$</span><span class="va">upper</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Test wines: a true Barolo (wine 36, typical) and a Grignolino (wine 107)</span></span>
@@ -672,36 +645,37 @@ where the new wine deviates:</p>
 <span>             Wine <span class="op">=</span> <span class="st">"Wine 107 (Grignolino)"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Check which wines stay inside the band</span></span>
+<span><span class="co"># Check which wines stay inside the tolerance band</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">w</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">36</span>, <span class="fl">107</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">inside</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">fd_wine</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">w</span>, <span class="op">]</span> <span class="op">&gt;=</span> <span class="va">barolo_pred_lower</span> <span class="op">&amp;</span></span>
-<span>                <span class="va">fd_wine</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">w</span>, <span class="op">]</span> <span class="op">&lt;=</span> <span class="va">barolo_pred_upper</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Wine %d (%s): %s Barolo prediction band\n"</span>,</span>
+<span>  <span class="va">inside</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">fd_wine</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">w</span>, <span class="op">]</span> <span class="op">&gt;=</span> <span class="va">tband_barolo</span><span class="op">$</span><span class="va">lower</span> <span class="op">&amp;</span></span>
+<span>                <span class="va">fd_wine</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">w</span>, <span class="op">]</span> <span class="op">&lt;=</span> <span class="va">tband_barolo</span><span class="op">$</span><span class="va">upper</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Wine %d (%s): %s Barolo tolerance band\n"</span>,</span>
 <span>              <span class="va">w</span>, <span class="va">cultivar</span><span class="op">[</span><span class="va">w</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">inside</span>, <span class="st">"INSIDE"</span>, <span class="st">"OUTSIDE"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; Wine 36 (Barolo): INSIDE Barolo prediction band</span></span>
-<span><span class="co">#&gt; Wine 107 (Grignolino): OUTSIDE Barolo prediction band</span></span>
+<span><span class="co">#&gt; Wine 36 (Barolo): INSIDE Barolo tolerance band</span></span>
+<span><span class="co">#&gt; Wine 107 (Grignolino): OUTSIDE Barolo tolerance band</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_barolo_band</span>,</span>
-<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, ymin <span class="op">=</span> <span class="va">pred_lower</span>, ymax <span class="op">=</span> <span class="va">pred_upper</span><span class="op">)</span>,</span>
-<span>              fill <span class="op">=</span> <span class="st">"gray80"</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_barolo_band</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span>,</span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, ymin <span class="op">=</span> <span class="va">lower</span>, ymax <span class="op">=</span> <span class="va">upper</span><span class="op">)</span>,</span>
+<span>              fill <span class="op">=</span> <span class="st">"#B0C4DE"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_barolo_band</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">center</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"navy"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_test_wines</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 36 (Barolo — typical)"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_test_wines</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 36 (Barolo — typical)"</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"#2E8B57"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_test_wines</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 107 (Grignolino)"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df_test_wines</span>, <span class="va">Wine</span> <span class="op">==</span> <span class="st">"Wine 107 (Grignolino)"</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>            linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Process Transfer Check: Barolo Prediction Band"</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Process Transfer Check: Barolo Tolerance Band (95% coverage)"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Green = true Barolo (passes), Red dashed = Grignolino (fails)"</span>,</span>
 <span>       x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">f</span><span class="op">[</span><span class="va">x</span><span class="op">]</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-andrews-wine-qc_files/figure-html/process-transfer-1.png" class="r-plt" alt="" width="100%"></p>
-<p>A true Barolo stays inside the gray band; a Grignolino immediately
-violates it. But the critical follow-up question is: <strong>which
-chemicals caused the failure?</strong> Because we preserved the mapping
-between curve and original variables, we can answer this directly:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p>A true Barolo stays inside the blue tolerance band; a Grignolino
+immediately violates it. But the critical follow-up question is:
+<strong>which chemicals caused the failure?</strong> Because we
+preserved the mapping between curve and original variables, we can
+answer this directly:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Compare wine 107 (Grignolino) against Barolo reference ranges</span></span>
 <span><span class="va">barolo_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span><span class="va">barolo_idx</span>, <span class="op">]</span><span class="op">)</span></span>
@@ -735,7 +709,7 @@ between curve and original variables, we can answer this directly:</p>
 <span>       x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Standard deviations from Barolo mean"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-andrews-wine-qc_files/figure-html/transfer-diagnostics-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Report the failing chemicals</span></span>
 <span><span class="va">failing</span> <span class="op">&lt;-</span> <span class="va">df_diag</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">z_score</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -770,7 +744,7 @@ FPCA)</li>
 <li>Checked against the cultivar-specific tolerance band <em>and</em>
 the functional boxplot fences</li>
 </ol>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Build the monitoring view: functional boxplot + incoming wines</span></span>
 <span><span class="va">grig_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">cultivar</span> <span class="op">==</span> <span class="st">"Grignolino"</span><span class="op">)</span></span>
@@ -796,9 +770,9 @@ the functional boxplot fences</li>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_monitor</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, ymin <span class="op">=</span> <span class="va">fence_min</span>, ymax <span class="op">=</span> <span class="va">fence_max</span><span class="op">)</span>,</span>
-<span>              fill <span class="op">=</span> <span class="st">"pink"</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>              fill <span class="op">=</span> <span class="st">"#B0C4DE"</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_monitor</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, ymin <span class="op">=</span> <span class="va">env_min</span>, ymax <span class="op">=</span> <span class="va">env_max</span><span class="op">)</span>,</span>
-<span>              fill <span class="op">=</span> <span class="st">"magenta"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>              fill <span class="op">=</span> <span class="st">"steelblue"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_monitor</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">median_val</span><span class="op">)</span>,</span>
 <span>            color <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">incoming</span>,</span>
@@ -817,7 +791,7 @@ the functional boxplot fences</li>
 with “investigate” — it tells you <strong>which chemicals</strong> are
 driving the deviation. For each flagged batch, we can decompose the
 alert back into the original measurement space:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># For the flagged wines (96 = investigate, 122 = reject), compute z-scores</span></span>
 <span><span class="co"># relative to Grignolino reference</span></span>
@@ -863,7 +837,7 @@ quality team knows exactly which assays to re-run. Wine 122 (the
 consistent with a different cultivar entirely — confirming the
 mislabeling hypothesis from the <a href="example-andrews-wine.html">outlier analysis</a>.</p>
 <p>This is the operational payoff of the entire pipeline. The validation
-phase produces the reference profiles, prediction bands, and decision
+phase produces the reference profiles, tolerance bands, and decision
 rules. The monitoring phase applies them to every new batch with a
 single curve overlay <em>plus</em> a chemical-level breakdown when
 something goes wrong. The quality controller doesn’t need to understand
@@ -879,8 +853,8 @@ guidance):</p>
 quality attributes (which chemicals matter); clustering validates
 groupings</li>
 <li>
-<strong>Stage 2 (Process Qualification)</strong>: prediction bands
-define acceptance criteria (tolerance bands for formal validation); the
+<strong>Stage 2 (Process Qualification)</strong>: tolerance bands
+define acceptance criteria with guaranteed population coverage; the
 permutation test provides statistical evidence of cultivar
 distinctness</li>
 <li>

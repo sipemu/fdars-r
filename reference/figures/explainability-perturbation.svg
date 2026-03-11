@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 250" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="16" text-anchor="middle" font-size="15" font-weight="bold" fill="#333">Perturbation Spaces for Functional Explainability</text>
+  <text x="350" y="30" text-anchor="middle" font-size="10" fill="#888">How do we define "change a curve slightly" for each model type?</text>
+
+  <!-- ===== Panel 1: FPC Scores (current) ===== -->
+  <rect x="8" y="38" width="165" height="120" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="90" y="54" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2C5F8A">FPC Scores</text>
+  <text x="90" y="64" text-anchor="middle" font-size="8.8" fill="#2E8B57" font-weight="bold">current implementation</text>
+  <!-- Score space axes -->
+  <line x1="26" y1="146" x2="156" y2="146" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="26" y1="72" x2="26" y2="146" stroke="#ccc" stroke-width="0.5"/>
+  <text x="90" y="156" text-anchor="middle" font-size="7.5" fill="#888">ξ₁</text>
+  <text x="20" y="110" text-anchor="middle" font-size="7.5" fill="#888" transform="rotate(-90, 20, 110)">ξ₂</text>
+  <!-- Score cloud -->
+  <circle cx="60" cy="120" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="72" cy="114" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="80" cy="106" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="90" cy="110" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="100" cy="100" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="108" cy="108" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="116" cy="96" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="84" cy="130" r="2" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="96" cy="124" r="2" fill="#4A90D9" opacity="0.3"/>
+  <!-- Target point -->
+  <circle cx="90" cy="110" r="4" fill="none" stroke="#D55E00" stroke-width="1.5"/>
+  <!-- Perturbation arrows -->
+  <line x1="90" y1="110" x2="104" y2="106" stroke="#D55E00" stroke-width="0.8" marker-end="none" opacity="0.6"/>
+  <line x1="90" y1="110" x2="82" y2="100" stroke="#D55E00" stroke-width="0.8" opacity="0.6"/>
+  <line x1="90" y1="110" x2="98" y2="118" stroke="#D55E00" stroke-width="0.8" opacity="0.6"/>
+  <text x="130" y="82" font-size="7.5" fill="#D55E00">perturb</text>
+  <text x="130" y="90" font-size="7.5" fill="#D55E00">scores</text>
+  <!-- Suitability -->
+  <text x="90" y="170" text-anchor="middle" font-size="7.5" fill="#2C5F8A">fregre.lm · functional.logistic</text>
+  <text x="90" y="180" text-anchor="middle" font-size="7.5" fill="#2E8B57">low-dim · natural for FPC models</text>
+
+  <!-- ===== Panel 2: Basis Coefficients ===== -->
+  <rect x="181" y="38" width="165" height="120" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
+  <text x="263" y="54" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#B37700">Basis Coefficients</text>
+  <text x="263" y="64" text-anchor="middle" font-size="8.8" fill="#888">B-spline / Fourier</text>
+  <!-- Basis functions -->
+  <path d="M196 132 Q210 92 224 132" stroke="#E6A020" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M218 132 Q232 92 246 132" stroke="#E6A020" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M240 132 Q254 92 268 132" stroke="#E6A020" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M262 132 Q276 92 290 132" stroke="#E6A020" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M284 132 Q298 92 312 132" stroke="#E6A020" stroke-width="1" fill="none" opacity="0.5"/>
+  <!-- Coefficient bars below -->
+  <rect x="208" y="136" width="8" height="8" rx="1" fill="#E6A020" opacity="0.4"/>
+  <rect x="230" y="134" width="8" height="10" rx="1" fill="#D55E00" opacity="0.5"/>
+  <rect x="252" y="138" width="8" height="6" rx="1" fill="#E6A020" opacity="0.4"/>
+  <rect x="274" y="136" width="8" height="8" rx="1" fill="#E6A020" opacity="0.4"/>
+  <rect x="296" y="140" width="8" height="4" rx="1" fill="#E6A020" opacity="0.3"/>
+  <!-- Perturbed coefficient -->
+  <text x="234" y="132" font-size="6.2" fill="#D55E00">Δcⱼ</text>
+  <!-- Suitability -->
+  <text x="263" y="170" text-anchor="middle" font-size="7.5" fill="#B37700">smooth.basis.fd models</text>
+  <text x="263" y="180" text-anchor="middle" font-size="7.5" fill="#888">low-dim · preserves smoothness</text>
+
+  <!-- ===== Panel 3: Pointwise ===== -->
+  <rect x="354" y="38" width="165" height="120" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="436" y="54" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#2E8B57">Pointwise / Segments</text>
+  <text x="436" y="64" text-anchor="middle" font-size="8.8" fill="#888">model-agnostic</text>
+  <!-- Curve -->
+  <path d="M370 120 Q390 100 410 96 Q430 94 450 100 Q470 108 490 116 Q506 122 510 124" stroke="#2E8B57" stroke-width="1.5" fill="none"/>
+  <!-- Segment highlight -->
+  <rect x="400" y="88" width="40" height="42" rx="2" fill="#D55E00" opacity="0.08" stroke="#D55E00" stroke-width="0.6" stroke-dasharray="3,2"/>
+  <!-- Perturbed segment -->
+  <path d="M400 96 Q420 86 440 90" stroke="#D55E00" stroke-width="1.2" fill="none" stroke-dasharray="3,2"/>
+  <text x="420" y="84" text-anchor="middle" font-size="6.9" fill="#D55E00">perturb segment</text>
+  <!-- High-dim warning -->
+  <text x="436" y="148" text-anchor="middle" font-size="7.5" fill="#2E8B57">fregre.np · any model</text>
+  <text x="436" y="170" text-anchor="middle" font-size="7.5" fill="#888">high-dim unless segmented</text>
+  <text x="436" y="180" text-anchor="middle" font-size="7.5" fill="#888">model-agnostic (any predict())</text>
+
+  <!-- ===== Panel 4: SRVF / Elastic ===== -->
+  <rect x="527" y="38" width="165" height="120" rx="6" fill="#FFE8E8" stroke="#C0392B" stroke-width="1.2"/>
+  <text x="609" y="54" text-anchor="middle" font-size="11.2" font-weight="bold" fill="#C0392B">SRVF + Warping</text>
+  <text x="609" y="64" text-anchor="middle" font-size="8.8" fill="#888">elastic / shape models</text>
+  <!-- Two curves: amplitude + phase -->
+  <path d="M544 120 Q570 96 596 100 Q622 104 648 92 Q670 86 682 90" stroke="#C0392B" stroke-width="1.2" fill="none"/>
+  <path d="M544 118 Q574 100 600 96 Q626 92 650 96 Q672 102 682 106" stroke="#4A90D9" stroke-width="1.2" fill="none" stroke-dasharray="3,2"/>
+  <!-- Labels -->
+  <text x="556" y="90" font-size="6.9" fill="#C0392B">amplitude</text>
+  <text x="660" y="112" font-size="6.9" fill="#4A90D9">phase</text>
+  <!-- Decomposition arrow -->
+  <text x="609" y="134" text-anchor="middle" font-size="7.5" fill="#888">separate amplitude</text>
+  <text x="609" y="142" text-anchor="middle" font-size="7.5" fill="#888">and phase perturbations</text>
+  <!-- Suitability -->
+  <text x="609" y="170" text-anchor="middle" font-size="7.5" fill="#C0392B">elastic alignment models</text>
+  <text x="609" y="180" text-anchor="middle" font-size="7.5" fill="#888">respects geometry of shape space</text>
+
+  <!-- Bottom: spectrum arrow -->
+  <line x1="90" y1="192" x2="609" y2="192" stroke="#ccc" stroke-width="0.8"/>
+  <text x="90" y="200" text-anchor="middle" font-size="7.5" fill="#888">simple · low-dim</text>
+  <text x="609" y="200" text-anchor="middle" font-size="7.5" fill="#888">faithful · geometry-aware</text>
+</svg>

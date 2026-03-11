@@ -24,37 +24,8 @@ A **metric** $d$ on a space $\mathcal{X}$ satisfies:
 
 A **semimetric** satisfies only conditions 1-3.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-
-# Create example data with different curve types
-set.seed(42)
-m <- 100
-t_grid <- seq(0, 1, length.out = m)
-
-# Four types of curves
-curve1 <- sin(2 * pi * t_grid)                    # Sine
-curve2 <- sin(2 * pi * t_grid + 0.5)              # Phase-shifted sine
-curve3 <- cos(2 * pi * t_grid)                    # Cosine
-curve4 <- sin(4 * pi * t_grid)                    # Higher frequency
-
-X <- rbind(curve1, curve2, curve3, curve4)
-fd <- fdata(X, argvals = t_grid,
-            names = list(main = "Four Curve Types"))
-plot(fd)
-```
-
-![](distance-metrics_files/figure-html/setup-1.png)
+![Distance Metrics and
+Semimetrics](../reference/figures/distance-metrics-diagram.svg)
 
 ## True Metrics
 
@@ -743,8 +714,8 @@ fit_np <- fregre.np(fd_large, y, metric = metric.lp)
   clustering
 - `vignette("elastic-alignment", package = "fdars")` — elastic curve
   alignment using SRVF
-- `vignette("regression", package = "fdars")` — scalar-on-function
-  regression methods
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  — scalar-on-function regression methods
 
 ## References
 

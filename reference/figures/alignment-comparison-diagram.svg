@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrAC" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="300" y="27.5" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Comparing Alignment Methods</text>
+
+  <!-- ===== Column 1: Elastic ===== -->
+  <rect x="14" y="52.5" width="180" height="206.2" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="104" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">Elastic Alignment</text>
+  <text x="104" y="87.5" text-anchor="middle" font-size="10" fill="#888">global DP optimization</text>
+
+  <!-- Smooth warping function -->
+  <text x="104" y="110" text-anchor="middle" font-size="10" fill="#555" font-weight="bold">Warping: smooth diffeomorphism</text>
+  <line x1="34" y1="200" x2="174" y2="125" stroke="#ccc" stroke-width="0.6" stroke-dasharray="3,2"/>
+  <path d="M 34 200.0 Q 64 185.0 84 167.5 Q 114 140.0 144 130.0 Q 164 122.5 174 125.0" stroke="#4A90D9" stroke-width="1.9" fill="none"/>
+  <path d="M 34 200.0 Q 54 190.0 74 175.0 Q 104 147.5 134 132.5 Q 154 125.0 174 127.5" stroke="#D55E00" stroke-width="1.4" fill="none" opacity="0.6"/>
+
+  <!-- Pros/cons -->
+  <text x="24" y="225" font-size="10" fill="#2E8B57">&#10003; Fully automatic</text>
+  <text x="24" y="240" font-size="10" fill="#2E8B57">&#10003; Smooth warps</text>
+  <text x="24" y="255" font-size="10" fill="#d62728">&#10007; No feature control</text>
+
+  <!-- ===== Column 2: Landmark ===== -->
+  <rect x="210" y="52.5" width="180" height="206.2" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="300" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#B37700">Landmark Registration</text>
+  <text x="300" y="87.5" text-anchor="middle" font-size="10" fill="#888">feature-based warping</text>
+
+  <!-- Piecewise-linear warping function -->
+  <text x="300" y="110" text-anchor="middle" font-size="10" fill="#555" font-weight="bold">Warping: piecewise-linear</text>
+  <line x1="230" y1="200" x2="370" y2="125" stroke="#ccc" stroke-width="0.6" stroke-dasharray="3,2"/>
+  <path d="M 230 200.0 L 282 165.0 L 340 135.0 L 370 125.0" stroke="#E6A020" stroke-width="1.9" fill="none"/>
+  <path d="M 230 200.0 L 270 172.5 L 330 140.0 L 370 127.5" stroke="#D55E00" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <!-- Anchor dots -->
+  <circle cx="282" cy="165" r="3" fill="#E6A020"/>
+  <circle cx="340" cy="135" r="3" fill="#E6A020"/>
+  <circle cx="270" cy="172.5" r="3" fill="#D55E00" opacity="0.6"/>
+  <circle cx="330" cy="140" r="3" fill="#D55E00" opacity="0.6"/>
+
+  <!-- Pros/cons -->
+  <text x="220" y="225" font-size="10" fill="#2E8B57">&#10003; Feature correspondence</text>
+  <text x="220" y="240" font-size="10" fill="#2E8B57">&#10003; Fast (O(nm + nk))</text>
+  <text x="220" y="255" font-size="10" fill="#d62728">&#10007; Corners at landmarks</text>
+
+  <!-- ===== Column 3: Constrained ===== -->
+  <rect x="406" y="52.5" width="180" height="206.2" rx="6" fill="#F3E8FD" stroke="#7B2D8E" stroke-width="1.3"/>
+  <text x="496" y="72.5" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#7B2D8E">Constrained Elastic</text>
+  <text x="496" y="87.5" text-anchor="middle" font-size="10" fill="#888">smooth + anchored</text>
+
+  <!-- Smooth warp with anchor points -->
+  <text x="496" y="110" text-anchor="middle" font-size="10" fill="#555" font-weight="bold">Warping: smooth with anchors</text>
+  <line x1="426" y1="200" x2="566" y2="125" stroke="#ccc" stroke-width="0.6" stroke-dasharray="3,2"/>
+  <path d="M 426 200.0 Q 456 182.5 476 165.0 Q 506 140.0 536 132.5 Q 556 125.0 566 125.0" stroke="#7B2D8E" stroke-width="1.9" fill="none"/>
+  <path d="M 426 200.0 Q 446 187.5 466 172.5 Q 496 147.5 526 135.0 Q 546 127.5 566 127.5" stroke="#D55E00" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <!-- Anchor dots on smooth curve -->
+  <circle cx="476" cy="165" r="3.5" fill="#7B2D8E" stroke="#fff" stroke-width="1.1"/>
+  <circle cx="536" cy="132.5" r="3.5" fill="#7B2D8E" stroke="#fff" stroke-width="1.1"/>
+
+  <!-- Pros/cons -->
+  <text x="416" y="225" font-size="10" fill="#2E8B57">&#10003; Feature correspondence</text>
+  <text x="416" y="240" font-size="10" fill="#2E8B57">&#10003; Smooth between anchors</text>
+  <text x="416" y="255" font-size="10" fill="#d62728">&#10007; Needs feature detection</text>
+
+  <!-- ===== BOTTOM: Decision guide ===== -->
+  <line x1="10" y1="277.5" x2="590" y2="277.5" stroke="#eee" stroke-width="1.1"/>
+  <text x="300" y="305" text-anchor="middle" font-size="13.8" font-weight="bold" fill="#555">When to Use Each Method</text>
+
+  <!-- Decision boxes -->
+  <rect x="14" y="320" width="180" height="65" rx="5" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.1"/>
+  <text x="104" y="342.5" text-anchor="middle" font-size="11.2" fill="#2C5F8A" font-weight="bold">Elastic</text>
+  <text x="104" y="360" text-anchor="middle" font-size="10" fill="#555">Smooth global shifts</text>
+  <text x="104" y="375" text-anchor="middle" font-size="10" fill="#555">No identifiable features</text>
+
+  <rect x="210" y="320" width="180" height="65" rx="5" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.1"/>
+  <text x="300" y="342.5" text-anchor="middle" font-size="11.2" fill="#B37700" font-weight="bold">Landmark</text>
+  <text x="300" y="360" text-anchor="middle" font-size="10" fill="#555">Clear peaks/valleys</text>
+  <text x="300" y="375" text-anchor="middle" font-size="10" fill="#555">Independent feature shifts</text>
+
+  <rect x="406" y="320" width="180" height="65" rx="5" fill="#F3E8FD" stroke="#7B2D8E" stroke-width="1.1"/>
+  <text x="496" y="342.5" text-anchor="middle" font-size="11.2" fill="#7B2D8E" font-weight="bold">Constrained</text>
+  <text x="496" y="360" text-anchor="middle" font-size="10" fill="#555">Features + smooth variation</text>
+  <text x="496" y="375" text-anchor="middle" font-size="10" fill="#555">ECG-like signals</text>
+
+  <!-- Bottom note -->
+  <text x="300" y="425" text-anchor="middle" font-size="11.2" fill="#888">All methods produce warping functions &#947;(t) mapping original time to aligned time</text>
+</svg>

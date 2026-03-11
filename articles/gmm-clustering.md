@@ -17,19 +17,8 @@ several advantages over k-means:
 which projects functional data onto a B-spline basis before fitting the
 mixture model.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
+![Model-Based Clustering with Gaussian
+Mixtures](../reference/figures/gmm-clustering-diagram.svg)
 
 ## Why Model-Based Clustering?
 

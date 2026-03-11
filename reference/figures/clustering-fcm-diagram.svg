@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="24" text-anchor="middle" font-size="18" font-weight="bold" fill="#B37700">Fuzzy C-Means Clustering</text>
+  <text x="350" y="46" text-anchor="middle" font-size="13" fill="#888">Soft probabilistic cluster membership</text>
+
+  <!-- ===== Left: Hard vs Soft ===== -->
+  <rect x="16" y="66" width="200" height="120" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="116" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#555">Hard vs Soft</text>
+
+  <!-- Hard: solid colored dots -->
+  <text x="36" y="110" font-size="11" fill="#555">K-means:</text>
+  <circle cx="110" cy="106" r="5" fill="#4A90D9"/>
+  <circle cx="130" cy="106" r="5" fill="#E6A020"/>
+  <circle cx="150" cy="106" r="5" fill="#2E8B57"/>
+  <circle cx="170" cy="106" r="5" fill="#4A90D9"/>
+
+  <!-- Soft: gradient colored dots -->
+  <text x="36" y="140" font-size="11" fill="#555">FCM:</text>
+  <circle cx="110" cy="136" r="5" fill="#4A90D9" opacity="0.8"/>
+  <circle cx="110" cy="136" r="5" fill="#E6A020" opacity="0.2"/>
+  <circle cx="130" cy="136" r="5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="130" cy="136" r="5" fill="#4A90D9" opacity="0.3"/>
+  <circle cx="150" cy="136" r="5" fill="#2E8B57" opacity="0.9"/>
+  <circle cx="170" cy="136" r="5" fill="#4A90D9" opacity="0.4"/>
+  <circle cx="170" cy="136" r="5" fill="#E6A020" opacity="0.4"/>
+
+  <text x="116" y="174" text-anchor="middle" font-size="11" fill="#888">&#x03C4;&#x1D62;&#x2096; &#x2208; [0, 1], &#x2211;&#x2096; &#x03C4;&#x1D62;&#x2096; = 1</text>
+
+  <!-- Arrow -->
+  <line x1="220" y1="126" x2="244" y2="126" stroke="#555" stroke-width="1.2" marker-end="url(#arrFCM)"/>
+
+  <!-- ===== Middle: Fuzziness parameter ===== -->
+  <rect x="248" y="66" width="200" height="120" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="348" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Fuzziness (m)</text>
+
+  <text x="268" y="112" font-size="12" fill="#555">m &#x2192; 1: hard (like k-means)</text>
+  <text x="268" y="132" font-size="12" fill="#555">m = 2: standard (default)</text>
+  <text x="268" y="152" font-size="12" fill="#555">m &gt; 2: softer boundaries</text>
+  <text x="268" y="174" font-size="11" fill="#888">Controls overlap degree</text>
+
+  <!-- Arrow -->
+  <line x1="452" y1="126" x2="476" y2="126" stroke="#555" stroke-width="1.2" marker-end="url(#arrFCM)"/>
+
+  <!-- ===== Right: Applications ===== -->
+  <rect x="480" y="66" width="204" height="120" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="582" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Applications</text>
+
+  <text x="500" y="112" font-size="12" fill="#555">&#x2022; Overlapping clusters</text>
+  <text x="500" y="132" font-size="12" fill="#555">&#x2022; Uncertainty quantification</text>
+  <text x="500" y="152" font-size="12" fill="#555">&#x2022; Outlier detection</text>
+  <text x="500" y="172" font-size="12" fill="#555">&#x2022; Transition states</text>
+
+  <!-- Bottom: membership example -->
+  <line x1="16" y1="204" x2="684" y2="204" stroke="#eee" stroke-width="1.5"/>
+  <text x="350" y="230" text-anchor="middle" font-size="14" font-weight="bold" fill="#555">Example: Membership Matrix</text>
+
+  <!-- Table header -->
+  <text x="100" y="254" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">Curve</text>
+  <text x="240" y="254" text-anchor="middle" font-size="12" font-weight="bold" fill="#4A90D9">Cluster 1</text>
+  <text x="390" y="254" text-anchor="middle" font-size="12" font-weight="bold" fill="#E6A020">Cluster 2</text>
+  <text x="540" y="254" text-anchor="middle" font-size="12" font-weight="bold" fill="#2E8B57">Cluster 3</text>
+
+  <!-- Row 1: clear assignment -->
+  <text x="100" y="274" text-anchor="middle" font-size="12" fill="#555">Curve 1</text>
+  <rect x="200" y="262" width="80" height="14" rx="2" fill="#4A90D9" opacity="0.8"/>
+  <text x="240" y="274" text-anchor="middle" font-size="11" fill="#fff" font-weight="bold">0.92</text>
+  <rect x="350" y="262" width="80" height="14" rx="2" fill="#E6A020" opacity="0.2"/>
+  <text x="390" y="274" text-anchor="middle" font-size="11" fill="#888">0.05</text>
+  <rect x="500" y="262" width="80" height="14" rx="2" fill="#2E8B57" opacity="0.2"/>
+  <text x="540" y="274" text-anchor="middle" font-size="11" fill="#888">0.03</text>
+
+  <defs>
+    <marker id="arrFCM" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

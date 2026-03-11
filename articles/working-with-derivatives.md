@@ -13,20 +13,8 @@ that the original curves may hide:
 Many real-world questions are about *when* and *how fast* things change,
 not just *what* values are observed.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-set.seed(42)
-```
+![Working with
+Derivatives](../reference/figures/derivatives-diagram.svg)
 
 ## Loading Growth Data
 
@@ -67,6 +55,9 @@ fd <- fdata(heights, argvals = age)
 cat("Loaded", n, "growth curves from ages", min(age), "to", max(age), "\n")
 #> Loaded 54 growth curves from ages 1 to 18
 ```
+
+![Noise Amplification with Differentiation
+Diagram](../reference/figures/derivatives-diagram.svg)
 
 ## The Problem: Noise Amplifies with Differentiation
 

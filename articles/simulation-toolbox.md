@@ -1,19 +1,5 @@
 # Simulating Functional Data
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Introduction
 
 The `fdars` package provides comprehensive tools for simulating
@@ -27,6 +13,9 @@ functional data. This is useful for:
 
 This vignette covers the Karhunen-Loeve simulation framework and related
 tools.
+
+![Karhunen-Loève Simulation
+Framework](../reference/figures/simulation-toolbox-diagram.svg)
 
 ## Karhunen-Loeve Simulation
 

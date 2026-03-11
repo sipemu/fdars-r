@@ -117,6 +117,7 @@ bootstrap</td>
 quantifies the uncertainty in the estimated <em>mean function</em>.
 Tolerance bands are always wider than confidence bands because
 individual curve variability exceeds mean estimation uncertainty.</p>
+<img src="../reference/figures/tolerance-bands-diagram.svg" alt="Confidence vs Tolerance Bands Diagram" style="width:100%; max-width:700px;">
 </div>
 <div class="section level2">
 <h2 id="how-it-works-intuition">How It Works (Intuition)<a class="anchor" aria-label="anchor" href="#how-it-works-intuition"></a>
@@ -355,28 +356,6 @@ variance at each grid point.</p>
 <div class="section level2">
 <h2 id="generate-sample-data">Generate Sample Data<a class="anchor" aria-label="anchor" href="#generate-sample-data"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">argvals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
-<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">60</span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">50</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">argvals</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>               <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">0</span>, <span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">data</span>, argvals <span class="op">=</span> <span class="va">argvals</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tolerance-bands_files/figure-html/setup-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="fpca-bootstrap-band">FPCA Bootstrap Band<a class="anchor" aria-label="anchor" href="#fpca-bootstrap-band"></a>
@@ -392,7 +371,7 @@ point (narrower)</li>
 <strong>Simultaneous</strong>: Single scaling factor across all
 points (wider, controls family-wise error)</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">band_pw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"fpca"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>                          band.type <span class="op">=</span> <span class="st">"pointwise"</span>, nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">band_pw</span><span class="op">)</span></span>
@@ -403,7 +382,7 @@ points (wider, controls family-wise error)</li>
 <span><span class="co">#&gt;   Mean half-width: 0.7171</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">band_pw</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tolerance-bands_files/figure-html/fpca-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">band_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"fpca"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>                           band.type <span class="op">=</span> <span class="st">"simultaneous"</span>, nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">band_sim</span><span class="op">)</span></span></code></pre></div>
@@ -419,7 +398,7 @@ scores on the calibration set to determine band width.</p>
 <p>Two score types are available: - <strong>supnorm</strong>: Maximum
 deviation (constant band width) - <strong>l2</strong>: Integrated
 squared deviation (variable band width)</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">band_conf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"conformal"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>                            score.type <span class="op">=</span> <span class="st">"supnorm"</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">band_conf</span><span class="op">)</span></span></code></pre></div>
@@ -460,7 +439,7 @@ indicate significant differences)</li>
 <li>Assessing sample size adequacy (very wide SCBs suggest more data is
 needed)</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">band_scb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"scb"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>                           nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">band_scb</span><span class="op">)</span></span></code></pre></div>
@@ -475,7 +454,7 @@ above – it targets the mean, not individual curves. The width scales as
 <p>For data from exponential family distributions (e.g., count data),
 the exponential family method applies the appropriate link function
 transformation before computing FPCA bands:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Gaussian data (identity link)</span></span>
 <span><span class="va">band_exp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"exponential"</span>, family <span class="op">=</span> <span class="st">"gaussian"</span>,</span>
 <span>                           nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
@@ -489,7 +468,7 @@ transformation before computing FPCA bands:</p>
 elastic metric, removing phase variability. It then computes an FPCA
 tolerance band on the aligned data. This produces tighter bands when
 curves exhibit timing differences:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate data with phase variability</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">data_phase</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="fl">50</span><span class="op">)</span></span>
@@ -511,7 +490,7 @@ curves exhibit timing differences:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">band_elastic</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tolerance-bands_files/figure-html/elastic-1.png" class="r-plt" alt="" width="100%"></p>
 <p>Compare the elastic band to FPCA on the same phase-shifted data:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">band_fpca_phase</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd_phase</span>, method <span class="op">=</span> <span class="st">"fpca"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>                                  nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"FPCA mean half-width:   "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">band_fpca_phase</span><span class="op">$</span><span class="va">half_width</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>

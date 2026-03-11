@@ -68,54 +68,7 @@
 atypical or anomalous compared to the rest of the sample.
 <strong>fdars</strong> provides several methods based on functional
 depth and likelihood ratio tests.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Generate normal data with low noise for clear signal</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">30</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
-<span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># Add three distinct types of outliers</span></span>
-<span><span class="va">X</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span> <span class="op">+</span> <span class="fl">3</span>           <span class="co"># MAGNITUDE outlier (shifted up)</span></span>
-<span><span class="va">X</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span>              <span class="co"># SHAPE outlier (inverted pattern)</span></span>
-<span><span class="va">X</span><span class="op">[</span><span class="fl">3</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span>           <span class="co"># AMPLITUDE outlier (larger scale)</span></span>
-<span></span>
-<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Visualize with outliers highlighted</span></span>
-<span><span class="va">df_curves</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="va">n</span><span class="op">)</span>,</span>
-<span>  value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  curve <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span>,</span>
-<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Magnitude"</span>, <span class="st">"Shape"</span>, <span class="st">"Amplitude"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Normal"</span>, <span class="va">n</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">df_curves</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">df_curves</span><span class="op">$</span><span class="va">type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Normal"</span>, <span class="st">"Magnitude"</span>, <span class="st">"Shape"</span>, <span class="st">"Amplitude"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_curves</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">curve</span>, color <span class="op">=</span> <span class="va">type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Normal"</span> <span class="op">=</span> <span class="st">"gray50"</span>, <span class="st">"Magnitude"</span> <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>                                 <span class="st">"Shape"</span> <span class="op">=</span> <span class="st">"blue"</span>, <span class="st">"Amplitude"</span> <span class="op">=</span> <span class="st">"green3"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Functional Data with Three Types of Outliers"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"t"</span>, y <span class="op">=</span> <span class="st">"X(t)"</span>, color <span class="op">=</span> <span class="st">"Type"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="outlier-detection_files/figure-html/setup-1.png" class="r-plt" alt="" width="100%"></p>
+<img src="../reference/figures/outlier-types-diagram.svg" alt="Functional Outlier Types Diagram" style="width:100%; max-width:700px;">
 </div>
 <div class="section level2">
 <h2 id="depth-based-methods">Depth-Based Methods<a class="anchor" aria-label="anchor" href="#depth-based-methods"></a>
@@ -163,7 +116,7 @@ supports three different methods for computing the threshold.</p>
 <p><strong>Default: 95th percentile threshold</strong>
 (<code>quan = 0.05</code>), which flags curves in the bottom 5% of
 depths as outliers.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Default: quantile method with quan = 0.05 (95th percentile, flags bottom 5%)</span></span>
 <span><span class="va">out_pond</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">)</span></span>
@@ -172,12 +125,13 @@ depths as outliers.</p>
 <span><span class="co">#&gt;   Number of outliers: 3 </span></span>
 <span><span class="co">#&gt;   Outlier indices: 1 2 3</span></span>
 <span><span class="co">#&gt;   Threshold method: quantile </span></span>
-<span><span class="co">#&gt;   Depth cutoff: 0.0591</span></span></code></pre></div>
+<span><span class="co">#&gt;   Depth cutoff: 0.0591 </span></span>
+<span><span class="co">#&gt;   Outlier p-values: 0.0323, 0.0645, 0.0968</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="comparing-threshold-methods">Comparing Threshold Methods<a class="anchor" aria-label="anchor" href="#comparing-threshold-methods"></a>
 </h4>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Quantile method: flags curves with depth in the bottom 5% (default)</span></span>
 <span><span class="va">out_quantile</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>                                     threshold_method <span class="op">=</span> <span class="st">"quantile"</span>, quan <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
@@ -220,14 +174,14 @@ false positive rate. Increase <code>k</code> for stricter detection
 <div class="section level3">
 <h3 id="visualizing-outliers">Visualizing Outliers<a class="anchor" aria-label="anchor" href="#visualizing-outliers"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/plot-outliers-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="examining-results">Examining Results<a class="anchor" aria-label="anchor" href="#examining-results"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Which curves are outliers?</span></span>
 <span><span class="va">out_pond</span><span class="op">$</span><span class="va">outliers</span></span>
 <span><span class="co">#&gt; [1] 1 2 3</span></span>
@@ -273,14 +227,15 @@ proportion.</p>
 <h3 id="trimming-based-method-outliers-depth-trim">Trimming-Based Method (outliers.depth.trim)<a class="anchor" aria-label="anchor" href="#trimming-based-method-outliers-depth-trim"></a>
 </h3>
 <p>Iteratively removes curves with lowest depth:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_trim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.trim.html">outliers.depth.trim</a></span><span class="op">(</span><span class="va">fd</span>, trim <span class="op">=</span> <span class="fl">0.1</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">out_trim</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Functional data outlier detection</span></span>
 <span><span class="co">#&gt;   Number of observations: 30 </span></span>
 <span><span class="co">#&gt;   Number of outliers: 3 </span></span>
 <span><span class="co">#&gt;   Outlier indices: 1 2 3</span></span>
-<span><span class="co">#&gt;   Depth cutoff: 0.7817</span></span>
+<span><span class="co">#&gt;   Depth cutoff: 0.7817 </span></span>
+<span><span class="co">#&gt;   Outlier p-values: 0.0323, 0.0968, 0.0645</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out_trim</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/depth-trim-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -289,7 +244,7 @@ proportion.</p>
 </h3>
 <p>Both methods accept a <code>depth</code> parameter to specify the
 depth function:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Using Random Projection depth</span></span>
 <span><span class="va">out_rp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
@@ -311,7 +266,7 @@ a percentile of the maximum distance distribution under the null
 hypothesis (no outliers). By default, the 99th percentile is used,
 meaning approximately 1% of observations would be flagged as outliers
 when there are no true outliers.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The outliers.lrt function automatically computes the threshold</span></span>
 <span><span class="va">out_lrt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.lrt.html">outliers.lrt</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">)</span></span>
@@ -319,7 +274,8 @@ when there are no true outliers.</p>
 <span><span class="co">#&gt;   Number of observations: 30 </span></span>
 <span><span class="co">#&gt;   Number of outliers: 3 </span></span>
 <span><span class="co">#&gt;   Outlier indices: 1 2 3</span></span>
-<span><span class="co">#&gt;   LRT threshold: 1.5905  (99th percentile)</span></span>
+<span><span class="co">#&gt;   LRT threshold: 1.5905  (99th percentile) </span></span>
+<span><span class="co">#&gt;   Outlier p-values: 0.001, 0.001, 0.001</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/lrt-detect-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
@@ -336,7 +292,7 @@ fewer false positives</li>
 <strong>Lower percentile</strong> (e.g., 0.95): More sensitive, may
 catch more subtle outliers</li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Default: 99th percentile (conservative)</span></span>
 <span><span class="va">out_lrt_99</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.lrt.html">outliers.lrt</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span>, percentile <span class="op">=</span> <span class="fl">0.99</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"99th percentile outliers:"</span>, <span class="va">out_lrt_99</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -352,7 +308,7 @@ catch more subtle outliers</li>
 </h3>
 <p>You can also compute the threshold separately if you want to examine
 it or apply a custom threshold:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute threshold separately (99th percentile by default)</span></span>
 <span><span class="va">threshold_99</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.thres.lrt.html">outliers.thres.lrt</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"LRT threshold (99th percentile):"</span>, <span class="va">threshold_99</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -366,7 +322,7 @@ it or apply a custom threshold:</p>
 <div class="section level3">
 <h3 id="lrt-results">LRT Results<a class="anchor" aria-label="anchor" href="#lrt-results"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Outlier indices</span></span>
 <span><span class="va">out_lrt</span><span class="op">$</span><span class="va">outliers</span></span>
 <span><span class="co">#&gt; [1] 1 2 3</span></span>
@@ -377,7 +333,18 @@ it or apply a custom threshold:</p>
 <span></span>
 <span><span class="co"># Threshold used</span></span>
 <span><span class="va">out_lrt</span><span class="op">$</span><span class="va">threshold</span></span>
-<span><span class="co">#&gt; [1] 1.590504</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 1.590504</span></span>
+<span></span>
+<span><span class="co"># Bootstrap-calibrated p-values (smaller = more outlying)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"P-values for detected outliers:"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">p.value</span><span class="op">[</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">outliers</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; P-values for detected outliers: 0.001 0.001 0.001</span></span>
+<span></span>
+<span><span class="co"># Bootstrap null distribution (sorted max distances from B bootstrap samples)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Bootstrap null distribution: n ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">boot_dist</span><span class="op">)</span>,</span>
+<span>    <span class="st">", range = ["</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">boot_dist</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">","</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">boot_dist</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"]\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Bootstrap null distribution: n = 1000 , range = [ 1.104 , 1.693 ]</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="when-lrt-works-best">When LRT Works Best<a class="anchor" aria-label="anchor" href="#when-lrt-works-best"></a>
@@ -410,7 +377,7 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <h2 id="comparing-methods">Comparing Methods<a class="anchor" aria-label="anchor" href="#comparing-methods"></a>
 </h2>
 <p>Different methods may detect different types of outliers:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run all methods</span></span>
 <span><span class="va">out1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">out2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.trim.html">outliers.depth.trim</a></span><span class="op">(</span><span class="va">fd</span>, trim <span class="op">=</span> <span class="fl">0.1</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
@@ -429,13 +396,555 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <span><span class="co">#&gt; True outliers: 1, 2, 3</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="quantifying-outlierness">Quantifying Outlierness<a class="anchor" aria-label="anchor" href="#quantifying-outlierness"></a>
+</h2>
+<p>Binary outlier/not labels don’t tell the full story. Every method in
+<strong>fdars</strong> now returns a continuous
+<strong>outlierness</strong> score and a <strong>p-value</strong> for
+each curve.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Run three methods on the same data</span></span>
+<span><span class="va">out_pond</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">ms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/magnitudeshape.html">magnitudeshape</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
+<span><span class="va">og</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliergram.html">outliergram</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Each method now has p.value and outlierness fields</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"depth.pond p-values (curves 1-3):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">$</span><span class="va">p.value</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; depth.pond p-values (curves 1-3): 0.0323 0.0968 0.0645</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"magnitudeshape p-values (curves 1-3):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ms</span><span class="op">$</span><span class="va">p.value</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; magnitudeshape p-values (curves 1-3): 0 0 0</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"outliergram p-values (curves 1-3):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">og</span><span class="op">$</span><span class="va">p.value</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; outliergram p-values (curves 1-3): 1 0.0645 0.0968</span></span></code></pre></div>
+<p>The <code><a href="../reference/outlier_summary.html">outlier_summary()</a></code> function provides a unified ranked
+view of any outlier detection result:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Ranked summary from depth.pond</span></span>
+<span><span class="va">summary_pond</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outlier_summary.html">outlier_summary</a></span><span class="op">(</span><span class="va">out_pond</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">summary_pond</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    index outlierness    p.value is_outlier</span></span>
+<span><span class="co">#&gt; 1      1   0.9677419 0.03225806       TRUE</span></span>
+<span><span class="co">#&gt; 3      3   0.9354839 0.06451613       TRUE</span></span>
+<span><span class="co">#&gt; 2      2   0.9032258 0.09677419       TRUE</span></span>
+<span><span class="co">#&gt; 10    10   0.8709677 0.12903226      FALSE</span></span>
+<span><span class="co">#&gt; 30    30   0.8387097 0.16129032      FALSE</span></span>
+<span><span class="co">#&gt; 29    29   0.8064516 0.19354839      FALSE</span></span>
+<span><span class="co">#&gt; 23    23   0.7741935 0.22580645      FALSE</span></span>
+<span><span class="co">#&gt; 27    27   0.7419355 0.25806452      FALSE</span></span>
+<span><span class="co">#&gt; 26    26   0.7096774 0.29032258      FALSE</span></span>
+<span><span class="co">#&gt; 6      6   0.6774194 0.32258065      FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Compare how different methods rank curves</span></span>
+<span><span class="va">rankings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  curve <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span>,</span>
+<span>  pond <span class="op">=</span> <span class="va">out_pond</span><span class="op">$</span><span class="va">outlierness</span>,</span>
+<span>  ms <span class="op">=</span> <span class="va">ms</span><span class="op">$</span><span class="va">outlierness</span>,</span>
+<span>  outliergram <span class="op">=</span> <span class="va">og</span><span class="op">$</span><span class="va">outlierness</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="st">"Outlier"</span>, <span class="st">"Normal"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Reshape for plotting</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="va">df_rank</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  curve <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  outlierness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rankings</span><span class="op">$</span><span class="va">pond</span>, <span class="va">rankings</span><span class="op">$</span><span class="va">ms</span>, <span class="va">rankings</span><span class="op">$</span><span class="va">outliergram</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"depth.pond"</span>, <span class="st">"magnitudeshape"</span>, <span class="st">"outliergram"</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">n</span><span class="op">)</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">rankings</span><span class="op">$</span><span class="va">type</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_rank</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">curve</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">outlierness</span>, fill <span class="op">=</span> <span class="va">type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">method</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Normal"</span> <span class="op">=</span> <span class="st">"gray60"</span>, <span class="st">"Outlier"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Outlierness Scores by Method"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Curve Index"</span>, y <span class="op">=</span> <span class="st">"Outlierness"</span>, fill <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="outlier-detection_files/figure-html/compare-outlierness-1.png" class="r-plt" alt="" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="statistical-significance">Statistical Significance<a class="anchor" aria-label="anchor" href="#statistical-significance"></a>
+</h2>
+<p>Each method now provides per-curve p-values. These allow a formal
+hypothesis test: “Is this curve an outlier at significance level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>?”</p>
+<div class="section level3">
+<h3 id="chi-squared-p-values-magnitudeshape">Chi-squared P-values (magnitudeshape)<a class="anchor" aria-label="anchor" href="#chi-squared-p-values-magnitudeshape"></a>
+</h3>
+<p>The magnitude-shape method uses a chi-squared test with 2 degrees of
+freedom. The squared distance <code>dist_sq</code> follows a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>χ</mi><mn>2</mn><mn>2</mn></msubsup><annotation encoding="application/x-tex">\chi^2_2</annotation></semantics></math>
+distribution under the null:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/magnitudeshape.html">magnitudeshape</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Show p-values for all curves</span></span>
+<span><span class="va">df_pval</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  curve <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span>,</span>
+<span>  dist_sq <span class="op">=</span> <span class="va">ms</span><span class="op">$</span><span class="va">dist_sq</span>,</span>
+<span>  p.value <span class="op">=</span> <span class="va">ms</span><span class="op">$</span><span class="va">p.value</span>,</span>
+<span>  is_outlier <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">ms</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"Outlier"</span>, <span class="st">"Normal"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Curves 1-3 are true outliers</span></span>
+<span><span class="va">df_pval</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt;   curve      dist_sq    p.value is_outlier</span></span>
+<span><span class="co">#&gt; 1     1 66965.537056 0.00000000    Outlier</span></span>
+<span><span class="co">#&gt; 2     2 15377.686287 0.00000000    Outlier</span></span>
+<span><span class="co">#&gt; 3     3 17135.681408 0.00000000    Outlier</span></span>
+<span><span class="co">#&gt; 4     4   111.714303 0.00000000    Outlier</span></span>
+<span><span class="co">#&gt; 5     5     6.251769 0.04389808     Normal</span></span>
+<span><span class="co">#&gt; 6     6     0.628857 0.73020607     Normal</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="bootstrap-calibrated-p-values-lrt">Bootstrap-calibrated P-values (LRT)<a class="anchor" aria-label="anchor" href="#bootstrap-calibrated-p-values-lrt"></a>
+</h3>
+<p>The LRT method provides <strong>bootstrap-calibrated
+p-values</strong>: each curve’s distance is compared against the null
+distribution of maximum distances from B bootstrap samples. This gives a
+proper calibration — the p-value answers: “what fraction of bootstrap
+null samples produced a maximum distance at least as extreme as this
+curve’s distance?”</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out_lrt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.lrt.html">outliers.lrt</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"LRT p-values for true outliers (1-3):"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">p.value</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; LRT p-values for true outliers (1-3): 0.001 0.001 0.001</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"LRT p-values for normal curves (4-6):"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">p.value</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; LRT p-values for normal curves (4-6): 1 1 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Bootstrap null distribution size:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">out_lrt</span><span class="op">$</span><span class="va">boot_dist</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Bootstrap null distribution size: 1000</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="rank-based-p-values-depth-methods">Rank-based P-values (depth methods)<a class="anchor" aria-label="anchor" href="#rank-based-p-values-depth-methods"></a>
+</h3>
+<p>For depth-based methods (<code>outliers.depth.pond</code>,
+<code>outliers.depth.trim</code>), p-values are rank-based: a curve with
+the lowest depth gets the smallest p-value.</p>
+</div>
+<div class="section level3">
+<h3 id="multiple-testing-correction">Multiple Testing Correction<a class="anchor" aria-label="anchor" href="#multiple-testing-correction"></a>
+</h3>
+<p>When testing many curves simultaneously, apply FDR correction:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Adjust p-values for multiple comparisons</span></span>
+<span><span class="va">p_adjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">p.adjust</a></span><span class="op">(</span><span class="va">ms</span><span class="op">$</span><span class="va">p.value</span>, method <span class="op">=</span> <span class="st">"BH"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare raw vs adjusted</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Raw p-values (curves 1-3):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ms</span><span class="op">$</span><span class="va">p.value</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Raw p-values (curves 1-3): 0 0 0</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"BH-adjusted (curves 1-3):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">p_adjusted</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; BH-adjusted (curves 1-3): 0 0 0</span></span>
+<span></span>
+<span><span class="co"># Decision at alpha = 0.05</span></span>
+<span><span class="va">sig_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">ms</span><span class="op">$</span><span class="va">p.value</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="va">sig_adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">p_adjusted</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Significant (raw):"</span>, <span class="va">sig_raw</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Significant (raw): 1 2 3 4 5 10 17 30</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Significant (BH-adjusted):"</span>, <span class="va">sig_adj</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Significant (BH-adjusted): 1 2 3 4</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="detection-sensitivity-and-the-role-of-noise">Detection Sensitivity and the Role of Noise<a class="anchor" aria-label="anchor" href="#detection-sensitivity-and-the-role-of-noise"></a>
+</h2>
+<p>How strong must an outlier be before a method reliably detects it?
+The answer depends not just on the <strong>signal strength</strong>
+(shift, frequency change, or scale factor) but also on the <strong>noise
+level</strong>. A shift of 2 units is obvious at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">\sigma = 0.2</annotation></semantics></math>
+but invisible at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>2.0</mn></mrow><annotation encoding="application/x-tex">\sigma = 2.0</annotation></semantics></math>.
+What matters is the <strong>signal-to-noise ratio (SNR)</strong>.</p>
+<p>To quantify this properly, we use a <strong>power analysis</strong>:
+for each combination of signal strength and noise level, we run 20
+independent replications and record the <strong>detection rate</strong>
+— the fraction of replications where the injected outlier (curve 1) is
+flagged. A detection rate of 80% or higher means the method reliably
+catches that anomaly; below 50% the method is essentially guessing.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_test</span> <span class="op">&lt;-</span> <span class="fl">30</span></span>
+<span><span class="va">m_test</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
+<span><span class="va">t_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m_test</span><span class="op">)</span></span>
+<span><span class="va">n_rep</span> <span class="op">&lt;-</span> <span class="fl">20</span>  <span class="co"># replications per grid point</span></span>
+<span><span class="va">noise_sds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span><span class="op">)</span>  <span class="co"># shared across all grids</span></span>
+<span></span>
+<span><span class="co"># Helper: compute detection rate over n_rep replications</span></span>
+<span><span class="va">detection_rate</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">shifts</span>, <span class="va">noise_sds</span>, <span class="va">inject_fn</span>, <span class="va">detect_fn</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>signal <span class="op">=</span> <span class="va">shifts</span>, noise_sd <span class="op">=</span> <span class="va">noise_sds</span><span class="op">)</span></span>
+<span>  <span class="va">grid</span><span class="op">$</span><span class="va">rate</span> <span class="op">&lt;-</span> <span class="cn">NA_real_</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">r</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">grid</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">sig</span> <span class="op">&lt;-</span> <span class="va">grid</span><span class="op">$</span><span class="va">signal</span><span class="op">[</span><span class="va">r</span><span class="op">]</span></span>
+<span>    <span class="va">sd_val</span> <span class="op">&lt;-</span> <span class="va">grid</span><span class="op">$</span><span class="va">noise_sd</span><span class="op">[</span><span class="va">r</span><span class="op">]</span></span>
+<span>    <span class="va">n_det</span> <span class="op">&lt;-</span> <span class="fl">0L</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span><span class="va">rep_i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_rep</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">rep_i</span> <span class="op">*</span> <span class="fl">1000L</span><span class="op">)</span></span>
+<span>      <span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_test</span>, <span class="va">m_test</span><span class="op">)</span></span>
+<span>      <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_test</span><span class="op">)</span><span class="op">)</span></span>
+<span>        <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_test</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m_test</span>, sd <span class="op">=</span> <span class="va">sd_val</span><span class="op">)</span></span>
+<span>      <span class="va">X</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">inject_fn</span><span class="op">(</span><span class="va">sig</span>, <span class="va">sd_val</span><span class="op">)</span></span>
+<span>      <span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t_test</span><span class="op">)</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="fu">detect_fn</span><span class="op">(</span><span class="va">fd</span>, <span class="va">rep_i</span><span class="op">)</span><span class="op">)</span> <span class="va">n_det</span> <span class="op">&lt;-</span> <span class="va">n_det</span> <span class="op">+</span> <span class="fl">1L</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">grid</span><span class="op">$</span><span class="va">rate</span><span class="op">[</span><span class="va">r</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">n_det</span> <span class="op">/</span> <span class="va">n_rep</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">grid</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Helper: compute rect boundaries for non-uniform grids (no white gaps)</span></span>
+<span><span class="va">add_rect_bounds</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">x_col</span>, <span class="va">y_col</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">midbreaks</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">u</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">mids</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">u</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">u</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">u</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">u</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="op">(</span><span class="va">mids</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="va">u</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="va">mids</span>,</span>
+<span>      <span class="va">u</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">u</span><span class="op">)</span><span class="op">]</span> <span class="op">+</span> <span class="op">(</span><span class="va">u</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">u</span><span class="op">)</span><span class="op">]</span> <span class="op">-</span> <span class="va">mids</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mids</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">xb</span> <span class="op">&lt;-</span> <span class="fu">midbreaks</span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="va">x_col</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">yb</span> <span class="op">&lt;-</span> <span class="fu">midbreaks</span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="va">y_col</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">xs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="va">x_col</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">ys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="va">y_col</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">xi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="va">x_col</span><span class="op">]</span><span class="op">]</span>, <span class="va">xs</span><span class="op">)</span></span>
+<span>  <span class="va">yi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="va">y_col</span><span class="op">]</span><span class="op">]</span>, <span class="va">ys</span><span class="op">)</span></span>
+<span>  <span class="va">df</span><span class="op">$</span><span class="va">xmin</span> <span class="op">&lt;-</span> <span class="va">xb</span><span class="op">[</span><span class="va">xi</span><span class="op">]</span>;  <span class="va">df</span><span class="op">$</span><span class="va">xmax</span> <span class="op">&lt;-</span> <span class="va">xb</span><span class="op">[</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span></span>
+<span>  <span class="va">df</span><span class="op">$</span><span class="va">ymin</span> <span class="op">&lt;-</span> <span class="va">yb</span><span class="op">[</span><span class="va">yi</span><span class="op">]</span>;  <span class="va">df</span><span class="op">$</span><span class="va">ymax</span> <span class="op">&lt;-</span> <span class="va">yb</span><span class="op">[</span><span class="va">yi</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span></span>
+<span>  <span class="va">df</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="magnitude-detection-power">Magnitude Detection Power<a class="anchor" aria-label="anchor" href="#magnitude-detection-power"></a>
+</h3>
+<p>We inject a magnitude outlier (vertical shift) and test with
+<code>outliers.lrt</code>. The LRT uses a likelihood ratio test with
+bootstrap calibration, giving well-calibrated detection across a wide
+range of signal-to-noise ratios.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mag_shifts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">3.0</span>, <span class="fl">4.0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mag_grid</span> <span class="op">&lt;-</span> <span class="fu">detection_rate</span><span class="op">(</span></span>
+<span>  <span class="va">mag_shifts</span>, <span class="va">noise_sds</span>,</span>
+<span>  inject_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">sig</span>, <span class="va">sd_val</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_test</span><span class="op">)</span> <span class="op">+</span> <span class="va">sig</span>,</span>
+<span>  detect_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">rep_i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.lrt.html">outliers.lrt</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="va">rep_i</span><span class="op">)</span></span>
+<span>    <span class="fl">1L</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">res</span><span class="op">$</span><span class="va">outliers</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mag_grid</span> <span class="op">&lt;-</span> <span class="fu">add_rect_bounds</span><span class="op">(</span><span class="va">mag_grid</span>, <span class="st">"signal"</span>, <span class="st">"noise_sd"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">mag_grid</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">rate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">xmin</span>, xmax <span class="op">=</span> <span class="va">xmax</span>, ymin <span class="op">=</span> <span class="va">ymin</span>, ymax <span class="op">=</span> <span class="va">ymax</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_contour.html" class="external-link">geom_contour</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">signal</span>, y <span class="op">=</span> <span class="va">noise_sd</span>, z <span class="op">=</span> <span class="va">rate</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>               color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_contour.html" class="external-link">geom_contour</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">signal</span>, y <span class="op">=</span> <span class="va">noise_sd</span>, z <span class="op">=</span> <span class="va">rate</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>               color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span>option <span class="op">=</span> <span class="st">"D"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                       labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html" class="external-link">percent</a></span>,</span>
+<span>                       name <span class="op">=</span> <span class="st">"Detection\nRate"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Magnitude Outlier: Detection Power (LRT)"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Solid contour = 80% power, dashed = 50%"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Shift Magnitude"</span>, y <span class="op">=</span> <span class="st">"Noise SD"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">fill</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> This can happen when ggplot fails to infer the correct grouping structure in</span></span>
+<span><span class="co">#&gt;   the data.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you forget to specify a `group` aesthetic or to convert a numerical</span></span>
+<span><span class="co">#&gt;   variable into a factor?</span></span>
+<span><span class="co">#&gt; The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">fill</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> This can happen when ggplot fails to infer the correct grouping structure in</span></span>
+<span><span class="co">#&gt;   the data.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you forget to specify a `group` aesthetic or to convert a numerical</span></span>
+<span><span class="co">#&gt;   variable into a factor?</span></span></code></pre></div>
+<p><img src="outlier-detection_files/figure-html/magnitude-power-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The <strong>detection frontier</strong> (80% contour) follows a
+diagonal, confirming that the shift-to-noise ratio — not shift or noise
+alone — determines detectability.</p>
+</div>
+<div class="section level3">
+<h3 id="shape-detection-power">Shape Detection Power<a class="anchor" aria-label="anchor" href="#shape-detection-power"></a>
+</h3>
+<p>We inject a shape outlier (altered frequency) and test with
+<code>outliergram</code>. The outliergram detects curves with anomalous
+relationships between modified band depth and modified epigraph index —
+a rank-based approach.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">shape_freqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">2.5</span>, <span class="fl">3.0</span>, <span class="fl">4.0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">shape_grid</span> <span class="op">&lt;-</span> <span class="fu">detection_rate</span><span class="op">(</span></span>
+<span>  <span class="va">shape_freqs</span>, <span class="va">noise_sds</span>,</span>
+<span>  inject_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">sig</span>, <span class="va">sd_val</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">sig</span> <span class="op">*</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_test</span><span class="op">)</span>,</span>
+<span>  detect_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">rep_i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliergram.html">outliergram</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
+<span>    <span class="fl">1L</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">res</span><span class="op">$</span><span class="va">outliers</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">shape_grid</span> <span class="op">&lt;-</span> <span class="fu">add_rect_bounds</span><span class="op">(</span><span class="va">shape_grid</span>, <span class="st">"signal"</span>, <span class="st">"noise_sd"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">shape_grid</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">rate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">xmin</span>, xmax <span class="op">=</span> <span class="va">xmax</span>, ymin <span class="op">=</span> <span class="va">ymin</span>, ymax <span class="op">=</span> <span class="va">ymax</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_contour.html" class="external-link">geom_contour</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">signal</span>, y <span class="op">=</span> <span class="va">noise_sd</span>, z <span class="op">=</span> <span class="va">rate</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>               color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_contour.html" class="external-link">geom_contour</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">signal</span>, y <span class="op">=</span> <span class="va">noise_sd</span>, z <span class="op">=</span> <span class="va">rate</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>               color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span>option <span class="op">=</span> <span class="st">"D"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                       labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html" class="external-link">percent</a></span>,</span>
+<span>                       name <span class="op">=</span> <span class="st">"Detection\nRate"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Shape Outlier: Detection Power (Outliergram)"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Solid contour = 80% power, dashed = 50%"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Frequency Multiplier"</span>, y <span class="op">=</span> <span class="st">"Noise SD"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">fill</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> This can happen when ggplot fails to infer the correct grouping structure in</span></span>
+<span><span class="co">#&gt;   the data.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you forget to specify a `group` aesthetic or to convert a numerical</span></span>
+<span><span class="co">#&gt;   variable into a factor?</span></span>
+<span><span class="co">#&gt; The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">fill</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> This can happen when ggplot fails to infer the correct grouping structure in</span></span>
+<span><span class="co">#&gt;   the data.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you forget to specify a `group` aesthetic or to convert a numerical</span></span>
+<span><span class="co">#&gt;   variable into a factor?</span></span></code></pre></div>
+<p><img src="outlier-detection_files/figure-html/shape-power-1.png" class="r-plt" alt="" width="100%"></p>
+<p>Unlike magnitude detection, the shape detection boundary is nearly
+<strong>horizontal</strong>: when noise exceeds the signal amplitude
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>≳</mo><mn>0.7</mn></mrow><annotation encoding="application/x-tex">\sigma \gtrsim 0.7</annotation></semantics></math>
+for a unit-amplitude sine), rank ordering is destroyed and detection
+power collapses. Below that threshold, any frequency multiplier
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">\geq 1.5</annotation></semantics></math>
+is caught.</p>
+</div>
+<div class="section level3">
+<h3 id="amplitude-detection-power">Amplitude Detection Power<a class="anchor" aria-label="anchor" href="#amplitude-detection-power"></a>
+</h3>
+<p>We inject an amplitude outlier (scaled curve) and test with
+<code>outliers.lrt</code>.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">amp_scales</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.25</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">2.5</span>, <span class="fl">3.0</span>, <span class="fl">4.0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">amp_grid</span> <span class="op">&lt;-</span> <span class="fu">detection_rate</span><span class="op">(</span></span>
+<span>  <span class="va">amp_scales</span>, <span class="va">noise_sds</span>,</span>
+<span>  inject_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">sig</span>, <span class="va">sd_val</span><span class="op">)</span> <span class="va">sig</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_test</span><span class="op">)</span>,</span>
+<span>  detect_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">rep_i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.lrt.html">outliers.lrt</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="va">rep_i</span><span class="op">)</span></span>
+<span>    <span class="fl">1L</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">res</span><span class="op">$</span><span class="va">outliers</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">amp_grid</span> <span class="op">&lt;-</span> <span class="fu">add_rect_bounds</span><span class="op">(</span><span class="va">amp_grid</span>, <span class="st">"signal"</span>, <span class="st">"noise_sd"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">amp_grid</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">rate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">xmin</span>, xmax <span class="op">=</span> <span class="va">xmax</span>, ymin <span class="op">=</span> <span class="va">ymin</span>, ymax <span class="op">=</span> <span class="va">ymax</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_contour.html" class="external-link">geom_contour</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">signal</span>, y <span class="op">=</span> <span class="va">noise_sd</span>, z <span class="op">=</span> <span class="va">rate</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>               color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_contour.html" class="external-link">geom_contour</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">signal</span>, y <span class="op">=</span> <span class="va">noise_sd</span>, z <span class="op">=</span> <span class="va">rate</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>               color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span>option <span class="op">=</span> <span class="st">"D"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                       labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/percent_format.html" class="external-link">percent</a></span>,</span>
+<span>                       name <span class="op">=</span> <span class="st">"Detection\nRate"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Amplitude Outlier: Detection Power (LRT)"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Solid contour = 80% power, dashed = 50%"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Scale Factor"</span>, y <span class="op">=</span> <span class="st">"Noise SD"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">fill</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> This can happen when ggplot fails to infer the correct grouping structure in</span></span>
+<span><span class="co">#&gt;   the data.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you forget to specify a `group` aesthetic or to convert a numerical</span></span>
+<span><span class="co">#&gt;   variable into a factor?</span></span>
+<span><span class="co">#&gt; The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">fill</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> This can happen when ggplot fails to infer the correct grouping structure in</span></span>
+<span><span class="co">#&gt;   the data.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you forget to specify a `group` aesthetic or to convert a numerical</span></span>
+<span><span class="co">#&gt;   variable into a factor?</span></span></code></pre></div>
+<p><img src="outlier-detection_files/figure-html/amplitude-power-1.png" class="r-plt" alt="" width="100%"></p>
+</div>
+<div class="section level3">
+<h3 id="minimum-detectable-effect">Minimum Detectable Effect<a class="anchor" aria-label="anchor" href="#minimum-detectable-effect"></a>
+</h3>
+<p>For each noise level and outlier type, the smallest signal achieving
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>≥</mo><annotation encoding="application/x-tex">\geq</annotation></semantics></math>
+80% detection rate:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mde_at</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">grid</span>, <span class="va">threshold</span> <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">noise_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">noise_sd</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">max_sig</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">signal</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">noise_levels</span>, <span class="kw">function</span><span class="op">(</span><span class="va">sd_val</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">sub</span> <span class="op">&lt;-</span> <span class="va">grid</span><span class="op">[</span><span class="va">grid</span><span class="op">$</span><span class="va">noise_sd</span> <span class="op">==</span> <span class="va">sd_val</span> <span class="op">&amp;</span> <span class="va">grid</span><span class="op">$</span><span class="va">signal</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">signal</span><span class="op">)</span>, <span class="op">]</span></span>
+<span>    <span class="va">det</span> <span class="op">&lt;-</span> <span class="va">sub</span><span class="op">$</span><span class="va">signal</span><span class="op">[</span><span class="va">sub</span><span class="op">$</span><span class="va">rate</span> <span class="op">&gt;=</span> <span class="va">threshold</span><span class="op">]</span></span>
+<span>    <span class="va">val</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">det</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">det</span><span class="op">)</span><span class="op">)</span></span>
+<span>           <span class="kw">else</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"&gt;"</span>, <span class="va">max_sig</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>noise_sd <span class="op">=</span> <span class="va">sd_val</span>, min_signal <span class="op">=</span> <span class="va">val</span>,</span>
+<span>               stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">mde_mag</span>   <span class="op">&lt;-</span> <span class="fu">mde_at</span><span class="op">(</span><span class="va">mag_grid</span><span class="op">)</span></span>
+<span><span class="va">mde_shape</span> <span class="op">&lt;-</span> <span class="fu">mde_at</span><span class="op">(</span><span class="va">shape_grid</span><span class="op">)</span></span>
+<span><span class="va">mde_amp</span>   <span class="op">&lt;-</span> <span class="fu">mde_at</span><span class="op">(</span><span class="va">amp_grid</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mde_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  `Noise SD` <span class="op">=</span> <span class="va">noise_sds</span>,</span>
+<span>  `Min Shift` <span class="op">=</span> <span class="va">mde_mag</span><span class="op">$</span><span class="va">min_signal</span>,</span>
+<span>  `Min Freq Mult` <span class="op">=</span> <span class="va">mde_shape</span><span class="op">$</span><span class="va">min_signal</span>,</span>
+<span>  `Min Scale` <span class="op">=</span> <span class="va">mde_amp</span><span class="op">$</span><span class="va">min_signal</span>,</span>
+<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">mde_table</span>,</span>
+<span>             caption <span class="op">=</span> <span class="st">"Minimum detectable effect (80% power, n = 30 curves)"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Minimum detectable effect (80% power, n = 30 curves)</caption>
+<thead><tr class="header">
+<th align="right">Noise SD</th>
+<th align="left">Min Shift</th>
+<th align="left">Min Freq Mult</th>
+<th align="left">Min Scale</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.20</td>
+<td align="left">0.5</td>
+<td align="left">1.5</td>
+<td align="left">1.5</td>
+</tr>
+<tr class="even">
+<td align="right">0.50</td>
+<td align="left">0.75</td>
+<td align="left">1.5</td>
+<td align="left">2.5</td>
+</tr>
+<tr class="odd">
+<td align="right">0.75</td>
+<td align="left">1.5</td>
+<td align="left">1.5</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="right">1.00</td>
+<td align="left">1.5</td>
+<td align="left">&gt;4</td>
+<td align="left">4</td>
+</tr>
+<tr class="odd">
+<td align="right">1.50</td>
+<td align="left">3</td>
+<td align="left">&gt;4</td>
+<td align="left">&gt;4</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="practical-rules-of-thumb">Practical Rules of Thumb<a class="anchor" aria-label="anchor" href="#practical-rules-of-thumb"></a>
+</h3>
+<ul>
+<li>
+<strong>Magnitude outliers</strong> (LRT): the detection frontier
+follows a diagonal — roughly shift
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1.0</mn><mo>×</mo><mi>σ</mi></mrow><annotation encoding="application/x-tex">\geq 1.0 \times \sigma</annotation></semantics></math>
+is needed. At
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\sigma = 0.5</annotation></semantics></math>,
+you need a shift of ~1; at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\sigma = 2</annotation></semantics></math>,
+you need ~3–4.</li>
+<li>
+<strong>Shape outliers</strong> (outliergram): detection is
+noise-robust up to a threshold. When noise SD approaches the signal
+amplitude
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>≳</mo><mn>0.8</mn></mrow><annotation encoding="application/x-tex">\sigma \gtrsim 0.8</annotation></semantics></math>
+for a unit sine), rank ordering collapses and no frequency change is
+detectable. Below that, even 50% frequency changes are caught.</li>
+<li>
+<strong>Amplitude outliers</strong> (LRT): similar diagonal pattern
+to magnitude — scale factor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">\geq 1.5</annotation></semantics></math>
+is detectable at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\sigma = 0.5</annotation></semantics></math>,
+but at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>1.0</mn></mrow><annotation encoding="application/x-tex">\sigma = 1.0</annotation></semantics></math>
+you need 3x scaling.</li>
+<li>
+<strong>In practice</strong>: estimate your noise level from the
+data (e.g., pointwise SD of residuals after removing the mean curve),
+then consult the table above to determine whether your expected anomaly
+size is detectable.</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="process-monitoring-decision-framework">Process Monitoring Decision Framework<a class="anchor" aria-label="anchor" href="#process-monitoring-decision-framework"></a>
+</h2>
+<div class="section level3">
+<h3 id="method-selection">Method Selection<a class="anchor" aria-label="anchor" href="#method-selection"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="22%">
+<col width="43%">
+<col width="34%">
+</colgroup>
+<thead><tr class="header">
+<th>Question</th>
+<th>Recommended Method</th>
+<th>Decision Rule</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Is the curve shifted?</td>
+<td><code>outliers.lrt</code></td>
+<td><code>p.value &lt; 0.05</code></td>
+</tr>
+<tr class="even">
+<td>Is the shape unusual?</td>
+<td><code>outliergram</code></td>
+<td><code>p.value &lt; 0.05</code></td>
+</tr>
+<tr class="odd">
+<td>Both types?</td>
+<td><code>magnitudeshape</code></td>
+<td>
+<code>p.value &lt; 0.05</code> (chi-sq)</td>
+</tr>
+<tr class="even">
+<td>How extreme is it?</td>
+<td>Any method</td>
+<td>
+<code>outlierness</code> score</td>
+</tr>
+<tr class="odd">
+<td>Is detection sensitive enough?</td>
+<td>Sensitivity analysis</td>
+<td>Min detectable severity</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="practical-guidance">Practical Guidance<a class="anchor" aria-label="anchor" href="#practical-guidance"></a>
+</h3>
+<p><strong>Multiple testing</strong>: When screening many curves, apply
+Benjamini-Hochberg correction to control the false discovery rate:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_adjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">p.adjust</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">p.value</span>, method <span class="op">=</span> <span class="st">"BH"</span><span class="op">)</span></span>
+<span><span class="va">outliers_fdr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">p_adjusted</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Bootstrap precision</strong>: For the LRT method, use
+<code>nb &gt;= 999</code> for stable p-values at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">\alpha = 0.05</annotation></semantics></math>.
+The rule of thumb is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>b</mi><mo>≥</mo><mn>1</mn><mi>/</mi><mi>α</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">nb \geq 1/\alpha - 1</annotation></semantics></math>.</p>
+<p><strong>Combining methods</strong>: When using multiple methods on
+the same data, consider Bonferroni correction
+(<code>alpha / n_methods</code>) or use the magnitudeshape method which
+jointly tests magnitude and shape.</p>
+<p><strong>Streaming monitoring</strong>: For real-time applications,
+use <code><a href="../reference/streaming_depth_one.html">streaming_depth_one()</a></code> with depth-based p-values to flag
+anomalies as they arrive. See the <a href="streaming-depth.html">streaming depth article</a> for details.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="types-of-outliers">Types of Outliers<a class="anchor" aria-label="anchor" href="#types-of-outliers"></a>
 </h2>
 <div class="section level3">
 <h3 id="magnitude-outliers">Magnitude Outliers<a class="anchor" aria-label="anchor" href="#magnitude-outliers"></a>
 </h3>
 <p>Curves shifted up or down from the main group:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create clean data with just a magnitude outlier</span></span>
 <span><span class="va">X_mag</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
@@ -450,7 +959,7 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Magnitude Outlier: Curve 1 Shifted Up"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Same shape as others, but at a different level"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/magnitude-outlier-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_mag</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd_mag</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Detected magnitude outlier:"</span>, <span class="va">out_mag</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Detected magnitude outlier: 1</span></span></code></pre></div>
@@ -459,7 +968,7 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <h3 id="shape-outliers">Shape Outliers<a class="anchor" aria-label="anchor" href="#shape-outliers"></a>
 </h3>
 <p>Curves with different patterns but similar overall level:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create clean data with just a shape outlier</span></span>
 <span><span class="va">X_shape</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
@@ -474,16 +983,16 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Shape Outlier: Curve 1 Has Inverted Pattern"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Same amplitude and level, but opposite phase"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/shape-outlier-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_shape</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd_shape</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Detected shape outlier:"</span>, <span class="va">out_shape</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Detected shape outlier: 1</span></span></code></pre></div>
+<span><span class="co">#&gt; Detected shape outlier: 1 28</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="amplitude-outliers">Amplitude Outliers<a class="anchor" aria-label="anchor" href="#amplitude-outliers"></a>
 </h3>
 <p>Curves with unusual amplitude (larger or smaller scale):</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create clean data with just an amplitude outlier</span></span>
 <span><span class="va">X_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
@@ -498,7 +1007,7 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Amplitude Outlier: Curve 1 Has 3x Larger Scale"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Same shape and center, but much larger oscillations"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/amplitude-outlier-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd_amp</span>, nb <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Detected amplitude outlier:"</span>, <span class="va">out_amp</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Detected amplitude outlier: 1</span></span></code></pre></div>
@@ -511,7 +1020,7 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <h3 id="number-of-bootstrap-samples">Number of Bootstrap Samples<a class="anchor" aria-label="anchor" href="#number-of-bootstrap-samples"></a>
 </h3>
 <p>More bootstrap samples give more stable results but take longer:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare with different nb values</span></span>
 <span><span class="va">out_nb50</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">50</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">out_nb200</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.pond.html">outliers.depth.pond</a></span><span class="op">(</span><span class="va">fd</span>, nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
@@ -519,14 +1028,14 @@ instead 3. Use the outliergram or MS-plot for visual detection</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"nb=50 outliers:"</span>, <span class="va">out_nb50</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; nb=50 outliers: 1 2 3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"nb=200 outliers:"</span>, <span class="va">out_nb200</span><span class="op">$</span><span class="va">outliers</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; nb=200 outliers: 1 2 3</span></span></code></pre></div>
+<span><span class="co">#&gt; nb=200 outliers: 1</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="trim-proportion">Trim Proportion<a class="anchor" aria-label="anchor" href="#trim-proportion"></a>
 </h3>
 <p>For <code>outliers.depth.trim</code>, the trim proportion controls
 sensitivity:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># More aggressive trimming</span></span>
 <span><span class="va">out_trim05</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.trim.html">outliers.depth.trim</a></span><span class="op">(</span><span class="va">fd</span>, trim <span class="op">=</span> <span class="fl">0.05</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">out_trim20</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliers.depth.trim.html">outliers.depth.trim</a></span><span class="op">(</span><span class="va">fd</span>, trim <span class="op">=</span> <span class="fl">0.2</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
@@ -541,7 +1050,7 @@ sensitivity:</p>
 <h2 id="handling-high-contamination">Handling High Contamination<a class="anchor" aria-label="anchor" href="#handling-high-contamination"></a>
 </h2>
 <p>When outlier contamination is high, use robust methods:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create data with 20% outliers</span></span>
 <span><span class="va">X_contam</span> <span class="op">&lt;-</span> <span class="va">X</span></span>
 <span><span class="va">n_outliers</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
@@ -561,7 +1070,7 @@ sensitivity:</p>
 <div class="section level2">
 <h2 id="visualizing-depth-distribution">Visualizing Depth Distribution<a class="anchor" aria-label="anchor" href="#visualizing-depth-distribution"></a>
 </h2>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute depths</span></span>
 <span><span class="va">depths</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/depth.FM.html">depth.FM</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span></span>
@@ -584,7 +1093,7 @@ sensitivity:</p>
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h2>
 <p>The LRT method uses a parallel Rust backend for speed:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Benchmark with larger dataset</span></span>
 <span><span class="va">X_large</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>, <span class="fl">200</span>, <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">fd_large</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_large</span><span class="op">)</span></span>
@@ -603,7 +1112,7 @@ powerful diagnostic plots.</p>
 </h3>
 <p>The outliergram plots the <strong>Modified Epigraph Index
 (MEI)</strong> against <strong>Modified Band Depth (MBD)</strong>:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">og</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliergram.html">outliergram</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">og</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/outliergram-1.png" class="r-plt" alt="" width="100%"></p>
@@ -660,7 +1169,7 @@ curves. Points below this boundary are flagged as outliers.</p>
 </h3>
 <p>The MS-plot separates magnitude outlyingness from shape
 outlyingness:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/magnitudeshape.html">magnitudeshape</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ms</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/msplot-1.png" class="r-plt" alt="" width="100%"></p>
@@ -710,7 +1219,7 @@ outlyingness:</p>
 <h3 id="labeling-outliers-by-id-or-metadata">Labeling Outliers by ID or Metadata<a class="anchor" aria-label="anchor" href="#labeling-outliers-by-id-or-metadata"></a>
 </h3>
 <p>When fdata has IDs or metadata, you can label outliers in plots:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create fdata with IDs and metadata</span></span>
 <span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%02d"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -724,17 +1233,17 @@ outlyingness:</p>
 <span><span class="va">og_labeled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outliergram.html">outliergram</a></span><span class="op">(</span><span class="va">fd_labeled</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">og_labeled</span>, label <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/outlier-labeling-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Or with metadata column</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">og_labeled</span>, label <span class="op">=</span> <span class="st">"subject"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/outlier-labeling-2.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Label ALL points, not just outliers</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">og_labeled</span>, label <span class="op">=</span> <span class="st">"id"</span>, label_all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="outlier-detection_files/figure-html/outlier-labeling-3.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># magnitudeshape with custom labels</span></span>
 <span><span class="fu"><a href="../reference/magnitudeshape.html">magnitudeshape</a></span><span class="op">(</span><span class="va">fd_labeled</span>, label <span class="op">=</span> <span class="st">"subject"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -803,7 +1312,7 @@ sense contextually</li>
 </h2>
 <ul>
 <li>
-<code><a href="../articles/depth-functions.html">vignette("depth-functions", package = "fdars")</a></code> —
+<code><a href="https://sipemu.github.io/fdars-r/articles/depth-functions.html">vignette("depth-functions", package = "fdars")</a></code> —
 functional depth measures and ranking</li>
 <li>
 <code>vignette("streaming-depth", package = "fdars")</code> —

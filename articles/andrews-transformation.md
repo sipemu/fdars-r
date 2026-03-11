@@ -13,24 +13,12 @@ equals $\sqrt{\pi}$ times the Euclidean distance between the original
 observations — so all distance-based FDA methods produce results that
 are directly interpretable in the original multivariate space.
 
+![Andrews Transformation: From Tables to
+Curves](../reference/figures/andrews-transformation-diagram.svg)
+
 This article demonstrates the full fdars pipeline — depth, outlier
 detection, clustering, and FPCA — applied to Andrews-transformed iris
 data.
-
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-set.seed(42)
-```
 
 ## Mathematical Background
 
@@ -689,7 +677,7 @@ from what you can do *afterward* in function space:
 
 ## See Also
 
-- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.html)
   — functional depth measures and ranking
 - `vignette("clustering", package = "fdars")` — functional data
   clustering

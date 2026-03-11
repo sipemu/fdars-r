@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 250" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#2C5F8A">Prediction-Level Uncertainty</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">How uncertain is ŷ for a new observation?</text>
+
+  <!-- ===== Left: Parametric Prediction Intervals ===== -->
+  <rect x="10" y="50" width="330" height="137" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="175" y="70" text-anchor="middle" font-size="15.6" font-weight="bold" fill="#2C5F8A">Parametric Prediction Intervals</text>
+  <text x="175" y="85" text-anchor="middle" font-size="11.0" fill="#888">ŷ ± t · σ̂ · √(1 + x'(X'X)⁻¹x) — width depends on leverage</text>
+
+  <!-- Axes -->
+  <line x1="24" y1="172" x2="326" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="24" y1="92" x2="24" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <text x="175" y="185" text-anchor="middle" font-size="9.4" fill="#888">Observation</text>
+
+  <!-- Variable-width prediction band -->
+  <path d="M32 96 Q80 80 130 78 Q175 76 220 82 Q270 92 318 96
+           L318 132 Q270 128 220 122 Q175 118 130 120 Q80 124 32 134 Z"
+        fill="#4A90D9" opacity="0.12"/>
+  <!-- Upper bound -->
+  <path d="M32 120Q80 100 130 97Q175 95 220 102Q270 115 318 120"
+        stroke="#4A90D9" stroke-width="0.7" fill="none" stroke-dasharray="3,2" opacity="0.6"/>
+  <!-- Lower bound -->
+  <path d="M32 167Q80 155 130 150Q175 147 220 152Q270 160 318 165"
+        stroke="#4A90D9" stroke-width="0.7" fill="none" stroke-dasharray="3,2" opacity="0.6"/>
+  <!-- Fitted line -->
+  <path d="M32 142Q80 127 130 123Q175 121 220 127Q270 137 318 142"
+        stroke="#2C5F8A" stroke-width="1.8" fill="none"/>
+
+  <!-- Observed points -->
+  <circle cx="48" cy="140" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="80" cy="132" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="112" cy="125" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="144" cy="122" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="175" cy="120" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="206" cy="125" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="238" cy="132" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="270" cy="140" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="302" cy="145" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <!-- Outlier (outside) -->
+  <circle cx="160" cy="102" r="2.2" fill="#D55E00" opacity="0.35" stroke="#D55E00" stroke-width="0.5" stroke-dasharray="2,1"/>
+
+  <!-- Width annotations -->
+  <line x1="44" y1="122" x2="44" y2="165" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="42" y1="122" x2="46" y2="122" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="42" y1="165" x2="46" y2="165" stroke="#7B2D8E" stroke-width="0.5"/>
+  <text x="52" y="147" font-size="8.6" fill="#7B2D8E">wide</text>
+
+  <line x1="175" y1="97" x2="175" y2="145" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="173" y1="97" x2="177" y2="97" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="173" y1="145" x2="177" y2="145" stroke="#7B2D8E" stroke-width="0.5"/>
+  <text x="183" y="125" font-size="8.6" fill="#7B2D8E">narrow</text>
+
+  <!-- Legend -->
+  <line x1="246" y1="95" x2="258" y2="95" stroke="#2C5F8A" stroke-width="1.2"/>
+  <text x="261" y="98" font-size="8.6" fill="#2C5F8A">fitted</text>
+  <circle cx="286" cy="95" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <text x="291" y="98" font-size="8.6" fill="#D55E00">observed</text>
+
+  <!-- ===== Right: Conformal Prediction ===== -->
+  <rect x="360" y="50" width="330" height="137" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="525" y="70" text-anchor="middle" font-size="15.6" font-weight="bold" fill="#2E8B57">Conformal Prediction</text>
+  <text x="525" y="85" text-anchor="middle" font-size="11.0" fill="#888">P(y ∈ C) ≥ 1−α — constant width, distribution-free</text>
+
+  <!-- Axes -->
+  <line x1="374" y1="172" x2="676" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="374" y1="92" x2="374" y2="172" stroke="#ccc" stroke-width="0.6"/>
+  <text x="525" y="185" text-anchor="middle" font-size="9.4" fill="#888">Test Observation</text>
+
+  <!-- Constant-width conformal band -->
+  <path d="M382 88 Q430 82 480 86 Q525 90 570 86 Q620 82 668 88
+           L668 122 Q620 116 570 120 Q525 124 480 120 Q430 116 382 122 Z"
+        fill="#2E8B57" opacity="0.12"/>
+  <path d="M382 110Q430 102 480 107Q525 112 570 107Q620 102 668 110"
+        stroke="#2E8B57" stroke-width="0.7" fill="none" stroke-dasharray="3,2" opacity="0.6"/>
+  <path d="M382 152Q430 145 480 150Q525 155 570 150Q620 145 668 152"
+        stroke="#2E8B57" stroke-width="0.7" fill="none" stroke-dasharray="3,2" opacity="0.6"/>
+  <!-- Predicted line -->
+  <path d="M382 131Q430 123 480 128Q525 133 570 128Q620 123 668 131"
+        stroke="#1B6B3A" stroke-width="1.8" fill="none"/>
+
+  <!-- Test points -->
+  <circle cx="398" cy="133" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="430" cy="125" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="462" cy="130" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="494" cy="132" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="525" cy="135" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="556" cy="127" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="588" cy="130" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="620" cy="125" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="652" cy="132" r="2.2" fill="#D55E00" opacity="0.7"/>
+
+  <!-- Constant-width annotation -->
+  <line x1="672" y1="112" x2="672" y2="150" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="670" y1="112" x2="674" y2="112" stroke="#7B2D8E" stroke-width="0.5"/>
+  <line x1="670" y1="150" x2="674" y2="150" stroke="#7B2D8E" stroke-width="0.5"/>
+  <text x="668" y="100" text-anchor="end" font-size="8.6" fill="#7B2D8E">const q̂</text>
+
+  <!-- Key differences callout -->
+  <rect x="396" y="92" width="54" height="15" rx="2" fill="#2E8B57" opacity="0.08" stroke="#2E8B57" stroke-width="0.4"/>
+  <text x="423" y="103" text-anchor="middle" font-size="8.6" fill="#2E8B57">no Gaussian</text>
+  <rect x="456" y="92" width="54" height="15" rx="2" fill="#2E8B57" opacity="0.08" stroke="#2E8B57" stroke-width="0.4"/>
+  <text x="483" y="103" text-anchor="middle" font-size="8.6" fill="#2E8B57">split calib.</text>
+
+  <!-- Legend -->
+  <line x1="590" y1="95" x2="602" y2="95" stroke="#1B6B3A" stroke-width="1.2"/>
+  <text x="605" y="98" font-size="8.6" fill="#1B6B3A">predicted</text>
+  <circle cx="636" cy="95" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <text x="641" y="98" font-size="8.6" fill="#D55E00">test obs</text>
+</svg>

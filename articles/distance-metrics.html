@@ -94,35 +94,7 @@ satisfies:</p>
 (triangle inequality)</li>
 </ol>
 <p>A <strong>semimetric</strong> satisfies only conditions 1-3.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create example data with different curve types</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
-<span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Four types of curves</span></span>
-<span><span class="va">curve1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span>                    <span class="co"># Sine</span></span>
-<span><span class="va">curve2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span>              <span class="co"># Phase-shifted sine</span></span>
-<span><span class="va">curve3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span>                    <span class="co"># Cosine</span></span>
-<span><span class="va">curve4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">4</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span>                    <span class="co"># Higher frequency</span></span>
-<span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">curve1</span>, <span class="va">curve2</span>, <span class="va">curve3</span>, <span class="va">curve4</span><span class="op">)</span></span>
-<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t_grid</span>,</span>
-<span>            names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>main <span class="op">=</span> <span class="st">"Four Curve Types"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span></code></pre></div>
-<p><img src="distance-metrics_files/figure-html/setup-1.png" class="r-plt" alt="" width="100%"></p>
+<img src="../reference/figures/distance-metrics-diagram.svg" alt="Distance Metrics and Semimetrics" style="width:100%; max-width:720px; display:block; margin:1em auto;">
 </div>
 <div class="section level2">
 <h2 id="true-metrics">True Metrics<a class="anchor" aria-label="anchor" href="#true-metrics"></a>
@@ -157,7 +129,7 @@ functional norm. Sensitive to vertical differences.</li>
 (L-infinity/Chebyshev)</strong>: Maximum absolute difference,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>∞</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo>,</mo><mi>g</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mo>max</mo><mi>t</mi></msub><mrow><mo stretchy="true" form="prefix">|</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow></mrow><annotation encoding="application/x-tex">d_\infty(f, g) = \max_t |f(t) - g(t)|</annotation></semantics></math>.</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># L2 (Euclidean) distance - default</span></span>
 <span><span class="va">dist_l2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.lp.html">metric.lp</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_l2</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
@@ -180,7 +152,7 @@ functional norm. Sensitive to vertical differences.</li>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi>p</mi><mo>,</mo><mi>w</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo>,</mo><mi>g</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mo>∫</mo><mi>𝒯</mi></msub><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><msup><mrow><mo stretchy="true" form="prefix">|</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow><mi>p</mi></msup><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>p</mi></mrow></msup></mrow><annotation encoding="application/x-tex">d_{p,w}(f, g) = \left( \int_{\mathcal{T}} w(t) |f(t) - g(t)|^p \, dt \right)^{1/p}</annotation></semantics></math></p>
 <p>This is useful when certain parts of the domain are more important
 than others.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Weight emphasizing the middle of the domain</span></span>
 <span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, mean <span class="op">=</span> <span class="fl">0.5</span>, sd <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
 <span><span class="va">w</span> <span class="op">&lt;-</span> <span class="va">w</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span>  <span class="co"># Normalize</span></span>
@@ -206,7 +178,7 @@ at time
 <li>The timing of features is less important than their shape</li>
 <li>Comparing curves with different supports</li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dist_haus</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.hausdorff.html">metric.hausdorff</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_haus</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        curve1 curve2 curve3 curve4</span></span>
@@ -236,7 +208,7 @@ preventing excessive distortion:</p>
 <li>Time series with varying speed</li>
 <li>Comparing signals with local time distortions</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dist_dtw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.DTW.html">metric.DTW</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_dtw</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        curve1 curve2 curve3 curve4</span></span>
@@ -246,14 +218,14 @@ preventing excessive distortion:</p>
 <span><span class="co">#&gt; curve4 24.844 25.980 40.825  0.000</span></span></code></pre></div>
 <p>Notice that DTW gives a smaller distance between the original sine
 and phase-shifted sine compared to L2, because it can align them:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare L2 vs DTW for phase-shifted curves</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L2 distance (sine vs phase-shifted):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_l2</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; L2 distance (sine vs phase-shifted): 0.35</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"DTW distance (sine vs phase-shifted):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_dtw</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; DTW distance (sine vs phase-shifted): 1.452</span></span></code></pre></div>
 <p>DTW with band constraint:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Restrict warping to 10% of the series length</span></span>
 <span><span class="va">dist_dtw_band</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.DTW.html">metric.DTW</a></span><span class="op">(</span><span class="va">fd</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">m</span> <span class="op">*</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -280,7 +252,7 @@ metric</strong> – it can assign negative values to self-distances. The
 <p>The divergence is non-negative, zero iff
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo>=</mo><mi>g</mi></mrow><annotation encoding="application/x-tex">f = g</annotation></semantics></math>,
 and symmetric.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Soft-DTW distance matrix (raw)</span></span>
 <span><span class="va">dist_sdtw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.softDTW.html">metric.softDTW</a></span><span class="op">(</span><span class="va">fd</span>, gamma <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Soft-DTW distance matrix:\n"</span><span class="op">)</span></span>
@@ -312,7 +284,7 @@ and symmetric.</p>
 approximates hard DTW (sharper, less smooth gradients); large
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
 averages over more warping paths (smoother, less discriminative):</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gammas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">1.0</span>, <span class="fl">10.0</span><span class="op">)</span></span>
 <span><span class="va">sdtw_12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gammas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="../reference/metric.softDTW.html">metric.softDTW</a></span><span class="op">(</span><span class="va">fd</span>, gamma <span class="op">=</span> <span class="va">g</span>, divergence <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span></span>
@@ -334,7 +306,7 @@ averages over more warping paths (smoother, less discriminative):</p>
 <p>Soft-DTW provides a differentiable loss, making it suitable for
 computing <strong>barycenters</strong> (weighted averages under DTW
 alignment) via gradient descent:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create shifted bumps for barycenter computation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n_bary</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
@@ -386,7 +358,7 @@ normalized to integrate to 1:</p>
 <li>Distribution comparison</li>
 <li>Information-theoretic analysis</li>
 </ul>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Shift curves to be positive for KL</span></span>
 <span><span class="va">X_pos</span> <span class="op">&lt;-</span> <span class="va">X</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.1</span></span>
 <span><span class="va">fd_pos</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_pos</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
@@ -429,7 +401,7 @@ are the eigenfunctions from functional PCA.</p>
 <li>Noise reduction (low-rank approximation)</li>
 <li>Computational efficiency with many evaluation points</li>
 </ul>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Distance using first 3 PCs</span></span>
 <span><span class="va">dist_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semimetric.pca.html">semimetric.pca</a></span><span class="op">(</span><span class="va">fd</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_pca</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
@@ -461,7 +433,7 @@ than their absolute values. It is particularly useful when:</p>
 <li>Analyzing curvature (second derivative)</li>
 <li>Functions are measured with different baselines</li>
 </ul>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># First derivative (velocity)</span></span>
 <span><span class="va">dist_deriv1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semimetric.deriv.html">semimetric.deriv</a></span><span class="op">(</span><span class="va">fd</span>, nderiv <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -491,7 +463,7 @@ are the basis coefficients from
 approximation of local features.</p>
 <p>For <strong>Fourier basis</strong>: Global support captures periodic
 patterns efficiently.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># B-spline basis (local features)</span></span>
 <span><span class="va">dist_bspline</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semimetric.basis.html">semimetric.basis</a></span><span class="op">(</span><span class="va">fd</span>, nbasis <span class="op">=</span> <span class="fl">15</span>, basis <span class="op">=</span> <span class="st">"bspline"</span><span class="op">)</span></span>
 <span></span>
@@ -522,7 +494,7 @@ is the
 Fourier coefficient computed via FFT.</p>
 <p>This is computationally efficient for large datasets and particularly
 useful for periodic or frequency-domain analysis.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dist_fft</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semimetric.fourier.html">semimetric.fourier</a></span><span class="op">(</span><span class="va">fd</span>, nfreq <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Fourier (FFT) distances:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fourier (FFT) distances:</span></span>
@@ -552,7 +524,7 @@ warping) but can be very effective for:</p>
 <li>ECG or other physiological signals with timing variations</li>
 <li>Comparing curves where horizontal alignment is meaningful</li>
 </ul>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dist_hshift</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semimetric.hshift.html">semimetric.hshift</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Horizontal shift distances:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Horizontal shift distances:</span></span>
@@ -587,7 +559,7 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Γ</mi><annotation encoding="application/x-tex">\Gamma</annotation></semantics></math>
 is the warping group. This is a proper metric that is invariant to
 reparameterization.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dist_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.distance.html">elastic.distance</a></span><span class="op">(</span><span class="va">fd</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Elastic distance matrix:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Elastic distance matrix:</span></span>
@@ -608,7 +580,7 @@ the curves differ in height, depth, and feature magnitude:</p>
 <p>where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
 controls the penalty on warping complexity.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dist_amp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/amplitude.distance.html">amplitude.distance</a></span><span class="op">(</span><span class="va">fd</span>, lambda <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude distance matrix:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Amplitude distance matrix:</span></span>
@@ -630,7 +602,7 @@ warped to match another:</p>
 identity on the warping group
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Γ</mi><annotation encoding="application/x-tex">\Gamma</annotation></semantics></math>,
 which forms a Riemannian manifold.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dist_phase</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phase.distance.html">phase.distance</a></span><span class="op">(</span><span class="va">fd</span>, lambda <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase distance matrix:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Phase distance matrix:</span></span>
@@ -648,7 +620,7 @@ which forms a Riemannian manifold.</p>
 variability. Curves that differ mainly in timing (phase-shifted copies
 of the same shape) will have small amplitude distance but large phase
 distance:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">amp_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_amp</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_amp</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">phase_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_phase</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_phase</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
@@ -668,7 +640,7 @@ distance:</p>
 </h2>
 <p>Use <code><a href="../reference/metric.html">metric()</a></code> for a unified interface to all distance
 functions:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Different methods via single function</span></span>
 <span><span class="va">d1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.html">metric</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"lp"</span>, lp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.html">metric</a></span><span class="op">(</span><span class="va">fd</span>, method <span class="op">=</span> <span class="st">"dtw"</span><span class="op">)</span></span>
@@ -684,7 +656,7 @@ functions:</p>
 </h2>
 <p>Different distance measures capture different aspects of curve
 similarity:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create comparison data</span></span>
 <span><span class="va">dists</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  L2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_l2</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -707,7 +679,7 @@ similarity:</p>
 <div class="section level2">
 <h2 id="distance-matrices-for-larger-samples">Distance Matrices for Larger Samples<a class="anchor" aria-label="anchor" href="#distance-matrices-for-larger-samples"></a>
 </h2>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate larger sample</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
@@ -922,7 +894,7 @@ satisfy triangle inequality</p>
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h2>
 <p>Distance computations are parallelized in Rust:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Benchmark for 500 curves</span></span>
 <span><span class="va">X_bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span> <span class="op">*</span> <span class="fl">200</span><span class="op">)</span>, <span class="fl">500</span>, <span class="fl">200</span><span class="op">)</span></span>
 <span><span class="va">fd_bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_bench</span><span class="op">)</span></span>
@@ -939,7 +911,7 @@ satisfy triangle inequality</p>
 <h2 id="using-distances-in-other-methods">Using Distances in Other Methods<a class="anchor" aria-label="anchor" href="#using-distances-in-other-methods"></a>
 </h2>
 <p>Distance functions can be passed to clustering and regression:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># K-means with L1 distance</span></span>
 <span><span class="va">km_l1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.kmeans.html">cluster.kmeans</a></span><span class="op">(</span><span class="va">fd_large</span>, ncl <span class="op">=</span> <span class="fl">3</span>, metric <span class="op">=</span> <span class="st">"L1"</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span></span>
@@ -961,7 +933,7 @@ data clustering</li>
 <code>vignette("elastic-alignment", package = "fdars")</code> —
 elastic curve alignment using SRVF</li>
 <li>
-<code>vignette("regression", package = "fdars")</code> —
+<code><a href="../articles/scalar-on-function.html">vignette("articles/scalar-on-function")</a></code> —
 scalar-on-function regression methods</li>
 </ul>
 </div>

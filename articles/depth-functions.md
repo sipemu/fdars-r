@@ -2,352 +2,378 @@
 
 ## Introduction
 
-Functional depth is a measure of how “central” or “typical” a curve is
-within a sample of curves. Curves with high depth are considered
-representative of the sample, while curves with low depth are outliers
-or extreme observations.
+Functional depth generalizes the notion of “how central is this
+observation?” from univariate statistics (where the median has maximum
+depth) to the space of curves. Given a sample of curves, each curve
+receives a depth value in $\lbrack 0,1\rbrack$: high values indicate
+typical, central curves; low values indicate unusual, peripheral curves.
 
-Depth functions extend the concept of statistical depth (like data depth
-for multivariate data) to the infinite-dimensional setting of functional
-data.
+Depth is a fundamental building block in functional data analysis
+because it provides:
+
+- **Nonparametric ranking** — order curves from most central to most
+  outlying without assuming a distribution
+- **Robust summary statistics** — the functional median (deepest curve)
+  and trimmed mean are resistant to outliers
+- **Outlier detection** — curves with low depth are candidate outliers,
+  used by
+  [`outliergram()`](https://sipemu.github.io/fdars-r/reference/outliergram.md)
+  and
+  [`magnitudeshape()`](https://sipemu.github.io/fdars-r/reference/magnitudeshape.md)
+- **Tolerance bands** — the central region containing the deepest
+  $\alpha\%$ of curves defines simultaneous confidence bands
+- **Functional boxplot** — `boxplot(fd)` uses depth to define the 50%
+  central region and fence
+- **Classification** — depth values serve as features for DD-classifiers
+  (`fclassif(..., method = "DD")`)
+- **Quality control** — streaming depth enables online monitoring of new
+  curves against a reference sample
+
+![Functional Depth: Ranking Curves by
+Centrality](../reference/figures/depth-functions-diagram.svg)
+
+### Available Methods
+
+| Method        | Function                                                                             | Description                                                  | Supports 2D |
+|---------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------|:-----------:|
+| **FM**        | [`depth.FM()`](https://sipemu.github.io/fdars-r/reference/depth.FM.md)               | Fraiman-Muniz: integrates pointwise univariate depth         |     Yes     |
+| **MBD**       | [`depth.MBD()`](https://sipemu.github.io/fdars-r/reference/depth.MBD.md)             | Modified Band Depth: proportion of time inside random bands  |     No      |
+| **BD**        | [`depth.BD()`](https://sipemu.github.io/fdars-r/reference/depth.BD.md)               | Band Depth: fraction of bands fully containing the curve     |     No      |
+| **MEI**       | [`depth.MEI()`](https://sipemu.github.io/fdars-r/reference/depth.MEI.md)             | Modified Epigraph Index: proportion above/below other curves |     No      |
+| **mode**      | [`depth.mode()`](https://sipemu.github.io/fdars-r/reference/depth.mode.md)           | Modal Depth: kernel density in function space                |     Yes     |
+| **RP**        | [`depth.RP()`](https://sipemu.github.io/fdars-r/reference/depth.RP.md)               | Random Projection: halfspace depth of projected scores       |     Yes     |
+| **RT**        | [`depth.RT()`](https://sipemu.github.io/fdars-r/reference/depth.RT.md)               | Random Tukey: Tukey depth via random projections             |     Yes     |
+| **RPD**       | [`depth.RPD()`](https://sipemu.github.io/fdars-r/reference/depth.RPD.md)             | RP with Derivatives: includes curve shape information        |     No      |
+| **FSD**       | [`depth.FSD()`](https://sipemu.github.io/fdars-r/reference/depth.FSD.md)             | Functional Spatial Depth: based on spatial signs             |     Yes     |
+| **KFSD**      | [`depth.KFSD()`](https://sipemu.github.io/fdars-r/reference/depth.KFSD.md)           | Kernel FSD: smoothed functional spatial depth                |     Yes     |
+| **streaming** | [`streaming.depth()`](https://sipemu.github.io/fdars-r/reference/streaming.depth.md) | O(T log N) per query via pre-sorted reference                |     No      |
+
+All methods are accessible through the unified
+`depth(fd, method = "...")` interface.
+
+## Generating Example Data
+
+We simulate a sample of smooth curves with two outliers: one shifted in
+magnitude and one with a different shape.
 
 ``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-
-# Create example data
-set.seed(42)
 n <- 30
 m <- 100
-t_grid <- seq(0, 1, length.out = m)
+argvals <- seq(0, 1, length.out = m)
 
-# Main sample: sine curves with noise
-X <- matrix(0, n, m)
-for (i in 1:n) {
-  X[i, ] <- sin(2 * pi * t_grid) + rnorm(m, sd = 0.15)
+# Normal curves: sine + individual variation
+data <- matrix(0, n, m)
+for (i in 1:(n - 2)) {
+  data[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.2) + rnorm(m, 0, 0.05)
 }
 
-# Add some outliers
-X[1, ] <- sin(2 * pi * t_grid) + 2  # Magnitude outlier
-X[2, ] <- cos(2 * pi * t_grid)       # Shape outlier
+# Magnitude outlier (shifted up)
+data[n - 1, ] <- sin(2 * pi * argvals) + 2.5 + rnorm(m, 0, 0.05)
 
-fd <- fdata(X, argvals = t_grid)
-plot(fd)
+# Shape outlier (different frequency)
+data[n, ] <- cos(4 * pi * argvals) + rnorm(m, 0, 0.05)
+
+fd <- fdata(data, argvals = argvals)
+
+plot(fd, main = "30 Curves with 2 Outliers",
+     xlab = "t", ylab = "X(t)")
 ```
 
-![](depth-functions_files/figure-html/setup-1.png)
+![](depth-functions_files/figure-html/generate-data-1.png)
 
-## Available Depth Functions
+Curve 29 (magnitude outlier) is shifted up; curve 30 (shape outlier) has
+a different oscillation pattern.
 
-All depth functions are accessed through the unified
-[`depth()`](https://sipemu.github.io/fdars-r/reference/depth.md)
-function with a `method` parameter.
+## Pointwise Depth Methods
 
-### Fraiman-Muniz Depth (method = “FM”)
+### Fraiman-Muniz Depth (FM)
 
-The Fraiman-Muniz depth integrates univariate depths across the domain.
-For each time point, it computes the proportion of curves above and
-below the given curve, then averages across time.
+FM depth integrates univariate depth (based on the empirical CDF) at
+each time point over the domain:
+
+$$D_{FM}(X) = \int_{0}^{1}D_{n}\left( X(t) \right)\, dt,\quad D_{n}(x) = 1 - \left| 2F_{n}(x) - 1 \right|$$
 
 ``` r
-depths_fm <- depth(fd, method = "FM")
-
-# Show depths (outliers should have lower depth)
-data.frame(
-  curve = 1:5,
-  depth = round(depths_fm[1:5], 4),
-  note = c("magnitude outlier", "shape outlier", rep("normal", 3))
-)
-#>   curve  depth              note
-#> 1     1 0.0000 magnitude outlier
-#> 2     2 0.1113     shape outlier
-#> 3     3 0.5233            normal
-#> 4     4 0.5707            normal
-#> 5     5 0.5407            normal
+d_fm <- depth.FM(fd)
+cat("FM depth range:", round(range(d_fm), 3), "\n")
+#> FM depth range: 0 0.877
+cat("Magnitude outlier (curve 29):", round(d_fm[n - 1], 4), "\n")
+#> Magnitude outlier (curve 29): 0
+cat("Shape outlier (curve 30):", round(d_fm[n], 4), "\n")
+#> Shape outlier (curve 30): 0.2113
+cat("Deepest curve:", which.max(d_fm), "with depth", round(max(d_fm), 4), "\n")
+#> Deepest curve: 26 with depth 0.8767
 ```
 
-**Intuition**: At each time point, FM depth asks: “What proportion of
-curves lie above and below this curve?” A curve that is consistently in
-the middle of the data cloud at every time point will have high FM
-depth.
+### Modified Band Depth (MBD)
 
-The FM depth can be scaled to \[0, 1\] using the `scale` parameter:
+MBD measures the proportion of time a curve lies within the band formed
+by random pairs of other curves. It captures both magnitude and shape
+information.
 
 ``` r
-depths_fm_scaled <- depth(fd, method = "FM", scale = TRUE)
-range(depths_fm_scaled)
-#> [1] 0.0000000 0.5813333
+d_mbd <- depth.MBD(fd)
+cat("MBD depth - outlier 29:", round(d_mbd[n - 1], 4),
+    "  outlier 30:", round(d_mbd[n], 4), "\n")
+#> MBD depth - outlier 29: 0.0667   outlier 30: 0.1914
 ```
 
-### Modal Depth (method = “mode”)
+### Band Depth (BD)
 
-Modal depth uses kernel density estimation in function space. Curves in
-high-density regions have high depth.
+BD counts the fraction of random bands (formed by pairs) that fully
+contain the curve. It is binary at each time point — a curve is either
+inside or outside the band.
 
 ``` r
-depths_mode <- depth(fd, method = "mode")
-head(depths_mode)
-#> [1] 0.03335153 0.09401245 0.83156568 0.84229565 0.83229521 0.82640249
+d_bd <- depth.BD(fd)
+cat("BD depth - outlier 29:", round(d_bd[n - 1], 4),
+    "  outlier 30:", round(d_bd[n], 4), "\n")
+#> BD depth - outlier 29: 0.0667   outlier 30: 0.0667
 ```
 
-**Intuition**: Modal depth estimates local density in function space.
-Curves in “crowded” regions (where many similar curves exist) have high
-depth. Think of it like finding the mode of a distribution, but for
-curves.
+### Modified Epigraph Index (MEI)
 
-### Random Projection Depth (method = “RP”)
-
-Projects curves onto random directions and computes univariate depths of
-the projections. More robust to local variations.
+MEI measures the proportion of time each curve lies below (or above)
+other curves in the sample.
 
 ``` r
-depths_rp <- depth(fd, method = "RP", nproj = 50)
-head(depths_rp)
-#> [1] 0.06000000 0.07806452 0.26645161 0.27096774 0.26838710 0.27935484
+d_mei <- depth.MEI(fd)
+cat("MEI depth - outlier 29:", round(d_mei[n - 1], 4),
+    "  outlier 30:", round(d_mei[n], 4), "\n")
+#> MEI depth - outlier 29: 0.0167   outlier 30: 0.427
 ```
 
-**Intuition**: RP depth projects all curves onto random 1D directions
-and computes depth there. It’s robust because outliers can’t hide from
-all projection angles - if a curve is unusual, some projection will
-reveal it.
+## Projection-Based Methods
 
-### Random Tukey Depth (method = “RT”)
+### Random Projection Depth (RP)
 
-Takes the minimum depth across random projections, similar to Tukey’s
-halfspace depth. Very robust to outliers.
+RP projects functional data to random directions and computes halfspace
+depth in the projected space. This method works for both 1D and 2D
+functional data.
 
 ``` r
-depths_rt <- depth(fd, method = "RT", nproj = 50)
-head(depths_rt)
-#> [1] 0.03225806 0.03225806 0.03225806 0.06451613 0.03225806 0.03225806
+d_rp <- depth.RP(fd, nproj = 50, seed = 123)
+cat("RP depth - outlier 29:", round(d_rp[n - 1], 4),
+    "  outlier 30:", round(d_rp[n], 4), "\n")
+#> RP depth - outlier 29: 0.04   outlier 30: 0.0845
 ```
 
-**Intuition**: RT depth takes the *minimum* depth across all
-projections. This is very conservative - a curve is only considered
-central if it looks central from *every* angle. This makes RT extremely
-robust to outliers.
+### Random Tukey Depth (RT)
 
-### Functional Spatial Depth (method = “FSD”)
-
-Based on unit vectors pointing from each curve to all others. Measures
-centrality in a geometric sense.
+RT uses Tukey’s halfspace depth on random projections. It tends to
+produce coarser depth rankings but is computationally fast.
 
 ``` r
-depths_fsd <- depth(fd, method = "FSD")
-head(depths_fsd)
-#> [1] 0.03927198 0.06164440 0.34346531 0.39240477 0.33894657 0.32391302
+d_rt <- depth.RT(fd, nproj = 50, seed = 123)
+cat("RT depth - outlier 29:", round(d_rt[n - 1], 4),
+    "  outlier 30:", round(d_rt[n], 4), "\n")
+#> RT depth - outlier 29: 0.0323   outlier 30: 0.0323
 ```
 
-**Intuition**: FSD computes unit vectors from each curve to all others.
-A central curve has these vectors pointing in all directions (they
-cancel out), resulting in high depth. An outlier has most vectors
-pointing in one direction (away from the data cloud).
+### Random Projection with Derivatives (RPD)
 
-### Kernel Functional Spatial Depth (method = “KFSD”)
-
-Smoothed version of FSD using a Gaussian kernel. The bandwidth `h`
-controls the smoothing.
+RPD extends RP by including derivatives. This makes it sensitive to
+shape differences even when curves have the same magnitude.
 
 ``` r
-depths_kfsd <- depth(fd, method = "KFSD", h = 0.15)
-head(depths_kfsd)
-#> [1] 0.2646598 0.2646598 0.3086986 0.3194105 0.3089607 0.3032314
+d_rpd <- depth.RPD(fd, nproj = 20, deriv = c(0, 1))
+cat("RPD depth - outlier 29:", round(d_rpd[n - 1], 4),
+    "  outlier 30:", round(d_rpd[n], 4), "\n")
+#> RPD depth - outlier 29: 0.035   outlier 30: 0.0483
 ```
 
-### Random Projection Depth with Derivatives (method = “RPD”)
+## Kernel and Spatial Methods
 
-Incorporates derivative information, making it sensitive to shape
-changes in addition to magnitude.
+### Modal Depth
+
+Modal depth is based on kernel density estimation in function space.
+Curves in high-density regions receive high depth.
 
 ``` r
-depths_rpd <- depth(fd, method = "RPD", nproj = 50)
-head(depths_rpd)
-#> [1] 0.07933333 0.11333333 0.22266667 0.21533333 0.22666667 0.17666667
+d_mode <- depth.mode(fd)
+cat("Mode depth - outlier 29:", round(d_mode[n - 1], 4),
+    "  outlier 30:", round(d_mode[n], 4), "\n")
+#> Mode depth - outlier 29: 0.0333   outlier 30: 0.1092
 ```
 
-**Intuition**: RPD is like RP, but the projections are based on curve
-derivatives. This makes it sensitive to *shape* differences - curves
-with unusual wiggliness or local behavior will have low depth even if
-their overall level is typical.
+### Functional Spatial Depth (FSD)
 
-## Comparing Depth Functions
-
-Different depth functions have different properties and may rank curves
-differently:
+FSD is based on spatial signs (unit vectors pointing from the curve to
+all other curves). It is affine-invariant and robust.
 
 ``` r
-# Compute all depths using unified depth() function
-all_depths <- data.frame(
-  FM = depth(fd, method = "FM"),
-  mode = depth(fd, method = "mode"),
-  RP = depth(fd, method = "RP", nproj = 50),
-  RT = depth(fd, method = "RT", nproj = 50),
-  FSD = depth(fd, method = "FSD")
-)
-
-# Correlation between depth functions
-round(cor(all_depths), 2)
-#>        FM mode   RP   RT  FSD
-#> FM   1.00 0.98 0.91 0.15 0.98
-#> mode 0.98 1.00 0.90 0.16 0.97
-#> RP   0.91 0.90 1.00 0.20 0.92
-#> RT   0.15 0.16 0.20 1.00 0.25
-#> FSD  0.98 0.97 0.92 0.25 1.00
+d_fsd <- depth.FSD(fd)
+cat("FSD depth - outlier 29:", round(d_fsd[n - 1], 4),
+    "  outlier 30:", round(d_fsd[n], 4), "\n")
+#> FSD depth - outlier 29: 0.0359   outlier 30: 0.0718
 ```
 
+### Kernel Functional Spatial Depth (KFSD)
+
+KFSD smooths the spatial depth using a kernel, improving performance in
+finite samples.
+
 ``` r
-# Which curves are identified as outliers (lowest depth)?
-outlier_ranks <- apply(all_depths, 2, function(d) order(d)[1:3])
-outlier_ranks
-#>      FM mode RP RT FSD
-#> [1,]  1    1  2  1   1
-#> [2,]  2    2  1  2   2
-#> [3,] 10   10 10  3  10
+d_kfsd <- depth.KFSD(fd)
+cat("KFSD depth - outlier 29:", round(d_kfsd[n - 1], 4),
+    "  outlier 30:", round(d_kfsd[n], 4), "\n")
+#> KFSD depth - outlier 29: 0.1151   outlier 30: 0.1157
 ```
 
-All depth functions correctly identify curves 1 and 2 as having low
-depth.
-
-### Visualizing Depth
-
-A powerful way to understand depth is to color curves by their depth
-values:
+## Comparing Methods
 
 ``` r
-# Visualize curves colored by their FM depth
-df_depth_viz <- data.frame(
-  t = rep(t_grid, n),
-  value = as.vector(t(X)),
-  curve = rep(1:n, each = m),
-  depth = rep(depths_fm, each = m)
+df_depths <- data.frame(
+  curve = 1:n,
+  FM = d_fm,
+  MBD = d_mbd,
+  BD = d_bd,
+  MEI = d_mei,
+  RP = d_rp,
+  RT = d_rt,
+  mode = d_mode,
+  FSD = d_fsd,
+  KFSD = d_kfsd,
+  RPD = d_rpd,
+  type = c(rep("Normal", n - 2), "Magnitude", "Shape")
 )
 
-ggplot(df_depth_viz, aes(x = t, y = value, group = curve, color = depth)) +
-  geom_line(alpha = 0.8) +
-  scale_color_viridis_c(option = "plasma", name = "FM Depth") +
-  labs(title = "Curves Colored by Depth",
-       subtitle = "Dark = low depth (outlier), Bright = high depth (central)",
-       x = "t", y = "X(t)")
+# Reshape for plotting
+df_long <- do.call(rbind, lapply(
+  c("FM", "MBD", "BD", "MEI", "RP", "RT", "mode", "FSD", "KFSD", "RPD"),
+  function(method) {
+    data.frame(
+      curve = df_depths$curve,
+      depth = df_depths[[method]],
+      method = method,
+      type = df_depths$type
+    )
+  }
+))
+
+ggplot(df_long, aes(x = curve, y = depth, fill = type)) +
+  geom_col(alpha = 0.8, width = 0.8) +
+  facet_wrap(~ method, scales = "free_y", ncol = 2) +
+  scale_fill_manual(values = c("Normal" = "#4A90D9", "Magnitude" = "#D55E00",
+                                "Shape" = "#E6A020")) +
+  labs(x = "Curve index", y = "Depth", fill = "Type",
+       title = "All 10 Depth Methods: Outliers Get Low Depth") +
+  theme(legend.position = "bottom")
 ```
 
-![](depth-functions_files/figure-html/depth-visualization-1.png)
+![](depth-functions_files/figure-html/compare-all-1.png)
 
-This visualization immediately reveals which curves are outliers (dark
-colors) and which are central (bright colors). The magnitude outlier
-(shifted up) and shape outlier (cosine instead of sine) both appear with
-low depth values.
+All methods assign low depth to both outliers, but they differ in
+sensitivity:
+
+- **FM, MBD, BD, MEI** are pointwise — they detect magnitude outliers
+  well but may miss subtle shape outliers
+- **RP, RT, RPD** use random projections — RPD is particularly good at
+  shape outliers because it includes derivatives
+- **mode, FSD, KFSD** use density/spatial approaches — they are robust
+  to the choice of metric
 
 ## Depth-Based Statistics
 
-### Functional Median
-
-The median is the curve with maximum depth:
+### Functional Median and Trimmed Mean
 
 ``` r
-# Using different depth functions via method parameter
-med_fm <- median(fd, method = "FM")
-med_mode <- median(fd, method = "mode")
-med_rp <- median(fd, method = "RP", nproj = 50)
+# Functional median (deepest curve)
+fd_median <- median(fd, method = "FM")
 
-# The median is one of the original curves
-which.max(depth(fd, method = "FM"))
-#> [1] 13
-```
+# Trimmed mean (exclude 20% shallowest)
+fd_trim <- trimmed(fd, trim = 0.2, method = "FM")
 
-### Trimmed Mean
+# Ordinary mean (affected by outliers)
+fd_mean <- mean(fd)
 
-Remove a proportion of curves with lowest depth, then compute the mean:
-
-``` r
-# 10% trimmed mean using different depth methods
-trim_fm <- trimmed(fd, trim = 0.1, method = "FM")
-trim_mode <- trimmed(fd, trim = 0.1, method = "mode")
-
-# Compare trimmed mean to regular mean
-mean_curve <- mean(fd)
-```
-
-``` r
-# Visualize: trimmed mean is more robust to outliers
-df_compare <- data.frame(
-  t = rep(t_grid, 2),
-  value = c(mean_curve$data[1, ], trim_fm$data[1, ]),
-  type = rep(c("Mean", "Trimmed Mean (FM)"), each = m)
+df_robust <- data.frame(
+  t = rep(argvals, 3),
+  value = c(fd_mean$data[1, ], fd_median$data[1, ], fd_trim$data[1, ]),
+  type = factor(rep(c("Mean", "Median", "Trimmed Mean (20%)"), each = m),
+                levels = c("Mean", "Median", "Trimmed Mean (20%)"))
 )
 
-library(ggplot2)
-ggplot(df_compare, aes(x = t, y = value, color = type)) +
+ggplot(df_robust, aes(x = t, y = value, color = type)) +
   geom_line(linewidth = 1.2) +
-  labs(title = "Mean vs Trimmed Mean",
-       x = "t", y = "X(t)", color = "") +
-  theme_minimal()
+  scale_color_manual(values = c("Mean" = "#D55E00", "Median" = "#2E8B57",
+                                 "Trimmed Mean (20%)" = "#4A90D9")) +
+  labs(x = "t", y = "Value", color = NULL,
+       title = "Mean vs Robust Alternatives",
+       subtitle = "Mean is pulled up by the magnitude outlier") +
+  theme(legend.position = "bottom")
 ```
 
-![](depth-functions_files/figure-html/plot-robust-1.png)
+![](depth-functions_files/figure-html/median-trimmed-1.png)
 
-### Functional Variance and Trimmed Variance
+### Functional Boxplot
 
 ``` r
-# Regular variance
-var_fd <- var(fd)
-
-# Trimmed variance (more robust)
-trimvar_fd <- trimvar(fd, trim = 0.1, method = "FM")
+boxplot(fd, main = "Functional Boxplot (FM Depth)")
 ```
 
-## Choosing a Depth Function
+## Depth Against a Reference Sample
 
-| Depth | Strengths                  | Best For                    |
-|-------|----------------------------|-----------------------------|
-| FM    | Simple, interpretable      | General use                 |
-| mode  | Sensitive to local density | Multimodal data             |
-| RP    | Robust, fast               | Large datasets              |
-| RT    | Very robust                | Heavy outlier contamination |
-| FSD   | Geometric interpretation   | Spatial patterns            |
-| KFSD  | Smooth, tunable            | When smoothness matters     |
-| RPD   | Shape-sensitive            | When derivatives matter     |
-
-## Performance
-
-All depth computations use a parallel Rust backend:
+All depth methods accept a separate reference sample via `fdataori`:
 
 ``` r
-# Large dataset benchmark
-X_large <- matrix(rnorm(500 * 200), 500, 200)
-fd_large <- fdata(X_large)
+# Split into reference (first 20) and query (last 10)
+fd_ref <- fd[1:20, ]
+fd_query <- fd[21:n, ]
 
-system.time(depth(fd_large, method = "FM"))
-#>    user  system elapsed
-#>   0.032   0.000   0.032
+# Compute depth of query curves against reference
+d_query <- depth.FM(fd_query, fdataori = fd_ref)
 
-system.time(depth(fd_large, method = "RP", nproj = 100))
-#>    user  system elapsed
-#>   0.089   0.000   0.089
+cat("Depth of query curves against reference:\n")
+#> Depth of query curves against reference:
+for (i in seq_along(d_query)) {
+  label <- if (20 + i == n - 1) " (magnitude outlier)"
+           else if (20 + i == n) " (shape outlier)"
+           else ""
+  cat(sprintf("  Curve %d: %.4f%s\n", 20 + i, d_query[i], label))
+}
+#>   Curve 21: 0.7760
+#>   Curve 22: 0.6760
+#>   Curve 23: 0.0790
+#>   Curve 24: 0.2160
+#>   Curve 25: 0.0700
+#>   Curve 26: 0.8400
+#>   Curve 27: 0.8690
+#>   Curve 28: 0.5190
+#>   Curve 29: 0.0000 (magnitude outlier)
+#>   Curve 30: 0.1520 (shape outlier)
 ```
+
+## Method Selection Guide
+
+| Use case             | Recommended method      | Why                                                                                                                                              |
+|----------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| General purpose      | **FM** or **MBD**       | Well-established, interpretable                                                                                                                  |
+| Shape-sensitive      | **RPD**                 | Includes derivatives                                                                                                                             |
+| 2D surfaces          | **FM**, **RP**, **FSD** | Support 2D data                                                                                                                                  |
+| Functional boxplot   | **MBD**                 | Default in [`boxplot.fdata()`](https://sipemu.github.io/fdars-r/reference/boxplot.fdata.md)                                                      |
+| Large reference sets | **streaming**           | O(T log N) per query                                                                                                                             |
+| Outlier detection    | **MBD** + outliergram   | Complementary views                                                                                                                              |
+| Robust estimation    | **FM**                  | Used by [`median()`](https://sipemu.github.io/fdars-r/reference/median.md), [`trimmed()`](https://sipemu.github.io/fdars-r/reference/trimmed.md) |
 
 ## See Also
 
-- `vignette("streaming-depth", package = "fdars")` — real-time depth
-  computation for streaming data
-- `vignette("outlier-detection", package = "fdars")` — functional
-  outlier detection methods
+- [`vignette("articles/outlier-detection")`](https://sipemu.github.io/fdars-r/articles/outlier-detection.md)
+  — depth-based outlier detection methods
+- [`vignette("articles/streaming-depth")`](https://sipemu.github.io/fdars-r/articles/streaming-depth.md)
+  — streaming depth for online monitoring
+- [`vignette("articles/tolerance-bands")`](https://sipemu.github.io/fdars-r/articles/tolerance-bands.md)
+  — depth-based tolerance bands and central regions
 
 ## References
 
 - Fraiman, R. and Muniz, G. (2001). Trimmed means for functional data.
-  *Test*, 10(2), 419-440.
+  *Test*, 10(2), 419–440.
+- Lopez-Pintado, S. and Romo, J. (2009). On the concept of depth for
+  functional data. *JASA*, 104(486), 718–734.
 - Cuevas, A., Febrero, M., and Fraiman, R. (2007). Robust estimation and
   classification for functional data via projection-based depth notions.
-  *Computational Statistics*, 22(3), 481-496.
-- López-Pintado, S. and Romo, J. (2009). On the concept of depth for
-  functional data. *Journal of the American Statistical Association*,
-  104(486), 718-734.
+  *Computational Statistics*, 22, 481–496.
+- Chakraborty, A. and Chaudhuri, P. (2014). The spatial distribution in
+  infinite dimensional spaces and related quantiles and depths. *Annals
+  of Statistics*, 42(3), 1203–1231.

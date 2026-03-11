@@ -154,6 +154,12 @@ Classification
 
 Mixed Models
 
+[](https://sipemu.github.io/fdars-r/articles/cross-validation.md)
+
+![Cross-Validation](reference/figures/card-cross-validation.svg)
+
+Cross-Validation
+
 ## Analyze
 
 Infer, cluster, detect outliers, and test functional data.

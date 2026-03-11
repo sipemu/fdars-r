@@ -8,21 +8,6 @@ infinite-dimensional function spaces, providing a powerful tool for
 dimension reduction, visualization, and feature extraction from
 functional data.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-set.seed(42)
-```
-
 ## Why FPCA?
 
 When working with functional data, we face several challenges:
@@ -35,6 +20,9 @@ When working with functional data, we face several challenges:
 FPCA addresses these challenges by finding the **principal modes of
 variation** in the data—orthogonal functions that capture how curves
 differ from each other.
+
+![Karhunen-Loève Decomposition
+Diagram](../reference/figures/fpca-diagram.svg)
 
 ## Mathematical Background
 
@@ -504,8 +492,8 @@ on the data matrix, but the functional interpretation adds value:
 
 ## See Also
 
-- `vignette("regression", package = "fdars")` — scalar-on-function
-  regression methods
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  — scalar-on-function regression methods
 - `vignette("clustering", package = "fdars")` — functional data
   clustering
 - `vignette("basis-representation", package = "fdars")` — basis function

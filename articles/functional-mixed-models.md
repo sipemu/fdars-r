@@ -24,19 +24,8 @@ for prediction, and
 [`fmm.test.fixed()`](https://sipemu.github.io/fdars-r/reference/fmm.test.fixed.md)
 for testing fixed effects via permutation.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
+![Functional Mixed Model
+Decomposition](../reference/figures/functional-mixed-models-diagram.svg)
 
 ## Why Mixed Models for Functional Data?
 
@@ -415,7 +404,9 @@ individual effect.
 
 ## See Also
 
-- [`vignette("articles/functional-regression")`](https://sipemu.github.io/fdars-r/articles/functional-regression.md)
-  for scalar-on-function and function-on-scalar regression
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  for scalar-on-function regression
+- [`vignette("articles/function-on-scalar")`](https://sipemu.github.io/fdars-r/articles/function-on-scalar.md)
+  for function-on-scalar regression (FOSR, FANOVA)
 - [`vignette("articles/fpca")`](https://sipemu.github.io/fdars-r/articles/fpca.md)
   for the FPC decomposition underlying the random effects

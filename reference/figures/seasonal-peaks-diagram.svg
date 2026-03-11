@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="24" text-anchor="middle" font-size="18" font-weight="bold" fill="#2E8B57">Peak Detection &amp; Seasonal Strength</text>
+  <text x="350" y="46" text-anchor="middle" font-size="13" fill="#888">Locate peaks, measure timing, and quantify seasonality</text>
+
+  <!-- ===== Left: Peak detection ===== -->
+  <rect x="16" y="66" width="330" height="120" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="181" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Peak Detection</text>
+
+  <!-- Signal with peaks marked -->
+  <path d="M36 150 Q52 130 68 110 Q84 130 100 150 Q116 130 132 100 Q148 130 164 150 Q180 130 196 108 Q212 130 228 150 Q244 130 260 104 Q276 130 292 150 Q308 130 324 116" stroke="#2E8B57" stroke-width="1.5" fill="none"/>
+  <!-- Peak markers -->
+  <circle cx="68" cy="110" r="4" fill="#D55E00" stroke="#D55E00" stroke-width="1"/>
+  <circle cx="132" cy="100" r="4" fill="#D55E00" stroke="#D55E00" stroke-width="1"/>
+  <circle cx="196" cy="108" r="4" fill="#D55E00" stroke="#D55E00" stroke-width="1"/>
+  <circle cx="260" cy="104" r="4" fill="#D55E00" stroke="#D55E00" stroke-width="1"/>
+  <text x="181" y="174" text-anchor="middle" font-size="11" fill="#555">seasonal.detect.peaks(x, prominence, distance)</text>
+
+  <!-- ===== Right: Strength measures ===== -->
+  <rect x="362" y="66" width="322" height="120" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="523" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Seasonal Strength</text>
+
+  <text x="382" y="112" font-size="12" fill="#555">&#x2022; Variance ratio: 1 &#x2212; Var(resid)/Var(detrended)</text>
+  <text x="382" y="132" font-size="12" fill="#555">&#x2022; Spectral: peak power / total power</text>
+  <text x="382" y="152" font-size="12" fill="#555">&#x2022; Wavelet: scale-localized energy</text>
+  <text x="382" y="172" font-size="12" fill="#555">&#x2022; Windowed: sliding-window strength</text>
+
+  <!-- ===== Bottom: Peak timing ===== -->
+  <rect x="16" y="204" width="668" height="60" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="350" y="228" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Peak Timing Analysis</text>
+  <text x="36" y="250" font-size="12" fill="#555">seasonal.analyze.peak.timing(x, period)  &#x2192;  mean timing, circular std, Rayleigh test of uniformity, plot()</text>
+
+  <defs>
+    <marker id="arrSPK" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

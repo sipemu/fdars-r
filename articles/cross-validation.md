@@ -22,19 +22,8 @@ The existing `*.cv` functions in **fdars** (`fregre.pc.cv`,
 function provides a unified framework for both, producing **out-of-fold
 (OOF) predictions** where every observation is predicted exactly once.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
+![Cross-Validation for Functional
+Data](../reference/figures/cross-validation-diagram.svg)
 
 ## K-Fold Cross-Validation
 
@@ -480,8 +469,8 @@ CV.
 
 ## See Also
 
-- [`vignette("articles/regression")`](https://sipemu.github.io/fdars-r/articles/regression.md)
-  — regression methods overview
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  — scalar-on-function regression methods
 - [`vignette("articles/example-cross-validation")`](https://sipemu.github.io/fdars-r/articles/example-cross-validation.md)
   — real-data example with Tecator NIR spectra
 - [`vignette("articles/functional-classification")`](https://sipemu.github.io/fdars-r/articles/functional-classification.md)

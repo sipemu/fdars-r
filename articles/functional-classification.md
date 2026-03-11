@@ -3,34 +3,28 @@
 ## Introduction
 
 Supervised classification assigns functional observations to discrete
-groups. **fdars** provides five methods through a unified
+groups. **fdars** provides seven methods:
+
+| Method               | Description                                   | Strengths                         |
+|----------------------|-----------------------------------------------|-----------------------------------|
+| **LDA**              | Linear discriminant analysis on FPC scores    | Fast, interpretable               |
+| **QDA**              | Quadratic discriminant analysis on FPC scores | Handles class-specific covariance |
+| **kNN**              | k-nearest neighbors in FPC space              | Nonparametric, flexible           |
+| **Kernel**           | Kernel classifier with functional bandwidth   | Fully nonparametric               |
+| **DD**               | Depth-vs-depth classification                 | Robust to outliers                |
+| **Logistic**         | FPC-based logistic regression                 | Calibrated probabilities          |
+| **Elastic logistic** | Phase-invariant logistic                      | Handles misalignment              |
+
+The first five methods are available through the unified
 [`fclassif()`](https://sipemu.github.io/fdars-r/reference/fclassif.md)
-interface:
+interface and support optional scalar covariates. Logistic regression
+uses
+[`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md),
+and elastic logistic uses
+[`elastic.logistic()`](https://sipemu.github.io/fdars-r/reference/elastic.logistic.md).
 
-| Method     | Description                                   | Strengths                         |
-|------------|-----------------------------------------------|-----------------------------------|
-| **LDA**    | Linear discriminant analysis on FPC scores    | Fast, interpretable               |
-| **QDA**    | Quadratic discriminant analysis on FPC scores | Handles class-specific covariance |
-| **kNN**    | k-nearest neighbors in FPC space              | Nonparametric, flexible           |
-| **Kernel** | Kernel classifier with functional bandwidth   | Fully nonparametric               |
-| **DD**     | Depth-vs-depth classification                 | Robust to outliers                |
-
-All methods support optional scalar covariates alongside functional
-predictors.
-
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
+![Functional Classification
+Pipeline](../reference/figures/functional-classification-diagram.svg)
 
 ## Why Functional Classification?
 
@@ -325,18 +319,98 @@ components captures the dominant modes of between-class variation,
 improving discrimination. Adding later components brings in directions
 that are mainly within-class noise, diluting the signal.
 
+## Functional Logistic Regression
+
+For binary classification,
+[`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md)
+fits a logistic regression model using FPC scores as features. Unlike
+the discriminative methods above, this produces **calibrated
+probabilities** — useful when you need confidence in the classification,
+not just a label.
+
+### The IRLS Algorithm
+
+The functional logistic model uses the logit link on FPC scores:
+
+$$\log\frac{P\left( Y_{i} = 1 \right)}{1 - P\left( Y_{i} = 1 \right)} = \alpha + \sum\limits_{k = 1}^{K}\gamma_{k}\xi_{ik}$$
+
+This is estimated via **Iteratively Reweighted Least Squares (IRLS)**,
+which alternates between:
+
+1.  **Working response**:
+    $z_{i} = {\widehat{\eta}}_{i} + \left( y_{i} - {\widehat{p}}_{i} \right)/\left\lbrack {\widehat{p}}_{i}\left( 1 - {\widehat{p}}_{i} \right) \right\rbrack$
+2.  **Working weights**:
+    $w_{i} = {\widehat{p}}_{i}\left( 1 - {\widehat{p}}_{i} \right)$
+3.  **Weighted least squares**: update $\widehat{\gamma}$ by regressing
+    $z$ on $\Xi$ with weights $w$
+
+Convergence is monitored via the log-likelihood:
+
+$$\ell(\gamma) = \sum\limits_{i = 1}^{n}\lbrack y_{i}\log p_{i} + \left( 1 - y_{i} \right)\log\left( 1 - p_{i} \right)\rbrack$$
+
+### Binary Classification Example
+
+``` r
+# Create binary response from iris species (setosa vs rest)
+y_bin <- as.numeric(y == 1)  # 1 = setosa, 0 = versicolor/virginica
+
+logit_fit <- functional.logistic(fd, y_bin, ncomp = 3)
+print(logit_fit)
+#> Functional Logistic Regression
+#> ==============================
+#>   Number of observations: 150 
+#>   Number of FPC components: 3 
+#>   Accuracy: 1 
+#>   Log-likelihood: 0 
+#>   Iterations: 100
+
+cat("Probabilities range:", range(logit_fit$probabilities), "\n")
+#> Probabilities range: 2.385465e-45 1
+```
+
+Estimated probabilities near 0 or 1 indicate confident classification;
+values near 0.5 indicate curves in the overlap region where the
+predictor’s FPC scores do not clearly separate the two classes.
+
+### Probability Interpretation
+
+Unlike discriminant methods (LDA/QDA), functional logistic regression
+directly models $P\left( Y = 1|X \right)$. This makes it natural for:
+
+- **Risk scoring**: rank observations by predicted probability
+- **Threshold tuning**: adjust the decision boundary beyond 0.5
+- **Calibration**: the predicted probabilities approximate true class
+  frequencies
+
+## Elastic Logistic Regression
+
+When curves exhibit **phase variability** (timing differences), standard
+logistic regression on FPC scores may confound amplitude and phase
+effects.
+[`elastic.logistic()`](https://sipemu.github.io/fdars-r/reference/elastic.logistic.md)
+jointly estimates alignment warping functions and logistic regression
+coefficients in the SRSF domain.
+
+See
+[`vignette("articles/elastic-regression")`](https://sipemu.github.io/fdars-r/articles/elastic-regression.md)
+for the full elastic regression framework, including
+[`elastic.logistic()`](https://sipemu.github.io/fdars-r/reference/elastic.logistic.md)
+and
+[`elastic.pcr()`](https://sipemu.github.io/fdars-r/reference/elastic.pcr.md).
+
 ## Choosing a Classifier
 
 The table below summarizes practical considerations:
 
-| Criterion        | LDA               | QDA                       | kNN      | Kernel   | DD          |
-|------------------|-------------------|---------------------------|----------|----------|-------------|
-| **Assumptions**  | Common covariance | Class-specific covariance | None     | None     | None        |
-| **Min. $n_{g}$** | $> K$             | $> K(K + 1)/2$            | $> k$    | $> 20$   | $> 20$      |
-| **Boundaries**   | Linear            | Quadratic                 | Flexible | Flexible | Depth-based |
-| **Tuning**       | $K$ only          | $K$ only                  | $K$, $k$ | $h$      | $K$         |
-| **Speed**        | Fast              | Fast                      | Moderate | Slow     | Moderate    |
-| **Robustness**   | Low               | Low                       | Moderate | Moderate | High        |
+| Criterion         | LDA         | QDA                 | kNN      | Kernel   | DD          | Logistic            |
+|-------------------|-------------|---------------------|----------|----------|-------------|---------------------|
+| **Assumptions**   | Common cov. | Class-specific cov. | None     | None     | None        | Linear in FPC space |
+| **Min. $n_{g}$**  | $> K$       | $> K(K + 1)/2$      | $> k$    | $> 20$   | $> 20$      | $> K$               |
+| **Boundaries**    | Linear      | Quadratic           | Flexible | Flexible | Depth-based | Linear              |
+| **Tuning**        | $K$ only    | $K$ only            | $K$, $k$ | $h$      | $K$         | $K$                 |
+| **Speed**         | Fast        | Fast                | Moderate | Slow     | Moderate    | Fast                |
+| **Robustness**    | Low         | Low                 | Moderate | Moderate | High        | Low                 |
+| **Probabilities** | Posterior   | Posterior           | No       | No       | No          | Calibrated          |
 
 **Rules of thumb:**
 
@@ -350,6 +424,8 @@ The table below summarizes practical considerations:
   want to avoid the FPC projection step entirely.
 - Use **DD** when robustness to outliers is paramount or distributional
   assumptions are suspect.
+- Use **logistic regression** when you need calibrated probabilities or
+  want to interpret coefficients as log-odds.
 
 ## References
 
@@ -371,9 +447,10 @@ The table below summarizes practical considerations:
 - [`vignette("articles/andrews-transformation")`](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md)
   for more on the Andrews transform and its distance-preservation
   property
-- [`vignette("articles/functional-regression")`](https://sipemu.github.io/fdars-r/articles/functional-regression.md)
-  for scalar-on-function regression including
-  [`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md)
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  for scalar-on-function regression
+- [`vignette("articles/elastic-regression")`](https://sipemu.github.io/fdars-r/articles/elastic-regression.md)
+  for elastic logistic and elastic PCR
 - [`vignette("articles/clustering")`](https://sipemu.github.io/fdars-r/articles/clustering.md)
   for unsupervised functional clustering
 - [`vignette("articles/fpca")`](https://sipemu.github.io/fdars-r/articles/fpca.md)

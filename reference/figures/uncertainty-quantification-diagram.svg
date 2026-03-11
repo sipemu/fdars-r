@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 281" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="20.2" font-weight="bold" fill="#333">Uncertainty Quantification for Functional Regression</text>
+
+  <!-- Category ribbons -->
+  <rect x="8" y="32" width="340" height="17" rx="3" fill="#2C5F8A" opacity="0.08"/>
+  <text x="178" y="45" text-anchor="middle" font-size="11.0" font-weight="bold" fill="#2C5F8A">Prediction-Level: How uncertain is ŷ?</text>
+  <rect x="356" y="32" width="160" height="17" rx="3" fill="#7B2D8E" opacity="0.08"/>
+  <text x="436" y="45" text-anchor="middle" font-size="11.0" font-weight="bold" fill="#7B2D8E">Model Assessment</text>
+  <rect x="524" y="32" width="168" height="17" rx="3" fill="#0D7377" opacity="0.08"/>
+  <text x="608" y="45" text-anchor="middle" font-size="11.0" font-weight="bold" fill="#0D7377">Coefficient-Level: β(t)</text>
+
+  <!-- ===== Panel 1: Prediction Intervals ===== -->
+  <rect x="8" y="55" width="166" height="125" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="91" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2C5F8A">Prediction Intervals</text>
+  <text x="91" y="85" text-anchor="middle" font-size="11.0" fill="#888">parametric, leverage-based</text>
+
+  <!-- Axes -->
+  <line x1="20" y1="165" x2="162" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="20" y1="92" x2="20" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Variable-width band -->
+  <path d="M26 127Q58 110 91 105Q124 110 158 122L158 157Q124 150 91 145Q58 150 26 162Z" fill="#4A90D9" opacity="0.12"/>
+  <path d="M26 127Q58 110 91 105Q124 110 158 122" stroke="#4A90D9" stroke-width="0.6" fill="none" stroke-dasharray="3,2"/>
+  <path d="M26 162Q58 150 91 145Q124 150 158 157" stroke="#4A90D9" stroke-width="0.6" fill="none" stroke-dasharray="3,2"/>
+  <!-- Fitted line -->
+  <path d="M26 145Q58 130 91 125Q124 130 158 140" stroke="#2C5F8A" stroke-width="1.5" fill="none"/>
+  <!-- Points -->
+  <circle cx="38" cy="142" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="62" cy="132" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="86" cy="125" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="110" cy="127" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="134" cy="135" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="152" cy="142" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <!-- Width annotation -->
+  <line x1="34" y1="130" x2="34" y2="160" stroke="#7B2D8E" stroke-width="0.5"/>
+  <text x="38" y="150" font-size="7.8" fill="#7B2D8E">∝ h&#7522;&#7522;</text>
+
+  <text x="91" y="192" text-anchor="middle" font-size="11.0" fill="#888">fregre.prediction.interval</text>
+
+  <!-- ===== Panel 2: Conformal Prediction ===== -->
+  <rect x="182" y="55" width="166" height="125" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="265" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#2E8B57">Conformal Prediction</text>
+  <text x="265" y="85" text-anchor="middle" font-size="11.0" fill="#888">distribution-free guarantee</text>
+
+  <!-- Axes -->
+  <line x1="194" y1="165" x2="336" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="194" y1="92" x2="194" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Constant-width band -->
+  <path d="M200 115Q232 107 265 112Q298 120 330 115L330 147Q298 152 265 145Q232 140 200 147Z" fill="#2E8B57" opacity="0.12"/>
+  <path d="M200 115Q232 107 265 112Q298 120 330 115" stroke="#2E8B57" stroke-width="0.6" fill="none" stroke-dasharray="3,2"/>
+  <path d="M200 147Q232 140 265 145Q298 152 330 147" stroke="#2E8B57" stroke-width="0.6" fill="none" stroke-dasharray="3,2"/>
+  <!-- Predicted line -->
+  <path d="M200 131Q232 123 265 128Q298 136 330 131" stroke="#1B6B3A" stroke-width="1.5" fill="none"/>
+  <!-- Test points -->
+  <circle cx="212" cy="133" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="236" cy="125" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="256" cy="130" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="276" cy="135" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="300" cy="137" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <circle cx="322" cy="130" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <!-- Constant width annotation -->
+  <line x1="334" y1="117" x2="334" y2="145" stroke="#7B2D8E" stroke-width="0.5"/>
+  <text x="332" y="102" text-anchor="end" font-size="7.8" fill="#7B2D8E">const q̂</text>
+
+  <text x="265" y="192" text-anchor="middle" font-size="11.0" fill="#888">fregre.conformal</text>
+
+  <!-- ===== Panel 3: LOO-CV ===== -->
+  <rect x="356" y="55" width="160" height="125" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="436" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#7B2D8E">LOO Cross-Validation</text>
+  <text x="436" y="85" text-anchor="middle" font-size="11.0" fill="#888">hat matrix shortcut</text>
+
+  <!-- Axes -->
+  <line x1="368" y1="165" x2="504" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="368" y1="92" x2="368" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Training points -->
+  <circle cx="380" cy="155" r="1.8" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="396" cy="147" r="1.8" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="412" cy="137" r="1.8" fill="#4A90D9" opacity="0.5"/>
+  <!-- Held-out point -->
+  <circle cx="436" cy="125" r="4" fill="white" stroke="#7B2D8E" stroke-width="1.5"/>
+  <circle cx="460" cy="135" r="1.8" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="476" cy="142" r="1.8" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="492" cy="150" r="1.8" fill="#4A90D9" opacity="0.5"/>
+  <!-- LOO curve -->
+  <path d="M376 157Q406 140 436 120Q466 135 500 152" stroke="#7B2D8E" stroke-width="1.3" fill="none"/>
+  <!-- Predicted dot -->
+  <circle cx="436" cy="120" r="2.5" fill="#7B2D8E" opacity="0.7"/>
+  <!-- Residual -->
+  <line x1="436" y1="121" x2="436" y2="123" stroke="#D55E00" stroke-width="1"/>
+  <text x="446" y="117" font-size="9.4" fill="#D55E00">e&#7522;⁽⁻ⁱ⁾</text>
+  <text x="436" y="107" text-anchor="middle" font-size="8.6" fill="#7B2D8E">removed</text>
+
+  <text x="436" y="192" text-anchor="middle" font-size="11.0" fill="#888">fregre.loo</text>
+
+  <!-- ===== Panel 4: Bootstrap CI for β(t) ===== -->
+  <rect x="524" y="55" width="168" height="125" rx="6" fill="#E6F5F5" stroke="#0D7377" stroke-width="1.2"/>
+  <text x="608" y="72" text-anchor="middle" font-size="14.0" font-weight="bold" fill="#0D7377">Bootstrap CI for β(t)</text>
+  <text x="608" y="85" text-anchor="middle" font-size="11.0" fill="#888">pointwise + simultaneous</text>
+
+  <!-- Axes -->
+  <line x1="536" y1="165" x2="680" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="536" y1="92" x2="536" y2="165" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Zero line -->
+  <line x1="536" y1="135" x2="680" y2="135" stroke="#999" stroke-width="0.4" stroke-dasharray="3,2"/>
+  <!-- Simultaneous band (wider) -->
+  <path d="M542 130Q572 95 608 97Q644 100 674 122L674 155Q644 147 608 145Q572 142 542 160Z" fill="#0D7377" opacity="0.06"/>
+  <path d="M542 130Q572 95 608 97Q644 100 674 122" stroke="#0D7377" stroke-width="0.5" fill="none" stroke-dasharray="4,2" opacity="0.4"/>
+  <path d="M542 160Q572 142 608 145Q644 147 674 155" stroke="#0D7377" stroke-width="0.5" fill="none" stroke-dasharray="4,2" opacity="0.4"/>
+  <!-- Pointwise band (narrower) -->
+  <path d="M542 135Q572 102 608 105Q644 107 674 127L674 150Q644 142 608 140Q572 137 542 155Z" fill="#0D7377" opacity="0.1"/>
+  <path d="M542 135Q572 102 608 105Q644 107 674 127" stroke="#0D7377" stroke-width="0.6" fill="none" stroke-dasharray="2,1"/>
+  <path d="M542 155Q572 137 608 140Q644 142 674 150" stroke="#0D7377" stroke-width="0.6" fill="none" stroke-dasharray="2,1"/>
+  <!-- β(t) estimate -->
+  <path d="M542 145Q572 112 608 117Q644 122 674 137" stroke="#0D7377" stroke-width="1.5" fill="none"/>
+  <!-- Labels -->
+  <text x="560" y="100" font-size="7.8" fill="#0D7377">simult.</text>
+  <text x="560" y="115" font-size="7.8" fill="#0D7377">pointwise</text>
+  <text x="540" y="132" font-size="7.8" fill="#999">0</text>
+
+  <text x="608" y="192" text-anchor="middle" font-size="11.0" fill="#888">fregre.bootstrap.ci</text>
+
+  <!-- Bottom attributes -->
+  <text x="91" y="210" text-anchor="middle" font-size="9.4" fill="#2C5F8A">Gaussian · variable width</text>
+  <text x="265" y="210" text-anchor="middle" font-size="9.4" fill="#2E8B57">distribution-free · P(y∈C) ≥ 1−α</text>
+  <text x="436" y="210" text-anchor="middle" font-size="9.4" fill="#7B2D8E">PRESS · LOO R²</text>
+  <text x="608" y="210" text-anchor="middle" font-size="9.4" fill="#0D7377">cases bootstrap · sup-norm</text>
+</svg>

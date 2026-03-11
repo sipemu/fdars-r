@@ -10,53 +10,12 @@ with:
 - k-means++ initialization
 - Automatic optimal k selection
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-
-# Generate data with 3 distinct clusters
-set.seed(42)
-n_per_cluster <- 20
-m <- 100
-t_grid <- seq(0, 1, length.out = m)
-
-# Cluster 1: Sine curves
-X1 <- matrix(0, n_per_cluster, m)
-for (i in 1:n_per_cluster) {
-  X1[i, ] <- sin(2 * pi * t_grid) + rnorm(m, sd = 0.15)
-}
-
-# Cluster 2: Cosine curves
-X2 <- matrix(0, n_per_cluster, m)
-for (i in 1:n_per_cluster) {
-  X2[i, ] <- cos(2 * pi * t_grid) + rnorm(m, sd = 0.15)
-}
-
-# Cluster 3: Linear curves
-X3 <- matrix(0, n_per_cluster, m)
-for (i in 1:n_per_cluster) {
-  X3[i, ] <- 2 * t_grid - 1 + rnorm(m, sd = 0.15)
-}
-
-X <- rbind(X1, X2, X3)
-true_clusters <- rep(1:3, each = n_per_cluster)
-
-fd <- fdata(X, argvals = t_grid)
-plot(fd)
-```
-
-![](clustering_files/figure-html/setup-1.png)
+![Functional Clustering](../reference/figures/clustering-diagram.svg)
 
 ## K-Means Clustering
+
+![K-Means
+Clustering](../reference/figures/clustering-kmeans-diagram.svg)
 
 ### Basic Usage
 
@@ -265,6 +224,9 @@ plot(init_centers)
 ![](clustering_files/figure-html/kmeanspp-1.png)
 
 ## Fuzzy C-Means Clustering
+
+![Fuzzy C-Means
+Clustering](../reference/figures/clustering-fcm-diagram.svg)
 
 Unlike hard k-means where each curve belongs to exactly one cluster,
 fuzzy c-means (FCM) assigns membership degrees to each cluster. This is

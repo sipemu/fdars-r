@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 225" fill="none">
+  <defs>
+    <style>text { font-family: 'Segoe UI', system-ui, sans-serif; }</style>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="25" font-size="17.5" fill="#333" text-anchor="middle" font-weight="600">Mixed Changepoint: Both Shape and Timing Change</text>
+
+  <!-- Before panel -->
+  <rect x="20" y="40" width="280" height="162.5" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.1"/>
+  <text x="160" y="62.5" font-size="13.8" fill="#4A90D9" text-anchor="middle" font-weight="600">Before (i = 1 … 30)</text>
+  <!-- Simple sine waves -->
+  <path d="M 40 125.0 Q 80 87.5 120 125.0 Q 160 162.5 200 125.0 Q 240 87.5 280 125.0" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <path d="M 40 127.5 Q 80 92.5 120 127.5 Q 160 160.0 200 127.5 Q 240 92.5 280 127.5" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.4"/>
+  <path d="M 40 122.5 Q 80 90.0 120 122.5 Q 160 157.5 200 122.5 Q 240 90.0 280 122.5" stroke="#4A90D9" stroke-width="1.6" fill="none" opacity="0.3"/>
+  <text x="160" y="187.5" font-size="11.2" fill="#666" text-anchor="middle">sin(2πt), regular timing</text>
+
+  <!-- Arrow -->
+  <line x1="320" y1="121.2" x2="370" y2="121.2" stroke="#7B2D8E" stroke-width="2.1" marker-end="u r l a r r o w 3"/>
+  <text x="345" y="110" font-size="12.5" fill="#7B2D8E" text-anchor="middle" font-weight="600">τ = 30</text>
+  <defs><marker id="a r r o w 3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto"><path d="M 0 0.0 L 10 6.2 L 0 12.5 z" fill="#7B2D8E"/></marker></defs>
+
+  <!-- After panel -->
+  <rect x="400" y="40" width="280" height="162.5" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.1"/>
+  <text x="540" y="62.5" font-size="13.8" fill="#7B2D8E" text-anchor="middle" font-weight="600">After (i = 31 … 60)</text>
+  <!-- Larger amplitude + harmonic + warped timing -->
+  <path d="M 420 125.0 Q 440 68.8 460 97.5 Q 480 127.5 510 87.5 Q 545 56.2 580 110.0 Q 610 156.2 640 100.0 Q 655 68.8 660 125.0" stroke="#7B2D8E" stroke-width="1.9" fill="none" opacity="0.6"/>
+  <path d="M 420 127.5 Q 440 72.5 460 102.5 Q 480 125.0 510 90.0 Q 545 60.0 580 115.0 Q 610 152.5 640 102.5 Q 655 72.5 660 127.5" stroke="#7B2D8E" stroke-width="1.9" fill="none" opacity="0.4"/>
+  <path d="M 420 122.5 Q 440 65.0 460 93.8 Q 480 130.0 510 85.0 Q 545 52.5 580 106.2 Q 610 160.0 640 97.5 Q 655 65.0 660 122.5" stroke="#7B2D8E" stroke-width="1.9" fill="none" opacity="0.3"/>
+  <text x="540" y="187.5" font-size="11.2" fill="#666" text-anchor="middle">new shape + warped timing</text>
+
+  <!-- Bottom annotation -->
+  <rect x="180" y="210" width="120" height="12.5" rx="3" fill="#D55E00" opacity="0.15"/>
+  <text x="240" y="220" font-size="10" fill="#D55E00" text-anchor="middle">amplitude change</text>
+  <rect x="390" y="210" width="120" height="12.5" rx="3" fill="#E6A020" opacity="0.15"/>
+  <text x="450" y="220" font-size="10" fill="#E6A020" text-anchor="middle">phase change</text>
+</svg>

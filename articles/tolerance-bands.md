@@ -32,6 +32,9 @@ quantifies the uncertainty in the estimated *mean function*. Tolerance
 bands are always wider than confidence bands because individual curve
 variability exceeds mean estimation uncertainty.
 
+![Confidence vs Tolerance Bands
+Diagram](../reference/figures/tolerance-bands-diagram.svg)
+
 ## How It Works (Intuition)
 
 Imagine you have a collection of temperature curves measured over a
@@ -187,31 +190,6 @@ into the amplitude component, reducing the effective variance at each
 grid point.
 
 ## Generate Sample Data
-
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-set.seed(42)
-
-argvals <- seq(0, 1, length.out = 50)
-n <- 60
-data <- matrix(0, n, 50)
-for (i in 1:n) {
-  data[i, ] <- sin(2 * pi * argvals) + rnorm(1, 0, 0.3) +
-               rnorm(50, 0, 0.1)
-}
-fd <- fdata(data, argvals = argvals)
-plot(fd)
-```
-
-![](tolerance-bands_files/figure-html/setup-1.png)
 
 ## FPCA Bootstrap Band
 

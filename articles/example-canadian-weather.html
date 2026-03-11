@@ -120,25 +120,13 @@ permutation FANOVA confirms highly significant regional differences (p
 &lt; 0.002).</p>
 <p>The Canadian Weather dataset is a classic benchmark in functional
 data analysis (Ramsay and Silverman, 2005).</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="data-preparation">Data Preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
 </h2>
 <p>The dataset contains daily temperature and precipitation averaged
 over 1960–1994 at 35 Canadian weather stations, grouped into 4
 regions.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">CanadianWeather</span>, package <span class="op">=</span> <span class="st">"fda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Temperature: 365 x 35 matrix (days x stations) — transpose for fdata</span></span>
@@ -167,7 +155,7 @@ regions.</p>
 <div class="section level2">
 <h2 id="temperature-curves-by-region">Temperature Curves by Region<a class="anchor" aria-label="anchor" href="#temperature-curves-by-region"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">region_colors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Arctic"</span> <span class="op">=</span> <span class="st">"#56B4E9"</span>, <span class="st">"Atlantic"</span> <span class="op">=</span> <span class="st">"#E69F00"</span>,</span>
 <span>                    <span class="st">"Continental"</span> <span class="op">=</span> <span class="st">"#009E73"</span>, <span class="st">"Pacific"</span> <span class="op">=</span> <span class="st">"#CC79A7"</span><span class="op">)</span></span>
 <span></span>
@@ -195,7 +183,7 @@ significant across the whole year?</p>
 <div class="section level2">
 <h2 id="functional-anova-do-regions-differ">Functional ANOVA: Do Regions Differ?<a class="anchor" aria-label="anchor" href="#functional-anova-do-regions-differ"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anova_temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fanova.html">fanova</a></span><span class="op">(</span><span class="va">fd_temp</span>, <span class="va">region</span>, n.perm <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">anova_temp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Functional ANOVA</span></span>
@@ -208,7 +196,7 @@ significant across the whole year?</p>
 <p>The small p-value confirms that the four regions have significantly
 different mean temperature curves — the visual separation is real, not a
 sampling artifact.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anova_temp</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">91</span>, <span class="fl">182</span>, <span class="fl">274</span><span class="op">)</span>,</span>
 <span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Jan"</span>, <span class="st">"Apr"</span>, <span class="st">"Jul"</span>, <span class="st">"Oct"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -224,7 +212,7 @@ intermediate. The separation is greatest in winter (days 1–90 and
 <h2 id="pairwise-fanova">Pairwise FANOVA<a class="anchor" aria-label="anchor" href="#pairwise-fanova"></a>
 </h2>
 <p>Which specific region pairs differ?</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test each pair of regions</span></span>
 <span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/combn.html" class="external-link">combn</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">region</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">pairwise_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -300,7 +288,7 @@ summer when both regions reach similar peak temperatures.</p>
 </h2>
 <p>Function-on-scalar regression reveals <em>how</em> geographic
 variables shape the temperature curve at each day of the year.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">latitude</span>, <span class="va">longitude</span><span class="op">)</span></span>
 <span><span class="va">fosr_temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.html">fosr</a></span><span class="op">(</span><span class="va">fd_temp</span>, <span class="va">predictors</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fosr_temp</span><span class="op">)</span></span>
@@ -311,7 +299,7 @@ variables shape the temperature curve at each day of the year.</p>
 <span><span class="co">#&gt;   Evaluation points: 365 </span></span>
 <span><span class="co">#&gt;   R-squared: 0.466 </span></span>
 <span><span class="co">#&gt;   Lambda: 1</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fosr_temp</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">91</span>, <span class="fl">182</span>, <span class="fl">274</span><span class="op">)</span>,</span>
 <span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Jan"</span>, <span class="st">"Apr"</span>, <span class="st">"Jul"</span>, <span class="st">"Oct"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -337,7 +325,7 @@ diminishes in summer.</li>
 <div class="section level3">
 <h3 id="fpc-based-fosr">FPC-Based FOSR<a class="anchor" aria-label="anchor" href="#fpc-based-fosr"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fosr_fpc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.fpc.html">fosr.fpc</a></span><span class="op">(</span><span class="va">fd_temp</span>, <span class="va">predictors</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"FPC-based R-squared:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fosr_fpc</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; FPC-based R-squared: 0.8114</span></span></code></pre></div>
@@ -346,7 +334,7 @@ diminishes in summer.</li>
 <h3 id="prediction-what-would-a-station-at-given-coordinates-look-like">Prediction: What Would a Station at Given Coordinates Look
 Like?<a class="anchor" aria-label="anchor" href="#prediction-what-would-a-station-at-given-coordinates-look-like"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predict temperature curve for hypothetical stations</span></span>
 <span><span class="va">new_locs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="fl">45</span>, <span class="op">-</span><span class="fl">75</span>,   <span class="co"># Montreal-like (Continental)</span></span>
@@ -379,7 +367,7 @@ Like?<a class="anchor" aria-label="anchor" href="#prediction-what-would-a-statio
 <div class="section level3">
 <h3 id="fanova-on-precipitation">FANOVA on Precipitation<a class="anchor" aria-label="anchor" href="#fanova-on-precipitation"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anova_precip</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fanova.html">fanova</a></span><span class="op">(</span><span class="va">fd_precip</span>, <span class="va">region</span>, n.perm <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">anova_precip</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Functional ANOVA</span></span>
@@ -389,7 +377,7 @@ Like?<a class="anchor" aria-label="anchor" href="#prediction-what-would-a-statio
 <span><span class="co">#&gt;   Global F-statistic: 14.0489 </span></span>
 <span><span class="co">#&gt;   P-value: 0.001996 </span></span>
 <span><span class="co">#&gt;   Permutations: 500</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anova_precip</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">91</span>, <span class="fl">182</span>, <span class="fl">274</span><span class="op">)</span>,</span>
 <span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Jan"</span>, <span class="st">"Apr"</span>, <span class="st">"Jul"</span>, <span class="st">"Oct"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -403,7 +391,7 @@ summer-dominated precipitation.</p>
 <div class="section level3">
 <h3 id="fosr-on-precipitation">FOSR on Precipitation<a class="anchor" aria-label="anchor" href="#fosr-on-precipitation"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fosr_precip</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.html">fosr</a></span><span class="op">(</span><span class="va">fd_precip</span>, <span class="va">predictors</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Precipitation FOSR R-squared:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fosr_precip</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Precipitation FOSR R-squared: 0.2542</span></span></code></pre></div>
@@ -414,7 +402,7 @@ summer-dominated precipitation.</p>
 </h2>
 <p>Can we classify a station’s region from its temperature curve
 alone?</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Functional classification with cross-validation</span></span>
 <span><span class="va">classif_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fclassif.cv.html">fclassif.cv</a></span><span class="op">(</span><span class="va">fd_temp</span>, <span class="va">region</span>, nfold <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">classif_result</span><span class="op">)</span></span>
@@ -424,7 +412,7 @@ alone?</p>
 <span><span class="co">#&gt;   Folds: 5 </span></span>
 <span><span class="co">#&gt;   Error rate: 0.1429 </span></span>
 <span><span class="co">#&gt;   Best ncomp: 3</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Also fit on full data to see confusion matrix</span></span>
 <span><span class="va">classif_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fclassif.html">fclassif</a></span><span class="op">(</span><span class="va">fd_temp</span>, <span class="va">region</span><span class="op">)</span></span>
 <span></span>
@@ -472,11 +460,11 @@ distinctive.</li>
 </h2>
 <ul>
 <li>
-<code><a href="../articles/functional-regression.html">vignette("articles/functional-regression")</a></code> — FOSR and
-FANOVA methodology</li>
+<code><a href="../articles/scalar-on-function.html">vignette("articles/scalar-on-function")</a></code> —
+scalar-on-function regression methods</li>
 <li>
-<code><a href="../articles/regression.html">vignette("articles/regression")</a></code> — scalar-on-function
-regression methods</li>
+<code><a href="../articles/function-on-scalar.html">vignette("articles/function-on-scalar")</a></code> — FOSR and
+FANOVA methodology</li>
 <li>
 <code><a href="../articles/example-tecator-regression.html">vignette("articles/example-tecator-regression")</a></code> —
 real-data regression: NIR spectra → fat content</li>

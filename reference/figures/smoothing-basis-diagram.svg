@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrBE" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#2E8B57">Basis Expansion</text>
+  <text x="350" y="50" text-anchor="middle" font-size="13" fill="#888">f(t) = &#931; c&#7096; &#966;&#7096;(t)  &#8212;  project onto K basis functions</text>
+
+  <!-- Left: Basis functions -->
+  <rect x="16" y="72" width="200" height="180" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="116" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">B-spline Basis</text>
+  <text x="116" y="114" text-anchor="middle" font-size="12" fill="#555">K basis functions &#966;&#7096;(t)</text>
+
+  <!-- Overlapping bell-shaped B-spline curves -->
+  <path d="M32 200 Q48 200 56 174 Q64 148 80 148 Q96 148 104 200" stroke="#2E8B57" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M64 200 Q80 200 88 168 Q96 136 112 136 Q128 136 136 200" stroke="#2E8B57" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M96 200 Q112 200 120 162 Q128 124 144 124 Q160 124 168 200" stroke="#2E8B57" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M128 200 Q144 200 152 156 Q160 112 176 112 Q192 112 200 200" stroke="#2E8B57" stroke-width="1.5" fill="none" opacity="0.4"/>
+
+  <text x="116" y="228" text-anchor="middle" font-size="12" fill="#888">fdata2basis(fd, K)</text>
+
+  <!-- Arrow -->
+  <line x1="220" y1="162" x2="268" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#arrBE)"/>
+
+  <!-- Middle: Coefficients -->
+  <rect x="276" y="72" width="150" height="180" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="351" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Coefficients</text>
+  <text x="351" y="114" text-anchor="middle" font-size="12" fill="#555">c = (c&#8321;, c&#8322;, ..., c&#7096;)</text>
+
+  <!-- Coefficient bar chart -->
+  <rect x="296" y="140" width="18" height="50" rx="2" fill="#2E8B57" opacity="0.7"/>
+  <rect x="320" y="130" width="18" height="60" rx="2" fill="#2E8B57" opacity="0.6"/>
+  <rect x="344" y="150" width="18" height="40" rx="2" fill="#2E8B57" opacity="0.5"/>
+  <rect x="368" y="160" width="18" height="30" rx="2" fill="#2E8B57" opacity="0.4"/>
+  <rect x="392" y="170" width="18" height="20" rx="2" fill="#2E8B57" opacity="0.3"/>
+  <text x="305" y="208" font-size="10" fill="#888">c&#8321;</text>
+  <text x="329" y="208" font-size="10" fill="#888">c&#8322;</text>
+  <text x="353" y="208" font-size="10" fill="#888">c&#8323;</text>
+  <text x="377" y="208" font-size="10" fill="#888">c&#8324;</text>
+  <text x="401" y="208" font-size="10" fill="#888">c&#8325;</text>
+  <text x="351" y="238" text-anchor="middle" font-size="11" fill="#888">K &#8810; m grid points</text>
+
+  <!-- Arrow -->
+  <line x1="430" y1="162" x2="478" y2="162" stroke="#555" stroke-width="1.5" marker-end="url(#arrBE)"/>
+
+  <!-- Right: Reconstructed curve -->
+  <rect x="486" y="72" width="198" height="180" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="585" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Reconstruction</text>
+  <text x="585" y="114" text-anchor="middle" font-size="12" fill="#555">basis2fdata(c)</text>
+  <!-- Smooth reconstructed curve -->
+  <path d="M506 180 Q524 166 542 154 Q560 144 578 136 Q596 130 614 128 Q632 130 650 134 Q666 140 674 142" stroke="#2E8B57" stroke-width="2.5" fill="none"/>
+  <!-- Faded dots showing original data -->
+  <circle cx="510" cy="184" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="528" cy="168" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="546" cy="160" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="564" cy="142" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="582" cy="140" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="600" cy="130" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="618" cy="132" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="636" cy="130" r="2.5" fill="#999" opacity="0.3"/>
+  <circle cx="654" cy="138" r="2.5" fill="#999" opacity="0.3"/>
+  <text x="585" y="232" text-anchor="middle" font-size="12" fill="#888">Dimensionality reduction</text>
+
+  <!-- Bottom: Key properties -->
+  <text x="120" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#2E8B57">B-spline or Fourier</text>
+  <text x="350" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#2E8B57">K controls complexity</text>
+  <text x="580" y="270" text-anchor="middle" font-size="12" font-weight="bold" fill="#2E8B57">CV selects optimal K</text>
+</svg>

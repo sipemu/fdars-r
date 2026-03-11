@@ -89,18 +89,7 @@ model will perform on new functional observations</li>
 <code><a href="../reference/cv.fdata.html">cv.fdata()</a></code> function provides a unified framework for both,
 producing <strong>out-of-fold (OOF) predictions</strong> where every
 observation is predicted exactly once.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'fdars'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     cov, decompose, deriv, median, sd, var</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     norm</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<img src="../reference/figures/cross-validation-diagram.svg" alt="Cross-Validation for Functional Data" style="width:100%; max-width:720px; display:block; margin:1em auto;">
 </div>
 <div class="section level2">
 <h2 id="k-fold-cross-validation">K-Fold Cross-Validation<a class="anchor" aria-label="anchor" href="#k-fold-cross-validation"></a>
@@ -189,7 +178,7 @@ can be computed efficiently.</p>
 <div class="section level2">
 <h2 id="simple-example">Simple Example<a class="anchor" aria-label="anchor" href="#simple-example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
@@ -213,7 +202,7 @@ can be computed efficiently.</p>
 </h3>
 <p>The interface is simple: pass any fitting function and
 <code>cv.fdata</code> handles the fold loop.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="../reference/fregre.pc.html">fregre.pc</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  kfold <span class="op">=</span> <span class="fl">5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
@@ -244,7 +233,7 @@ can be computed efficiently.</p>
 <li>
 <code>$fold.metrics</code> — per-fold metrics</li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Every observation predicted exactly once</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Predictions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cv_result</span><span class="op">$</span><span class="va">oof.predictions</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Predictions: 80</span></span>
@@ -275,7 +264,7 @@ folds, on training data only): selects hyperparameters</li>
 </ul>
 <img src="../reference/figures/nested-cv-diagram.svg" alt="Nested Cross-Validation Diagram" style="width:100%; max-width:700px;"><p>With <code>cv.fdata</code>, nested CV is achieved by putting the
 existing <code>*.cv</code> function inside <code>fit.fn</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_nested</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="co"># Inner CV selects optimal ncomp on training data only</span></span>
@@ -297,7 +286,7 @@ existing <code>*.cv</code> function inside <code>fit.fn</code>:</p>
 <span><span class="co">#&gt; Per-fold RMSE range: [0.4592, 0.6934]</span></span></code></pre></div>
 <p>The hyperparameter selected can vary across outer folds — this is
 expected and desirable, as it reflects genuine uncertainty:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ncomps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">cv_nested</span><span class="op">$</span><span class="va">fold.models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">m</span><span class="op">$</span><span class="va">ncomp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ncomp per fold:"</span>, <span class="va">ncomps</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ncomp per fold: 1 5 8 1 1</span></span></code></pre></div>
@@ -316,7 +305,7 @@ similar
 distribution.</p>
 <img src="../reference/figures/stratified-folds-diagram.svg" alt="Stratified Folds Diagram" style="width:100%; max-width:700px;"><p><code>cv.fdata</code> uses stratified folds by default
 (<code>stratified = TRUE</code>).</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Skewed response</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">y_skew</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
@@ -352,7 +341,7 @@ each observation multiple predictions.</p>
 <p>This lets you assess <strong>prediction variability</strong>: how
 much a prediction changes depending on which observations happen to be
 in its training set.</p>
-<img src="../reference/figures/repeated-cv-diagram.svg" alt="Repeated Cross-Validation Diagram" style="width:100%; max-width:700px;"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<img src="../reference/figures/repeated-cv-diagram.svg" alt="Repeated Cross-Validation Diagram" style="width:100%; max-width:700px;"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="../reference/fregre.pc.html">fregre.pc</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  kfold <span class="op">=</span> <span class="fl">5</span>, nrep <span class="op">=</span> <span class="fl">10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
@@ -381,7 +370,7 @@ repetition (an
 matrix), while <code>$oof.predictions</code> contains the aggregated
 (mean) predictions. The <code>$oof.sd</code> vector gives the standard
 deviation of predictions across repetitions for each observation.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Observations with highest prediction variability</span></span>
 <span><span class="va">top_var</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">cv_rep</span><span class="op">$</span><span class="va">oof.sd</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Top 6 per-observation SDs:\n"</span><span class="op">)</span></span>
@@ -467,7 +456,7 @@ deviation of predictions across repetitions for each observation.</p>
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\pm 1</annotation></semantics></math>
 SD) on the observed-vs-predicted scatter, plus a histogram of prediction
 variability:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cv_rep</span><span class="op">)</span></span></code></pre></div>
 <p><img src="cross-validation_files/figure-html/repeated-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>High per-observation variability can flag <strong>influential
@@ -482,7 +471,7 @@ is unstable.</p>
 assignments with the <code>seed</code> parameter. When two methods use
 the same seed, they are evaluated on identical train/test splits,
 removing a source of variability.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="../reference/fregre.pc.html">fregre.pc</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  kfold <span class="op">=</span> <span class="fl">5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
@@ -550,7 +539,7 @@ observations</li>
 <strong>Model sensitivity</strong> — the method is fragile to small
 data changes</li>
 </ul>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">cv_nested</span><span class="op">$</span><span class="va">fold.metrics</span>, digits <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"Per-fold metrics (nested CV)"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -606,11 +595,11 @@ data changes</li>
 </h2>
 <p>The <code>plot</code> method for <code>cv.fdata</code> objects
 produces observed-vs-predicted and per-fold residual boxplots:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cv_nested</span><span class="op">)</span></span></code></pre></div>
 <p><img src="cross-validation_files/figure-html/plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>For multi-method comparison, build a ggplot directly:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_oof</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Observed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">y</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  Predicted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cv_pc</span><span class="op">$</span><span class="va">oof.predictions</span>, <span class="va">cv_basis</span><span class="op">$</span><span class="va">oof.predictions</span>,</span>
@@ -633,7 +622,7 @@ produces observed-vs-predicted and per-fold residual boxplots:</p>
 <p>By default, <code>cv.fdata</code> calls
 <code>predict(model, newdata)</code>. For models that need a different
 prediction interface, pass a <code>predict.fn</code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.fdata.html">cv.fdata</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>,</span>
 <span>  fit.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="../reference/fregre.basis.html">fregre.basis</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, nbasis <span class="op">=</span> <span class="fl">11</span>, lambda <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
 <span>  predict.fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span><span class="op">)</span>,</span>
@@ -650,7 +639,7 @@ method.</p>
 <p><code>cv.fdata</code> supports classification when <code>y</code> is
 a factor. Fold stratification preserves class proportions, and metrics
 include accuracy and a confusion matrix.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Binary classification from the simulated data</span></span>
 <span><span class="va">y_class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">y</span> <span class="op">&gt;</span> <span class="fu"><a href="../reference/median.html">median</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span>, <span class="st">"high"</span>, <span class="st">"low"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -760,8 +749,8 @@ hyperparameters</li>
 </h2>
 <ul>
 <li>
-<code><a href="../articles/regression.html">vignette("articles/regression")</a></code> — regression methods
-overview</li>
+<code><a href="../articles/scalar-on-function.html">vignette("articles/scalar-on-function")</a></code> —
+scalar-on-function regression methods</li>
 <li>
 <code><a href="../articles/example-cross-validation.html">vignette("articles/example-cross-validation")</a></code> —
 real-data example with Tecator NIR spectra</li>

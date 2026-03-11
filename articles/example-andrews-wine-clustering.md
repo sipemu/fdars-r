@@ -1,15 +1,5 @@
 # Andrews Wine: Clustering & Variable Importance
 
-``` r
-library(fdars)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(knitr)
-theme_set(theme_minimal(base_size = 13))
-set.seed(42)
-```
-
 This article is part of a four-article series analyzing 178 wines (3
 cultivars, 13 chemicals) with Andrews curves and functional data
 analysis. Each article is self-contained.

@@ -15,9 +15,9 @@ boxplot(
   depth.func = depth.MBD,
   show.outliers = TRUE,
   col.median = "black",
-  col.envelope = "magenta",
-  col.fence = "pink",
-  col.outliers = "red",
+  col.envelope = "steelblue",
+  col.fence = "#B0C4DE",
+  col.outliers = "#D55E00",
   ...
 )
 ```
@@ -51,15 +51,15 @@ boxplot(
 
 - col.envelope:
 
-  Color for central envelope (default "magenta").
+  Color for central envelope (default "steelblue").
 
 - col.fence:
 
-  Color for fence region (default "pink").
+  Color for fence region (default "#B0C4DE").
 
 - col.outliers:
 
-  Color for outlier curves (default "red").
+  Color for outlier curves (default "#D55E00").
 
 - ...:
 

@@ -67,6 +67,14 @@ A list of class 'outliers.fdata' with components:
 
   Percentile used for threshold
 
+- p.value:
+
+  Bootstrap-calibrated p-values for each curve
+
+- boot_dist:
+
+  Sorted bootstrap null distribution of max distances
+
 - fdataobj:
 
   Original fdata object

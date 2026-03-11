@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Cross-Validation for Functional Data</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">Honest out-of-sample evaluation via fold rotation</text>
+
+  <!-- ===== Left: K-Fold diagram ===== -->
+  <rect x="16" y="80" width="320" height="220" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="176" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">K-Fold CV (k = 5)</text>
+
+  <!-- Fold 1 -->
+  <rect x="32" y="118" width="56" height="20" rx="3" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <rect x="92" y="118" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="152" y="118" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="212" y="118" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="272" y="118" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <text x="60" y="133" text-anchor="middle" font-size="9" fill="#fff" font-weight="bold">Test</text>
+  <text x="120" y="133" text-anchor="middle" font-size="9" fill="#2C5F8A">Train</text>
+
+  <!-- Fold 2 -->
+  <rect x="32" y="144" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="92" y="144" width="56" height="20" rx="3" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <rect x="152" y="144" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="212" y="144" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="272" y="144" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+
+  <!-- Fold 3 -->
+  <rect x="32" y="170" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="92" y="170" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="152" y="170" width="56" height="20" rx="3" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <rect x="212" y="170" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="272" y="170" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+
+  <!-- Fold 4 -->
+  <rect x="32" y="196" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="92" y="196" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="152" y="196" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="212" y="196" width="56" height="20" rx="3" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <rect x="272" y="196" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+
+  <!-- Fold 5 -->
+  <rect x="32" y="222" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="92" y="222" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="152" y="222" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="212" y="222" width="56" height="20" rx="3" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <rect x="272" y="222" width="56" height="20" rx="3" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+
+  <!-- Legend -->
+  <rect x="40" y="258" width="14" height="14" rx="2" fill="#E74C3C"/>
+  <text x="60" y="270" font-size="11" fill="#555">Test fold</text>
+  <rect x="130" y="258" width="14" height="14" rx="2" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <text x="150" y="270" font-size="11" fill="#555">Training folds</text>
+
+  <!-- ===== Right: Pipeline ===== -->
+  <rect x="370" y="80" width="334" height="220" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="537" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">cv.fdata() Pipeline</text>
+
+  <!-- Step 1 -->
+  <rect x="390" y="118" width="294" height="36" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="537" y="133" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">1. Partition data into k folds</text>
+  <text x="537" y="148" text-anchor="middle" font-size="11" fill="#555">Stratified by response (optional)</text>
+
+  <!-- Arrow -->
+  <line x1="537" y1="154" x2="537" y2="168" stroke="#555" stroke-width="1.2" marker-end="url(#arrCV)"/>
+
+  <!-- Step 2 -->
+  <rect x="390" y="168" width="294" height="36" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="537" y="183" text-anchor="middle" font-size="13" font-weight="bold" fill="#B37700">2. For each fold: fit &#x2192; predict</text>
+  <text x="537" y="198" text-anchor="middle" font-size="11" fill="#555">Train on k&#x2212;1 folds, predict held-out</text>
+
+  <!-- Arrow -->
+  <line x1="537" y1="204" x2="537" y2="218" stroke="#555" stroke-width="1.2" marker-end="url(#arrCV)"/>
+
+  <!-- Step 3 -->
+  <rect x="390" y="218" width="294" height="36" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="537" y="233" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">3. Collect OOF predictions</text>
+  <text x="537" y="248" text-anchor="middle" font-size="11" fill="#555">Every obs predicted exactly once</text>
+
+  <!-- Arrow -->
+  <line x1="537" y1="254" x2="537" y2="268" stroke="#555" stroke-width="1.2" marker-end="url(#arrCV)"/>
+
+  <!-- Step 4 -->
+  <rect x="390" y="268" width="294" height="28" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="537" y="287" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">4. Compute CV metrics (RMSE, R&#xB2;)</text>
+
+  <!-- ===== Bottom: Two purposes ===== -->
+  <line x1="16" y1="320" x2="704" y2="320" stroke="#eee" stroke-width="1.5"/>
+  <text x="360" y="348" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Two Purposes of CV</text>
+
+  <!-- Purpose 1: Hyperparameter selection -->
+  <rect x="24" y="366" width="330" height="96" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="189" y="390" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Hyperparameter Selection</text>
+  <text x="44" y="410" font-size="12" fill="#555">fregre.pc.cv()  &#x2014; # of PCs</text>
+  <text x="44" y="428" font-size="12" fill="#555">fregre.basis.cv() &#x2014; &#x03BB; penalty</text>
+  <text x="44" y="446" font-size="12" fill="#555">fregre.np.cv()  &#x2014; bandwidth h</text>
+
+  <!-- Purpose 2: Model evaluation -->
+  <rect x="374" y="366" width="330" height="96" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="539" y="390" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Model Evaluation</text>
+  <text x="394" y="410" font-size="12" fill="#555">cv.fdata() &#x2014; unified framework</text>
+  <text x="394" y="428" font-size="12" fill="#555">OOF predictions &#x2192; honest RMSE</text>
+  <text x="394" y="446" font-size="12" fill="#555">Compare models on equal footing</text>
+
+  <defs>
+    <marker id="arrCV" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

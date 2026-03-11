@@ -18,78 +18,8 @@ Returns indices of detected outliers"></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-learn" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Learn</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-learn"><li><h6 class="dropdown-header" data-toc-skip>Getting Started</h6></li>
-    <li><a class="dropdown-item" href="../articles/introduction.html">Introduction to fdars</a></li>
-    <li><a class="dropdown-item" href="../articles/custom-plotting.html">Custom Plotting with ggplot2</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Preprocessing</h6></li>
-    <li><a class="dropdown-item" href="../articles/intro-to-smoothing.html">Introduction to Smoothing</a></li>
-    <li><a class="dropdown-item" href="../articles/working-with-derivatives.html">Working with Derivatives</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Data</h6></li>
-    <li><a class="dropdown-item" href="../articles/simulation-toolbox.html">Simulation Toolbox</a></li>
-    <li><a class="dropdown-item" href="../articles/irregular-sampling.html">Irregular Sampling</a></li>
-  </ul></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-represent" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Represent</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-represent"><li><h6 class="dropdown-header" data-toc-skip>Decomposition</h6></li>
-    <li><a class="dropdown-item" href="../articles/fpca.html">Functional PCA (FPCA)</a></li>
-    <li><a class="dropdown-item" href="../articles/basis-representation.html">Basis Representation</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Transformation</h6></li>
-    <li><a class="dropdown-item" href="../articles/andrews-transformation.html">Andrews Curves</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Ranking &amp; Centrality</h6></li>
-    <li><a class="dropdown-item" href="../articles/depth-functions.html">Depth Functions</a></li>
-    <li><a class="dropdown-item" href="../articles/streaming-depth.html">Streaming Depth</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Proximity</h6></li>
-    <li><a class="dropdown-item" href="../articles/distance-metrics.html">Distance Metrics</a></li>
-  </ul></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-align" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Align</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-align"><li><h6 class="dropdown-header" data-toc-skip>Methods</h6></li>
-    <li><a class="dropdown-item" href="../articles/elastic-alignment.html">Elastic Alignment</a></li>
-    <li><a class="dropdown-item" href="../articles/landmark-registration.html">Landmark Registration</a></li>
-    <li><a class="dropdown-item" href="../articles/tsrvf.html">TSRVF (Tangent Space)</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/alignment-comparison.html">Comparing Alignment Methods</a></li>
-  </ul></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-regression" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Regression</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-regression"><li><h6 class="dropdown-header" data-toc-skip>Nonparametric</h6></li>
-    <li><a class="dropdown-item" href="../articles/regression.html">Kernel &amp; kNN Regression</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Scalar-on-Function</h6></li>
-    <li><a class="dropdown-item" href="../articles/functional-regression.html">Functional Regression</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Function-on-Scalar</h6></li>
-    <li><a class="dropdown-item" href="../articles/functional-regression.html#function-on-scalar-regression">Functional Regression (FOSR)</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Classification</h6></li>
-    <li><a class="dropdown-item" href="../articles/functional-classification.html">Supervised Classification</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Repeated Measures</h6></li>
-    <li><a class="dropdown-item" href="../articles/functional-mixed-models.html">Functional Mixed Models</a></li>
-  </ul></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-analyze" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Analyze</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-analyze"><li><h6 class="dropdown-header" data-toc-skip>Inference</h6></li>
-    <li><a class="dropdown-item" href="../articles/tolerance-bands.html">Tolerance Bands</a></li>
-    <li><a class="dropdown-item" href="../articles/equivalence-testing.html">Equivalence Testing</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Unsupervised</h6></li>
-    <li><a class="dropdown-item" href="../articles/clustering.html">Clustering (K-Means)</a></li>
-    <li><a class="dropdown-item" href="../articles/gmm-clustering.html">GMM Clustering</a></li>
-    <li><a class="dropdown-item" href="../articles/outlier-detection.html">Outlier Detection</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Time Series</h6></li>
-    <li><a class="dropdown-item" href="../articles/seasonal-analysis.html">Seasonal Analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/covariance-functions.html">Covariance Functions</a></li>
-  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/learn.html">Learn</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/examples.html">Examples</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/sipemu/fdars-r/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>

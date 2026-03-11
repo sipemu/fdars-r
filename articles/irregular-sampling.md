@@ -1,19 +1,5 @@
 # Working with Irregular Functional Data
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-```
-
 ## Introduction
 
 Many real-world functional data are irregularly sampled, meaning:
@@ -32,6 +18,9 @@ analysis.
 - **Sensor data**: Measurements with gaps or varying frequency
 - **Environmental monitoring**: Non-uniform temporal sampling
 - **Financial data**: Trades occurring at irregular intervals
+
+![Irregular Functional Data
+Pipeline](../reference/figures/irregular-sampling-diagram.svg)
 
 ## The irregFdata Class
 

@@ -22,20 +22,8 @@ This approach provides:
 **fdars** provides tools to find the optimal basis representation for
 your data.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-theme_set(theme_minimal())
-set.seed(42)
-```
+![Basis Representation Comparison
+Diagram](../reference/figures/basis-representation-diagram.svg)
 
 ## Creating Example Data
 
@@ -576,8 +564,8 @@ ggplot(df_comp, aes(x = t, y = value, color = method, linetype = method, linewid
   analysis
 - `vignette("intro-to-smoothing", package = "fdars")` — smoothing
   techniques for functional data
-- `vignette("regression", package = "fdars")` — scalar-on-function
-  regression methods
+- [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
+  — scalar-on-function regression methods
 
 ## References
 

@@ -26,21 +26,6 @@ timing shifts. Column standardization + kNN or SVM at 10 FPCs achieves
 The elastic pipeline drops to ~66%, demonstrating that elastic alignment
 can *degrade* performance on phase-rigid data.
 
-``` r
-library(fdars)
-#> 
-#> Attaching package: 'fdars'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     cov, decompose, deriv, median, sd, var
-#> The following object is masked from 'package:base':
-#> 
-#>     norm
-library(ggplot2)
-library(patchwork)
-theme_set(theme_minimal())
-```
-
 ![](../../reference/figures/sonar-validation-framework.svg)
 
 ## 1. Data Preparation
