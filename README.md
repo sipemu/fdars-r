@@ -71,17 +71,72 @@ Characterize curve-level variability:
 - Exponential family bands (for non-Gaussian data)
 - Simultaneous confidence band for the mean (Degras)
 
-### Regression
+### Scalar-on-Function Regression
 Predict scalar outcomes from functional predictors:
+- FPC regression (`fregre.lm`) — Rust backend, standard errors, GCV
 - Principal component regression (`fregre.pc`)
 - Basis expansion regression (`fregre.basis`)
 - Nonparametric kernel regression (`fregre.np`)
-- Cross-validation for model selection
+- Multiple functional predictors (`fregre.np.multi`)
+- Mixed scalar + functional (`fregre.np.mixed`)
+- Cross-validation for model selection (`cv.fdata`)
+
+### Function-on-Scalar Regression
+Predict functional responses from scalar predictors:
+- Penalized FOSR (`fosr`) — ridge penalty, coefficient functions
+- FPC-based FOSR (`fosr.fpc`) — dimension-reduced estimation
+- Functional ANOVA (`fanova`) — permutation F-test for group differences
+
+### Elastic Regression
+Alignment-aware regression that jointly aligns curves and fits models:
+- `elastic.regression()` — scalar-on-function regression with simultaneous alignment
+- `elastic.logistic()` — elastic logistic regression for binary classification
+- `elastic.pcr()` — principal component regression with elastic FPCA
+
+### Elastic FPCA
+Separate amplitude and phase variability via PCA:
+- `vert.fpca()` — amplitude (vertical) FPCA on aligned curves
+- `horiz.fpca()` — phase (horizontal) FPCA on warping functions
+- `joint.fpca()` — combined amplitude + phase FPCA with balance parameter
+
+### Elastic Changepoint Detection
+Detect structural breaks in functional time series:
+- `elastic.changepoint()` — CUSUM test with permutation p-values
+- Three change types: amplitude (shape), phase (timing), fpca (combined)
+
+### Functional Classification
+Supervised classification of functional data:
+- LDA, QDA, k-NN, kernel, DD-plot classifiers (`fclassif`)
+- SVM classification
+- Functional logistic regression (`functional.logistic`)
+- Elastic logistic regression (`elastic.logistic`)
+- Cross-validated classification error (`fclassif.cv`)
+
+### Cross-Validation
+- `cv.fdata()` — unified k-fold CV for any fitting function
+- Supports regression (RMSE, MAE, R²) and classification (accuracy)
+- Repeated k-fold with majority voting / mean aggregation
+- Stratified folding for balanced splits
+
+### Model Explainability & Diagnostics
+Comprehensive toolkit for understanding functional regression models:
+- **Global**: beta decomposition, PDP, ALE, Sobol sensitivity, permutation importance
+- **Local**: LIME, SHAP, counterfactual, anchor rules, saliency maps
+- **Diagnostics**: leverage, Cook's distance, VIF, DFBETAS, LOO
+- **Domain**: significant regions, domain selection, pointwise importance
+- **Calibration**: Brier score, ECE, Hosmer-Lemeshow (logistic models)
+- All 22 methods support both `fregre.lm` and `functional.logistic` models
+
+### Uncertainty Quantification
+- Prediction intervals with standard errors
+- Conformal prediction intervals (distribution-free)
+- Bootstrap-based explanation stability
 
 ### Clustering
 Group similar curves together:
 - K-means clustering with K-means++ initialization
 - Fuzzy C-means with soft membership
+- Gaussian Mixture Models (`cluster.gmm`)
 - Automatic selection of optimal k (silhouette, CH, elbow)
 
 ### Smoothing & Basis Expansion
@@ -89,6 +144,7 @@ Group similar curves together:
 - B-spline and Fourier basis expansions
 - P-splines with automatic smoothing parameter selection
 - Cross-validation (GCV, AIC, BIC) for basis selection
+- Penalized basis smoothing (`smooth.basis.fd`) with automatic lambda via GCV
 
 ### Functional Statistics
 - Mean, variance, standard deviation, covariance
@@ -254,11 +310,14 @@ depth(fd, method = "RPD")    # Random projection with derivatives
 
 Predict a scalar response from functional predictors:
 
+- `fregre.lm` - FPC-based functional linear model (Rust backend)
 - `fregre.pc` - Principal component regression
 - `fregre.basis` - Basis expansion regression
 - `fregre.np` - Nonparametric kernel regression
+- `elastic.regression` - Elastic alignment + regression (joint)
+- `elastic.pcr` - Elastic FPCA + principal component regression
 
-All models support `predict()` for new data.
+All models support `predict()` for new data. `fregre.lm` has full explainability/diagnostics support.
 
 ### Distance Metrics
 

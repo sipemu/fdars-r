@@ -2,7 +2,7 @@
 
 All notable changes to fdars are documented in this file.
 
-## [0.5.0] - 2026-03-09
+## [0.5.0] - 2026-03-11
 
 ### Added
 
@@ -17,6 +17,45 @@ All notable changes to fdars are documented in this file.
   - `alignment.quality()` — diagnostic metrics for alignment results
   - `alignment.pairwise.consistency()` — transitivity checks
   - `periodic.rotate()` — rotate periodic curves with methods: peak, xcorr, landmark, iterative
+
+- **Elastic FPCA** (amplitude/phase PCA):
+  - `vert.fpca()` — amplitude (vertical) PCA on aligned curves
+  - `horiz.fpca()` — phase (horizontal) PCA on warping functions
+  - `joint.fpca()` — joint amplitude + phase PCA with balance parameter
+  - S3 print/plot methods for all three classes
+
+- **Elastic regression** (alignment-aware models):
+  - `elastic.regression()` — scalar-on-function regression with simultaneous alignment
+  - `elastic.logistic()` — elastic logistic regression for binary classification
+  - `elastic.pcr()` — principal component regression with elastic FPCA
+  - `elastic.attribution()` — amplitude vs phase contribution decomposition
+  - S3 print/plot methods for all three classes
+
+- **Elastic changepoint detection**:
+  - `elastic.changepoint()` — detect structural breaks in functional time series
+  - Three change types: "amplitude" (shape), "phase" (timing), "fpca" (combined)
+  - CUSUM test statistics with permutation-based p-values
+  - S3 print/plot methods with statistic and data visualization
+
+- **Model explainability & diagnostics** (22+ methods for `fregre.lm` and `functional.logistic`):
+  - Global: `fregre.beta.decomp()`, `fregre.pdp()`, `fregre.ale()`, `fregre.sobol()`, `fregre.importance()`, `fregre.friedman()`
+  - Local: `fregre.lime()`, `fregre.shap()`, `fregre.counterfactual()`, `fregre.anchor()`, `fregre.saliency()`
+  - Diagnostics: `fregre.influence()`, `fregre.vif()`, `fregre.dfbetas()`, `fregre.loo()`
+  - Domain: `fregre.significant.regions()`, `fregre.domain()`, `fregre.pointwise()`
+  - Calibration (logistic): `fregre.calibration()`, `fregre.ece()`
+  - Uncertainty: `fregre.prediction.interval()`, `fregre.conformal()`
+  - Meta: `fregre.stability()`, `fregre.depth()`, `fregre.prototype()`, `fregre.conditional.importance()`
+
+- **Penalized basis smoothing**:
+  - `smooth.basis.fd()` — penalized B-spline/Fourier basis smoothing
+  - `smooth.basis.gcv()` — automatic lambda selection via GCV grid search
+  - S3 print/plot methods for `smooth.basis` objects
+
+- **Cross-validation framework**:
+  - `cv.fdata()` — unified k-fold cross-validation for any fitting function
+  - Supports regression (RMSE, MAE, R²) and classification (accuracy, confusion matrix)
+  - Repeated k-fold CV with aggregation
+  - Stratified folding for balanced class splits
 
 - **Landmark registration**:
   - `detect.landmarks()` — detect peaks, valleys, zero-crossings, inflection points
@@ -45,7 +84,7 @@ All notable changes to fdars are documented in this file.
   - `fanova()` — one-way functional ANOVA with permutation testing
 
 - **Functional classification**:
-  - `fclassif()` — supervised classification (LDA, QDA, kNN, kernel, DD-plot)
+  - `fclassif()` — supervised classification (LDA, QDA, kNN, kernel, DD-plot, SVM)
   - `fclassif.cv()` — cross-validated classification error
 
 - **Functional mixed models**:
@@ -56,6 +95,11 @@ All notable changes to fdars are documented in this file.
 - **GMM clustering**:
   - `cluster.gmm()` — Gaussian Mixture Model clustering with automatic K selection
   - `cluster.init()` — k-means++ initialization
+
+- **Scalar-on-function regression**:
+  - `fregre.lm()`, `fregre.lm.cv()` — FPC-based functional linear regression with Rust backend
+  - `functional.logistic()` — functional logistic regression via IRLS
+  - `fregre.np.mixed()` — mixed scalar + functional nonparametric regression
 
 - **Andrews transformation**:
   - `andrews_transform()` — Fourier expansion of multivariate data to functional curves
@@ -69,13 +113,10 @@ All notable changes to fdars are documented in this file.
   - Diagnostics: `seasonal.strength()`, `seasonal.strength.curve()`, `classify.seasonality()`
   - Change detection: `detect.seasonality.changes()`, `detect.seasonality.changes.auto()`
   - `detect_amplitude_modulation()`, `instantaneous.period()`, `analyze.peak.timing()`
+  - S3 plot methods: `plot.peak_detection()`, `plot.peak_timing()`
 
 - **Equivalence testing**:
   - `fequiv.test()` — functional equivalence test
-
-- **Functional linear model**:
-  - `fregre.lm()`, `fregre.lm.cv()` — FPC-based functional linear regression
-  - `functional.logistic()` — functional logistic regression
 
 - **Simulation toolbox**:
   - `simFunData()`, `simMultiFunData()` — simulate functional data via Karhunen-Loève
@@ -98,19 +139,26 @@ All notable changes to fdars are documented in this file.
   - `plot.tolerance.band()`
   - `plot.fclassif()`, `plot.fmm()`, `plot.fosr()`, `plot.fanova()`
   - `plot.cluster.gmm()`
+  - `plot.elastic.changepoint()`, `plot.elastic.regression()`, `plot.elastic.logistic()`, `plot.elastic.pcr()`
+  - `plot.vert.fpca()`, `plot.horiz.fpca()`, `plot.joint.fpca()`
+  - `plot.smooth.basis()`, `plot.cv.fdata()`
 
-- **Vignettes/articles** (17 articles covering all major features):
+- **Vignettes/articles** (46 articles with SVG overview diagrams):
   - Elastic alignment, landmark registration, TSRVF, alignment comparison
+  - Elastic FPCA, elastic regression, elastic changepoint detection
   - Tolerance bands, streaming depth, distance metrics
   - Functional regression, classification, mixed models, GMM clustering
+  - Model explainability, regression diagnostics, uncertainty quantification
+  - Penalized basis smoothing, cross-validation framework
   - Andrews transformation, seasonal analysis
-  - Example analyses: Berkeley growth study, wine dataset (4 articles)
+  - Covariance functions, simulation toolbox, custom plotting
+  - Example analyses: Berkeley growth study, wine dataset, Sonar TSRVF classification
 
 - **Pre-built binary packages** for macOS (.tgz) and Windows (.zip) attached to
   GitHub Releases — install without Rust toolchain
 
 ### Changed
-- Upgraded Rust backend (fdars-core) to v0.7.2
+- Upgraded Rust backend (fdars-core) to v0.8.0
 - All plots use ggplot2; respects `theme_set()`
 - Renamed functions to avoid S3 dispatch conflicts:
   - `fdata2basis.cv()` → `fdata2basis_cv()`
@@ -121,11 +169,16 @@ All notable changes to fdars are documented in this file.
 - Internal Rust wrapper functions no longer generate man pages (CRAN compliance)
 - Portable Makefiles: removed GNU extensions (`export`, `:=`)
 - Vendored Rust crates cleaned of hidden files and long paths
+- GitHub Actions: pinned R 4.5.2, added Rust toolchain to pkgdown workflow
 
 ### Fixed
+- Changepoint p-values always 1.0 (normalization mismatch in Brownian bridge simulation; replaced with permutation testing)
+- `functional.logistic()` missing `.fpca_scores`, `beta.se`, `std.errors` from Rust
+- `fregre.conformal()` wrapper now works correctly
 - `fdata2basis_2d` example error caused by extendr wrapper name collision
 - `mean(fd)` now returns fdata object (was returning matrix)
 - TSRVF inverse initial values
+- Empty bar charts in seasonal plots (use `coord_cartesian` instead of `ylim`)
 - Regression article cross-references and See Also sections
 
 ## [0.4.0] - 2026-03-04
