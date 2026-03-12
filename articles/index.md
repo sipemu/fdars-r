@@ -123,12 +123,6 @@
   Prediction intervals, LOO cross-validation, conformal prediction, and
   bootstrap confidence bands for functional regression models.
 
-- [Penalized Basis
-  Smoothing](https://sipemu.github.io/fdars-r/articles/smooth-basis.md):
-
-  Smooth functional data using penalized B-spline and Fourier basis
-  expansion with automatic smoothing parameter selection via GCV.
-
 ### Analyze
 
 - [Functional Tolerance

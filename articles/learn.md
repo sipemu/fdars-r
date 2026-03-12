@@ -178,12 +178,6 @@ Quantification](../reference/figures/card-uncertainty-quantification.svg)
 
 Uncertainty Quantification
 
-[](https://sipemu.github.io/fdars-r/articles/smooth-basis.md)
-
-![Penalized Basis Smoothing](../reference/figures/card-smooth-basis.svg)
-
-Penalized Basis Smoothing
-
 ## Analyze
 
 Infer, cluster, detect outliers, and test functional data.
