@@ -4,7 +4,7 @@
 ## usethis namespace: start
 #' @importFrom grDevices rgb
 #' @importFrom graphics abline legend lines mtext par points
-#' @importFrom stats approx as.dist coef dnorm hclust lm mad median optimize pnorm qchisq qnorm qt quantile rnorm runif sd var
+#' @importFrom stats approx as.dist coef dnorm hclust lm mad median optimize pnorm predict qchisq qnorm qt quantile rnorm runif sd var
 #' @importFrom utils head
 #' @importFrom ggplot2 .data
 ## usethis namespace: end

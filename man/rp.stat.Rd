@@ -21,6 +21,12 @@ Computes Cramer-von Mises and Kolmogorov-Smirnov statistics for
 random projection goodness-of-fit testing.
 }
 \examples{
-rp.stat(sample(10), rnorm(10), n.proj = 3)
+\donttest{
+set.seed(1)
+n <- 10
+n_proj <- 3
+proj <- unlist(replicate(n_proj, sample(n), simplify = FALSE))
+rp.stat(proj, rnorm(n), n.proj = n_proj)
+}
 
 }

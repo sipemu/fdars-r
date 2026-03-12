@@ -1521,8 +1521,12 @@ fregre.np.mixed <- function(fdataobj, y, scalar.covariates = NULL,
 #'
 #' @examples
 #' \donttest{
-#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
-#' y <- factor(sample(0:1, 50, replace = TRUE))
+#' set.seed(42)
+#' t_grid <- seq(0, 1, length.out = 30)
+#' X <- matrix(0, 40, 30)
+#' for (i in 1:40) X[i, ] <- sin(2*pi*t_grid) * (2*(i > 20) - 1) + rnorm(30, sd = 0.2)
+#' fd <- fdata(X, argvals = t_grid)
+#' y <- as.numeric(1:40 > 20)
 #' result <- functional.logistic(fd, y, ncomp = 3)
 #' result$accuracy
 #' }
@@ -1847,7 +1851,13 @@ plot.fregre.bootstrap.ci <- function(x, simultaneous = FALSE, ...) {
 #' @return A list with \code{cvm} and \code{ks} vectors of test statistics.
 #'
 #' @examples
-#' rp.stat(sample(10), rnorm(10), n.proj = 3)
+#' \donttest{
+#' set.seed(1)
+#' n <- 10
+#' n_proj <- 3
+#' proj <- unlist(replicate(n_proj, sample(n), simplify = FALSE))
+#' rp.stat(proj, rnorm(n), n.proj = n_proj)
+#' }
 #'
 #' @export
 rp.stat <- function(proj.x.ord, residuals, n.proj) {

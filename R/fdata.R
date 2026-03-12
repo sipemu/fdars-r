@@ -844,7 +844,7 @@ summary.fdata <- function(object, ...) {
 #' @return A ggplot object.
 #'
 #' @export
-#' @importFrom ggplot2 ggplot aes geom_line labs theme_minimal geom_tile geom_contour scale_fill_viridis_c scale_color_viridis_c facet_wrap geom_ribbon scale_color_manual scale_fill_manual geom_text coord_equal autoplot
+#' @importFrom ggplot2 ggplot aes geom_line labs theme_minimal geom_tile geom_contour scale_fill_viridis_c scale_color_viridis_c facet_wrap geom_ribbon scale_color_manual scale_fill_manual geom_text coord_equal autoplot geom_point geom_pointrange geom_abline geom_histogram geom_boxplot geom_hline
 #' @examples
 #' library(ggplot2)
 #' # Get ggplot object without displaying
