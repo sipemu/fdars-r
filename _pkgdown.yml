@@ -72,7 +72,6 @@ articles:
   - articles/explainability
   - articles/regression-diagnostics
   - articles/uncertainty-quantification
-  - articles/smooth-basis
 - title: Analyze
   contents:
   - articles/tolerance-bands

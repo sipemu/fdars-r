@@ -173,11 +173,6 @@ output: github_document
     <div class="fdars-gallery-title">Uncertainty Quantification</div>
   </a>
 
-  <a class="fdars-gallery-item" href="articles/smooth-basis.html">
-    <div class="fdars-gallery-thumb"><img src="reference/figures/card-smooth-basis.svg" alt="Penalized Basis Smoothing"></div>
-    <div class="fdars-gallery-title">Penalized Basis Smoothing</div>
-  </a>
-
 </div>
 
 <!-- ===== ANALYZE ===== -->
