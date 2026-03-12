@@ -96,6 +96,12 @@ Streaming Depth
 
 Distance Metrics
 
+[](https://sipemu.github.io/fdars-r/articles/elastic-fpca.md)
+
+![Elastic FPCA](reference/figures/card-elastic-fpca.svg)
+
+Elastic FPCA
+
 ## Align
 
 Register and align curves to remove phase variability.
@@ -129,18 +135,19 @@ Comparing Methods
 
 Regression, classification, and mixed models for functional data.
 
-[](https://sipemu.github.io/fdars-r/articles/regression.md)
+[](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
 
-![Regression](reference/figures/card-regression.svg)
+![Scalar-on-Function
+Regression](reference/figures/card-scalar-on-function.svg)
 
-Nonparametric Regression
+Scalar-on-Function Regression
 
-[](https://sipemu.github.io/fdars-r/articles/functional-regression.md)
+[](https://sipemu.github.io/fdars-r/articles/function-on-scalar.md)
 
-![Functional
-Regression](reference/figures/card-functional-regression.svg)
+![Function-on-Scalar
+Regression](reference/figures/card-function-on-scalar.svg)
 
-Functional Regression
+Function-on-Scalar Regression
 
 [](https://sipemu.github.io/fdars-r/articles/functional-classification.md)
 
@@ -159,6 +166,38 @@ Mixed Models
 ![Cross-Validation](reference/figures/card-cross-validation.svg)
 
 Cross-Validation
+
+[](https://sipemu.github.io/fdars-r/articles/elastic-regression.md)
+
+![Elastic Regression](reference/figures/card-elastic-regression.svg)
+
+Elastic Regression
+
+[](https://sipemu.github.io/fdars-r/articles/explainability.md)
+
+![Model Explainability](reference/figures/card-explainability.svg)
+
+Model Explainability
+
+[](https://sipemu.github.io/fdars-r/articles/regression-diagnostics.md)
+
+![Regression
+Diagnostics](reference/figures/card-regression-diagnostics.svg)
+
+Regression Diagnostics
+
+[](https://sipemu.github.io/fdars-r/articles/uncertainty-quantification.md)
+
+![Uncertainty
+Quantification](reference/figures/card-uncertainty-quantification.svg)
+
+Uncertainty Quantification
+
+[](https://sipemu.github.io/fdars-r/articles/smooth-basis.md)
+
+![Penalized Basis Smoothing](reference/figures/card-smooth-basis.svg)
+
+Penalized Basis Smoothing
 
 ## Analyze
 
@@ -205,3 +244,9 @@ Seasonal Analysis
 ![Covariance Functions](reference/figures/card-covariance-functions.svg)
 
 Covariance Functions
+
+[](https://sipemu.github.io/fdars-r/articles/elastic-changepoint.md)
+
+![Elastic Changepoint](reference/figures/card-elastic-changepoint.svg)
+
+Elastic Changepoint
