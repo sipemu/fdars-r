@@ -1651,7 +1651,7 @@ predict.fregre.lm <- function(object, newdata = NULL, new.scalar = NULL, ...) {
 #'
 #' @param model A fitted object of class 'fregre.lm' or 'fregre.logistic'.
 #' @param n.boot Number of bootstrap replicates (default 200).
-#' @param alpha Significance level (default 0.05 for 95\% CI).
+#' @param alpha Significance level (default 0.05 for 95 percent CI).
 #' @param seed Random seed for reproducibility.
 #'
 #' @return An object of class 'fregre.bootstrap.ci' with components:

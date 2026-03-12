@@ -11,7 +11,7 @@ fregre.bootstrap.ci(model, n.boot = 200, alpha = 0.05, seed = 42)
 
 \item{n.boot}{Number of bootstrap replicates (default 200).}
 
-\item{alpha}{Significance level (default 0.05 for 95\\% CI).}
+\item{alpha}{Significance level (default 0.05 for 95 percent CI).}
 
 \item{seed}{Random seed for reproducibility.}
 }
