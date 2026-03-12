@@ -390,7 +390,7 @@ for (n_size in sizes) {
 #>   N =   50: 0.0000 sec
 #>   N =  100: 0.0000 sec
 #>   N =  500: 0.0010 sec
-#>   N = 1000: 0.0010 sec
+#>   N = 1000: 0.0020 sec
 ```
 
 For large reference samples with many incoming queries, the streaming
@@ -421,8 +421,8 @@ all.equal(d, d2)
 
 ## See Also
 
-- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.html)
-  — functional depth measures and ranking
+- `vignette("depth-functions", package = "fdars")` — functional depth
+  measures and ranking
 - `vignette("outlier-detection", package = "fdars")` — functional
   outlier detection methods
 

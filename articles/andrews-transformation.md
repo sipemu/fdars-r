@@ -677,8 +677,8 @@ from what you can do *afterward* in function space:
 
 ## See Also
 
-- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.html)
-  — functional depth measures and ranking
+- `vignette("depth-functions", package = "fdars")` — functional depth
+  measures and ranking
 - `vignette("clustering", package = "fdars")` — functional data
   clustering
 - `vignette("outlier-detection", package = "fdars")` — functional

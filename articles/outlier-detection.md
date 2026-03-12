@@ -1076,8 +1076,8 @@ magnitudeshape(fd_labeled, label = "subject")
 
 ## See Also
 
-- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.html)
-  — functional depth measures and ranking
+- `vignette("depth-functions", package = "fdars")` — functional depth
+  measures and ranking
 - `vignette("streaming-depth", package = "fdars")` — real-time depth
   computation for streaming data
 - `vignette("clustering", package = "fdars")` — functional data

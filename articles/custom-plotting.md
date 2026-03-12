@@ -575,5 +575,5 @@ fd %>%
   techniques for functional data
 - `vignette("fpca", package = "fdars")` — functional principal component
   analysis
-- [`vignette("depth-functions", package = "fdars")`](https://sipemu.github.io/fdars-r/articles/depth-functions.html)
-  — functional depth measures and ranking
+- `vignette("depth-functions", package = "fdars")` — functional depth
+  measures and ranking

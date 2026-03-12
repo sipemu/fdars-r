@@ -32,7 +32,7 @@ which is the Kronecker product of two 1D bases."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Convert 2D Functional Data to Tensor Product Basis Coefficients</h1>
-      <small class="dont-index">Source: <a href="https://github.com/sipemu/fdars-r/blob/main/R/basis.R" class="external-link"><code>R/basis.R</code></a>, <a href="https://github.com/sipemu/fdars-r/blob/main/R/extendr-wrappers.R" class="external-link"><code>R/extendr-wrappers.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sipemu/fdars-r/blob/main/R/basis.R" class="external-link"><code>R/basis.R</code></a></small>
       <div class="d-none name"><code>fdata2basis_2d.Rd</code></div>
     </div>
 
@@ -43,9 +43,12 @@ which is the Kronecker product of two 1D bases.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fdata2basis_2d</span><span class="op">(</span><span class="va">data</span>, <span class="va">argvals_s</span>, <span class="va">argvals_t</span>, <span class="va">nbasis_s</span>, <span class="va">nbasis_t</span>, <span class="va">basis_type</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">fdata2basis_2d</span><span class="op">(</span><span class="va">data</span>, <span class="va">argvals_s</span>, <span class="va">argvals_t</span>, <span class="va">nbasis_s</span>, <span class="va">nbasis_t</span>, <span class="va">basis_type</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fdata2basis_2d</span><span class="op">(</span></span>
+<span>  <span class="va">fdataobj</span>,</span>
+<span>  nbasis.s <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  nbasis.t <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bspline"</span>, <span class="st">"fourier"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -88,7 +91,6 @@ $$B_{2d}(s, t) = B_s(s) \otimes B_t(t)$$</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Project to tensor product basis</span></span></span>
 <span class="r-in"><span><span class="va">coefs</span> <span class="op">&lt;-</span> <span class="fu">fdata2basis_2d</span><span class="op">(</span><span class="va">fd2d</span>, nbasis.s <span class="op">=</span> <span class="fl">7</span>, nbasis.t <span class="op">=</span> <span class="fl">7</span>, type <span class="op">=</span> <span class="st">"fourier"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in fdata2basis_2d(fd2d, nbasis.s = 7, nbasis.t = 7, type = "fourier"):</span> unused arguments (nbasis.s = 7, nbasis.t = 7, type = "fourier")</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
