@@ -44,6 +44,23 @@ jobs:
           error-on: '"error"'
           check-dir: '"check"'
 
+      - name: Check for prohibited symbols (CRAN compliance)
+        if: runner.os != 'Windows'
+        run: |
+          SO_FILE=$(find check -name "fdars.so" -o -name "fdars.dylib" 2>/dev/null | head -1)
+          if [ -z "$SO_FILE" ]; then
+            echo "Shared library not found in check dir, skipping symbol check"
+            exit 0
+          fi
+          echo "Scanning $SO_FILE for prohibited symbols..."
+          FOUND=$(nm -g "$SO_FILE" 2>/dev/null | grep -E " T _(abort|exit|_exit|printf|puts)$| T (abort|exit|_exit|printf|puts)$" || true)
+          if [ -n "$FOUND" ]; then
+            echo "::error::CRAN prohibited symbols found in shared library:"
+            echo "$FOUND"
+            exit 1
+          fi
+          echo "No prohibited symbols found - CRAN compliant"
+
   coverage:
     name: Test coverage
     runs-on: ubuntu-latest
