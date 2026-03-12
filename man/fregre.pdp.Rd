@@ -7,7 +7,7 @@
 fregre.pdp(model, data, component, n.grid = 20)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
 \item{data}{An fdata object (the training data).}
 

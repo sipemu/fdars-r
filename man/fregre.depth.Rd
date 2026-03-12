@@ -7,7 +7,7 @@
 fregre.depth(model, data, y, n.boot = 100, seed = NULL)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
 \item{data}{An fdata object.}
 

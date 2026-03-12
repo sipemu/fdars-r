@@ -4,12 +4,16 @@
 \alias{fregre.shap}
 \title{FPC SHAP Values}
 \usage{
-fregre.shap(model, data)
+fregre.shap(model, data, n.samples = 100, seed = NULL)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
 \item{data}{An fdata object (the training data).}
+
+\item{n.samples}{Number of samples for logistic SHAP (default 100).}
+
+\item{seed}{Random seed (used for logistic models).}
 }
 \value{
 A list with values (SHAP matrix), base_value, and mean_scores.

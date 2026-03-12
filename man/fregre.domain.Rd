@@ -7,7 +7,7 @@
 fregre.domain(model, window.width = 5, threshold = 0.1)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
 \item{window.width}{Width of the sliding window (default 5).}
 

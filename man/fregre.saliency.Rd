@@ -4,12 +4,12 @@
 \alias{fregre.saliency}
 \title{Functional Saliency Map}
 \usage{
-fregre.saliency(model, data)
+fregre.saliency(model, data = NULL)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
-\item{data}{An fdata object (the training data).}
+\item{data}{An fdata object (the training data, used for lm models).}
 }
 \value{
 A list with saliency_map (matrix) and mean_absolute_saliency.

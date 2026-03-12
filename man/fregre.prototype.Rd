@@ -7,7 +7,8 @@
 fregre.prototype(model, ncomp, n.prototypes = 5, n.criticisms = 5)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model (uses its FPCA scores).}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model
+(uses its FPCA scores).}
 
 \item{ncomp}{Number of components to use.}
 

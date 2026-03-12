@@ -35,6 +35,8 @@ A list of class 'outliers.fdata' with components:
 \item{distances}{Normalized distances for all curves}
 \item{threshold}{Bootstrap threshold used}
 \item{percentile}{Percentile used for threshold}
+\item{p.value}{Bootstrap-calibrated p-values for each curve}
+\item{boot_dist}{Sorted bootstrap null distribution of max distances}
 \item{fdataobj}{Original fdata object}
 }
 }

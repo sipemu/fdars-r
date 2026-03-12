@@ -7,7 +7,7 @@
 fregre.pointwise(model)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 }
 \value{
 A list with importance, importance_normalized,

@@ -7,7 +7,7 @@
 fregre.anchor(model, data, observation, precision = 0.95, n.bins = 10)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
 \item{data}{An fdata object.}
 

@@ -4,14 +4,18 @@
 \alias{fregre.sobol}
 \title{Sobol Indices}
 \usage{
-fregre.sobol(model, data, y)
+fregre.sobol(model, data, y = NULL, n.samples = 500, seed = NULL)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
 \item{data}{An fdata object (the training data).}
 
-\item{y}{Response vector.}
+\item{y}{Response vector (used for lm models).}
+
+\item{n.samples}{Number of samples for logistic Sobol (default 500).}
+
+\item{seed}{Random seed (used for logistic models).}
 }
 \value{
 A list with first_order, total_order, var_y, and component_variance.

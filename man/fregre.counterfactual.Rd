@@ -4,16 +4,27 @@
 \alias{fregre.counterfactual}
 \title{Counterfactual Explanation}
 \usage{
-fregre.counterfactual(model, data, observation, target.value)
+fregre.counterfactual(
+  model,
+  data,
+  observation,
+  target.value = NULL,
+  max.iter = 100,
+  step.size = 0.1
+)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 
 \item{data}{An fdata object.}
 
 \item{observation}{Index of the observation (1-based).}
 
-\item{target.value}{Target prediction value.}
+\item{target.value}{Target prediction value (for lm models).}
+
+\item{max.iter}{Maximum iterations for logistic counterfactual (default 100).}
+
+\item{step.size}{Step size for logistic counterfactual (default 0.1).}
 }
 \value{
 A list with observation, original_scores, counterfactual_scores,
@@ -22,5 +33,6 @@ counterfactual_prediction, and found.
 }
 \description{
 Finds the minimal change in FPC scores needed to achieve a target
-prediction value.
+prediction value. For logistic models, uses gradient-based optimization
+to find the class-flipping counterfactual.
 }

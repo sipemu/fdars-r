@@ -7,7 +7,7 @@
 fregre.beta.decomp(model)
 }
 \arguments{
-\item{model}{A fitted \code{fregre.lm} model.}
+\item{model}{A fitted \code{fregre.lm} or \code{fregre.logistic} model.}
 }
 \value{
 A list with components (per-FPC beta contributions), coefficients,

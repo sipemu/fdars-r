@@ -7,7 +7,8 @@
 .fit_args(model)
 }
 \description{
-Explainability tools for functional regression models (fregre.lm).
-Includes global explanations (PDP, ALE, Sobol), local explanations
-(SHAP, LIME, anchors, counterfactuals), and diagnostics.
+Explainability tools for functional regression models (fregre.lm
+and fregre.logistic). Includes global explanations (PDP, ALE, Sobol),
+local explanations (SHAP, LIME, anchors, counterfactuals), diagnostics,
+and calibration metrics for logistic models.
 }
