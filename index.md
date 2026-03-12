@@ -89,6 +89,11 @@ output: github_document
     <div class="fdars-gallery-title">Distance Metrics</div>
   </a>
 
+  <a class="fdars-gallery-item" href="articles/elastic-fpca.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-elastic-fpca.svg" alt="Elastic FPCA"></div>
+    <div class="fdars-gallery-title">Elastic FPCA</div>
+  </a>
+
 </div>
 
 <!-- ===== ALIGN ===== -->
@@ -123,14 +128,14 @@ output: github_document
 <p class="fdars-section-desc">Regression, classification, and mixed models for functional data.</p>
 <div class="fdars-gallery">
 
-  <a class="fdars-gallery-item" href="articles/regression.html">
-    <div class="fdars-gallery-thumb"><img src="reference/figures/card-regression.svg" alt="Regression"></div>
-    <div class="fdars-gallery-title">Nonparametric Regression</div>
+  <a class="fdars-gallery-item" href="articles/scalar-on-function.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-scalar-on-function.svg" alt="Scalar-on-Function Regression"></div>
+    <div class="fdars-gallery-title">Scalar-on-Function Regression</div>
   </a>
 
-  <a class="fdars-gallery-item" href="articles/functional-regression.html">
-    <div class="fdars-gallery-thumb"><img src="reference/figures/card-functional-regression.svg" alt="Functional Regression"></div>
-    <div class="fdars-gallery-title">Functional Regression</div>
+  <a class="fdars-gallery-item" href="articles/function-on-scalar.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-function-on-scalar.svg" alt="Function-on-Scalar Regression"></div>
+    <div class="fdars-gallery-title">Function-on-Scalar Regression</div>
   </a>
 
   <a class="fdars-gallery-item" href="articles/functional-classification.html">
@@ -146,6 +151,31 @@ output: github_document
   <a class="fdars-gallery-item" href="articles/cross-validation.html">
     <div class="fdars-gallery-thumb"><img src="reference/figures/card-cross-validation.svg" alt="Cross-Validation"></div>
     <div class="fdars-gallery-title">Cross-Validation</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="articles/elastic-regression.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-elastic-regression.svg" alt="Elastic Regression"></div>
+    <div class="fdars-gallery-title">Elastic Regression</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="articles/explainability.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-explainability.svg" alt="Model Explainability"></div>
+    <div class="fdars-gallery-title">Model Explainability</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="articles/regression-diagnostics.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-regression-diagnostics.svg" alt="Regression Diagnostics"></div>
+    <div class="fdars-gallery-title">Regression Diagnostics</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="articles/uncertainty-quantification.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-uncertainty-quantification.svg" alt="Uncertainty Quantification"></div>
+    <div class="fdars-gallery-title">Uncertainty Quantification</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="articles/smooth-basis.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-smooth-basis.svg" alt="Penalized Basis Smoothing"></div>
+    <div class="fdars-gallery-title">Penalized Basis Smoothing</div>
   </a>
 
 </div>
@@ -188,6 +218,11 @@ output: github_document
   <a class="fdars-gallery-item" href="articles/covariance-functions.html">
     <div class="fdars-gallery-thumb"><img src="reference/figures/card-covariance-functions.svg" alt="Covariance Functions"></div>
     <div class="fdars-gallery-title">Covariance Functions</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="articles/elastic-changepoint.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-elastic-changepoint.svg" alt="Elastic Changepoint"></div>
+    <div class="fdars-gallery-title">Elastic Changepoint</div>
   </a>
 
 </div>
