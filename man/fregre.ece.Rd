@@ -19,3 +19,11 @@ A list with ece, mce, ace, n_bins, and bin_ece_contributions.
 \description{
 Computes ECE, MCE, and ACE for a functional logistic model.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y_bin <- factor(sample(0:1, 50, replace = TRUE))
+fit <- functional.logistic(fd, y_bin)
+result <- fregre.ece(fit, as.numeric(as.character(y_bin)))
+}
+}

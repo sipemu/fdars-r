@@ -20,3 +20,10 @@ A distance matrix (numeric matrix).
 Alias for \code{\link{elastic.distance}} for use with the \code{\link{metric}}
 dispatcher.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+D <- metric.elastic(fd)
+}
+
+}

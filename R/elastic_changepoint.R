@@ -31,6 +31,13 @@
 #'   \item{type}{Type of test performed}
 #'   \item{n}{Number of curves in the series}
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' cp <- elastic.changepoint(fd, type = "amplitude", n.mc = 100)
+#' cp
+#' }
+#'
 #' @export
 elastic.changepoint <- function(fdataobj,
                                 type = c("amplitude", "phase", "fpca"),

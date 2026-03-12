@@ -224,6 +224,12 @@ elastic.distance <- function(fdataobj, fdataref = NULL, ...) {
 #'
 #' @return A distance matrix (numeric matrix).
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+#' D <- metric.elastic(fd)
+#' }
+#'
 #' @export
 metric.elastic <- function(fdataobj, fdataref = NULL, ...) {
   elastic.distance(fdataobj, fdataref, ...)
@@ -1114,6 +1120,14 @@ elastic.align.constrained <- function(fdataobj, target = NULL,
 #'
 #' @return An fdata object containing the reparameterized curve.
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(sin(seq(0, pi, length.out = 20)), 1, 20),
+#'             argvals = seq(0, 1, length.out = 20))
+#' gamma <- seq(0, 1, length.out = 20)^2
+#' fd_warped <- srsf.reparameterize(fd, gamma)
+#' }
+#'
 #' @export
 srsf.reparameterize <- function(fdataobj, gamma) {
   if (!inherits(fdataobj, "fdata")) {
@@ -1135,6 +1149,14 @@ srsf.reparameterize <- function(fdataobj, gamma) {
 #' @param fdataobj An fdata object providing the grid (argvals).
 #'
 #' @return Numeric vector of the composed warping function.
+#'
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 20)
+#' gamma1 <- t^2
+#' gamma2 <- sqrt(t)
+#' composed <- warp.compose(gamma1, gamma2, t)
+#' }
 #'
 #' @export
 warp.compose <- function(gamma1, gamma2, fdataobj) {
@@ -1161,6 +1183,14 @@ warp.compose <- function(gamma1, gamma2, fdataobj) {
 #'   \item \code{f.aligned} — fdata of the aligned curve.
 #'   \item \code{gamma} — Numeric warping function.
 #'   \item \code{distance} — Elastic distance after alignment.
+#' }
+#'
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 50)
+#' f1 <- fdata(matrix(sin(2 * pi * t), 1, 50), argvals = t)
+#' f2 <- fdata(matrix(sin(2 * pi * t^1.5), 1, 50), argvals = t)
+#' res <- elastic.pair(f1, f2)
 #' }
 #'
 #' @export
@@ -1190,6 +1220,11 @@ elastic.pair <- function(f1, f2) {
 #'
 #' @return A scalar complexity value (0 = identity warp).
 #'
+#' @examples
+#' t <- seq(0, 1, length.out = 20)
+#' warp.complexity(t^2, t)
+#' warp.complexity(t, t)  # identity = 0
+#'
 #' @export
 warp.complexity <- function(gamma, argvals) {
   alignment_warp_complexity(as.numeric(gamma), as.numeric(argvals))
@@ -1203,6 +1238,10 @@ warp.complexity <- function(gamma, argvals) {
 #' @param argvals Numeric vector of grid points.
 #'
 #' @return A scalar smoothness (bending energy) value.
+#'
+#' @examples
+#' t <- seq(0, 1, length.out = 20)
+#' warp.smoothness(t^2, t)
 #'
 #' @export
 warp.smoothness <- function(gamma, argvals) {

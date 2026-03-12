@@ -25,6 +25,16 @@
 #' @seealso \code{\link{fosr.fpc}} for FPC-based FOSR,
 #'   \code{\link{fanova}} for functional ANOVA
 #'
+#' @examples
+#' \donttest{
+#' # Functional response: 50 curves observed at 10 time points
+#' Y <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' # Two scalar predictors
+#' X <- cbind(rnorm(50), rnorm(50))
+#' fit <- fosr(Y, predictors = X, lambda = 1)
+#' fit
+#' }
+#'
 #' @export
 fosr <- function(fdataobj, predictors, lambda = 0) {
   if (!inherits(fdataobj, "fdata")) {
@@ -89,6 +99,14 @@ fosr <- function(fdataobj, predictors, lambda = 0) {
 #' @param ncomp Number of FPC components (default 3).
 #'
 #' @return An object of class 'fosr'.
+#'
+#' @examples
+#' \donttest{
+#' Y <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' X <- cbind(rnorm(50), rnorm(50))
+#' fit <- fosr.fpc(Y, predictors = X, ncomp = 2)
+#' fit
+#' }
 #'
 #' @export
 fosr.fpc <- function(fdataobj, predictors, ncomp = 3) {
@@ -157,6 +175,14 @@ fosr.fpc <- function(fdataobj, predictors, ncomp = 3) {
 #'   \item{f.statistic.t}{Pointwise F-statistic}
 #'   \item{global.statistic}{Global test statistic}
 #'   \item{p.value}{P-value from permutation test}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' groups <- rep(1:2, each = 25)
+#' res <- fanova(fd, groups = groups, n.perm = 100)
+#' res
+#' }
 #'
 #' @export
 fanova <- function(fdataobj, groups, n.perm = 1000) {

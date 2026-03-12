@@ -930,6 +930,11 @@ trimvar <- function(fdataobj, trim = 0.1, method = c("FM", "mode", "RP", "RT",
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.MBD(fd)
+#' }
 #' @export
 depth.MBD <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "MBD", ...)
@@ -945,6 +950,11 @@ depth.MBD <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.FM(fd)
+#' }
 #' @export
 depth.FM <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "FM", ...)
@@ -960,6 +970,11 @@ depth.FM <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.mode(fd)
+#' }
 #' @export
 depth.mode <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "mode", ...)
@@ -975,6 +990,11 @@ depth.mode <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.RP(fd)
+#' }
 #' @export
 depth.RP <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "RP", ...)
@@ -990,6 +1010,11 @@ depth.RP <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.RT(fd)
+#' }
 #' @export
 depth.RT <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "RT", ...)
@@ -1005,6 +1030,11 @@ depth.RT <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.BD(fd)
+#' }
 #' @export
 depth.BD <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "BD", ...)
@@ -1020,6 +1050,11 @@ depth.BD <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.MEI(fd)
+#' }
 #' @export
 depth.MEI <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "MEI", ...)
@@ -1035,6 +1070,11 @@ depth.MEI <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.FSD(fd)
+#' }
 #' @export
 depth.FSD <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "FSD", ...)
@@ -1050,6 +1090,11 @@ depth.FSD <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.KFSD(fd)
+#' }
 #' @export
 depth.KFSD <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "KFSD", ...)
@@ -1065,6 +1110,11 @@ depth.KFSD <- function(fdataobj, fdataori = NULL, ...) {
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.RPD(fd)
+#' }
 #' @export
 depth.RPD <- function(fdataobj, fdataori = NULL, ...) {
   depth(fdataobj, fdataori, method = "RPD", ...)
@@ -1127,6 +1177,11 @@ streaming.depth <- function(fdataobj, fdataori = NULL,
 #'
 #' @return Numeric vector of depth values.
 #' @seealso \code{\link{streaming.depth}}, \code{\link{depth}}
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' d <- depth.streaming(fd)
+#' }
 #' @export
 depth.streaming <- function(fdataobj, fdataori = NULL, ...) {
   streaming.depth(fdataobj, fdataori, ...)

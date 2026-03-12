@@ -44,3 +44,10 @@ and p_values.
 Decomposes prediction importance into amplitude and phase contributions
 after elastic PCR.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+result <- elastic.attribution(fd, y, ncomp = 3)
+}
+}

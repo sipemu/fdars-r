@@ -24,3 +24,12 @@ A list with \code{optimal.k}, \code{cv.errors}, and \code{model}.
 Uses the Rust backend to select the optimal number of FPC components
 via k-fold cross-validation for the functional linear model.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+cv_result <- fregre.lm.cv(fd, y, k.range = 1:5, nfold = 5)
+cv_result$optimal.k
+}
+
+}

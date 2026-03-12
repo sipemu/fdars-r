@@ -22,3 +22,11 @@ A list with grid_values, pdp_curve, ice_curves, and component.
 Computes the partial dependence of the response on a specific FPC score,
 along with ICE (Individual Conditional Expectation) curves.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.pdp(fit, fd, component = 1)
+}
+}

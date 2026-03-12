@@ -30,3 +30,12 @@ Vertical (Amplitude) FPCA
 Performs FPCA on the amplitude component of curves after elastic alignment.
 Captures shape variability independent of timing/phase.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+km <- karcher.mean(fd)
+v <- vert.fpca(km, ncomp = 2)
+v
+}
+
+}

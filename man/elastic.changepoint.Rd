@@ -60,3 +60,11 @@ Elastic Changepoint Detection
 Tests for a changepoint in a functional time series using amplitude, phase,
 or FPCA-based test statistics with permutation-based p-values.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+cp <- elastic.changepoint(fd, type = "amplitude", n.mc = 100)
+cp
+}
+
+}

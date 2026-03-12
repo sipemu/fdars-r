@@ -20,6 +20,14 @@
 #'   \item{mean.q}{Mean SRVF}
 #'   \item{karcher}{The Karcher mean used}
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' km <- karcher.mean(fd)
+#' v <- vert.fpca(km, ncomp = 2)
+#' v
+#' }
+#'
 #' @export
 vert.fpca <- function(karcher, ncomp = 3) {
   if (!inherits(karcher, "karcher.mean")) {
@@ -72,6 +80,14 @@ vert.fpca <- function(karcher, ncomp = 3) {
 #'   \item{shooting.vectors}{Shooting vectors matrix}
 #'   \item{karcher}{The Karcher mean used}
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' km <- karcher.mean(fd)
+#' h <- horiz.fpca(km, ncomp = 2)
+#' h
+#' }
+#'
 #' @export
 horiz.fpca <- function(karcher, ncomp = 3) {
   if (!inherits(karcher, "karcher.mean")) {
@@ -123,6 +139,14 @@ horiz.fpca <- function(karcher, ncomp = 3) {
 #'   \item{vert.component}{Vertical (amplitude) eigenvector components}
 #'   \item{horiz.component}{Horizontal (phase) eigenvector components}
 #'   \item{karcher}{The Karcher mean used}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' km <- karcher.mean(fd)
+#' j <- joint.fpca(km, ncomp = 2)
+#' j
+#' }
 #'
 #' @export
 joint.fpca <- function(karcher, ncomp = 3) {

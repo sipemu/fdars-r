@@ -17,3 +17,8 @@ A scalar smoothness (bending energy) value.
 \description{
 Computes the bending energy of a warping function, measuring its roughness.
 }
+\examples{
+t <- seq(0, 1, length.out = 20)
+warp.smoothness(t^2, t)
+
+}

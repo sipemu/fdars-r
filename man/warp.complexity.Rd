@@ -18,3 +18,9 @@ A scalar complexity value (0 = identity warp).
 Computes the geodesic distance of a warping function from the identity,
 measuring how much phase variability the warp introduces.
 }
+\examples{
+t <- seq(0, 1, length.out = 20)
+warp.complexity(t^2, t)
+warp.complexity(t, t)  # identity = 0
+
+}

@@ -79,6 +79,14 @@
 #' @param n.grid Number of grid points for the PDP (default 20).
 #'
 #' @return A list with grid_values, pdp_curve, ice_curves, and component.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.pdp(fit, fd, component = 1)
+#' }
 #' @export
 fregre.pdp <- function(model, data, component, n.grid = 20) {
   if (inherits(model, "fregre.logistic")) {
@@ -98,6 +106,14 @@ fregre.pdp <- function(model, data, component, n.grid = 20) {
 #'
 #' @return A list with components (per-FPC beta contributions), coefficients,
 #'   and variance_proportion.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.beta.decomp(fit)
+#' }
 #' @export
 fregre.beta.decomp <- function(model) {
   if (inherits(model, "fregre.logistic")) {
@@ -115,6 +131,14 @@ fregre.beta.decomp <- function(model) {
 #'
 #' @return A list with importance, importance_normalized,
 #'   component_importance, and score_variance.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.pointwise(fit)
+#' }
 #' @export
 fregre.pointwise <- function(model) {
   if (inherits(model, "fregre.logistic")) {
@@ -134,6 +158,14 @@ fregre.pointwise <- function(model) {
 #'
 #' @return A list with start_idx, end_idx, and direction vectors,
 #'   or NULL if no significant regions found.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.significant.regions(fit)
+#' }
 #' @export
 fregre.significant.regions <- function(model, alpha = 0.05) {
   if (!inherits(model, "fregre.lm") && !inherits(model, "fregre.logistic")) {
@@ -155,6 +187,14 @@ fregre.significant.regions <- function(model, alpha = 0.05) {
 #' @param seed Random seed (used for logistic models).
 #'
 #' @return A list with values (SHAP matrix), base_value, and mean_scores.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.shap(fit, fd)
+#' }
 #' @export
 fregre.shap <- function(model, data, n.samples = 100, seed = NULL) {
   if (inherits(model, "fregre.logistic")) {
@@ -174,6 +214,14 @@ fregre.shap <- function(model, data, n.samples = 100, seed = NULL) {
 #' @param data An fdata object (the training data).
 #'
 #' @return A list with leverage, cooks_distance, p, and mse.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.influence(fit, fd)
+#' }
 #' @export
 fregre.influence <- function(model, data) {
   .explain_call("wrap__explain_influence_rust", model, data$data)
@@ -187,6 +235,14 @@ fregre.influence <- function(model, data) {
 #' @param data An fdata object (the training data).
 #'
 #' @return A list with vif, labels, mean_vif, n_moderate, and n_severe.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.vif(fit, fd)
+#' }
 #' @export
 fregre.vif <- function(model, data) {
   if (inherits(model, "fregre.logistic")) {
@@ -206,6 +262,14 @@ fregre.vif <- function(model, data) {
 #'
 #' @return A list with dfbetas (matrix), dffits, studentized_residuals,
 #'   dfbetas_cutoff, and dffits_cutoff.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.dfbetas(fit, fd)
+#' }
 #' @export
 fregre.dfbetas <- function(model, data) {
   .explain_call("wrap__explain_dfbetas_rust", model, data$data)
@@ -220,6 +284,14 @@ fregre.dfbetas <- function(model, data) {
 #' @param data An fdata object (the training data, used for lm models).
 #'
 #' @return A list with saliency_map (matrix) and mean_absolute_saliency.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.saliency(fit, fd)
+#' }
 #' @export
 fregre.saliency <- function(model, data = NULL) {
   if (inherits(model, "fregre.logistic")) {
@@ -241,6 +313,14 @@ fregre.saliency <- function(model, data = NULL) {
 #' @param seed Random seed.
 #'
 #' @return A list with importance, baseline_metric, and permuted_metric.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.importance(fit, fd, y)
+#' }
 #' @export
 fregre.importance <- function(model, data, y, n.perm = 100, seed = NULL) {
   if (is.null(seed)) seed <- sample.int(.Machine$integer.max, 1)
@@ -264,6 +344,14 @@ fregre.importance <- function(model, data, y, n.perm = 100, seed = NULL) {
 #' @param y Response vector.
 #'
 #' @return A list with press, loo_r_squared, loo_residuals, leverage, and tss.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.loo(fit, fd, y)
+#' }
 #' @export
 fregre.loo <- function(model, data, y) {
   .explain_call("wrap__explain_loo_rust", model,
@@ -282,6 +370,14 @@ fregre.loo <- function(model, data, y) {
 #' @param seed Random seed (used for logistic models).
 #'
 #' @return A list with first_order, total_order, var_y, and component_variance.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.sobol(fit, fd, y)
+#' }
 #' @export
 fregre.sobol <- function(model, data, y = NULL, n.samples = 500, seed = NULL) {
   if (inherits(model, "fregre.logistic")) {
@@ -305,6 +401,14 @@ fregre.sobol <- function(model, data, y = NULL, n.samples = 500, seed = NULL) {
 #'
 #' @return A list with bin_midpoints, ale_values, bin_edges,
 #'   bin_counts, and component.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.ale(fit, fd, component = 1)
+#' }
 #' @export
 fregre.ale <- function(model, data, component, n.bins = 20) {
   if (inherits(model, "fregre.logistic")) {
@@ -327,6 +431,14 @@ fregre.ale <- function(model, data, component, n.bins = 20) {
 #'
 #' @return A list with pointwise_importance, intervals, window_width,
 #'   and threshold.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.domain(fit)
+#' }
 #' @export
 fregre.domain <- function(model, window.width = 5, threshold = 0.1) {
   if (inherits(model, "fregre.logistic")) {
@@ -349,6 +461,15 @@ fregre.domain <- function(model, window.width = 5, threshold = 0.1) {
 #'
 #' @return A list with predictions, lower, upper, prediction_se,
 #'   confidence_level, t_critical, and residual_se.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' new_fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' result <- fregre.prediction.interval(fit, fd, new_fd)
+#' }
 #' @export
 fregre.prediction.interval <- function(model, train.data, new.data,
                                        confidence = 0.95) {
@@ -370,6 +491,14 @@ fregre.prediction.interval <- function(model, train.data, new.data,
 #'
 #' @return A list with observation, attributions, local_intercept,
 #'   local_r_squared, and kernel_width.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.lime(fit, fd, observation = 1)
+#' }
 #' @export
 fregre.lime <- function(model, data, observation, n.samples = 500,
                         kernel.width = 1, seed = NULL) {
@@ -403,6 +532,14 @@ fregre.lime <- function(model, data, observation, n.samples = 500,
 #' @return A list with observation, original_scores, counterfactual_scores,
 #'   delta_scores, delta_function, distance, original_prediction,
 #'   counterfactual_prediction, and found.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.counterfactual(fit, fd, observation = 1, target.value = 0)
+#' }
 #' @export
 fregre.counterfactual <- function(model, data, observation, target.value = NULL,
                                   max.iter = 100, step.size = 0.1) {
@@ -429,6 +566,14 @@ fregre.counterfactual <- function(model, data, observation, target.value = NULL,
 #'
 #' @return A list with conditions, precision, coverage, n_matching,
 #'   observation, and predicted_value.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.anchor(fit, fd, observation = 1)
+#' }
 #' @export
 fregre.anchor <- function(model, data, observation, precision = 0.95,
                           n.bins = 10) {
@@ -457,6 +602,15 @@ fregre.anchor <- function(model, data, observation, precision = 0.95,
 #'
 #' @return A list with predictions, lower, upper, residual_quantile,
 #'   and coverage.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' new_fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+#' result <- fregre.conformal(fit, fd, y, new_fd)
+#' }
 #' @export
 fregre.conformal <- function(model, train.data, train.y, test.data,
                              cal.fraction = 0.2, alpha = 0.1, seed = NULL) {
@@ -487,6 +641,13 @@ fregre.conformal <- function(model, train.data, train.y, test.data,
 #'
 #' @return A list with beta_t_std, coefficient_std, metric_std,
 #'   beta_t_cv, importance_stability, and n_boot_success.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' result <- fregre.stability(fd, y, ncomp = 3)
+#' }
 #' @export
 fregre.stability <- function(data, y, ncomp, n.boot = 100, seed = NULL) {
   if (is.null(seed)) seed <- sample.int(.Machine$integer.max, 1)
@@ -508,6 +669,14 @@ fregre.stability <- function(data, y, ncomp, n.boot = 100, seed = NULL) {
 #'
 #' @return A list with component_j, component_k, h_squared,
 #'   grid_j, grid_k, and pdp_2d.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.friedman(fit, fd, component.j = 1, component.k = 2)
+#' }
 #' @export
 fregre.friedman <- function(model, data, component.j, component.k,
                             n.grid = 20) {
@@ -535,6 +704,14 @@ fregre.friedman <- function(model, data, component.j, component.k,
 #'
 #' @return A list with beta_depth, score_depths, mean_score_depth,
 #'   and n_boot_success.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.depth(fit, fd, y)
+#' }
 #' @export
 fregre.depth <- function(model, data, y, n.boot = 100, seed = NULL) {
   if (is.null(seed)) seed <- sample.int(.Machine$integer.max, 1)
@@ -562,6 +739,14 @@ fregre.depth <- function(model, data, y, n.boot = 100, seed = NULL) {
 #'
 #' @return A list with prototypes (indices), prototype_witness,
 #'   criticisms (indices), criticism_witness, and bandwidth.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.prototype(fit, ncomp = 3)
+#' }
 #' @export
 fregre.prototype <- function(model, ncomp, n.prototypes = 5,
                              n.criticisms = 5) {
@@ -588,6 +773,14 @@ fregre.prototype <- function(model, ncomp, n.prototypes = 5,
 #'
 #' @return A list with brier_score, log_loss, hosmer_lemeshow_chi2,
 #'   hosmer_lemeshow_df, n_groups, reliability_bins, and bin_counts.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y_bin <- factor(sample(0:1, 50, replace = TRUE))
+#' fit <- functional.logistic(fd, y_bin)
+#' result <- fregre.calibration(fit, as.numeric(as.character(y_bin)))
+#' }
 #' @export
 fregre.calibration <- function(model, y, n.groups = 10) {
   # Extract logistic model components
@@ -612,6 +805,14 @@ fregre.calibration <- function(model, y, n.groups = 10) {
 #' @param n.bins Number of bins (default 10).
 #'
 #' @return A list with ece, mce, ace, n_bins, and bin_ece_contributions.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y_bin <- factor(sample(0:1, 50, replace = TRUE))
+#' fit <- functional.logistic(fd, y_bin)
+#' result <- fregre.ece(fit, as.numeric(as.character(y_bin)))
+#' }
 #' @export
 fregre.ece <- function(model, y, n.bins = 10) {
   fa <- .logistic_args(model)
@@ -639,6 +840,14 @@ fregre.ece <- function(model, y, n.bins = 10) {
 #'
 #' @return A list with importance, baseline_metric, and
 #'   unconditional_importance.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.lm(fd, y, ncomp = 3)
+#' result <- fregre.conditional.importance(fit, fd, y)
+#' }
 #' @export
 fregre.conditional.importance <- function(model, data, y, n.bins = 5,
                                           n.perm = 100, seed = NULL) {
@@ -672,6 +881,13 @@ fregre.conditional.importance <- function(model, data, y, n.bins = 5,
 #' @return A list with amplitude_r_squared, phase_r_squared,
 #'   total_r_squared, amplitude_importance, phase_importance,
 #'   and p_values.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' result <- elastic.attribution(fd, y, ncomp = 3)
+#' }
 #' @export
 elastic.attribution <- function(fdataobj, y, ncomp = 3,
                                 pca.method = c("vertical", "horizontal", "joint"),

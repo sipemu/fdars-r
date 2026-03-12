@@ -37,3 +37,12 @@ A fitted object of class 'fregre.logistic' with components:
 Binary logistic regression with functional and optional scalar predictors
 using FPC projection and IRLS.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- factor(sample(0:1, 50, replace = TRUE))
+result <- functional.logistic(fd, y, ncomp = 3)
+result$accuracy
+}
+
+}

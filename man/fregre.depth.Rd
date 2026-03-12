@@ -25,3 +25,11 @@ and n_boot_success.
 Computes regression depth for the fitted model and individual
 observation score depths.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.depth(fit, fd, y)
+}
+}

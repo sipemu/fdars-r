@@ -25,3 +25,12 @@ An object of class 'joint.fpca' with components:
 Performs joint FPCA combining amplitude and phase components with a
 balancing parameter.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+km <- karcher.mean(fd)
+j <- joint.fpca(km, ncomp = 2)
+j
+}
+
+}

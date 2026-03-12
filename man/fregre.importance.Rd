@@ -24,3 +24,11 @@ A list with importance, baseline_metric, and permuted_metric.
 Measures importance of each FPC by permuting scores and measuring
 the increase in prediction error.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.importance(fit, fd, y)
+}
+}

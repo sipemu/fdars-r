@@ -25,3 +25,11 @@ grid_j, grid_k, and pdp_2d.
 Measures the interaction strength between two FPC components
 using the Friedman H-statistic.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.friedman(fit, fd, component.j = 1, component.k = 2)
+}
+}

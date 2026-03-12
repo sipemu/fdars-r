@@ -27,6 +27,14 @@
 #'   \item{y}{Response vector}
 #'   \item{call}{The function call}
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' result <- fregre.pc(fd, y, ncomp = 3)
+#' result$ncomp
+#' }
+#'
 #' @export
 fregre.pc <- function(fdataobj, y, ncomp = NULL, ...) {
   if (!inherits(fdataobj, "fdata")) {
@@ -131,6 +139,14 @@ fregre.pc <- function(fdataobj, y, ncomp = NULL, ...) {
 #'   \item{fdataobj}{Original functional data}
 #'   \item{y}{Response vector}
 #'   \item{call}{The function call}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' result <- fregre.basis(fd, y, lambda = 0.1)
+#' result$r.squared
+#' }
 #'
 #' @export
 fregre.basis <- function(fdataobj, y, basis.x = NULL, basis.b = NULL,
@@ -539,6 +555,15 @@ fregre.pc.cv <- function(fdataobj, y, kfold = 10, ncomp.range = NULL,
 #'   \item{model}{Fitted model with optimal lambda}
 #' }
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' cv_result <- fregre.basis.cv(fd, y, kfold = 5,
+#'   lambda.range = 10^seq(-2, 2, length.out = 10))
+#' cv_result$optimal.lambda
+#' }
+#'
 #' @export
 fregre.basis.cv <- function(fdataobj, y, kfold = 10, lambda.range = NULL,
                             seed = NULL, ...) {
@@ -633,6 +658,14 @@ fregre.basis.cv <- function(fdataobj, y, kfold = 10, lambda.range = NULL,
 #'   \item{cv.errors}{Mean squared prediction error for each h}
 #'   \item{cv.se}{Standard error of cv.errors}
 #'   \item{model}{Fitted model with optimal h}
+#' }
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' cv_result <- fregre.np.cv(fd, y, kfold = 5)
+#' cv_result$optimal.h
 #' }
 #'
 #' @export
@@ -1331,6 +1364,14 @@ predict.fregre.np.multi <- function(object, newdata.list = NULL, ...) {
 #' @seealso \code{\link{fregre.pc}} for the R-native FPC regression,
 #'   \code{\link{fregre.lm.cv}} for cross-validated component selection
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' result <- fregre.lm(fd, y, ncomp = 3)
+#' result$r.squared
+#' }
+#'
 #' @export
 fregre.lm <- function(fdataobj, y, scalar.covariates = NULL, ncomp = NULL) {
   if (!inherits(fdataobj, "fdata")) {
@@ -1409,6 +1450,15 @@ fregre.lm <- function(fdataobj, y, scalar.covariates = NULL, ncomp = NULL) {
 #'
 #' @return A fitted regression object of class 'fregre.np'.
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' scalars <- matrix(rnorm(100), nrow = 50, ncol = 2)
+#' result <- fregre.np.mixed(fd, y, scalar.covariates = scalars)
+#' result$r.squared
+#' }
+#'
 #' @export
 fregre.np.mixed <- function(fdataobj, y, scalar.covariates = NULL,
                              h.func = NULL, h.scalar = NULL) {
@@ -1468,6 +1518,14 @@ fregre.np.mixed <- function(fdataobj, y, scalar.covariates = NULL,
 #'   \item{predicted.classes}{Predicted class labels (0 or 1)}
 #'   \item{accuracy}{Classification accuracy on training data}
 #'   \item{log.likelihood}{Log-likelihood at convergence}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- factor(sample(0:1, 50, replace = TRUE))
+#' result <- functional.logistic(fd, y, ncomp = 3)
+#' result$accuracy
+#' }
 #'
 #' @export
 functional.logistic <- function(fdataobj, y, scalar.covariates = NULL,
@@ -1536,6 +1594,14 @@ functional.logistic <- function(fdataobj, y, scalar.covariates = NULL,
 #' @param nfold Number of CV folds (default 10).
 #'
 #' @return A list with \code{optimal.k}, \code{cv.errors}, and \code{model}.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' cv_result <- fregre.lm.cv(fd, y, k.range = 1:5, nfold = 5)
+#' cv_result$optimal.k
+#' }
 #'
 #' @export
 fregre.lm.cv <- function(fdataobj, y, scalar.covariates = NULL,
@@ -1779,6 +1845,9 @@ plot.fregre.bootstrap.ci <- function(x, simultaneous = FALSE, ...) {
 #' @param n.proj Number of random projections.
 #'
 #' @return A list with \code{cvm} and \code{ks} vectors of test statistics.
+#'
+#' @examples
+#' rp.stat(sample(10), rnorm(10), n.proj = 3)
 #'
 #' @export
 rp.stat <- function(proj.x.ord, residuals, n.proj) {

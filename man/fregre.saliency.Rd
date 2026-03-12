@@ -18,3 +18,11 @@ A list with saliency_map (matrix) and mean_absolute_saliency.
 Computes a saliency map showing which domain regions most influence
 each observation's prediction.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.saliency(fit, fd)
+}
+}

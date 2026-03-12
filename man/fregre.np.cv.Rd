@@ -43,3 +43,12 @@ A list with components:
 Performs k-fold cross-validation to select the optimal bandwidth
 parameter (h) for nonparametric functional regression.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+cv_result <- fregre.np.cv(fd, y, kfold = 5)
+cv_result$optimal.h
+}
+
+}

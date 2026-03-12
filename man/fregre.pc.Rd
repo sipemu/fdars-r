@@ -39,3 +39,12 @@ Functional Principal Component Regression
 \details{
 Fits a functional linear model using principal component regression.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+result <- fregre.pc(fd, y, ncomp = 3)
+result$ncomp
+}
+
+}

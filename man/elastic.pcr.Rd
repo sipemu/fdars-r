@@ -45,3 +45,12 @@ An object of class 'elastic.pcr' with components:
 \description{
 Fits scalar-on-function regression using elastic FPCA scores as predictors.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- elastic.pcr(fd, y, ncomp = 2)
+fit
+}
+
+}

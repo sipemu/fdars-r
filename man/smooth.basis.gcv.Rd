@@ -36,3 +36,11 @@ An object of class 'smooth.basis' (same as smooth.basis.fd).
 Selects the smoothing parameter by minimizing the generalized
 cross-validation (GCV) criterion over a grid of lambda values.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+sm <- smooth.basis.gcv(fd, type = "bspline", nbasis = 5)
+sm
+}
+
+}

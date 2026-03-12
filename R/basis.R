@@ -144,6 +144,10 @@ basis.gcv <- function(fdataobj, nbasis, type = c("bspline", "fourier"),
 #' effective degrees of freedom (n_curves * edf). When \code{pooled = FALSE},
 #' the criterion is computed for each curve separately and the mean is returned.
 #'
+#' @examples
+#' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+#' basis.aic(fd, nbasis = 6)
+#'
 #' @export
 basis.aic <- function(fdataobj, nbasis, type = c("bspline", "fourier"),
                       lambda = 0, pooled = TRUE) {
@@ -183,6 +187,10 @@ basis.aic <- function(fdataobj, nbasis, type = c("bspline", "fourier"),
 #' When \code{pooled = TRUE}, the criterion uses total observations and total
 #' effective degrees of freedom (n_curves * edf). When \code{pooled = FALSE},
 #' the criterion is computed for each curve separately and the mean is returned.
+#'
+#' @examples
+#' fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+#' basis.bic(fd, nbasis = 6)
 #'
 #' @export
 basis.bic <- function(fdataobj, nbasis, type = c("bspline", "fourier"),
@@ -598,6 +606,14 @@ fdata2basis_2d <- function(fdataobj, nbasis.s = 10, nbasis.t = 10,
 #'
 #' @return A 2D fdata object.
 #'
+#' @examples
+#' \donttest{
+#' s <- seq(0, 1, length.out = 10)
+#' t <- seq(0, 1, length.out = 10)
+#' coefs <- matrix(rnorm(36), nrow = 1)
+#' fd2d <- basis2fdata_2d(coefs, argvals = list(s, t), nbasis.s = 6, nbasis.t = 6)
+#' }
+#'
 #' @export
 basis2fdata_2d <- function(coefs, argvals, nbasis.s, nbasis.t,
                            type = c("bspline", "fourier")) {
@@ -653,6 +669,14 @@ basis2fdata_2d <- function(coefs, argvals, nbasis.s, nbasis.t,
 #' @details
 #' The 2D penalty uses Kronecker product structure:
 #' \deqn{P = \lambda_s (I_t \otimes P_s) + \lambda_t (P_t \otimes I_s)}
+#'
+#' @examples
+#' \donttest{
+#' fd2d <- fdata(matrix(rnorm(500), 5, 100),
+#'               argvals = list(seq(0, 1, length.out = 10), seq(0, 1, length.out = 10)),
+#'               fdata2d = TRUE, dims = c(10, 10))
+#' ps2d <- pspline.2d(fd2d)
+#' }
 #'
 #' @export
 pspline.2d <- function(fdataobj, nbasis.s = 10, nbasis.t = 10,

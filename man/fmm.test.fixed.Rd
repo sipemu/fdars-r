@@ -35,3 +35,14 @@ An object of class 'fmm.test' with components:
 Tests significance of fixed effects (covariates) using a
 permutation-based F-test that respects the within-subject correlation.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+subject <- rep(1:10, each = 5)
+x <- cbind(rnorm(50))
+test <- fmm.test.fixed(fd, subject.ids = subject, covariates = x,
+                        n.perm = 100)
+test
+}
+
+}

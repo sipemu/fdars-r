@@ -23,6 +23,13 @@
 ^vignettes/articles$
 ^index\.md$
 ^validation$
+# Exclude pkgdown-only SVGs (gallery cards and article diagrams)
+^man/figures/card-.*\.svg$
+^man/figures/.*-diagram\.svg$
+^man/figures/diag-.*\.svg$
+^man/figures/explainability-.*\.svg$
+^man/figures/uq-.*\.svg$
+^man/figures/sonar-.*\.svg$
 # Exclude windows-sys paths that are too long (>100 bytes)
 ^src/rust/vendor/windows-sys.*/src/Windows/Win32/Management/MobileDeviceManagementRegistration
 ^src/rust/vendor/windows-sys.*/src/Windows/Win32/NetworkManagement/InternetConnectionWizard

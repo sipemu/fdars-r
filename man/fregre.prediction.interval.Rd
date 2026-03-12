@@ -22,3 +22,12 @@ confidence_level, t_critical, and residual_se.
 \description{
 Computes prediction intervals for new observations.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+new_fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+result <- fregre.prediction.interval(fit, fd, new_fd)
+}
+}

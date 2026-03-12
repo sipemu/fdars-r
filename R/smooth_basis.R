@@ -28,6 +28,13 @@
 #'   \item{type}{Basis type used}
 #'   \item{fdataobj}{Original functional data}
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' sm <- smooth.basis.fd(fd, type = "bspline", nbasis = 5, lambda = 0.1)
+#' sm
+#' }
+#'
 #' @export
 smooth.basis.fd <- function(fdataobj, type = c("bspline", "fourier"),
                             nbasis = NULL, lambda = 0, lfd.order = 2,
@@ -91,6 +98,13 @@ smooth.basis.fd <- function(fdataobj, type = c("bspline", "fourier"),
 #' @param period Period for Fourier basis.
 #'
 #' @return An object of class 'smooth.basis' (same as smooth.basis.fd).
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' sm <- smooth.basis.gcv(fd, type = "bspline", nbasis = 5)
+#' sm
+#' }
 #'
 #' @export
 smooth.basis.gcv <- function(fdataobj, type = c("bspline", "fourier"),

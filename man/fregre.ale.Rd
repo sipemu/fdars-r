@@ -22,3 +22,11 @@ bin_counts, and component.
 \description{
 Computes ALE for a specific FPC component.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.ale(fit, fd, component = 1)
+}
+}

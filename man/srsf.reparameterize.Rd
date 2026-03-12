@@ -18,3 +18,12 @@ An fdata object containing the reparameterized curve.
 Reparameterizes a curve f by composing it with a warping function gamma:
 f(gamma(t)).
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(sin(seq(0, pi, length.out = 20)), 1, 20),
+            argvals = seq(0, 1, length.out = 20))
+gamma <- seq(0, 1, length.out = 20)^2
+fd_warped <- srsf.reparameterize(fd, gamma)
+}
+
+}

@@ -31,6 +31,15 @@ A fitted regression object of class 'fregre.lm' with components:
 Fits a functional linear model using FPC regression with the Rust backend.
 Supports optional scalar covariates.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+result <- fregre.lm(fd, y, ncomp = 3)
+result$r.squared
+}
+
+}
 \seealso{
 \code{\link{fregre.pc}} for the R-native FPC regression,
 \code{\link{fregre.lm.cv}} for cross-validated component selection

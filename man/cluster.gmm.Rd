@@ -61,6 +61,15 @@ Performs model-based clustering using Gaussian mixture models on functional
 data. Curves are projected onto a B-spline or Fourier basis before fitting.
 Automatic K selection via BIC or ICL.
 }
+\examples{
+\donttest{
+fd <- fdata(rbind(matrix(rnorm(250), 25, 10),
+                  matrix(rnorm(250, 2), 25, 10)),
+            argvals = seq(0, 1, length.out = 10))
+gmm <- cluster.gmm(fd, k.range = 2:3)
+}
+
+}
 \seealso{
 \code{\link{cluster.kmeans}} for hard clustering,
 \code{\link{cluster.fcm}} for fuzzy clustering

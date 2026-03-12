@@ -53,11 +53,15 @@ The package sets `RAYON_NUM_THREADS=2` in `.onLoad()` to comply with CRAN's
 policy on parallel resource usage. Users can override by setting the environment
 variable before loading the package.
 
+### Symbol Visibility
+On Linux, `--wrap=abort,exit,_exit` linker flags and a `--version-script`
+hide Rust stdlib symbols (abort, exit, _exit) that R CMD check would flag.
+On macOS, `-exported_symbols_list` achieves the same by exporting only
+`R_init_fdars`. These symbols are never actually called by the package.
+
 ### Panic Safety
 All Rust functions called from R are wrapped by extendr's `catch_unwind`
-mechanism, which converts Rust panics into R errors via `Rf_error()`. On Linux,
-additional `--wrap=abort,exit,_exit` linker flags and a version script provide
-an extra safety layer.
+mechanism, which converts Rust panics into R errors via `Rf_error()`.
 
 ### Build Requirements
 - Rust toolchain (rustc >= 1.81, cargo)

@@ -23,3 +23,12 @@ A list with components:
 Aligns curve f2 to curve f1 using elastic (Fisher-Rao) alignment.
 Returns the aligned curve, warping function, and elastic distance.
 }
+\examples{
+\donttest{
+t <- seq(0, 1, length.out = 50)
+f1 <- fdata(matrix(sin(2 * pi * t), 1, 50), argvals = t)
+f2 <- fdata(matrix(sin(2 * pi * t^1.5), 1, 50), argvals = t)
+res <- elastic.pair(f1, f2)
+}
+
+}

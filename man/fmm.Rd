@@ -36,3 +36,13 @@ Fits a functional mixed model for repeated measures data:
 \code{Y_ij(t) = mu(t) + sum_k x_ijk beta_k(t) + b_i(t) + eps_ij(t)}
 where b_i(t) are subject-level random effects.
 }
+\examples{
+\donttest{
+# 10 subjects, 5 curves each = 50 total curves
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+subject <- rep(1:10, each = 5)
+fit <- fmm(fd, subject.ids = subject)
+fit
+}
+
+}

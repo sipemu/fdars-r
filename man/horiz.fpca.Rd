@@ -26,3 +26,12 @@ An object of class 'horiz.fpca' with components:
 Performs FPCA on the phase (warping) component after elastic alignment.
 Captures timing variability independent of shape.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+km <- karcher.mean(fd)
+h <- horiz.fpca(km, ncomp = 2)
+h
+}
+
+}

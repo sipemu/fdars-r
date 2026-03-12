@@ -36,3 +36,11 @@ Finds the minimal change in FPC scores needed to achieve a target
 prediction value. For logistic models, uses gradient-based optimization
 to find the class-flipping counterfactual.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.counterfactual(fit, fd, observation = 1, target.value = 0)
+}
+}

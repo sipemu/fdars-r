@@ -25,3 +25,12 @@ An object of class 'fanova' with components:
 Tests for differences in mean functions across groups using a
 permutation-based F-test.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+groups <- rep(1:2, each = 25)
+res <- fanova(fd, groups = groups, n.perm = 100)
+res
+}
+
+}

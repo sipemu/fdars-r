@@ -32,6 +32,14 @@
 #'   \item{method}{Method used}
 #'   \item{ncomp}{Number of FPC components}
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rep(1:2, each = 25)
+#' fit <- fclassif(fd, y, method = "lda", ncomp = 3)
+#' fit$accuracy
+#' }
+#'
 #' @export
 fclassif <- function(fdataobj, y, method = c("lda", "qda", "knn", "kernel", "dd",
                                               "svm"),
@@ -220,6 +228,14 @@ fclassif <- function(fdataobj, y, method = c("lda", "qda", "knn", "kernel", "dd"
 #'   \item{error.rate}{Mean error rate across folds}
 #'   \item{fold.errors}{Per-fold error rates}
 #'   \item{best.ncomp}{Best ncomp if tuned}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rep(1:2, each = 25)
+#' cv <- fclassif.cv(fd, y, method = "lda", ncomp = 3, nfold = 5)
+#' cv$error.rate
+#' }
 #'
 #' @export
 fclassif.cv <- function(fdataobj, y, method = "lda", covariates = NULL,

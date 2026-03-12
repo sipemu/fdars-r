@@ -839,6 +839,14 @@ plot.cluster.fcm <- function(x, type = c("curves", "membership"), ...) {
 #' @seealso \code{\link{cluster.kmeans}} for hard clustering,
 #'   \code{\link{cluster.fcm}} for fuzzy clustering
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(rbind(matrix(rnorm(250), 25, 10),
+#'                   matrix(rnorm(250, 2), 25, 10)),
+#'             argvals = seq(0, 1, length.out = 10))
+#' gmm <- cluster.gmm(fd, k.range = 2:3)
+#' }
+#'
 #' @export
 cluster.gmm <- function(fdataobj, k.range = 2:6, covariates = NULL,
                           nbasis = 10, basis.type = c("bspline", "fourier"),
@@ -1025,6 +1033,13 @@ plot.cluster.gmm <- function(x, type = c("bic", "membership"), ...) {
 #'   \item \code{log.likelihood} — Final log-likelihood.
 #'   \item \code{bic}, \code{icl} — Model selection criteria.
 #'   \item \code{iterations} — Number of EM iterations.
+#' }
+#'
+#' @examples
+#' \donttest{
+#' X <- rbind(matrix(rnorm(100), 50, 2), matrix(rnorm(100, 3), 50, 2))
+#' fit <- gmm.em(X, k = 2)
+#' table(fit$cluster)
 #' }
 #'
 #' @export

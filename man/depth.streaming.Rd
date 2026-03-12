@@ -20,6 +20,12 @@ Numeric vector of depth values.
 \description{
 Alias for \code{\link{streaming.depth}}.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+d <- depth.streaming(fd)
+}
+}
 \seealso{
 \code{\link{streaming.depth}}, \code{\link{depth}}
 }

@@ -53,3 +53,12 @@ Functional Classification
 Classifies functional data using one of several methods: LDA, QDA, kNN,
 kernel, DD-plot (depth-vs-depth), or SVM (support vector machine).
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+y <- rep(1:2, each = 25)
+fit <- fclassif(fd, y, method = "lda", ncomp = 3)
+fit$accuracy
+}
+
+}

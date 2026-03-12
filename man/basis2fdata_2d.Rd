@@ -25,3 +25,12 @@ A 2D fdata object.
 \description{
 Reconstructs 2D surfaces from tensor product basis coefficients.
 }
+\examples{
+\donttest{
+s <- seq(0, 1, length.out = 10)
+t <- seq(0, 1, length.out = 10)
+coefs <- matrix(rnorm(36), nrow = 1)
+fd2d <- basis2fdata_2d(coefs, argvals = list(s, t), nbasis.s = 6, nbasis.t = 6)
+}
+
+}

@@ -39,3 +39,8 @@ When \code{pooled = TRUE}, the criterion uses total observations and total
 effective degrees of freedom (n_curves * edf). When \code{pooled = FALSE},
 the criterion is computed for each curve separately and the mean is returned.
 }
+\examples{
+fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+basis.bic(fd, nbasis = 6)
+
+}

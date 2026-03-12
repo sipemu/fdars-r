@@ -38,3 +38,12 @@ A fitted regression object of class 'fregre.fd' with components:
 Fits a functional linear model using basis expansion (ridge regression).
 Uses the anofox-regression Rust backend for efficient L2-regularized regression.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+result <- fregre.basis(fd, y, lambda = 0.1)
+result$r.squared
+}
+
+}

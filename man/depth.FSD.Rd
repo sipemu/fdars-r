@@ -19,6 +19,12 @@ Numeric vector of depth values.
 \description{
 Wrapper for \code{depth(method = "FSD")}. Useful as a function argument.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(50), nrow = 5), argvals = seq(0, 1, length.out = 10))
+d <- depth.FSD(fd)
+}
+}
 \seealso{
 \code{\link{depth}}
 }

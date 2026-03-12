@@ -21,3 +21,11 @@ A list with values (SHAP matrix), base_value, and mean_scores.
 \description{
 Computes Shapley values for the FPC scores.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.shap(fit, fd)
+}
+}

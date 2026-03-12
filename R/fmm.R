@@ -24,6 +24,15 @@
 #'   \item{sigma2.u}{Random effect variance estimates}
 #'   \item{n.subjects}{Number of unique subjects}
 #'
+#' @examples
+#' \donttest{
+#' # 10 subjects, 5 curves each = 50 total curves
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' subject <- rep(1:10, each = 5)
+#' fit <- fmm(fd, subject.ids = subject)
+#' fit
+#' }
+#'
 #' @export
 fmm <- function(fdataobj, subject.ids, covariates = NULL, ncomp = 3) {
   if (!inherits(fdataobj, "fdata")) {
@@ -103,6 +112,15 @@ fmm <- function(fdataobj, subject.ids, covariates = NULL, ncomp = 3) {
 #'
 #' @return An fdata object of predicted functional values.
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' subject <- rep(1:10, each = 5)
+#' x <- cbind(rnorm(50))
+#' fit <- fmm(fd, subject.ids = subject, covariates = x)
+#' pred <- fmm.predict(fit, new.covariates = cbind(c(0, 1)))
+#' }
+#'
 #' @export
 fmm.predict <- function(object, new.covariates = NULL, ...) {
   cov_mat <- if (!is.null(new.covariates)) as.matrix(new.covariates) else NULL
@@ -133,6 +151,16 @@ fmm.predict <- function(object, new.covariates = NULL, ...) {
 #' @return An object of class 'fmm.test' with components:
 #'   \item{f.statistics}{F-statistic per covariate}
 #'   \item{p.values}{P-values per covariate}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' subject <- rep(1:10, each = 5)
+#' x <- cbind(rnorm(50))
+#' test <- fmm.test.fixed(fd, subject.ids = subject, covariates = x,
+#'                         n.perm = 100)
+#' test
+#' }
 #'
 #' @export
 fmm.test.fixed <- function(fdataobj, subject.ids, covariates,

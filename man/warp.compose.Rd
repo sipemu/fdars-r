@@ -19,3 +19,12 @@ Numeric vector of the composed warping function.
 \description{
 Computes the composition (gamma1 o gamma2)(t) = gamma1(gamma2(t)).
 }
+\examples{
+\donttest{
+t <- seq(0, 1, length.out = 20)
+gamma1 <- t^2
+gamma2 <- sqrt(t)
+composed <- warp.compose(gamma1, gamma2, t)
+}
+
+}

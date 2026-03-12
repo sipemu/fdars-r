@@ -27,6 +27,14 @@
 #'   \item{fdataobj}{Original functional data}
 #'   \item{y}{Response vector}
 #'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- elastic.regression(fd, y)
+#' fit
+#' }
+#'
 #' @export
 elastic.regression <- function(fdataobj, y, ncomp.beta = 10, lambda = 0,
                                max.iter = 20, tol = 1e-4) {
@@ -93,6 +101,14 @@ elastic.regression <- function(fdataobj, y, ncomp.beta = 10, lambda = 0,
 #'   \item{gammas}{Estimated warping functions}
 #'   \item{aligned.srsfs}{Aligned SRSF transforms}
 #'   \item{n.iter}{Number of iterations}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- sample(0:1, 50, replace = TRUE)
+#' fit <- elastic.logistic(fd, y)
+#' fit
+#' }
 #'
 #' @export
 elastic.logistic <- function(fdataobj, y, ncomp.beta = 10, lambda = 0,
@@ -162,6 +178,14 @@ elastic.logistic <- function(fdataobj, y, ncomp.beta = 10, lambda = 0,
 #'   \item{karcher.mean}{Karcher mean curve}
 #'   \item{vert.scores}{Vertical FPCA scores (if applicable)}
 #'   \item{horiz.scores}{Horizontal FPCA scores (if applicable)}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- elastic.pcr(fd, y, ncomp = 2)
+#' fit
+#' }
 #'
 #' @export
 elastic.pcr <- function(fdataobj, y, ncomp = 3,

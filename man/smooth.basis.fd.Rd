@@ -49,3 +49,11 @@ Penalized Basis Smoothing
 Fits a penalized basis expansion to smooth functional data. Supports
 B-spline and Fourier basis types with a roughness penalty.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+sm <- smooth.basis.fd(fd, type = "bspline", nbasis = 5, lambda = 0.1)
+sm
+}
+
+}

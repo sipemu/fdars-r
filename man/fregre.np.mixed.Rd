@@ -30,3 +30,13 @@ A fitted regression object of class 'fregre.np'.
 Fits a nonparametric kernel regression with functional and scalar predictors
 using the Rust backend.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+scalars <- matrix(rnorm(100), nrow = 50, ncol = 2)
+result <- fregre.np.mixed(fd, y, scalar.covariates = scalars)
+result$r.squared
+}
+
+}

@@ -20,3 +20,7 @@ A list with \code{cvm} and \code{ks} vectors of test statistics.
 Computes Cramer-von Mises and Kolmogorov-Smirnov statistics for
 random projection goodness-of-fit testing.
 }
+\examples{
+rp.stat(sample(10), rnorm(10), n.proj = 3)
+
+}

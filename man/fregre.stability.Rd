@@ -24,3 +24,10 @@ beta_t_cv, importance_stability, and n_boot_success.
 \description{
 Assesses how stable the model explanation is under bootstrap resampling.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+result <- fregre.stability(fd, y, ncomp = 3)
+}
+}

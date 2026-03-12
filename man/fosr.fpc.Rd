@@ -19,3 +19,12 @@ An object of class 'fosr'.
 \description{
 Fits a function-on-scalar regression using functional principal components.
 }
+\examples{
+\donttest{
+Y <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+X <- cbind(rnorm(50), rnorm(50))
+fit <- fosr.fpc(Y, predictors = X, ncomp = 2)
+fit
+}
+
+}

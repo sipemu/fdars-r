@@ -43,3 +43,11 @@ Fits a GMM directly to a feature matrix using the EM algorithm.
 Unlike \code{\link{cluster.gmm}} which operates on functional data,
 this function works on arbitrary numeric feature matrices.
 }
+\examples{
+\donttest{
+X <- rbind(matrix(rnorm(100), 50, 2), matrix(rnorm(100, 3), 50, 2))
+fit <- gmm.em(X, k = 2)
+table(fit$cluster)
+}
+
+}

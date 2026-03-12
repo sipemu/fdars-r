@@ -48,3 +48,12 @@ Elastic Scalar-on-Function Regression
 Fits a functional linear model with simultaneous elastic alignment of the
 functional covariate. The alignment and regression are jointly optimized.
 }
+\examples{
+\donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- elastic.regression(fd, y)
+fit
+}
+
+}
