@@ -71,3 +71,23 @@ is a function Y_i(t) and predictors are scalar:
 FPC-based FOSR,
 [`fanova`](https://sipemu.github.io/fdars-r/reference/fanova.md) for
 functional ANOVA
+
+## Examples
+
+``` r
+# \donttest{
+# Functional response: 50 curves observed at 10 time points
+Y <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+# Two scalar predictors
+X <- cbind(rnorm(50), rnorm(50))
+fit <- fosr(Y, predictors = X, lambda = 1)
+fit
+#> Function-on-Scalar Regression
+#> =============================
+#>   Number of observations: 50 
+#>   Number of predictors: 2 
+#>   Evaluation points: 10 
+#>   R-squared: 0.0302 
+#>   Lambda: 1 
+# }
+```

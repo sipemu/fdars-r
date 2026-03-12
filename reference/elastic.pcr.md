@@ -87,3 +87,18 @@ An object of class 'elastic.pcr' with components:
 - horiz.scores:
 
   Horizontal FPCA scores (if applicable)
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- elastic.pcr(fd, y, ncomp = 2)
+fit
+#> Elastic Principal Component Regression
+#>   PCA method: vertical 
+#>   Components: 2 
+#>   R-squared: 0.03428 
+# }
+```

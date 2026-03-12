@@ -35,3 +35,14 @@ fregre.anchor(model, data, observation, precision = 0.95, n.bins = 10)
 
 A list with conditions, precision, coverage, n_matching, observation,
 and predicted_value.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.anchor(fit, fd, observation = 1)
+# }
+```

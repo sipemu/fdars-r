@@ -92,3 +92,19 @@ An object of class 'smooth.basis' with components:
 
 Fits a penalized basis expansion to smooth functional data. Supports
 B-spline and Fourier basis types with a roughness penalty.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+sm <- smooth.basis.fd(fd, type = "bspline", nbasis = 5, lambda = 0.1)
+sm
+#> Penalized Basis Smoothing
+#>   Basis type: bspline 
+#>   Number of basis functions: 6 
+#>   Lambda: 0.1 
+#>   EDF: 2.2 
+#>   GCV: 1.31118 
+# }
+```

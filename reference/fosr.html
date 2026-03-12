@@ -104,6 +104,26 @@ is a function Y_i(t) and predictors are scalar: <code>Y_i(t) = mu(t) + sum_j x_i
 <code><a href="fanova.html">fanova</a></code> for functional ANOVA</p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Functional response: 50 curves observed at 10 time points</span></span></span>
+<span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="fdata.html">fdata</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>, <span class="fl">50</span>, <span class="fl">10</span><span class="op">)</span>, argvals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Two scalar predictors</span></span></span>
+<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">fosr</span><span class="op">(</span><span class="va">Y</span>, predictors <span class="op">=</span> <span class="va">X</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Function-on-Scalar Regression</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> =============================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of predictors: 2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Evaluation points: 10 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   R-squared: 0.0302 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Lambda: 1 </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

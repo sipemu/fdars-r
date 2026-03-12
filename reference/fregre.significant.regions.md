@@ -23,3 +23,14 @@ fregre.significant.regions(model, alpha = 0.05)
 
 A list with start_idx, end_idx, and direction vectors, or NULL if no
 significant regions found.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.significant.regions(fit)
+# }
+```

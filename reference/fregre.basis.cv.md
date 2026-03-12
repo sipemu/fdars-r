@@ -55,3 +55,16 @@ A list with components:
 - model:
 
   Fitted model with optimal lambda
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+cv_result <- fregre.basis.cv(fd, y, kfold = 5,
+  lambda.range = 10^seq(-2, 2, length.out = 10))
+cv_result$optimal.lambda
+#> [1] 100
+# }
+```

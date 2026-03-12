@@ -26,3 +26,10 @@ rp.stat(proj.x.ord, residuals, n.proj)
 ## Value
 
 A list with `cvm` and `ks` vectors of test statistics.
+
+## Examples
+
+``` r
+rp.stat(sample(10), rnorm(10), n.proj = 3)
+#> Error in rp_stat(as.integer(proj.x.ord), as.double(residuals), as.integer(n.proj)): User function panicked: rp_stat
+```

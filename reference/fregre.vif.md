@@ -21,3 +21,14 @@ fregre.vif(model, data)
 ## Value
 
 A list with vif, labels, mean_vif, n_moderate, and n_severe.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.vif(fit, fd)
+# }
+```

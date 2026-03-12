@@ -46,3 +46,21 @@ An object of class 'fanova' with components:
 - p.value:
 
   P-value from permutation test
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+groups <- rep(1:2, each = 25)
+res <- fanova(fd, groups = groups, n.perm = 100)
+res
+#> Functional ANOVA
+#> ================
+#>   Number of groups: 2 
+#>   Number of observations: 50 
+#>   Global F-statistic: 1.0353 
+#>   P-value: 0.41584 
+#>   Permutations: 100 
+# }
+```

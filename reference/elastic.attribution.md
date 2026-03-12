@@ -61,3 +61,13 @@ elastic.attribution(
 
 A list with amplitude_r_squared, phase_r_squared, total_r_squared,
 amplitude_importance, phase_importance, and p_values.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+result <- elastic.attribution(fd, y, ncomp = 3)
+# }
+```

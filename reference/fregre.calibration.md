@@ -27,3 +27,16 @@ fregre.calibration(model, y, n.groups = 10)
 
 A list with brier_score, log_loss, hosmer_lemeshow_chi2,
 hosmer_lemeshow_df, n_groups, reliability_bins, and bin_counts.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y_bin <- factor(sample(0:1, 50, replace = TRUE))
+fit <- functional.logistic(fd, y_bin)
+#> Error in functional.logistic(fd, y_bin): functional.logistic failed: check data dimensions and response
+result <- fregre.calibration(fit, as.numeric(as.character(y_bin)))
+#> Error: object 'fit' not found
+# }
+```

@@ -69,3 +69,21 @@ An object of class 'fmm' with components:
 Fits a functional mixed model for repeated measures data:
 `Y_ij(t) = mu(t) + sum_k x_ijk beta_k(t) + b_i(t) + eps_ij(t)` where
 b_i(t) are subject-level random effects.
+
+## Examples
+
+``` r
+# \donttest{
+# 10 subjects, 5 curves each = 50 total curves
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+subject <- rep(1:10, each = 5)
+fit <- fmm(fd, subject.ids = subject)
+fit
+#> Functional Mixed Model
+#> ======================
+#>   Number of observations: 50 
+#>   Number of subjects: 10 
+#>   FPC components: 3 
+#>   Residual variance (sigma2_eps): 0.170716 
+# }
+```

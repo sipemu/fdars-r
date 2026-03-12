@@ -30,3 +30,14 @@ fregre.pdp(model, data, component, n.grid = 20)
 ## Value
 
 A list with grid_values, pdp_curve, ice_curves, and component.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.pdp(fit, fd, component = 1)
+# }
+```

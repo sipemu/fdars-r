@@ -61,3 +61,16 @@ A list with components:
 - `bic`, `icl` — Model selection criteria.
 
 - `iterations` — Number of EM iterations.
+
+## Examples
+
+``` r
+# \donttest{
+X <- rbind(matrix(rnorm(100), 50, 2), matrix(rnorm(100, 3), 50, 2))
+fit <- gmm.em(X, k = 2)
+table(fit$cluster)
+#> 
+#>  2  3 
+#> 49 51 
+# }
+```

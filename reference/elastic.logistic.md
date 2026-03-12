@@ -80,3 +80,17 @@ An object of class 'elastic.logistic' with components:
 - n.iter:
 
   Number of iterations
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+y <- sample(0:1, 50, replace = TRUE)
+fit <- elastic.logistic(fd, y)
+fit
+#> Elastic Logistic Classification
+#>   Accuracy: 44 %
+#>   Iterations: 20 
+# }
+```

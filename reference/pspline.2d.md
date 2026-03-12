@@ -60,3 +60,16 @@ A list of class "pspline.2d" similar to
 
 The 2D penalty uses Kronecker product structure: \$\$P = \lambda_s (I_t
 \otimes P_s) + \lambda_t (P_t \otimes I_s)\$\$
+
+## Examples
+
+``` r
+# \donttest{
+fd2d <- fdata(matrix(rnorm(500), 5, 100),
+              argvals = list(seq(0, 1, length.out = 10), seq(0, 1, length.out = 10)),
+              fdata2d = TRUE, dims = c(10, 10))
+#> Error in fdata(matrix(rnorm(500), 5, 100), argvals = list(seq(0, 1, length.out = 10),     seq(0, 1, length.out = 10)), fdata2d = TRUE, dims = c(10,     10)): unused argument (dims = c(10, 10))
+ps2d <- pspline.2d(fd2d)
+#> Error: object 'fd2d' not found
+# }
+```

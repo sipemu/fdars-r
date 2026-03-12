@@ -28,3 +28,14 @@ A list with components:
 - `gamma` — Numeric warping function.
 
 - `distance` — Elastic distance after alignment.
+
+## Examples
+
+``` r
+# \donttest{
+t <- seq(0, 1, length.out = 50)
+f1 <- fdata(matrix(sin(2 * pi * t), 1, 50), argvals = t)
+f2 <- fdata(matrix(sin(2 * pi * t^1.5), 1, 50), argvals = t)
+res <- elastic.pair(f1, f2)
+# }
+```

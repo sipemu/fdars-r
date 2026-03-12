@@ -119,3 +119,14 @@ An object of class 'cluster.gmm' with components:
 for hard clustering,
 [`cluster.fcm`](https://sipemu.github.io/fdars-r/reference/cluster.fcm.md)
 for fuzzy clustering
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(rbind(matrix(rnorm(250), 25, 10),
+                  matrix(rnorm(250, 2), 25, 10)),
+            argvals = seq(0, 1, length.out = 10))
+gmm <- cluster.gmm(fd, k.range = 2:3)
+# }
+```

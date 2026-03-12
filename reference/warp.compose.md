@@ -25,3 +25,14 @@ warp.compose(gamma1, gamma2, fdataobj)
 ## Value
 
 Numeric vector of the composed warping function.
+
+## Examples
+
+``` r
+# \donttest{
+t <- seq(0, 1, length.out = 20)
+gamma1 <- t^2
+gamma2 <- sqrt(t)
+composed <- warp.compose(gamma1, gamma2, t)
+# }
+```

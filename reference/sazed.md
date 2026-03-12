@@ -110,14 +110,14 @@ result <- sazed(fd)
 print(result)  # Shows consensus period and component details
 #> SAZED Period Detection
 #> ----------------------
-#> Period:     2.0029
+#> Period:     2.0033
 #> Confidence: 1.00 (5/5 components agree)
 #> 
 #> Component estimates:
 #>   Spectral:      2.0050
 #>   ACF Peak:      2.0050
-#>   ACF Average:   2.0036
-#>   Zero-crossing: 2.0008
+#>   ACF Average:   2.0050
+#>   Zero-crossing: 2.0013
 #>   Spectral Diff: 2.0000
 
 # With trend - SAZED's spectral_diff component handles this

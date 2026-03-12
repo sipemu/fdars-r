@@ -90,3 +90,15 @@ A fitted regression object of class 'fregre.fd' with components:
 ## Details
 
 Fits a functional linear model using principal component regression.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+result <- fregre.pc(fd, y, ncomp = 3)
+result$ncomp
+#> [1] 3
+# }
+```

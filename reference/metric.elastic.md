@@ -29,3 +29,12 @@ metric.elastic(fdataobj, fdataref = NULL, ...)
 ## Value
 
 A distance matrix (numeric matrix).
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(200), 20, 10), argvals = seq(0, 1, length.out = 10))
+D <- metric.elastic(fd)
+# }
+```

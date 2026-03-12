@@ -50,3 +50,19 @@ smooth.basis.gcv(
 ## Value
 
 An object of class 'smooth.basis' (same as smooth.basis.fd).
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+sm <- smooth.basis.gcv(fd, type = "bspline", nbasis = 5)
+sm
+#> Penalized Basis Smoothing
+#>   Basis type: bspline 
+#>   Number of basis functions: 6 
+#>   Lambda: 15.64 
+#>   EDF: 2.1 
+#>   GCV: 1.19421 
+# }
+```

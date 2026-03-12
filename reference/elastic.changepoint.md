@@ -97,3 +97,18 @@ An object of class 'elastic.changepoint' with components:
 
 Tests for a changepoint in a functional time series using amplitude,
 phase, or FPCA-based test statistics with permutation-based p-values.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+cp <- elastic.changepoint(fd, type = "amplitude", n.mc = 100)
+cp
+#> Elastic Changepoint Detection
+#>   Type: amplitude 
+#>   Changepoint at: 28 of 50 curves
+#>   Test statistic: 0.002919 
+#>   p-value: 0.8317 
+# }
+```

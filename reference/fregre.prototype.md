@@ -32,3 +32,14 @@ fregre.prototype(model, ncomp, n.prototypes = 5, n.criticisms = 5)
 
 A list with prototypes (indices), prototype_witness, criticisms
 (indices), criticism_witness, and bandwidth.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.prototype(fit, ncomp = 3)
+# }
+```

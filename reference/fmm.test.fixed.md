@@ -53,3 +53,22 @@ An object of class 'fmm.test' with components:
 - p.values:
 
   P-values per covariate
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+subject <- rep(1:10, each = 5)
+x <- cbind(rnorm(50))
+test <- fmm.test.fixed(fd, subject.ids = subject, covariates = x,
+                        n.perm = 100)
+test
+#> Fixed Effects Permutation Test
+#> ==============================
+#>   Permutations: 100 
+#> 
+#>             F.statistic P.value
+#> Covariate 1      0.0029 0.80198
+# }
+```

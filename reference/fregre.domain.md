@@ -27,3 +27,14 @@ fregre.domain(model, window.width = 5, threshold = 0.1)
 
 A list with pointwise_importance, intervals, window_width, and
 threshold.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.domain(fit)
+# }
+```

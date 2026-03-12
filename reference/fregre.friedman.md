@@ -35,3 +35,14 @@ fregre.friedman(model, data, component.j, component.k, n.grid = 20)
 
 A list with component_j, component_k, h_squared, grid_j, grid_k, and
 pdp_2d.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- fregre.lm(fd, y, ncomp = 3)
+result <- fregre.friedman(fit, fd, component.j = 1, component.k = 2)
+# }
+```

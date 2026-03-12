@@ -22,3 +22,11 @@ warp.smoothness(gamma, argvals)
 ## Value
 
 A scalar smoothness (bending energy) value.
+
+## Examples
+
+``` r
+t <- seq(0, 1, length.out = 20)
+warp.smoothness(t^2, t)
+#> [1] 4
+```
