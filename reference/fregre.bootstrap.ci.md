@@ -1,5 +1,9 @@
 # Bootstrap Confidence Intervals for Functional Coefficient
 
+Computes pointwise and simultaneous bootstrap confidence intervals for
+the functional coefficient beta(t) in a functional linear or logistic
+model.
+
 ## Usage
 
 ``` r
@@ -18,9 +22,13 @@ fregre.bootstrap.ci(model, n.boot = 200, alpha = 0.05, seed = 42)
 
 - alpha:
 
-  Significance level (default 0.05 for 95\\
+  Significance level (default 0.05 for 95 percent CI).
 
-  seedRandom seed for reproducibility.
+- seed:
+
+  Random seed for reproducibility.
+
+## Value
 
 An object of class 'fregre.bootstrap.ci' with components:
 
@@ -38,6 +46,12 @@ An object of class 'fregre.bootstrap.ci' with components:
 
 - `model.class`: Class of the original model.
 
-Computes pointwise and simultaneous bootstrap confidence intervals for
-the functional coefficient beta(t) in a functional linear or logistic
-model.
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+fit <- fregre.lm(fdataobj, y, ncomp = 3)
+ci <- fregre.bootstrap.ci(fit, n.boot = 200)
+plot(ci)
+} # }
+```
