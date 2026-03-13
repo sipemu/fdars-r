@@ -1,6 +1,6 @@
 # Generic Conformal Classification
 
-Split-conformal prediction sets using a pre-fitted fregre.logistic
+Split-conformal prediction sets using a pre-fitted functional.logistic
 model.
 
 ## Usage
@@ -24,7 +24,8 @@ conformal.generic.classification(
 
 - model:
 
-  A fitted `fregre.logistic` model object.
+  A fitted model object from
+  [`functional.logistic`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md).
 
 - fdataobj:
 
@@ -73,9 +74,7 @@ Same as
 # \donttest{
 fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
 y <- rbinom(50, 1, 0.5)
-model <- fregre.logistic(fd, y)
-#> Error in fregre.logistic(fd, y): could not find function "fregre.logistic"
+model <- functional.logistic(fd, y)
 cp <- conformal.generic.classification(model, fd, y, fd[1:10, ])
-#> Error: object 'model' not found
 # }
 ```
