@@ -354,6 +354,85 @@ fd2d <- fdata(Z, argvals = list(s = s, t = t), fdata2d = TRUE)
 # nderiv = 1 for ds, nderiv = 2 for dt, etc.
 ```
 
+## High-Accuracy Gradient (`fdata.gradient`)
+
+The [`deriv()`](https://sipemu.github.io/fdars-r/reference/deriv.md)
+function uses central differences, which are $O\left( h^{2} \right)$
+accurate. For higher accuracy,
+[`fdata.gradient()`](https://sipemu.github.io/fdars-r/reference/fdata.gradient.md)
+uses a 5-point stencil on uniform grids — achieving
+$O\left( h^{4} \right)$ accuracy — and 3-point Lagrange interpolation on
+non-uniform grids.
+
+``` r
+# Compare deriv() vs fdata.gradient() on a smooth function
+set.seed(42)
+m_g <- 50
+t_fine <- seq(0, 2 * pi, length.out = m_g)
+
+# True function and derivative
+f_vals <- sin(t_fine)
+f_deriv_true <- cos(t_fine)
+
+fd_smooth_g <- fdata(matrix(f_vals, 1, m_g), argvals = t_fine)
+
+# Central differences (deriv)
+fd_d1 <- deriv(fd_smooth_g, nderiv = 1)
+
+# High-accuracy gradient
+fd_grad <- fdata.gradient(fd_smooth_g)
+
+# Compare errors
+err_deriv <- max(abs(fd_d1$data[1, ] - f_deriv_true[seq_along(fd_d1$argvals)]))
+err_grad <- max(abs(fd_grad$data[1, ] - f_deriv_true))
+
+cat("Max error (central differences):", round(err_deriv, 6), "\n")
+#> Max error (central differences): 0.002738
+cat("Max error (5-point gradient):   ", round(err_grad, 6), "\n")
+#> Max error (5-point gradient):    5.3e-05
+```
+
+``` r
+df_grad <- data.frame(
+  t = rep(t_fine, 3),
+  value = c(f_deriv_true,
+            c(fd_d1$data[1, ], rep(NA, m_g - length(fd_d1$argvals))),
+            fd_grad$data[1, ]),
+  method = rep(c("True", "deriv() [O(h\u00b2)]", "fdata.gradient() [O(h\u2074)]"),
+               each = m_g)
+)
+
+ggplot(df_grad, aes(x = .data$t, y = .data$value, color = .data$method,
+                    linetype = .data$method)) +
+  geom_line(linewidth = 0.8, na.rm = TRUE) +
+  scale_color_manual(values = c("True" = "black",
+                                "deriv() [O(h\u00b2)]" = "#D55E00",
+                                "fdata.gradient() [O(h\u2074)]" = "#0072B2")) +
+  scale_linetype_manual(values = c("True" = "solid",
+                                   "deriv() [O(h\u00b2)]" = "dashed",
+                                   "fdata.gradient() [O(h\u2074)]" = "dotdash")) +
+  labs(title = "Derivative Accuracy: Central Differences vs 5-Point Gradient",
+       x = "t", y = "f'(t)", color = NULL, linetype = NULL) +
+  theme(legend.position = "bottom")
+```
+
+![](working-with-derivatives_files/figure-html/gradient-plot-1.png)
+
+### When to Use Each
+
+| Function                                                                           | Order                                                                | Grid | Best for                                     |
+|------------------------------------------------------------------------------------|----------------------------------------------------------------------|------|----------------------------------------------|
+| [`deriv()`](https://sipemu.github.io/fdars-r/reference/deriv.md)                   | $O\left( h^{2} \right)$                                              | Any  | General use, higher-order derivatives        |
+| [`fdata.gradient()`](https://sipemu.github.io/fdars-r/reference/fdata.gradient.md) | $O\left( h^{4} \right)$ uniform, $O\left( h^{2} \right)$ non-uniform | Any  | First derivatives requiring maximum accuracy |
+
+Use
+[`fdata.gradient()`](https://sipemu.github.io/fdars-r/reference/fdata.gradient.md)
+when accuracy of the first derivative matters (e.g., computing growth
+velocity for clinical thresholds). Use
+[`deriv()`](https://sipemu.github.io/fdars-r/reference/deriv.md) when
+you need second or higher derivatives, or when $O\left( h^{2} \right)$
+accuracy is sufficient.
+
 ## Optimal Smoothing for Derivatives
 
 When the goal is to estimate derivatives, we may need different
@@ -457,12 +536,13 @@ cat("Correlation between age at PHV and max velocity:",
 
 ## Summary
 
-| Task                | Function                       | Notes                                     |
-|---------------------|--------------------------------|-------------------------------------------|
-| First derivative    | `deriv(fd, nderiv = 1)`        | Velocity, rate of change                  |
-| Second derivative   | `deriv(fd, nderiv = 2)`        | Acceleration, curvature                   |
-| Derivative distance | `semimetric.deriv(fd, nderiv)` | Shape-based comparison                    |
-| Pre-smoothing       | `pspline(fd)`                  | **Always smooth before differentiating!** |
+| Task                             | Function                       | Notes                                     |
+|----------------------------------|--------------------------------|-------------------------------------------|
+| First derivative                 | `deriv(fd, nderiv = 1)`        | Velocity, rate of change                  |
+| First derivative (high accuracy) | `fdata.gradient(fd)`           | $O\left( h^{4} \right)$ 5-point stencil   |
+| Second derivative                | `deriv(fd, nderiv = 2)`        | Acceleration, curvature                   |
+| Derivative distance              | `semimetric.deriv(fd, nderiv)` | Shape-based comparison                    |
+| Pre-smoothing                    | `pspline(fd)`                  | **Always smooth before differentiating!** |
 
 **Key Takeaways:**
 
@@ -474,15 +554,6 @@ cat("Correlation between age at PHV and max velocity:",
     variation
 4.  **Derivative-based distances** - useful for shape-based clustering
     and comparison
-
-## See Also
-
-- `vignette("intro-to-smoothing", package = "fdars")` — smoothing
-  techniques for functional data
-- `vignette("fpca", package = "fdars")` — functional principal component
-  analysis
-- `vignette("distance-metrics", package = "fdars")` — distance and
-  semimetric measures
 
 ## See Also
 

@@ -8,6 +8,8 @@
   : Center functional data
 - [`deriv()`](https://sipemu.github.io/fdars-r/reference/deriv.md) :
   Compute functional derivative
+- [`fdata.gradient()`](https://sipemu.github.io/fdars-r/reference/fdata.gradient.md)
+  : High-Accuracy Gradient for Functional Data
 - [`mean(`*`<fdata>`*`)`](https://sipemu.github.io/fdars-r/reference/mean.fdata.md)
   : Compute functional mean
 - [`median()`](https://sipemu.github.io/fdars-r/reference/median.md) :
@@ -243,6 +245,8 @@
   : LRT-based Outlier Detection for Functional Data
 - [`outliers.thres.lrt()`](https://sipemu.github.io/fdars-r/reference/outliers.thres.lrt.md)
   : LRT Outlier Detection Threshold
+- [`outliers.lrt.dist()`](https://sipemu.github.io/fdars-r/reference/outliers.lrt.dist.md)
+  : LRT Outlier Threshold with Bootstrap Distribution
 - [`magnitudeshape()`](https://sipemu.github.io/fdars-r/reference/magnitudeshape.md)
   : Magnitude-Shape Outlier Detection for Functional Data
 
@@ -272,6 +276,10 @@
   : Cross-Validation for Functional PC Regression
 - [`functional.logistic()`](https://sipemu.github.io/fdars-r/reference/functional.logistic.md)
   : Functional Logistic Regression
+- [`predict(`*`<fregre.logistic>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.fregre.logistic.md)
+  : Predict from Functional Logistic Model
+- [`model.selection.ncomp()`](https://sipemu.github.io/fdars-r/reference/model.selection.ncomp.md)
+  : Model Selection for Number of FPC Components
 - [`optim.np()`](https://sipemu.github.io/fdars-r/reference/optim.np.md)
   : Optimize Bandwidth Using Cross-Validation
 - [`flm.test()`](https://sipemu.github.io/fdars-r/reference/flm.test.md)
@@ -291,6 +299,8 @@
   Function-on-Scalar Regression
 - [`fosr.fpc()`](https://sipemu.github.io/fdars-r/reference/fosr.fpc.md)
   : FPC-based Function-on-Scalar Regression
+- [`fosr.2d()`](https://sipemu.github.io/fdars-r/reference/fosr.2d.md) :
+  2D Function-on-Scalar Regression
 - [`fanova()`](https://sipemu.github.io/fdars-r/reference/fanova.md) :
   Functional ANOVA
 
@@ -388,11 +398,42 @@
   : Elastic Logistic Classification
 - [`elastic.pcr()`](https://sipemu.github.io/fdars-r/reference/elastic.pcr.md)
   : Elastic Principal Component Regression
+- [`predict(`*`<elastic.regression>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.elastic.regression.md)
+  : Predict from Elastic Regression
+- [`predict(`*`<elastic.logistic>`*`)`](https://sipemu.github.io/fdars-r/reference/predict.elastic.logistic.md)
+  : Predict from Elastic Logistic Classification
 
 ## Elastic Changepoint
 
 - [`elastic.changepoint()`](https://sipemu.github.io/fdars-r/reference/elastic.changepoint.md)
   : Elastic Changepoint Detection
+
+## Conformal Prediction
+
+- [`conformal.fregre.lm()`](https://sipemu.github.io/fdars-r/reference/conformal.fregre.lm.md)
+  : Conformal Prediction for Functional Linear Model
+- [`conformal.fregre.np()`](https://sipemu.github.io/fdars-r/reference/conformal.fregre.np.md)
+  : Conformal Prediction for Nonparametric Functional Regression
+- [`conformal.elastic.regression()`](https://sipemu.github.io/fdars-r/reference/conformal.elastic.regression.md)
+  : Conformal Prediction for Elastic Regression
+- [`conformal.elastic.pcr()`](https://sipemu.github.io/fdars-r/reference/conformal.elastic.pcr.md)
+  : Conformal Prediction for Elastic PCR
+- [`conformal.elastic.logistic()`](https://sipemu.github.io/fdars-r/reference/conformal.elastic.logistic.md)
+  : Conformal Prediction for Elastic Logistic Regression
+- [`conformal.logistic()`](https://sipemu.github.io/fdars-r/reference/conformal.logistic.md)
+  : Conformal Prediction for Logistic Regression
+- [`conformal.classif()`](https://sipemu.github.io/fdars-r/reference/conformal.classif.md)
+  : Conformal Classification
+- [`cv.conformal.regression()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.regression.md)
+  : Cross-Conformal (CV+) Regression
+- [`cv.conformal.classification()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.classification.md)
+  : Cross-Conformal (CV+) Classification
+- [`jackknife.plus()`](https://sipemu.github.io/fdars-r/reference/jackknife.plus.md)
+  : Jackknife+ Regression
+- [`conformal.generic.regression()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.regression.md)
+  : Generic Conformal Regression
+- [`conformal.generic.classification()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.classification.md)
+  : Generic Conformal Classification
 
 ## Explainability
 
@@ -793,357 +834,18 @@
 
 Low-level Rust wrappers and internal functions
 
-- [`explain_ale_rust()`](https://sipemu.github.io/fdars-r/reference/explain_ale_rust.md)
-  : ALE (Accumulated Local Effects)
-- [`explain_anchor_rust()`](https://sipemu.github.io/fdars-r/reference/explain_anchor_rust.md)
-  : Anchor explanation
-- [`explain_beta_decomposition_rust()`](https://sipemu.github.io/fdars-r/reference/explain_beta_decomposition_rust.md)
-  : Beta decomposition
-- [`explain_calibration_rust()`](https://sipemu.github.io/fdars-r/reference/explain_calibration_rust.md)
-  : Calibration diagnostics (logistic only)
-- [`explain_conditional_importance_rust()`](https://sipemu.github.io/fdars-r/reference/explain_conditional_importance_rust.md)
-  : Conditional permutation importance
-- [`explain_conformal_rust()`](https://sipemu.github.io/fdars-r/reference/explain_conformal_rust.md)
-  : Conformal prediction
-- [`explain_counterfactual_rust()`](https://sipemu.github.io/fdars-r/reference/explain_counterfactual_rust.md)
-  : Counterfactual explanation
-- [`explain_dfbetas_rust()`](https://sipemu.github.io/fdars-r/reference/explain_dfbetas_rust.md)
-  : DFBETAS and DFFITS
-- [`explain_domain_rust()`](https://sipemu.github.io/fdars-r/reference/explain_domain_rust.md)
-  : Domain selection
-- [`explain_ece_rust()`](https://sipemu.github.io/fdars-r/reference/explain_ece_rust.md)
-  : Expected calibration error (logistic only)
-- [`explain_friedman_rust()`](https://sipemu.github.io/fdars-r/reference/explain_friedman_rust.md)
-  : Friedman H-statistic
-- [`explain_importance_rust()`](https://sipemu.github.io/fdars-r/reference/explain_importance_rust.md)
-  : FPC permutation importance
-- [`explain_influence_rust()`](https://sipemu.github.io/fdars-r/reference/explain_influence_rust.md)
-  : Influence diagnostics
-- [`explain_lime_rust()`](https://sipemu.github.io/fdars-r/reference/explain_lime_rust.md)
-  : LIME explanation
-- [`explain_loo_rust()`](https://sipemu.github.io/fdars-r/reference/explain_loo_rust.md)
-  : LOO-CV / PRESS
-- [`explain_pdp_rust()`](https://sipemu.github.io/fdars-r/reference/explain_pdp_rust.md)
-  : Functional PDP (Partial Dependence Plot)
-- [`explain_pointwise_importance_rust()`](https://sipemu.github.io/fdars-r/reference/explain_pointwise_importance_rust.md)
-  : Pointwise importance
-- [`explain_prediction_intervals_rust()`](https://sipemu.github.io/fdars-r/reference/explain_prediction_intervals_rust.md)
-  : Prediction intervals
-- [`explain_prototype_rust()`](https://sipemu.github.io/fdars-r/reference/explain_prototype_rust.md)
-  : Prototype criticism
-- [`explain_regression_depth_rust()`](https://sipemu.github.io/fdars-r/reference/explain_regression_depth_rust.md)
-  : Regression depth
-- [`explain_saliency_rust()`](https://sipemu.github.io/fdars-r/reference/explain_saliency_rust.md)
-  : Functional saliency
-- [`explain_shap_rust()`](https://sipemu.github.io/fdars-r/reference/explain_shap_rust.md)
-  : FPC SHAP values
-- [`explain_significant_regions_rust()`](https://sipemu.github.io/fdars-r/reference/explain_significant_regions_rust.md)
-  : Significant regions from standard errors
-- [`explain_sobol_rust()`](https://sipemu.github.io/fdars-r/reference/explain_sobol_rust.md)
-  : Sobol indices
-- [`explain_stability_rust()`](https://sipemu.github.io/fdars-r/reference/explain_stability_rust.md)
-  : Explanation stability
-- [`explain_vif_rust()`](https://sipemu.github.io/fdars-r/reference/explain_vif_rust.md)
-  : FPC VIF
-- [`elastic_amp_changepoint_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_amp_changepoint_rust.md)
-  : Amplitude changepoint detection
-- [`elastic_fpca_changepoint_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_fpca_changepoint_rust.md)
-  : FPCA-based changepoint detection
-- [`elastic_horiz_fpca_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_horiz_fpca_rust.md)
-  : Horizontal (phase) FPCA after elastic alignment
-- [`elastic_joint_fpca_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_joint_fpca_rust.md)
-  : Joint (amplitude + phase) FPCA after elastic alignment
-- [`elastic_logistic_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_logistic_rust.md)
-  : Elastic logistic classification
-- [`elastic_pcr_attribution_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_pcr_attribution_rust.md)
-  : Elastic PCR amplitude vs phase attribution
-- [`elastic_pcr_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_pcr_rust.md)
-  : Elastic principal component regression
-- [`elastic_ph_changepoint_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_ph_changepoint_rust.md)
-  : Phase changepoint detection
-- [`elastic_regression_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_regression_rust.md)
-  : Elastic scalar-on-function regression
-- [`elastic_vert_fpca_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_vert_fpca_rust.md)
-  : Vertical (amplitude) FPCA after elastic alignment
-- [`smooth_basis_gcv_rust()`](https://sipemu.github.io/fdars-r/reference/smooth_basis_gcv_rust.md)
-  : Penalized basis smoothing with GCV-optimal lambda
-- [`smooth_basis_rust()`](https://sipemu.github.io/fdars-r/reference/smooth_basis_rust.md)
-  : Penalized basis smoothing
-- [`bootstrap_ci_fregre_lm_rust()`](https://sipemu.github.io/fdars-r/reference/bootstrap_ci_fregre_lm_rust.md)
-  : Bootstrap CI for functional linear model beta(t)
-- [`bootstrap_ci_functional_logistic_rust()`](https://sipemu.github.io/fdars-r/reference/bootstrap_ci_functional_logistic_rust.md)
-  : Bootstrap CI for functional logistic model beta(t)
-- [`fanova_rust()`](https://sipemu.github.io/fdars-r/reference/fanova_rust.md)
-  : Functional ANOVA
-- [`fclassif_cv_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_cv_rust.md)
-  : Cross-validated classification
-- [`fclassif_dd_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_dd_rust.md)
-  : DD-plot classification
-- [`fclassif_kernel_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_kernel_rust.md)
-  : Kernel classification
-- [`fclassif_knn_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_knn_rust.md)
-  : kNN classification
-- [`fclassif_lda_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_lda_rust.md)
-  : LDA classification
-- [`fclassif_qda_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_qda_rust.md)
-  : QDA classification
-- [`fmm_predict_rust()`](https://sipemu.github.io/fdars-r/reference/fmm_predict_rust.md)
-  : Predict from functional mixed model
-- [`fmm_rust()`](https://sipemu.github.io/fdars-r/reference/fmm_rust.md)
-  : Functional mixed model
-- [`fmm_test_fixed_rust()`](https://sipemu.github.io/fdars-r/reference/fmm_test_fixed_rust.md)
-  : Permutation test for fixed effects in FMM
-- [`fosr_fpc_rust()`](https://sipemu.github.io/fdars-r/reference/fosr_fpc_rust.md)
-  : FPC-based function-on-scalar regression
-- [`fosr_rust()`](https://sipemu.github.io/fdars-r/reference/fosr_rust.md)
-  : Function-on-scalar regression (penalized)
-- [`fregre_cv_rust()`](https://sipemu.github.io/fdars-r/reference/fregre_cv_rust.md)
-  : Cross-validation for FPC component selection
-- [`fregre_lm_rust()`](https://sipemu.github.io/fdars-r/reference/fregre_lm_rust.md)
-  : Functional linear model (FPC-based)
-- [`fregre_np_mixed_rust()`](https://sipemu.github.io/fdars-r/reference/fregre_np_mixed_rust.md)
-  : Nonparametric functional regression with mixed predictors
-- [`functional_logistic_rust()`](https://sipemu.github.io/fdars-r/reference/functional_logistic_rust.md)
-  : Functional logistic regression
-- [`gmm_cluster_rust()`](https://sipemu.github.io/fdars-r/reference/gmm_cluster_rust.md)
-  : GMM clustering with automatic K selection
-- [`gmm_em_rust()`](https://sipemu.github.io/fdars-r/reference/gmm_em_rust.md)
-  : Raw GMM EM on feature matrix
-- [`predict_fosr_rust()`](https://sipemu.github.io/fdars-r/reference/predict_fosr_rust.md)
-  : Predict from function-on-scalar regression
-- [`predict_gmm_rust()`](https://sipemu.github.io/fdars-r/reference/predict_gmm_rust.md)
-  : Predict from GMM
-- [`add_error_curve_1d()`](https://sipemu.github.io/fdars-r/reference/add_error_curve_1d.md)
-  : Add curve-level Gaussian noise to functional data
-- [`add_error_pointwise_1d()`](https://sipemu.github.io/fdars-r/reference/add_error_pointwise_1d.md)
-  : Add pointwise Gaussian noise to functional data
-- [`alignment_align_to_target()`](https://sipemu.github.io/fdars-r/reference/alignment_align_to_target.md)
-  : Align all curves to a target curve
-- [`alignment_amplitude_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_amplitude_dist.md)
-  : Amplitude self-distance matrix
-- [`alignment_compose_warps()`](https://sipemu.github.io/fdars-r/reference/alignment_compose_warps.md)
-  : Compose two warping functions
-- [`alignment_constrained()`](https://sipemu.github.io/fdars-r/reference/alignment_constrained.md)
-  : Elastic alignment with explicit landmark constraints
-- [`alignment_cross_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_cross_dist.md)
-  : Elastic cross-distance matrix
-- [`alignment_decomposition()`](https://sipemu.github.io/fdars-r/reference/alignment_decomposition.md)
-  : Elastic phase-amplitude decomposition
-- [`alignment_elastic_distance()`](https://sipemu.github.io/fdars-r/reference/alignment_elastic_distance.md)
-  : Elastic (Fisher-Rao) distance between two curves
-- [`alignment_elastic_pair()`](https://sipemu.github.io/fdars-r/reference/alignment_elastic_pair.md)
-  : Elastic alignment of one curve to another
-- [`alignment_karcher_mean()`](https://sipemu.github.io/fdars-r/reference/alignment_karcher_mean.md)
-  : Karcher (Fréchet) mean in elastic metric
-- [`alignment_pairwise_consistency()`](https://sipemu.github.io/fdars-r/reference/alignment_pairwise_consistency.md)
-  : Pairwise alignment consistency
-- [`alignment_phase_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_phase_dist.md)
-  : Phase self-distance matrix
-- [`alignment_quality_compute()`](https://sipemu.github.io/fdars-r/reference/alignment_quality_compute.md)
-  : Compute alignment quality metrics
-- [`alignment_reparameterize()`](https://sipemu.github.io/fdars-r/reference/alignment_reparameterize.md)
-  : Apply warping function to reparameterize a curve
-- [`alignment_self_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_self_dist.md)
-  : Elastic self-distance matrix
-- [`alignment_srsf_inverse()`](https://sipemu.github.io/fdars-r/reference/alignment_srsf_inverse.md)
-  : Inverse SRSF: reconstruct curve from SRSF representation
-- [`alignment_srsf_transform()`](https://sipemu.github.io/fdars-r/reference/alignment_srsf_transform.md)
-  : SRSF transform of functional data
-- [`alignment_tsrvf_from_karcher()`](https://sipemu.github.io/fdars-r/reference/alignment_tsrvf_from_karcher.md)
-  : Compute TSRVF from a pre-computed Karcher mean
-- [`alignment_tsrvf_inverse()`](https://sipemu.github.io/fdars-r/reference/alignment_tsrvf_inverse.md)
-  : Inverse TSRVF: reconstruct curves from tangent vectors
-- [`alignment_tsrvf_transform()`](https://sipemu.github.io/fdars-r/reference/alignment_tsrvf_transform.md)
-  : Full TSRVF transform: compute Karcher mean + transport to tangent
-  space
-- [`alignment_warp_complexity()`](https://sipemu.github.io/fdars-r/reference/alignment_warp_complexity.md)
-  : Compute warp complexity (geodesic distance from identity)
-- [`alignment_warp_smoothness()`](https://sipemu.github.io/fdars-r/reference/alignment_warp_smoothness.md)
-  : Compute warp smoothness (bending energy)
-- [`alignment_with_landmarks()`](https://sipemu.github.io/fdars-r/reference/alignment_with_landmarks.md)
-  : Elastic alignment with automatic landmark detection
 - [`andrews_loadings()`](https://sipemu.github.io/fdars-r/reference/andrews_loadings.md)
   : Andrews Loadings: Project FPCA Eigenfunctions to Original Variables
 - [`andrews_transform()`](https://sipemu.github.io/fdars-r/reference/andrews_transform.md)
   : Andrews Transformation
-- [`basis_aic_1d()`](https://sipemu.github.io/fdars-r/reference/basis_aic_1d.md)
-  : Compute AIC for basis fit AIC = n \* log(RSS/n) + 2 \* total_edf
-  Where total_edf = n_curves \* edf (each curve has edf parameters) When
-  pooled=true: compute single AIC across all curves When pooled=false:
-  compute per-curve AIC and return mean
-- [`basis_bic_1d()`](https://sipemu.github.io/fdars-r/reference/basis_bic_1d.md)
-  : Compute BIC for basis fit BIC = n \* log(RSS/n) + log(n) \*
-  total_edf Where total_edf = n_curves \* edf (each curve has edf
-  parameters) When pooled=true: compute single BIC across all curves
-  When pooled=false: compute per-curve BIC and return mean
-- [`basis_gcv_1d()`](https://sipemu.github.io/fdars-r/reference/basis_gcv_1d.md)
-  : Compute GCV score for basis fit GCV = RSS/n / (1 - edf/n)^2 When
-  pooled=true: compute single GCV across all curves When pooled=false:
-  compute per-curve GCV and return mean
-- [`calinski_harabasz()`](https://sipemu.github.io/fdars-r/reference/calinski_harabasz.md)
-  : Compute Calinski-Harabasz index (variance ratio criterion) Higher
-  values indicate better defined clusters
-- [`compute_adot()`](https://sipemu.github.io/fdars-r/reference/compute_adot.md)
-  : Compute the Adot matrix (parallelized)
-- [`depth_bd_1d()`](https://sipemu.github.io/fdars-r/reference/depth_bd_1d.md)
-  : Band Depth (BD) for 1D functional data BD(x) = proportion of pairs
-  (i,j) where x lies within the band formed by curves i and j A curve
-  lies in the band if at every time point t, min(X_i(t), X_j(t)) \<=
-  x(t) \<= max(X_i(t), X_j(t))
-- [`depth_fm_1d()`](https://sipemu.github.io/fdars-r/reference/depth_fm_1d.md)
-  : Compute Fraiman-Muniz depth
-- [`depth_fm_2d()`](https://sipemu.github.io/fdars-r/reference/depth_fm_2d.md)
-  : Fraiman-Muniz depth for 2D functional data (surfaces) Integrates
-  univariate depth over (s,t) grid
-- [`depth_fsd_1d()`](https://sipemu.github.io/fdars-r/reference/depth_fsd_1d.md)
-  : Compute Functional Spatial Depth
-- [`depth_fsd_2d()`](https://sipemu.github.io/fdars-r/reference/depth_fsd_2d.md)
-  : Functional Spatial Depth for 2D functional data
-- [`depth_kfsd_1d()`](https://sipemu.github.io/fdars-r/reference/depth_kfsd_1d.md)
-  : Kernel Functional Spatial Depth (KFSD) for 1D functional data
-  Implements the RKHS-based formulation matching fda.usc h is treated as
-  the actual bandwidth, matching how fda.usc uses hq2 argvals is used
-  for trapezoidal integration to compute L2 norms
-- [`depth_kfsd_2d()`](https://sipemu.github.io/fdars-r/reference/depth_kfsd_2d.md)
-  : Kernel Functional Spatial Depth (KFSD) for 2D functional data
-  Implements the RKHS-based formulation matching fda.usc
-- [`depth_mbd_1d()`](https://sipemu.github.io/fdars-r/reference/depth_mbd_1d.md)
-  : Modified Band Depth (MBD) for 1D functional data MBD(x) = average
-  over pairs (i,j) of the proportion of the domain where x is inside the
-  band This is more robust than BD as it doesn't require complete
-  containment
-- [`depth_mei_1d()`](https://sipemu.github.io/fdars-r/reference/depth_mei_1d.md)
-  : Modified Epigraph Index (MEI) for 1D functional data MEI measures
-  the proportion of time a curve is below other curves MEI(x_i) = (1/n)
-  \* sum_j (1/m) \* sum_t I(x_i(t) \< x_j(t)) + 0.5\*I(x_i(t) = x_j(t))
-- [`depth_mode_1d()`](https://sipemu.github.io/fdars-r/reference/depth_mode_1d.md)
-  : Compute modal depth
-- [`depth_mode_2d()`](https://sipemu.github.io/fdars-r/reference/depth_mode_2d.md)
-  : Modal depth for 2D functional data (surfaces) Uses L2 distance in
-  the flattened surface space
-- [`depth_rp_1d()`](https://sipemu.github.io/fdars-r/reference/depth_rp_1d.md)
-  : Compute random projection depth
-- [`depth_rp_1d_seeded()`](https://sipemu.github.io/fdars-r/reference/depth_rp_1d_seeded.md)
-  : Random projection depth with optional seed
-- [`depth_rp_2d()`](https://sipemu.github.io/fdars-r/reference/depth_rp_2d.md)
-  : Random projection depth for 2D functional data (surfaces) Projects
-  surfaces to scalars using random projections
-- [`depth_rt_1d()`](https://sipemu.github.io/fdars-r/reference/depth_rt_1d.md)
-  : Compute random Tukey depth
-- [`depth_rt_1d_seeded()`](https://sipemu.github.io/fdars-r/reference/depth_rt_1d_seeded.md)
-  : Random Tukey depth with optional seed
-- [`depth_rt_2d()`](https://sipemu.github.io/fdars-r/reference/depth_rt_2d.md)
-  : Random Tukey depth for 2D functional data (surfaces)
 - [`detect_amplitude_modulation()`](https://sipemu.github.io/fdars-r/reference/detect_amplitude_modulation.md)
   : Detect Amplitude Modulation in Seasonal Time Series
 - [`df_to_fdata2d()`](https://sipemu.github.io/fdars-r/reference/df_to_fdata2d.md)
   : Convert DataFrame to 2D functional data
 - [`fdata2basis_cv()`](https://sipemu.github.io/fdars-r/reference/fdata2basis_cv.md)
   : Cross-Validation for Basis Function Number Selection
-- [`fdata_center_1d()`](https://sipemu.github.io/fdars-r/reference/fdata_center_1d.md)
-  : Center functional data by subtracting the mean function
-- [`fdata_deriv_1d()`](https://sipemu.github.io/fdars-r/reference/fdata_deriv_1d.md)
-  : Compute numerical derivative of functional data (parallelized over
-  rows)
-- [`fdata_deriv_2d()`](https://sipemu.github.io/fdars-r/reference/fdata_deriv_2d.md)
-  : Compute 2D partial derivatives for surface data
-- [`fdata_mean_1d()`](https://sipemu.github.io/fdars-r/reference/fdata_mean_1d.md)
-  : Compute the mean function across all samples (1D)
-- [`fdata_mean_2d()`](https://sipemu.github.io/fdars-r/reference/fdata_mean_2d.md)
-  : Compute the mean function across all samples (2D surfaces) Data is
-  stored as n x (m1\*m2) matrix where each row is a flattened surface
-- [`fdata_norm_lp_1d()`](https://sipemu.github.io/fdars-r/reference/fdata_norm_lp_1d.md)
-  : Compute Lp norm for each sample
-- [`fuzzycmeans_fd()`](https://sipemu.github.io/fdars-r/reference/fuzzycmeans_fd.md)
-  : Fuzzy C-Means clustering for functional data m_fuzz is the fuzziness
-  parameter (typically 2)
-- [`geometric_median_1d()`](https://sipemu.github.io/fdars-r/reference/geometric_median_1d.md)
-  : Compute the geometric median (L1 median) of functional data using
-  Weiszfeld's algorithm The geometric median minimizes sum of L2
-  distances to all curves
-- [`geometric_median_2d()`](https://sipemu.github.io/fdars-r/reference/geometric_median_2d.md)
-  : Compute the geometric median (L1 median) of 2D functional data using
-  Weiszfeld's algorithm Data is stored as n x (m1\*m2) matrix where each
-  row is a flattened surface
-- [`inprod_fdata()`](https://sipemu.github.io/fdars-r/reference/inprod_fdata.md)
-  : Inner product of two functional data objects \<f, g\> =
-  integral(f(t) \* g(t) dt)
-- [`int_simpson()`](https://sipemu.github.io/fdars-r/reference/int_simpson.md)
-  : Simpson's rule integration for functional data Integrates each curve
-  over the domain
-- [`irreg_fdata2basis()`](https://sipemu.github.io/fdars-r/reference/irreg_fdata2basis.md)
-  : Fit basis functions to irregular functional data Each curve is
-  individually fitted via least squares at its own observation points
-  basis_type: 0 = bspline, 1 = fourier
-- [`irreg_integrate()`](https://sipemu.github.io/fdars-r/reference/irreg_integrate.md)
-  : Compute integral for each curve in irregular functional data
-- [`irreg_mean_kernel()`](https://sipemu.github.io/fdars-r/reference/irreg_mean_kernel.md)
-  : Estimate mean function for irregular data using kernel smoothing
-- [`irreg_metric_lp()`](https://sipemu.github.io/fdars-r/reference/irreg_metric_lp.md)
-  : Compute pairwise Lp distances for irregular functional data
-- [`irreg_norm_lp()`](https://sipemu.github.io/fdars-r/reference/irreg_norm_lp.md)
-  : Compute Lp norm for each curve in irregular functional data
-- [`irreg_to_regular()`](https://sipemu.github.io/fdars-r/reference/irreg_to_regular.md)
-  : Convert irregular data to regular grid via interpolation
-- [`kmeans_fd()`](https://sipemu.github.io/fdars-r/reference/kmeans_fd.md)
-  : Functional k-means clustering
-- [`knn_gcv()`](https://sipemu.github.io/fdars-r/reference/knn_gcv.md) :
-  k-NN with Global Cross-Validation Finds a single optimal k for all
-  observations
-- [`knn_lcv()`](https://sipemu.github.io/fdars-r/reference/knn_lcv.md) :
-  k-NN with Local Cross-Validation Finds an optimal k for each
-  observation
-- [`knn_predict()`](https://sipemu.github.io/fdars-r/reference/knn_predict.md)
-  : Kernel prediction with fixed bandwidth for prediction on new data
-- [`landmark_detect()`](https://sipemu.github.io/fdars-r/reference/landmark_detect.md)
-  : Detect landmarks in a single curve
-- [`landmark_register_curves()`](https://sipemu.github.io/fdars-r/reference/landmark_register_curves.md)
-  : Detect landmarks and register curves
-- [`metric_dtw_cross_1d()`](https://sipemu.github.io/fdars-r/reference/metric_dtw_cross_1d.md)
-  : Compute DTW distance matrix for cross-distances (n1 x n2)
-- [`metric_dtw_self_1d()`](https://sipemu.github.io/fdars-r/reference/metric_dtw_self_1d.md)
-  : Compute DTW distance matrix for self-distances (symmetric)
-- [`metric_hausdorff_1d()`](https://sipemu.github.io/fdars-r/reference/metric_hausdorff_1d.md)
-  : Compute Hausdorff distance matrix for self-distances (symmetric)
-- [`metric_hausdorff_2d()`](https://sipemu.github.io/fdars-r/reference/metric_hausdorff_2d.md)
-  : Compute Hausdorff distance for 2D functional data (surfaces)
-- [`metric_hausdorff_cross_1d()`](https://sipemu.github.io/fdars-r/reference/metric_hausdorff_cross_1d.md)
-  : Compute Hausdorff distance matrix for cross-distances (n1 x n2)
-- [`metric_hausdorff_cross_2d()`](https://sipemu.github.io/fdars-r/reference/metric_hausdorff_cross_2d.md)
-  : Compute Hausdorff cross-distances for 2D functional data
-- [`metric_kl_cross_1d()`](https://sipemu.github.io/fdars-r/reference/metric_kl_cross_1d.md)
-  : Compute symmetric KL divergence matrix for cross-distances (1D)
-- [`metric_kl_self_1d()`](https://sipemu.github.io/fdars-r/reference/metric_kl_self_1d.md)
-  : Compute symmetric KL divergence matrix for self-distances (1D)
-  Curves are first normalized to be valid probability distributions
-- [`metric_lp_1d()`](https://sipemu.github.io/fdars-r/reference/metric_lp_1d.md)
-  : Compute Lp distance matrix between two sets of functional data
-- [`metric_lp_2d()`](https://sipemu.github.io/fdars-r/reference/metric_lp_2d.md)
-  : Compute Lp distance between two 2D functional data objects
-  (surfaces)
-- [`metric_lp_self_1d()`](https://sipemu.github.io/fdars-r/reference/metric_lp_self_1d.md)
-  : Compute Lp distance matrix for self-distances (symmetric)
-- [`metric_lp_self_2d()`](https://sipemu.github.io/fdars-r/reference/metric_lp_self_2d.md)
-  : Compute Lp self-distance matrix for 2D functional data (symmetric)
-- [`metric_soft_dtw_barycenter()`](https://sipemu.github.io/fdars-r/reference/metric_soft_dtw_barycenter.md)
-  : Soft-DTW barycenter computation
-- [`metric_soft_dtw_cross_1d()`](https://sipemu.github.io/fdars-r/reference/metric_soft_dtw_cross_1d.md)
-  : Soft-DTW cross-distance matrix
-- [`metric_soft_dtw_div_cross_1d()`](https://sipemu.github.io/fdars-r/reference/metric_soft_dtw_div_cross_1d.md)
-  : Soft-DTW divergence cross-distance matrix
-- [`metric_soft_dtw_div_self_1d()`](https://sipemu.github.io/fdars-r/reference/metric_soft_dtw_div_self_1d.md)
-  : Soft-DTW divergence self-distance matrix
-- [`metric_soft_dtw_self_1d()`](https://sipemu.github.io/fdars-r/reference/metric_soft_dtw_self_1d.md)
-  : Soft-DTW self-distance matrix
 - [`outlier_summary()`](https://sipemu.github.io/fdars-r/reference/outlier_summary.md)
   : Unified Outlier Summary
-- [`outliers_lrt()`](https://sipemu.github.io/fdars-r/reference/outliers_lrt.md)
-  : LRT-based outlier detection Returns indices of detected outliers
-- [`outliers_thres_lrt()`](https://sipemu.github.io/fdars-r/reference/outliers_thres_lrt.md)
-  : Compute bootstrap threshold for LRT outlier detection Highly
-  parallelized across bootstrap iterations
-- [`pcvm_statistic()`](https://sipemu.github.io/fdars-r/reference/pcvm_statistic.md)
-  : Compute the PCvM statistic
 - [`plot(`*`<amplitude_modulation>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.amplitude_modulation.md)
   : Plot method for amplitude_modulation objects
 - [`plot(`*`<lomb_scargle_result>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.lomb_scargle_result.md)
@@ -1188,142 +890,5 @@ Low-level Rust wrappers and internal functions
   : Print method for ssa_result objects
 - [`print(`*`<stl_result>`*`)`](https://sipemu.github.io/fdars-r/reference/print.stl_result.md)
   : Print method for stl_result objects
-- [`pspline_fit_1d()`](https://sipemu.github.io/fdars-r/reference/pspline_fit_1d.md)
-  : P-spline fitting: returns coefficients, fitted values, and
-  diagnostics
-- [`pspline_fit_2d()`](https://sipemu.github.io/fdars-r/reference/pspline_fit_2d.md)
-  : 2D P-spline fitting with anisotropic penalties
-- [`register_shift_1d()`](https://sipemu.github.io/fdars-r/reference/register_shift_1d.md)
-  : Shift registration: find optimal horizontal shift for each curve to
-  align with a target (usually the mean)
-- [`rp_stat()`](https://sipemu.github.io/fdars-r/reference/rp_stat.md) :
-  Compute random projection statistics (parallelized over projections)
-- [`s_knn()`](https://sipemu.github.io/fdars-r/reference/s_knn.md) :
-  K-Nearest Neighbors smoother matrix
-- [`s_llr()`](https://sipemu.github.io/fdars-r/reference/s_llr.md) :
-  Local Linear Regression smoother matrix Uses weighted least squares
-  with degree-1 polynomial
-- [`s_lpr()`](https://sipemu.github.io/fdars-r/reference/s_lpr.md) :
-  Local Polynomial Regression smoother matrix Solves (p+1)×(p+1)
-  weighted least squares system for each point
-- [`s_nw()`](https://sipemu.github.io/fdars-r/reference/s_nw.md) :
-  Nadaraya-Watson smoother matrix S_ij = K((t_i - t_j)/h) \* w_j /
-  sum_k(K((t_i - t_k)/h) \* w_k)
 - [`scale_minmax()`](https://sipemu.github.io/fdars-r/reference/scale_minmax.md)
   : Min-Max scaling for functional data
-- [`seasonal_analyze_peak_timing()`](https://sipemu.github.io/fdars-r/reference/seasonal_analyze_peak_timing.md)
-  : Analyze peak timing variability across cycles (uses Fourier
-  smoothing)
-- [`seasonal_autoperiod()`](https://sipemu.github.io/fdars-r/reference/seasonal_autoperiod.md)
-  : Autoperiod: Hybrid FFT + ACF period detection with gradient ascent
-  refinement Returns period, confidence, FFT power, ACF validation
-  score, and candidates
-- [`seasonal_cfd_autoperiod()`](https://sipemu.github.io/fdars-r/reference/seasonal_cfd_autoperiod.md)
-  : CFDAutoperiod: Clustered Filtered Detrended Autoperiod Uses
-  differencing for detrending and clustering for robust period detection
-- [`seasonal_classify_seasonality()`](https://sipemu.github.io/fdars-r/reference/seasonal_classify_seasonality.md)
-  : Classify seasonality type
-- [`seasonal_decompose()`](https://sipemu.github.io/fdars-r/reference/seasonal_decompose.md)
-  : Decompose functional data into trend, seasonal, and remainder
-  components
-- [`seasonal_detect_amplitude_modulation()`](https://sipemu.github.io/fdars-r/reference/seasonal_detect_amplitude_modulation.md)
-  : Detect amplitude modulation in seasonal time series using Hilbert
-  transform
-- [`seasonal_detect_amplitude_modulation_wavelet()`](https://sipemu.github.io/fdars-r/reference/seasonal_detect_amplitude_modulation_wavelet.md)
-  : Detect amplitude modulation using wavelet transform (Morlet wavelet)
-- [`seasonal_detect_changes()`](https://sipemu.github.io/fdars-r/reference/seasonal_detect_changes.md)
-  : Detect seasonality changes (onset/cessation)
-- [`seasonal_detect_changes_auto()`](https://sipemu.github.io/fdars-r/reference/seasonal_detect_changes_auto.md)
-  : Detect seasonality changes with automatic threshold
-- [`seasonal_detect_multiple_periods()`](https://sipemu.github.io/fdars-r/reference/seasonal_detect_multiple_periods.md)
-  : Detect multiple concurrent periodicities using iterative residual
-  subtraction
-- [`seasonal_detect_peaks()`](https://sipemu.github.io/fdars-r/reference/seasonal_detect_peaks.md)
-  : Detect peaks in functional data using Fourier basis smoothing
-- [`seasonal_detrend()`](https://sipemu.github.io/fdars-r/reference/seasonal_detrend.md)
-  : Detrend functional data using specified method Returns trend,
-  detrended data, method used, RSS per curve, and number of parameters
-- [`seasonal_estimate_period_acf()`](https://sipemu.github.io/fdars-r/reference/seasonal_estimate_period_acf.md)
-  : Estimate period using autocorrelation
-- [`seasonal_estimate_period_fft()`](https://sipemu.github.io/fdars-r/reference/seasonal_estimate_period_fft.md)
-  : Estimate period using FFT periodogram
-- [`seasonal_instantaneous_period()`](https://sipemu.github.io/fdars-r/reference/seasonal_instantaneous_period.md)
-  : Estimate instantaneous period using Hilbert transform
-- [`seasonal_lomb_scargle()`](https://sipemu.github.io/fdars-r/reference/seasonal_lomb_scargle.md)
-  : Lomb-Scargle periodogram for irregularly sampled data Computes the
-  power spectrum and significance for period detection
-- [`seasonal_matrix_profile()`](https://sipemu.github.io/fdars-r/reference/seasonal_matrix_profile.md)
-  : Matrix Profile for motif discovery and period detection Uses STOMP
-  algorithm for efficient computation
-- [`seasonal_sazed()`](https://sipemu.github.io/fdars-r/reference/seasonal_sazed.md)
-  : SAZED: Spectral-ACF Zero-crossing Ensemble Detection A
-  parameter-free ensemble method for robust period detection Returns
-  period, confidence, component periods, and agreeing component count
-- [`seasonal_ssa()`](https://sipemu.github.io/fdars-r/reference/seasonal_ssa.md)
-  : Singular Spectrum Analysis for time series decomposition Extracts
-  trend, seasonal, and noise components via SVD
-- [`seasonal_stl()`](https://sipemu.github.io/fdars-r/reference/seasonal_stl.md)
-  : STL (Seasonal and Trend decomposition using LOESS) Implements
-  Cleveland et al. 1990 algorithm
-- [`seasonal_strength_spectral()`](https://sipemu.github.io/fdars-r/reference/seasonal_strength_spectral.md)
-  : Measure seasonal strength using spectral method
-- [`seasonal_strength_variance()`](https://sipemu.github.io/fdars-r/reference/seasonal_strength_variance.md)
-  : Measure seasonal strength using variance decomposition
-- [`seasonal_strength_wavelet()`](https://sipemu.github.io/fdars-r/reference/seasonal_strength_wavelet.md)
-  : Measure seasonal strength using wavelet (Morlet) method
-- [`seasonal_strength_windowed()`](https://sipemu.github.io/fdars-r/reference/seasonal_strength_windowed.md)
-  : Time-varying seasonal strength using sliding windows
-- [`select_basis_auto()`](https://sipemu.github.io/fdars-r/reference/select_basis_auto.md)
-  : Automatic basis selection for each curve individually.
-- [`semimetric_fourier_cross_1d()`](https://sipemu.github.io/fdars-r/reference/semimetric_fourier_cross_1d.md)
-  : Compute semimetric based on Fourier coefficients for cross-distances
-- [`semimetric_fourier_self_1d()`](https://sipemu.github.io/fdars-r/reference/semimetric_fourier_self_1d.md)
-  : Compute semimetric based on Fourier coefficients for self-distances
-  (symmetric) Uses FFT to compute Fourier coefficients and then L2
-  distance on coefficients
-- [`semimetric_hshift_cross_1d()`](https://sipemu.github.io/fdars-r/reference/semimetric_hshift_cross_1d.md)
-  : Compute semimetric based on horizontal shift for cross-distances
-- [`semimetric_hshift_self_1d()`](https://sipemu.github.io/fdars-r/reference/semimetric_hshift_self_1d.md)
-  : Compute semimetric based on horizontal shift for self-distances
-  (symmetric) This finds the minimum L2 distance after optimally
-  shifting one curve horizontally
-- [`silhouette_score()`](https://sipemu.github.io/fdars-r/reference/silhouette_score.md)
-  : Compute silhouette score for clustering Returns the mean silhouette
-  coefficient across all samples
-- [`sim_kl_1d()`](https://sipemu.github.io/fdars-r/reference/sim_kl_1d.md)
-  : Simulate functional data via Karhunen-Loève expansion
-- [`streaming_depth_batch()`](https://sipemu.github.io/fdars-r/reference/streaming_depth_batch.md)
-  : Streaming depth: batch self-depth computation
-- [`streaming_depth_one()`](https://sipemu.github.io/fdars-r/reference/streaming_depth_one.md)
-  : Streaming depth: single curve against reference
-- [`streaming_depth_vs_ref()`](https://sipemu.github.io/fdars-r/reference/streaming_depth_vs_ref.md)
-  : Streaming depth: new data against reference
-- [`tolerance_conformal()`](https://sipemu.github.io/fdars-r/reference/tolerance_conformal.md)
-  : Conformal prediction band
-- [`tolerance_elastic()`](https://sipemu.github.io/fdars-r/reference/tolerance_elastic.md)
-  : Elastic tolerance band (alignment + FPCA)
-- [`tolerance_exponential()`](https://sipemu.github.io/fdars-r/reference/tolerance_exponential.md)
-  : Exponential family tolerance band
-- [`tolerance_fpca()`](https://sipemu.github.io/fdars-r/reference/tolerance_fpca.md)
-  : FPCA-based tolerance band
-- [`tolerance_scb_degras()`](https://sipemu.github.io/fdars-r/reference/tolerance_scb_degras.md)
-  : SCB mean confidence band (Degras method)
-- [`.fit_args()`](https://sipemu.github.io/fdars-r/reference/dot-fit_args.md)
-  : Model Explainability
-- [`basis2fdata_1d()`](https://sipemu.github.io/fdars-r/reference/basis2fdata_1d.md)
-  : Reconstruct functional data from basis coefficients Returns data
-  matrix (n x m)
-- [`eigenfunctions_1d()`](https://sipemu.github.io/fdars-r/reference/eigenfunctions_1d.md)
-  : Compute eigenfunction basis values efun_type: 0 = Fourier, 1 = Poly,
-  2 = PolyHigh, 3 = Wiener
-- [`eigenvalues_1d()`](https://sipemu.github.io/fdars-r/reference/eigenvalues_1d.md)
-  : Generate eigenvalue sequence eval_type: 0 = linear, 1 = exponential,
-  2 = wiener
-- [`fdata2basis_1d()`](https://sipemu.github.io/fdars-r/reference/fdata2basis_1d.md)
-  : Convert functional data to basis coefficients type: 0 = bspline, 1 =
-  fourier
-- [`fdata2pc_1d()`](https://sipemu.github.io/fdars-r/reference/fdata2pc_1d.md)
-  : Perform functional PCA via SVD on centered data Returns: singular
-  values, rotation matrix (loadings), scores, mean
-- [`fdata2pls_1d()`](https://sipemu.github.io/fdars-r/reference/fdata2pls_1d.md)
-  : Perform PLS via NIPALS algorithm Returns: weights, scores, loadings

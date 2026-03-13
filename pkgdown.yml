@@ -6,6 +6,8 @@ articles:
   articles/andrews-transformation: andrews-transformation.html
   articles/basis-representation: basis-representation.html
   articles/clustering: clustering.html
+  articles/conformal-classification: conformal-classification.html
+  articles/conformal-prediction-guide: conformal-prediction-guide.html
   articles/covariance-functions: covariance-functions.html
   articles/cross-validation: cross-validation.html
   articles/custom-plotting: custom-plotting.html
@@ -48,7 +50,7 @@ articles:
   articles/tsrvf: tsrvf.html
   articles/uncertainty-quantification: uncertainty-quantification.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-12T11:05Z
+last_built: 2026-03-13T12:42Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

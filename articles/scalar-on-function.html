@@ -303,9 +303,9 @@ components via k-fold cross-validation.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.cv.html">fregre.lm.cv</a></span><span class="op">(</span><span class="va">fd_lm</span>, <span class="va">y_lm</span>, k.range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, nfold <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal ncomp:"</span>, <span class="va">cv_lm</span><span class="op">$</span><span class="va">optimal.k</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Optimal ncomp: 6</span></span>
+<span><span class="co">#&gt; Optimal ncomp: 7</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV errors:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_lm</span><span class="op">$</span><span class="va">cv.errors</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; CV errors: 0.0957 0.0959 0.0971 0.0971 0.0978 0.0938 0.0942 0.0951</span></span></code></pre></div>
+<span><span class="co">#&gt; CV errors: 0.0972 0.0964 0.0967 0.0986 0.0987 0.0966 0.0954 0.0967</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -1077,7 +1077,7 @@ for interpretability.</li>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Linear RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/pred.RMSE.html">pred.RMSE</a></span><span class="op">(</span><span class="va">y_te</span>, <span class="va">pred_lm_wf</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| R2:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/pred.R2.html">pred.R2</a></span><span class="op">(</span><span class="va">y_te</span>, <span class="va">pred_lm_wf</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Linear RMSE: 0.4598 | R2: -0.0105</span></span>
+<span><span class="co">#&gt; Linear RMSE: 0.4575 | R2: -3e-04</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Nonpar RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/pred.RMSE.html">pred.RMSE</a></span><span class="op">(</span><span class="va">y_te</span>, <span class="va">pred_np_wf</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| R2:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/pred.R2.html">pred.R2</a></span><span class="op">(</span><span class="va">y_te</span>, <span class="va">pred_np_wf</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Nonpar RMSE: 0.5028 | R2: -0.2086</span></span></code></pre></div>

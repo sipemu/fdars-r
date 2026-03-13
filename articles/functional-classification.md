@@ -282,8 +282,8 @@ print(cv_df)
 #> lda       LDA    0.027       0.973
 #> qda       QDA    0.033       0.967
 #> knn       KNN    0.040       0.960
-#> kernel KERNEL    0.667       0.333
-#> dd         DD    0.667       0.333
+#> kernel KERNEL    1.000       0.000
+#> dd         DD    1.000       0.000
 ```
 
 The CV error rates account for overfitting. Methods that had perfect

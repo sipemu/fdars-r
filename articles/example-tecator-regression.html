@@ -265,7 +265,7 @@ derivative-based feature enhancement with the Rust FPCA backend:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_lm_d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.cv.html">fregre.lm.cv</a></span><span class="op">(</span><span class="va">fd2_train</span>, <span class="va">fat_train</span>, k.range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, nfold <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal k:"</span>, <span class="va">cv_lm_d2</span><span class="op">$</span><span class="va">optimal.k</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Optimal k: 15</span></span>
+<span><span class="co">#&gt; Optimal k: 14</span></span>
 <span><span class="va">fit_lm_d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd2_train</span>, <span class="va">fat_train</span>, ncomp <span class="op">=</span> <span class="va">cv_lm_d2</span><span class="op">$</span><span class="va">optimal.k</span><span class="op">)</span></span>
 <span><span class="va">pred_lm_d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_lm_d2</span>, <span class="va">fd2_test</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -358,9 +358,9 @@ differences.</p>
 </tr>
 <tr class="even">
 <td align="left">fregre.lm (2nd derivative)</td>
-<td align="right">2.593</td>
+<td align="right">2.606</td>
 <td align="right">0.962</td>
-<td align="right">1.912</td>
+<td align="right">1.960</td>
 </tr>
 <tr class="odd">
 <td align="left">k-NN / elastic (2nd derivative)</td>

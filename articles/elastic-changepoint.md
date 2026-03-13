@@ -112,14 +112,14 @@ res_amp_p <- elastic.changepoint(fd_amp, type = "phase", n.mc = 199, seed = 42)
 cat("Amplitude test: detected at", res_amp_a$changepoint,
     "| CUSUM =", round(res_amp_a$test.statistic, 5),
     "| p =", format(res_amp_a$p.value, digits = 3), "\n")
-#> Amplitude test: detected at 30 | CUSUM = 0.04854 | p = 0.005
+#> Amplitude test: detected at 30 | CUSUM = 0.05105 | p = 0.005
 cat("Phase test:     detected at", res_amp_p$changepoint,
     "| CUSUM =", round(res_amp_p$test.statistic, 5),
     "| p =", format(res_amp_p$p.value, digits = 3), "\n")
-#> Phase test:     detected at 30 | CUSUM = 0.00319 | p = 0.005
+#> Phase test:     detected at 30 | CUSUM = 0.00255 | p = 0.005
 cat("Amplitude/Phase CUSUM ratio:", round(res_amp_a$test.statistic /
                                      res_amp_p$test.statistic, 1), "x\n")
-#> Amplitude/Phase CUSUM ratio: 15.2 x
+#> Amplitude/Phase CUSUM ratio: 20 x
 ```
 
 The amplitude test is highly significant (small p-value) with a much
@@ -180,14 +180,14 @@ res_ph_p <- elastic.changepoint(fd_ph, type = "phase", n.mc = 199, seed = 42)
 cat("Amplitude test: detected at", res_ph_a$changepoint,
     "| CUSUM =", round(res_ph_a$test.statistic, 5),
     "| p =", format(res_ph_a$p.value, digits = 3), "\n")
-#> Amplitude test: detected at 30 | CUSUM = 0.00184 | p = 0.005
+#> Amplitude test: detected at 30 | CUSUM = 0.002 | p = 0.005
 cat("Phase test:     detected at", res_ph_p$changepoint,
     "| CUSUM =", round(res_ph_p$test.statistic, 5),
     "| p =", format(res_ph_p$p.value, digits = 3), "\n")
-#> Phase test:     detected at 30 | CUSUM = 0.00449 | p = 0.005
+#> Phase test:     detected at 30 | CUSUM = 0.00422 | p = 0.005
 cat("Phase/Amplitude CUSUM ratio:", round(res_ph_p$test.statistic /
                                      res_ph_a$test.statistic, 1), "x\n")
-#> Phase/Amplitude CUSUM ratio: 2.4 x
+#> Phase/Amplitude CUSUM ratio: 2.1 x
 ```
 
 The phase CUSUM is larger and significant, confirming the change is in
@@ -247,15 +247,15 @@ res_mix_f <- elastic.changepoint(fd_mix, type = "fpca", pca.method = "vertical",
 cat("Amplitude test: detected at", res_mix_a$changepoint,
     "| CUSUM =", round(res_mix_a$test.statistic, 5),
     "| p =", format(res_mix_a$p.value, digits = 3), "\n")
-#> Amplitude test: detected at 30 | CUSUM = 0.02456 | p = 0.005
+#> Amplitude test: detected at 30 | CUSUM = 0.02362 | p = 0.005
 cat("Phase test:     detected at", res_mix_p$changepoint,
     "| CUSUM =", round(res_mix_p$test.statistic, 5),
     "| p =", format(res_mix_p$p.value, digits = 3), "\n")
-#> Phase test:     detected at 30 | CUSUM = 0.00369 | p = 0.005
+#> Phase test:     detected at 30 | CUSUM = 0.00372 | p = 0.005
 cat("FPCA test:      detected at", res_mix_f$changepoint,
     "| CUSUM =", round(res_mix_f$test.statistic, 5),
     "| p =", format(res_mix_f$p.value, digits = 3), "\n")
-#> FPCA test:      detected at 30 | CUSUM = 0.22961 | p = 0.005
+#> FPCA test:      detected at 30 | CUSUM = 0.23432 | p = 0.005
 ```
 
 ``` r
@@ -298,13 +298,13 @@ knitr::kable(summary_df, digits = c(0, 0, 0, 5, 4))
 
 | Example            | Test      | Detected |   CUSUM | p.value |
 |:-------------------|:----------|---------:|--------:|--------:|
-| 1\. Pure Amplitude | amplitude |       30 | 0.04854 |   0.005 |
-| 1\. Pure Amplitude | phase     |       30 | 0.00319 |   0.005 |
-| 2\. Pure Phase     | amplitude |       30 | 0.00184 |   0.005 |
-| 2\. Pure Phase     | phase     |       30 | 0.00449 |   0.005 |
-| 3\. Mixed          | amplitude |       30 | 0.02456 |   0.005 |
-| 3\. Mixed          | phase     |       30 | 0.00369 |   0.005 |
-| 3\. Mixed          | fpca      |       30 | 0.22961 |   0.005 |
+| 1\. Pure Amplitude | amplitude |       30 | 0.05105 |   0.005 |
+| 1\. Pure Amplitude | phase     |       30 | 0.00255 |   0.005 |
+| 2\. Pure Phase     | amplitude |       30 | 0.00200 |   0.005 |
+| 2\. Pure Phase     | phase     |       30 | 0.00422 |   0.005 |
+| 3\. Mixed          | amplitude |       30 | 0.02362 |   0.005 |
+| 3\. Mixed          | phase     |       30 | 0.00372 |   0.005 |
+| 3\. Mixed          | fpca      |       30 | 0.23432 |   0.005 |
 
 | Change type | Best test            | Rationale                                                |
 |:------------|:---------------------|:---------------------------------------------------------|
@@ -608,10 +608,10 @@ knitr::kable(mde_cp, caption = "Minimum detectable effect at alpha = 0.05")
 
 | Noise SD | Min Amp Factor | Min Warp (max dev %) |
 |---------:|---------------:|:---------------------|
-|     0.05 |            1.1 | 3.4%                 |
-|     0.12 |            1.1 | 3.4%                 |
-|     0.25 |            1.1 | 12.6%                |
-|     0.40 |            1.1 | 22.8%                |
+|     0.05 |           1.10 | 3.4%                 |
+|     0.12 |           1.10 | 6.6%                 |
+|     0.25 |           1.25 | 3.4%                 |
+|     0.40 |           1.25 | 22.8%                |
 
 Minimum detectable effect at alpha = 0.05
 

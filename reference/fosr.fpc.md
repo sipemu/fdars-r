@@ -40,7 +40,7 @@ fit
 #>   Number of observations: 50 
 #>   Number of predictors: 2 
 #>   Evaluation points: 10 
-#>   R-squared: 0.0037 
+#>   R-squared: 0.0155 
 #>   FPC components: 2 
 # }
 ```

@@ -66,11 +66,14 @@ A fitted object of class 'fregre.logistic' with components:
 
 ``` r
 # \donttest{
-fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
-y <- factor(sample(0:1, 50, replace = TRUE))
+set.seed(42)
+t_grid <- seq(0, 1, length.out = 30)
+X <- matrix(0, 40, 30)
+for (i in 1:40) X[i, ] <- sin(2*pi*t_grid) * (2*(i > 20) - 1) + rnorm(30, sd = 0.2)
+fd <- fdata(X, argvals = t_grid)
+y <- as.numeric(1:40 > 20)
 result <- functional.logistic(fd, y, ncomp = 3)
-#> Error in functional.logistic(fd, y, ncomp = 3): functional.logistic failed: check data dimensions and response
 result$accuracy
-#> Error: object 'result' not found
+#> [1] 1
 # }
 ```

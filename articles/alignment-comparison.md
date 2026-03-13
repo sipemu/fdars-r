@@ -234,13 +234,13 @@ km_smooth <- karcher.mean(fd_smooth, max.iter = 15)
 aq_smooth <- alignment.quality(fd_smooth, km_smooth)
 print(aq_smooth)
 #> Alignment Quality Diagnostics
-#>   Mean warp complexity: 0.1576 
-#>   Mean warp smoothness: 125.5327 
+#>   Mean warp complexity: 0.1567 
+#>   Mean warp smoothness: 127.4957 
 #>   Total variance:      0.1426 
-#>   Amplitude variance:  0.0669 
-#>   Phase variance:      0.0758 
-#>   Phase/Total ratio:   0.5312 
-#>   Mean VR:             0.4606
+#>   Amplitude variance:  0.067 
+#>   Phase variance:      0.0757 
+#>   Phase/Total ratio:   0.5306 
+#>   Mean VR:             0.4609
 ```
 
 ### Amplitude-Phase Decomposition
@@ -600,7 +600,7 @@ pca <- prcomp(tv$tangent_vectors$data)
 var_exp <- cumsum(pca$sdev^2 / sum(pca$sdev^2))
 cat("Variance explained (first 3 PCs):",
     round(var_exp[1:3] * 100, 1), "%\n")
-#> Variance explained (first 3 PCs): 20.5 38.1 51.5 %
+#> Variance explained (first 3 PCs): 26.6 42.6 53.2 %
 ```
 
 ## See Also

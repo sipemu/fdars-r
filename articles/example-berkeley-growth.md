@@ -124,7 +124,7 @@ cat("Cross-sectional mean peak:", round(max(cross_mean_pub), 2), "cm/yr at age",
 #> Cross-sectional mean peak: 6.39 cm/yr at age 11.5
 cat("Karcher mean peak:        ", round(max(karcher_pub), 2), "cm/yr at age",
     round(fd_pub$argvals[which.max(karcher_pub)], 1), "\n")
-#> Karcher mean peak:         8.42 cm/yr at age 12.4
+#> Karcher mean peak:         8.44 cm/yr at age 12.4
 ```
 
 ``` r
@@ -167,7 +167,7 @@ cat("Before alignment: PC1 =", pve_before[1], "%, PC2 =", pve_before[2],
 #> Before alignment: PC1 = 67.6 %, PC2 = 26.3 %, PC3 = 6.1 %
 cat("After alignment:  PC1 =", pve_after[1], "%, PC2 =", pve_after[2],
     "%, PC3 =", pve_after[3], "%\n")
-#> After alignment:  PC1 = 58.1 %, PC2 = 32.1 %, PC3 = 9.8 %
+#> After alignment:  PC1 = 57.6 %, PC2 = 32.3 %, PC3 = 10.1 %
 ```
 
 Before alignment, phase variability spreads across multiple PCs. After
@@ -242,9 +242,9 @@ print(equiv)
 #> Equivalence margin (delta): 0.5 
 #> Significance level (alpha): 0.05 
 #> ---
-#> Test statistic (sup|d_hat|): 2.0022 
-#> Critical value: 0.4279 
-#> SCB range: [ -0.4279 , 2.43 ]
+#> Test statistic (sup|d_hat|): 2.0033 
+#> Critical value: 0.4225 
+#> SCB range: [ -0.4225 , 2.4258 ]
 #> P-value: 1 
 #> ---
 #> Decision: Fail to reject H0 -- equivalence NOT declared
@@ -358,10 +358,10 @@ timing_shift <- rowMeans(km_pub$gammas$data - identity)
 
 cat("Earliest maturer: child", which.min(timing_shift),
     "(shift =", round(min(timing_shift), 2), "years)\n")
-#> Earliest maturer: child 42 (shift = -1.83 years)
+#> Earliest maturer: child 42 (shift = -1.82 years)
 cat("Latest maturer:   child", which.max(timing_shift),
     "(shift =", round(max(timing_shift), 2), "years)\n")
-#> Latest maturer:   child 26 (shift = 2 years)
+#> Latest maturer:   child 27 (shift = 1.92 years)
 ```
 
 These scalar scores can be used as covariates in standard regression, or
@@ -388,7 +388,7 @@ the main modes of timing variation:
 pc_warps <- fdata2pc(km_pub$gammas, ncomp = 2)
 pve_warps <- round(pc_warps$d^2 / sum(pc_warps$d^2) * 100, 1)
 cat("Warp PC1:", pve_warps[1], "% — PC2:", pve_warps[2], "%\n")
-#> Warp PC1: 92.5 % — PC2: 7.5 %
+#> Warp PC1: 91.8 % — PC2: 8.2 %
 ```
 
 ``` r

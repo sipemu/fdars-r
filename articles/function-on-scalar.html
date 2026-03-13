@@ -307,6 +307,170 @@ predictors fail to capture the response variation, suggesting additional
 predictors or a more flexible model.</p>
 </div>
 <div class="section level2">
+<h2 id="d-function-on-scalar-regression-fosr-2d">2D Function-on-Scalar Regression (<code>fosr.2d</code>)<a class="anchor" aria-label="anchor" href="#d-function-on-scalar-regression-fosr-2d"></a>
+</h2>
+<p>When the functional response is a <strong>2D surface</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Y_i(s, t)</annotation></semantics></math>
+rather than a curve
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Y_i(t)</annotation></semantics></math>,
+standard FOSR does not apply directly. Examples include:</p>
+<ul>
+<li>
+<strong>Spatial-temporal fields</strong> — temperature or
+precipitation measured on a spatial grid over time.</li>
+<li>
+<strong>Brain imaging</strong> — cortical activation surfaces from
+fMRI or EEG.</li>
+<li>
+<strong>Environmental monitoring</strong> — pollutant concentrations
+over a geographic region.</li>
+</ul>
+<p><code><a href="../reference/fosr.2d.html">fosr.2d()</a></code> extends the penalized FOSR framework to
+surface-valued responses.</p>
+<div class="section level3">
+<h3 id="mathematical-model">Mathematical Model<a class="anchor" aria-label="anchor" href="#mathematical-model"></a>
+</h3>
+<p>The 2D function-on-scalar model is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mspace width="0.167em"></mspace><msub><mi>β</mi><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>ε</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Y_i(s, t) = \mu(s, t) + \sum_{j=1}^p x_{ij}\,\beta_j(s, t) + \varepsilon_i(s, t)</annotation></semantics></math></p>
+<p>Each coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta_j(s, t)</annotation></semantics></math>
+is now a <strong>coefficient surface</strong> describing how predictor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+modifies the response across the entire 2D domain. The intercept
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mu(s, t)</annotation></semantics></math>
+is the mean surface when all predictors are zero.</p>
+</div>
+<div class="section level3">
+<h3 id="anisotropic-penalization">Anisotropic Penalization<a class="anchor" aria-label="anchor" href="#anisotropic-penalization"></a>
+</h3>
+<p>The two grid directions may require different amounts of smoothing.
+<code><a href="../reference/fosr.2d.html">fosr.2d()</a></code> supports <strong>separate penalties</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mi>s</mi></msub><annotation encoding="application/x-tex">\lambda_s</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mi>t</mi></msub><annotation encoding="application/x-tex">\lambda_t</annotation></semantics></math>
+for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+dimensions respectively. This anisotropic penalization is important when
+the response varies more rapidly in one direction than the other — for
+example, spatial fields that are smooth geographically but fluctuate
+quickly over time.</p>
+</div>
+<div class="section level3">
+<h3 id="worked-example">Worked Example<a class="anchor" aria-label="anchor" href="#worked-example"></a>
+</h3>
+<p>We simulate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>40</mn></mrow><annotation encoding="application/x-tex">n = 40</annotation></semantics></math>
+observations of a surface response on a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>15</mn><mo>×</mo><mn>15</mn></mrow><annotation encoding="application/x-tex">15 \times 15</annotation></semantics></math>
+grid with two scalar predictors: a continuous predictor <code>x1</code>
+and a binary predictor <code>x2</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">n_2d</span> <span class="op">&lt;-</span> <span class="fl">40</span></span>
+<span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fl">15</span>; <span class="va">m2</span> <span class="op">&lt;-</span> <span class="fl">15</span></span>
+<span><span class="va">s_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m1</span><span class="op">)</span></span>
+<span><span class="va">t_2d_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Two scalar predictors</span></span>
+<span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_2d</span><span class="op">)</span></span>
+<span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n_2d</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">pred_2d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># True coefficient surfaces</span></span>
+<span><span class="va">beta1_true</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">s_grid</span>, <span class="va">t_2d_grid</span>, <span class="kw">function</span><span class="op">(</span><span class="va">s</span>, <span class="va">t</span><span class="op">)</span></span>
+<span>  <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">s</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">beta2_true</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">s_grid</span>, <span class="va">t_2d_grid</span>, <span class="kw">function</span><span class="op">(</span><span class="va">s</span>, <span class="va">t</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="op">(</span><span class="va">s</span> <span class="op">-</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="op">(</span><span class="va">t</span> <span class="op">-</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate surface responses (each row is a flattened m1*m2 surface)</span></span>
+<span><span class="va">Y_2d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_2d</span>, <span class="va">m1</span> <span class="op">*</span> <span class="va">m2</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_2d</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">surface</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">pi</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">s_grid</span>, <span class="va">t_2d_grid</span>, <span class="st">"+"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="va">x1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="va">beta1_true</span> <span class="op">+</span> <span class="va">x2</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="va">beta2_true</span></span>
+<span>  <span class="va">Y_2d</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">surface</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m1</span> <span class="op">*</span> <span class="va">m2</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">fd_2d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">Y_2d</span><span class="op">)</span></span>
+<span><span class="va">fit_2d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.2d.html">fosr.2d</a></span><span class="op">(</span><span class="va">fd_2d</span>, <span class="va">pred_2d</span>, <span class="va">s_grid</span>, <span class="va">t_2d_grid</span>,</span>
+<span>                  lambda.s <span class="op">=</span> <span class="fl">0.01</span>, lambda.t <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_2d</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 2D Function-on-Scalar Regression</span></span>
+<span><span class="co">#&gt;   Grid: 15 x 15 </span></span>
+<span><span class="co">#&gt;   Predictors: 2 </span></span>
+<span><span class="co">#&gt;   R-squared: 0.7596 </span></span>
+<span><span class="co">#&gt;   Lambda (s, t): 0.01 , 0.01</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="prediction-on-new-data">Prediction on New Data<a class="anchor" aria-label="anchor" href="#prediction-on-new-data"></a>
+</h3>
+<p>Use <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> to obtain fitted surfaces for new
+observations:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">new_pred_2d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1</span>,    <span class="co"># x1 = 1.0, x2 = 1</span></span>
+<span>                         <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0</span><span class="op">)</span>,  <span class="co"># x1 = -0.5, x2 = 0</span></span>
+<span>                       nrow <span class="op">=</span> <span class="fl">2</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">pred_2d_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_2d</span>, <span class="va">new_pred_2d</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="visualizing-coefficient-surfaces">Visualizing Coefficient Surfaces<a class="anchor" aria-label="anchor" href="#visualizing-coefficient-surfaces"></a>
+</h3>
+<p>Each estimated coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta_j(s, t)</annotation></semantics></math>
+is stored as a flattened row in <code>fit_2d$beta$data</code>. To
+visualize, reshape to the original
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mn>1</mn></msub><mo>×</mo><msub><mi>m</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">m_1 \times m_2</annotation></semantics></math>
+grid and plot as a heatmap.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Extract and reshape coefficient surfaces for visualization</span></span>
+<span><span class="va">coef_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">s_grid</span>, <span class="va">m2</span><span class="op">)</span>, t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_2d_grid</span>, each <span class="op">=</span> <span class="va">m1</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">fit_2d</span><span class="op">$</span><span class="va">intercept</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, <span class="va">m1</span>, <span class="va">m2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    coefficient <span class="op">=</span> <span class="st">"Intercept"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">s_grid</span>, <span class="va">m2</span><span class="op">)</span>, t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_2d_grid</span>, each <span class="op">=</span> <span class="va">m1</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">fit_2d</span><span class="op">$</span><span class="va">beta</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, <span class="va">m1</span>, <span class="va">m2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    coefficient <span class="op">=</span> <span class="st">"x1"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">s_grid</span>, <span class="va">m2</span><span class="op">)</span>, t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_2d_grid</span>, each <span class="op">=</span> <span class="va">m1</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">fit_2d</span><span class="op">$</span><span class="va">beta</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>, <span class="va">m1</span>, <span class="va">m2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    coefficient <span class="op">=</span> <span class="st">"x2"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">df_coef</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">coef_list</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_coef</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">s</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">t</span>, fill <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.data</span><span class="op">$</span><span class="va">coefficient</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Estimated Coefficient Surfaces"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"s"</span>, y <span class="op">=</span> <span class="st">"t"</span>, fill <span class="op">=</span> <span class="st">"Value"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="function-on-scalar_files/figure-html/fosr-2d-coef-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The <code>x1</code> surface should recover the sinusoidal pattern
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.5</mn><mo>sin</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mi>π</mi><mi>s</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>cos</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mi>π</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">0.5\sin(2\pi s)\cos(2\pi t)</annotation></semantics></math>,
+while the <code>x2</code> surface should approximate the Gaussian bump
+centred at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.5</mn><mo>,</mo><mn>0.5</mn><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0.5, 0.5)</annotation></semantics></math>.</p>
+</div>
+<div class="section level3">
+<h3 id="gcv-for-tuning">GCV for Tuning<a class="anchor" aria-label="anchor" href="#gcv-for-tuning"></a>
+</h3>
+<p>The returned object includes a <strong>generalized
+cross-validation</strong> criterion (<code>fit_2d$gcv</code>) that can
+guide the choice of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mi>s</mi></msub><annotation encoding="application/x-tex">\lambda_s</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mi>t</mi></msub><annotation encoding="application/x-tex">\lambda_t</annotation></semantics></math>.
+Lower GCV values indicate a better bias–variance trade-off. In practice,
+you can search over a grid of penalty pairs and select the combination
+that minimizes GCV.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="when-to-use-each-method">When to Use Each Method<a class="anchor" aria-label="anchor" href="#when-to-use-each-method"></a>
 </h2>
 <table class="table">
@@ -346,6 +510,12 @@ predictors or a more flexible model.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
 (# permutations)</td>
 <td>Testing group differences</td>
+</tr>
+<tr class="even">
+<td><strong>2D Penalized FOSR</strong></td>
+<td><code><a href="../reference/fosr.2d.html">fosr.2d()</a></code></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>s</mi></msub><mo>,</mo><msub><mi>λ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\lambda_s, \lambda_t</annotation></semantics></math></td>
+<td>Surface responses on 2D grids</td>
 </tr>
 </tbody>
 </table>

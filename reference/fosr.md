@@ -87,7 +87,7 @@ fit
 #>   Number of observations: 50 
 #>   Number of predictors: 2 
 #>   Evaluation points: 10 
-#>   R-squared: 0.0302 
+#>   R-squared: 0.0451 
 #>   Lambda: 1 
 # }
 ```

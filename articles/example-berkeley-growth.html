@@ -202,7 +202,7 @@ the true peak amplitude:</p>
 <span><span class="co">#&gt; Cross-sectional mean peak: 6.39 cm/yr at age 11.5</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Karcher mean peak:        "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">karcher_pub</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"cm/yr at age"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">karcher_pub</span><span class="op">)</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Karcher mean peak:         8.42 cm/yr at age 12.4</span></span></code></pre></div>
+<span><span class="co">#&gt; Karcher mean peak:         8.44 cm/yr at age 12.4</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">fd_pub</span><span class="op">$</span><span class="va">argvals</span>, <span class="fl">2</span><span class="op">)</span>,</span>
@@ -240,7 +240,7 @@ per-child warping functions interpretable and mutually comparable.</p>
 <span><span class="co">#&gt; Before alignment: PC1 = 67.6 %, PC2 = 26.3 %, PC3 = 6.1 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"After alignment:  PC1 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"%, PC2 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
 <span>    <span class="st">"%, PC3 ="</span>, <span class="va">pve_after</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; After alignment:  PC1 = 58.1 %, PC2 = 32.1 %, PC3 = 9.8 %</span></span></code></pre></div>
+<span><span class="co">#&gt; After alignment:  PC1 = 57.6 %, PC2 = 32.3 %, PC3 = 10.1 %</span></span></code></pre></div>
 <p>Before alignment, phase variability spreads across multiple PCs.
 After alignment, the remaining (amplitude) variability is more
 efficiently captured by the first PC.</p>
@@ -318,9 +318,9 @@ practically negligible:</p>
 <span><span class="co">#&gt; Equivalence margin (delta): 0.5 </span></span>
 <span><span class="co">#&gt; Significance level (alpha): 0.05 </span></span>
 <span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Test statistic (sup|d_hat|): 2.0022 </span></span>
-<span><span class="co">#&gt; Critical value: 0.4279 </span></span>
-<span><span class="co">#&gt; SCB range: [ -0.4279 , 2.43 ]</span></span>
+<span><span class="co">#&gt; Test statistic (sup|d_hat|): 2.0033 </span></span>
+<span><span class="co">#&gt; Critical value: 0.4225 </span></span>
+<span><span class="co">#&gt; SCB range: [ -0.4225 , 2.4258 ]</span></span>
 <span><span class="co">#&gt; P-value: 1 </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Decision: Fail to reject H0 -- equivalence NOT declared</span></span></code></pre></div>
@@ -424,10 +424,10 @@ Averaging this gives a single “timing shift” score per child:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Earliest maturer: child"</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>,</span>
 <span>    <span class="st">"(shift ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"years)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Earliest maturer: child 42 (shift = -1.83 years)</span></span>
+<span><span class="co">#&gt; Earliest maturer: child 42 (shift = -1.82 years)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Latest maturer:   child"</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>,</span>
 <span>    <span class="st">"(shift ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">timing_shift</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"years)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Latest maturer:   child 26 (shift = 2 years)</span></span></code></pre></div>
+<span><span class="co">#&gt; Latest maturer:   child 27 (shift = 1.92 years)</span></span></code></pre></div>
 <p>These scalar scores can be used as covariates in standard regression,
 or for correlation with other variables (e.g., adult height, BMI):</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -447,7 +447,7 @@ functions identifies the main modes of timing variation:</p>
 <code class="sourceCode R"><span><span class="va">pc_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata2pc.html">fdata2pc</a></span><span class="op">(</span><span class="va">km_pub</span><span class="op">$</span><span class="va">gammas</span>, ncomp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">pve_warps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pc_warps</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">pc_warps</span><span class="op">$</span><span class="va">d</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Warp PC1:"</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"% — PC2:"</span>, <span class="va">pve_warps</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warp PC1: 92.5 % — PC2: 7.5 %</span></span></code></pre></div>
+<span><span class="co">#&gt; Warp PC1: 91.8 % — PC2: 8.2 %</span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  PC1 <span class="op">=</span> <span class="va">pc_warps</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>

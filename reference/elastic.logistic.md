@@ -90,7 +90,7 @@ y <- sample(0:1, 50, replace = TRUE)
 fit <- elastic.logistic(fd, y)
 fit
 #> Elastic Logistic Classification
-#>   Accuracy: 44 %
+#>   Accuracy: 92 %
 #>   Iterations: 20 
 # }
 ```

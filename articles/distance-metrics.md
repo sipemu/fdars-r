@@ -190,10 +190,10 @@ cat("Soft-DTW distance matrix:\n")
 #> Soft-DTW distance matrix:
 print(round(as.matrix(dist_sdtw), 3))
 #>          curve1   curve2   curve3   curve4
-#> curve1    0.000 -162.953 -126.778 -104.031
-#> curve2 -162.953    0.000 -152.837 -103.278
-#> curve3 -126.778 -152.837    0.000  -80.142
-#> curve4 -104.031 -103.278  -80.142    0.000
+#> curve1 -168.624 -162.953 -126.778 -104.031
+#> curve2 -162.953 -168.552 -152.837 -103.278
+#> curve3 -126.778 -152.837 -168.248  -80.142
+#> curve4 -104.031 -103.278  -80.142 -164.320
 
 # Soft-DTW divergence (non-negative, symmetric)
 dist_sdtw_div <- metric.softDTW(fd, gamma = 1.0, divergence = TRUE)

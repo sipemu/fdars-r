@@ -413,12 +413,113 @@ derivatives:</p>
 <span><span class="co"># nderiv = 1 for ds, nderiv = 2 for dt, etc.</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="high-accuracy-gradient-fdata-gradient">High-Accuracy Gradient (<code>fdata.gradient</code>)<a class="anchor" aria-label="anchor" href="#high-accuracy-gradient-fdata-gradient"></a>
+</h2>
+<p>The <code><a href="../reference/deriv.html">deriv()</a></code> function uses central differences, which are
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^2)</annotation></semantics></math>
+accurate. For higher accuracy, <code><a href="../reference/fdata.gradient.html">fdata.gradient()</a></code> uses a
+5-point stencil on uniform grids — achieving
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>4</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^4)</annotation></semantics></math>
+accuracy — and 3-point Lagrange interpolation on non-uniform grids.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Compare deriv() vs fdata.gradient() on a smooth function</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">m_g</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
+<span><span class="va">t_fine</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span>, length.out <span class="op">=</span> <span class="va">m_g</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># True function and derivative</span></span>
+<span><span class="va">f_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">t_fine</span><span class="op">)</span></span>
+<span><span class="va">f_deriv_true</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">t_fine</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fd_smooth_g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">f_vals</span>, <span class="fl">1</span>, <span class="va">m_g</span><span class="op">)</span>, argvals <span class="op">=</span> <span class="va">t_fine</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Central differences (deriv)</span></span>
+<span><span class="va">fd_d1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deriv.html">deriv</a></span><span class="op">(</span><span class="va">fd_smooth_g</span>, nderiv <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># High-accuracy gradient</span></span>
+<span><span class="va">fd_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.gradient.html">fdata.gradient</a></span><span class="op">(</span><span class="va">fd_smooth_g</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare errors</span></span>
+<span><span class="va">err_deriv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">fd_d1</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">-</span> <span class="va">f_deriv_true</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">fd_d1</span><span class="op">$</span><span class="va">argvals</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">err_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">fd_grad</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">-</span> <span class="va">f_deriv_true</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max error (central differences):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">err_deriv</span>, <span class="fl">6</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Max error (central differences): 0.002738</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max error (5-point gradient):   "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">err_grad</span>, <span class="fl">6</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Max error (5-point gradient):    5.3e-05</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_fine</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">f_deriv_true</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fd_d1</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="va">m_g</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">fd_d1</span><span class="op">$</span><span class="va">argvals</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>            <span class="va">fd_grad</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"True"</span>, <span class="st">"deriv() [O(h\u00b2)]"</span>, <span class="st">"fdata.gradient() [O(h\u2074)]"</span><span class="op">)</span>,</span>
+<span>               each <span class="op">=</span> <span class="va">m_g</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_grad</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">t</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">value</span>, color <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">method</span>,</span>
+<span>                    linetype <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">0.8</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"True"</span> <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>                                <span class="st">"deriv() [O(h\u00b2)]"</span> <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
+<span>                                <span class="st">"fdata.gradient() [O(h\u2074)]"</span> <span class="op">=</span> <span class="st">"#0072B2"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"True"</span> <span class="op">=</span> <span class="st">"solid"</span>,</span>
+<span>                                   <span class="st">"deriv() [O(h\u00b2)]"</span> <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>                                   <span class="st">"fdata.gradient() [O(h\u2074)]"</span> <span class="op">=</span> <span class="st">"dotdash"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Derivative Accuracy: Central Differences vs 5-Point Gradient"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"t"</span>, y <span class="op">=</span> <span class="st">"f'(t)"</span>, color <span class="op">=</span> <span class="cn">NULL</span>, linetype <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="working-with-derivatives_files/figure-html/gradient-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<div class="section level3">
+<h3 id="when-to-use-each">When to Use Each<a class="anchor" aria-label="anchor" href="#when-to-use-each"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="30%">
+<col width="21%">
+<col width="18%">
+<col width="30%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Order</th>
+<th>Grid</th>
+<th>Best for</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/deriv.html">deriv()</a></code></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^2)</annotation></semantics></math></td>
+<td>Any</td>
+<td>General use, higher-order derivatives</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/fdata.gradient.html">fdata.gradient()</a></code></td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>4</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^4)</annotation></semantics></math>
+uniform,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^2)</annotation></semantics></math>
+non-uniform</td>
+<td>Any</td>
+<td>First derivatives requiring maximum accuracy</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code><a href="../reference/fdata.gradient.html">fdata.gradient()</a></code> when accuracy of the first
+derivative matters (e.g., computing growth velocity for clinical
+thresholds). Use <code><a href="../reference/deriv.html">deriv()</a></code> when you need second or higher
+derivatives, or when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^2)</annotation></semantics></math>
+accuracy is sufficient.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="optimal-smoothing-for-derivatives">Optimal Smoothing for Derivatives<a class="anchor" aria-label="anchor" href="#optimal-smoothing-for-derivatives"></a>
 </h2>
 <p>When the goal is to estimate derivatives, we may need different
 smoothing than for the curves themselves. Higher penalty (more
 smoothing) often gives better derivative estimates:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare different smoothing levels</span></span>
 <span><span class="va">lambdas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">1</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
@@ -453,7 +554,7 @@ smoothing) often gives better derivative estimates:</p>
 <h2 id="practical-workflow">Practical Workflow<a class="anchor" aria-label="anchor" href="#practical-workflow"></a>
 </h2>
 <p>Here’s a recommended workflow for derivative analysis:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1. Load and inspect raw data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Step 1: Inspect raw data\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Step 1: Inspect raw data</span></span>
@@ -531,16 +632,23 @@ smoothing) often gives better derivative estimates:</p>
 <td>Velocity, rate of change</td>
 </tr>
 <tr class="even">
+<td>First derivative (high accuracy)</td>
+<td><code>fdata.gradient(fd)</code></td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>4</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^4)</annotation></semantics></math>
+5-point stencil</td>
+</tr>
+<tr class="odd">
 <td>Second derivative</td>
 <td><code>deriv(fd, nderiv = 2)</code></td>
 <td>Acceleration, curvature</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Derivative distance</td>
 <td><code>semimetric.deriv(fd, nderiv)</code></td>
 <td>Shape-based comparison</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Pre-smoothing</td>
 <td><code>pspline(fd)</code></td>
 <td><strong>Always smooth before differentiating!</strong></td>
@@ -566,21 +674,6 @@ clustering and comparison</li>
 </div>
 <div class="section level2">
 <h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
-</h2>
-<ul>
-<li>
-<code>vignette("intro-to-smoothing", package = "fdars")</code> —
-smoothing techniques for functional data</li>
-<li>
-<code>vignette("fpca", package = "fdars")</code> — functional
-principal component analysis</li>
-<li>
-<code>vignette("distance-metrics", package = "fdars")</code> —
-distance and semimetric measures</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="see-also-1">See Also<a class="anchor" aria-label="anchor" href="#see-also-1"></a>
 </h2>
 <ul>
 <li>

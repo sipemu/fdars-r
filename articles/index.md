@@ -123,6 +123,12 @@
   Prediction intervals, LOO cross-validation, conformal prediction, and
   bootstrap confidence bands for functional regression models.
 
+- [Conformal Prediction for
+  Classification](https://sipemu.github.io/fdars-r/articles/conformal-classification.md):
+
+- [Conformal Prediction
+  Guide](https://sipemu.github.io/fdars-r/articles/conformal-prediction-guide.md):
+
 ### Analyze
 
 - [Functional Tolerance

@@ -259,10 +259,10 @@ and symmetric.</p>
 <span><span class="co">#&gt; Soft-DTW distance matrix:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_sdtw</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          curve1   curve2   curve3   curve4</span></span>
-<span><span class="co">#&gt; curve1    0.000 -162.953 -126.778 -104.031</span></span>
-<span><span class="co">#&gt; curve2 -162.953    0.000 -152.837 -103.278</span></span>
-<span><span class="co">#&gt; curve3 -126.778 -152.837    0.000  -80.142</span></span>
-<span><span class="co">#&gt; curve4 -104.031 -103.278  -80.142    0.000</span></span>
+<span><span class="co">#&gt; curve1 -168.624 -162.953 -126.778 -104.031</span></span>
+<span><span class="co">#&gt; curve2 -162.953 -168.552 -152.837 -103.278</span></span>
+<span><span class="co">#&gt; curve3 -126.778 -152.837 -168.248  -80.142</span></span>
+<span><span class="co">#&gt; curve4 -104.031 -103.278  -80.142 -164.320</span></span>
 <span></span>
 <span><span class="co"># Soft-DTW divergence (non-negative, symmetric)</span></span>
 <span><span class="va">dist_sdtw_div</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metric.softDTW.html">metric.softDTW</a></span><span class="op">(</span><span class="va">fd</span>, gamma <span class="op">=</span> <span class="fl">1.0</span>, divergence <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>

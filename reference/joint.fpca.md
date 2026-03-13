@@ -63,6 +63,6 @@ j
 #> Joint (Amplitude + Phase) FPCA
 #>   Components: 2 
 #>   Balance parameter: 0.000331 
-#>   Cumulative variance:  52 %, 100 % 
+#>   Cumulative variance:  59 %, 100 % 
 # }
 ```

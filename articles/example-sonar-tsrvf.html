@@ -169,11 +169,11 @@ step of the Validation-First Framework.</p>
 <span></span>
 <span><span class="va">phase_ratio</span> <span class="op">&lt;-</span> <span class="va">aq</span><span class="op">$</span><span class="va">phase_variance</span> <span class="op">/</span> <span class="op">(</span><span class="va">aq</span><span class="op">$</span><span class="va">amplitude_variance</span> <span class="op">+</span> <span class="va">aq</span><span class="op">$</span><span class="va">phase_variance</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude variance:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">aq</span><span class="op">$</span><span class="va">amplitude_variance</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude variance: 0.5937</span></span>
+<span><span class="co">#&gt; Amplitude variance: 0.5712</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase variance:    "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">aq</span><span class="op">$</span><span class="va">phase_variance</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase variance:     0.2627</span></span>
+<span><span class="co">#&gt; Phase variance:     0.2852</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase/Total ratio: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">phase_ratio</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase/Total ratio:  0.307</span></span></code></pre></div>
+<span><span class="co">#&gt; Phase/Total ratio:  0.333</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_warp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">gammas</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">class_labels</span><span class="op">)</span>,</span>
 <span>               palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Mine"</span> <span class="op">=</span> <span class="st">"#0072B2"</span>, <span class="st">"Rock"</span> <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span>,</span>
@@ -190,7 +190,7 @@ step of the Validation-First Framework.</p>
 <span><span class="va">p_warp</span> <span class="op">/</span> <span class="va">p_var</span></span></code></pre></div>
 <p><img src="example-sonar-tsrvf_files/figure-html/elasticity-plots-1.png" class="r-plt" alt="" width="100%"></p>
 <p><strong>Interpretation:</strong> The phase/total variance ratio is
-0.31. While this might seem to suggest moderate phase variability, the
+0.33. While this might seem to suggest moderate phase variability, the
 warping functions tell a different story. Sonar frequency bands are
 <strong>fixed physical measurements</strong> — band 10 always measures
 the same frequency range. When the alignment algorithm “warps” these
@@ -425,8 +425,8 @@ vectors, combined amplitude + phase features</li>
 <td align="left">Raw (scaled)</td>
 <td align="left">A: Simple</td>
 <td align="left">QDA</td>
-<td align="right">20</td>
-<td align="right">0.797</td>
+<td align="right">5</td>
+<td align="right">0.792</td>
 </tr>
 <tr class="odd">
 <td align="left">Smoothed</td>
@@ -450,32 +450,32 @@ vectors, combined amplitude + phase features</li>
 <td align="right">0.773</td>
 </tr>
 <tr class="even">
+<td align="left">Aligned</td>
+<td align="left">C: Elastic</td>
+<td align="left">SVM</td>
+<td align="right">10</td>
+<td align="right">0.760</td>
+</tr>
+<tr class="odd">
 <td align="left">1st derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">SVM</td>
 <td align="right">20</td>
 <td align="right">0.756</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">2nd derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">SVM</td>
 <td align="right">20</td>
 <td align="right">0.756</td>
 </tr>
-<tr class="even">
-<td align="left">Aligned</td>
-<td align="left">C: Elastic</td>
-<td align="left">SVM</td>
-<td align="right">5</td>
-<td align="right">0.751</td>
-</tr>
 <tr class="odd">
 <td align="left">Aligned</td>
 <td align="left">C: Elastic</td>
 <td align="left">KNN</td>
-<td align="right">10</td>
-<td align="right">0.730</td>
+<td align="right">20</td>
+<td align="right">0.755</td>
 </tr>
 <tr class="even">
 <td align="left">1st derivative</td>
@@ -506,81 +506,81 @@ vectors, combined amplitude + phase features</li>
 <td align="right">0.697</td>
 </tr>
 <tr class="even">
+<td align="left">Aligned</td>
+<td align="left">C: Elastic</td>
+<td align="left">LDA</td>
+<td align="right">20</td>
+<td align="right">0.696</td>
+</tr>
+<tr class="odd">
 <td align="left">2nd derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">KNN</td>
 <td align="right">10</td>
 <td align="right">0.691</td>
 </tr>
-<tr class="odd">
-<td align="left">Aligned</td>
-<td align="left">C: Elastic</td>
-<td align="left">LDA</td>
-<td align="right">20</td>
-<td align="right">0.681</td>
-</tr>
 <tr class="even">
 <td align="left">TSRVF (amp)</td>
 <td align="left">C: Elastic</td>
-<td align="left">KNN</td>
+<td align="left">SVM</td>
+<td align="right">15</td>
+<td align="right">0.678</td>
+</tr>
+<tr class="odd">
+<td align="left">TSRVF (amp)</td>
+<td align="left">C: Elastic</td>
+<td align="left">LDA</td>
 <td align="right">15</td>
 <td align="right">0.658</td>
-</tr>
-<tr class="odd">
-<td align="left">Aligned</td>
-<td align="left">C: Elastic</td>
-<td align="left">QDA</td>
-<td align="right">15</td>
-<td align="right">0.657</td>
-</tr>
-<tr class="even">
-<td align="left">Full elastic</td>
-<td align="left">C: Elastic</td>
-<td align="left">KNN</td>
-<td align="right">8</td>
-<td align="right">0.655</td>
-</tr>
-<tr class="odd">
-<td align="left">TSRVF (amp)</td>
-<td align="left">C: Elastic</td>
-<td align="left">LDA</td>
-<td align="right">15</td>
-<td align="right">0.653</td>
 </tr>
 <tr class="even">
 <td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
 <td align="left">QDA</td>
 <td align="right">10</td>
+<td align="right">0.654</td>
+</tr>
+<tr class="odd">
+<td align="left">TSRVF (amp)</td>
+<td align="left">C: Elastic</td>
+<td align="left">KNN</td>
+<td align="right">20</td>
+<td align="right">0.648</td>
+</tr>
+<tr class="even">
+<td align="left">Full elastic</td>
+<td align="left">C: Elastic</td>
+<td align="left">SVM</td>
+<td align="right">10</td>
 <td align="right">0.640</td>
 </tr>
 <tr class="odd">
 <td align="left">TSRVF (amp)</td>
 <td align="left">C: Elastic</td>
-<td align="left">SVM</td>
+<td align="left">QDA</td>
 <td align="right">8</td>
-<td align="right">0.635</td>
+<td align="right">0.638</td>
 </tr>
 <tr class="even">
-<td align="left">Full elastic</td>
+<td align="left">Aligned</td>
 <td align="left">C: Elastic</td>
-<td align="left">SVM</td>
-<td align="right">8</td>
-<td align="right">0.635</td>
+<td align="left">QDA</td>
+<td align="right">15</td>
+<td align="right">0.630</td>
 </tr>
 <tr class="odd">
 <td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
-<td align="left">LDA</td>
-<td align="right">8</td>
-<td align="right">0.623</td>
+<td align="left">KNN</td>
+<td align="right">10</td>
+<td align="right">0.620</td>
 </tr>
 <tr class="even">
-<td align="left">TSRVF (amp)</td>
+<td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
-<td align="left">QDA</td>
+<td align="left">LDA</td>
 <td align="right">8</td>
-<td align="right">0.610</td>
+<td align="right">0.604</td>
 </tr>
 </tbody>
 </table>

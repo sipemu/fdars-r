@@ -191,7 +191,7 @@ y_bin <- as.numeric(y > median(y))
 fit_logistic <- elastic.logistic(fd, y_bin, ncomp.beta = 5, lambda = 0.01,
                                  max.iter = 15, tol = 1e-3)
 cat("Accuracy:", round(fit_logistic$accuracy * 100, 1), "%\n")
-#> Accuracy: 50 %
+#> Accuracy: 98.3 %
 ```
 
 ``` r
@@ -215,9 +215,9 @@ comp_pcr <- data.frame(
 )
 print(comp_pcr)
 #>       Method         R2
-#> 1   Vertical 0.05441282
-#> 2 Horizontal 0.03157880
-#> 3      Joint 0.05441282
+#> 1   Vertical 0.06631723
+#> 2 Horizontal 0.01171428
+#> 3      Joint 0.06631723
 ```
 
 ``` r
@@ -245,7 +245,7 @@ attr <- elastic.attribution(fd, y, ncomp = 3, pca.method = "vertical",
                             n.perm = 50, seed = 42)
 
 cat("Amplitude importance:", round(attr$amplitude_importance, 4), "\n")
-#> Amplitude importance: 0.1102
+#> Amplitude importance: 0.1163
 cat("Phase importance:", round(attr$phase_importance, 4), "\n")
 #> Phase importance: 0
 ```

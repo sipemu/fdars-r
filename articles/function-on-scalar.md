@@ -233,13 +233,154 @@ indicate time points where the scalar predictors fail to capture the
 response variation, suggesting additional predictors or a more flexible
 model.
 
+## 2D Function-on-Scalar Regression (`fosr.2d`)
+
+When the functional response is a **2D surface** $Y_{i}(s,t)$ rather
+than a curve $Y_{i}(t)$, standard FOSR does not apply directly. Examples
+include:
+
+- **Spatial-temporal fields** — temperature or precipitation measured on
+  a spatial grid over time.
+- **Brain imaging** — cortical activation surfaces from fMRI or EEG.
+- **Environmental monitoring** — pollutant concentrations over a
+  geographic region.
+
+[`fosr.2d()`](https://sipemu.github.io/fdars-r/reference/fosr.2d.md)
+extends the penalized FOSR framework to surface-valued responses.
+
+### Mathematical Model
+
+The 2D function-on-scalar model is:
+
+$$Y_{i}(s,t) = \mu(s,t) + \sum\limits_{j = 1}^{p}x_{ij}\,\beta_{j}(s,t) + \varepsilon_{i}(s,t)$$
+
+Each coefficient $\beta_{j}(s,t)$ is now a **coefficient surface**
+describing how predictor $j$ modifies the response across the entire 2D
+domain. The intercept $\mu(s,t)$ is the mean surface when all predictors
+are zero.
+
+### Anisotropic Penalization
+
+The two grid directions may require different amounts of smoothing.
+[`fosr.2d()`](https://sipemu.github.io/fdars-r/reference/fosr.2d.md)
+supports **separate penalties** $\lambda_{s}$ and $\lambda_{t}$ for the
+$s$ and $t$ dimensions respectively. This anisotropic penalization is
+important when the response varies more rapidly in one direction than
+the other — for example, spatial fields that are smooth geographically
+but fluctuate quickly over time.
+
+### Worked Example
+
+We simulate $n = 40$ observations of a surface response on a
+$15 \times 15$ grid with two scalar predictors: a continuous predictor
+`x1` and a binary predictor `x2`.
+
+``` r
+set.seed(42)
+n_2d <- 40
+m1 <- 15; m2 <- 15
+s_grid <- seq(0, 1, length.out = m1)
+t_2d_grid <- seq(0, 1, length.out = m2)
+
+# Two scalar predictors
+x1 <- rnorm(n_2d)
+x2 <- rbinom(n_2d, 1, 0.5)
+pred_2d <- cbind(x1, x2)
+
+# True coefficient surfaces
+beta1_true <- outer(s_grid, t_2d_grid, function(s, t)
+  0.5 * sin(2 * pi * s) * cos(2 * pi * t))
+beta2_true <- outer(s_grid, t_2d_grid, function(s, t)
+  exp(-((s - 0.5)^2 + (t - 0.5)^2) / 0.1))
+
+# Generate surface responses (each row is a flattened m1*m2 surface)
+Y_2d <- matrix(0, n_2d, m1 * m2)
+for (i in 1:n_2d) {
+  surface <- sin(pi * outer(s_grid, t_2d_grid, "+")) +
+    x1[i] * beta1_true + x2[i] * beta2_true
+  Y_2d[i, ] <- as.vector(surface) + rnorm(m1 * m2, sd = 0.1)
+}
+
+fd_2d <- fdata(Y_2d)
+fit_2d <- fosr.2d(fd_2d, pred_2d, s_grid, t_2d_grid,
+                  lambda.s = 0.01, lambda.t = 0.01)
+print(fit_2d)
+#> 2D Function-on-Scalar Regression
+#>   Grid: 15 x 15 
+#>   Predictors: 2 
+#>   R-squared: 0.7596 
+#>   Lambda (s, t): 0.01 , 0.01
+```
+
+### Prediction on New Data
+
+Use [`predict()`](https://rdrr.io/r/stats/predict.html) to obtain fitted
+surfaces for new observations:
+
+``` r
+new_pred_2d <- matrix(c(1.0, 1,    # x1 = 1.0, x2 = 1
+                         -0.5, 0),  # x1 = -0.5, x2 = 0
+                       nrow = 2, byrow = TRUE)
+pred_2d_out <- predict(fit_2d, new_pred_2d)
+```
+
+### Visualizing Coefficient Surfaces
+
+Each estimated coefficient ${\widehat{\beta}}_{j}(s,t)$ is stored as a
+flattened row in `fit_2d$beta$data`. To visualize, reshape to the
+original $m_{1} \times m_{2}$ grid and plot as a heatmap.
+
+``` r
+# Extract and reshape coefficient surfaces for visualization
+coef_list <- list(
+  data.frame(
+    s = rep(s_grid, m2), t = rep(t_2d_grid, each = m1),
+    value = as.vector(matrix(fit_2d$intercept$data[1, ], m1, m2)),
+    coefficient = "Intercept"
+  ),
+  data.frame(
+    s = rep(s_grid, m2), t = rep(t_2d_grid, each = m1),
+    value = as.vector(matrix(fit_2d$beta$data[1, ], m1, m2)),
+    coefficient = "x1"
+  ),
+  data.frame(
+    s = rep(s_grid, m2), t = rep(t_2d_grid, each = m1),
+    value = as.vector(matrix(fit_2d$beta$data[2, ], m1, m2)),
+    coefficient = "x2"
+  )
+)
+df_coef <- do.call(rbind, coef_list)
+
+ggplot(df_coef, aes(x = .data$s, y = .data$t, fill = .data$value)) +
+  geom_tile() +
+  facet_wrap(~ .data$coefficient, scales = "free") +
+  scale_fill_viridis_c() +
+  labs(title = "Estimated Coefficient Surfaces",
+       x = "s", y = "t", fill = "Value")
+```
+
+![](function-on-scalar_files/figure-html/fosr-2d-coef-1.png)
+
+The `x1` surface should recover the sinusoidal pattern
+$0.5\sin(2\pi s)\cos(2\pi t)$, while the `x2` surface should approximate
+the Gaussian bump centred at $(0.5,0.5)$.
+
+### GCV for Tuning
+
+The returned object includes a **generalized cross-validation**
+criterion (`fit_2d$gcv`) that can guide the choice of $\lambda_{s}$ and
+$\lambda_{t}$. Lower GCV values indicate a better bias–variance
+trade-off. In practice, you can search over a grid of penalty pairs and
+select the combination that minimizes GCV.
+
 ## When to Use Each Method
 
-| Method               | Function                                                               | Tuning               | Best when                               |
-|----------------------|------------------------------------------------------------------------|----------------------|-----------------------------------------|
-| **Penalized FOSR**   | [`fosr()`](https://sipemu.github.io/fdars-r/reference/fosr.md)         | $\lambda$            | Smooth coefficient functions, large $m$ |
-| **FPC-Based FOSR**   | [`fosr.fpc()`](https://sipemu.github.io/fdars-r/reference/fosr.fpc.md) | $K$ (# components)   | Low-rank response structure             |
-| **Functional ANOVA** | [`fanova()`](https://sipemu.github.io/fdars-r/reference/fanova.md)     | $B$ (# permutations) | Testing group differences               |
+| Method                | Function                                                               | Tuning                    | Best when                               |
+|-----------------------|------------------------------------------------------------------------|---------------------------|-----------------------------------------|
+| **Penalized FOSR**    | [`fosr()`](https://sipemu.github.io/fdars-r/reference/fosr.md)         | $\lambda$                 | Smooth coefficient functions, large $m$ |
+| **FPC-Based FOSR**    | [`fosr.fpc()`](https://sipemu.github.io/fdars-r/reference/fosr.fpc.md) | $K$ (# components)        | Low-rank response structure             |
+| **Functional ANOVA**  | [`fanova()`](https://sipemu.github.io/fdars-r/reference/fanova.md)     | $B$ (# permutations)      | Testing group differences               |
+| **2D Penalized FOSR** | [`fosr.2d()`](https://sipemu.github.io/fdars-r/reference/fosr.2d.md)   | $\lambda_{s},\lambda_{t}$ | Surface responses on 2D grids           |
 
 ## See Also
 

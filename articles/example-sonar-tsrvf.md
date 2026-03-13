@@ -89,11 +89,11 @@ aq <- alignment.quality(fd_smooth, km)
 
 phase_ratio <- aq$phase_variance / (aq$amplitude_variance + aq$phase_variance)
 cat("Amplitude variance:", round(aq$amplitude_variance, 4), "\n")
-#> Amplitude variance: 0.5937
+#> Amplitude variance: 0.5712
 cat("Phase variance:    ", round(aq$phase_variance, 4), "\n")
-#> Phase variance:     0.2627
+#> Phase variance:     0.2852
 cat("Phase/Total ratio: ", round(phase_ratio, 3), "\n")
-#> Phase/Total ratio:  0.307
+#> Phase/Total ratio:  0.333
 ```
 
 ``` r
@@ -114,7 +114,7 @@ p_warp / p_var
 
 ![](example-sonar-tsrvf_files/figure-html/elasticity-plots-1.png)
 
-**Interpretation:** The phase/total variance ratio is 0.31. While this
+**Interpretation:** The phase/total variance ratio is 0.33. While this
 might seem to suggest moderate phase variability, the warping functions
 tell a different story. Sonar frequency bands are **fixed physical
 measurements** — band 10 always measures the same frequency range. When
@@ -316,29 +316,29 @@ knitr::kable(ablation[order(-ablation$CV_Accuracy), ],
 | Smoothed       | A: Simple     | SVM    |         10 |       0.856 |
 | Raw (scaled)   | A: Simple     | SVM    |         10 |       0.837 |
 | Smoothed       | A: Simple     | QDA    |         15 |       0.806 |
-| Raw (scaled)   | A: Simple     | QDA    |         20 |       0.797 |
+| Raw (scaled)   | A: Simple     | QDA    |          5 |       0.792 |
 | Smoothed       | A: Simple     | LDA    |         20 |       0.788 |
 | 1st derivative | B: Derivative | KNN    |         20 |       0.777 |
 | Raw (scaled)   | A: Simple     | LDA    |         10 |       0.773 |
+| Aligned        | C: Elastic    | SVM    |         10 |       0.760 |
 | 1st derivative | B: Derivative | SVM    |         20 |       0.756 |
 | 2nd derivative | B: Derivative | SVM    |         20 |       0.756 |
-| Aligned        | C: Elastic    | SVM    |          5 |       0.751 |
-| Aligned        | C: Elastic    | KNN    |         10 |       0.730 |
+| Aligned        | C: Elastic    | KNN    |         20 |       0.755 |
 | 1st derivative | B: Derivative | QDA    |         20 |       0.716 |
 | 2nd derivative | B: Derivative | LDA    |         20 |       0.711 |
 | 2nd derivative | B: Derivative | QDA    |         20 |       0.711 |
 | 1st derivative | B: Derivative | LDA    |         15 |       0.697 |
+| Aligned        | C: Elastic    | LDA    |         20 |       0.696 |
 | 2nd derivative | B: Derivative | KNN    |         10 |       0.691 |
-| Aligned        | C: Elastic    | LDA    |         20 |       0.681 |
-| TSRVF (amp)    | C: Elastic    | KNN    |         15 |       0.658 |
-| Aligned        | C: Elastic    | QDA    |         15 |       0.657 |
-| Full elastic   | C: Elastic    | KNN    |          8 |       0.655 |
-| TSRVF (amp)    | C: Elastic    | LDA    |         15 |       0.653 |
-| Full elastic   | C: Elastic    | QDA    |         10 |       0.640 |
-| TSRVF (amp)    | C: Elastic    | SVM    |          8 |       0.635 |
-| Full elastic   | C: Elastic    | SVM    |          8 |       0.635 |
-| Full elastic   | C: Elastic    | LDA    |          8 |       0.623 |
-| TSRVF (amp)    | C: Elastic    | QDA    |          8 |       0.610 |
+| TSRVF (amp)    | C: Elastic    | SVM    |         15 |       0.678 |
+| TSRVF (amp)    | C: Elastic    | LDA    |         15 |       0.658 |
+| Full elastic   | C: Elastic    | QDA    |         10 |       0.654 |
+| TSRVF (amp)    | C: Elastic    | KNN    |         20 |       0.648 |
+| Full elastic   | C: Elastic    | SVM    |         10 |       0.640 |
+| TSRVF (amp)    | C: Elastic    | QDA    |          8 |       0.638 |
+| Aligned        | C: Elastic    | QDA    |         15 |       0.630 |
+| Full elastic   | C: Elastic    | KNN    |         10 |       0.620 |
+| Full elastic   | C: Elastic    | LDA    |          8 |       0.604 |
 
 10-Fold CV Accuracy (best ncomp per feature × method)
 

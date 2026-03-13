@@ -210,14 +210,14 @@ the amplitude test should produce a much larger CUSUM statistic:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude test: detected at"</span>, <span class="va">res_amp_a</span><span class="op">$</span><span class="va">changepoint</span>,</span>
 <span>    <span class="st">"| CUSUM ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_amp_a</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">res_amp_a</span><span class="op">$</span><span class="va">p.value</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude test: detected at 30 | CUSUM = 0.04854 | p = 0.005</span></span>
+<span><span class="co">#&gt; Amplitude test: detected at 30 | CUSUM = 0.05105 | p = 0.005</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase test:     detected at"</span>, <span class="va">res_amp_p</span><span class="op">$</span><span class="va">changepoint</span>,</span>
 <span>    <span class="st">"| CUSUM ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_amp_p</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">res_amp_p</span><span class="op">$</span><span class="va">p.value</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase test:     detected at 30 | CUSUM = 0.00319 | p = 0.005</span></span>
+<span><span class="co">#&gt; Phase test:     detected at 30 | CUSUM = 0.00255 | p = 0.005</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude/Phase CUSUM ratio:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_amp_a</span><span class="op">$</span><span class="va">test.statistic</span> <span class="op">/</span></span>
 <span>                                     <span class="va">res_amp_p</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"x\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude/Phase CUSUM ratio: 15.2 x</span></span></code></pre></div>
+<span><span class="co">#&gt; Amplitude/Phase CUSUM ratio: 20 x</span></span></code></pre></div>
 <p>The amplitude test is highly significant (small p-value) with a much
 larger CUSUM, confirming the change is in shape, not timing. The phase
 test may also reach significance because shape changes can induce
@@ -262,14 +262,14 @@ process runs faster at the start and slower at the end).</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude test: detected at"</span>, <span class="va">res_ph_a</span><span class="op">$</span><span class="va">changepoint</span>,</span>
 <span>    <span class="st">"| CUSUM ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_ph_a</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">res_ph_a</span><span class="op">$</span><span class="va">p.value</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude test: detected at 30 | CUSUM = 0.00184 | p = 0.005</span></span>
+<span><span class="co">#&gt; Amplitude test: detected at 30 | CUSUM = 0.002 | p = 0.005</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase test:     detected at"</span>, <span class="va">res_ph_p</span><span class="op">$</span><span class="va">changepoint</span>,</span>
 <span>    <span class="st">"| CUSUM ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_ph_p</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">res_ph_p</span><span class="op">$</span><span class="va">p.value</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase test:     detected at 30 | CUSUM = 0.00449 | p = 0.005</span></span>
+<span><span class="co">#&gt; Phase test:     detected at 30 | CUSUM = 0.00422 | p = 0.005</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase/Amplitude CUSUM ratio:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_ph_p</span><span class="op">$</span><span class="va">test.statistic</span> <span class="op">/</span></span>
 <span>                                     <span class="va">res_ph_a</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"x\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase/Amplitude CUSUM ratio: 2.4 x</span></span></code></pre></div>
+<span><span class="co">#&gt; Phase/Amplitude CUSUM ratio: 2.1 x</span></span></code></pre></div>
 <p>The phase CUSUM is larger and significant, confirming the change is
 in timing, not shape.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -313,15 +313,15 @@ strongest signal:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude test: detected at"</span>, <span class="va">res_mix_a</span><span class="op">$</span><span class="va">changepoint</span>,</span>
 <span>    <span class="st">"| CUSUM ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_mix_a</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">res_mix_a</span><span class="op">$</span><span class="va">p.value</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude test: detected at 30 | CUSUM = 0.02456 | p = 0.005</span></span>
+<span><span class="co">#&gt; Amplitude test: detected at 30 | CUSUM = 0.02362 | p = 0.005</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase test:     detected at"</span>, <span class="va">res_mix_p</span><span class="op">$</span><span class="va">changepoint</span>,</span>
 <span>    <span class="st">"| CUSUM ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_mix_p</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">res_mix_p</span><span class="op">$</span><span class="va">p.value</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Phase test:     detected at 30 | CUSUM = 0.00369 | p = 0.005</span></span>
+<span><span class="co">#&gt; Phase test:     detected at 30 | CUSUM = 0.00372 | p = 0.005</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"FPCA test:      detected at"</span>, <span class="va">res_mix_f</span><span class="op">$</span><span class="va">changepoint</span>,</span>
 <span>    <span class="st">"| CUSUM ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res_mix_f</span><span class="op">$</span><span class="va">test.statistic</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>    <span class="st">"| p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">res_mix_f</span><span class="op">$</span><span class="va">p.value</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; FPCA test:      detected at 30 | CUSUM = 0.22961 | p = 0.005</span></span></code></pre></div>
+<span><span class="co">#&gt; FPCA test:      detected at 30 | CUSUM = 0.23432 | p = 0.005</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_mix_f</span>, type <span class="op">=</span> <span class="st">"statistic"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="elastic-changepoint_files/figure-html/plot-mix-cusum-1.png" class="r-plt" alt="" width="100%"></p>
@@ -367,49 +367,49 @@ strongest signal:</p>
 <td align="left">1. Pure Amplitude</td>
 <td align="left">amplitude</td>
 <td align="right">30</td>
-<td align="right">0.04854</td>
+<td align="right">0.05105</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="even">
 <td align="left">1. Pure Amplitude</td>
 <td align="left">phase</td>
 <td align="right">30</td>
-<td align="right">0.00319</td>
+<td align="right">0.00255</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="odd">
 <td align="left">2. Pure Phase</td>
 <td align="left">amplitude</td>
 <td align="right">30</td>
-<td align="right">0.00184</td>
+<td align="right">0.00200</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="even">
 <td align="left">2. Pure Phase</td>
 <td align="left">phase</td>
 <td align="right">30</td>
-<td align="right">0.00449</td>
+<td align="right">0.00422</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="odd">
 <td align="left">3. Mixed</td>
 <td align="left">amplitude</td>
 <td align="right">30</td>
-<td align="right">0.02456</td>
+<td align="right">0.02362</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="even">
 <td align="left">3. Mixed</td>
 <td align="left">phase</td>
 <td align="right">30</td>
-<td align="right">0.00369</td>
+<td align="right">0.00372</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="odd">
 <td align="left">3. Mixed</td>
 <td align="left">fpca</td>
 <td align="right">30</td>
-<td align="right">0.22961</td>
+<td align="right">0.23432</td>
 <td align="right">0.005</td>
 </tr>
 </tbody>
@@ -743,22 +743,22 @@ where the test is significant:</p>
 <tbody>
 <tr class="odd">
 <td align="right">0.05</td>
-<td align="right">1.1</td>
+<td align="right">1.10</td>
 <td align="left">3.4%</td>
 </tr>
 <tr class="even">
 <td align="right">0.12</td>
-<td align="right">1.1</td>
-<td align="left">3.4%</td>
+<td align="right">1.10</td>
+<td align="left">6.6%</td>
 </tr>
 <tr class="odd">
 <td align="right">0.25</td>
-<td align="right">1.1</td>
-<td align="left">12.6%</td>
+<td align="right">1.25</td>
+<td align="left">3.4%</td>
 </tr>
 <tr class="even">
 <td align="right">0.40</td>
-<td align="right">1.1</td>
+<td align="right">1.25</td>
 <td align="left">22.8%</td>
 </tr>
 </tbody>

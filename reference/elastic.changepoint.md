@@ -54,12 +54,11 @@ elastic.changepoint(
 
 - cov.kernel:
 
-  Long-run covariance kernel: "bartlett", "parzen", "flattop", or
-  "simple".
+  Deprecated. No longer used (ignored with a warning).
 
 - cov.bandwidth:
 
-  Bandwidth for the covariance kernel. If NULL, automatically selected.
+  Deprecated. No longer used (ignored with a warning).
 
 - seed:
 
@@ -107,8 +106,8 @@ cp <- elastic.changepoint(fd, type = "amplitude", n.mc = 100)
 cp
 #> Elastic Changepoint Detection
 #>   Type: amplitude 
-#>   Changepoint at: 28 of 50 curves
-#>   Test statistic: 0.002919 
-#>   p-value: 0.8317 
+#>   Changepoint at: 26 of 50 curves
+#>   Test statistic: 0.001991 
+#>   p-value: 0.9802 
 # }
 ```

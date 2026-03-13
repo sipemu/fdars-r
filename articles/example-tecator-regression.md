@@ -180,7 +180,7 @@ enhancement with the Rust FPCA backend:
 ``` r
 cv_lm_d2 <- fregre.lm.cv(fd2_train, fat_train, k.range = 1:15, nfold = 10)
 cat("Optimal k:", cv_lm_d2$optimal.k, "\n")
-#> Optimal k: 15
+#> Optimal k: 14
 fit_lm_d2 <- fregre.lm(fd2_train, fat_train, ncomp = cv_lm_d2$optimal.k)
 pred_lm_d2 <- predict(fit_lm_d2, fd2_test)
 ```
@@ -242,7 +242,7 @@ knitr::kable(results, caption = "Test set performance: fat prediction")
 | fregre.lm (absorbance)          |  3.200 | 0.943 | 2.410 |
 | k-NN / L2 (absorbance)          | 10.135 | 0.425 | 7.434 |
 | PC (2nd derivative)             |  2.606 | 0.962 | 1.960 |
-| fregre.lm (2nd derivative)      |  2.593 | 0.962 | 1.912 |
+| fregre.lm (2nd derivative)      |  2.606 | 0.962 | 1.960 |
 | k-NN / elastic (2nd derivative) |  2.092 | 0.976 | 1.396 |
 
 Test set performance: fat prediction

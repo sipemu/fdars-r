@@ -346,8 +346,8 @@ km <- karcher.mean(fd, max.iter = 20, tol = 1e-4)
 print(km)
 #> Karcher Mean (Elastic)
 #>   Curves: 15 x 100 grid points
-#>   Iterations: 18 
-#>   Converged: TRUE
+#>   Iterations: 15 
+#>   Converged: FALSE
 ```
 
 ``` r
@@ -387,9 +387,9 @@ fd_bumps <- fdata(dm, argvals = argvals)
 
 km <- karcher.mean(fd_bumps, max.iter = 30, tol = 1e-4)
 cat("Converged:", km$converged, "\n")
-#> Converged: TRUE
+#> Converged: FALSE
 cat("Iterations:", km$n.iter, "\n")
-#> Iterations: 20
+#> Iterations: 30
 ```
 
 ``` r
@@ -464,13 +464,13 @@ km_diag <- karcher.mean(fd, max.iter = 20, tol = 1e-4)
 aq <- alignment.quality(fd, km_diag)
 print(aq)
 #> Alignment Quality Diagnostics
-#>   Mean warp complexity: 0.0669 
-#>   Mean warp smoothness: 20.6504 
+#>   Mean warp complexity: 0.0666 
+#>   Mean warp smoothness: 19.2674 
 #>   Total variance:      0.0457 
 #>   Amplitude variance:  0.0104 
 #>   Phase variance:      0.0353 
-#>   Phase/Total ratio:   0.7733 
-#>   Mean VR:             0.1479
+#>   Phase/Total ratio:   0.7725 
+#>   Mean VR:             0.1483
 ```
 
 ### Before vs After: What Changed?
@@ -508,9 +508,9 @@ knitr::kable(tab, align = "lrrr")
 
 | Metric                    | Before |  After | Reduction |
 |:--------------------------|-------:|-------:|----------:|
-| Mean pairwise L² distance | 0.2603 | 0.1243 |     52.3% |
-| Mean pointwise variance   | 0.0494 | 0.0120 |     75.8% |
-| Mean cross-sectional SD   | 0.2043 | 0.0652 |     68.1% |
+| Mean pairwise L² distance | 0.2603 | 0.1242 |     52.3% |
+| Mean pointwise variance   | 0.0494 | 0.0120 |     75.7% |
+| Mean cross-sectional SD   | 0.2043 | 0.0646 |     68.4% |
 
 ### Pointwise Variance: Where Did Alignment Help?
 
@@ -1788,8 +1788,8 @@ km_per <- karcher.mean(fd_p, max.iter = 15, periodic = TRUE)
 print(km_per)
 #> Karcher Mean (Elastic)
 #>   Curves: 15 x 100 grid points
-#>   Iterations: 1 
-#>   Converged: TRUE 
+#>   Iterations: 10 
+#>   Converged: FALSE 
 #>   Periodic: TRUE (method: peak )
 ```
 

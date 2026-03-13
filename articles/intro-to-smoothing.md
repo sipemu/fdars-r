@@ -424,7 +424,7 @@ print(result_gcv)
 cat("Selected lambda:", result_gcv$lambda, "\n")
 #> Selected lambda: 378604.5
 cat("GCV:", result_gcv$gcv, "  AIC:", result_gcv$aic, "  BIC:", result_gcv$bic, "\n")
-#> GCV: 5.578186   AIC: 1717.275   BIC: 1767.158
+#> GCV: 5.578186   AIC: 2692.299   BIC: 5385.944
 ```
 
 ### Fourier Basis for Periodic Data

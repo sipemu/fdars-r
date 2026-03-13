@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Three class curves -->
+  <path d="M15 40 Q50 25, 85 30 Q120 35, 155 28 Q175 25, 190 30"
+        stroke="#4A90D9" stroke-width="1.5" opacity="0.4"/>
+  <path d="M15 60 Q50 70, 85 65 Q120 58, 155 62 Q175 68, 190 65"
+        stroke="#2E8B57" stroke-width="1.5" opacity="0.4"/>
+  <path d="M15 80 Q50 85, 85 78 Q120 75, 155 80 Q175 82, 190 76"
+        stroke="#D55E00" stroke-width="1.5" opacity="0.4"/>
+  <!-- Test point -->
+  <circle cx="100" cy="52" r="4" fill="#7B2D8E" stroke="#7B2D8E" stroke-width="1"/>
+  <text x="108" y="50" font-size="7" fill="#7B2D8E" font-family="sans-serif">?</text>
+  <!-- Prediction set bracket -->
+  <path d="M130 32 L125 32 L125 68 L130 68" stroke="#7B2D8E" stroke-width="1.5" fill="none"/>
+  <rect x="134" y="30" width="28" height="12" rx="3" fill="#4A90D9" opacity="0.2"/>
+  <text x="148" y="39" font-size="7" fill="#4A90D9" font-family="sans-serif" text-anchor="middle">A</text>
+  <rect x="134" y="46" width="28" height="12" rx="3" fill="#2E8B57" opacity="0.2"/>
+  <text x="148" y="55" font-size="7" fill="#2E8B57" font-family="sans-serif" text-anchor="middle">B</text>
+  <!-- Coverage badge -->
+  <rect x="120" y="85" width="60" height="16" rx="8" fill="#7B2D8E" opacity="0.15"/>
+  <text x="150" y="96" font-size="7" fill="#7B2D8E" font-family="sans-serif" text-anchor="middle">pred. sets</text>
+  <!-- Conformal label -->
+  <text x="20" y="100" font-size="7" fill="#4A90D9" font-family="sans-serif" opacity="0.5">conformal</text>
+</svg>

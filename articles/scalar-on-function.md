@@ -156,9 +156,9 @@ cross-validation.
 ``` r
 cv_lm <- fregre.lm.cv(fd_lm, y_lm, k.range = 1:8, nfold = 10)
 cat("Optimal ncomp:", cv_lm$optimal.k, "\n")
-#> Optimal ncomp: 6
+#> Optimal ncomp: 7
 cat("CV errors:", round(cv_lm$cv.errors, 4), "\n")
-#> CV errors: 0.0957 0.0959 0.0971 0.0971 0.0978 0.0938 0.0942 0.0951
+#> CV errors: 0.0972 0.0964 0.0967 0.0986 0.0987 0.0966 0.0954 0.0967
 ```
 
 ## PC Regression (`fregre.pc`)
@@ -788,7 +788,7 @@ pred_np_wf <- predict(fit_best_np, fd_te)
 
 cat("Linear RMSE:", round(pred.RMSE(y_te, pred_lm_wf), 4),
     "| R2:", round(pred.R2(y_te, pred_lm_wf), 4), "\n")
-#> Linear RMSE: 0.4598 | R2: -0.0105
+#> Linear RMSE: 0.4575 | R2: -3e-04
 cat("Nonpar RMSE:", round(pred.RMSE(y_te, pred_np_wf), 4),
     "| R2:", round(pred.R2(y_te, pred_np_wf), 4), "\n")
 #> Nonpar RMSE: 0.5028 | R2: -0.2086

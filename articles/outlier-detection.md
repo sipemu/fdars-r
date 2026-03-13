@@ -230,6 +230,62 @@ cat("LRT threshold (95th percentile):", threshold_95, "\n")
 #> LRT threshold (95th percentile): 1.53227
 ```
 
+### Full Bootstrap Distribution (`outliers.lrt.dist`)
+
+For finer-grained inference,
+[`outliers.lrt.dist()`](https://sipemu.github.io/fdars-r/reference/outliers.lrt.dist.md)
+returns both the threshold and the full sorted bootstrap null
+distribution. This enables per-curve p-value computation and
+visualization of the null distribution:
+
+``` r
+lrt_dist <- outliers.lrt.dist(fd, nb = 1000, seed = 123, percentile = 0.99)
+
+cat("Threshold:", round(lrt_dist$threshold, 4), "\n")
+#> Threshold: 32.8872
+cat("Bootstrap distribution: n =", length(lrt_dist$boot.distribution),
+    ", range = [", round(min(lrt_dist$boot.distribution), 3), ",",
+    round(max(lrt_dist$boot.distribution), 3), "]\n")
+#> Bootstrap distribution: n = 1000 , range = [ 1.173 , 33.766 ]
+```
+
+Visualize the null distribution with the threshold:
+
+``` r
+df_boot <- data.frame(max_distance = lrt_dist$boot.distribution)
+
+ggplot(df_boot, aes(x = .data$max_distance)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "white", alpha = 0.7) +
+  geom_vline(xintercept = lrt_dist$threshold, color = "red",
+             linewidth = 1, linetype = "dashed") +
+  annotate("text", x = lrt_dist$threshold, y = Inf,
+           label = paste0("99th percentile = ", round(lrt_dist$threshold, 3)),
+           vjust = 2, hjust = -0.1, color = "red", size = 3.5) +
+  labs(title = "Bootstrap Null Distribution of Maximum Distances",
+       subtitle = "Red line = threshold for outlier detection",
+       x = "Maximum Distance", y = "Count")
+```
+
+![](outlier-detection_files/figure-html/lrt-dist-plot-1.png)
+
+Compute per-curve p-values from the bootstrap distribution:
+
+``` r
+# Distance of each curve from the centre
+curve_depths <- depth.FM(fd)
+curve_distances <- max(curve_depths) - curve_depths  # convert depth to distance
+
+# Per-curve p-value: fraction of bootstrap maxima >= curve's distance
+p_values <- sapply(curve_distances, function(d) {
+  mean(lrt_dist$boot.distribution >= d)
+})
+
+cat("P-values for curves 1-3 (true outliers):", round(p_values[1:3], 4), "\n")
+#> P-values for curves 1-3 (true outliers): 1 1 1
+cat("P-values for curves 4-6 (normal):", round(p_values[4:6], 4), "\n")
+#> P-values for curves 4-6 (normal): 1 1 1
+```
+
 ### LRT Results
 
 ``` r
@@ -774,9 +830,8 @@ consider Bonferroni correction (`alpha / n_methods`) or use the
 magnitudeshape method which jointly tests magnitude and shape.
 
 **Streaming monitoring**: For real-time applications, use
-[`streaming_depth_one()`](https://sipemu.github.io/fdars-r/reference/streaming_depth_one.md)
-with depth-based p-values to flag anomalies as they arrive. See the
-[streaming depth
+`streaming_depth_one()` with depth-based p-values to flag anomalies as
+they arrive. See the [streaming depth
 article](https://sipemu.github.io/fdars-r/articles/streaming-depth.md)
 for details.
 

@@ -30,6 +30,17 @@ A list with `cvm` and `ks` vectors of test statistics.
 ## Examples
 
 ``` r
-rp.stat(sample(10), rnorm(10), n.proj = 3)
-#> Error in rp_stat(as.integer(proj.x.ord), as.double(residuals), as.integer(n.proj)): User function panicked: rp_stat
+# \donttest{
+set.seed(1)
+n <- 10
+n_proj <- 3
+proj <- unlist(replicate(n_proj, sample(n), simplify = FALSE))
+rp.stat(proj, rnorm(n), n.proj = n_proj)
+#> $cvm
+#> [1] 0.05562997 0.16858091 0.19217356
+#> 
+#> $ks
+#> [1] 0.3426421 0.6733942 0.7741449
+#> 
+# }
 ```

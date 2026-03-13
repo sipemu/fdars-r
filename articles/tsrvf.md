@@ -198,7 +198,7 @@ pca_result <- prcomp(tv_data, center = TRUE, scale. = FALSE)
 var_explained <- pca_result$sdev^2 / sum(pca_result$sdev^2)
 cat("Variance explained by first 3 PCs:",
     round(cumsum(var_explained)[1:3] * 100, 1), "%\n")
-#> Variance explained by first 3 PCs: 92.1 96.6 98.4 %
+#> Variance explained by first 3 PCs: 93.1 96.9 98.3 %
 ```
 
 ``` r

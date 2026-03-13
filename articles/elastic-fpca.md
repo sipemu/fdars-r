@@ -126,7 +126,7 @@ vert_result <- vert.fpca(karcher, ncomp = 3)
 cat("Vertical FPCA - cumulative variance:\n")
 #> Vertical FPCA - cumulative variance:
 print(round(vert_result$cumulative.variance, 4))
-#> [1] 0.7113 0.9932 1.0000
+#> [1] 0.7132 0.9950 1.0000
 ```
 
 ``` r
@@ -158,7 +158,7 @@ horiz_result <- horiz.fpca(karcher, ncomp = 3)
 cat("Horizontal FPCA - cumulative variance:\n")
 #> Horizontal FPCA - cumulative variance:
 print(round(horiz_result$cumulative.variance, 4))
-#> [1] 0.9532 0.9845 1.0000
+#> [1] 0.9533 0.9817 1.0000
 ```
 
 ``` r
@@ -183,7 +183,7 @@ joint_result <- joint.fpca(karcher, ncomp = 3)
 cat("Joint FPCA - cumulative variance:\n")
 #> Joint FPCA - cumulative variance:
 print(round(joint_result$cumulative.variance, 4))
-#> [1] 0.7113 0.9932 1.0000
+#> [1] 0.7132 0.9950 1.0000
 ```
 
 ``` r
