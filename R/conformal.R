@@ -584,9 +584,9 @@ conformal.generic.regression <- function(model, fdataobj, y, newdata,
 
 #' Generic Conformal Classification
 #'
-#' Split-conformal prediction sets using a pre-fitted fregre.logistic model.
+#' Split-conformal prediction sets using a pre-fitted functional.logistic model.
 #'
-#' @param model A fitted \code{fregre.logistic} model object.
+#' @param model A fitted model object from \code{\link{functional.logistic}}.
 #' @param fdataobj An object of class 'fdata' (training data).
 #' @param y Binary response (0/1).
 #' @param newdata An object of class 'fdata' (test data).
@@ -603,7 +603,7 @@ conformal.generic.regression <- function(model, fdataobj, y, newdata,
 #' \donttest{
 #' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
 #' y <- rbinom(50, 1, 0.5)
-#' model <- fregre.logistic(fd, y)
+#' model <- functional.logistic(fd, y)
 #' cp <- conformal.generic.classification(model, fd, y, fd[1:10, ])
 #' }
 #'

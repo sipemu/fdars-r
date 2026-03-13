@@ -18,7 +18,7 @@ conformal.generic.classification(
 )
 }
 \arguments{
-\item{model}{A fitted \code{fregre.logistic} model object.}
+\item{model}{A fitted model object from \code{\link{functional.logistic}}.}
 
 \item{fdataobj}{An object of class 'fdata' (training data).}
 
@@ -42,13 +42,13 @@ conformal.generic.classification(
 Same as \code{\link{conformal.classif}}.
 }
 \description{
-Split-conformal prediction sets using a pre-fitted fregre.logistic model.
+Split-conformal prediction sets using a pre-fitted functional.logistic model.
 }
 \examples{
 \donttest{
 fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
 y <- rbinom(50, 1, 0.5)
-model <- fregre.logistic(fd, y)
+model <- functional.logistic(fd, y)
 cp <- conformal.generic.classification(model, fd, y, fd[1:10, ])
 }
 
