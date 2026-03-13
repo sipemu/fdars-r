@@ -28,6 +28,10 @@ Unlike regression conformal (which produces intervals), classification conformal
 answers: "which classes are plausible for this observation?" A set of size 1
 means high confidence; larger sets indicate ambiguity.
 
+```{=html}
+<img src="../reference/figures/conformal-classification-overview.svg" alt="Conformal classification: prediction sets, three methods, and scoring rules" style="width:100%; max-width:700px;">
+```
+
 ```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
