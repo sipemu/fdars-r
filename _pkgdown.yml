@@ -91,6 +91,7 @@ reference:
   - fdata
   - fdata.cen
   - deriv
+  - fdata.gradient
   - mean.fdata
   - median
   - trimmed
@@ -223,6 +224,7 @@ reference:
   - outliers.depth.trim
   - outliers.lrt
   - outliers.thres.lrt
+  - outliers.lrt.dist
   - magnitudeshape
 
 - title: Regression
@@ -239,6 +241,8 @@ reference:
   - fregre.pc
   - fregre.pc.cv
   - functional.logistic
+  - predict.fregre.logistic
+  - model.selection.ncomp
   - optim.np
   - flm.test
   - pred.MAE
@@ -250,6 +254,7 @@ reference:
   contents:
   - fosr
   - fosr.fpc
+  - fosr.2d
   - fanova
 
 - title: Classification
@@ -309,10 +314,27 @@ reference:
   - elastic.regression
   - elastic.logistic
   - elastic.pcr
+  - predict.elastic.regression
+  - predict.elastic.logistic
 
 - title: Elastic Changepoint
   contents:
   - elastic.changepoint
+
+- title: Conformal Prediction
+  contents:
+  - conformal.fregre.lm
+  - conformal.fregre.np
+  - conformal.elastic.regression
+  - conformal.elastic.pcr
+  - conformal.elastic.logistic
+  - conformal.logistic
+  - conformal.classif
+  - cv.conformal.regression
+  - cv.conformal.classification
+  - jackknife.plus
+  - conformal.generic.regression
+  - conformal.generic.classification
 
 - title: Explainability
   contents:
