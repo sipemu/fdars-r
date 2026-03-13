@@ -367,117 +367,417 @@ intervals.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="quick-examples">Quick Examples<a class="anchor" aria-label="anchor" href="#quick-examples"></a>
+<h2 id="worked-example-regression">Worked Example: Regression<a class="anchor" aria-label="anchor" href="#worked-example-regression"></a>
 </h2>
-<div class="section level3">
-<h3 id="regression-split-vs-cv-vs-jackknife">Regression: Split vs CV+ vs Jackknife+<a class="anchor" aria-label="anchor" href="#regression-split-vs-cv-vs-jackknife"></a>
-</h3>
+<p>We simulate a realistic near-infrared spectroscopy scenario: 200
+absorbance curves measured at 100 wavelengths, with a scalar response
+(e.g., fat content) that depends on a localized spectral region. The
+goal is to predict the response for 40 new spectra with valid
+uncertainty quantification.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">80</span>; <span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Simulate spectra with realistic structure:</span></span>
+<span><span class="co"># - smooth baseline (low-freq Fourier)</span></span>
+<span><span class="co"># - absorption peak near t = 0.4 that varies across samples</span></span>
+<span><span class="co"># - measurement noise</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">baseline</span> <span class="op">&lt;-</span> <span class="fl">0.8</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<span>  <span class="va">peak_loc</span> <span class="op">&lt;-</span> <span class="fl">0.4</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, sd <span class="op">=</span> <span class="fl">0.03</span><span class="op">)</span></span>
+<span>  <span class="va">peak_height</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, mean <span class="op">=</span> <span class="fl">2</span>, sd <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span></span>
+<span>  <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">baseline</span> <span class="op">+</span> <span class="va">peak_height</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="va">peak_loc</span>, <span class="fl">0.05</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m</span>, sd <span class="op">=</span> <span class="fl">0.08</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">fd_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">60</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
-<span><span class="va">fd_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span><span class="fl">61</span><span class="op">:</span><span class="fl">80</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
-<span><span class="va">y_train</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">60</span><span class="op">]</span>; <span class="va">y_test</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span><span class="fl">61</span><span class="op">:</span><span class="fl">80</span><span class="op">]</span></span>
+<span><span class="co"># Response depends on the peak region (t ∈ [0.3, 0.5])</span></span>
+<span><span class="va">beta_true</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">0.4</span>, <span class="fl">0.06</span><span class="op">)</span></span>
+<span><span class="va">beta_true</span> <span class="op">&lt;-</span> <span class="va">beta_true</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">beta_true</span><span class="op">)</span></span>
+<span><span class="va">dt</span> <span class="op">&lt;-</span> <span class="va">t_grid</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">t_grid</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="va">y</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">beta_true</span> <span class="op">*</span> <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span> <span class="op">*</span> <span class="va">dt</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, sd <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Split conformal</span></span>
-<span><span class="va">split_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/conformal.fregre.lm.html">conformal.fregre.lm</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
-<span>                                  ncomp <span class="op">=</span> <span class="fl">3</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># CV+ conformal</span></span>
-<span><span class="va">cv_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.conformal.regression.html">cv.conformal.regression</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
-<span>                                   method <span class="op">=</span> <span class="st">"fregre.lm"</span>, ncomp <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>                                   n.folds <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Jackknife+</span></span>
-<span><span class="va">jk_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/jackknife.plus.html">jackknife.plus</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
-<span>                          method <span class="op">=</span> <span class="st">"fregre.lm"</span>, ncomp <span class="op">=</span> <span class="fl">3</span>, alpha <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Compare widths</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Split mean width:     "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">split_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">split_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Split mean width:      1.0911</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV+ mean width:       "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cv_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">cv_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; CV+ mean width:        1.0333</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Jackknife+ mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">jk_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">jk_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Jackknife+ mean width: 1.1484</span></span></code></pre></div>
+<span><span class="co"># 80/20 train-test split</span></span>
+<span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">160</span></span>
+<span><span class="va">test_idx</span> <span class="op">&lt;-</span> <span class="fl">161</span><span class="op">:</span><span class="fl">200</span></span>
+<span><span class="va">fd_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span><span class="va">train_idx</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<span><span class="va">fd_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span><span class="va">test_idx</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<span><span class="va">y_train</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span><span class="va">train_idx</span><span class="op">]</span></span>
+<span><span class="va">y_test</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span><span class="va">test_idx</span><span class="op">]</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_width</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span>, <span class="st">"CV+"</span>, <span class="st">"Jackknife+"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span>
-<span>  Width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">split_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">split_res</span><span class="op">$</span><span class="va">lower</span>,</span>
-<span>            <span class="va">cv_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">cv_res</span><span class="op">$</span><span class="va">lower</span>,</span>
-<span>            <span class="va">jk_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">jk_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">df_spectra</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  curve <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, each <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">df_width</span><span class="op">$</span><span class="va">Method</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">df_width</span><span class="op">$</span><span class="va">Method</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span>, <span class="st">"CV+"</span>, <span class="st">"Jackknife+"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Method</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Width</span>, fill <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span> <span class="op">=</span> <span class="st">"#2E8B57"</span>, <span class="st">"CV+"</span> <span class="op">=</span> <span class="st">"#4A90D9"</span>,</span>
-<span>                                <span class="st">"Jackknife+"</span> <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Prediction Interval Width by Method"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Interval Width"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="conformal-prediction-guide_files/figure-html/regression-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_spectra</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">t</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">value</span>,</span>
+<span>                       group <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">curve</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, color <span class="op">=</span> <span class="st">"#4A90D9"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Simulated Absorbance Spectra (first 20)"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Wavelength (normalized)"</span>, y <span class="op">=</span> <span class="st">"Absorbance"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="conformal-prediction-guide_files/figure-html/plot-spectra-1.png" class="r-plt" alt="" width="100%"></p>
+<div class="section level3">
+<h3 id="when-to-use-split-conformal">When to Use Split Conformal<a class="anchor" aria-label="anchor" href="#when-to-use-split-conformal"></a>
+</h3>
+<p><strong>Use split conformal when you have plenty of data</strong>
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≥</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">n \geq 100</annotation></semantics></math>)
+and want the strongest guarantee
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1</mn><mo>−</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">\geq 1 - \alpha</annotation></semantics></math>).
+It only fits the model once, so it’s the fastest option. The trade-off:
+it “wastes” 25% of training data on calibration, producing slightly
+wider intervals.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">split_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/conformal.fregre.lm.html">conformal.fregre.lm</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
+<span>  ncomp <span class="op">=</span> <span class="fl">5</span>, cal.fraction <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Split conformal:\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Split conformal:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">split_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Coverage: 92.5 %</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">split_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">split_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Mean width: 0.5484</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="classification-split-vs-cv">Classification: Split vs CV+<a class="anchor" aria-label="anchor" href="#classification-split-vs-cv"></a>
+<h3 id="when-to-use-cv">When to Use CV+<a class="anchor" aria-label="anchor" href="#when-to-use-cv"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p><strong>Use CV+ when data is limited</strong>
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>&lt;</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">n &lt; 100</annotation></semantics></math>)
+or when you want tighter intervals. All data contributes to both
+training and calibration through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>-fold
+cross-validation. The theoretical guarantee is weaker
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1</mn><mo>−</mo><mn>2</mn><mi>α</mi></mrow><annotation encoding="application/x-tex">\geq 1 - 2\alpha</annotation></semantics></math>),
+but empirically coverage is near
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">1 - \alpha</annotation></semantics></math>.
+Cost:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+model fits instead of 1.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cv_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.conformal.regression.html">cv.conformal.regression</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"fregre.lm"</span>, ncomp <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  n.folds <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV+ conformal (fregre.lm):\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; CV+ conformal (fregre.lm):</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Coverage: 90.6 %</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cv_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">cv_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Mean width: 0.4996</span></span></code></pre></div>
+<p>CV+ also works with nonparametric models — useful when the
+relationship between spectra and response is nonlinear:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cv_np</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.conformal.regression.html">cv.conformal.regression</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"fregre.np"</span>, ncomp <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  n.folds <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV+ conformal (fregre.np):\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; CV+ conformal (fregre.np):</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_np</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Coverage: 90.6 %</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cv_np</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">cv_np</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Mean width: 4.2679</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="when-to-use-jackknife">When to Use Jackknife+<a class="anchor" aria-label="anchor" href="#when-to-use-jackknife"></a>
+</h3>
+<p><strong>Use jackknife+ when you want maximum data efficiency</strong>
+and can afford
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+model fits. Every observation is left out exactly once, giving the most
+precise calibration. Best for small-to-moderate datasets
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≤</mo><mn>500</mn></mrow><annotation encoding="application/x-tex">n \leq 500</annotation></semantics></math>).</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">jk_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/jackknife.plus.html">jackknife.plus</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"fregre.lm"</span>, ncomp <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.10</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Jackknife+:\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Jackknife+:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">jk_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Coverage: 90.6 %</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">jk_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">jk_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Mean width: 0.5817</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="when-to-use-generic-conformal">When to Use Generic Conformal<a class="anchor" aria-label="anchor" href="#when-to-use-generic-conformal"></a>
+</h3>
+<p><strong>Use generic conformal when the model is already
+fitted</strong> and you want to add uncertainty quantification without
+re-training. This is common in production: the model was trained once
+(possibly expensive), and you want prediction intervals for new
+batches.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model_fitted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">gen_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/conformal.generic.regression.html">conformal.generic.regression</a></span><span class="op">(</span></span>
+<span>  <span class="va">model_fitted</span>, <span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
+<span>  cal.fraction <span class="op">=</span> <span class="fl">0.25</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Generic conformal (from fitted model):\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Generic conformal (from fitted model):</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gen_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Coverage: 92.5 %</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">gen_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">gen_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Mean width: 0.541</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="comparing-all-methods">Comparing All Methods<a class="anchor" aria-label="anchor" href="#comparing-all-methods"></a>
+</h3>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span>, <span class="st">"CV+ (lm)"</span>, <span class="st">"CV+ (np)"</span>, <span class="st">"Jackknife+"</span>, <span class="st">"Generic"</span><span class="op">)</span></span>
+<span><span class="va">widths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="va">split_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">split_res</span><span class="op">$</span><span class="va">lower</span>,</span>
+<span>  <span class="va">cv_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">cv_res</span><span class="op">$</span><span class="va">lower</span>,</span>
+<span>  <span class="va">cv_np</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">cv_np</span><span class="op">$</span><span class="va">lower</span>,</span>
+<span>  <span class="va">jk_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">jk_res</span><span class="op">$</span><span class="va">lower</span>,</span>
+<span>  <span class="va">gen_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">gen_res</span><span class="op">$</span><span class="va">lower</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df_compare</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">methods</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y_test</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  Width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">widths</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">df_compare</span><span class="op">$</span><span class="va">Method</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">df_compare</span><span class="op">$</span><span class="va">Method</span>, levels <span class="op">=</span> <span class="va">methods</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_compare</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Method</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Width</span>,</span>
+<span>                       fill <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span> <span class="op">=</span> <span class="st">"#2E8B57"</span>, <span class="st">"CV+ (lm)"</span> <span class="op">=</span> <span class="st">"#4A90D9"</span>,</span>
+<span>                                <span class="st">"CV+ (np)"</span> <span class="op">=</span> <span class="st">"#6BAED6"</span>, <span class="st">"Jackknife+"</span> <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
+<span>                                <span class="st">"Generic"</span> <span class="op">=</span> <span class="st">"#7B2D8E"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Prediction Interval Width by Conformal Method"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"All at 90% nominal level, n = 160 training curves"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Interval Width"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="conformal-prediction-guide_files/figure-html/compare-regression-1.png" class="r-plt" alt="" width="100%"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Method <span class="op">=</span> <span class="va">methods</span>,</span>
+<span>  Coverage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">split_res</span>, <span class="va">cv_res</span>, <span class="va">cv_np</span>, <span class="va">jk_res</span>, <span class="va">gen_res</span><span class="op">)</span>,</span>
+<span>                    <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  Mean_Width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">widths</span>, <span class="kw">function</span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  Fits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"5"</span>, <span class="st">"5"</span>, <span class="st">"160"</span>, <span class="st">"0"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">df_summary</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Method"</span>, <span class="st">"Coverage (%)"</span>,</span>
+<span>             <span class="st">"Mean Width"</span>, <span class="st">"Model Fits"</span><span class="op">)</span>,</span>
+<span>             caption <span class="op">=</span> <span class="st">"Conformal method comparison on spectroscopy data"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Conformal method comparison on spectroscopy data</caption>
+<thead><tr class="header">
+<th align="left">Method</th>
+<th align="right">Coverage (%)</th>
+<th align="right">Mean Width</th>
+<th align="left">Model Fits</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Split</td>
+<td align="right">92.5</td>
+<td align="right">0.5484</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">CV+ (lm)</td>
+<td align="right">90.6</td>
+<td align="right">0.4996</td>
+<td align="left">5</td>
+</tr>
+<tr class="odd">
+<td align="left">CV+ (np)</td>
+<td align="right">90.6</td>
+<td align="right">4.2679</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">Jackknife+</td>
+<td align="right">90.6</td>
+<td align="right">0.5817</td>
+<td align="left">160</td>
+</tr>
+<tr class="odd">
+<td align="left">Generic</td>
+<td align="right">92.5</td>
+<td align="right">0.5410</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="worked-example-classification">Worked Example: Classification<a class="anchor" aria-label="anchor" href="#worked-example-classification"></a>
+</h2>
+<p>A three-class functional classification problem with overlapping
+classes to demonstrate how prediction sets adapt to ambiguity.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">n_cl</span> <span class="op">&lt;-</span> <span class="fl">60</span>; <span class="va">m_cl</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
+<span><span class="va">n_per</span> <span class="op">&lt;-</span> <span class="fl">50</span></span>
+<span><span class="va">n_cl</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="op">*</span> <span class="va">n_per</span></span>
+<span><span class="va">m_cl</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">t_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m_cl</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">X_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_cl</span>, <span class="va">m_cl</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span> <span class="va">X_cl</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_cl</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m_cl</span>, sd <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">31</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span> <span class="va">X_cl</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_cl</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m_cl</span>, sd <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
-<span><span class="va">y_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, each <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_per</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Class 1: sine-dominated</span></span>
+<span>  <span class="va">X_cl</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_cl</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">4</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_cl</span><span class="op">)</span> <span class="op">+</span></span>
+<span>               <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m_cl</span>, sd <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span>
+<span>  <span class="co"># Class 2: cosine-dominated</span></span>
+<span>  <span class="va">X_cl</span><span class="op">[</span><span class="va">n_per</span> <span class="op">+</span> <span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_cl</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                        <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">4</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_cl</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                        <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m_cl</span>, sd <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span>
+<span>  <span class="co"># Class 3: linear trend + noise (hardest to separate)</span></span>
+<span>  <span class="va">X_cl</span><span class="op">[</span><span class="fl">2</span> <span class="op">*</span> <span class="va">n_per</span> <span class="op">+</span> <span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0.6</span> <span class="op">*</span> <span class="op">(</span><span class="va">t_cl</span> <span class="op">-</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                             <span class="fl">0.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">3</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">t_cl</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                             <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m_cl</span>, sd <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">y_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, each <span class="op">=</span> <span class="va">n_per</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fd_cl_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_cl</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">25</span>, <span class="fl">31</span><span class="op">:</span><span class="fl">55</span><span class="op">)</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_cl</span><span class="op">)</span></span>
-<span><span class="va">fd_cl_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_cl</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">26</span><span class="op">:</span><span class="fl">30</span>, <span class="fl">56</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_cl</span><span class="op">)</span></span>
-<span><span class="va">y_cl_train</span> <span class="op">&lt;-</span> <span class="va">y_cl</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">25</span>, <span class="fl">31</span><span class="op">:</span><span class="fl">55</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co"># 80/20 split per class</span></span>
+<span><span class="va">train_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span>, <span class="fl">51</span><span class="op">:</span><span class="fl">90</span>, <span class="fl">101</span><span class="op">:</span><span class="fl">140</span><span class="op">)</span></span>
+<span><span class="va">test_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_cl</span>, <span class="va">train_cl</span><span class="op">)</span></span>
+<span><span class="va">fd_cl_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_cl</span><span class="op">[</span><span class="va">train_cl</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_cl</span><span class="op">)</span></span>
+<span><span class="va">fd_cl_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_cl</span><span class="op">[</span><span class="va">test_cl</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_cl</span><span class="op">)</span></span>
+<span><span class="va">y_cl_train</span> <span class="op">&lt;-</span> <span class="va">y_cl</span><span class="op">[</span><span class="va">train_cl</span><span class="op">]</span></span>
+<span><span class="va">y_cl_test</span> <span class="op">&lt;-</span> <span class="va">y_cl</span><span class="op">[</span><span class="va">test_cl</span><span class="op">]</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="split-vs-cv-classification">Split vs CV+ Classification<a class="anchor" aria-label="anchor" href="#split-vs-cv-classification"></a>
+</h3>
+<p>With 120 training curves, split conformal works well. CV+ uses all
+data for calibration, so it can produce tighter prediction sets:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Split conformal (LDA + LAC scoring)</span></span>
+<span><span class="va">split_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/conformal.classif.html">conformal.classif</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_cl_train</span>, <span class="va">y_cl_train</span>, <span class="va">fd_cl_test</span>,</span>
+<span>  ncomp <span class="op">=</span> <span class="fl">5</span>, classifier <span class="op">=</span> <span class="st">"lda"</span>,</span>
+<span>  score.type <span class="op">=</span> <span class="st">"lac"</span>, cal.fraction <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Split conformal classification</span></span>
-<span><span class="va">split_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/conformal.classif.html">conformal.classif</a></span><span class="op">(</span><span class="va">fd_cl_train</span>, <span class="va">y_cl_train</span>, <span class="va">fd_cl_test</span>,</span>
-<span>                               ncomp <span class="op">=</span> <span class="fl">3</span>, classifier <span class="op">=</span> <span class="st">"lda"</span>,</span>
-<span>                               score.type <span class="op">=</span> <span class="st">"lac"</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
+<span><span class="co"># CV+ conformal</span></span>
+<span><span class="va">cv_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.conformal.classification.html">cv.conformal.classification</a></span><span class="op">(</span></span>
+<span>  <span class="va">fd_cl_train</span>, <span class="va">y_cl_train</span>, <span class="va">fd_cl_test</span>,</span>
+<span>  ncomp <span class="op">=</span> <span class="fl">5</span>, classifier <span class="op">=</span> <span class="st">"lda"</span>,</span>
+<span>  score.type <span class="op">=</span> <span class="st">"lac"</span>, n.folds <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># CV+ conformal classification</span></span>
-<span><span class="va">cv_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.conformal.classification.html">cv.conformal.classification</a></span><span class="op">(</span><span class="va">fd_cl_train</span>, <span class="va">y_cl_train</span>, <span class="va">fd_cl_test</span>,</span>
-<span>                                      ncomp <span class="op">=</span> <span class="fl">3</span>, classifier <span class="op">=</span> <span class="st">"lda"</span>,</span>
-<span>                                      score.type <span class="op">=</span> <span class="st">"lac"</span>, n.folds <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>                                      alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Split conformal classification:\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Split conformal classification:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">split_cl</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Coverage: 100 %</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Average set size:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">split_cl</span><span class="op">$</span><span class="va">average_set_size</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Average set size: 3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV+ conformal classification:\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; CV+ conformal classification:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_cl</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Coverage: 100 %</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Average set size:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_cl</span><span class="op">$</span><span class="va">average_set_size</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Average set size: 4</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span>, <span class="st">"CV+"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y_cl_test</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  Set_Size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">split_cl</span><span class="op">$</span><span class="va">set_sizes</span>, <span class="va">cv_cl</span><span class="op">$</span><span class="va">set_sizes</span><span class="op">)</span>,</span>
+<span>  Observation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">y_cl_test</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Split avg set size:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">split_cl</span><span class="op">$</span><span class="va">average_set_size</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Split avg set size: 2</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV+ avg set size:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_cl</span><span class="op">$</span><span class="va">average_set_size</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; CV+ avg set size:   3</span></span></code></pre></div>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_sets</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Observation</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Set_Size</span>,</span>
+<span>                    fill <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span> <span class="op">=</span> <span class="st">"#2E8B57"</span>, <span class="st">"CV+"</span> <span class="op">=</span> <span class="st">"#4A90D9"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Prediction Set Sizes: Split vs CV+"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Size 1 = confident, size 2+ = ambiguous between classes"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Test Observation"</span>, y <span class="op">=</span> <span class="st">"Set Size"</span>, fill <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<p><img src="conformal-prediction-guide_files/figure-html/classif-sets-1.png" class="r-plt" alt="" width="100%"></p>
+<hr>
 </div>
 </div>
 <div class="section level2">
 <h2 id="practical-guidance">Practical Guidance<a class="anchor" aria-label="anchor" href="#practical-guidance"></a>
 </h2>
 <div class="section level3">
+<h3 id="which-method-should-i-use">Which Method Should I Use?<a class="anchor" aria-label="anchor" href="#which-method-should-i-use"></a>
+</h3>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="32%">
+<col width="51%">
+<col width="16%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Scenario</th>
+<th align="left">Recommendation</th>
+<th align="left">Why</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Large dataset
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>&gt;</mo><mn>200</mn></mrow><annotation encoding="application/x-tex">n &gt; 200</annotation></semantics></math>),
+fast results needed</td>
+<td align="left"><strong>Split</strong></td>
+<td align="left">1 fit, strong guarantee</td>
+</tr>
+<tr class="even">
+<td align="left">Small dataset
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>&lt;</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">n &lt; 100</annotation></semantics></math>)</td>
+<td align="left"><strong>CV+</strong></td>
+<td align="left">No data waste, tighter intervals</td>
+</tr>
+<tr class="odd">
+<td align="left">Need tightest possible intervals</td>
+<td align="left"><strong>Jackknife+</strong></td>
+<td align="left">LOO calibration, most precise</td>
+</tr>
+<tr class="even">
+<td align="left">Model already trained (production)</td>
+<td align="left"><strong>Generic</strong></td>
+<td align="left">0 re-fits, post-hoc UQ</td>
+</tr>
+<tr class="odd">
+<td align="left">Nonlinear relationship suspected</td>
+<td align="left"><strong>CV+ with fregre.np</strong></td>
+<td align="left">Distribution-free + flexible model</td>
+</tr>
+<tr class="even">
+<td align="left">Classification with few samples</td>
+<td align="left"><strong>CV+ classification</strong></td>
+<td align="left">All data used for calibration</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
 <h3 id="sample-size-requirements">Sample Size Requirements<a class="anchor" aria-label="anchor" href="#sample-size-requirements"></a>
 </h3>
 <ul>
 <li>
-<strong>Split conformal</strong>: needs enough calibration data for
-a reliable quantile. With <code>cal.fraction = 0.25</code> and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">n = 100</annotation></semantics></math>,
-you have 25 calibration points. Rule of thumb:
+<strong>Split conformal</strong>: rule of thumb:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mtext mathvariant="normal">cal</mtext></msub><mo>≥</mo><mn>1</mn><mi>/</mi><mi>α</mi></mrow><annotation encoding="application/x-tex">n_{\text{cal}} \geq 1/\alpha</annotation></semantics></math>
 (e.g.,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">\geq 10</annotation></semantics></math>
 for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.10</mn></mrow><annotation encoding="application/x-tex">\alpha = 0.10</annotation></semantics></math>).</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.10</mn></mrow><annotation encoding="application/x-tex">\alpha = 0.10</annotation></semantics></math>).
+With <code>cal.fraction = 0.25</code> and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">n = 100</annotation></semantics></math>,
+you get 25 calibration points — sufficient for most cases.</li>
 <li>
-<strong>CV+</strong>: works well with smaller
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
-since all data contributes. Effective with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≥</mo><mn>30</mn></mrow><annotation encoding="application/x-tex">n \geq 30</annotation></semantics></math>.</li>
+<strong>CV+</strong>: effective with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≥</mo><mn>30</mn></mrow><annotation encoding="application/x-tex">n \geq 30</annotation></semantics></math>.
+All data contributes to both training and calibration.</li>
 <li>
 <strong>Jackknife+</strong>: most data-efficient but requires
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
@@ -541,6 +841,11 @@ CV+ and jackknife+ give
 in theory but often achieve
 near-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">1 - \alpha</annotation></semantics></math>
 empirically.</li>
+<li>
+<strong>Ignoring the base model</strong>: conformal guarantees
+coverage regardless of model quality, but a better base model produces
+tighter intervals. Always tune <code>ncomp</code> and consider both
+<code>fregre.lm</code> and <code>fregre.np</code>.</li>
 </ol>
 </div>
 </div>
