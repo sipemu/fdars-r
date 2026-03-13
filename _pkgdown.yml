@@ -539,7 +539,6 @@ reference:
   - matches("_rust$")
   - starts_with("dot-")
   - matches("^[a-z].*_[a-z]")
-  - ".fit_args"
   - basis2fdata_1d
   - eigenfunctions_1d
   - eigenvalues_1d
