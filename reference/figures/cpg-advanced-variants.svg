@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 180" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="18" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">Advanced Variants: CV+, Jackknife+, Generic</text>
+  <text x="350" y="33" text-anchor="middle" font-size="11" fill="#888">Beyond split conformal — better data efficiency or zero re-fitting</text>
+
+  <!-- CV+ -->
+  <rect x="15" y="48" width="215" height="120" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1"/>
+  <text x="122" y="66" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">CV+ (Cross-Conformal)</text>
+  <text x="122" y="82" text-anchor="middle" font-size="9" fill="#888">K-fold: each fold calibrates</text>
+  <!-- Mini folds -->
+  <rect x="35" y="90" width="170" height="6" rx="1" fill="#4A90D9" opacity="0.15"/>
+  <rect x="35" y="90" width="34" height="6" rx="1" fill="#D55E00" opacity="0.2"/>
+  <rect x="35" y="98" width="170" height="6" rx="1" fill="#4A90D9" opacity="0.15"/>
+  <rect x="69" y="98" width="34" height="6" rx="1" fill="#D55E00" opacity="0.2"/>
+  <rect x="35" y="106" width="170" height="6" rx="1" fill="#4A90D9" opacity="0.15"/>
+  <rect x="103" y="106" width="34" height="6" rx="1" fill="#D55E00" opacity="0.2"/>
+
+  <text x="122" y="128" text-anchor="middle" font-size="9.5" fill="#2C5F8A" font-weight="bold">cv.conformal.regression()</text>
+  <text x="122" y="140" text-anchor="middle" font-size="9.5" fill="#2C5F8A" font-weight="bold">cv.conformal.classification()</text>
+  <rect x="60" y="148" width="125" height="16" rx="8" fill="#4A90D9" opacity="0.12"/>
+  <text x="122" y="160" text-anchor="middle" font-size="9" fill="#2C5F8A">K fits · ≥ 1−2α</text>
+
+  <!-- Jackknife+ -->
+  <rect x="243" y="48" width="215" height="120" rx="6" fill="#FEF0E6" stroke="#D55E00" stroke-width="1"/>
+  <text x="350" y="66" text-anchor="middle" font-size="13" font-weight="bold" fill="#D55E00">Jackknife+</text>
+  <text x="350" y="82" text-anchor="middle" font-size="9" fill="#888">Leave-one-out calibration</text>
+  <!-- Mini LOO -->
+  <g transform="translate(273, 92)">
+    <circle cx="8" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="22" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="36" cy="6" r="4" fill="white" stroke="#D55E00" stroke-width="0.8"/>
+    <circle cx="50" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="64" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <text x="78" y="9" font-size="8" fill="#888">···</text>
+    <circle cx="94" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="108" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="122" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="136" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="150" cy="6" r="4" fill="#D55E00" opacity="0.2"/>
+  </g>
+  <text x="350" y="118" text-anchor="middle" font-size="8" fill="#D55E00">each point left out once</text>
+
+  <text x="350" y="136" text-anchor="middle" font-size="9.5" fill="#D55E00" font-weight="bold">jackknife.plus()</text>
+  <text x="350" y="148" text-anchor="middle" font-size="9" fill="#888">regression only (lm, np)</text>
+  <rect x="288" y="153" width="125" height="16" rx="8" fill="#D55E00" opacity="0.1"/>
+  <text x="350" y="165" text-anchor="middle" font-size="9" fill="#D55E00">n fits · ≥ 1−2α</text>
+
+  <!-- Generic -->
+  <rect x="471" y="48" width="215" height="120" rx="6" fill="#F3E8F9" stroke="#7B2D8E" stroke-width="1"/>
+  <text x="578" y="66" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">Generic</text>
+  <text x="578" y="82" text-anchor="middle" font-size="9" fill="#888">From a pre-fitted model</text>
+  <!-- Mini model box -->
+  <rect x="518" y="90" width="120" height="22" rx="4" fill="#7B2D8E" opacity="0.08" stroke="#7B2D8E" stroke-width="0.5"/>
+  <text x="578" y="103" text-anchor="middle" font-size="9" fill="#7B2D8E">existing fregre.lm / logistic</text>
+  <text x="578" y="118" text-anchor="middle" font-size="8" fill="#888">uses internal FPCA components</text>
+
+  <text x="578" y="136" text-anchor="middle" font-size="9.5" fill="#7B2D8E" font-weight="bold">conformal.generic.regression()</text>
+  <text x="578" y="148" text-anchor="middle" font-size="9.5" fill="#7B2D8E" font-weight="bold">conformal.generic.classification()</text>
+  <rect x="516" y="153" width="125" height="16" rx="8" fill="#7B2D8E" opacity="0.1"/>
+  <text x="578" y="165" text-anchor="middle" font-size="9" fill="#7B2D8E">0 fits · ≥ 1−α</text>
+</svg>

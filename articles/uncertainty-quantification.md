@@ -445,6 +445,9 @@ producing tighter intervals.
 
 ### Cross-Conformal (CV+) Regression
 
+![CV+ conformal: K-fold calibration with no data
+waste](../reference/figures/uq-cv-conformal.svg)
+
 CV+ conformal runs K-fold cross-validation internally: each fold serves
 as the calibration set for the model trained on the remaining folds.
 This avoids the data-splitting penalty of split conformal — all
@@ -487,6 +490,9 @@ cat("CV+ (nonparametric) coverage:", round(cv_conf_np$coverage * 100, 1), "%\n")
 
 ### Jackknife+ Regression
 
+![Jackknife+: leave-one-out
+calibration](../reference/figures/uq-jackknife.svg)
+
 Jackknife+ is the leave-one-out analogue: each training observation is
 left out once, the model is fitted on the remaining $n - 1$
 observations, and the left-out residual calibrates the interval. This is
@@ -507,6 +513,9 @@ cat("Jackknife+ mean width:", round(mean(jk$upper - jk$lower), 4), "\n")
 
 ### Generic Conformal from a Fitted Model
 
+![Generic conformal: post-hoc UQ from a fitted
+model](../reference/figures/uq-generic-conformal.svg)
+
 If you already have a fitted `fregre.lm` model,
 [`conformal.generic.regression()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.regression.md)
 constructs conformal intervals without re-fitting. It uses the model’s
@@ -523,6 +532,9 @@ cat("Generic conformal coverage:", round(gen_conf$coverage * 100, 1), "%\n")
 ```
 
 ### Comparing All Conformal Variants
+
+![Conformal methods at a glance: split, CV+, jackknife+,
+generic](../reference/figures/uq-conformal-compare.svg)
 
 ``` r
 df_all <- data.frame(

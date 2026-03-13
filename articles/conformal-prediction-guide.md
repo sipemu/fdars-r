@@ -16,6 +16,9 @@ holds for any data distribution, with no parametric assumptions.
 
 ## Decision Flowchart
 
+![Conformal prediction decision
+flowchart](../reference/figures/cpg-decision-flowchart.svg)
+
 Choose your conformal method based on three questions:
 
 **1. Regression or classification?**
@@ -49,6 +52,9 @@ Choose your conformal method based on three questions:
 
 ### Split Conformal — Regression
 
+![Split conformal regression
+pipeline](../reference/figures/cpg-split-regression.svg)
+
 Each function takes training `fdata`, response `y`, test `fdata`, and
 returns prediction intervals.
 
@@ -65,6 +71,9 @@ All return: `predictions`, `lower`, `upper`, `residual.quantile`,
 
 ### Split Conformal — Classification
 
+![Split conformal classification
+pipeline](../reference/figures/cpg-split-classification.svg)
+
 | Function                                                                                                   | Model            | Key parameters               |
 |:-----------------------------------------------------------------------------------------------------------|:-----------------|:-----------------------------|
 | [`conformal.classif()`](https://sipemu.github.io/fdars-r/reference/conformal.classif.md)                   | LDA, QDA, kNN    | `classifier`, `score.type`   |
@@ -74,6 +83,9 @@ Returns: `predicted_classes`, `set_sizes`, `average_set_size`,
 `coverage`, `score_quantile`.
 
 ### Cross-Conformal (CV+)
+
+![Advanced conformal variants: CV+, Jackknife+,
+Generic](../reference/figures/cpg-advanced-variants.svg)
 
 | Function                                                                                                     | Task           | Key parameters                                   |
 |:-------------------------------------------------------------------------------------------------------------|:---------------|:-------------------------------------------------|

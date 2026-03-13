@@ -587,7 +587,7 @@ typically producing tighter intervals.</p>
 <div class="section level3">
 <h3 id="cross-conformal-cv-regression">Cross-Conformal (CV+) Regression<a class="anchor" aria-label="anchor" href="#cross-conformal-cv-regression"></a>
 </h3>
-<p>CV+ conformal runs K-fold cross-validation internally: each fold
+<img src="../reference/figures/uq-cv-conformal.svg" alt="CV+ conformal: K-fold calibration with no data waste" style="width:100%; max-width:700px;"><p>CV+ conformal runs K-fold cross-validation internally: each fold
 serves as the calibration set for the model trained on the remaining
 folds. This avoids the data-splitting penalty of split conformal — all
 observations contribute to both training and calibration.</p>
@@ -625,7 +625,7 @@ which has no parametric prediction intervals — conformal is the
 <div class="section level3">
 <h3 id="jackknife-regression">Jackknife+ Regression<a class="anchor" aria-label="anchor" href="#jackknife-regression"></a>
 </h3>
-<p>Jackknife+ is the leave-one-out analogue: each training observation
+<img src="../reference/figures/uq-jackknife.svg" alt="Jackknife+: leave-one-out calibration" style="width:100%; max-width:700px;"><p>Jackknife+ is the leave-one-out analogue: each training observation
 is left out once, the model is fitted on the remaining
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math>
 observations, and the left-out residual calibrates the interval. This is
@@ -647,7 +647,7 @@ model fits.</p>
 <div class="section level3">
 <h3 id="generic-conformal-from-a-fitted-model">Generic Conformal from a Fitted Model<a class="anchor" aria-label="anchor" href="#generic-conformal-from-a-fitted-model"></a>
 </h3>
-<p>If you already have a fitted <code>fregre.lm</code> model,
+<img src="../reference/figures/uq-generic-conformal.svg" alt="Generic conformal: post-hoc UQ from a fitted model" style="width:100%; max-width:700px;"><p>If you already have a fitted <code>fregre.lm</code> model,
 <code><a href="../reference/conformal.generic.regression.html">conformal.generic.regression()</a></code> constructs conformal
 intervals without re-fitting. It uses the model’s FPCA components to
 split and calibrate internally:</p>
@@ -663,7 +663,7 @@ split and calibrate internally:</p>
 <div class="section level3">
 <h3 id="comparing-all-conformal-variants">Comparing All Conformal Variants<a class="anchor" aria-label="anchor" href="#comparing-all-conformal-variants"></a>
 </h3>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<img src="../reference/figures/uq-conformal-compare.svg" alt="Conformal methods at a glance: split, CV+, jackknife+, generic" style="width:100%; max-width:700px;"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Split"</span>, <span class="st">"CV+"</span>, <span class="st">"Jackknife+"</span>, <span class="st">"Generic"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">test_y</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  Width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>

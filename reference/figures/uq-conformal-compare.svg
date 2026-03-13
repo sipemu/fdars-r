@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 200" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#333">Conformal Methods at a Glance</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">Trade-offs: data efficiency vs computational cost vs coverage guarantee</text>
+
+  <!-- ===== Four columns ===== -->
+
+  <!-- Split -->
+  <rect x="12" y="50" width="160" height="140" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1.2"/>
+  <text x="92" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">Split</text>
+  <line x1="32" y1="74" x2="152" y2="74" stroke="#2E8B57" stroke-width="0.4" opacity="0.5"/>
+  <!-- Mini interval diagram -->
+  <rect x="32" y="82" width="120" height="32" rx="3" fill="#2E8B57" opacity="0.08"/>
+  <path d="M40 98 L60 94 L80 97 L100 96 L120 98 L140 96" stroke="#2E8B57" stroke-width="1.2" fill="none"/>
+  <rect x="38" y="88" width="106" height="20" rx="2" fill="#2E8B57" opacity="0.06" stroke="#2E8B57" stroke-width="0.3" stroke-dasharray="2,1"/>
+  <!-- Properties -->
+  <text x="92" y="128" text-anchor="middle" font-size="9.5" fill="#2E8B57" font-weight="bold">1 model fit</text>
+  <text x="92" y="142" text-anchor="middle" font-size="9" fill="#888">wastes cal. data</text>
+  <text x="92" y="156" text-anchor="middle" font-size="9" fill="#888">constant width</text>
+  <rect x="52" y="165" width="80" height="16" rx="8" fill="#2E8B57" opacity="0.15"/>
+  <text x="92" y="177" text-anchor="middle" font-size="9" fill="#2E8B57" font-weight="bold">≥ 1 − α</text>
+
+  <!-- CV+ -->
+  <rect x="184" y="50" width="160" height="140" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="264" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C5F8A">CV+</text>
+  <line x1="204" y1="74" x2="324" y2="74" stroke="#4A90D9" stroke-width="0.4" opacity="0.5"/>
+  <!-- Mini fold bars -->
+  <rect x="204" y="82" width="120" height="6" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <rect x="204" y="82" width="24" height="6" rx="1" fill="#D55E00" opacity="0.25"/>
+  <rect x="204" y="90" width="120" height="6" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <rect x="228" y="90" width="24" height="6" rx="1" fill="#D55E00" opacity="0.25"/>
+  <rect x="204" y="98" width="120" height="6" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <rect x="252" y="98" width="24" height="6" rx="1" fill="#D55E00" opacity="0.25"/>
+  <rect x="204" y="106" width="120" height="6" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <rect x="276" y="106" width="24" height="6" rx="1" fill="#D55E00" opacity="0.25"/>
+  <rect x="204" y="114" width="120" height="6" rx="1" fill="#4A90D9" opacity="0.2"/>
+  <rect x="300" y="114" width="24" height="6" rx="1" fill="#D55E00" opacity="0.25"/>
+  <!-- Properties -->
+  <text x="264" y="135" text-anchor="middle" font-size="9.5" fill="#2C5F8A" font-weight="bold">K model fits</text>
+  <text x="264" y="149" text-anchor="middle" font-size="9" fill="#888">all data used</text>
+  <text x="264" y="163" text-anchor="middle" font-size="9" fill="#888">tighter intervals</text>
+  <rect x="224" y="168" width="80" height="16" rx="8" fill="#4A90D9" opacity="0.15"/>
+  <text x="264" y="180" text-anchor="middle" font-size="9" fill="#2C5F8A" font-weight="bold">≥ 1 − 2α</text>
+
+  <!-- Jackknife+ -->
+  <rect x="356" y="50" width="160" height="140" rx="6" fill="#FEF0E6" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="436" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#D55E00">Jackknife+</text>
+  <line x1="376" y1="74" x2="496" y2="74" stroke="#D55E00" stroke-width="0.4" opacity="0.5"/>
+  <!-- Mini LOO diagram -->
+  <g transform="translate(376, 82)">
+    <circle cx="8" cy="8" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="20" cy="8" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="32" cy="8" r="4" fill="white" stroke="#D55E00" stroke-width="0.8"/>
+    <circle cx="44" cy="8" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="56" cy="8" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="68" cy="8" r="4" fill="#D55E00" opacity="0.2"/>
+    <text x="80" y="11" font-size="9" fill="#888">···</text>
+    <circle cx="96" cy="8" r="4" fill="#D55E00" opacity="0.2"/>
+    <circle cx="108" cy="8" r="4" fill="#D55E00" opacity="0.2"/>
+  </g>
+  <text x="436" y="108" text-anchor="middle" font-size="8" fill="#D55E00">leave each one out</text>
+  <!-- Properties -->
+  <text x="436" y="128" text-anchor="middle" font-size="9.5" fill="#D55E00" font-weight="bold">n model fits</text>
+  <text x="436" y="142" text-anchor="middle" font-size="9" fill="#888">most data-efficient</text>
+  <text x="436" y="156" text-anchor="middle" font-size="9" fill="#888">adaptive width</text>
+  <rect x="396" y="165" width="80" height="16" rx="8" fill="#D55E00" opacity="0.12"/>
+  <text x="436" y="177" text-anchor="middle" font-size="9" fill="#D55E00" font-weight="bold">≥ 1 − 2α</text>
+
+  <!-- Generic -->
+  <rect x="528" y="50" width="160" height="140" rx="6" fill="#F3E8F9" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="608" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">Generic</text>
+  <line x1="548" y1="74" x2="668" y2="74" stroke="#7B2D8E" stroke-width="0.4" opacity="0.5"/>
+  <!-- Mini model box -->
+  <rect x="558" y="82" width="100" height="28" rx="4" fill="#7B2D8E" opacity="0.08" stroke="#7B2D8E" stroke-width="0.6"/>
+  <text x="608" y="95" text-anchor="middle" font-size="9" fill="#7B2D8E">existing model</text>
+  <text x="608" y="106" text-anchor="middle" font-size="8" fill="#888">already fitted</text>
+  <!-- Properties -->
+  <text x="608" y="128" text-anchor="middle" font-size="9.5" fill="#7B2D8E" font-weight="bold">0 model fits</text>
+  <text x="608" y="142" text-anchor="middle" font-size="9" fill="#888">post-hoc UQ</text>
+  <text x="608" y="156" text-anchor="middle" font-size="9" fill="#888">constant width</text>
+  <rect x="568" y="165" width="80" height="16" rx="8" fill="#7B2D8E" opacity="0.12"/>
+  <text x="608" y="177" text-anchor="middle" font-size="9" fill="#7B2D8E" font-weight="bold">≥ 1 − α</text>
+</svg>

@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 220" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#2C5F8A">Cross-Conformal (CV+) Regression</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">Every observation is used for both training and calibration</text>
+
+  <!-- ===== Left: K-fold diagram ===== -->
+  <rect x="10" y="50" width="330" height="155" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="175" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">K-Fold Calibration</text>
+
+  <!-- Fold bars -->
+  <!-- Fold 1 -->
+  <rect x="30" y="82" width="48" height="14" rx="2" fill="#D55E00" opacity="0.3"/>
+  <rect x="78" y="82" width="192" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <text x="54" y="92" text-anchor="middle" font-size="8" fill="#D55E00">cal</text>
+  <text x="174" y="92" text-anchor="middle" font-size="8" fill="#2C5F8A">train</text>
+  <text x="285" y="92" font-size="8" fill="#888">→ scores₁</text>
+
+  <!-- Fold 2 -->
+  <rect x="30" y="100" width="48" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <rect x="78" y="100" width="48" height="14" rx="2" fill="#D55E00" opacity="0.3"/>
+  <rect x="126" y="100" width="144" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <text x="102" y="110" text-anchor="middle" font-size="8" fill="#D55E00">cal</text>
+  <text x="285" y="110" font-size="8" fill="#888">→ scores₂</text>
+
+  <!-- Fold 3 -->
+  <rect x="30" y="118" width="96" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <rect x="126" y="118" width="48" height="14" rx="2" fill="#D55E00" opacity="0.3"/>
+  <rect x="174" y="118" width="96" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <text x="150" y="128" text-anchor="middle" font-size="8" fill="#D55E00">cal</text>
+  <text x="285" y="128" font-size="8" fill="#888">→ scores₃</text>
+
+  <!-- Fold 4 -->
+  <rect x="30" y="136" width="144" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <rect x="174" y="136" width="48" height="14" rx="2" fill="#D55E00" opacity="0.3"/>
+  <rect x="222" y="136" width="48" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <text x="198" y="146" text-anchor="middle" font-size="8" fill="#D55E00">cal</text>
+  <text x="285" y="146" font-size="8" fill="#888">→ scores₄</text>
+
+  <!-- Fold 5 -->
+  <rect x="30" y="154" width="192" height="14" rx="2" fill="#4A90D9" opacity="0.2"/>
+  <rect x="222" y="154" width="48" height="14" rx="2" fill="#D55E00" opacity="0.3"/>
+  <text x="246" y="164" text-anchor="middle" font-size="8" fill="#D55E00">cal</text>
+  <text x="285" y="164" font-size="8" fill="#888">→ scores₅</text>
+
+  <!-- Arrow down to merge -->
+  <line x1="175" y1="175" x2="175" y2="190" stroke="#4A90D9" stroke-width="1" marker-end="url(#arrowBlue)"/>
+  <text x="175" y="200" text-anchor="middle" font-size="9" fill="#2C5F8A">merge all scores → quantile q̂</text>
+
+  <defs>
+    <marker id="arrowBlue" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+      <path d="M0,0 L6,2 L0,4" fill="#4A90D9"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Right: Result ===== -->
+  <rect x="360" y="50" width="330" height="155" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="525" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">CV+ Intervals</text>
+  <text x="525" y="85" text-anchor="middle" font-size="11" fill="#888">No data wasted — tighter than split conformal</text>
+
+  <!-- Axes -->
+  <line x1="374" y1="185" x2="676" y2="185" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="374" y1="95" x2="374" y2="185" stroke="#ccc" stroke-width="0.6"/>
+  <text x="525" y="198" text-anchor="middle" font-size="9.4" fill="#888">Test Observation</text>
+
+  <!-- CV+ band (slightly variable width) -->
+  <path d="M382 110 Q430 103 480 108 Q525 112 570 106 Q620 102 668 108
+           L668 148 Q620 155 570 150 Q525 155 480 150 Q430 153 382 148 Z"
+        fill="#4A90D9" opacity="0.15"/>
+  <!-- Predicted line -->
+  <path d="M382 130Q430 125 480 128Q525 133 570 128Q620 126 668 130"
+        stroke="#2C5F8A" stroke-width="1.8" fill="none"/>
+
+  <!-- Test points -->
+  <circle cx="398" cy="132" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="430" cy="126" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="462" cy="130" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="494" cy="134" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="525" cy="131" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="556" cy="127" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="588" cy="130" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="620" cy="125" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="652" cy="131" r="2.2" fill="#D55E00" opacity="0.7"/>
+
+  <!-- Key properties -->
+  <rect x="396" y="95" width="56" height="14" rx="2" fill="#4A90D9" opacity="0.08" stroke="#4A90D9" stroke-width="0.4"/>
+  <text x="424" y="105" text-anchor="middle" font-size="8" fill="#2C5F8A">K fits</text>
+  <rect x="458" y="95" width="66" height="14" rx="2" fill="#4A90D9" opacity="0.08" stroke="#4A90D9" stroke-width="0.4"/>
+  <text x="491" y="105" text-anchor="middle" font-size="8" fill="#2C5F8A">no data waste</text>
+  <rect x="530" y="95" width="58" height="14" rx="2" fill="#4A90D9" opacity="0.08" stroke="#4A90D9" stroke-width="0.4"/>
+  <text x="559" y="105" text-anchor="middle" font-size="8" fill="#2C5F8A">≥ 1−2α</text>
+
+  <!-- Legend -->
+  <line x1="590" y1="170" x2="602" y2="170" stroke="#2C5F8A" stroke-width="1.2"/>
+  <text x="605" y="173" font-size="8.6" fill="#2C5F8A">predicted</text>
+  <circle cx="642" cy="170" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <text x="647" y="173" font-size="8.6" fill="#D55E00">observed</text>
+</svg>
