@@ -16,6 +16,9 @@ Unlike regression conformal (which produces intervals), classification
 conformal answers: “which classes are plausible for this observation?” A
 set of size 1 means high confidence; larger sets indicate ambiguity.
 
+![Conformal classification: prediction sets, three methods, and scoring
+rules](../reference/figures/conformal-classification-overview.svg)
+
 ## Simulated Data
 
 We simulate a three-class functional classification problem where each

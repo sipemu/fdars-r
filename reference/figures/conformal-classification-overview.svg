@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 250" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#D55E00">Conformal Prediction for Classification</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">Point predictions → prediction sets with coverage guarantee</text>
+
+  <!-- ===== Left: Point prediction vs prediction set ===== -->
+  <rect x="10" y="50" width="220" height="190" rx="6" fill="#FEF0E6" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="120" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#D55E00">Prediction Sets</text>
+
+  <!-- Confident prediction (size 1) -->
+  <text x="30" y="92" font-size="9" fill="#888">Obs 1 (confident):</text>
+  <rect x="130" y="80" width="36" height="18" rx="9" fill="#2E8B57" opacity="0.2" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="148" y="93" text-anchor="middle" font-size="10" fill="#2E8B57" font-weight="bold">A</text>
+  <text x="178" y="93" font-size="8" fill="#2E8B57">size 1</text>
+
+  <!-- Ambiguous prediction (size 2) -->
+  <text x="30" y="118" font-size="9" fill="#888">Obs 2 (ambiguous):</text>
+  <rect x="130" y="106" width="36" height="18" rx="9" fill="#4A90D9" opacity="0.2" stroke="#4A90D9" stroke-width="0.8"/>
+  <text x="148" y="119" text-anchor="middle" font-size="10" fill="#4A90D9" font-weight="bold">A</text>
+  <rect x="170" y="106" width="36" height="18" rx="9" fill="#4A90D9" opacity="0.2" stroke="#4A90D9" stroke-width="0.8"/>
+  <text x="188" y="119" text-anchor="middle" font-size="10" fill="#4A90D9" font-weight="bold">B</text>
+
+  <!-- Very uncertain (size 3) -->
+  <text x="30" y="144" font-size="9" fill="#888">Obs 3 (uncertain):</text>
+  <rect x="130" y="132" width="30" height="18" rx="9" fill="#7B2D8E" opacity="0.2" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="145" y="145" text-anchor="middle" font-size="10" fill="#7B2D8E" font-weight="bold">A</text>
+  <rect x="164" y="132" width="30" height="18" rx="9" fill="#7B2D8E" opacity="0.2" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="179" y="145" text-anchor="middle" font-size="10" fill="#7B2D8E" font-weight="bold">B</text>
+  <rect x="198" y="132" width="30" height="18" rx="9" fill="#7B2D8E" opacity="0.2" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="213" y="145" text-anchor="middle" font-size="10" fill="#7B2D8E" font-weight="bold">C</text>
+
+  <!-- Coverage guarantee -->
+  <rect x="25" y="162" width="190" height="30" rx="4" fill="#D55E00" opacity="0.06" stroke="#D55E00" stroke-width="0.5"/>
+  <text x="120" y="176" text-anchor="middle" font-size="10" fill="#D55E00">P(y_true ∈ set) ≥ 1 − α</text>
+  <text x="120" y="188" text-anchor="middle" font-size="8.5" fill="#888">guaranteed for any distribution</text>
+
+  <!-- Set size interpretation -->
+  <text x="120" y="210" text-anchor="middle" font-size="9" fill="#2E8B57">size 1 → high confidence</text>
+  <text x="120" y="222" text-anchor="middle" font-size="9" fill="#7B2D8E">size K → maximum ambiguity</text>
+
+  <!-- ===== Right: Three methods ===== -->
+  <rect x="245" y="50" width="445" height="190" rx="6" fill="#FEF0E6" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="467" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#D55E00">Three Approaches</text>
+
+  <!-- Split conformal -->
+  <rect x="260" y="82" width="130" height="100" rx="5" fill="white" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="325" y="98" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E8B57">Split</text>
+  <line x1="275" y1="103" x2="375" y2="103" stroke="#2E8B57" stroke-width="0.3" opacity="0.5"/>
+  <!-- Data split visual -->
+  <rect x="275" y="110" width="85" height="8" rx="2" fill="#2E8B57" opacity="0.15"/>
+  <rect x="275" y="110" width="21" height="8" rx="2" fill="#D55E00" opacity="0.2"/>
+  <text x="325" y="130" text-anchor="middle" font-size="8" fill="#888">LDA, QDA, kNN</text>
+  <text x="325" y="142" text-anchor="middle" font-size="8" fill="#888">1 model fit</text>
+  <rect x="282" y="150" width="86" height="16" rx="8" fill="#2E8B57" opacity="0.1"/>
+  <text x="325" y="162" text-anchor="middle" font-size="8.5" fill="#2E8B57" font-weight="bold">≥ 1 − α</text>
+  <text x="325" y="176" text-anchor="middle" font-size="7.5" fill="#888">conformal.classif()</text>
+
+  <!-- CV+ -->
+  <rect x="400" y="82" width="130" height="100" rx="5" fill="white" stroke="#4A90D9" stroke-width="0.8"/>
+  <text x="465" y="98" text-anchor="middle" font-size="11" font-weight="bold" fill="#2C5F8A">CV+</text>
+  <line x1="415" y1="103" x2="515" y2="103" stroke="#4A90D9" stroke-width="0.3" opacity="0.5"/>
+  <!-- Fold bars -->
+  <rect x="415" y="110" width="85" height="5" rx="1" fill="#4A90D9" opacity="0.12"/>
+  <rect x="415" y="110" width="17" height="5" rx="1" fill="#D55E00" opacity="0.2"/>
+  <rect x="415" y="117" width="85" height="5" rx="1" fill="#4A90D9" opacity="0.12"/>
+  <rect x="432" y="117" width="17" height="5" rx="1" fill="#D55E00" opacity="0.2"/>
+  <rect x="415" y="124" width="85" height="5" rx="1" fill="#4A90D9" opacity="0.12"/>
+  <rect x="449" y="124" width="17" height="5" rx="1" fill="#D55E00" opacity="0.2"/>
+  <text x="465" y="142" text-anchor="middle" font-size="8" fill="#888">K folds, no data waste</text>
+  <rect x="422" y="150" width="86" height="16" rx="8" fill="#4A90D9" opacity="0.1"/>
+  <text x="465" y="162" text-anchor="middle" font-size="8.5" fill="#2C5F8A" font-weight="bold">≥ 1 − 2α</text>
+  <text x="465" y="176" text-anchor="middle" font-size="7.5" fill="#888">cv.conformal.classification()</text>
+
+  <!-- Generic -->
+  <rect x="540" y="82" width="135" height="100" rx="5" fill="white" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="607" y="98" text-anchor="middle" font-size="11" font-weight="bold" fill="#7B2D8E">Generic</text>
+  <line x1="555" y1="103" x2="660" y2="103" stroke="#7B2D8E" stroke-width="0.3" opacity="0.5"/>
+  <!-- Pre-fitted model -->
+  <rect x="565" y="110" width="85" height="20" rx="3" fill="#7B2D8E" opacity="0.06" stroke="#7B2D8E" stroke-width="0.4"/>
+  <text x="607" y="123" text-anchor="middle" font-size="8" fill="#7B2D8E">pre-fitted logistic</text>
+  <text x="607" y="142" text-anchor="middle" font-size="8" fill="#888">0 re-fits, post-hoc</text>
+  <rect x="564" y="150" width="86" height="16" rx="8" fill="#7B2D8E" opacity="0.1"/>
+  <text x="607" y="162" text-anchor="middle" font-size="8.5" fill="#7B2D8E" font-weight="bold">≥ 1 − α</text>
+  <text x="607" y="176" text-anchor="middle" font-size="7.5" fill="#888">conformal.generic.classification()</text>
+
+  <!-- Scoring rules footer -->
+  <rect x="260" y="192" width="415" height="36" rx="4" fill="#D55E00" opacity="0.04" stroke="#D55E00" stroke-width="0.4"/>
+  <text x="467" y="207" text-anchor="middle" font-size="10" font-weight="bold" fill="#D55E00">Scoring Rules</text>
+  <text x="370" y="222" text-anchor="middle" font-size="9" fill="#888"><tspan font-weight="bold" fill="#D55E00">LAC</tspan> — 1 − p̂(y|x) — smaller sets (adaptive)</text>
+  <text x="575" y="222" text-anchor="middle" font-size="9" fill="#888"><tspan font-weight="bold" fill="#D55E00">APS</tspan> — cumulative prob — stronger coverage</text>
+</svg>
