@@ -1,6 +1,15 @@
 on:
   push:
     branches: [main]
+    paths:
+      - 'R/**'
+      - 'src/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - 'man/**'
+      - '_pkgdown.yml'
+      - 'index.md'
+      - '.github/workflows/pkgdown.yaml'
   release:
     types: [published]
   workflow_dispatch:
