@@ -162,13 +162,16 @@ is expensive to train or when you want to conformalize an existing model:
 
 ```{r generic-conformal}
 # Binary classification for generic conformal (requires logistic model)
-train_binary <- fd_train[y_train %in% c(1, 2), ]
-test_binary <- fd_test[y_test %in% c(1, 2), ]
-y_train_bin <- y_train[y_train %in% c(1, 2)]
-y_test_bin <- y_test[y_test %in% c(1, 2)]
+# functional.logistic expects 0/1 labels
+idx_train_bin <- y_train %in% c(1, 2)
+idx_test_bin <- y_test %in% c(1, 2)
+train_binary <- fd_train[idx_train_bin, ]
+test_binary <- fd_test[idx_test_bin, ]
+y_train_bin <- as.integer(y_train[idx_train_bin] == 2)  # recode to 0/1
+y_test_bin <- as.integer(y_test[idx_test_bin] == 2)
 
 # Fit logistic model
-log_model <- functional.logistic(train_binary, y_train_bin, ncomp = 5)
+log_model <- functional.logistic(train_binary, y_train_bin, ncomp = 3)
 
 # Generic conformal from the fitted model
 gen_conf <- conformal.generic.classification(
