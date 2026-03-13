@@ -193,6 +193,20 @@ Quantification](reference/figures/card-uncertainty-quantification.svg)
 
 Uncertainty Quantification
 
+[](https://sipemu.github.io/fdars-r/articles/conformal-classification.md)
+
+![Conformal
+Classification](reference/figures/card-conformal-classification.svg)
+
+Conformal Classification
+
+[](https://sipemu.github.io/fdars-r/articles/conformal-prediction-guide.md)
+
+![Conformal Prediction
+Guide](reference/figures/card-conformal-prediction-guide.svg)
+
+Conformal Prediction Guide
+
 ## Analyze
 
 Infer, cluster, detect outliers, and test functional data.
