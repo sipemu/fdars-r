@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.81"
 name = "fdars-core"
-version = "0.8.1"
+version = "0.8.4"
 authors = ["Simon Muller"]
 build = false
 autolib = false
@@ -157,56 +157,56 @@ name = "tsrvf"
 path = "examples/19_tsrvf/main.rs"
 
 [[test]]
+name = "integration_explain_advanced"
+path = "tests/integration_explain_advanced.rs"
+
+[[test]]
+name = "integration_explain_diagnostics"
+path = "tests/integration_explain_diagnostics.rs"
+
+[[test]]
+name = "integration_explain_pdp"
+path = "tests/integration_explain_pdp.rs"
+
+[[test]]
+name = "integration_explain_sensitivity"
+path = "tests/integration_explain_sensitivity.rs"
+
+[[test]]
+name = "integration_explain_shap"
+path = "tests/integration_explain_shap.rs"
+
+[[test]]
 name = "validate_against_r"
 path = "tests/validate_against_r.rs"
-
-[[test]]
-name = "validate_explain_deep"
-path = "tests/validate_explain_deep.rs"
-
-[[test]]
-name = "validate_explain_final"
-path = "tests/validate_explain_final.rs"
-
-[[test]]
-name = "validate_explainability"
-path = "tests/validate_explainability.rs"
-
-[[test]]
-name = "validate_explainability_v2"
-path = "tests/validate_explainability_v2.rs"
-
-[[test]]
-name = "validate_explainability_v2_deep"
-path = "tests/validate_explainability_v2_deep.rs"
-
-[[test]]
-name = "validate_explainability_v3"
-path = "tests/validate_explainability_v3.rs"
-
-[[test]]
-name = "validate_explainability_v3_deep"
-path = "tests/validate_explainability_v3_deep.rs"
-
-[[test]]
-name = "validate_explainability_v4"
-path = "tests/validate_explainability_v4.rs"
-
-[[test]]
-name = "validate_explainability_v4_deep"
-path = "tests/validate_explainability_v4_deep.rs"
-
-[[test]]
-name = "validate_explainability_v5"
-path = "tests/validate_explainability_v5.rs"
 
 [[test]]
 name = "validate_new_modules"
 path = "tests/validate_new_modules.rs"
 
 [[bench]]
+name = "alignment_benchmarks"
+path = "benches/alignment_benchmarks.rs"
+harness = false
+
+[[bench]]
+name = "classification_benchmarks"
+path = "benches/classification_benchmarks.rs"
+harness = false
+
+[[bench]]
 name = "depth_benchmarks"
 path = "benches/depth_benchmarks.rs"
+harness = false
+
+[[bench]]
+name = "explain_benchmarks"
+path = "benches/explain_benchmarks.rs"
+harness = false
+
+[[bench]]
+name = "regression_benchmarks"
+path = "benches/regression_benchmarks.rs"
 harness = false
 
 [[bench]]

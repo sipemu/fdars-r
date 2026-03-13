@@ -1695,6 +1695,57 @@ deriv <- function(fdataobj, nderiv = 1, method = "diff",
   result
 }
 
+#' High-Accuracy Gradient for Functional Data
+#'
+#' Computes the numerical gradient (first derivative) of functional data using
+#' a 5-point stencil for uniform grids (O(h^4) accuracy) or 3-point Lagrange
+#' for non-uniform grids. Complementary to \code{deriv.fdata} which uses
+#' central differences.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#'
+#' @return An \code{fdata} object with the gradient values.
+#'
+#' @export
+#' @examples
+#' t <- seq(0, 1, length.out = 100)
+#' X <- matrix(sin(2 * pi * t), nrow = 1)
+#' fd <- fdata(X, argvals = t)
+#' gd <- fdata.gradient(fd)
+fdata.gradient <- function(fdataobj) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  if (isTRUE(fdataobj$fdata2d)) {
+    stop("fdata.gradient for 2D functional data not yet implemented")
+  }
+
+  grad_data <- .Call("wrap__fdata_gradient_rust", fdataobj$data,
+                      as.numeric(fdataobj$argvals))
+
+  new_names <- fdataobj$names
+  if (!is.null(new_names$ylab)) {
+    new_names$ylab <- paste0("D[", new_names$ylab, "]")
+  }
+
+  result <- structure(
+    list(
+      data = grad_data,
+      argvals = fdataobj$argvals,
+      rangeval = fdataobj$rangeval,
+      names = new_names,
+      fdata2d = FALSE
+    ),
+    class = "fdata"
+  )
+
+  if (!is.null(fdataobj$id)) result$id <- fdataobj$id
+  if (!is.null(fdataobj$metadata)) result$metadata <- fdataobj$metadata
+
+  result
+}
+
 #' Subset method for fdata objects
 #'
 #' @param x An object of class 'fdata'.

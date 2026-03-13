@@ -775,8 +775,8 @@ fn test_fdata_l2_norm() {
     let dat: StandardData = load_json("data", "standard_50x101");
     let mat = fdars_core::matrix::FdMatrix::from_slice(&dat.data, dat.n, dat.m).unwrap();
     let actual = fdars_core::fdata::norm_lp_1d(&mat, &dat.argvals, 2.0);
-    // R's norm.fdata uses its own integration; Rust uses Simpson's 1/3
-    assert_vec_close(&actual, &exp.norm_l2, 1e-2, "l2_norms");
+    // R's norm.fdata uses trapezoidal; Rust uses Simpson's 1/3 — inherent integration gap ~4e-3
+    assert_vec_close(&actual, &exp.norm_l2, 5e-3, "l2_norms");
 }
 
 // ─── Depth ──────────────────────────────────────────────────────────────────
@@ -1038,8 +1038,8 @@ fn test_lp_l2_distance_matrix() {
 
     let sub_mat = FdMatrix::from_column_major(sub_data, n_sub, m).unwrap();
     let actual = fdars_core::metric::lp_self_1d(&sub_mat, &dat.argvals, 2.0, &[]);
-    // R's metric.lp uses its own integration; Rust uses Simpson's 1/3
-    assert_vec_close(actual.as_slice(), &exp.lp_l2.data, 1e-2, "lp_l2_distance");
+    // R's metric.lp uses trapezoidal; Rust uses Simpson's 1/3 — inherent integration gap ~6e-3
+    assert_vec_close(actual.as_slice(), &exp.lp_l2.data, 6e-3, "lp_l2_distance");
 }
 
 #[test]
@@ -1579,7 +1579,7 @@ fn test_alignment_srsf_roundtrip() {
     let f0_initial = mat[(0, 0)];
     let reconstructed = fdars_core::srsf_inverse(&q0, &d.argvals, f0_initial);
 
-    // Compare against R's round-trip
+    // Compare against R's round-trip (5-point gradient helps accuracy)
     assert_vec_close(
         &reconstructed,
         &exp.srsf_roundtrip_row0,
@@ -1589,7 +1589,12 @@ fn test_alignment_srsf_roundtrip() {
 
     // Also check round-trip fidelity against original
     let original: Vec<f64> = mat.row(0);
-    assert_vec_close(&reconstructed, &original, 0.1, "srsf_roundtrip_vs_original");
+    assert_vec_close(
+        &reconstructed,
+        &original,
+        0.05,
+        "srsf_roundtrip_vs_original",
+    );
 }
 
 #[test]
@@ -2141,7 +2146,7 @@ fn test_kmeans_quality_r_data() {
     let d: StandardData = load_json("data", "clusters_60x51");
     let mat = FdMatrix::from_slice(&d.data, d.n, d.m).unwrap();
 
-    let result = fdars_core::clustering::kmeans_fd(&mat, &d.argvals, 3, 100, 1e-6, 42);
+    let result = fdars_core::clustering::kmeans_fd(&mat, &d.argvals, 3, 100, 1e-6, 42).unwrap();
     assert_eq!(result.cluster.len(), d.n);
     assert!(result.converged);
 
@@ -2165,7 +2170,7 @@ fn test_kmeans_convergence_r_data() {
     let d: StandardData = load_json("data", "clusters_60x51");
     let mat = FdMatrix::from_slice(&d.data, d.n, d.m).unwrap();
 
-    let result = fdars_core::clustering::kmeans_fd(&mat, &d.argvals, 3, 100, 1e-6, 42);
+    let result = fdars_core::clustering::kmeans_fd(&mat, &d.argvals, 3, 100, 1e-6, 42).unwrap();
     assert!(result.converged, "K-means should converge");
     assert!(
         result.tot_withinss > 0.0,
@@ -2179,7 +2184,8 @@ fn test_fuzzy_cmeans_membership_sums() {
     let d: StandardData = load_json("data", "clusters_60x51");
     let mat = FdMatrix::from_slice(&d.data, d.n, d.m).unwrap();
 
-    let result = fdars_core::clustering::fuzzy_cmeans_fd(&mat, &d.argvals, 3, 2.0, 100, 1e-6, 42);
+    let result =
+        fdars_core::clustering::fuzzy_cmeans_fd(&mat, &d.argvals, 3, 2.0, 100, 1e-6, 42).unwrap();
     let k = 3;
 
     // Each observation's membership should sum to 1
@@ -2197,7 +2203,8 @@ fn test_fuzzy_cmeans_center_separation() {
     let d: StandardData = load_json("data", "clusters_60x51");
     let mat = FdMatrix::from_slice(&d.data, d.n, d.m).unwrap();
 
-    let result = fdars_core::clustering::fuzzy_cmeans_fd(&mat, &d.argvals, 3, 2.0, 100, 1e-6, 42);
+    let result =
+        fdars_core::clustering::fuzzy_cmeans_fd(&mat, &d.argvals, 3, 2.0, 100, 1e-6, 42).unwrap();
 
     // Centers should be distinct
     for c1 in 0..3 {
@@ -2406,7 +2413,7 @@ fn test_elastic_tolerance_valid() {
         100,
         0.95,
         fdars_core::BandType::Simultaneous,
-        100,
+        20,
         42,
     )
     .unwrap();
@@ -2619,9 +2626,9 @@ fn test_add_error_pointwise_variance() {
 
 #[test]
 fn test_add_error_curve_variance() {
-    let t: Vec<f64> = (0..100).map(|i| i as f64 / 99.0).collect();
+    let t: Vec<f64> = (0..30).map(|i| i as f64 / 29.0).collect();
     let data = fdars_core::simulation::sim_fundata(
-        100,
+        20,
         &t,
         3,
         fdars_core::EFunType::Fourier,
@@ -2634,7 +2641,7 @@ fn test_add_error_curve_variance() {
     // Curve-level noise: each curve gets same shift, check that within a curve the shift is constant
     for i in 0..10 {
         let diff0 = noisy[(i, 0)] - data[(i, 0)];
-        for j in 1..100 {
+        for j in 1..30 {
             let diff_j = noisy[(i, j)] - data[(i, j)];
             assert!(
                 (diff_j - diff0).abs() < 1e-10,
@@ -2704,14 +2711,22 @@ fn test_detrend_linear_residuals_zero_mean() {
 #[test]
 fn test_decompose_additive_identity() {
     // For data = trend + seasonal + residual, reconstructing should give back original
-    let d: StandardData = load_json("data", "standard_50x101");
-    let mat = FdMatrix::from_slice(&d.data, d.n, d.m).unwrap();
+    let t: Vec<f64> = (0..31).map(|i| i as f64 / 30.0).collect();
+    let mat = fdars_core::simulation::sim_fundata(
+        10,
+        &t,
+        3,
+        fdars_core::EFunType::Fourier,
+        fdars_core::EValType::Exponential,
+        Some(42),
+    );
+    let (n, m) = mat.shape();
 
     // Use period=10 for decomposition
-    let result = fdars_core::detrend::decompose_additive(&mat, &d.argvals, 10.0, "loess", 0.3, 3);
+    let result = fdars_core::detrend::decompose_additive(&mat, &t, 10.0, "loess", 0.3, 3);
     // trend + seasonal + remainder ~ original (additive)
-    for i in 0..d.n.min(5) {
-        for j in 0..d.m {
+    for i in 0..n.min(5) {
+        for j in 0..m {
             let reconstructed =
                 result.trend[(i, j)] + result.seasonal[(i, j)] + result.remainder[(i, j)];
             assert!(
@@ -2725,23 +2740,30 @@ fn test_decompose_additive_identity() {
 
 #[test]
 fn test_decompose_multiplicative_identity() {
-    let d: StandardData = load_json("data", "standard_50x101");
-    let mat = FdMatrix::from_slice(&d.data, d.n, d.m).unwrap();
+    let t: Vec<f64> = (0..31).map(|i| i as f64 / 30.0).collect();
+    let mat = fdars_core::simulation::sim_fundata(
+        10,
+        &t,
+        3,
+        fdars_core::EFunType::Fourier,
+        fdars_core::EValType::Exponential,
+        Some(42),
+    );
+    let (n, m) = mat.shape();
 
     // Make sure data is positive for multiplicative decomposition
-    let mut pos_data = vec![0.0; d.n * d.m];
-    for i in 0..d.n {
-        for j in 0..d.m {
-            pos_data[i + j * d.n] = mat[(i, j)] + 10.0; // shift to positive
+    let mut pos_data = vec![0.0; n * m];
+    for i in 0..n {
+        for j in 0..m {
+            pos_data[i + j * n] = mat[(i, j)] + 10.0; // shift to positive
         }
     }
-    let pos_mat = FdMatrix::from_column_major(pos_data, d.n, d.m).unwrap();
+    let pos_mat = FdMatrix::from_column_major(pos_data, n, m).unwrap();
 
-    let result =
-        fdars_core::detrend::decompose_multiplicative(&pos_mat, &d.argvals, 10.0, "loess", 0.3, 3);
+    let result = fdars_core::detrend::decompose_multiplicative(&pos_mat, &t, 10.0, "loess", 0.3, 3);
     // trend * seasonal * remainder ~ original (multiplicative)
-    for i in 0..d.n.min(5) {
-        for j in 0..d.m {
+    for i in 0..n.min(5) {
+        for j in 0..m {
             let reconstructed =
                 result.trend[(i, j)] * result.seasonal[(i, j)] * result.remainder[(i, j)];
             assert!(
@@ -3607,6 +3629,7 @@ fn test_tsrvf_from_alignment_vs_prealigned() {
         aligned_data,
         n_iter: 1,
         converged: true,
+        aligned_srsfs: None,
     };
 
     let result = fdars_core::alignment::tsrvf_from_alignment(&karcher, &time);
@@ -3695,6 +3718,7 @@ fn test_tsrvf_smoothed_vs_python() {
         aligned_data,
         n_iter: 1,
         converged: true,
+        aligned_srsfs: None,
     };
 
     let result = fdars_core::alignment::tsrvf_from_alignment(&karcher, &time);
@@ -4789,8 +4813,8 @@ fn test_local_polynomial_vs_r() {
         );
 
         // Local polynomial with degree=2 should be close to R's locpoly degree=2
-        // R uses FFT-based binning, Rust uses direct computation, so moderate tolerance
-        assert_vec_close(&result, r_lp, 0.15, "local_polynomial_degree2");
+        // R uses FFT-based binning, Rust uses direct computation
+        assert_vec_close(&result, r_lp, 0.1, "local_polynomial_degree2");
     }
 }
 
@@ -5258,4 +5282,1173 @@ fn test_lp_cross_values_vs_r() {
             }
         }
     }
+}
+
+// ─── New module helpers ──────────────────────────────────────────────────
+
+/// Load fdasrvf-style data: R stores m×n column-major (columns = curves),
+/// but FdMatrix needs n×m column-major (rows = curves). This transposes.
+fn load_fdasrvf_data(flat: &[f64], n: usize, m: usize) -> FdMatrix {
+    // R's flat: flat[j + i*m] = curve i at point j (column-major m×n)
+    // Rust FdMatrix(n, m): data[(i, j)] = col_major[i + j*n] = curve i at point j
+    let mut col_major = vec![0.0; n * m];
+    for i in 0..n {
+        for j in 0..m {
+            col_major[i + j * n] = flat[j + i * m];
+        }
+    }
+    FdMatrix::from_column_major(col_major, n, m).unwrap()
+}
+
+/// Load fdasrvf-style fitted data: R's eval.fd returns m×n, as.numeric flattens column-major.
+fn load_fdasrvf_fitted(flat: &[f64], n: usize, m: usize) -> Vec<f64> {
+    // Same transpose as data: flat[j + i*m] → FdMatrix order [i + j*n]
+    let mut col_major = vec![0.0; n * m];
+    for i in 0..n {
+        for j in 0..m {
+            col_major[i + j * n] = flat[j + i * m];
+        }
+    }
+    col_major
+}
+
+/// Construct a KarcherMeanResult from R's alignment output,
+/// bypassing Rust's alignment so FPCA comparison is apples-to-apples.
+fn karcher_from_r(exp: &ElasticFpcaExpected) -> fdars_core::alignment::KarcherMeanResult {
+    let n = exp.n;
+    let m = exp.m;
+    let aligned_data = load_fdasrvf_data(&exp.aligned_data, n, m);
+    let gammas = load_fdasrvf_data(&exp.gammas, n, m);
+    let aligned_srsfs = if !exp.aligned_srsfs.is_empty() {
+        Some(load_fdasrvf_data(&exp.aligned_srsfs, n, m))
+    } else {
+        None
+    };
+    fdars_core::alignment::KarcherMeanResult {
+        mean: exp.mean.clone(),
+        mean_srsf: exp.mean_srsf.clone(),
+        gammas,
+        aligned_data,
+        n_iter: 1,
+        converged: true,
+        aligned_srsfs,
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Smooth Basis (R cross-validation)
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[derive(Deserialize)]
+struct SmoothBasisExpected {
+    bspline_smooth: BsplineSmoothExpected,
+    fourier_smooth: FourierSmoothExpected,
+    gcv_optimal: GcvOptimalExpected,
+}
+
+#[derive(Deserialize)]
+struct BsplineSmoothExpected {
+    data: Vec<f64>,
+    n: usize,
+    m: usize,
+    nbasis: usize,
+    lambda: f64,
+    coefficients: Vec<f64>,
+    fitted: Vec<f64>,
+    edf: f64,
+    gcv: Vec<f64>,
+    penalty_matrix: Vec<f64>,
+    penalty_dim: usize,
+}
+
+#[derive(Deserialize)]
+struct FourierSmoothExpected {
+    data: Vec<f64>,
+    nbasis: usize,
+    period: f64,
+    lambda: f64,
+    coefficients: Vec<f64>,
+    fitted: Vec<f64>,
+    edf: f64,
+    gcv: Vec<f64>,
+    penalty_matrix: Vec<f64>,
+    penalty_dim: usize,
+}
+
+#[derive(Deserialize)]
+struct GcvOptimalExpected {
+    log_lambdas: Vec<f64>,
+    gcv_values: Vec<f64>,
+    best_log_lambda: f64,
+    best_gcv: f64,
+}
+
+#[test]
+fn validate_smooth_basis_bspline_penalty_matrix() {
+    use fdars_core::smooth_basis::bspline_penalty_matrix;
+
+    let exp: SmoothBasisExpected = load_json("expected", "smooth_basis");
+    let bs = &exp.bspline_smooth;
+
+    let argvals: Vec<f64> = (0..bs.m).map(|j| j as f64 / (bs.m - 1) as f64).collect();
+    let pen = bspline_penalty_matrix(&argvals, bs.nbasis, 4, 2);
+    let k = (pen.len() as f64).sqrt() as usize;
+
+    // NOTE: Rust uses extended boundary knots while R uses repeated boundary knots,
+    // so penalty matrix entries differ significantly. We check structural properties:
+
+    // 1. Symmetric
+    for i in 0..k {
+        for j in i + 1..k {
+            assert_scalar_close(
+                pen[i + j * k],
+                pen[j + i * k],
+                1e-10,
+                &format!("bspline_penalty_symmetry[{},{}]", i, j),
+            );
+        }
+    }
+
+    // 2. Positive semi-definite (diag entries non-negative)
+    for i in 0..k {
+        assert!(
+            pen[i + i * k] >= -1e-10,
+            "penalty diagonal [{}] = {} should be >= 0",
+            i,
+            pen[i + i * k]
+        );
+    }
+
+    // 3. Same dimension as R
+    assert_eq!(k, bs.penalty_dim, "penalty dimension mismatch");
+}
+
+#[test]
+fn validate_smooth_basis_bspline_fitted() {
+    use fdars_core::smooth_basis::{smooth_basis, BasisType, FdPar};
+
+    let exp: SmoothBasisExpected = load_json("expected", "smooth_basis");
+    let bs = &exp.bspline_smooth;
+
+    let argvals: Vec<f64> = (0..bs.m).map(|j| j as f64 / (bs.m - 1) as f64).collect();
+    let data = load_fdasrvf_data(&bs.data, bs.n, bs.m);
+
+    let penalty = fdars_core::smooth_basis::bspline_penalty_matrix(&argvals, bs.nbasis, 4, 2);
+    let fdpar = FdPar {
+        basis_type: BasisType::Bspline { order: 4 },
+        nbasis: bs.nbasis,
+        lambda: bs.lambda,
+        lfd_order: 2,
+        penalty_matrix: penalty,
+    };
+    let result = smooth_basis(&data, &argvals, &fdpar).expect("smooth_basis should succeed");
+
+    // NOTE: B-spline knot convention differs (Rust: extended, R: repeated boundary).
+    // Fitted values will differ. Check structural properties instead:
+
+    // 1. Correct dimensions
+    assert_eq!(result.fitted.shape(), (bs.n, bs.m), "fitted shape mismatch");
+    assert_eq!(
+        result.coefficients.shape().0,
+        bs.n,
+        "coefficients n mismatch"
+    );
+
+    // 2. EDF should be positive and less than nbasis
+    assert!(
+        result.edf > 0.0 && result.edf <= bs.nbasis as f64 + 1.0,
+        "EDF={} out of range",
+        result.edf
+    );
+
+    // 3. Per-curve R² should be >0.95 (high quality smooth)
+    for curve in 0..bs.n {
+        let mut ss_res = 0.0;
+        let mut ss_tot = 0.0;
+        let mean: f64 = (0..bs.m).map(|j| data[(curve, j)]).sum::<f64>() / bs.m as f64;
+        for j in 0..bs.m {
+            let d = data[(curve, j)];
+            let f = result.fitted[(curve, j)];
+            ss_res += (d - f) * (d - f);
+            ss_tot += (d - mean) * (d - mean);
+        }
+        let r2 = 1.0 - ss_res / ss_tot.max(1e-10);
+        assert!(
+            r2 > 0.95,
+            "bspline curve {} R²={:.4} too low (expected >0.95)",
+            curve,
+            r2
+        );
+    }
+}
+
+#[test]
+fn validate_smooth_basis_fourier_penalty_matrix() {
+    use fdars_core::smooth_basis::fourier_penalty_matrix;
+
+    let exp: SmoothBasisExpected = load_json("expected", "smooth_basis");
+    let fs = &exp.fourier_smooth;
+
+    let pen = fourier_penalty_matrix(fs.nbasis, fs.period, 2);
+    assert_eq!(pen.len(), fs.penalty_dim * fs.penalty_dim);
+
+    // Fourier penalty is diagonal — compare diagonals
+    for i in 0..fs.penalty_dim {
+        let rust_val = pen[i + i * fs.penalty_dim];
+        let r_val = fs.penalty_matrix[i + i * fs.penalty_dim];
+        assert_relative_close(
+            rust_val,
+            r_val,
+            1e-6,
+            &format!("fourier_penalty[{},{}]", i, i),
+        );
+    }
+}
+
+#[test]
+fn validate_smooth_basis_fourier_fitted() {
+    use fdars_core::smooth_basis::{smooth_basis, BasisType, FdPar};
+
+    let exp: SmoothBasisExpected = load_json("expected", "smooth_basis");
+    let fs = &exp.fourier_smooth;
+
+    let m = 101;
+    let n = 5;
+    let argvals: Vec<f64> = (0..m).map(|j| j as f64 / (m - 1) as f64).collect();
+    let data = load_fdasrvf_data(&fs.data, n, m);
+
+    let penalty = fdars_core::smooth_basis::fourier_penalty_matrix(fs.nbasis, fs.period, 2);
+    let fdpar = FdPar {
+        basis_type: BasisType::Fourier { period: fs.period },
+        nbasis: fs.nbasis,
+        lambda: fs.lambda,
+        lfd_order: 2,
+        penalty_matrix: penalty,
+    };
+    let result = smooth_basis(&data, &argvals, &fdpar).expect("smooth_basis should succeed");
+
+    assert_eq!(result.fitted.shape(), (n, m), "fourier fitted shape");
+
+    // EDF: should match R closely since penalty matrix matches exactly
+    assert_scalar_close(result.edf, fs.edf, 0.01, "fourier_edf");
+
+    // Fourier fitted values match R nearly exactly (RMSE < 1e-4)
+    let r_fitted = load_fdasrvf_data(&fs.fitted, n, m);
+    for curve in 0..n {
+        let mut ss_res = 0.0;
+        let mut ss_tot = 0.0;
+        let mut ss_vs_r = 0.0;
+        let mean: f64 = (0..m).map(|j| data[(curve, j)]).sum::<f64>() / m as f64;
+        for j in 0..m {
+            let d = data[(curve, j)];
+            let f = result.fitted[(curve, j)];
+            let rf = r_fitted[(curve, j)];
+            ss_res += (d - f) * (d - f);
+            ss_tot += (d - mean) * (d - mean);
+            ss_vs_r += (f - rf) * (f - rf);
+        }
+        let r2 = 1.0 - ss_res / ss_tot.max(1e-10);
+        let rmse_vs_r = (ss_vs_r / m as f64).sqrt();
+        assert!(
+            r2 > 0.95,
+            "fourier curve {} R²={:.4} too low (expected >0.95)",
+            curve,
+            r2
+        );
+        assert!(
+            rmse_vs_r < 1e-3,
+            "fourier curve {} RMSE_vs_R={:.6} too high (should match R closely)",
+            curve,
+            rmse_vs_r
+        );
+    }
+}
+
+#[test]
+fn validate_smooth_basis_gcv_optimal() {
+    use fdars_core::smooth_basis::{smooth_basis_gcv, BasisType};
+
+    let exp: SmoothBasisExpected = load_json("expected", "smooth_basis");
+    let bs = &exp.bspline_smooth;
+
+    let m = bs.m;
+    let argvals: Vec<f64> = (0..m).map(|j| j as f64 / (m - 1) as f64).collect();
+    let data = load_fdasrvf_data(&bs.data, bs.n, m);
+
+    let result = smooth_basis_gcv(
+        &data,
+        &argvals,
+        &BasisType::Bspline { order: 4 },
+        bs.nbasis,
+        2,
+        (-8.0, 4.0),
+        25,
+    )
+    .expect("smooth_basis_gcv should succeed");
+
+    // GCV value should be very close to R despite knot convention differences
+    assert_relative_close(
+        result.gcv,
+        exp.gcv_optimal.best_gcv,
+        0.01,
+        "gcv_optimal_value",
+    );
+
+    // EDF is reasonable (may differ due to knot convention)
+    assert!(
+        result.edf > 3.0 && result.edf < 20.0,
+        "GCV-optimal EDF={} out of range",
+        result.edf
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Elastic FPCA (R cross-validation)
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[derive(Deserialize)]
+struct ElasticFpcaExpected {
+    data: Vec<f64>,
+    n: usize,
+    m: usize,
+    argvals: Vec<f64>,
+    aligned_data: Vec<f64>,
+    mean: Vec<f64>,
+    #[serde(default)]
+    mean_srsf: Vec<f64>,
+    #[serde(default)]
+    gammas: Vec<f64>,
+    #[serde(default)]
+    aligned_srsfs: Vec<f64>,
+    vert_fpca: Option<FpcaSubExpected>,
+    horiz_fpca: Option<FpcaSubExpected>,
+    joint_fpca: Option<JointFpcaSubExpected>,
+}
+
+#[derive(Deserialize)]
+struct FpcaSubExpected {
+    scores: Vec<f64>,
+    scores_nrow: usize,
+    scores_ncol: usize,
+    eigenvalues: Vec<f64>,
+    cumulative_variance: Vec<f64>,
+}
+
+#[derive(Deserialize)]
+struct JointFpcaSubExpected {
+    scores: Vec<f64>,
+    scores_nrow: usize,
+    scores_ncol: usize,
+    eigenvalues: Vec<f64>,
+    cumulative_variance: Vec<f64>,
+    balance_c: f64,
+}
+
+#[test]
+fn validate_elastic_vert_fpca() {
+    use fdars_core::elastic_fpca::vert_fpca;
+
+    let exp: ElasticFpcaExpected = load_json("expected", "elastic_fpca");
+    let vf = exp.vert_fpca.as_ref().expect("vert_fpca should be present");
+
+    // Use R's aligned data directly to isolate FPCA from alignment differences
+    let karcher = karcher_from_r(&exp);
+
+    let result =
+        vert_fpca(&karcher, &exp.argvals, vf.scores_ncol).expect("vert_fpca should succeed");
+
+    assert_eq!(result.eigenvalues.len(), vf.eigenvalues.len());
+
+    // Eigenvalues: positive, decreasing
+    for (i, ev) in result.eigenvalues.iter().enumerate() {
+        assert!(
+            *ev > 0.0,
+            "vert_eigenvalue_{} should be positive: {}",
+            i,
+            ev
+        );
+    }
+    for w in result.eigenvalues.windows(2) {
+        assert!(w[0] >= w[1] - 1e-10, "vert eigenvalues not decreasing");
+    }
+    // Direct eigenvalue comparison against R (same aligned input + pre-computed SRSFs → exact)
+    for (i, (rust_ev, r_ev)) in result.eigenvalues.iter().zip(&vf.eigenvalues).enumerate() {
+        assert_relative_close(*rust_ev, *r_ev, 1e-6, &format!("vert_ev_{}", i));
+    }
+
+    // Cumulative variance: exact match with R
+    for (i, (rust_cv, r_cv)) in result
+        .cumulative_variance
+        .iter()
+        .zip(&vf.cumulative_variance)
+        .enumerate()
+    {
+        assert_scalar_close(*rust_cv, *r_cv, 1e-6, &format!("vert_cumvar_{}", i));
+    }
+
+    // Scores shape
+    let (sn, sk) = result.scores.shape();
+    assert_eq!(sn, vf.scores_nrow, "vert_scores n mismatch");
+    assert_eq!(sk, vf.scores_ncol, "vert_scores k mismatch");
+}
+
+#[test]
+fn validate_elastic_horiz_fpca() {
+    use fdars_core::elastic_fpca::horiz_fpca;
+
+    let exp: ElasticFpcaExpected = load_json("expected", "elastic_fpca");
+    let hf = exp
+        .horiz_fpca
+        .as_ref()
+        .expect("horiz_fpca should be present");
+
+    // Use R's aligned data + gammas directly
+    let karcher = karcher_from_r(&exp);
+
+    let result =
+        horiz_fpca(&karcher, &exp.argvals, hf.scores_ncol).expect("horiz_fpca should succeed");
+
+    assert_eq!(result.eigenvalues.len(), hf.eigenvalues.len());
+
+    // Eigenvalues: positive, decreasing
+    for ev in &result.eigenvalues {
+        assert!(*ev > 0.0, "horiz eigenvalue should be positive");
+    }
+    for w in result.eigenvalues.windows(2) {
+        assert!(w[0] >= w[1] - 1e-10, "horiz eigenvalues not decreasing");
+    }
+    // Direct eigenvalue comparison against R (same gammas + matching gradient → exact)
+    for (i, (rust_ev, r_ev)) in result.eigenvalues.iter().zip(&hf.eigenvalues).enumerate() {
+        assert_relative_close(*rust_ev, *r_ev, 1e-6, &format!("horiz_ev_{}", i));
+    }
+
+    // Cumulative variance: exact match with R
+    for (i, (rust_cv, r_cv)) in result
+        .cumulative_variance
+        .iter()
+        .zip(&hf.cumulative_variance)
+        .enumerate()
+    {
+        assert_scalar_close(*rust_cv, *r_cv, 1e-6, &format!("horiz_cumvar_{}", i));
+    }
+
+    // Scores shape
+    let (sn, sk) = result.scores.shape();
+    assert_eq!(sn, hf.scores_nrow, "horiz_scores n mismatch");
+    assert_eq!(sk, hf.scores_ncol, "horiz_scores k mismatch");
+}
+
+#[test]
+fn validate_elastic_joint_fpca() {
+    use fdars_core::elastic_fpca::joint_fpca;
+
+    let exp: ElasticFpcaExpected = load_json("expected", "elastic_fpca");
+    let jf = exp
+        .joint_fpca
+        .as_ref()
+        .expect("joint_fpca should be present");
+
+    // Use R's aligned data + gammas directly
+    let karcher = karcher_from_r(&exp);
+
+    // Use R's balance_c directly for apples-to-apples comparison
+    let result = joint_fpca(&karcher, &exp.argvals, jf.scores_ncol, Some(jf.balance_c))
+        .expect("joint_fpca should succeed");
+
+    assert_eq!(result.eigenvalues.len(), jf.eigenvalues.len());
+
+    // Eigenvalues: positive, decreasing
+    for ev in &result.eigenvalues {
+        assert!(*ev > 0.0, "joint eigenvalue should be positive: {}", ev);
+    }
+    for w in result.eigenvalues.windows(2) {
+        assert!(w[0] >= w[1] - 1e-10, "joint eigenvalues not decreasing");
+    }
+    // Direct eigenvalue comparison (same data + same balance_c + pre-computed SRSFs → exact)
+    for (i, (rust_ev, r_ev)) in result.eigenvalues.iter().zip(&jf.eigenvalues).enumerate() {
+        assert_relative_close(*rust_ev, *r_ev, 1e-6, &format!("joint_ev_{}", i));
+    }
+
+    // Balance C: should match since we provided it
+    assert_scalar_close(result.balance_c, jf.balance_c, 1e-6, "joint_balance_c");
+
+    // Cumulative variance: exact match with R
+    for (i, (rust_cv, r_cv)) in result
+        .cumulative_variance
+        .iter()
+        .zip(&jf.cumulative_variance)
+        .enumerate()
+    {
+        assert_scalar_close(*rust_cv, *r_cv, 1e-6, &format!("joint_cumvar_{}", i));
+    }
+
+    // Scores shape
+    let (sn, sk) = result.scores.shape();
+    assert_eq!(sn, jf.scores_nrow, "joint_scores n mismatch");
+    assert_eq!(sk, jf.scores_ncol, "joint_scores k mismatch");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Elastic Regression (R cross-validation)
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[derive(Deserialize)]
+struct ElasticRegressionExpected {
+    data: Vec<f64>,
+    y: Vec<f64>,
+    n: usize,
+    m: usize,
+    argvals: Vec<f64>,
+    elastic_pcr_vert: Option<PcrSubExpected>,
+    elastic_pcr_horiz: Option<PcrSubExpected>,
+    elastic_pcr_combined: Option<PcrSubExpected>,
+}
+
+#[derive(Deserialize)]
+struct PcrSubExpected {
+    alpha: f64,
+    coefficients: Vec<f64>,
+    fitted_values: Vec<f64>,
+    sse: f64,
+    r_squared: Option<f64>,
+}
+
+#[test]
+fn validate_elastic_pcr_vert() {
+    use fdars_core::elastic_regression::{elastic_pcr, PcaMethod};
+
+    let exp: ElasticRegressionExpected = load_json("expected", "elastic_regression");
+    let pcr = exp
+        .elastic_pcr_vert
+        .as_ref()
+        .expect("elastic_pcr_vert should be present");
+
+    let data = load_fdasrvf_data(&exp.data, exp.n, exp.m);
+
+    let result = elastic_pcr(
+        &data,
+        &exp.y,
+        &exp.argvals,
+        3,
+        PcaMethod::Vertical,
+        0.0,
+        10,
+        1e-4,
+    )
+    .expect("elastic_pcr (vert) should succeed");
+
+    // Alpha (intercept): exact match (mean of y)
+    assert_scalar_close(result.alpha, pcr.alpha, 1e-6, "pcr_vert_alpha");
+
+    // SSE: within 5% of R
+    assert_relative_close(result.sse, pcr.sse, 0.05, "pcr_vert_sse");
+
+    // Number of coefficients
+    assert_eq!(
+        result.coefficients.len(),
+        pcr.coefficients.len(),
+        "pcr_vert ncoeff mismatch"
+    );
+
+    // Fitted values: compare against R
+    assert_eq!(
+        result.fitted_values.len(),
+        exp.n,
+        "pcr_vert fitted_values length"
+    );
+    if !pcr.fitted_values.is_empty() {
+        for (i, (rust_v, r_v)) in result
+            .fitted_values
+            .iter()
+            .zip(&pcr.fitted_values)
+            .enumerate()
+        {
+            assert_scalar_close(*rust_v, *r_v, 0.1, &format!("pcr_vert_fitted_{}", i));
+        }
+    }
+
+    // R²: both should be in similar range
+    let mean_y: f64 = exp.y.iter().sum::<f64>() / exp.y.len() as f64;
+    let ss_tot: f64 = exp.y.iter().map(|&yi| (yi - mean_y).powi(2)).sum();
+    let r2 = 1.0 - result.sse / ss_tot;
+    if let Some(r_r2) = pcr.r_squared {
+        assert_scalar_close(r2, r_r2, 0.05, "pcr_vert_r_squared");
+    }
+}
+
+#[test]
+fn validate_elastic_pcr_horiz() {
+    use fdars_core::elastic_regression::{elastic_pcr, PcaMethod};
+
+    let exp: ElasticRegressionExpected = load_json("expected", "elastic_regression");
+    let pcr = exp
+        .elastic_pcr_horiz
+        .as_ref()
+        .expect("elastic_pcr_horiz should be present");
+
+    let data = load_fdasrvf_data(&exp.data, exp.n, exp.m);
+
+    let result = elastic_pcr(
+        &data,
+        &exp.y,
+        &exp.argvals,
+        3,
+        PcaMethod::Horizontal,
+        0.0,
+        10,
+        1e-4,
+    )
+    .expect("elastic_pcr (horiz) should succeed");
+
+    // Alpha: exact match
+    assert_scalar_close(result.alpha, pcr.alpha, 1e-6, "pcr_horiz_alpha");
+
+    // SSE: within 5% of R
+    assert_relative_close(result.sse, pcr.sse, 0.05, "pcr_horiz_sse");
+
+    assert_eq!(
+        result.coefficients.len(),
+        pcr.coefficients.len(),
+        "pcr_horiz ncoeff mismatch"
+    );
+
+    // Fitted values
+    if !pcr.fitted_values.is_empty() {
+        for (i, (rust_v, r_v)) in result
+            .fitted_values
+            .iter()
+            .zip(&pcr.fitted_values)
+            .enumerate()
+        {
+            assert_scalar_close(*rust_v, *r_v, 0.1, &format!("pcr_horiz_fitted_{}", i));
+        }
+    }
+
+    // R²
+    if let Some(r_r2) = pcr.r_squared {
+        let mean_y: f64 = exp.y.iter().sum::<f64>() / exp.y.len() as f64;
+        let ss_tot: f64 = exp.y.iter().map(|&yi| (yi - mean_y).powi(2)).sum();
+        let r2 = 1.0 - result.sse / ss_tot;
+        assert_scalar_close(r2, r_r2, 0.05, "pcr_horiz_r_squared");
+    }
+}
+
+#[test]
+fn validate_elastic_pcr_combined() {
+    use fdars_core::elastic_regression::{elastic_pcr, PcaMethod};
+
+    let exp: ElasticRegressionExpected = load_json("expected", "elastic_regression");
+    let pcr = exp
+        .elastic_pcr_combined
+        .as_ref()
+        .expect("elastic_pcr_combined should be present");
+
+    let data = load_fdasrvf_data(&exp.data, exp.n, exp.m);
+
+    let result = elastic_pcr(
+        &data,
+        &exp.y,
+        &exp.argvals,
+        3,
+        PcaMethod::Joint,
+        0.0,
+        10,
+        1e-4,
+    )
+    .expect("elastic_pcr (combined) should succeed");
+
+    // Alpha: exact match
+    assert_scalar_close(result.alpha, pcr.alpha, 1e-6, "pcr_combined_alpha");
+
+    // SSE: within 5% of R
+    assert_relative_close(result.sse, pcr.sse, 0.05, "pcr_combined_sse");
+
+    assert_eq!(
+        result.coefficients.len(),
+        pcr.coefficients.len(),
+        "pcr_combined ncoeff mismatch"
+    );
+
+    // Fitted values
+    if !pcr.fitted_values.is_empty() {
+        for (i, (rust_v, r_v)) in result
+            .fitted_values
+            .iter()
+            .zip(&pcr.fitted_values)
+            .enumerate()
+        {
+            assert_scalar_close(*rust_v, *r_v, 0.1, &format!("pcr_combined_fitted_{}", i));
+        }
+    }
+
+    // R²
+    if let Some(r_r2) = pcr.r_squared {
+        let mean_y: f64 = exp.y.iter().sum::<f64>() / exp.y.len() as f64;
+        let ss_tot: f64 = exp.y.iter().map(|&yi| (yi - mean_y).powi(2)).sum();
+        let r2 = 1.0 - result.sse / ss_tot;
+        assert_scalar_close(r2, r_r2, 0.05, "pcr_combined_r_squared");
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Elastic Changepoint Detection (R cross-validation)
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[derive(Deserialize)]
+struct ElasticChangepointExpected {
+    data_amp: Vec<f64>,
+    n: usize,
+    m: usize,
+    argvals: Vec<f64>,
+    true_changepoint: usize,
+    amp_changepoint: Option<AmpChangepointExpected>,
+}
+
+#[derive(Deserialize)]
+struct AmpChangepointExpected {
+    detected_changepoint: usize,
+    cusum_values: Vec<f64>,
+    test_statistic: f64,
+}
+
+#[test]
+fn validate_elastic_amp_changepoint() {
+    use fdars_core::elastic_changepoint::elastic_amp_changepoint;
+
+    let exp: ElasticChangepointExpected = load_json("expected", "elastic_changepoint");
+    let acp = exp
+        .amp_changepoint
+        .as_ref()
+        .expect("amp_changepoint should be present");
+
+    let data = load_fdasrvf_data(&exp.data_amp, exp.n, exp.m);
+
+    let result = elastic_amp_changepoint(
+        &data,
+        &exp.argvals,
+        0.0,
+        5,   // max_iter for alignment
+        200, // n_mc
+        42,
+    )
+    .expect("elastic_amp_changepoint should succeed");
+
+    // Detected changepoint: exact match on this synthetic data
+    assert_eq!(
+        result.changepoint, acp.detected_changepoint,
+        "changepoint: Rust={}, R={}",
+        result.changepoint, acp.detected_changepoint
+    );
+
+    // CUSUM values: now use Simpson's quadrature weights (not uniform 1/m),
+    // so values differ from R's uniform-weight reference by ~2%. Use looser tolerance.
+    assert_eq!(
+        result.cusum_values.len(),
+        acp.cusum_values.len(),
+        "cusum_values length mismatch"
+    );
+    for (k, (rust_v, r_v)) in result
+        .cusum_values
+        .iter()
+        .zip(&acp.cusum_values)
+        .enumerate()
+    {
+        assert_relative_close(*rust_v, *r_v, 0.05, &format!("cusum[{}]", k));
+    }
+
+    // Test statistic: same tolerance as CUSUM
+    assert_relative_close(
+        result.test_statistic,
+        acp.test_statistic,
+        0.05,
+        "test_statistic",
+    );
+
+    // P-value should be in [0, 1]
+    assert!(
+        result.p_value >= 0.0 && result.p_value <= 1.0,
+        "p_value={} should be in [0,1]",
+        result.p_value
+    );
+}
+
+// ─── Conformal Prediction ────────────────────────────────────────────────────
+
+/// Split conformal regression: coverage should be ≥ 1−α on calibration set.
+#[test]
+fn validate_conformal_split_regression() {
+    let reg: RegressionData = load_json("data", "regression_30x51");
+    let data = FdMatrix::from_column_major(reg.data.clone(), reg.n, reg.m).unwrap();
+    let n = reg.n;
+    let alpha = 0.1;
+
+    // Use first 20 as train, last 10 as test
+    let n_train = 20;
+    let n_test = n - n_train;
+    let train_data = fdars_core::cv::subset_rows(&data, &(0..n_train).collect::<Vec<_>>());
+    let train_y: Vec<f64> = reg.y[..n_train].to_vec();
+    let test_data = fdars_core::cv::subset_rows(&data, &(n_train..n).collect::<Vec<_>>());
+
+    let result = fdars_core::conformal::conformal_fregre_lm(
+        &train_data,
+        &train_y,
+        &test_data,
+        None,
+        None,
+        3,
+        0.5,
+        alpha,
+        42,
+    )
+    .expect("conformal_fregre_lm should succeed");
+
+    // Basic structural checks
+    assert_eq!(result.predictions.len(), n_test);
+    assert_eq!(result.lower.len(), n_test);
+    assert_eq!(result.upper.len(), n_test);
+
+    // Intervals should be well-ordered: lower ≤ prediction ≤ upper
+    for i in 0..n_test {
+        assert!(
+            result.lower[i] <= result.predictions[i] + 1e-10,
+            "lower[{}]={} > prediction[{}]={}",
+            i,
+            result.lower[i],
+            i,
+            result.predictions[i]
+        );
+        assert!(
+            result.predictions[i] <= result.upper[i] + 1e-10,
+            "prediction[{}]={} > upper[{}]={}",
+            i,
+            result.predictions[i],
+            i,
+            result.upper[i]
+        );
+    }
+
+    // Calibration coverage should be ≥ 1−α (conformal guarantee)
+    assert!(
+        result.coverage >= 1.0 - alpha - 0.01,
+        "calibration coverage {} should be ≥ {}",
+        result.coverage,
+        1.0 - alpha
+    );
+}
+
+/// Jackknife+ regression: intervals should be valid and coverage ≥ 1−α.
+#[test]
+fn validate_conformal_jackknife_plus() {
+    let reg: RegressionData = load_json("data", "regression_30x51");
+    let data = FdMatrix::from_column_major(reg.data.clone(), reg.n, reg.m).unwrap();
+    let alpha = 0.1;
+
+    let n_train = 20;
+    let n_test = reg.n - n_train;
+    let train_data = fdars_core::cv::subset_rows(&data, &(0..n_train).collect::<Vec<_>>());
+    let train_y: Vec<f64> = reg.y[..n_train].to_vec();
+    let test_data = fdars_core::cv::subset_rows(&data, &(n_train..reg.n).collect::<Vec<_>>());
+
+    let result = fdars_core::conformal::jackknife_plus_regression(
+        &train_data,
+        &train_y,
+        &test_data,
+        None,
+        None,
+        |tr_d, tr_y, tr_sc, te_d, te_sc| {
+            let fit = fdars_core::scalar_on_function::fregre_lm(tr_d, tr_y, tr_sc, 3).ok()?;
+            let train_pred = fit.fitted_values.clone();
+            let test_pred = fdars_core::scalar_on_function::predict_fregre_lm(&fit, te_d, te_sc);
+            Some((train_pred, test_pred))
+        },
+        alpha,
+    )
+    .expect("jackknife_plus should succeed");
+
+    assert_eq!(result.predictions.len(), n_test);
+    for i in 0..n_test {
+        assert!(
+            result.lower[i] <= result.upper[i] + 1e-10,
+            "jackknife+ lower[{}]={} > upper[{}]={}",
+            i,
+            result.lower[i],
+            i,
+            result.upper[i]
+        );
+    }
+}
+
+/// Conformal classification (LAC): prediction sets should contain true class often.
+#[test]
+fn validate_conformal_classification_lac() {
+    let reg: RegressionData = load_json("data", "regression_30x51");
+    let data = FdMatrix::from_column_major(reg.data.clone(), reg.n, reg.m).unwrap();
+    // Create binary labels from y
+    let y_mean: f64 = reg.y.iter().sum::<f64>() / reg.n as f64;
+    let labels: Vec<usize> = reg
+        .y
+        .iter()
+        .map(|&v| if v > y_mean { 1 } else { 0 })
+        .collect();
+    let alpha = 0.2;
+
+    let n_train = 20;
+    let train_data = fdars_core::cv::subset_rows(&data, &(0..n_train).collect::<Vec<_>>());
+    let train_labels: Vec<usize> = labels[..n_train].to_vec();
+    let test_data = fdars_core::cv::subset_rows(&data, &(n_train..reg.n).collect::<Vec<_>>());
+
+    let result = fdars_core::conformal::conformal_classif(
+        &train_data,
+        &train_labels,
+        &test_data,
+        None,
+        None,
+        3,
+        "lda",
+        5,
+        fdars_core::conformal::ClassificationScore::Lac,
+        0.5,
+        alpha,
+        42,
+    )
+    .expect("conformal_classif LAC should succeed");
+
+    assert_eq!(result.predicted_classes.len(), reg.n - n_train);
+    assert_eq!(result.prediction_sets.len(), reg.n - n_train);
+
+    // Each prediction set should be non-empty
+    for (i, ps) in result.prediction_sets.iter().enumerate() {
+        assert!(!ps.is_empty(), "prediction set {} is empty", i);
+    }
+
+    // Average set size should be ≥ 1
+    assert!(
+        result.average_set_size >= 1.0,
+        "average set size {} < 1.0",
+        result.average_set_size
+    );
+}
+
+// ─── Cross-Validation ────────────────────────────────────────────────────────
+
+/// 5-fold CV on regression: RMSE should be positive and finite.
+#[test]
+fn validate_cv_fdata_regression() {
+    use std::any::Any;
+
+    let reg: RegressionData = load_json("data", "regression_30x51");
+    let data = FdMatrix::from_column_major(reg.data.clone(), reg.n, reg.m).unwrap();
+
+    let result = fdars_core::cv::cv_fdata(
+        &data,
+        &reg.y,
+        |train_data: &FdMatrix, train_y: &[f64]| -> Box<dyn Any> {
+            let fit = fdars_core::scalar_on_function::fregre_lm(train_data, train_y, None, 3);
+            Box::new(fit)
+        },
+        |model: &dyn Any, test_data: &FdMatrix| -> Vec<f64> {
+            let fit = model
+                .downcast_ref::<Option<fdars_core::scalar_on_function::FregreLmResult>>()
+                .and_then(|o| o.as_ref());
+            match fit {
+                Some(f) => fdars_core::scalar_on_function::predict_fregre_lm(f, test_data, None),
+                None => vec![0.0; test_data.nrows()],
+            }
+        },
+        5,
+        1,
+        fdars_core::cv::CvType::Regression,
+        false,
+        42,
+    );
+
+    match &result.metrics {
+        fdars_core::cv::CvMetrics::Regression { rmse, .. } => {
+            assert!(
+                *rmse > 0.0 && rmse.is_finite(),
+                "CV RMSE={} should be positive and finite",
+                rmse
+            );
+        }
+        _ => panic!("Expected regression metrics"),
+    }
+    assert_eq!(result.fold_metrics.len(), 5);
+}
+
+/// Stratified folds: each fold should contain proportional class representation.
+#[test]
+fn validate_cv_stratified_folds() {
+    let n = 30;
+    let labels: Vec<usize> = (0..n).map(|i| if i < 20 { 0 } else { 1 }).collect();
+    let folds = fdars_core::cv::create_stratified_folds(n, &labels, 5, 42);
+
+    assert_eq!(folds.len(), n);
+
+    // Check all fold indices are in 0..5
+    for &f in &folds {
+        assert!(f < 5, "fold index {} >= 5", f);
+    }
+
+    // Each fold should have roughly n/5 = 6 elements
+    for fold_id in 0..5 {
+        let count = folds.iter().filter(|&&f| f == fold_id).count();
+        assert!(
+            (4..=8).contains(&count),
+            "fold {} has {} elements (expected ~6)",
+            fold_id,
+            count
+        );
+    }
+
+    // Check that class proportions are roughly maintained per fold
+    for fold_id in 0..5 {
+        let fold_class0: usize = folds
+            .iter()
+            .enumerate()
+            .filter(|(_, &f)| f == fold_id)
+            .filter(|(i, _)| labels[*i] == 0)
+            .count();
+        let fold_total = folds.iter().filter(|&&f| f == fold_id).count();
+        let ratio = fold_class0 as f64 / fold_total as f64;
+        // Population ratio is 20/30 ≈ 0.667
+        assert!(
+            ratio > 0.3 && ratio < 1.0,
+            "fold {} class-0 ratio={} is too far from 0.667",
+            fold_id,
+            ratio
+        );
+    }
+}
+
+// ─── Generic vs Dedicated Explainability ─────────────────────────────────────
+
+/// Generic PDP on FregreLmResult should match dedicated functional_pdp.
+#[test]
+fn validate_generic_pdp_vs_dedicated() {
+    let reg: RegressionData = load_json("data", "regression_30x51");
+    let data = FdMatrix::from_column_major(reg.data.clone(), reg.n, reg.m).unwrap();
+    let fit = fregre_lm(&data, &reg.y, None, 3).expect("fregre_lm should succeed");
+
+    let dedicated = fdars_core::explain::functional_pdp(&fit, &data, None, 0, 20)
+        .expect("functional_pdp should succeed");
+    let generic = fdars_core::explain_generic::generic_pdp(&fit, &data, None, 0, 20)
+        .expect("generic_pdp should succeed");
+
+    // Grid values should match exactly (same algorithm)
+    assert_vec_close(
+        &generic.grid_values,
+        &dedicated.grid_values,
+        1e-10,
+        "pdp_grid_values",
+    );
+
+    // Mean PDP curve should match
+    assert_vec_close(&generic.pdp_curve, &dedicated.pdp_curve, 1e-10, "pdp_curve");
+}
+
+/// Generic SHAP on FregreLmResult should match dedicated fpc_shap_values.
+/// For linear models both are exact, so they should agree closely.
+#[test]
+fn validate_generic_shap_vs_dedicated() {
+    let reg: RegressionData = load_json("data", "regression_30x51");
+    let data = FdMatrix::from_column_major(reg.data.clone(), reg.n, reg.m).unwrap();
+    let fit = fregre_lm(&data, &reg.y, None, 3).expect("fregre_lm should succeed");
+
+    let dedicated = fdars_core::explain::fpc_shap_values(&fit, &data, None)
+        .expect("fpc_shap_values should succeed");
+    // generic uses sampling but for linear models, large n_samples converges
+    let generic = fdars_core::explain_generic::generic_shap_values(&fit, &data, None, 10000, 42)
+        .expect("generic_shap_values should succeed");
+
+    let (n, ncomp) = (dedicated.values.nrows(), dedicated.values.ncols());
+    assert_eq!(n, generic.values.nrows(), "SHAP nrows mismatch");
+    assert_eq!(ncomp, generic.values.ncols(), "SHAP ncols mismatch");
+
+    // Base values should match
+    assert!(
+        (dedicated.base_value - generic.base_value).abs() < 1e-6,
+        "base_value: dedicated={}, generic={}",
+        dedicated.base_value,
+        generic.base_value
+    );
+
+    // SHAP values should match (may have sampling noise for generic)
+    let mut ded_data = Vec::with_capacity(n * ncomp);
+    let mut gen_data = Vec::with_capacity(n * ncomp);
+    for i in 0..n {
+        for j in 0..ncomp {
+            ded_data.push(dedicated.values[(i, j)]);
+            gen_data.push(generic.values[(i, j)]);
+        }
+    }
+    assert_vec_close(&gen_data, &ded_data, 0.1, "shap_values");
+}
+
+/// Generic ALE on FregreLmResult should match dedicated fpc_ale.
+#[test]
+fn validate_generic_ale_vs_dedicated() {
+    let reg: RegressionData = load_json("data", "regression_30x51");
+    let data = FdMatrix::from_column_major(reg.data.clone(), reg.n, reg.m).unwrap();
+    let fit = fregre_lm(&data, &reg.y, None, 3).expect("fregre_lm should succeed");
+
+    let dedicated =
+        fdars_core::explain::fpc_ale(&fit, &data, None, 0, 10).expect("fpc_ale should succeed");
+    let generic = fdars_core::explain_generic::generic_ale(&fit, &data, None, 0, 10)
+        .expect("generic_ale should succeed");
+
+    // ALE effects should match
+    assert_vec_close(
+        &generic.ale_values,
+        &dedicated.ale_values,
+        1e-10,
+        "ale_values",
+    );
+    assert_vec_close(
+        &generic.bin_midpoints,
+        &dedicated.bin_midpoints,
+        1e-10,
+        "ale_bin_midpoints",
+    );
+}
+
+// ─── Elastic Phase Changepoint ───────────────────────────────────────────────
+
+/// Phase changepoint with known phase shift should detect location.
+#[test]
+fn validate_elastic_phase_changepoint() {
+    use std::f64::consts::PI;
+
+    let n = 30;
+    let m = 51;
+    let argvals: Vec<f64> = (0..m).map(|j| j as f64 / (m - 1) as f64).collect();
+    let mut col_major_data = vec![0.0; n * m];
+
+    // First half: sin(2πt), second half: sin(2π(t+0.2)) — phase-shifted
+    for i in 0..n {
+        let phase_shift = if i < n / 2 { 0.0 } else { 0.2 };
+        for j in 0..m {
+            let t = argvals[j];
+            col_major_data[i + j * n] = (2.0 * PI * (t + phase_shift)).sin();
+        }
+    }
+
+    let data = FdMatrix::from_column_major(col_major_data, n, m).unwrap();
+    let result =
+        fdars_core::elastic_changepoint::elastic_ph_changepoint(&data, &argvals, 0.0, 10, 100, 42)
+            .expect("elastic_ph_changepoint should succeed");
+
+    // Detected changepoint should be near the midpoint (n/2 = 15)
+    let cp = result.changepoint;
+    assert!(
+        (10..=20).contains(&cp),
+        "changepoint {} should be near 15 (phase shift at sample 15)",
+        cp
+    );
+
+    // Test statistic should be positive
+    assert!(
+        result.test_statistic > 0.0,
+        "test_statistic {} should be positive",
+        result.test_statistic
+    );
 }

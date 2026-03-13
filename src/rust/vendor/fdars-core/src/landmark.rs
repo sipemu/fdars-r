@@ -28,7 +28,7 @@ pub enum LandmarkKind {
 }
 
 /// A detected landmark on a curve.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Landmark {
     /// Position on the domain (t-value).
     pub position: f64,
@@ -41,7 +41,7 @@ pub struct Landmark {
 }
 
 /// Result of landmark registration.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LandmarkResult {
     /// Registered (aligned) curves (n × m).
     pub registered: FdMatrix,
@@ -215,7 +215,7 @@ fn hermite_eval(t: f64, x_knots: &[f64], y_knots: &[f64], d: &[f64]) -> f64 {
     } else if t >= x_knots[k - 1] {
         k - 2
     } else {
-        match x_knots.binary_search_by(|v| v.partial_cmp(&t).unwrap()) {
+        match x_knots.binary_search_by(|v| v.partial_cmp(&t).unwrap_or(std::cmp::Ordering::Equal)) {
             Ok(i) => i.min(k - 2),
             Err(i) => (i - 1).min(k - 2),
         }
@@ -332,7 +332,7 @@ fn compute_target_landmarks(landmarks: &[Vec<f64>], target: Option<&[f64]>, n: u
     if let Some(t) = target {
         return t.to_vec();
     }
-    let min_count = landmarks.iter().map(|l| l.len()).min().unwrap_or(0);
+    let min_count = landmarks.iter().map(std::vec::Vec::len).min().unwrap_or(0);
     if min_count == 0 {
         return Vec::new();
     }
@@ -399,7 +399,7 @@ pub fn landmark_register(
     let mut landmark_info = Vec::with_capacity(n);
 
     for i in 0..n {
-        let source: Vec<f64> = landmarks[i].iter().take(k).cloned().collect();
+        let source: Vec<f64> = landmarks[i].iter().take(k).copied().collect();
         let gamma = monotone_landmark_warp(&source, &target_pos, argvals);
         let fi = data.row(i);
         let f_aligned = reparameterize_curve(&fi, argvals, &gamma);

@@ -185,6 +185,7 @@ pub fn pcvm_statistic(adot_vec: &[f64], residuals: &[f64]) -> f64 {
 }
 
 /// Result of random projection statistics.
+#[derive(Debug, Clone, PartialEq)]
 pub struct RpStatResult {
     /// CvM statistics for each projection
     pub cvm: Vec<f64>,
@@ -303,6 +304,20 @@ pub fn knn_loocv(distance_matrix: &FdMatrix, y: &[f64], k: usize) -> f64 {
         .collect();
 
     errors.iter().sum::<f64>() / n as f64
+}
+
+/// Safely convert a non-negative f64 to usize, clamping to `0..=usize::MAX`.
+///
+/// Returns 0 for negative values and NaN.
+#[inline]
+pub(crate) fn f64_to_usize_clamped(x: f64) -> usize {
+    if x.is_nan() || x <= 0.0 {
+        0
+    } else if x >= usize::MAX as f64 {
+        usize::MAX
+    } else {
+        x as usize
+    }
 }
 
 #[cfg(test)]

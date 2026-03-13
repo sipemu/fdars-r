@@ -3,14 +3,16 @@
 //! This module provides k-means and fuzzy c-means clustering algorithms
 //! for functional data.
 
+use crate::error::FdarError;
 use crate::helpers::{l2_distance, simpsons_weights, NUMERICAL_EPS};
 use crate::matrix::FdMatrix;
-use crate::{iter_maybe_parallel, slice_maybe_parallel};
+use crate::{iter_maybe_parallel, maybe_par_chunks_mut_enumerate, slice_maybe_parallel};
 use rand::prelude::*;
 #[cfg(feature = "parallel")]
 use rayon::iter::ParallelIterator;
 
 /// Result of k-means clustering.
+#[derive(Debug, Clone, PartialEq)]
 pub struct KmeansResult {
     /// Cluster assignments for each observation
     pub cluster: Vec<usize>,
@@ -89,12 +91,12 @@ fn kmeans_plusplus_init(
 
         // Update min_dist_sq: only compute distance to the newest center
         let new_center = &centers[c_idx * m..(c_idx + 1) * m];
-        for i in 0..n {
+        maybe_par_chunks_mut_enumerate!(min_dist_sq, 1, |(i, chunk): (usize, &mut [f64])| {
             let d_sq = l2_distance(&curves[i * m..(i + 1) * m], new_center, weights).powi(2);
-            if d_sq < min_dist_sq[i] {
-                min_dist_sq[i] = d_sq;
+            if d_sq < chunk[0] {
+                chunk[0] = d_sq;
             }
-        }
+        });
     }
 
     centers
@@ -139,7 +141,7 @@ fn centers_to_matrix(centers: &[f64], k: usize, m: usize) -> FdMatrix {
             flat[c + j * k] = centers[c * m + j];
         }
     }
-    FdMatrix::from_column_major(flat, k, m).unwrap()
+    FdMatrix::from_column_major(flat, k, m).expect("dimension invariant: data.len() == n * m")
 }
 
 /// Initialize a random membership matrix (n x k) with rows summing to 1.
@@ -454,6 +456,7 @@ fn kmeans_iterate(
 /// * `max_iter` - Maximum iterations
 /// * `tol` - Convergence tolerance
 /// * `seed` - Random seed
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn kmeans_fd(
     data: &FdMatrix,
     argvals: &[f64],
@@ -461,19 +464,35 @@ pub fn kmeans_fd(
     max_iter: usize,
     tol: f64,
     seed: u64,
-) -> KmeansResult {
+) -> Result<KmeansResult, FdarError> {
     let n = data.nrows();
     let m = data.ncols();
 
-    if n == 0 || m == 0 || k == 0 || k > n || argvals.len() != m {
-        return KmeansResult {
-            cluster: Vec::new(),
-            centers: FdMatrix::zeros(0, 0),
-            withinss: Vec::new(),
-            tot_withinss: 0.0,
-            iter: 0,
-            converged: false,
-        };
+    if n == 0 || m == 0 {
+        return Err(FdarError::InvalidDimension {
+            parameter: "data",
+            expected: "non-empty matrix".into(),
+            actual: format!("{n}x{m}"),
+        });
+    }
+    if k == 0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "k",
+            message: "number of clusters must be > 0".into(),
+        });
+    }
+    if k > n {
+        return Err(FdarError::InvalidParameter {
+            parameter: "k",
+            message: format!("k={k} exceeds number of observations n={n}"),
+        });
+    }
+    if argvals.len() != m {
+        return Err(FdarError::InvalidDimension {
+            parameter: "argvals",
+            expected: format!("{m}"),
+            actual: format!("{}", argvals.len()),
+        });
     }
 
     let weights = simpsons_weights(argvals);
@@ -492,17 +511,18 @@ pub fn kmeans_fd(
     let tot_withinss: f64 = withinss.iter().sum();
     let centers_mat = centers_to_matrix(&centers, k, m);
 
-    KmeansResult {
+    Ok(KmeansResult {
         cluster,
         centers: centers_mat,
         withinss,
         tot_withinss,
         iter,
         converged,
-    }
+    })
 }
 
 /// Result of fuzzy c-means clustering.
+#[derive(Debug, Clone, PartialEq)]
 pub struct FuzzyCmeansResult {
     /// Membership matrix (n x k)
     pub membership: FdMatrix,
@@ -524,6 +544,7 @@ pub struct FuzzyCmeansResult {
 /// * `max_iter` - Maximum iterations
 /// * `tol` - Convergence tolerance
 /// * `seed` - Random seed
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn fuzzy_cmeans_fd(
     data: &FdMatrix,
     argvals: &[f64],
@@ -532,17 +553,41 @@ pub fn fuzzy_cmeans_fd(
     max_iter: usize,
     tol: f64,
     seed: u64,
-) -> FuzzyCmeansResult {
+) -> Result<FuzzyCmeansResult, FdarError> {
     let n = data.nrows();
     let m = data.ncols();
 
-    if n == 0 || m == 0 || k == 0 || k > n || argvals.len() != m || fuzziness <= 1.0 {
-        return FuzzyCmeansResult {
-            membership: FdMatrix::zeros(0, 0),
-            centers: FdMatrix::zeros(0, 0),
-            iter: 0,
-            converged: false,
-        };
+    if n == 0 || m == 0 {
+        return Err(FdarError::InvalidDimension {
+            parameter: "data",
+            expected: "non-empty matrix".into(),
+            actual: format!("{n}x{m}"),
+        });
+    }
+    if k == 0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "k",
+            message: "number of clusters must be > 0".into(),
+        });
+    }
+    if k > n {
+        return Err(FdarError::InvalidParameter {
+            parameter: "k",
+            message: format!("k={k} exceeds number of observations n={n}"),
+        });
+    }
+    if argvals.len() != m {
+        return Err(FdarError::InvalidDimension {
+            parameter: "argvals",
+            expected: format!("{m}"),
+            actual: format!("{}", argvals.len()),
+        });
+    }
+    if fuzziness <= 1.0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "fuzziness",
+            message: format!("fuzziness must be > 1.0, got {fuzziness}"),
+        });
     }
 
     let weights = simpsons_weights(argvals);
@@ -584,15 +629,16 @@ pub fn fuzzy_cmeans_fd(
 
     let centers_mat = centers_to_matrix(&centers, k, m);
 
-    FuzzyCmeansResult {
+    Ok(FuzzyCmeansResult {
         membership,
         centers: centers_mat,
         iter,
         converged,
-    }
+    })
 }
 
 /// Compute silhouette score for clustering result.
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn silhouette_score(data: &FdMatrix, argvals: &[f64], cluster: &[usize]) -> Vec<f64> {
     let n = data.nrows();
     let m = data.ncols();
@@ -604,7 +650,7 @@ pub fn silhouette_score(data: &FdMatrix, argvals: &[f64], cluster: &[usize]) -> 
     let weights = simpsons_weights(argvals);
     let curves = data.to_row_major();
 
-    let k = cluster.iter().cloned().max().unwrap_or(0) + 1;
+    let k = cluster.iter().copied().max().unwrap_or(0) + 1;
     let members = cluster_member_indices(cluster, k);
 
     iter_maybe_parallel!(0..n)
@@ -647,6 +693,7 @@ pub fn silhouette_score(data: &FdMatrix, argvals: &[f64], cluster: &[usize]) -> 
 }
 
 /// Compute Calinski-Harabasz index for clustering result.
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn calinski_harabasz(data: &FdMatrix, argvals: &[f64], cluster: &[usize]) -> f64 {
     let n = data.nrows();
     let m = data.ncols();
@@ -658,7 +705,7 @@ pub fn calinski_harabasz(data: &FdMatrix, argvals: &[f64], cluster: &[usize]) ->
     let weights = simpsons_weights(argvals);
     let curves = data.to_row_major();
 
-    let k = cluster.iter().cloned().max().unwrap_or(0) + 1;
+    let k = cluster.iter().copied().max().unwrap_or(0) + 1;
     if k < 2 {
         return 0.0;
     }
@@ -725,7 +772,7 @@ mod tests {
         let (data, t) = generate_two_clusters(n_per, m);
         let n = 2 * n_per;
 
-        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
 
         assert_eq!(result.cluster.len(), n);
         assert!(result.converged);
@@ -739,7 +786,7 @@ mod tests {
         let (data, t) = generate_two_clusters(n_per, m);
         let n = 2 * n_per;
 
-        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
 
         // First half should be one cluster, second half the other
         let cluster_0 = result.cluster[0];
@@ -764,8 +811,8 @@ mod tests {
         let n_per = 5;
         let (data, t) = generate_two_clusters(n_per, m);
 
-        let result1 = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
-        let result2 = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
+        let result1 = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
+        let result2 = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
 
         // Same seed should give same results
         assert_eq!(result1.cluster, result2.cluster);
@@ -777,7 +824,7 @@ mod tests {
         let n_per = 5;
         let (data, t) = generate_two_clusters(n_per, m);
 
-        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
 
         // Within-cluster sum of squares should be non-negative
         for &wss in &result.withinss {
@@ -796,7 +843,7 @@ mod tests {
         let (data, t) = generate_two_clusters(n_per, m);
         let k = 3;
 
-        let result = kmeans_fd(&data, &t, k, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, k, 100, 1e-6, 42).unwrap();
 
         // Centers should be k x m matrix
         assert_eq!(result.centers.nrows(), k);
@@ -809,14 +856,11 @@ mod tests {
 
         // Empty data
         let data = FdMatrix::zeros(0, 0);
-        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
-        assert!(result.cluster.is_empty());
-        assert!(!result.converged);
+        assert!(kmeans_fd(&data, &t, 2, 100, 1e-6, 42).is_err());
 
         // k > n
         let data = FdMatrix::zeros(5, 30);
-        let result = kmeans_fd(&data, &t, 10, 100, 1e-6, 42);
-        assert!(result.cluster.is_empty());
+        assert!(kmeans_fd(&data, &t, 10, 100, 1e-6, 42).is_err());
     }
 
     #[test]
@@ -826,7 +870,7 @@ mod tests {
         let n = 10;
         let data = FdMatrix::zeros(n, m);
 
-        let result = kmeans_fd(&data, &t, 1, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, 1, 100, 1e-6, 42).unwrap();
 
         // All should be in cluster 0
         for &c in &result.cluster {
@@ -843,7 +887,7 @@ mod tests {
         let (data, t) = generate_two_clusters(n_per, m);
         let n = 2 * n_per;
 
-        let result = fuzzy_cmeans_fd(&data, &t, 2, 2.0, 100, 1e-6, 42);
+        let result = fuzzy_cmeans_fd(&data, &t, 2, 2.0, 100, 1e-6, 42).unwrap();
 
         assert_eq!(result.membership.nrows(), n);
         assert_eq!(result.membership.ncols(), 2);
@@ -858,7 +902,7 @@ mod tests {
         let n = 2 * n_per;
         let k = 2;
 
-        let result = fuzzy_cmeans_fd(&data, &t, k, 2.0, 100, 1e-6, 42);
+        let result = fuzzy_cmeans_fd(&data, &t, k, 2.0, 100, 1e-6, 42).unwrap();
 
         // Each observation's membership should sum to 1
         for i in 0..n {
@@ -877,7 +921,7 @@ mod tests {
         let n_per = 5;
         let (data, t) = generate_two_clusters(n_per, m);
 
-        let result = fuzzy_cmeans_fd(&data, &t, 2, 2.0, 100, 1e-6, 42);
+        let result = fuzzy_cmeans_fd(&data, &t, 2, 2.0, 100, 1e-6, 42).unwrap();
 
         // All memberships should be in [0, 1]
         for &mem in result.membership.as_slice() {
@@ -891,8 +935,8 @@ mod tests {
         let n_per = 5;
         let (data, t) = generate_two_clusters(n_per, m);
 
-        let result_low = fuzzy_cmeans_fd(&data, &t, 2, 1.5, 100, 1e-6, 42);
-        let result_high = fuzzy_cmeans_fd(&data, &t, 2, 3.0, 100, 1e-6, 42);
+        let result_low = fuzzy_cmeans_fd(&data, &t, 2, 1.5, 100, 1e-6, 42).unwrap();
+        let result_high = fuzzy_cmeans_fd(&data, &t, 2, 3.0, 100, 1e-6, 42).unwrap();
 
         // Higher fuzziness should give more diffuse memberships
         // Measure by entropy-like metric
@@ -922,11 +966,8 @@ mod tests {
         let data = FdMatrix::zeros(10, 30);
 
         // Fuzziness <= 1 should fail
-        let result = fuzzy_cmeans_fd(&data, &t, 2, 1.0, 100, 1e-6, 42);
-        assert!(result.membership.is_empty());
-
-        let result = fuzzy_cmeans_fd(&data, &t, 2, 0.5, 100, 1e-6, 42);
-        assert!(result.membership.is_empty());
+        assert!(fuzzy_cmeans_fd(&data, &t, 2, 1.0, 100, 1e-6, 42).is_err());
+        assert!(fuzzy_cmeans_fd(&data, &t, 2, 0.5, 100, 1e-6, 42).is_err());
     }
 
     #[test]
@@ -937,7 +978,7 @@ mod tests {
         let k = 3;
         let data = FdMatrix::zeros(n, m);
 
-        let result = fuzzy_cmeans_fd(&data, &t, k, 2.0, 100, 1e-6, 42);
+        let result = fuzzy_cmeans_fd(&data, &t, k, 2.0, 100, 1e-6, 42).unwrap();
 
         assert_eq!(result.centers.nrows(), k);
         assert_eq!(result.centers.ncols(), m);
@@ -1090,7 +1131,7 @@ mod tests {
             .map(|idx| (2.0 * PI * (idx % m) as f64 / (m - 1) as f64).sin())
             .collect();
         let data = FdMatrix::from_column_major(data_vec, n, m).unwrap();
-        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
         // Should not panic with identical data
         assert_eq!(result.cluster.len(), n);
     }
@@ -1101,7 +1142,7 @@ mod tests {
         let t = uniform_grid(m);
         let n = 5;
         let (data, _) = generate_two_clusters(n, m);
-        let result = kmeans_fd(&data, &t, 2 * n, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, 2 * n, 100, 1e-6, 42).unwrap();
         // k == n: each curve is its own cluster
         assert_eq!(result.cluster.len(), 2 * n);
     }
@@ -1115,7 +1156,7 @@ mod tests {
             data[(0, j)] = 0.0;
             data[(1, j)] = 10.0;
         }
-        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42);
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
         assert_eq!(result.cluster.len(), 2);
         assert_ne!(result.cluster[0], result.cluster[1]);
     }

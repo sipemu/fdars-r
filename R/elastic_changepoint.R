@@ -17,10 +17,8 @@
 #' @param lambda Regularization for alignment (default 0).
 #' @param max.iter Maximum alignment iterations (default 20).
 #' @param n.mc Number of Monte Carlo permutations for p-value (default 1000).
-#' @param cov.kernel Long-run covariance kernel: "bartlett", "parzen",
-#'   "flattop", or "simple".
-#' @param cov.bandwidth Bandwidth for the covariance kernel. If NULL,
-#'   automatically selected.
+#' @param cov.kernel Deprecated. No longer used (ignored with a warning).
+#' @param cov.bandwidth Deprecated. No longer used (ignored with a warning).
 #' @param seed Random seed for reproducibility.
 #'
 #' @return An object of class 'elastic.changepoint' with components:
@@ -53,10 +51,15 @@ elastic.changepoint <- function(fdataobj,
 
   type <- match.arg(type)
   pca.method <- match.arg(pca.method)
-  cov.kernel <- match.arg(cov.kernel)
+
+  if (!missing(cov.kernel) && !is.null(cov.kernel)) {
+    warning("'cov.kernel' is deprecated and ignored. Permutation-based p-values are used instead.")
+  }
+  if (!missing(cov.bandwidth) && !is.null(cov.bandwidth)) {
+    warning("'cov.bandwidth' is deprecated and ignored. Permutation-based p-values are used instead.")
+  }
 
   if (is.null(seed)) seed <- sample.int(.Machine$integer.max, 1)
-  if (is.null(cov.bandwidth)) cov.bandwidth <- 0L  # 0 signals auto-select to Rust
 
   n <- nrow(fdataobj$data)
   argvals <- as.numeric(fdataobj$argvals)
@@ -65,14 +68,12 @@ elastic.changepoint <- function(fdataobj,
     result <- .Call("wrap__elastic_amp_changepoint_rust",
                     fdataobj$data, argvals,
                     as.numeric(lambda), as.integer(max.iter),
-                    as.integer(n.mc), cov.kernel,
-                    as.integer(cov.bandwidth), as.integer(seed))
+                    as.integer(n.mc), as.integer(seed))
   } else if (type == "phase") {
     result <- .Call("wrap__elastic_ph_changepoint_rust",
                     fdataobj$data, argvals,
                     as.numeric(lambda), as.integer(max.iter),
-                    as.integer(n.mc), cov.kernel,
-                    as.integer(cov.bandwidth), as.integer(seed))
+                    as.integer(n.mc), as.integer(seed))
   } else {
     result <- .Call("wrap__elastic_fpca_changepoint_rust",
                     fdataobj$data, argvals,

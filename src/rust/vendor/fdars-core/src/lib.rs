@@ -27,18 +27,24 @@
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::type_complexity)]
 
+pub mod error;
+pub(crate) mod linalg;
 pub mod matrix;
 pub mod parallel;
+
+pub use error::FdarError;
 
 pub mod alignment;
 pub mod basis;
 pub mod classification;
 pub mod clustering;
+pub mod cv;
 pub mod depth;
 pub mod detrend;
 pub mod famm;
 pub mod fdata;
 pub mod function_on_scalar;
+pub mod function_on_scalar_2d;
 pub mod gmm;
 pub mod helpers;
 pub mod irreg_fdata;
@@ -56,11 +62,15 @@ pub mod utility;
 pub mod warping;
 
 // Elastic analysis modules
+pub mod conformal;
+pub mod elastic;
 pub mod elastic_changepoint;
 pub mod elastic_explain;
 pub mod elastic_fpca;
 pub mod elastic_regression;
 pub mod explain;
+pub mod explain_generic;
+pub mod prelude;
 pub mod smooth_basis;
 
 // Re-export matrix types
@@ -82,8 +92,9 @@ pub use alignment::{
 
 // Re-export commonly used items
 pub use helpers::{
-    cumulative_trapz, extract_curves, gradient_uniform, l2_distance, linear_interp,
-    simpsons_weights, simpsons_weights_2d, trapz, DEFAULT_CONVERGENCE_TOL, NUMERICAL_EPS,
+    cumulative_trapz, extract_curves, gradient, gradient_nonuniform, gradient_uniform, l2_distance,
+    linear_interp, simpsons_weights, simpsons_weights_2d, trapz, DEFAULT_CONVERGENCE_TOL,
+    NUMERICAL_EPS,
 };
 
 // Re-export warping utilities
@@ -107,7 +118,7 @@ pub use landmark::{
 };
 
 // Re-export detrending types
-pub use detrend::{DecomposeResult, TrendResult};
+pub use detrend::{DecomposeResult, StlConfig, StlResult, TrendResult};
 
 // Re-export simulation types
 pub use simulation::{EFunType, EValType};
@@ -130,12 +141,24 @@ pub use famm::{fmm, fmm_predict, fmm_test_fixed, FmmResult, FmmTestResult};
 pub use function_on_scalar::{
     fanova, fosr, fosr_fpc, predict_fosr, FanovaResult, FosrFpcResult, FosrResult,
 };
+pub use function_on_scalar_2d::{fosr_2d, predict_fosr_2d, FosrResult2d, Grid2d};
 
 // Re-export scalar-on-function regression types
 pub use scalar_on_function::{
-    bootstrap_ci_fregre_lm, bootstrap_ci_functional_logistic, fregre_cv, fregre_lm,
-    fregre_np_mixed, functional_logistic, predict_fregre_lm, predict_fregre_np, BootstrapCiResult,
-    FregreCvResult, FregreLmResult, FregreNpResult, FunctionalLogisticResult,
+    bootstrap_ci_fregre_lm, bootstrap_ci_functional_logistic, fregre_basis_cv, fregre_cv,
+    fregre_lm, fregre_np_cv, fregre_np_mixed, functional_logistic, model_selection_ncomp,
+    predict_fregre_lm, predict_fregre_np, predict_functional_logistic, BootstrapCiResult,
+    FregreBasisCvResult, FregreCvResult, FregreLmResult, FregreNpCvResult, FregreNpResult,
+    FunctionalLogisticResult, ModelSelectionResult, SelectionCriterion,
+};
+
+// Re-export generic explainability types
+pub use explain_generic::{
+    generic_ale, generic_anchor, generic_conditional_permutation_importance,
+    generic_counterfactual, generic_domain_selection, generic_friedman_h, generic_lime,
+    generic_pdp, generic_permutation_importance, generic_prototype_criticism, generic_saliency,
+    generic_shap_values, generic_sobol_indices, generic_stability, generic_vif, FpcPredictor,
+    TaskType,
 };
 
 // Re-export explainability types
@@ -165,12 +188,27 @@ pub use explain::{
 
 // Re-export classification types
 pub use classification::{
-    fclassif_cv, fclassif_dd, fclassif_kernel, fclassif_knn, fclassif_lda, fclassif_qda,
-    ClassifCvResult, ClassifResult,
+    fclassif_cv, fclassif_cv_with_config, fclassif_dd, fclassif_kernel, fclassif_knn,
+    fclassif_knn_fit, fclassif_lda, fclassif_lda_fit, fclassif_qda, fclassif_qda_fit,
+    ClassifCvConfig, ClassifCvResult, ClassifFit, ClassifMethod, ClassifResult,
+};
+
+// Re-export conformal prediction types
+pub use conformal::{
+    conformal_classif, conformal_elastic_logistic, conformal_elastic_pcr,
+    conformal_elastic_pcr_with_config, conformal_elastic_regression,
+    conformal_elastic_regression_with_config, conformal_fregre_lm, conformal_fregre_np,
+    conformal_generic_classification, conformal_generic_regression, conformal_logistic,
+    cv_conformal_classification, cv_conformal_regression, jackknife_plus_regression,
+    ClassificationScore, ConformalClassificationResult, ConformalConfig, ConformalMethod,
+    ConformalRegressionResult,
 };
 
 // Re-export GMM clustering types
-pub use gmm::{gmm_cluster, gmm_em, predict_gmm, CovType, GmmClusterResult, GmmResult};
+pub use gmm::{
+    gmm_cluster, gmm_cluster_with_config, gmm_em, predict_gmm, CovType, GmmClusterConfig,
+    GmmClusterResult, GmmResult,
+};
 
 // Re-export streaming depth types
 pub use streaming_depth::{
@@ -180,8 +218,8 @@ pub use streaming_depth::{
 
 // Re-export smooth basis types
 pub use smooth_basis::{
-    bspline_penalty_matrix, fourier_penalty_matrix, smooth_basis, smooth_basis_gcv, BasisType,
-    FdPar, SmoothBasisResult,
+    basis_nbasis_cv, bspline_penalty_matrix, fourier_penalty_matrix, smooth_basis,
+    smooth_basis_gcv, BasisCriterion, BasisNbasisCvResult, BasisType, FdPar, SmoothBasisResult,
 };
 
 // Re-export elastic FPCA types
@@ -191,12 +229,79 @@ pub use elastic_fpca::{
 
 // Re-export elastic regression types
 pub use elastic_regression::{
-    elastic_logistic, elastic_pcr, elastic_regression, ElasticLogisticResult, ElasticPcrResult,
-    ElasticRegressionResult, PcaMethod,
+    elastic_logistic, elastic_logistic_with_config, elastic_pcr, elastic_pcr_with_config,
+    elastic_regression, elastic_regression_with_config, predict_elastic_logistic,
+    predict_elastic_regression, ElasticConfig, ElasticLogisticResult, ElasticPcrConfig,
+    ElasticPcrResult, ElasticRegressionResult, PcaMethod,
 };
 
 // Re-export elastic changepoint types
 pub use elastic_changepoint::{
     elastic_amp_changepoint, elastic_fpca_changepoint, elastic_ph_changepoint, ChangepointResult,
-    ChangepointType, CovKernel, FpcaChangepointMethod,
+    ChangepointType, FpcaChangepointMethod,
+};
+
+// Re-export cross-validation utilities
+pub use cv::{
+    create_folds, create_stratified_folds, cv_fdata, fold_indices, subset_rows, subset_vec,
+    CvFdataResult, CvMetrics, CvType,
+};
+
+// Re-export smoothing CV types
+pub use smoothing::{
+    cv_smoother, gcv_smoother, knn_gcv, knn_lcv, optim_bandwidth, CvCriterion, KnnCvResult,
+    OptimBandwidthResult,
+};
+
+// Re-export regression types
+pub use regression::{fdata_to_pc_1d, fdata_to_pls_1d, FpcaResult, PlsResult};
+#[cfg(feature = "linalg")]
+pub use regression::{ridge_regression_fit, RidgeResult};
+
+// Re-export clustering types
+pub use clustering::{
+    calinski_harabasz, fuzzy_cmeans_fd, kmeans_fd, silhouette_score, FuzzyCmeansResult,
+    KmeansResult,
+};
+
+// Re-export distance metric types and functions
+pub use metric::{
+    dtw_cross_1d, dtw_distance, dtw_self_1d, fourier_cross_1d, fourier_self_1d, hausdorff_3d,
+    hausdorff_cross_1d, hausdorff_cross_2d, hausdorff_self_1d, hausdorff_self_2d, hshift_cross_1d,
+    hshift_self_1d, lp_cross_1d, lp_cross_2d, lp_self_1d, lp_self_2d, soft_dtw_barycenter,
+    soft_dtw_cross_1d, soft_dtw_distance, soft_dtw_div_cross_1d, soft_dtw_div_self_1d,
+    soft_dtw_divergence, soft_dtw_self_1d, SoftDtwBarycenterResult,
+};
+
+// Re-export depth measure functions
+pub use depth::{
+    band_1d, fraiman_muniz_1d, fraiman_muniz_2d, functional_spatial_1d, functional_spatial_2d,
+    kernel_functional_spatial_1d, kernel_functional_spatial_2d, modal_1d, modal_2d,
+    modified_band_1d, modified_epigraph_index_1d, random_projection_1d,
+    random_projection_1d_seeded, random_projection_2d, random_tukey_1d, random_tukey_1d_seeded,
+    random_tukey_2d,
+};
+
+// Re-export outlier detection functions
+pub use outliers::{detect_outliers_lrt, outliers_threshold_lrt, outliers_threshold_lrt_with_dist};
+
+// Re-export utility functions
+pub use utility::{
+    compute_adot, inner_product, inner_product_matrix, integrate_simpson, knn_loocv, knn_predict,
+    pcvm_statistic, rp_stat, RpStatResult,
+};
+
+// Re-export functional data operation types and functions
+pub use fdata::{
+    center_1d, deriv_1d, deriv_2d, geometric_median_1d, geometric_median_2d, mean_1d, mean_2d,
+    norm_lp_1d, Deriv2DResult,
+};
+
+// Re-export basis representation types and functions
+pub use basis::{
+    basis_to_fdata, basis_to_fdata_1d, bspline_basis, difference_matrix, fdata_to_basis,
+    fdata_to_basis_1d, fourier_basis, fourier_basis_with_period, fourier_fit_1d, pspline_fit_1d,
+    select_basis_auto_1d, select_fourier_nbasis_gcv, BasisAutoSelectionResult,
+    BasisProjectionResult, FourierFitResult, ProjectionBasisType, PsplineFitResult,
+    SingleCurveSelection,
 };

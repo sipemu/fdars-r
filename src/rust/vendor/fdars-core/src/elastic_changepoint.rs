@@ -15,16 +15,15 @@ use crate::elastic_fpca::{
 };
 use crate::helpers::simpsons_weights;
 use crate::matrix::FdMatrix;
-use nalgebra::{DMatrix, SVD};
+use nalgebra::DMatrix;
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
-use rand_distr::{Distribution, Normal};
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 /// Result of changepoint detection.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ChangepointResult {
     /// Estimated changepoint location (index in 1..n-1).
     pub changepoint: usize,
@@ -55,15 +54,6 @@ pub enum FpcaChangepointMethod {
     Joint,
 }
 
-/// Kernel for long-run covariance estimation.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum CovKernel {
-    Bartlett,
-    Parzen,
-    FlatTop,
-    Simple,
-}
-
 // ─── Amplitude Changepoint ──────────────────────────────────────────────────
 
 /// Detect a changepoint in the amplitude of functional data.
@@ -71,7 +61,7 @@ pub enum CovKernel {
 /// 1. Karcher mean alignment
 /// 2. CUSUM statistic on aligned curves
 /// 3. k* = argmax(S_n), T_n = max(S_n)
-/// 4. Monte Carlo p-value via Brownian bridge simulation
+/// 4. Monte Carlo p-value via permutation testing
 ///
 /// # Arguments
 /// * `data` — Functional data (n × m), ordered by time/index
@@ -79,22 +69,23 @@ pub enum CovKernel {
 /// * `lambda` — Alignment penalty
 /// * `max_iter` — Karcher mean iterations
 /// * `n_mc` — Number of Monte Carlo simulations for p-value
-/// * `cov_kernel` — Kernel for long-run covariance
-/// * `cov_bandwidth` — Bandwidth for covariance kernel (if None, auto-select)
 /// * `seed` — Random seed for reproducibility
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn elastic_amp_changepoint(
     data: &FdMatrix,
     argvals: &[f64],
     lambda: f64,
     max_iter: usize,
     n_mc: usize,
-    cov_kernel: CovKernel,
-    cov_bandwidth: Option<usize>,
     seed: u64,
-) -> Option<ChangepointResult> {
+) -> Result<ChangepointResult, crate::FdarError> {
     let (n, m) = data.shape();
     if n < 4 || m < 2 || argvals.len() != m {
-        return None;
+        return Err(crate::FdarError::InvalidDimension {
+            parameter: "data",
+            expected: "n >= 4, m >= 2, argvals.len() == m".to_string(),
+            actual: format!("n={}, m={}, argvals.len()={}", n, m, argvals.len()),
+        });
     }
 
     // Alignment
@@ -106,16 +97,10 @@ pub fn elastic_amp_changepoint(
 
     let (changepoint, test_statistic) = find_max_cusum(&cusum_values);
 
-    // Permutation p-value: shuffle curve order, recompute CUSUM
-    let p_value = mc_pvalue_permutation_functional(
-        test_statistic,
-        &km.aligned_data,
-        &weights,
-        n_mc,
-        seed,
-    );
+    // Monte Carlo p-value via permutation
+    let p_value = mc_pvalue_permutation(test_statistic, &km.aligned_data, &weights, n_mc, seed);
 
-    Some(ChangepointResult {
+    Ok(ChangepointResult {
         changepoint,
         test_statistic,
         p_value,
@@ -128,40 +113,43 @@ pub fn elastic_amp_changepoint(
 /// Detect a changepoint in the phase (warping) of functional data.
 ///
 /// Same as amplitude changepoint but on shooting vectors from the warping functions.
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn elastic_ph_changepoint(
     data: &FdMatrix,
     argvals: &[f64],
     lambda: f64,
     max_iter: usize,
     n_mc: usize,
-    cov_kernel: CovKernel,
-    cov_bandwidth: Option<usize>,
     seed: u64,
-) -> Option<ChangepointResult> {
+) -> Result<ChangepointResult, crate::FdarError> {
     let (n, m) = data.shape();
     if n < 4 || m < 2 || argvals.len() != m {
-        return None;
+        return Err(crate::FdarError::InvalidDimension {
+            parameter: "data",
+            expected: "n >= 4, m >= 2, argvals.len() == m".to_string(),
+            actual: format!("n={}, m={}, argvals.len()={}", n, m, argvals.len()),
+        });
     }
 
     let km = karcher_mean(data, argvals, max_iter, 1e-4, lambda);
 
-    // Compute shooting vectors from warps
-    let shooting = compute_shooting_vectors(&km, argvals)?;
+    // Compute shooting vectors from warps (live on uniform [0,1] grid, not argvals)
+    let shooting = compute_shooting_vectors(&km, argvals).ok_or_else(|| {
+        crate::FdarError::ComputationFailed {
+            operation: "compute_shooting_vectors",
+            detail: "failed to compute shooting vectors from warps".to_string(),
+        }
+    })?;
 
-    let weights = simpsons_weights(argvals);
+    let time: Vec<f64> = (0..m).map(|i| i as f64 / (m - 1) as f64).collect();
+    let weights = simpsons_weights(&time);
     let cusum_values = functional_cusum(&shooting, &weights);
     let (changepoint, test_statistic) = find_max_cusum(&cusum_values);
 
-    // Permutation p-value: shuffle shooting vector order, recompute CUSUM
-    let p_value = mc_pvalue_permutation_functional(
-        test_statistic,
-        &shooting,
-        &weights,
-        n_mc,
-        seed,
-    );
+    // Monte Carlo p-value via permutation
+    let p_value = mc_pvalue_permutation(test_statistic, &shooting, &weights, n_mc, seed);
 
-    Some(ChangepointResult {
+    Ok(ChangepointResult {
         changepoint,
         test_statistic,
         p_value,
@@ -184,6 +172,7 @@ pub fn elastic_ph_changepoint(
 /// * `max_iter` — Karcher mean iterations
 /// * `n_mc` — Monte Carlo simulations
 /// * `seed` — Random seed
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn elastic_fpca_changepoint(
     data: &FdMatrix,
     argvals: &[f64],
@@ -193,10 +182,20 @@ pub fn elastic_fpca_changepoint(
     max_iter: usize,
     n_mc: usize,
     seed: u64,
-) -> Option<ChangepointResult> {
+) -> Result<ChangepointResult, crate::FdarError> {
     let (n, m) = data.shape();
     if n < 4 || m < 2 || argvals.len() != m || ncomp < 1 {
-        return None;
+        return Err(crate::FdarError::InvalidDimension {
+            parameter: "data",
+            expected: "n >= 4, m >= 2, argvals.len() == m, ncomp >= 1".to_string(),
+            actual: format!(
+                "n={}, m={}, argvals.len()={}, ncomp={}",
+                n,
+                m,
+                argvals.len(),
+                ncomp
+            ),
+        });
     }
 
     let km = karcher_mean(data, argvals, max_iter, 1e-4, lambda);
@@ -217,16 +216,14 @@ pub fn elastic_fpca_changepoint(
         }
     };
 
-    let actual_ncomp = scores.ncols();
-
     // Hotelling CUSUM on scores
     let cusum_values = hotelling_cusum(&scores);
     let (changepoint, test_statistic) = find_max_cusum(&cusum_values);
 
-    // Permutation p-value: shuffle score rows, recompute Hotelling CUSUM
+    // Monte Carlo p-value via permutation
     let p_value = mc_pvalue_permutation_hotelling(test_statistic, &scores, n_mc, seed);
 
-    Some(ChangepointResult {
+    Ok(ChangepointResult {
         changepoint,
         test_statistic,
         p_value,
@@ -248,10 +245,10 @@ fn compute_shooting_vectors(km: &KarcherMeanResult, argvals: &[f64]) -> Option<F
     Some(shooting_vectors_from_psis(&psis, &mu_psi, &time))
 }
 
-/// Functional CUSUM: S_n(k) = (1/(m*n²)) Σ_j (cumsum_j - (k/n)*total_j)²
+/// Functional CUSUM: S_n(k) = (1/n²) Σ_j w_j * (cumsum_j - (k/n)*total_j)²
 ///
-/// Matches R's fdasrvf formula: `sum(diff_vec^2) / (m * n^2)`.
-fn functional_cusum(data: &FdMatrix, _weights: &[f64]) -> Vec<f64> {
+/// Uses Simpson's quadrature weights for spatial integration.
+fn functional_cusum(data: &FdMatrix, weights: &[f64]) -> Vec<f64> {
     let (n, m) = data.shape();
     let mut cusum_values = Vec::with_capacity(n - 1);
 
@@ -269,14 +266,14 @@ fn functional_cusum(data: &FdMatrix, _weights: &[f64]) -> Vec<f64> {
             cumsum[j] += data[(k - 1, j)];
         }
 
-        // S_n(k) = (1/(m*n²)) Σ_j (cumsum_j - (k/n)*total_j)²
+        // S_n(k) = (1/n²) Σ_j w_j * (cumsum_j - (k/n)*total_j)²
         let ratio = k as f64 / n as f64;
         let mut s = 0.0;
         for j in 0..m {
             let diff = cumsum[j] - ratio * total[j];
-            s += diff * diff;
+            s += weights[j] * diff * diff;
         }
-        s /= (m * n * n) as f64;
+        s /= (n * n) as f64;
         cusum_values.push(s);
     }
 
@@ -356,121 +353,11 @@ fn find_max_cusum(cusum_values: &[f64]) -> (usize, f64) {
     (max_idx, max_val)
 }
 
-/// Compute lag-h cross-covariance matrix Γ(h) = (1/n) Σ_i (x_i - μ)(x_{i+h} - μ)'.
-#[allow(dead_code)]
-fn lag_cross_covariance(
-    data: &FdMatrix,
-    mean: &[f64],
-    n: usize,
-    m: usize,
-    lag: usize,
-) -> DMatrix<f64> {
-    let count = n.saturating_sub(lag);
-    let mut gamma_lag = DMatrix::zeros(m, m);
-    for i in 0..count {
-        let i2 = i + lag;
-        for j1 in 0..m {
-            for j2 in 0..m {
-                gamma_lag[(j1, j2)] += (data[(i, j1)] - mean[j1]) * (data[(i2, j2)] - mean[j2]);
-            }
-        }
-    }
-    gamma_lag /= n as f64;
-    gamma_lag
-}
-
-/// Eigenvalues of long-run covariance via kernel-weighted lag cross-covariances.
-#[allow(dead_code)]
-fn long_run_cov_eigenvalues(
-    data: &FdMatrix,
-    bandwidth: usize,
-    kernel: CovKernel,
-    n_eigen: usize,
-) -> Vec<f64> {
-    let (n, m) = data.shape();
-
-    let mut mean = vec![0.0; m];
-    for j in 0..m {
-        for i in 0..n {
-            mean[j] += data[(i, j)];
-        }
-        mean[j] /= n as f64;
-    }
-
-    let mut d_mat = DMatrix::zeros(m, m);
-    for lag in 0..=bandwidth {
-        let k_weight = kernel_weight(lag as f64 / bandwidth as f64, kernel);
-        if k_weight.abs() < 1e-15 || lag >= n {
-            continue;
-        }
-        let gamma_lag = lag_cross_covariance(data, &mean, n, m, lag);
-        if lag == 0 {
-            d_mat += k_weight * &gamma_lag;
-        } else {
-            d_mat += k_weight * (&gamma_lag + gamma_lag.transpose());
-        }
-    }
-
-    let svd = SVD::new(d_mat, false, false);
-    svd.singular_values
-        .iter()
-        .take(n_eigen)
-        .map(|&s| s.max(0.0))
-        .collect()
-}
-
-/// Kernel weight function.
-#[allow(dead_code)]
-fn kernel_weight(x: f64, kernel: CovKernel) -> f64 {
-    let x_abs = x.abs();
-    match kernel {
-        CovKernel::Bartlett => {
-            if x_abs <= 1.0 {
-                1.0 - x_abs
-            } else {
-                0.0
-            }
-        }
-        CovKernel::Parzen => {
-            if x_abs <= 0.5 {
-                1.0 - 6.0 * x_abs * x_abs + 6.0 * x_abs * x_abs * x_abs
-            } else if x_abs <= 1.0 {
-                2.0 * (1.0 - x_abs).powi(3)
-            } else {
-                0.0
-            }
-        }
-        CovKernel::FlatTop => {
-            if x_abs <= 0.5 {
-                1.0
-            } else if x_abs <= 1.0 {
-                2.0 * (1.0 - x_abs)
-            } else {
-                0.0
-            }
-        }
-        CovKernel::Simple => {
-            if x_abs <= 1.0 {
-                1.0
-            } else {
-                0.0
-            }
-        }
-    }
-}
-
-/// Auto-select bandwidth: floor(n^{1/3}).
-#[allow(dead_code)]
-fn auto_bandwidth(n: usize) -> usize {
-    (n as f64).powf(1.0 / 3.0).floor() as usize
-}
-
-/// Permutation p-value for functional CUSUM.
+/// Monte Carlo p-value via permutation testing for functional CUSUM.
 ///
-/// Under H0, the ordering of curves is exchangeable. We permute the row
-/// indices B times, recompute the CUSUM each time, and count how often
-/// the permuted statistic exceeds the observed one.
-fn mc_pvalue_permutation_functional(
+/// Shuffles the row order of `data`, recomputes `functional_cusum`, and compares
+/// max(cusum) to the observed test statistic. Scale-invariant by construction.
+fn mc_pvalue_permutation(
     test_stat: f64,
     data: &FdMatrix,
     weights: &[f64],
@@ -479,24 +366,20 @@ fn mc_pvalue_permutation_functional(
 ) -> f64 {
     let (n, m) = data.shape();
     let mut rng = StdRng::seed_from_u64(seed);
-    let mut count_exceed = 0usize;
     let mut indices: Vec<usize> = (0..n).collect();
+    let mut count_exceed = 0usize;
 
+    let mut shuffled = FdMatrix::zeros(n, m);
     for _ in 0..n_mc {
         indices.shuffle(&mut rng);
-
-        // Build permuted data
-        let mut perm_data = FdMatrix::zeros(n, m);
-        for (new_i, &old_i) in indices.iter().enumerate() {
+        for (new_i, &orig_i) in indices.iter().enumerate() {
             for j in 0..m {
-                perm_data[(new_i, j)] = data[(old_i, j)];
+                shuffled[(new_i, j)] = data[(orig_i, j)];
             }
         }
-
-        let cusum = functional_cusum(&perm_data, weights);
-        let (_, perm_stat) = find_max_cusum(&cusum);
-
-        if perm_stat >= test_stat {
+        let cusum = functional_cusum(&shuffled, weights);
+        let (_, max_val) = find_max_cusum(&cusum);
+        if max_val >= test_stat {
             count_exceed += 1;
         }
     }
@@ -504,7 +387,9 @@ fn mc_pvalue_permutation_functional(
     (count_exceed as f64 + 1.0) / (n_mc as f64 + 1.0)
 }
 
-/// Permutation p-value for Hotelling CUSUM on multivariate scores.
+/// Monte Carlo p-value via permutation testing for Hotelling CUSUM.
+///
+/// Shuffles row order of scores, recomputes `hotelling_cusum`, and compares.
 fn mc_pvalue_permutation_hotelling(
     test_stat: f64,
     scores: &FdMatrix,
@@ -513,56 +398,25 @@ fn mc_pvalue_permutation_hotelling(
 ) -> f64 {
     let (n, p) = scores.shape();
     let mut rng = StdRng::seed_from_u64(seed);
-    let mut count_exceed = 0usize;
     let mut indices: Vec<usize> = (0..n).collect();
+    let mut count_exceed = 0usize;
 
+    let mut shuffled = FdMatrix::zeros(n, p);
     for _ in 0..n_mc {
         indices.shuffle(&mut rng);
-
-        // Build permuted scores
-        let mut perm_scores = FdMatrix::zeros(n, p);
-        for (new_i, &old_i) in indices.iter().enumerate() {
+        for (new_i, &orig_i) in indices.iter().enumerate() {
             for j in 0..p {
-                perm_scores[(new_i, j)] = scores[(old_i, j)];
+                shuffled[(new_i, j)] = scores[(orig_i, j)];
             }
         }
-
-        let cusum = hotelling_cusum(&perm_scores);
-        let (_, perm_stat) = find_max_cusum(&cusum);
-
-        if perm_stat >= test_stat {
+        let cusum = hotelling_cusum(&shuffled);
+        let (_, max_val) = find_max_cusum(&cusum);
+        if max_val >= test_stat {
             count_exceed += 1;
         }
     }
 
     (count_exceed as f64 + 1.0) / (n_mc as f64 + 1.0)
-}
-
-/// Simulate a Brownian bridge on a grid.
-#[allow(dead_code)]
-fn brownian_bridge(n: usize, rng: &mut StdRng) -> Vec<f64> {
-    let normal = Normal::new(0.0, 1.0).unwrap();
-    let mut bb = vec![0.0; n];
-    if n < 2 {
-        return bb;
-    }
-
-    // Generate Brownian motion
-    let dt = 1.0 / (n - 1) as f64;
-    let sqrt_dt = dt.sqrt();
-    let mut w = vec![0.0; n];
-    for i in 1..n {
-        w[i] = w[i - 1] + sqrt_dt * normal.sample(rng);
-    }
-
-    // Bridge: BB(t) = W(t) - t * W(1)
-    let w_final = w[n - 1];
-    for i in 0..n {
-        let t = i as f64 / (n - 1) as f64;
-        bb[i] = w[i] - t * w_final;
-    }
-
-    bb
 }
 
 #[cfg(test)]
@@ -590,8 +444,8 @@ mod tests {
         let cp = 15;
         let (data, t) = generate_changepoint_data(n, m, cp);
 
-        let result = elastic_amp_changepoint(&data, &t, 0.0, 5, 100, CovKernel::Bartlett, None, 42);
-        assert!(result.is_some(), "amp changepoint should succeed");
+        let result = elastic_amp_changepoint(&data, &t, 0.0, 5, 199, 42);
+        assert!(result.is_ok(), "amp changepoint should succeed");
 
         let res = result.unwrap();
         assert!(
@@ -604,7 +458,11 @@ mod tests {
             res.changepoint,
             cp
         );
-        assert!(res.p_value >= 0.0 && res.p_value <= 1.0);
+        assert!(
+            res.p_value < 0.05,
+            "Clear amplitude shift should be significant, got p={}",
+            res.p_value
+        );
     }
 
     #[test]
@@ -621,8 +479,8 @@ mod tests {
             }
         }
 
-        let result = elastic_ph_changepoint(&data, &t, 0.0, 5, 100, CovKernel::Bartlett, None, 42);
-        assert!(result.is_some());
+        let result = elastic_ph_changepoint(&data, &t, 0.0, 5, 100, 42);
+        assert!(result.is_ok());
     }
 
     #[test]
@@ -642,31 +500,7 @@ mod tests {
             100,
             42,
         );
-        assert!(result.is_some(), "fpca changepoint should succeed");
-    }
-
-    #[test]
-    fn test_kernel_weights() {
-        // Bartlett
-        assert!((kernel_weight(0.0, CovKernel::Bartlett) - 1.0).abs() < 1e-10);
-        assert!((kernel_weight(0.5, CovKernel::Bartlett) - 0.5).abs() < 1e-10);
-        assert!(kernel_weight(1.5, CovKernel::Bartlett).abs() < 1e-10);
-
-        // Parzen
-        assert!((kernel_weight(0.0, CovKernel::Parzen) - 1.0).abs() < 1e-10);
-        assert!(kernel_weight(1.5, CovKernel::Parzen).abs() < 1e-10);
-
-        // FlatTop
-        assert!((kernel_weight(0.0, CovKernel::FlatTop) - 1.0).abs() < 1e-10);
-        assert!((kernel_weight(0.3, CovKernel::FlatTop) - 1.0).abs() < 1e-10);
-    }
-
-    #[test]
-    fn test_brownian_bridge_endpoints() {
-        let mut rng = StdRng::seed_from_u64(123);
-        let bb = brownian_bridge(101, &mut rng);
-        assert!((bb[0]).abs() < 1e-10, "BB should start at 0");
-        assert!((bb[100]).abs() < 1e-10, "BB should end at 0");
+        assert!(result.is_ok(), "fpca changepoint should succeed");
     }
 
     #[test]
@@ -682,12 +516,45 @@ mod tests {
             }
         }
 
-        let result = elastic_amp_changepoint(&data, &t, 0.0, 5, 200, CovKernel::Bartlett, None, 42);
-        if let Some(res) = result {
-            // With no change, p-value should tend to be higher
-            // (not a strict guarantee due to randomness, but a sanity check)
-            assert!(res.p_value > 0.0);
+        let result = elastic_amp_changepoint(&data, &t, 0.0, 5, 200, 42);
+        if let Ok(res) = result {
+            assert!(
+                res.p_value > 0.1,
+                "No change should not be significant, got p={}",
+                res.p_value
+            );
         }
+    }
+
+    #[test]
+    fn test_pvalue_permutation_discriminates() {
+        let m = 51;
+        let t: Vec<f64> = (0..m).map(|j| j as f64 / (m - 1) as f64).collect();
+
+        // Strong signal: amplitude doubles at midpoint
+        let (data_signal, _) = generate_changepoint_data(30, m, 15);
+        let res_signal =
+            elastic_amp_changepoint(&data_signal, &t, 0.0, 5, 199, 99).expect("should succeed");
+        assert!(
+            res_signal.p_value < 0.05,
+            "Strong signal should give small p, got {}",
+            res_signal.p_value
+        );
+
+        // No signal: all curves identical
+        let mut data_null = FdMatrix::zeros(30, m);
+        for i in 0..30 {
+            for j in 0..m {
+                data_null[(i, j)] = (2.0 * PI * t[j]).sin();
+            }
+        }
+        let res_null =
+            elastic_amp_changepoint(&data_null, &t, 0.0, 5, 199, 99).expect("should succeed");
+        assert!(
+            res_null.p_value > 0.1,
+            "No signal should give large p, got {}",
+            res_null.p_value
+        );
     }
 
     #[test]
@@ -695,8 +562,61 @@ mod tests {
         let data = FdMatrix::zeros(2, 5);
         let t: Vec<f64> = (0..5).map(|i| i as f64 / 4.0).collect();
         // n=2 < 4 → should return None
-        assert!(
-            elastic_amp_changepoint(&data, &t, 0.0, 5, 100, CovKernel::Simple, None, 42).is_none()
+        assert!(elastic_amp_changepoint(&data, &t, 0.0, 5, 100, 42).is_err());
+    }
+
+    #[test]
+    fn test_fpca_changepoint_horizontal() {
+        let n = 30;
+        let m = 51;
+        let cp = 15;
+        let (data, t) = generate_changepoint_data(n, m, cp);
+
+        let result = elastic_fpca_changepoint(
+            &data,
+            &t,
+            FpcaChangepointMethod::Horizontal,
+            3,
+            0.0,
+            5,
+            100,
+            42,
         );
+        assert!(
+            result.is_ok(),
+            "fpca changepoint (horizontal) should succeed"
+        );
+
+        let res = result.unwrap();
+        assert_eq!(res.cusum_values.len(), n - 1);
+    }
+
+    #[test]
+    fn test_fpca_changepoint_joint() {
+        let n = 30;
+        let m = 51;
+        let cp = 15;
+        let (data, t) = generate_changepoint_data(n, m, cp);
+
+        let result =
+            elastic_fpca_changepoint(&data, &t, FpcaChangepointMethod::Joint, 3, 0.0, 5, 100, 42);
+        assert!(result.is_ok(), "fpca changepoint (joint) should succeed");
+
+        let res = result.unwrap();
+        assert_eq!(res.cusum_values.len(), n - 1);
+    }
+
+    #[test]
+    fn test_changepoint_seed_determinism() {
+        let n = 30;
+        let m = 51;
+        let cp = 15;
+        let (data, t) = generate_changepoint_data(n, m, cp);
+
+        let res1 = elastic_amp_changepoint(&data, &t, 0.0, 5, 199, 42).expect("should succeed");
+        let res2 = elastic_amp_changepoint(&data, &t, 0.0, 5, 199, 42).expect("should succeed");
+
+        assert_eq!(res1.changepoint, res2.changepoint);
+        assert!((res1.p_value - res2.p_value).abs() < 1e-10);
     }
 }

@@ -35,11 +35,9 @@ or "joint".}
 
 \item{n.mc}{Number of Monte Carlo permutations for p-value (default 1000).}
 
-\item{cov.kernel}{Long-run covariance kernel: "bartlett", "parzen",
-"flattop", or "simple".}
+\item{cov.kernel}{Deprecated. No longer used (ignored with a warning).}
 
-\item{cov.bandwidth}{Bandwidth for the covariance kernel. If NULL,
-automatically selected.}
+\item{cov.bandwidth}{Deprecated. No longer used (ignored with a warning).}
 
 \item{seed}{Random seed for reproducibility.}
 }

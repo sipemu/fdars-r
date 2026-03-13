@@ -341,3 +341,116 @@ plot.fanova <- function(x, ...) {
                                  format.pval(x$p.value), ")"),
                   color = "Group")
 }
+
+# =============================================================================
+# 2D Function-on-Scalar Regression
+# =============================================================================
+
+#' 2D Function-on-Scalar Regression
+#'
+#' Fits a penalized regression model where the response is a 2D surface
+#' Y_i(s,t) and predictors are scalar.
+#'
+#' @param fdataobj An fdata object where each row is a flattened 2D surface
+#'   (m1 * m2 grid points).
+#' @param predictors A matrix of scalar predictors (n x p).
+#' @param argvals.s Grid points along the s dimension.
+#' @param argvals.t Grid points along the t dimension.
+#' @param lambda.s Smoothing penalty in s direction (default 0).
+#' @param lambda.t Smoothing penalty in t direction (default 0).
+#'
+#' @return An object of class 'fosr.2d' with components:
+#'   \item{intercept}{Intercept surface as fdata}
+#'   \item{beta}{Coefficient surfaces as fdata}
+#'   \item{fitted}{Fitted surfaces as fdata}
+#'   \item{residuals}{Residual surfaces as fdata}
+#'   \item{r.squared}{Global R-squared}
+#'   \item{r.squared.pointwise}{Pointwise R-squared values}
+#'   \item{lambda.s}{Penalty in s direction}
+#'   \item{lambda.t}{Penalty in t direction}
+#'   \item{gcv}{GCV criterion}
+#'   \item{grid}{List with argvals.s, argvals.t, m1, m2}
+#'
+#' @examples
+#' \donttest{
+#' n <- 30; m1 <- 5; m2 <- 5
+#' fd <- fdata(matrix(rnorm(n * m1 * m2), n, m1 * m2))
+#' X <- matrix(rnorm(n * 2), n, 2)
+#' fit <- fosr.2d(fd, X, seq(0, 1, length.out = m1), seq(0, 1, length.out = m2))
+#' }
+#'
+#' @export
+fosr.2d <- function(fdataobj, predictors, argvals.s, argvals.t,
+                     lambda.s = 0, lambda.t = 0) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+  predictors <- as.matrix(predictors)
+
+  result <- .Call("wrap__fosr_2d_rust",
+                  fdataobj$data, predictors,
+                  as.numeric(argvals.s), as.numeric(argvals.t),
+                  as.numeric(lambda.s), as.numeric(lambda.t))
+
+  if (is.null(result)) {
+    stop("fosr.2d failed: check data dimensions and grid compatibility")
+  }
+
+  m <- length(argvals.s) * length(argvals.t)
+  argvals <- seq_len(m)
+
+  structure(
+    list(
+      intercept = fdata(matrix(result$intercept, nrow = 1), argvals = argvals),
+      beta = fdata(result$beta, argvals = argvals),
+      fitted = fdata(result$fitted, argvals = argvals),
+      residuals = fdata(result$residuals, argvals = argvals),
+      r.squared = result$r_squared,
+      r.squared.pointwise = result$r_squared_pointwise,
+      beta.se = result$beta_se,
+      lambda.s = result$lambda_s,
+      lambda.t = result$lambda_t,
+      gcv = result$gcv,
+      grid = list(argvals.s = argvals.s, argvals.t = argvals.t,
+                  m1 = result$grid_m1, m2 = result$grid_m2),
+      fdataobj = fdataobj,
+      predictors = predictors,
+      call = match.call()
+    ),
+    class = "fosr.2d"
+  )
+}
+
+#' @export
+predict.fosr.2d <- function(object, new.predictors = NULL, ...) {
+  if (is.null(new.predictors)) {
+    return(object$fitted)
+  }
+  new.predictors <- as.matrix(new.predictors)
+
+  result <- .Call("wrap__predict_fosr_2d_rust",
+                  as.numeric(object$intercept$data[1, ]),
+                  object$beta$data,
+                  new.predictors,
+                  object$grid$argvals.s,
+                  object$grid$argvals.t,
+                  object$lambda.s,
+                  object$lambda.t)
+
+  if (is.null(result)) {
+    stop("predict.fosr.2d failed")
+  }
+
+  m <- object$grid$m1 * object$grid$m2
+  fdata(result, argvals = seq_len(m))
+}
+
+#' @export
+print.fosr.2d <- function(x, ...) {
+  cat("2D Function-on-Scalar Regression\n")
+  cat("  Grid:", x$grid$m1, "x", x$grid$m2, "\n")
+  cat("  Predictors:", ncol(x$predictors), "\n")
+  cat("  R-squared:", round(x$r.squared, 4), "\n")
+  cat("  Lambda (s, t):", x$lambda.s, ",", x$lambda.t, "\n")
+  invisible(x)
+}

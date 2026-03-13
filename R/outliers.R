@@ -1200,3 +1200,59 @@ outlier_summary <- function(x) {
   # Sort by outlierness descending
   df[order(-df$outlierness), ]
 }
+
+#' LRT Outlier Threshold with Bootstrap Distribution
+#'
+#' Computes the bootstrap threshold AND the full sorted null distribution
+#' for LRT-based outlier detection. The returned distribution enables
+#' per-curve p-value computation: \code{p = (sum(boot_dist >= d) + 1) / (B + 1)}.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param nb Number of bootstrap replications (default 200).
+#' @param smo Smoothing parameter for bootstrap noise (default 0.05).
+#' @param trim Proportion of curves to trim (default 0.1).
+#' @param seed Random seed for reproducibility.
+#' @param percentile Percentile for threshold (default 0.99).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{threshold}{Threshold at the specified percentile}
+#'   \item{boot.distribution}{Sorted bootstrap null distribution of max-distances}
+#' }
+#'
+#' @export
+#' @examples
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 30, 50)
+#' for (i in 1:30) X[i, ] <- sin(2*pi*t) + rnorm(50, sd = 0.1)
+#' fd <- fdata(X, argvals = t)
+#' res <- outliers.lrt.dist(fd, nb = 100)
+#' res$threshold
+outliers.lrt.dist <- function(fdataobj, nb = 200, smo = 0.05, trim = 0.1,
+                               seed = NULL, percentile = 0.99) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  if (isTRUE(fdataobj$fdata2d)) {
+    stop("outliers.lrt.dist for 2D functional data not yet implemented")
+  }
+
+  if (percentile <= 0 || percentile >= 1) {
+    stop("percentile must be between 0 and 1 (exclusive)")
+  }
+
+  if (is.null(seed)) {
+    seed <- sample.int(.Machine$integer.max, 1)
+  }
+
+  result <- .Call("wrap__outliers_thres_lrt_with_dist_rust",
+                  fdataobj$data, as.numeric(fdataobj$argvals),
+                  as.integer(nb), as.numeric(smo), as.numeric(trim),
+                  as.numeric(seed), as.numeric(percentile))
+
+  list(
+    threshold = result$threshold,
+    boot.distribution = result$boot_distribution
+  )
+}

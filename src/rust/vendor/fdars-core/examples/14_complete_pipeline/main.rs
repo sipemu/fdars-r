@@ -227,7 +227,7 @@ fn main() {
     // Step 4: Functional PCA
     println!("\n--- Step 4: Functional PCA ---");
     let ncomp = 4;
-    if let Some(fpca) = fdata_to_pc_1d(&clean_mat, ncomp) {
+    if let Ok(fpca) = fdata_to_pc_1d(&clean_mat, ncomp) {
         let total_var: f64 = fpca.singular_values.iter().map(|s| s * s).sum();
         let mut cumvar = 0.0;
         for (k, sv) in fpca.singular_values.iter().enumerate() {
@@ -244,7 +244,7 @@ fn main() {
         // Step 5: Clustering
         println!("\n--- Step 5: K-Means Clustering ---");
         let k = 2;
-        let km = kmeans_fd(&clean_mat, &t, k, 100, 1e-6, 42);
+        let km = kmeans_fd(&clean_mat, &t, k, 100, 1e-6, 42).unwrap();
         print_clustering_results(&km, &clean_mat, &t, &clean_indices, n_per_group, n_clean, k);
 
         // Step 6: Depth-based characterization

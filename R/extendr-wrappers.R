@@ -668,10 +668,10 @@ elastic_logistic_rust <- function(data, y, argvals, ncomp_beta, lambda, max_iter
 elastic_pcr_rust <- function(data, y, argvals, ncomp, pca_method, lambda, max_iter, tol) .Call(wrap__elastic_pcr_rust, data, y, argvals, ncomp, pca_method, lambda, max_iter, tol)
 
 # Amplitude changepoint detection
-elastic_amp_changepoint_rust <- function(data, argvals, lambda, max_iter, n_mc, cov_kernel, cov_bandwidth, seed) .Call(wrap__elastic_amp_changepoint_rust, data, argvals, lambda, max_iter, n_mc, cov_kernel, cov_bandwidth, seed)
+elastic_amp_changepoint_rust <- function(data, argvals, lambda, max_iter, n_mc, seed) .Call(wrap__elastic_amp_changepoint_rust, data, argvals, lambda, max_iter, n_mc, seed)
 
 # Phase changepoint detection
-elastic_ph_changepoint_rust <- function(data, argvals, lambda, max_iter, n_mc, cov_kernel, cov_bandwidth, seed) .Call(wrap__elastic_ph_changepoint_rust, data, argvals, lambda, max_iter, n_mc, cov_kernel, cov_bandwidth, seed)
+elastic_ph_changepoint_rust <- function(data, argvals, lambda, max_iter, n_mc, seed) .Call(wrap__elastic_ph_changepoint_rust, data, argvals, lambda, max_iter, n_mc, seed)
 
 # FPCA-based changepoint detection
 elastic_fpca_changepoint_rust <- function(data, argvals, pca_method, ncomp, lambda, max_iter, n_mc, seed) .Call(wrap__elastic_fpca_changepoint_rust, data, argvals, pca_method, ncomp, lambda, max_iter, n_mc, seed)
@@ -757,5 +757,57 @@ explain_ece_rust <- function(intercept, beta_t, beta_se, gamma, probabilities, p
 # Conditional permutation importance
 explain_conditional_importance_rust <- function(intercept, beta_t, beta_se, gamma, fitted_values, residuals, r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv, fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol, fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol, data, y, n_bins, n_perm, seed) .Call(wrap__explain_conditional_importance_rust, intercept, beta_t, beta_se, gamma, fitted_values, residuals, r_squared, r_squared_adj, std_errors, ncomp, coefficients, residual_se, gcv, fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol, fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol, data, y, n_bins, n_perm, seed)
 
+
+# Phase B1: 2D Function-on-Scalar
+fosr_2d_rust <- function(data, predictors, argvals_s, argvals_t, lambda_s, lambda_t) .Call(wrap__fosr_2d_rust, data, predictors, argvals_s, argvals_t, lambda_s, lambda_t)
+
+predict_fosr_2d_rust <- function(intercept, beta_data, new_predictors, argvals_s, argvals_t, lambda_s, lambda_t) .Call(wrap__predict_fosr_2d_rust, intercept, beta_data, new_predictors, argvals_s, argvals_t, lambda_s, lambda_t)
+
+# Phase B2: Predict Methods
+predict_functional_logistic_rust <- function(intercept, beta_t, beta_se, gamma, probabilities, predicted_classes, ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations, fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol, fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol, new_data, new_scalar) .Call(wrap__predict_functional_logistic_rust, intercept, beta_t, beta_se, gamma, probabilities, predicted_classes, ncomp, accuracy, std_errors, coefficients, log_likelihood, iterations, fpca_mean, fpca_rotation_data, fpca_rotation_nrow, fpca_rotation_ncol, fpca_scores_data, fpca_scores_nrow, fpca_scores_ncol, new_data, new_scalar)
+
+predict_elastic_regression_rust <- function(alpha, beta, fitted_values, residuals, sse, r_squared, gammas_data, aligned_srsfs_data, n_iter, new_data, argvals) .Call(wrap__predict_elastic_regression_rust, alpha, beta, fitted_values, residuals, sse, r_squared, gammas_data, aligned_srsfs_data, n_iter, new_data, argvals)
+
+predict_elastic_logistic_rust <- function(alpha, beta, probabilities, predicted_classes, accuracy, loss, gammas_data, aligned_srsfs_data, n_iter, new_data, argvals) .Call(wrap__predict_elastic_logistic_rust, alpha, beta, probabilities, predicted_classes, accuracy, loss, gammas_data, aligned_srsfs_data, n_iter, new_data, argvals)
+
+# Phase B3: Model Selection
+model_selection_ncomp_rust <- function(data, y, scalar_covariates, max_ncomp, criterion) .Call(wrap__model_selection_ncomp_rust, data, y, scalar_covariates, max_ncomp, criterion)
+
+# Phase B4: Conformal Prediction
+conformal_fregre_lm_rust <- function(data, y, test_data, scalar_train, scalar_test, ncomp, cal_fraction, alpha, seed) .Call(wrap__conformal_fregre_lm_rust, data, y, test_data, scalar_train, scalar_test, ncomp, cal_fraction, alpha, seed)
+
+conformal_fregre_np_rust <- function(data, y, test_data, argvals, scalar_train, scalar_test, h_func, h_scalar, cal_fraction, alpha, seed) .Call(wrap__conformal_fregre_np_rust, data, y, test_data, argvals, scalar_train, scalar_test, h_func, h_scalar, cal_fraction, alpha, seed)
+
+conformal_elastic_regression_rust <- function(data, y, test_data, argvals, ncomp_beta, lambda, cal_fraction, alpha, seed) .Call(wrap__conformal_elastic_regression_rust, data, y, test_data, argvals, ncomp_beta, lambda, cal_fraction, alpha, seed)
+
+conformal_elastic_pcr_rust <- function(data, y, test_data, argvals, ncomp, pca_method, lambda, cal_fraction, alpha, seed) .Call(wrap__conformal_elastic_pcr_rust, data, y, test_data, argvals, ncomp, pca_method, lambda, cal_fraction, alpha, seed)
+
+conformal_classif_rust <- function(data, y, test_data, covariates_train, covariates_test, ncomp, classifier, k_nn, score_type, cal_fraction, alpha, seed) .Call(wrap__conformal_classif_rust, data, y, test_data, covariates_train, covariates_test, ncomp, classifier, k_nn, score_type, cal_fraction, alpha, seed)
+
+conformal_logistic_rust <- function(data, y, test_data, scalar_train, scalar_test, ncomp, max_iter, tol, score_type, cal_fraction, alpha, seed) .Call(wrap__conformal_logistic_rust, data, y, test_data, scalar_train, scalar_test, ncomp, max_iter, tol, score_type, cal_fraction, alpha, seed)
+
+conformal_elastic_logistic_rust <- function(data, y, test_data, argvals, lambda, score_type, cal_fraction, alpha, seed) .Call(wrap__conformal_elastic_logistic_rust, data, y, test_data, argvals, lambda, score_type, cal_fraction, alpha, seed)
+
+# Phase C1: CV-Conformal & Jackknife+
+cv_conformal_fregre_lm_rust <- function(data, y, test_data, scalar_train, scalar_test, ncomp, n_folds, alpha, seed) .Call(wrap__cv_conformal_fregre_lm_rust, data, y, test_data, scalar_train, scalar_test, ncomp, n_folds, alpha, seed)
+
+cv_conformal_fregre_np_rust <- function(data, y, test_data, argvals, scalar_train, scalar_test, h_func, h_scalar, n_folds, alpha, seed) .Call(wrap__cv_conformal_fregre_np_rust, data, y, test_data, argvals, scalar_train, scalar_test, h_func, h_scalar, n_folds, alpha, seed)
+
+cv_conformal_classif_rust <- function(data, y, test_data, covariates_train, covariates_test, ncomp, classifier, k_nn, score_type, n_folds, alpha, seed) .Call(wrap__cv_conformal_classif_rust, data, y, test_data, covariates_train, covariates_test, ncomp, classifier, k_nn, score_type, n_folds, alpha, seed)
+
+jackknife_plus_fregre_lm_rust <- function(data, y, test_data, scalar_train, scalar_test, ncomp, alpha) .Call(wrap__jackknife_plus_fregre_lm_rust, data, y, test_data, scalar_train, scalar_test, ncomp, alpha)
+
+jackknife_plus_fregre_np_rust <- function(data, y, test_data, argvals, scalar_train, scalar_test, h_func, h_scalar, alpha) .Call(wrap__jackknife_plus_fregre_np_rust, data, y, test_data, argvals, scalar_train, scalar_test, h_func, h_scalar, alpha)
+
+# Phase C2: Conformal Generic
+conformal_generic_regression_lm_rust <- function(data, y, test_data, scalar_train, scalar_test, fpca_mean, fpca_rotation, fpca_scores, ncomp, coefficients, gamma, cal_fraction, alpha, seed) .Call(wrap__conformal_generic_regression_lm_rust, data, y, test_data, scalar_train, scalar_test, fpca_mean, fpca_rotation, fpca_scores, ncomp, coefficients, gamma, cal_fraction, alpha, seed)
+
+conformal_generic_classification_logistic_rust <- function(data, y, test_data, scalar_train, scalar_test, fpca_mean, fpca_rotation, fpca_scores, ncomp, intercept, coefficients, gamma, score_type, cal_fraction, alpha, seed) .Call(wrap__conformal_generic_classification_logistic_rust, data, y, test_data, scalar_train, scalar_test, fpca_mean, fpca_rotation, fpca_scores, ncomp, intercept, coefficients, gamma, score_type, cal_fraction, alpha, seed)
+
+# Phase C3: Outliers with distribution
+outliers_thres_lrt_with_dist_rust <- function(data, argvals, nb, smo, trim, seed, percentile) .Call(wrap__outliers_thres_lrt_with_dist_rust, data, argvals, nb, smo, trim, seed, percentile)
+
+# Phase C4: Gradient
+fdata_gradient_rust <- function(data, argvals) .Call(wrap__fdata_gradient_rust, data, argvals)
 
 # nolint end

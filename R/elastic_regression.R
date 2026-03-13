@@ -236,6 +236,83 @@ elastic.pcr <- function(fdataobj, y, ncomp = 3,
   )
 }
 
+#' Predict from Elastic Regression
+#'
+#' @param object A fitted object of class 'elastic.regression'.
+#' @param newdata New functional data (fdata object).
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Predicted response values.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- elastic.regression(fd, y)
+#' predict(fit, fd)
+#' }
+#'
+#' @export
+predict.elastic.regression <- function(object, newdata, ...) {
+  if (!inherits(newdata, "fdata")) {
+    newdata <- fdata(newdata, argvals = object$fdataobj$argvals)
+  }
+  .Call("wrap__predict_elastic_regression_rust",
+        object$alpha,
+        as.numeric(object$beta$data),
+        object$fitted.values,
+        object$residuals,
+        object$sse,
+        object$r.squared,
+        object$gammas,
+        object$aligned.srsfs,
+        as.integer(object$n.iter),
+        newdata$data,
+        as.numeric(object$fdataobj$argvals))
+}
+
+#' Predict from Elastic Logistic Classification
+#'
+#' @param object A fitted object of class 'elastic.logistic'.
+#' @param newdata New functional data (fdata object).
+#' @param type "response" for probabilities (default) or "class" for classes.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Predicted probabilities or class labels.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- sample(0:1, 50, replace = TRUE)
+#' fit <- elastic.logistic(fd, y)
+#' predict(fit, fd)
+#' }
+#'
+#' @export
+predict.elastic.logistic <- function(object, newdata,
+                                      type = c("response", "class"), ...) {
+  type <- match.arg(type)
+  if (!inherits(newdata, "fdata")) {
+    newdata <- fdata(newdata, argvals = object$fdataobj$argvals)
+  }
+  probs <- .Call("wrap__predict_elastic_logistic_rust",
+                 object$alpha,
+                 as.numeric(object$beta$data),
+                 object$probabilities,
+                 as.integer(object$predicted.classes),
+                 object$accuracy,
+                 object$loss,
+                 object$gammas,
+                 object$aligned.srsfs,
+                 as.integer(object$n.iter),
+                 newdata$data,
+                 as.numeric(object$fdataobj$argvals))
+  if (type == "class") {
+    return(as.integer(probs >= 0.5))
+  }
+  probs
+}
+
 #' @export
 print.elastic.regression <- function(x, ...) {
   cat("Elastic Scalar-on-Function Regression\n")

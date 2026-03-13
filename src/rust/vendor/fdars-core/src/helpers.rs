@@ -6,6 +6,11 @@ pub const NUMERICAL_EPS: f64 = 1e-10;
 /// Default convergence tolerance for iterative algorithms.
 pub const DEFAULT_CONVERGENCE_TOL: f64 = 1e-6;
 
+/// Sort a slice using total ordering that treats NaN as equal.
+pub fn sort_nan_safe(slice: &mut [f64]) {
+    slice.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+}
+
 /// Extract curves from column-major data matrix.
 ///
 /// Converts a flat column-major matrix into a vector of curve vectors,
@@ -145,7 +150,7 @@ fn simpsons_weights_nonuniform(weights: &mut [f64], argvals: &[f64], n: usize) {
 /// * `argvals_t` - Grid points in t direction
 ///
 /// # Returns
-/// Flattened vector of integration weights (row-major order)
+/// Flattened vector of integration weights (column-major: s-varies-fastest, matching FdMatrix surface layout)
 pub fn simpsons_weights_2d(argvals_s: &[f64], argvals_t: &[f64]) -> Vec<f64> {
     let weights_s = simpsons_weights(argvals_s);
     let weights_t = simpsons_weights(argvals_t);
@@ -155,7 +160,7 @@ pub fn simpsons_weights_2d(argvals_s: &[f64], argvals_t: &[f64]) -> Vec<f64> {
     let mut weights = vec![0.0; m1 * m2];
     for i in 0..m1 {
         for j in 0..m2 {
-            weights[i * m2 + j] = weights_s[i] * weights_t[j];
+            weights[i + j * m1] = weights_s[i] * weights_t[j];
         }
     }
     weights
@@ -173,7 +178,7 @@ pub fn linear_interp(x: &[f64], y: &[f64], t: f64) -> f64 {
         return y[last];
     }
 
-    let idx = match x.binary_search_by(|v| v.partial_cmp(&t).unwrap()) {
+    let idx = match x.binary_search_by(|v| v.partial_cmp(&t).unwrap_or(std::cmp::Ordering::Equal)) {
         Ok(i) => return y[i],
         Err(i) => i,
     };
@@ -282,6 +287,91 @@ pub fn gradient_uniform(y: &[f64], h: f64) -> Vec<f64> {
         + 25.0 * y[n - 1])
         / (12.0 * h);
     g
+}
+
+/// Numerical gradient for non-uniform grids using 3-point Lagrange derivative.
+///
+/// At interior points uses the three-point formula:
+///   `g[i] = y[i-1]*h_r/(-h_l*(h_l+h_r)) + y[i]*(h_r-h_l)/(h_l*h_r) + y[i+1]*h_l/(h_r*(h_l+h_r))`
+/// where `h_l = t[i]-t[i-1]` and `h_r = t[i+1]-t[i]`.
+///
+/// Boundary points use forward/backward 3-point formulas.
+pub fn gradient_nonuniform(y: &[f64], t: &[f64]) -> Vec<f64> {
+    let n = y.len();
+    assert_eq!(n, t.len(), "y and t must have the same length");
+    let mut g = vec![0.0; n];
+    if n < 2 {
+        return g;
+    }
+    if n == 2 {
+        let h = t[1] - t[0];
+        if h.abs() < 1e-15 {
+            return g;
+        }
+        g[0] = (y[1] - y[0]) / h;
+        g[1] = g[0];
+        return g;
+    }
+
+    // Left boundary: 3-point forward Lagrange derivative
+    let h0 = t[1] - t[0];
+    let h1 = t[2] - t[0];
+    if h0.abs() > 1e-15 && h1.abs() > 1e-15 && (h1 - h0).abs() > 1e-15 {
+        g[0] = y[0] * (-h1 - h0) / (h0 * h1) + y[1] * h1 / (h0 * (h1 - h0))
+            - y[2] * h0 / (h1 * (h1 - h0));
+    } else {
+        g[0] = (y[1] - y[0]) / h0.max(1e-15);
+    }
+
+    // Interior: 3-point Lagrange central formula
+    for i in 1..n - 1 {
+        let h_l = t[i] - t[i - 1];
+        let h_r = t[i + 1] - t[i];
+        let h_sum = h_l + h_r;
+        if h_l.abs() < 1e-15 || h_r.abs() < 1e-15 || h_sum.abs() < 1e-15 {
+            g[i] = 0.0;
+            continue;
+        }
+        g[i] = -y[i - 1] * h_r / (h_l * h_sum)
+            + y[i] * (h_r - h_l) / (h_l * h_r)
+            + y[i + 1] * h_l / (h_r * h_sum);
+    }
+
+    // Right boundary: 3-point backward Lagrange derivative
+    let h_last = t[n - 1] - t[n - 2];
+    let h_prev = t[n - 1] - t[n - 3];
+    let h_mid = t[n - 2] - t[n - 3];
+    if h_last.abs() > 1e-15 && h_prev.abs() > 1e-15 && h_mid.abs() > 1e-15 {
+        g[n - 1] = y[n - 3] * h_last / (h_mid * h_prev) - y[n - 2] * h_prev / (h_mid * h_last)
+            + y[n - 1] * (h_prev + h_last) / (h_prev * h_last);
+    } else {
+        g[n - 1] = (y[n - 1] - y[n - 2]) / h_last.max(1e-15);
+    }
+
+    g
+}
+
+/// Numerical gradient that auto-detects uniform vs non-uniform grids.
+///
+/// If the grid `t` is uniformly spaced (max|Δt_i − Δt_0| < ε), dispatches to
+/// [`gradient_uniform`] for optimal accuracy. Otherwise falls back to
+/// [`gradient_nonuniform`].
+pub fn gradient(y: &[f64], t: &[f64]) -> Vec<f64> {
+    let n = t.len();
+    if n < 2 {
+        return vec![0.0; y.len()];
+    }
+
+    let h0 = t[1] - t[0];
+    let is_uniform = t
+        .windows(2)
+        .all(|w| ((w[1] - w[0]) - h0).abs() < 1e-12 * h0.abs().max(1.0));
+
+    if is_uniform {
+        gradient_uniform(y, h0)
+    } else {
+        gradient_nonuniform(y, t)
+    }
 }
 
 #[cfg(test)]

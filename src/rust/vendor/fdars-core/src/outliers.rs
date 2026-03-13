@@ -27,23 +27,28 @@ fn compute_trimmed_stats(data: &FdMatrix, depths: &[f64], n_keep: usize) -> (Vec
     }
     let keep_idx: Vec<usize> = depth_idx[..n_keep].iter().map(|(i, _)| *i).collect();
 
-    let mut trimmed_mean = vec![0.0; m];
-    for j in 0..m {
-        for &i in &keep_idx {
-            trimmed_mean[j] += data[(i, j)];
-        }
-        trimmed_mean[j] /= n_keep as f64;
-    }
+    let results: Vec<(f64, f64)> = iter_maybe_parallel!(0..m)
+        .map(|j| {
+            let mut mean_j = 0.0;
+            for &i in &keep_idx {
+                mean_j += data[(i, j)];
+            }
+            mean_j /= n_keep as f64;
 
-    let mut trimmed_var = vec![0.0; m];
-    for j in 0..m {
-        for &i in &keep_idx {
-            let diff = data[(i, j)] - trimmed_mean[j];
-            trimmed_var[j] += diff * diff;
-        }
-        trimmed_var[j] /= n_keep as f64;
-        trimmed_var[j] = trimmed_var[j].max(1e-10);
-    }
+            let mut var_j = 0.0;
+            for &i in &keep_idx {
+                let diff = data[(i, j)] - mean_j;
+                var_j += diff * diff;
+            }
+            var_j /= n_keep as f64;
+            var_j = var_j.max(1e-10);
+
+            (mean_j, var_j)
+        })
+        .collect();
+
+    let trimmed_mean: Vec<f64> = results.iter().map(|&(m, _)| m).collect();
+    let trimmed_var: Vec<f64> = results.iter().map(|&(_, v)| v).collect();
 
     (trimmed_mean, trimmed_var)
 }
@@ -76,6 +81,7 @@ fn normalized_distance(
 ///
 /// # Returns
 /// Threshold at specified percentile for outlier detection
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn outliers_threshold_lrt(
     data: &FdMatrix,
     nb: usize,
@@ -104,6 +110,7 @@ pub fn outliers_threshold_lrt(
 /// # Returns
 /// `(threshold, sorted_distribution)` — threshold at specified percentile and the
 /// full sorted bootstrap null distribution of max-distances (length `nb`).
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn outliers_threshold_lrt_with_dist(
     data: &FdMatrix,
     nb: usize,
@@ -123,7 +130,7 @@ pub fn outliers_threshold_lrt_with_dist(
     let n_keep = n_keep.min(n);
 
     // Compute column standard deviations for smoothing
-    let col_vars: Vec<f64> = (0..m)
+    let col_vars: Vec<f64> = iter_maybe_parallel!(0..m)
         .map(|j| {
             let mut sum = 0.0;
             let mut sum_sq = 0.0;
@@ -133,6 +140,7 @@ pub fn outliers_threshold_lrt_with_dist(
                 sum_sq += val * val;
             }
             let mean = sum / n as f64;
+            // Bootstrap variance, population formula
             let var = sum_sq / n as f64 - mean * mean;
             var.max(0.0).sqrt()
         })
@@ -141,7 +149,7 @@ pub fn outliers_threshold_lrt_with_dist(
     // Run bootstrap iterations in parallel
     let max_dists: Vec<f64> = iter_maybe_parallel!(0..nb)
         .map(|b| {
-            let mut rng = StdRng::seed_from_u64(seed + b as u64);
+            let mut rng = StdRng::seed_from_u64(seed.wrapping_add(b as u64));
 
             // Resample with replacement and add smoothing noise
             let indices: Vec<usize> = (0..n).map(|_| rng.gen_range(0..n)).collect();
@@ -174,8 +182,9 @@ pub fn outliers_threshold_lrt_with_dist(
 
     // Sort and extract threshold at specified percentile
     let mut sorted_dists = max_dists;
-    sorted_dists.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-    let idx = ((nb as f64 * percentile) as usize).min(nb.saturating_sub(1));
+    crate::helpers::sort_nan_safe(&mut sorted_dists);
+    let idx =
+        crate::utility::f64_to_usize_clamped(nb as f64 * percentile).min(nb.saturating_sub(1));
     let threshold = sorted_dists.get(idx).copied().unwrap_or(0.0);
     (threshold, sorted_dists)
 }
@@ -189,6 +198,7 @@ pub fn outliers_threshold_lrt_with_dist(
 ///
 /// # Returns
 /// Vector of booleans indicating outliers
+#[must_use = "expensive computation whose result should not be discarded"]
 pub fn detect_outliers_lrt(data: &FdMatrix, threshold: f64, trim: f64) -> Vec<bool> {
     let n = data.nrows();
     let m = data.ncols();

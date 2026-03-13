@@ -1417,6 +1417,8 @@ fregre.lm <- function(fdataobj, y, scalar.covariates = NULL, ncomp = NULL) {
       ncomp = result$ncomp,
       residual.se = result$residual_se,
       gcv = result$gcv,
+      aic = result$aic,
+      bic = result$bic,
       fdataobj = fdataobj,
       y = y,
       scalar.covariates = scalar.covariates,
@@ -1569,6 +1571,8 @@ functional.logistic <- function(fdataobj, y, scalar.covariates = NULL,
       std.errors = result$std_errors,
       coefficients = result$coefficients,
       log.likelihood = result$log_likelihood,
+      aic = result$aic,
+      bic = result$bic,
       iterations = result$iterations,
       fdataobj = fdataobj,
       y = y,
@@ -1583,6 +1587,105 @@ functional.logistic <- function(fdataobj, y, scalar.covariates = NULL,
       call = match.call()
     ),
     class = "fregre.logistic"
+  )
+}
+
+#' Predict from Functional Logistic Model
+#'
+#' @param object A fitted object of class 'fregre.logistic'.
+#' @param newdata New functional data (fdata object). If NULL, returns
+#'   fitted probabilities.
+#' @param new.scalar Optional matrix of new scalar covariates.
+#' @param type "response" for probabilities (default) or "class" for classes.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Predicted probabilities or class labels.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rbinom(50, 1, 0.5)
+#' fit <- functional.logistic(fd, y, ncomp = 3)
+#' predict(fit)
+#' }
+#'
+#' @export
+predict.fregre.logistic <- function(object, newdata = NULL, new.scalar = NULL,
+                                     type = c("response", "class"), ...) {
+  type <- match.arg(type)
+  if (is.null(newdata)) {
+    probs <- object$probabilities
+  } else {
+    if (!inherits(newdata, "fdata")) {
+      newdata <- fdata(newdata, argvals = object$fdataobj$argvals)
+    }
+    X_centered <- sweep(newdata$data, 2, object$.fpca_mean)
+    scores <- X_centered %*% object$.fpca_rotation
+    ncomp <- object$ncomp
+    coefs <- object$coefficients
+    fpc_coefs <- coefs[seq_len(ncomp) + 1L]
+    eta <- rep(object$intercept, nrow(newdata$data))
+    eta <- eta + as.vector(scores[, seq_len(ncomp), drop = FALSE] %*% fpc_coefs)
+    if (!is.null(new.scalar) && length(object$gamma) > 0) {
+      new.scalar <- as.matrix(new.scalar)
+      eta <- eta + as.vector(new.scalar %*% object$gamma)
+    }
+    probs <- 1 / (1 + exp(-eta))
+  }
+  if (type == "class") {
+    return(as.integer(probs >= 0.5))
+  }
+  probs
+}
+
+#' Model Selection for Number of FPC Components
+#'
+#' Selects the optimal number of FPC components for scalar-on-function
+#' regression using AIC, BIC, or GCV criterion.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param y Response vector (scalar).
+#' @param scalar.covariates Optional matrix of scalar covariates.
+#' @param max.ncomp Maximum number of components to evaluate (default 15).
+#' @param criterion Selection criterion: "aic", "bic", or "gcv".
+#'
+#' @return A list with components:
+#'   \item{best.ncomp}{Optimal number of components}
+#'   \item{ncomp}{Vector of tested component counts}
+#'   \item{aic}{AIC values}
+#'   \item{bic}{BIC values}
+#'   \item{gcv}{GCV values}
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' model.selection.ncomp(fd, y, criterion = "bic")
+#' }
+#'
+#' @export
+model.selection.ncomp <- function(fdataobj, y, scalar.covariates = NULL,
+                                   max.ncomp = 15, criterion = c("aic", "bic", "gcv")) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+  criterion <- match.arg(criterion)
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  result <- .Call("wrap__model_selection_ncomp_rust", fdataobj$data,
+                  as.numeric(y), sc, as.integer(max.ncomp), criterion)
+
+  if (is.null(result)) {
+    stop("model.selection.ncomp failed")
+  }
+
+  list(
+    best.ncomp = result$best_ncomp,
+    ncomp = result$ncomp,
+    aic = result$aic,
+    bic = result$bic,
+    gcv = result$gcv
   )
 }
 

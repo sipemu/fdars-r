@@ -41,13 +41,16 @@ pub enum EFunType {
 
 impl EFunType {
     /// Create from integer (for FFI)
-    pub fn from_i32(value: i32) -> Option<Self> {
+    pub fn from_i32(value: i32) -> Result<Self, crate::FdarError> {
         match value {
-            0 => Some(EFunType::Fourier),
-            1 => Some(EFunType::Poly),
-            2 => Some(EFunType::PolyHigh),
-            3 => Some(EFunType::Wiener),
-            _ => None,
+            0 => Ok(EFunType::Fourier),
+            1 => Ok(EFunType::Poly),
+            2 => Ok(EFunType::PolyHigh),
+            3 => Ok(EFunType::Wiener),
+            _ => Err(crate::FdarError::InvalidEnumValue {
+                enum_name: "EFunType",
+                value,
+            }),
         }
     }
 }
@@ -65,12 +68,15 @@ pub enum EValType {
 
 impl EValType {
     /// Create from integer (for FFI)
-    pub fn from_i32(value: i32) -> Option<Self> {
+    pub fn from_i32(value: i32) -> Result<Self, crate::FdarError> {
         match value {
-            0 => Some(EValType::Linear),
-            1 => Some(EValType::Exponential),
-            2 => Some(EValType::Wiener),
-            _ => None,
+            0 => Ok(EValType::Linear),
+            1 => Ok(EValType::Exponential),
+            2 => Ok(EValType::Wiener),
+            _ => Err(crate::FdarError::InvalidEnumValue {
+                enum_name: "EValType",
+                value,
+            }),
         }
     }
 }
@@ -107,12 +113,12 @@ pub fn fourier_eigenfunctions(t: &[f64], m: usize) -> FdMatrix {
         while k < m {
             // sin term: sqrt(2) * sin(2*pi*freq*t)
             if k < m {
-                phi[(i, k)] = sqrt2 * (2.0 * PI * freq as f64 * ti).sin();
+                phi[(i, k)] = sqrt2 * (2.0 * PI * f64::from(freq) * ti).sin();
                 k += 1;
             }
             // cos term: sqrt(2) * cos(2*pi*freq*t)
             if k < m {
-                phi[(i, k)] = sqrt2 * (2.0 * PI * freq as f64 * ti).cos();
+                phi[(i, k)] = sqrt2 * (2.0 * PI * f64::from(freq) * ti).cos();
                 k += 1;
             }
             freq += 1;
@@ -305,7 +311,7 @@ pub fn sim_kl(
         None => StdRng::from_entropy(),
     };
 
-    let normal = Normal::new(0.0, 1.0).unwrap();
+    let normal = Normal::new(0.0, 1.0).expect("valid distribution parameters");
 
     // Generate scores ξ ~ N(0, λ) for all curves
     // xi is n × big_m in column-major format
@@ -334,7 +340,7 @@ pub fn sim_kl(
         }
     });
 
-    FdMatrix::from_column_major(data, n, m).unwrap()
+    FdMatrix::from_column_major(data, n, m).expect("dimension invariant: data.len() == n * m")
 }
 
 /// Simulate functional data with specified eigenfunction and eigenvalue types.
@@ -386,7 +392,7 @@ pub fn add_error_pointwise(data: &FdMatrix, sd: f64, seed: Option<u64>) -> FdMat
         None => StdRng::from_entropy(),
     };
 
-    let normal = Normal::new(0.0, sd).unwrap();
+    let normal = Normal::new(0.0, sd).expect("valid distribution parameters: sd > 0");
 
     let noisy: Vec<f64> = data
         .as_slice()
@@ -394,7 +400,8 @@ pub fn add_error_pointwise(data: &FdMatrix, sd: f64, seed: Option<u64>) -> FdMat
         .map(|&x| x + rng.sample::<f64, _>(normal))
         .collect();
 
-    FdMatrix::from_column_major(noisy, data.nrows(), data.ncols()).unwrap()
+    FdMatrix::from_column_major(noisy, data.nrows(), data.ncols())
+        .expect("dimension invariant: data.len() == n * m")
 }
 
 /// Add curve-level Gaussian noise to functional data.
@@ -418,7 +425,7 @@ pub fn add_error_curve(data: &FdMatrix, sd: f64, seed: Option<u64>) -> FdMatrix 
         None => StdRng::from_entropy(),
     };
 
-    let normal = Normal::new(0.0, sd).unwrap();
+    let normal = Normal::new(0.0, sd).expect("valid distribution parameters: sd > 0");
 
     // Generate one noise value per curve
     let curve_noise: Vec<f64> = (0..n).map(|_| rng.sample::<f64, _>(normal)).collect();
@@ -430,7 +437,7 @@ pub fn add_error_curve(data: &FdMatrix, sd: f64, seed: Option<u64>) -> FdMatrix 
             result[i + j * n] += curve_noise[i];
         }
     }
-    FdMatrix::from_column_major(result, n, m).unwrap()
+    FdMatrix::from_column_major(result, n, m).expect("dimension invariant: data.len() == n * m")
 }
 
 #[cfg(test)]
@@ -719,23 +726,23 @@ mod tests {
 
     #[test]
     fn test_efun_type_from_i32() {
-        assert_eq!(EFunType::from_i32(0), Some(EFunType::Fourier));
-        assert_eq!(EFunType::from_i32(1), Some(EFunType::Poly));
-        assert_eq!(EFunType::from_i32(2), Some(EFunType::PolyHigh));
-        assert_eq!(EFunType::from_i32(3), Some(EFunType::Wiener));
-        assert_eq!(EFunType::from_i32(-1), None);
-        assert_eq!(EFunType::from_i32(4), None);
-        assert_eq!(EFunType::from_i32(100), None);
+        assert_eq!(EFunType::from_i32(0), Ok(EFunType::Fourier));
+        assert_eq!(EFunType::from_i32(1), Ok(EFunType::Poly));
+        assert_eq!(EFunType::from_i32(2), Ok(EFunType::PolyHigh));
+        assert_eq!(EFunType::from_i32(3), Ok(EFunType::Wiener));
+        assert!(EFunType::from_i32(-1).is_err());
+        assert!(EFunType::from_i32(4).is_err());
+        assert!(EFunType::from_i32(100).is_err());
     }
 
     #[test]
     fn test_eval_type_from_i32() {
-        assert_eq!(EValType::from_i32(0), Some(EValType::Linear));
-        assert_eq!(EValType::from_i32(1), Some(EValType::Exponential));
-        assert_eq!(EValType::from_i32(2), Some(EValType::Wiener));
-        assert_eq!(EValType::from_i32(-1), None);
-        assert_eq!(EValType::from_i32(3), None);
-        assert_eq!(EValType::from_i32(99), None);
+        assert_eq!(EValType::from_i32(0), Ok(EValType::Linear));
+        assert_eq!(EValType::from_i32(1), Ok(EValType::Exponential));
+        assert_eq!(EValType::from_i32(2), Ok(EValType::Wiener));
+        assert!(EValType::from_i32(-1).is_err());
+        assert!(EValType::from_i32(3).is_err());
+        assert!(EValType::from_i32(99).is_err());
     }
 
     #[test]

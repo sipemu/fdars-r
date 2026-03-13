@@ -5,6 +5,7 @@
 //! - Full pipeline with automatic K selection (`gmm_cluster`)
 //! - Prediction on new data (`predict_gmm`)
 
+use fdars_core::basis::ProjectionBasisType;
 use fdars_core::gmm::{gmm_cluster, gmm_em, predict_gmm, CovType};
 use fdars_core::matrix::FdMatrix;
 use fdars_core::regression::fdata_to_pc_1d;
@@ -64,7 +65,7 @@ fn main() {
         None,       // no scalar covariates
         &[2, 3, 4], // test K=2,3,4
         5,          // 5 basis functions
-        0,          // B-spline basis
+        ProjectionBasisType::Bspline,
         CovType::Full,
         1.0,   // covariate weight
         200,   // max EM iterations
@@ -89,8 +90,17 @@ fn main() {
     println!("\n=== Predict Cluster for New Curve ===");
     let new_col = t.iter().map(|&tj| (2.0 * PI * tj).sin()).collect();
     let new_data = FdMatrix::from_column_major(new_col, 1, m).unwrap();
-    let (labels, probs) =
-        predict_gmm(&new_data, &t, None, &result.best, 5, 0, 1.0, CovType::Full).unwrap();
+    let (labels, probs) = predict_gmm(
+        &new_data,
+        &t,
+        None,
+        &result.best,
+        5,
+        ProjectionBasisType::Bspline,
+        1.0,
+        CovType::Full,
+    )
+    .unwrap();
     println!("  Assigned cluster: {}", labels[0]);
     println!(
         "  Membership: [{}]",
@@ -101,31 +111,36 @@ fn main() {
     );
 }
 
+/// Find the best unused (row, col) entry in the confusion matrix.
+fn find_best_match(conf: &[Vec<usize>], used: &[bool], k: usize) -> (usize, usize, usize) {
+    let mut best = (0, 0, 0);
+    for (r, row) in conf.iter().enumerate() {
+        for (c, &val) in row.iter().enumerate() {
+            if !used[c] && val > best.2 {
+                best = (r, c, val);
+            }
+        }
+    }
+    let _ = k;
+    best
+}
+
 /// Compute accuracy with best label permutation (greedy matching).
 fn compute_accuracy(predicted: &[usize], true_labels: &[usize], k: usize) -> f64 {
     let n = predicted.len();
-    // Build confusion matrix
     let mut conf = vec![vec![0usize; k]; k];
     for i in 0..n {
         if predicted[i] < k && true_labels[i] < k {
             conf[true_labels[i]][predicted[i]] += 1;
         }
     }
-    // Greedy match: pick the best column for each row
     let mut used = vec![false; k];
     let mut correct = 0;
     for _ in 0..k {
-        let mut best = (0, 0, 0);
-        for (r, row) in conf.iter().enumerate() {
-            for (c, &val) in row.iter().enumerate() {
-                if !used[c] && val > best.2 {
-                    best = (r, c, val);
-                }
-            }
-        }
+        let best = find_best_match(&conf, &used, k);
         used[best.1] = true;
         correct += best.2;
-        conf[best.0] = vec![0; k]; // clear row
+        conf[best.0] = vec![0; k];
     }
     correct as f64 / n as f64
 }

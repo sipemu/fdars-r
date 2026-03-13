@@ -20,7 +20,7 @@
 ^CHANGELOG\.md$
 ^Rplots\.pdf$
 ^.*\.tar\.gz$
-^vignettes/articles$
+^vignettes$
 ^index\.md$
 ^validation$
 # Exclude pkgdown-only SVGs (gallery cards and article diagrams)
@@ -39,3 +39,8 @@
 ^src/rust/vendor/windows-sys.*/src/Windows/Win32/NetworkManagement/WindowsNetworkVirtualization
 ^src/rust/vendor/windows-sys.*/src/Windows/Win32/System/ApplicationInstallationAndServicing
 ^src/rust/vendor/windows-sys.*/src/Windows/Win32/System/Performance/HardwareCounterProfiling
+# Exclude zerocopy test paths that are too long (>100 bytes)
+^src/rust/vendor/zerocopy-derive/tests/ui-nightly/union_into_bytes_cfg
+^src/rust/vendor/zerocopy-derive/tests/ui-stable/union_into_bytes_cfg
+^src/rust/vendor/zerocopy/tests/ui-nightly/try_transmute_ref-dst-not-immutable
+^src/rust/vendor/zerocopy/tests/ui-stable/try_transmute_ref-dst-not-immutable
