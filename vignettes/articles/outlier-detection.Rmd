@@ -243,6 +243,54 @@ threshold_95 <- outliers.thres.lrt(fd, nb = 1000, seed = 123, percentile = 0.95)
 cat("LRT threshold (95th percentile):", threshold_95, "\n")
 ```
 
+### Full Bootstrap Distribution (`outliers.lrt.dist`)
+
+For finer-grained inference, `outliers.lrt.dist()` returns both the threshold
+and the full sorted bootstrap null distribution. This enables per-curve p-value
+computation and visualization of the null distribution:
+
+```{r lrt-dist}
+lrt_dist <- outliers.lrt.dist(fd, nb = 1000, seed = 123, percentile = 0.99)
+
+cat("Threshold:", round(lrt_dist$threshold, 4), "\n")
+cat("Bootstrap distribution: n =", length(lrt_dist$boot.distribution),
+    ", range = [", round(min(lrt_dist$boot.distribution), 3), ",",
+    round(max(lrt_dist$boot.distribution), 3), "]\n")
+```
+
+Visualize the null distribution with the threshold:
+
+```{r lrt-dist-plot, fig.height = 4}
+df_boot <- data.frame(max_distance = lrt_dist$boot.distribution)
+
+ggplot(df_boot, aes(x = .data$max_distance)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "white", alpha = 0.7) +
+  geom_vline(xintercept = lrt_dist$threshold, color = "red",
+             linewidth = 1, linetype = "dashed") +
+  annotate("text", x = lrt_dist$threshold, y = Inf,
+           label = paste0("99th percentile = ", round(lrt_dist$threshold, 3)),
+           vjust = 2, hjust = -0.1, color = "red", size = 3.5) +
+  labs(title = "Bootstrap Null Distribution of Maximum Distances",
+       subtitle = "Red line = threshold for outlier detection",
+       x = "Maximum Distance", y = "Count")
+```
+
+Compute per-curve p-values from the bootstrap distribution:
+
+```{r lrt-pvalues}
+# Distance of each curve from the centre
+curve_depths <- depth.FM(fd)
+curve_distances <- max(curve_depths) - curve_depths  # convert depth to distance
+
+# Per-curve p-value: fraction of bootstrap maxima >= curve's distance
+p_values <- sapply(curve_distances, function(d) {
+  mean(lrt_dist$boot.distribution >= d)
+})
+
+cat("P-values for curves 1-3 (true outliers):", round(p_values[1:3], 4), "\n")
+cat("P-values for curves 4-6 (normal):", round(p_values[4:6], 4), "\n")
+```
+
 ### LRT Results
 
 ```{r lrt-results}

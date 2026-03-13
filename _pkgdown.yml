@@ -72,6 +72,8 @@ articles:
   - articles/explainability
   - articles/regression-diagnostics
   - articles/uncertainty-quantification
+  - articles/conformal-classification
+  - articles/conformal-prediction-guide
 - title: Analyze
   contents:
   - articles/tolerance-bands

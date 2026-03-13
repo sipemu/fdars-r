@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Decision tree structure -->
+  <!-- Root node -->
+  <rect x="70" y="8" width="60" height="18" rx="4" fill="#4A90D9" opacity="0.2"/>
+  <text x="100" y="20" font-size="7" fill="#4A90D9" font-family="sans-serif" text-anchor="middle">Regression?</text>
+  <!-- Left branch (Yes) -->
+  <line x1="85" y1="26" x2="50" y2="38" stroke="#999" stroke-width="1"/>
+  <rect x="20" y="38" width="60" height="16" rx="4" fill="#2E8B57" opacity="0.2"/>
+  <text x="50" y="49" font-size="6.5" fill="#2E8B57" font-family="sans-serif" text-anchor="middle">intervals</text>
+  <!-- Right branch (No) -->
+  <line x1="115" y1="26" x2="150" y2="38" stroke="#999" stroke-width="1"/>
+  <rect x="120" y="38" width="60" height="16" rx="4" fill="#D55E00" opacity="0.2"/>
+  <text x="150" y="49" font-size="6.5" fill="#D55E00" font-family="sans-serif" text-anchor="middle">pred. sets</text>
+  <!-- Split / CV+ / JK+ leaves -->
+  <line x1="35" y1="54" x2="22" y2="66" stroke="#999" stroke-width="0.8"/>
+  <line x1="50" y1="54" x2="50" y2="66" stroke="#999" stroke-width="0.8"/>
+  <line x1="65" y1="54" x2="78" y2="66" stroke="#999" stroke-width="0.8"/>
+  <rect x="8" y="66" width="30" height="14" rx="3" fill="#2E8B57" opacity="0.15"/>
+  <text x="23" y="76" font-size="5.5" fill="#2E8B57" font-family="sans-serif" text-anchor="middle">Split</text>
+  <rect x="40" y="66" width="22" height="14" rx="3" fill="#2E8B57" opacity="0.15"/>
+  <text x="51" y="76" font-size="5.5" fill="#2E8B57" font-family="sans-serif" text-anchor="middle">CV+</text>
+  <rect x="64" y="66" width="28" height="14" rx="3" fill="#2E8B57" opacity="0.15"/>
+  <text x="78" y="76" font-size="5.5" fill="#2E8B57" font-family="sans-serif" text-anchor="middle">JK+</text>
+  <!-- Classification leaves -->
+  <line x1="140" y1="54" x2="128" y2="66" stroke="#999" stroke-width="0.8"/>
+  <line x1="160" y1="54" x2="172" y2="66" stroke="#999" stroke-width="0.8"/>
+  <rect x="112" y="66" width="32" height="14" rx="3" fill="#D55E00" opacity="0.15"/>
+  <text x="128" y="76" font-size="5.5" fill="#D55E00" font-family="sans-serif" text-anchor="middle">Split</text>
+  <rect x="158" y="66" width="28" height="14" rx="3" fill="#D55E00" opacity="0.15"/>
+  <text x="172" y="76" font-size="5.5" fill="#D55E00" font-family="sans-serif" text-anchor="middle">CV+</text>
+  <!-- Footer -->
+  <rect x="55" y="92" width="90" height="16" rx="8" fill="#4A90D9" opacity="0.12"/>
+  <text x="100" y="103" font-size="7" fill="#4A90D9" font-family="sans-serif" text-anchor="middle">14 functions guide</text>
+</svg>

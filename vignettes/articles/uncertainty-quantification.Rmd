@@ -33,7 +33,7 @@ functional regression models:
 | Method | Question | Assumptions | Current Models | Function |
 |:-------|:---------|:------------|:------:|:---------|
 | Prediction Intervals | How uncertain is $\hat{y}$? | Gaussian errors | **lm only** | `fregre.prediction.interval()` |
-| Conformal Prediction | How uncertain is $\hat{y}$? | None (distribution-free) | **lm** (expanding) | `fregre.conformal()` |
+| Conformal Prediction | How uncertain is $\hat{y}$? | None (distribution-free) | **lm, np, elastic, logistic** | `conformal.fregre.lm()`, `cv.conformal.regression()`, etc. |
 | LOO Cross-Validation | How well does the model generalise? | None | **lm only** | `fregre.loo()` |
 | Bootstrap CI for $\beta(t)$ | Where is the coefficient significant? | None (bootstrap) | lm + logistic | `fregre.bootstrap.ci()` |
 
@@ -53,13 +53,11 @@ LOO-CV (which exploit $e_i^{(-i)} = e_i / (1 - h_{ii})$) do not apply.
 model-agnostic — it only needs a `fit`/`predict` function and a set of
 calibration residuals. The coverage guarantee
 $P(y_{\text{new}} \in C_\alpha) \geq 1 - \alpha$ holds for *any* model, with
-no distributional assumptions. The current R wrapper `fregre.conformal()` is
-coupled to `fregre.lm` internals (it passes FPC scores to the Rust backend),
-but the underlying Rust crate (`fdars-core`) is being extended with
-model-specific conformal functions for nonparametric regression
-(`fregre.np`), elastic regression, logistic regression, classification, and
-generic models via closure-based interfaces. These will be exposed to R as
-they become available.
+no distributional assumptions. **fdars** provides conformal inference for
+linear (`fregre.lm`), nonparametric (`fregre.np`), elastic regression,
+elastic PCR, and logistic models, via split, cross-validation (CV+), jackknife+,
+and generic conformal interfaces. See [Advanced Conformal
+Methods](#advanced-conformal-methods) for details.
 
 ## Setup
 
@@ -171,9 +169,9 @@ ggplot(df_pi, aes(x = .data$Observation, y = .data$Width)) +
 
 ### Conformal Prediction
 
-*Currently `fregre.lm` only. The Rust backend is being extended to support
-`fregre.np`, elastic regression, logistic regression, classification, and
-generic models — see [Supported Models](#supported-models) above.*
+*Split conformal is shown here for `fregre.lm`. See [Advanced Conformal
+Methods](#advanced-conformal-methods) below for CV+, jackknife+, nonparametric,
+and generic conformal variants.*
 
 **In plain English.** Conformal prediction makes no assumptions about the data
 distribution. Instead of relying on Gaussian theory, it sets aside a portion
@@ -428,39 +426,112 @@ than controlling coverage at each $t$ separately.
 
 ---
 
-## Conformal Prediction: Beyond Linear Models
+## Advanced Conformal Methods
 
-The `fregre.conformal()` function currently requires `fregre.lm`, but conformal
-prediction is **theoretically model-agnostic**. The algorithm only needs a
-fit/predict function and a calibration set — no distributional assumptions, no
-hat matrix, no parametric variance estimate.
+The split conformal method above uses a single calibration/training split.
+**fdars** also provides cross-conformal (CV+) and jackknife+ variants that use
+all data for both training and calibration, typically producing tighter intervals.
 
-The Rust backend (`fdars-core`) is being extended with a comprehensive
-conformal prediction framework supporting many model types:
+### Cross-Conformal (CV+) Regression
 
-| Conformal variant | Model type | Key idea |
-|:------------------|:-----------|:---------|
-| Split conformal | `fregre.lm` | Calibrate on held-out residuals (current) |
-| Split conformal | `fregre.np` | Same algorithm, nonparametric model |
-| Split conformal | Elastic regression | Conformal intervals in SRVF space |
-| Split conformal | Elastic PCR | Phase-aware conformal intervals |
-| Split conformal | Logistic / classification | Conformal prediction sets (labels, not intervals) |
-| CV+ conformal | Any regression | Cross-validation instead of a single split |
-| Jackknife+ | Any regression | LOO-based, uses all data for training |
-| Generic closure | Any `fit`/`predict` | User provides fit and predict closures |
+CV+ conformal runs K-fold cross-validation internally: each fold serves as the
+calibration set for the model trained on the remaining folds. This avoids the
+data-splitting penalty of split conformal — all observations contribute to both
+training and calibration.
 
-**Why does this matter?**
+The coverage guarantee is slightly weaker than split conformal ($1 - 2\alpha$
+in theory), but empirically CV+ intervals are tighter with near-nominal
+coverage.
 
-- **Nonparametric models** (`fregre.np`) have no parametric prediction intervals
-  — conformal is the *only* rigorous uncertainty quantification available.
-- **Elastic models** operate in SRVF space — standard intervals in function
-  space are meaningless; conformal intervals respect the registration geometry.
-- **Classification models** can produce prediction *sets* (multiple plausible
-  labels with coverage guarantees) instead of just point predictions.
+```{r cv-conformal}
+# CV+ conformal with fregre.lm (5-fold)
+cv_conf <- cv.conformal.regression(
+  train_fd, train_y, test_fd,
+  method = "fregre.lm",
+  ncomp = 5, n.folds = 5,
+  alpha = 0.10, seed = 42
+)
 
-These functions will be exposed to R as they become available in the vendored
-crate. The interface will follow the same `fregre.conformal()` pattern, with
-automatic dispatch based on model class.
+cat("CV+ coverage:", round(cv_conf$coverage * 100, 1), "%\n")
+cat("CV+ mean width:", round(mean(cv_conf$upper - cv_conf$lower), 4), "\n")
+```
+
+CV+ also works with the nonparametric model `fregre.np`, which has no parametric
+prediction intervals — conformal is the *only* rigorous UQ method available:
+
+```{r cv-conformal-np}
+cv_conf_np <- cv.conformal.regression(
+  train_fd, train_y, test_fd,
+  method = "fregre.np",
+  ncomp = 5, n.folds = 5,
+  alpha = 0.10, seed = 42
+)
+
+cat("CV+ (nonparametric) coverage:", round(cv_conf_np$coverage * 100, 1), "%\n")
+```
+
+### Jackknife+ Regression
+
+Jackknife+ is the leave-one-out analogue: each training observation is left out
+once, the model is fitted on the remaining $n-1$ observations, and the left-out
+residual calibrates the interval. This is the most data-efficient conformal
+method but requires $n$ model fits.
+
+```{r jackknife}
+jk <- jackknife.plus(
+  train_fd, train_y, test_fd,
+  method = "fregre.lm",
+  ncomp = 5, alpha = 0.10
+)
+
+cat("Jackknife+ coverage:", round(jk$coverage * 100, 1), "%\n")
+cat("Jackknife+ mean width:", round(mean(jk$upper - jk$lower), 4), "\n")
+```
+
+### Generic Conformal from a Fitted Model
+
+If you already have a fitted `fregre.lm` model, `conformal.generic.regression()`
+constructs conformal intervals without re-fitting. It uses the model's FPCA
+components to split and calibrate internally:
+
+```{r generic-conformal}
+gen_conf <- conformal.generic.regression(
+  model_train, train_fd, train_y, test_fd,
+  cal.fraction = 0.25, alpha = 0.10, seed = 42
+)
+
+cat("Generic conformal coverage:", round(gen_conf$coverage * 100, 1), "%\n")
+```
+
+### Comparing All Conformal Variants
+
+```{r compare-conformal, fig.height = 5}
+df_all <- data.frame(
+  Method = rep(c("Split", "CV+", "Jackknife+", "Generic"), each = length(test_y)),
+  Width = c(
+    conf$upper - conf$lower,
+    cv_conf$upper - cv_conf$lower,
+    jk$upper - jk$lower,
+    gen_conf$upper - gen_conf$lower
+  )
+)
+
+ggplot(df_all, aes(x = .data$Method, y = .data$Width, fill = .data$Method)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_fill_manual(values = c("Split" = "#2E8B57", "CV+" = "#4A90D9",
+                                "Jackknife+" = "#D55E00", "Generic" = "#7B2D8E")) +
+  labs(title = "Interval Width by Conformal Method",
+       subtitle = "All at 90% nominal level",
+       y = "Interval Width") +
+  theme(legend.position = "none")
+```
+
+| Variant | Function | Data use | # model fits | Guarantee |
+|:--------|:---------|:---------|:-------------|:----------|
+| Split | `conformal.fregre.lm()` | Wastes calibration data | 1 | $\geq 1 - \alpha$ |
+| CV+ | `cv.conformal.regression()` | All data used | $K$ | $\geq 1 - 2\alpha$ |
+| Jackknife+ | `jackknife.plus()` | All data used | $n$ | $\geq 1 - 2\alpha$ |
+| Generic | `conformal.generic.regression()` | From fitted model | 0 (pre-fitted) | $\geq 1 - \alpha$ |
 
 ---
 
@@ -469,9 +540,9 @@ automatic dispatch based on model class.
 | Aspect | Prediction Intervals | Conformal | LOO-CV | Bootstrap CI |
 |:-------|:---------------------|:----------|:-------|:-------------|
 | Target | $\hat{y}$ | $\hat{y}$ | Model fit | $\beta(t)$ |
-| Models | lm only | lm (expanding to all) | lm only | lm + logistic |
+| Models | lm only | lm, np, elastic, logistic | lm only | lm + logistic |
 | Assumptions | Gaussian | None | None | None |
-| Width | Variable (leverage) | Constant | — | Variable (SE) |
+| Width | Variable (leverage) | Constant (split) or variable (CV+) | — | Variable (SE) |
 | Guarantee | Exact if Gaussian | Finite-sample | — | Asymptotic |
 | Key output | Interval bounds | Interval bounds | PRESS, LOO $R^2$ | Pointwise + simultaneous bands |
 
@@ -486,8 +557,16 @@ automatic dispatch based on model class.
 - Vovk, V., Gammerman, A. and Shafer, G. (2005). *Algorithmic Learning in
   a Random World*. Springer.
 
+- Barber, R.F., Candes, E.J., Ramdas, A. and Tibshirani, R.J. (2021).
+  Predictive inference with the jackknife+. *Annals of Statistics*, 49(1),
+  486--507.
+
+- Romano, Y., Patterson, E. and Candes, E. (2019). Conformalized quantile
+  regression. *Advances in Neural Information Processing Systems*, 32.
+
 ## See Also
 
 - `vignette("explainability")` --- global and local model explanations
 - `vignette("regression-diagnostics")` --- influence analysis and VIF
 - `vignette("cross-validation")` --- K-fold cross-validation framework
+- `vignette("conformal-classification")` --- conformal prediction sets for classification
