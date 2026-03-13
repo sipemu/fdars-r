@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#333">Conformal Prediction Decision Flowchart</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">14 functions — choose based on task, model, and data budget</text>
+
+  <!-- Root: Regression or Classification? -->
+  <rect x="260" y="50" width="180" height="32" rx="16" fill="#4A90D9" opacity="0.15" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="350" y="71" text-anchor="middle" font-size="12" font-weight="bold" fill="#2C5F8A">Regression or Classification?</text>
+
+  <!-- Branches -->
+  <line x1="305" y1="82" x2="175" y2="110" stroke="#2E8B57" stroke-width="1.2"/>
+  <line x1="395" y1="82" x2="525" y2="110" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="230" y="94" font-size="10" fill="#2E8B57" font-weight="bold">Regression</text>
+  <text x="460" y="94" font-size="10" fill="#D55E00" font-weight="bold">Classification</text>
+
+  <!-- ===== Left: Regression ===== -->
+  <rect x="20" y="110" width="310" height="160" rx="6" fill="#E8F5EE" stroke="#2E8B57" stroke-width="1"/>
+
+  <!-- Model row -->
+  <text x="175" y="128" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E8B57">Which model?</text>
+
+  <!-- Model boxes -->
+  <rect x="30" y="135" width="62" height="22" rx="3" fill="#2E8B57" opacity="0.1" stroke="#2E8B57" stroke-width="0.6"/>
+  <text x="61" y="149" text-anchor="middle" font-size="8" fill="#2E8B57">fregre.lm</text>
+
+  <rect x="98" y="135" width="62" height="22" rx="3" fill="#2E8B57" opacity="0.1" stroke="#2E8B57" stroke-width="0.6"/>
+  <text x="129" y="149" text-anchor="middle" font-size="8" fill="#2E8B57">fregre.np</text>
+
+  <rect x="166" y="135" width="62" height="22" rx="3" fill="#2E8B57" opacity="0.1" stroke="#2E8B57" stroke-width="0.6"/>
+  <text x="197" y="149" text-anchor="middle" font-size="8" fill="#2E8B57">elastic</text>
+
+  <rect x="234" y="135" width="62" height="22" rx="3" fill="#2E8B57" opacity="0.1" stroke="#2E8B57" stroke-width="0.6"/>
+  <text x="265" y="149" text-anchor="middle" font-size="8" fill="#2E8B57">logistic</text>
+
+  <!-- Variant row -->
+  <text x="175" y="175" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E8B57">Which variant?</text>
+
+  <rect x="30" y="182" width="55" height="20" rx="10" fill="#2E8B57" opacity="0.12"/>
+  <text x="57" y="195" text-anchor="middle" font-size="8" fill="#2E8B57">Split (1)</text>
+
+  <rect x="92" y="182" width="55" height="20" rx="10" fill="#4A90D9" opacity="0.12"/>
+  <text x="119" y="195" text-anchor="middle" font-size="8" fill="#2C5F8A">CV+ (K)</text>
+
+  <rect x="154" y="182" width="55" height="20" rx="10" fill="#D55E00" opacity="0.12"/>
+  <text x="181" y="195" text-anchor="middle" font-size="8" fill="#D55E00">JK+ (n)</text>
+
+  <rect x="216" y="182" width="65" height="20" rx="10" fill="#7B2D8E" opacity="0.12"/>
+  <text x="248" y="195" text-anchor="middle" font-size="8" fill="#7B2D8E">Generic (0)</text>
+
+  <!-- Output -->
+  <rect x="70" y="214" width="170" height="22" rx="4" fill="#2E8B57" opacity="0.06" stroke="#2E8B57" stroke-width="0.5"/>
+  <text x="155" y="229" text-anchor="middle" font-size="10" fill="#2E8B57">→ [lower, upper] intervals</text>
+
+  <!-- Count -->
+  <text x="175" y="260" text-anchor="middle" font-size="10" fill="#888">9 regression functions</text>
+
+  <!-- ===== Right: Classification ===== -->
+  <rect x="370" y="110" width="310" height="160" rx="6" fill="#FEF0E6" stroke="#D55E00" stroke-width="1"/>
+
+  <!-- Model row -->
+  <text x="525" y="128" text-anchor="middle" font-size="11" font-weight="bold" fill="#D55E00">Which model?</text>
+
+  <!-- Model boxes -->
+  <rect x="390" y="135" width="80" height="22" rx="3" fill="#D55E00" opacity="0.1" stroke="#D55E00" stroke-width="0.6"/>
+  <text x="430" y="149" text-anchor="middle" font-size="8" fill="#D55E00">LDA/QDA/kNN</text>
+
+  <rect x="480" y="135" width="80" height="22" rx="3" fill="#D55E00" opacity="0.1" stroke="#D55E00" stroke-width="0.6"/>
+  <text x="520" y="149" text-anchor="middle" font-size="8" fill="#D55E00">elastic logistic</text>
+
+  <rect x="570" y="135" width="96" height="22" rx="3" fill="#D55E00" opacity="0.1" stroke="#D55E00" stroke-width="0.6"/>
+  <text x="618" y="149" text-anchor="middle" font-size="8" fill="#D55E00">functional.logistic</text>
+
+  <!-- Variant row -->
+  <text x="525" y="175" text-anchor="middle" font-size="11" font-weight="bold" fill="#D55E00">Which variant?</text>
+
+  <rect x="400" y="182" width="55" height="20" rx="10" fill="#D55E00" opacity="0.12"/>
+  <text x="427" y="195" text-anchor="middle" font-size="8" fill="#D55E00">Split (1)</text>
+
+  <rect x="462" y="182" width="55" height="20" rx="10" fill="#4A90D9" opacity="0.12"/>
+  <text x="489" y="195" text-anchor="middle" font-size="8" fill="#2C5F8A">CV+ (K)</text>
+
+  <rect x="524" y="182" width="65" height="20" rx="10" fill="#7B2D8E" opacity="0.12"/>
+  <text x="556" y="195" text-anchor="middle" font-size="8" fill="#7B2D8E">Generic (0)</text>
+
+  <!-- Scoring -->
+  <rect x="596" y="182" width="55" height="20" rx="10" fill="#D55E00" opacity="0.06" stroke="#D55E00" stroke-width="0.5"/>
+  <text x="623" y="195" text-anchor="middle" font-size="8" fill="#D55E00">LAC/APS</text>
+
+  <!-- Output -->
+  <rect x="420" y="214" width="200" height="22" rx="4" fill="#D55E00" opacity="0.06" stroke="#D55E00" stroke-width="0.5"/>
+  <text x="520" y="229" text-anchor="middle" font-size="10" fill="#D55E00">→ {class₁, class₃, …} prediction sets</text>
+
+  <!-- Count -->
+  <text x="525" y="260" text-anchor="middle" font-size="10" fill="#888">5 classification functions</text>
+</svg>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 180" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="18" text-anchor="middle" font-size="16" font-weight="bold" fill="#2E8B57">Split Conformal — Regression</text>
+  <text x="350" y="33" text-anchor="middle" font-size="11" fill="#888">5 model-specific functions, 1 model fit, constant-width intervals</text>
+
+  <!-- Pipeline -->
+  <!-- Step 1 -->
+  <rect x="20" y="48" width="120" height="50" rx="5" fill="#2E8B57" opacity="0.1" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="80" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#2E8B57">Training Data</text>
+  <text x="80" y="80" text-anchor="middle" font-size="8.5" fill="#888">75% proper train</text>
+  <text x="80" y="91" text-anchor="middle" font-size="8.5" fill="#D55E00">25% calibration</text>
+
+  <!-- Arrow -->
+  <line x1="140" y1="73" x2="162" y2="73" stroke="#2E8B57" stroke-width="1" marker-end="url(#arrG)"/>
+
+  <!-- Step 2 -->
+  <rect x="164" y="48" width="120" height="50" rx="5" fill="#2E8B57" opacity="0.1" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="224" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#2E8B57">Fit Model</text>
+  <text x="224" y="80" text-anchor="middle" font-size="8.5" fill="#888">fregre.lm, fregre.np,</text>
+  <text x="224" y="91" text-anchor="middle" font-size="8.5" fill="#888">elastic, logistic</text>
+
+  <!-- Arrow -->
+  <line x1="284" y1="73" x2="306" y2="73" stroke="#2E8B57" stroke-width="1" marker-end="url(#arrG)"/>
+
+  <!-- Step 3 -->
+  <rect x="308" y="48" width="120" height="50" rx="5" fill="#2E8B57" opacity="0.1" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="368" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#2E8B57">Calibrate</text>
+  <text x="368" y="80" text-anchor="middle" font-size="8.5" fill="#888">residuals on cal set</text>
+  <text x="368" y="91" text-anchor="middle" font-size="8.5" fill="#888">q̂ = quantile(|eᵢ|)</text>
+
+  <!-- Arrow -->
+  <line x1="428" y1="73" x2="450" y2="73" stroke="#2E8B57" stroke-width="1" marker-end="url(#arrG)"/>
+
+  <!-- Step 4 -->
+  <rect x="452" y="48" width="120" height="50" rx="5" fill="#2E8B57" opacity="0.15" stroke="#2E8B57" stroke-width="1"/>
+  <text x="512" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#2E8B57">Predict</text>
+  <text x="512" y="80" text-anchor="middle" font-size="8.5" fill="#888">ŷ_new ± q̂</text>
+  <text x="512" y="91" text-anchor="middle" font-size="8.5" fill="#2E8B57">≥ 1−α coverage</text>
+
+  <defs>
+    <marker id="arrG" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+      <path d="M0,0 L6,2 L0,4" fill="#2E8B57"/>
+    </marker>
+  </defs>
+
+  <!-- Function reference -->
+  <rect x="20" y="112" width="660" height="55" rx="5" fill="#E8F5EE" stroke="#2E8B57" stroke-width="0.6"/>
+  <text x="35" y="130" font-size="9" fill="#2E8B57" font-weight="bold">conformal.fregre.lm()</text>
+  <text x="35" y="143" font-size="8" fill="#888">FPC linear regression</text>
+
+  <text x="185" y="130" font-size="9" fill="#2E8B57" font-weight="bold">conformal.fregre.np()</text>
+  <text x="185" y="143" font-size="8" fill="#888">Nonparametric</text>
+
+  <text x="335" y="130" font-size="9" fill="#2E8B57" font-weight="bold">conformal.elastic.regression()</text>
+  <text x="335" y="143" font-size="8" fill="#888">Elastic alignment</text>
+
+  <text x="185" y="158" font-size="9" fill="#2E8B57" font-weight="bold">conformal.elastic.pcr()</text>
+  <text x="185" y="168" font-size="8" fill="#888">Elastic PCR</text>
+
+  <text x="380" y="158" font-size="9" fill="#2E8B57" font-weight="bold">conformal.logistic()</text>
+  <text x="380" y="168" font-size="8" fill="#888">Binary logistic</text>
+</svg>

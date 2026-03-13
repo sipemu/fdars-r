@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 160" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="18" text-anchor="middle" font-size="16" font-weight="bold" fill="#D55E00">Split Conformal — Classification</text>
+  <text x="350" y="33" text-anchor="middle" font-size="11" fill="#888">Prediction sets with LAC or APS scoring rules</text>
+
+  <!-- Pipeline -->
+  <!-- Step 1 -->
+  <rect x="20" y="48" width="130" height="50" rx="5" fill="#D55E00" opacity="0.08" stroke="#D55E00" stroke-width="0.8"/>
+  <text x="85" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#D55E00">Training Data</text>
+  <text x="85" y="80" text-anchor="middle" font-size="8.5" fill="#888">labels ∈ {1, …, K}</text>
+  <text x="85" y="91" text-anchor="middle" font-size="8.5" fill="#D55E00">split → cal set</text>
+
+  <!-- Arrow -->
+  <line x1="150" y1="73" x2="172" y2="73" stroke="#D55E00" stroke-width="1" marker-end="url(#arrO)"/>
+
+  <!-- Step 2 -->
+  <rect x="174" y="48" width="130" height="50" rx="5" fill="#D55E00" opacity="0.08" stroke="#D55E00" stroke-width="0.8"/>
+  <text x="239" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#D55E00">Fit Classifier</text>
+  <text x="239" y="80" text-anchor="middle" font-size="8.5" fill="#888">LDA, QDA, kNN,</text>
+  <text x="239" y="91" text-anchor="middle" font-size="8.5" fill="#888">elastic logistic</text>
+
+  <!-- Arrow -->
+  <line x1="304" y1="73" x2="326" y2="73" stroke="#D55E00" stroke-width="1" marker-end="url(#arrO)"/>
+
+  <!-- Step 3 -->
+  <rect x="328" y="48" width="130" height="50" rx="5" fill="#D55E00" opacity="0.08" stroke="#D55E00" stroke-width="0.8"/>
+  <text x="393" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#D55E00">Score Calibration</text>
+  <text x="393" y="80" text-anchor="middle" font-size="8.5" fill="#888">LAC: 1 − p̂(y|x)</text>
+  <text x="393" y="91" text-anchor="middle" font-size="8.5" fill="#888">APS: cumulative prob</text>
+
+  <!-- Arrow -->
+  <line x1="458" y1="73" x2="480" y2="73" stroke="#D55E00" stroke-width="1" marker-end="url(#arrO)"/>
+
+  <!-- Step 4 -->
+  <rect x="482" y="48" width="200" height="50" rx="5" fill="#D55E00" opacity="0.12" stroke="#D55E00" stroke-width="1"/>
+  <text x="582" y="66" text-anchor="middle" font-size="10" font-weight="bold" fill="#D55E00">Prediction Sets</text>
+  <text x="582" y="80" text-anchor="middle" font-size="8.5" fill="#888">{classes with score ≤ q̂}</text>
+  <text x="582" y="91" text-anchor="middle" font-size="8.5" fill="#D55E00">size 1 = confident, >1 = ambiguous</text>
+
+  <defs>
+    <marker id="arrO" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+      <path d="M0,0 L6,2 L0,4" fill="#D55E00"/>
+    </marker>
+  </defs>
+
+  <!-- Function reference -->
+  <rect x="20" y="112" width="660" height="38" rx="5" fill="#FEF0E6" stroke="#D55E00" stroke-width="0.6"/>
+  <text x="35" y="130" font-size="9" fill="#D55E00" font-weight="bold">conformal.classif()</text>
+  <text x="35" y="143" font-size="8" fill="#888">LDA / QDA / kNN classifier</text>
+
+  <text x="250" y="130" font-size="9" fill="#D55E00" font-weight="bold">conformal.elastic.logistic()</text>
+  <text x="250" y="143" font-size="8" fill="#888">Elastic logistic regression</text>
+</svg>

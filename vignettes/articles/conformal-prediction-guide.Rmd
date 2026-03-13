@@ -34,6 +34,10 @@ theme_set(theme_minimal())
 
 ## Decision Flowchart
 
+```{=html}
+<img src="../reference/figures/cpg-decision-flowchart.svg" alt="Conformal prediction decision flowchart" style="width:100%; max-width:700px;">
+```
+
 Choose your conformal method based on three questions:
 
 **1. Regression or classification?**
@@ -65,6 +69,10 @@ Choose your conformal method based on three questions:
 
 ### Split Conformal — Regression
 
+```{=html}
+<img src="../reference/figures/cpg-split-regression.svg" alt="Split conformal regression pipeline" style="width:100%; max-width:700px;">
+```
+
 Each function takes training `fdata`, response `y`, test `fdata`, and returns
 prediction intervals.
 
@@ -80,6 +88,10 @@ All return: `predictions`, `lower`, `upper`, `residual.quantile`, `coverage`.
 
 ### Split Conformal — Classification
 
+```{=html}
+<img src="../reference/figures/cpg-split-classification.svg" alt="Split conformal classification pipeline" style="width:100%; max-width:700px;">
+```
+
 | Function | Model | Key parameters |
 |:---------|:------|:---------------|
 | `conformal.classif()` | LDA, QDA, kNN | `classifier`, `score.type` |
@@ -89,6 +101,10 @@ Returns: `predicted_classes`, `set_sizes`, `average_set_size`, `coverage`,
 `score_quantile`.
 
 ### Cross-Conformal (CV+)
+
+```{=html}
+<img src="../reference/figures/cpg-advanced-variants.svg" alt="Advanced conformal variants: CV+, Jackknife+, Generic" style="width:100%; max-width:700px;">
+```
 
 | Function | Task | Key parameters |
 |:---------|:-----|:---------------|

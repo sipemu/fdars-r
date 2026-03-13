@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 220" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="20" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#7B2D8E">Generic Conformal from a Fitted Model</text>
+  <text x="350" y="37" text-anchor="middle" font-size="12.5" fill="#888">Conformalize an existing model without re-fitting</text>
+
+  <!-- ===== Left: Pipeline ===== -->
+  <rect x="10" y="50" width="330" height="155" rx="6" fill="#F3E8F9" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="175" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Pipeline</text>
+
+  <!-- Step 1: Pre-fitted model -->
+  <rect x="30" y="82" width="120" height="30" rx="5" fill="#7B2D8E" opacity="0.12" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="90" y="95" text-anchor="middle" font-size="10" fill="#7B2D8E">Pre-fitted model</text>
+  <text x="90" y="106" text-anchor="middle" font-size="8" fill="#888">fregre.lm()</text>
+
+  <!-- Arrow -->
+  <line x1="150" y1="97" x2="170" y2="97" stroke="#7B2D8E" stroke-width="0.8" marker-end="url(#arrowPurple)"/>
+
+  <!-- Step 2: Split training data -->
+  <rect x="172" y="82" width="150" height="30" rx="5" fill="#7B2D8E" opacity="0.12" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="247" y="95" text-anchor="middle" font-size="10" fill="#7B2D8E">Split training data</text>
+  <text x="247" y="106" text-anchor="middle" font-size="8" fill="#888">proper train + calibration</text>
+
+  <!-- Arrow down -->
+  <line x1="247" y1="112" x2="247" y2="125" stroke="#7B2D8E" stroke-width="0.8" marker-end="url(#arrowPurple)"/>
+
+  <!-- Step 3: Calibration -->
+  <rect x="172" y="128" width="150" height="26" rx="5" fill="#7B2D8E" opacity="0.12" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="247" y="141" text-anchor="middle" font-size="10" fill="#7B2D8E">Compute cal. residuals</text>
+  <text x="247" y="150" text-anchor="middle" font-size="8" fill="#888">|y_cal − ŷ_cal|</text>
+
+  <!-- Arrow down -->
+  <line x1="247" y1="154" x2="247" y2="167" stroke="#7B2D8E" stroke-width="0.8" marker-end="url(#arrowPurple)"/>
+
+  <!-- Step 4: Quantile -->
+  <rect x="172" y="170" width="150" height="22" rx="5" fill="#7B2D8E" opacity="0.15" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="247" y="185" text-anchor="middle" font-size="10" fill="#7B2D8E">q̂ → intervals for test</text>
+
+  <!-- Key advantage -->
+  <rect x="30" y="125" width="120" height="55" rx="4" fill="#7B2D8E" opacity="0.05" stroke="#7B2D8E" stroke-width="0.4"/>
+  <text x="90" y="142" text-anchor="middle" font-size="10" font-weight="bold" fill="#7B2D8E">0 re-fits</text>
+  <text x="90" y="155" text-anchor="middle" font-size="9" fill="#888">uses existing</text>
+  <text x="90" y="166" text-anchor="middle" font-size="9" fill="#888">FPCA components</text>
+
+  <defs>
+    <marker id="arrowPurple" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+      <path d="M0,0 L6,2 L0,4" fill="#7B2D8E"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Right: Result ===== -->
+  <rect x="360" y="50" width="330" height="155" rx="6" fill="#F3E8F9" stroke="#7B2D8E" stroke-width="1.2"/>
+  <text x="525" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">Generic Conformal Intervals</text>
+  <text x="525" y="85" text-anchor="middle" font-size="11" fill="#888">Same guarantee as split conformal (≥ 1−α)</text>
+
+  <!-- Axes -->
+  <line x1="374" y1="185" x2="676" y2="185" stroke="#ccc" stroke-width="0.6"/>
+  <line x1="374" y1="95" x2="374" y2="185" stroke="#ccc" stroke-width="0.6"/>
+  <text x="525" y="198" text-anchor="middle" font-size="9.4" fill="#888">Test Observation</text>
+
+  <!-- Conformal band -->
+  <path d="M382 112 Q430 106 480 110 Q525 115 570 110 Q620 106 668 112
+           L668 148 Q620 155 570 150 Q525 155 480 150 Q430 153 382 148 Z"
+        fill="#7B2D8E" opacity="0.12"/>
+  <!-- Predicted line -->
+  <path d="M382 130Q430 125 480 128Q525 133 570 128Q620 126 668 130"
+        stroke="#5A1E6E" stroke-width="1.8" fill="none"/>
+
+  <!-- Test points -->
+  <circle cx="398" cy="132" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="430" cy="126" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="462" cy="130" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="494" cy="134" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="525" cy="131" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="556" cy="127" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="588" cy="130" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="620" cy="125" r="2.2" fill="#D55E00" opacity="0.7"/>
+  <circle cx="652" cy="131" r="2.2" fill="#D55E00" opacity="0.7"/>
+
+  <!-- Key properties -->
+  <rect x="396" y="95" width="52" height="14" rx="2" fill="#7B2D8E" opacity="0.08" stroke="#7B2D8E" stroke-width="0.4"/>
+  <text x="422" y="105" text-anchor="middle" font-size="8" fill="#7B2D8E">0 fits</text>
+  <rect x="454" y="95" width="74" height="14" rx="2" fill="#7B2D8E" opacity="0.08" stroke="#7B2D8E" stroke-width="0.4"/>
+  <text x="491" y="105" text-anchor="middle" font-size="8" fill="#7B2D8E">post-hoc UQ</text>
+  <rect x="534" y="95" width="58" height="14" rx="2" fill="#7B2D8E" opacity="0.08" stroke="#7B2D8E" stroke-width="0.4"/>
+  <text x="563" y="105" text-anchor="middle" font-size="8" fill="#7B2D8E">≥ 1−α</text>
+
+  <!-- Legend -->
+  <line x1="590" y1="170" x2="602" y2="170" stroke="#5A1E6E" stroke-width="1.2"/>
+  <text x="605" y="173" font-size="8.6" fill="#5A1E6E">predicted</text>
+  <circle cx="642" cy="170" r="1.8" fill="#D55E00" opacity="0.7"/>
+  <text x="647" y="173" font-size="8.6" fill="#D55E00">observed</text>
+</svg>
