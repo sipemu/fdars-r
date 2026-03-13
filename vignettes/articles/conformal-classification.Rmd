@@ -168,7 +168,7 @@ y_train_bin <- y_train[y_train %in% c(1, 2)]
 y_test_bin <- y_test[y_test %in% c(1, 2)]
 
 # Fit logistic model
-log_model <- fregre.logistic(train_binary, y_train_bin, ncomp = 5)
+log_model <- functional.logistic(train_binary, y_train_bin, ncomp = 5)
 
 # Generic conformal from the fitted model
 gen_conf <- conformal.generic.classification(
