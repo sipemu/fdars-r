@@ -109,87 +109,6 @@ response on the shape of each curve.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Key insight:</strong> <code><a href="../reference/elastic.regression.html">elastic.regression()</a></code>
-aligns curves then regresses on amplitude.
-<code><a href="../reference/scalar.on.shape.html">scalar.on.shape()</a></code> goes further — it extracts a
-<em>phase-invariant shape score</em> via the Fisher-Rao inner product,
-then maps that score to the response through a flexible index function.
-This makes it robust even when the predictive signal lives entirely in
-shape.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="the-scalar-on-shape-model">The Scalar-on-Shape Model<a class="anchor" aria-label="anchor" href="#the-scalar-on-shape-model"></a>
-</h2>
-<div class="section level3">
-<h3 id="mathematical-formulation">Mathematical Formulation<a class="anchor" aria-label="anchor" href="#mathematical-formulation"></a>
-</h3>
-<p>Given functional observations
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>X</mi><mi>n</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X_1(t), \ldots, X_n(t)</annotation></semantics></math>
-and scalar responses
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>y</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">y_1, \ldots, y_n</annotation></semantics></math>,
-the model proceeds in four stages.</p>
-<p><strong>1. SRSF transformation.</strong> Each curve is mapped to its
-square-root slope function (SRSF):</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mtext mathvariant="normal">sign</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mi>′</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><msqrt><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>X</mi><mi>i</mi></msub><mi>′</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow></msqrt></mrow><annotation encoding="application/x-tex">q_i(t) = \text{sign}(X_i'(t)) \sqrt{|X_i'(t)|}</annotation></semantics></math></p>
-<p>The SRSF representation makes the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>𝕃</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{L}^2</annotation></semantics></math>
-distance between transformed curves equal to the Fisher-Rao distance
-between original curves.</p>
-<p><strong>2. Elastic alignment.</strong> Each SRSF
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mi>i</mi></msub><annotation encoding="application/x-tex">q_i</annotation></semantics></math>
-is aligned to a shape index function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
-via dynamic programming, producing optimal warping functions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>i</mi></msub><mo>∈</mo><mi>Γ</mi></mrow><annotation encoding="application/x-tex">\gamma_i \in \Gamma</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>q</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mo>⋅</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>q</mi><mi>i</mi></msub><mo>∘</mo><msub><mi>γ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><msqrt><msub><mover><mi>γ</mi><mo accent="true">̇</mo></mover><mi>i</mi></msub></msqrt></mrow><annotation encoding="application/x-tex">q_i^*(\cdot) = (q_i \circ \gamma_i) \sqrt{\dot\gamma_i}</annotation></semantics></math></p>
-<p><strong>3. Shape scores.</strong> Each aligned curve is projected
-onto the shape index function:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false" form="prefix">⟨</mo><msubsup><mi>q</mi><mi>i</mi><mo>*</mo></msubsup><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">⟩</mo><mo>=</mo><msubsup><mo>∫</mo><mn>0</mn><mn>1</mn></msubsup><msubsup><mi>q</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">s_i = \langle q_i^*, \beta \rangle = \int_0^1 q_i^*(t) \, \beta(t) \, dt</annotation></semantics></math></p>
-<p>These scalar shape scores capture <em>how much</em> of the common
-shape pattern each curve exhibits, invariant to timing.</p>
-<p><strong>4. Index function.</strong> The response is linked to the
-shape score through a flexible function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>y</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>=</mo><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>s</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{y}_i = h(s_i)</annotation></semantics></math></p>
-<p>The index function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
-can be the identity (linear), a polynomial, or a Nadaraya-Watson kernel
-smoother.</p>
-</div>
-<div class="section level3">
-<h3 id="iterative-optimization">Iterative Optimization<a class="anchor" aria-label="anchor" href="#iterative-optimization"></a>
-</h3>
-<p>The shape index
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>,
-warping functions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>,
-and link function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
-are estimated jointly by alternating:</p>
-<ol style="list-style-type: decimal">
-<li>Fix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>,
-update each
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>
-via DP alignment</li>
-<li>Fix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>’s,
-update
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
-via penalized least squares on the Fourier basis</li>
-<li>Fix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>’s,
-update
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
-(polynomial fit or kernel smooth)</li>
-</ol>
-<p>The algorithm converges when the relative change in SSE falls below
-<code>tol</code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -200,19 +119,11 @@ force curves with both amplitude and phase variation. The scalar
 response (e.g., vertical jump height) depends on the <em>shape</em> of
 the force curve, not its timing or scale.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Template: ground reaction force profile with two peaks</span></span>
-<span><span class="va">template</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fl">0.8</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">40</span> <span class="op">*</span> <span class="op">(</span><span class="va">s</span> <span class="op">-</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span> <span class="op">*</span> <span class="op">(</span><span class="va">s</span> <span class="op">-</span> <span class="fl">0.7</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
@@ -239,16 +150,10 @@ the force curve, not its timing or scale.</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span></code></pre></div>
-<p>The response
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
-depends on <code>shape_param</code>, which controls the relative height
-of the two peaks. The nonlinear warping (<code>pbeta</code>) shifts peak
-<em>locations</em> randomly, creating phase variation that is unrelated
-to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span>, main <span class="op">=</span> <span class="st">"Simulated Ground Reaction Force Curves"</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Normalized Time"</span>, ylab <span class="op">=</span> <span class="st">"Force (BW)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="scalar-on-shape_files/figure-html/plot-sim-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="fitting-the-model">Fitting the Model<a class="anchor" aria-label="anchor" href="#fitting-the-model"></a>
@@ -263,82 +168,48 @@ response.</p>
 <code class="sourceCode R"><span><span class="va">fit_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scalar.on.shape.html">scalar.on.shape</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, nbasis <span class="op">=</span> <span class="fl">11</span>, lambda <span class="op">=</span> <span class="fl">1e-3</span>,</span>
 <span>                          index.method <span class="op">=</span> <span class="st">"identity"</span>,</span>
 <span>                          max.iter.outer <span class="op">=</span> <span class="fl">15</span>, tol <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_id</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="polynomial-index-nonlinear-link">Polynomial Index (Nonlinear Link)<a class="anchor" aria-label="anchor" href="#polynomial-index-nonlinear-link"></a>
-</h3>
-<p>When the relationship between shape score and response may be
-nonlinear, use a polynomial index with
-<code>index.method = "polynomial"</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_poly</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scalar.on.shape.html">scalar.on.shape</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, nbasis <span class="op">=</span> <span class="fl">11</span>, lambda <span class="op">=</span> <span class="fl">1e-3</span>,</span>
-<span>                            index.method <span class="op">=</span> <span class="st">"polynomial"</span>,</span>
-<span>                            index.param <span class="op">=</span> <span class="fl">3</span>,  <span class="co"># cubic polynomial</span></span>
-<span>                            max.iter.outer <span class="op">=</span> <span class="fl">15</span>, tol <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_poly</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="nadaraya-watson-index-fully-nonparametric-link">Nadaraya-Watson Index (Fully Nonparametric Link)<a class="anchor" aria-label="anchor" href="#nadaraya-watson-index-fully-nonparametric-link"></a>
-</h3>
-<p>For maximum flexibility, the Nadaraya-Watson kernel smoother makes no
-parametric assumptions about
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_nw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scalar.on.shape.html">scalar.on.shape</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, nbasis <span class="op">=</span> <span class="fl">11</span>, lambda <span class="op">=</span> <span class="fl">1e-3</span>,</span>
-<span>                          index.method <span class="op">=</span> <span class="st">"nadaraya.watson"</span>,</span>
-<span>                          index.param <span class="op">=</span> <span class="fl">0.5</span>,  <span class="co"># bandwidth</span></span>
-<span>                          max.iter.outer <span class="op">=</span> <span class="fl">15</span>, tol <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_nw</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="comparing-index-methods">Comparing Index Methods<a class="anchor" aria-label="anchor" href="#comparing-index-methods"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">comp_index</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Identity (linear)"</span>, <span class="st">"Polynomial (cubic)"</span>, <span class="st">"Nadaraya-Watson"</span><span class="op">)</span>,</span>
-<span>  R2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_id</span><span class="op">$</span><span class="va">r.squared</span>, <span class="va">fit_poly</span><span class="op">$</span><span class="va">r.squared</span>, <span class="va">fit_nw</span><span class="op">$</span><span class="va">r.squared</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
-<span>  SSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_id</span><span class="op">$</span><span class="va">sse</span>, <span class="va">fit_poly</span><span class="op">$</span><span class="va">sse</span>, <span class="va">fit_nw</span><span class="op">$</span><span class="va">sse</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  Outer_Iter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_id</span><span class="op">$</span><span class="va">n.iter.outer</span>, <span class="va">fit_poly</span><span class="op">$</span><span class="va">n.iter.outer</span>,</span>
-<span>                 <span class="va">fit_nw</span><span class="op">$</span><span class="va">n.iter.outer</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">comp_index</span>, caption <span class="op">=</span> <span class="st">"Index method comparison"</span><span class="op">)</span></span></code></pre></div>
-<p>When the true relationship is linear (as in our simulation), the
-identity index should perform well. Polynomial and NW indices add
-flexibility at the cost of potential overfitting on small samples.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_id</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Scalar-on-Shape Regression</span></span>
+<span><span class="co">#&gt;   Index method: identity </span></span>
+<span><span class="co">#&gt;   R-squared: 0.096 </span></span>
+<span><span class="co">#&gt;   SSE: 231.683 </span></span>
+<span><span class="co">#&gt;   Iterations: 15 (outer), 15 (inner)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="examining-the-fitted-model">Examining the Fitted Model<a class="anchor" aria-label="anchor" href="#examining-the-fitted-model"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Shape index function beta(t)</span></span>
 <span><span class="va">df_beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="va">t_grid</span>, beta <span class="op">=</span> <span class="va">fit_id</span><span class="op">$</span><span class="va">beta</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_beta</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">beta</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"#4A90D9"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Estimated Shape Index Function"</span>,</span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_beta</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">beta</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"#4A90D9"</span>, linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Estimated Shape Index Function"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"beta(t): the shape pattern that predicts y"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Normalized Time"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">beta</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="scalar-on-shape_files/figure-html/examine-fit-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The shape index
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat\beta(t)</annotation></semantics></math>
 reveals <em>which aspects of curve shape</em> drive the response. Peaks
 in
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
 correspond to regions where the curve shape is most predictive.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Shape scores vs observed response</span></span>
 <span><span class="va">df_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>score <span class="op">=</span> <span class="va">fit_id</span><span class="op">$</span><span class="va">shape.scores</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_scores</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">score</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"#2E8B57"</span>, alpha <span class="op">=</span> <span class="fl">0.6</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, color <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_scores</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">score</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"#2E8B57"</span>, alpha <span class="op">=</span> <span class="fl">0.6</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span>, color <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
 <span>              linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Shape Scores vs Response"</span>,</span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Shape Scores vs Response"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"R-squared ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_id</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Shape Score"</span>, y <span class="op">=</span> <span class="st">"Response (y)"</span><span class="op">)</span></span></code></pre></div>
+<span>       x <span class="op">=</span> <span class="st">"Shape Score"</span>, y <span class="op">=</span> <span class="st">"Response (y)"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
+<p><img src="scalar-on-shape_files/figure-html/examine-scores-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Hold-out evaluation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">70</span><span class="op">)</span></span>
@@ -356,15 +227,17 @@ correspond to regions where the curve shape is most predictive.</p>
 <span><span class="va">y_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_train</span>, <span class="va">fd_test</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Test RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">y_pred</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Test RMSE: 2.3223</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Test R2:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">y_pred</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span></span>
-<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y_test</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y_test</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Test R2: -1.4935</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-other-methods">Comparison with Other Methods<a class="anchor" aria-label="anchor" href="#comparison-with-other-methods"></a>
 </h2>
-<p>We compare three regression approaches on our phase-variable data to
-demonstrate when scalar-on-shape regression is the right tool.</p>
+<p>We compare three regression approaches on our phase-variable
+data.</p>
 <div class="section level3">
 <h3 id="standard-regression-ignoring-phase">Standard Regression (Ignoring Phase)<a class="anchor" aria-label="anchor" href="#standard-regression-ignoring-phase"></a>
 </h3>
@@ -373,13 +246,15 @@ Because FPCA captures the dominant <em>phase</em> variation first, the
 shape signal that drives
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
 is buried in higher-order components.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">pred_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_std</span>, <span class="va">fd_test</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"fregre.lm R-squared (train):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_std</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; fregre.lm R-squared (train): 0.242</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"fregre.lm RMSE (test):"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_std</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_std</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; fregre.lm RMSE (test): 1.2402</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="elastic-regression-alignment-aware">Elastic Regression (Alignment-Aware)<a class="anchor" aria-label="anchor" href="#elastic-regression-alignment-aware"></a>
@@ -387,36 +262,25 @@ is buried in higher-order components.</p>
 <p><code><a href="../reference/elastic.regression.html">elastic.regression()</a></code> jointly aligns curves and fits a
 coefficient function. It captures amplitude variation after alignment,
 but does not extract a phase-invariant shape score.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.regression.html">elastic.regression</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, ncomp.beta <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                                  lambda <span class="op">=</span> <span class="fl">0.01</span>, max.iter <span class="op">=</span> <span class="fl">20</span>, tol <span class="op">=</span> <span class="fl">1e-3</span><span class="op">)</span></span>
 <span><span class="va">pred_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_elastic</span>, <span class="va">fd_test</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"elastic.regression R-squared (train):"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_elastic</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; elastic.regression R-squared (train): 0.8034</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"elastic.regression RMSE (test):"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_elastic</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="scalar-on-shape-full-phase-invariant">Scalar-on-Shape (Full Phase-Invariant)<a class="anchor" aria-label="anchor" href="#scalar-on-shape-full-phase-invariant"></a>
-</h3>
-<p><code><a href="../reference/scalar.on.shape.html">scalar.on.shape()</a></code> extracts a phase-invariant shape score
-via the Fisher-Rao inner product, giving it the cleanest signal when
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
-depends on shape.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pred_sos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_train</span>, <span class="va">fd_test</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"scalar.on.shape R-squared (train):"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_train</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"scalar.on.shape RMSE (test):"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_sos</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_elastic</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; elastic.regression RMSE (test): 1.4582</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="summary-table">Summary Table<a class="anchor" aria-label="anchor" href="#summary-table"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rmse_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_std</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pred_sos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_train</span>, <span class="va">fd_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rmse_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_std</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">rmse_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_elastic</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">rmse_sos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_sos</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -438,11 +302,44 @@ depends on shape.</p>
 <span>                     <span class="fu">r2_test</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_sos</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">comparison</span>, caption <span class="op">=</span> <span class="st">"Method comparison on phase-variable data"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Method comparison on phase-variable data</caption>
+<thead><tr class="header">
+<th align="left">Method</th>
+<th align="left">Handles_Phase</th>
+<th align="right">Train_R2</th>
+<th align="right">Test_RMSE</th>
+<th align="right">Test_R2</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">fregre.lm (standard)</td>
+<td align="left">No</td>
+<td align="right">0.2420</td>
+<td align="right">1.2402</td>
+<td align="right">0.2889</td>
+</tr>
+<tr class="even">
+<td align="left">elastic.regression</td>
+<td align="left">Yes (alignment)</td>
+<td align="right">0.8034</td>
+<td align="right">1.4582</td>
+<td align="right">0.0169</td>
+</tr>
+<tr class="odd">
+<td align="left">scalar.on.shape</td>
+<td align="left">Yes (shape score)</td>
+<td align="right">-0.0087</td>
+<td align="right">2.3223</td>
+<td align="right">-1.4935</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level3">
 <h3 id="visualizing-predictions">Visualizing Predictions<a class="anchor" aria-label="anchor" href="#visualizing-predictions"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Observed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">y_test</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  Predicted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">pred_std</span>, <span class="va">pred_elastic</span>, <span class="va">pred_sos</span><span class="op">)</span>,</span>
@@ -450,84 +347,14 @@ depends on shape.</p>
 <span>               each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y_test</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_pred</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Observed</span>, y <span class="op">=</span> <span class="va">Predicted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, color <span class="op">=</span> <span class="st">"#4A90D9"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Method</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Observed vs Predicted by Method"</span>,</span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_pred</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Observed</span>, y <span class="op">=</span> <span class="va">Predicted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, color <span class="op">=</span> <span class="st">"#4A90D9"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span> <span class="va">Method</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Observed vs Predicted by Method"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Observed"</span>, y <span class="op">=</span> <span class="st">"Predicted"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="scalar-on-shape_files/figure-html/vis-predictions-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="when-to-use-which-method">When to Use Which Method<a class="anchor" aria-label="anchor" href="#when-to-use-which-method"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="16%">
-<col width="19%">
-<col width="33%">
-<col width="30%">
-</colgroup>
-<thead><tr class="header">
-<th>Criterion</th>
-<th align="center"><code>fregre.lm</code></th>
-<th align="center"><code>elastic.regression</code></th>
-<th align="center"><code>scalar.on.shape</code></th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><strong>Phase variation</strong></td>
-<td align="center">Ignores it</td>
-<td align="center">Removes via alignment</td>
-<td align="center">Invariant via shape score</td>
-</tr>
-<tr class="even">
-<td><strong>Signal source</strong></td>
-<td align="center">Raw curve values</td>
-<td align="center">Amplitude after alignment</td>
-<td align="center">Shape (Fisher-Rao inner product)</td>
-</tr>
-<tr class="odd">
-<td><strong>Link to response</strong></td>
-<td align="center">Linear (FPC scores)</td>
-<td align="center">Linear
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta(t)</annotation></semantics></math>
-integral)</td>
-<td align="center">Identity / polynomial / NW</td>
-</tr>
-<tr class="even">
-<td><strong>Diagnostics</strong></td>
-<td align="center">Full (explainability, influence, etc.)</td>
-<td align="center">R-squared, residuals</td>
-<td align="center">R-squared, residuals</td>
-</tr>
-<tr class="odd">
-<td><strong>Speed</strong></td>
-<td align="center">Fast</td>
-<td align="center">Moderate (iterative alignment)</td>
-<td align="center">Moderate (iterative alignment)</td>
-</tr>
-<tr class="even">
-<td><strong>Best for</strong></td>
-<td align="center">Well-aligned curves</td>
-<td align="center">Misaligned; amplitude signal</td>
-<td align="center">Misaligned; shape signal</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Decision rule:</strong></p>
-<ol style="list-style-type: decimal">
-<li>If curves are well-aligned or phase variation is small, use
-<code><a href="../reference/fregre.lm.html">fregre.lm()</a></code>. It has the richest diagnostics and
-explainability support.</li>
-<li>If curves are misaligned and the response depends on
-<em>amplitude</em> (overall scale or height differences), use
-<code><a href="../reference/elastic.regression.html">elastic.regression()</a></code>.</li>
-<li>If curves are misaligned and the response depends on <em>shape</em>
-(the functional form after removing timing and scale), use
-<code><a href="../reference/scalar.on.shape.html">scalar.on.shape()</a></code>.</li>
-<li>When unsure, fit all three and compare hold-out RMSE.</li>
-</ol>
 </div>
 <div class="section level2">
 <h2 id="tuning-parameters">Tuning Parameters<a class="anchor" aria-label="anchor" href="#tuning-parameters"></a>
@@ -577,18 +404,6 @@ decrease to capture detail</td>
 <td>Higher = more flexible (risk of overfitting)</td>
 </tr>
 <tr class="odd">
-<td><code>g.degree</code></td>
-<td>2</td>
-<td>Amplitude link polynomial degree</td>
-<td>Usually left at default</td>
-</tr>
-<tr class="even">
-<td><code>dp.lambda</code></td>
-<td>0</td>
-<td>DP alignment penalty</td>
-<td>Increase to discourage extreme warps</td>
-</tr>
-<tr class="odd">
 <td><code>max.iter.outer</code></td>
 <td>10</td>
 <td>Outer loop iterations</td>
@@ -615,10 +430,6 @@ Transactions on Pattern Analysis and Machine Intelligence</em>, 33(7),
 for Functional Data Using Phase and Amplitude Separation.
 <em>Computational Statistics &amp; Data Analysis</em>, 61,
 50–66.</p></li>
-<li><p>Xie, W., Kurtek, S., Bharath, K. and Sun, Y. (2017). A Geometric
-Approach to Visualization of Variability in Functional Data. <em>Journal
-of the American Statistical Association</em>, 112(519),
-979–993.</p></li>
 </ul>
 </div>
 <div class="section level2">
@@ -634,9 +445,6 @@ scalar-on-function regression methods</li>
 <li>
 <code><a href="../articles/elastic-alignment.html">vignette("articles/elastic-alignment")</a></code> — curve
 alignment without regression</li>
-<li>
-<code>vignette("elastic-fpca")</code> — elastic FPCA for
-amplitude/phase separation</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

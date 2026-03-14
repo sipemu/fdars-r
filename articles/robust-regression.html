@@ -158,8 +158,7 @@ relationship between the spectra and a scalar property (e.g., moisture
 content). We then contaminate 10% of the responses with large
 measurement errors to mimic real-world outliers.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># --- Dimensions ---</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">200</span>          <span class="co"># number of spectra</span></span>
@@ -201,64 +200,79 @@ measurement errors to mimic real-world outliers.</p>
 <p>The contaminated observations have errors roughly 25 times larger
 than the noise standard deviation, simulating gross measurement
 mistakes.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span>, main <span class="op">=</span> <span class="st">"NIR Absorbance Spectra"</span>,</span>
+<span>     xlab <span class="op">=</span> <span class="st">"Wavelength (nm)"</span>, ylab <span class="op">=</span> <span class="st">"Absorbance"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="robust-regression_files/figure-html/plot-spectra-1.png" class="r-plt" alt="" width="100%"></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  idx <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span>,</span>
+<span>  clean <span class="op">=</span> <span class="va">y_clean</span>,</span>
+<span>  contaminated <span class="op">=</span> <span class="va">y_contam</span>,</span>
+<span>  is_outlier <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">outlier_idx</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_y</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">clean</span>, y <span class="op">=</span> <span class="va">contaminated</span>, color <span class="op">=</span> <span class="va">is_outlier</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FALSE"</span> <span class="op">=</span> <span class="st">"#2E8B57"</span>, <span class="st">"TRUE"</span> <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span>,</span>
+<span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Clean"</span>, <span class="st">"Outlier"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Clean vs Contaminated Responses"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Clean y"</span>, y <span class="op">=</span> <span class="st">"Contaminated y"</span>, color <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code></pre></div>
+<p><img src="robust-regression_files/figure-html/plot-responses-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="ols-regression-baseline">OLS Regression — Baseline<a class="anchor" aria-label="anchor" href="#ols-regression-baseline"></a>
 </h2>
 <p>We first fit ordinary least squares via <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> on
 both the clean and contaminated data.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># --- Clean data ---</span></span>
 <span><span class="va">fit_ols_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_clean</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_ols_clean</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># --- Contaminated data ---</span></span>
 <span><span class="va">fit_ols_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_ols_contam</span><span class="op">)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"OLS R-squared (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_ols_clean</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; OLS R-squared (clean): 0.0453</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"OLS R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_ols_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; OLS R-squared (contaminated): 0.0191</span></span></code></pre></div>
 <p>On clean data, OLS performs well. On contaminated data, the 20
 outliers pull the coefficient estimates away from their true values,
 inflating the residuals for <em>all</em> observations — including the
-clean ones. The
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>
-drops and the RMSE increases substantially.</p>
+clean ones.</p>
 </div>
 <div class="section level2">
 <h2 id="l1-lad-regression">L1 (LAD) Regression<a class="anchor" aria-label="anchor" href="#l1-lad-regression"></a>
 </h2>
 <p><code><a href="../reference/fregre.l1.html">fregre.l1()</a></code> minimises the sum of absolute residuals
-rather than squared residuals:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mo>=</mo><mo>arg</mo><munder><mo>min</mo><mi>𝛄</mi></munder><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false" form="prefix">|</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mi>α</mi><mo>−</mo><msubsup><mi>𝛏</mi><mi>i</mi><mi>⊤</mi></msubsup><mi>𝛄</mi><mo stretchy="false" form="postfix">|</mo></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\gamma}} = \arg\min_{\boldsymbol{\gamma}} \sum_{i=1}^{n} \lvert y_i - \alpha - \boldsymbol{\xi}_i^{\top}\boldsymbol{\gamma} \rvert</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛏</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\xi}_i</annotation></semantics></math>
-is the vector of FPC scores for observation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.
-Because the absolute value penalises large residuals linearly (not
-quadratically), outliers exert much less influence on the fit.</p>
-<p>The optimisation is carried out via IRLS (iteratively reweighted
-least squares), which re-weights each observation inversely proportional
-to its current residual magnitude at each iteration.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+rather than squared residuals. Because the absolute value penalises
+large residuals linearly (not quadratically), outliers exert much less
+influence on the fit.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># --- Clean data ---</span></span>
 <span><span class="va">fit_l1_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.l1.html">fregre.l1</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_clean</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_l1_clean</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># --- Contaminated data ---</span></span>
 <span><span class="va">fit_l1_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.l1.html">fregre.l1</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_l1_contam</span><span class="op">)</span></span></code></pre></div>
-<p>On the contaminated data, the L1 fit remains close to the clean-data
-fit. The IRLS weights for the 20 outlier observations will be much
-smaller than those for the clean observations, effectively
-down-weighting their influence.</p>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L1 R-squared (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_l1_clean</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; L1 R-squared (clean): 0.0273</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L1 R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; L1 R-squared (contaminated): 0.005</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="examining-the-irls-weights">Examining the IRLS Weights<a class="anchor" aria-label="anchor" href="#examining-the-irls-weights"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Observations with small weights are effectively identified as outliers</span></span>
 <span><span class="va">w</span> <span class="op">&lt;-</span> <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">weights</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean weight (clean obs):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="op">-</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Mean weight (clean obs): 27791.38</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean weight (outlier obs):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Mean weight (outlier obs): 1.173</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">iterations</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; Iterations: 100</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Converged: FALSE</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -273,36 +287,21 @@ is a tuning parameter. For small residuals
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">|</mo><mi>r</mi><mo stretchy="true" form="postfix">|</mo></mrow><mo>≤</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">|r| \leq k</annotation></semantics></math>),
 the loss is quadratic (like OLS); for large residuals
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">|</mo><mi>r</mi><mo stretchy="true" form="postfix">|</mo></mrow><mo>&gt;</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">|r| &gt; k</annotation></semantics></math>),
-the loss is linear (like L1). This means:</p>
-<ul>
-<li>Small residuals are treated as in standard OLS, preserving
-efficiency.</li>
-<li>Large residuals are down-weighted, providing outlier
-resistance.</li>
-<li>The default
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1.345</mn></mrow><annotation encoding="application/x-tex">k = 1.345</annotation></semantics></math>
-achieves 95% asymptotic efficiency under Gaussian errors while still
-providing substantial robustness.</li>
-</ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+the loss is linear (like L1).</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># --- Default k = 1.345 ---</span></span>
 <span><span class="va">fit_huber_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.huber.html">fregre.huber</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_huber_contam</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># --- More aggressive robustness with smaller k ---</span></span>
-<span><span class="va">fit_huber_k08</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.huber.html">fregre.huber</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, k <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_huber_k08</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># --- Nearly OLS with large k ---</span></span>
-<span><span class="va">fit_huber_k5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.huber.html">fregre.huber</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, k <span class="op">=</span> <span class="fl">5.0</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_huber_k5</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Huber R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Huber R-squared (contaminated): 0.0071</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">iterations</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Iterations: 6</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Converged: TRUE</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="the-tuning-parameter-k">The Tuning Parameter
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#the-tuning-parameter-k"></a>
 </h3>
-<p>The parameter
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-controls the transition between quadratic and linear loss:</p>
 <table class="table">
 <thead><tr class="header">
 <th><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math></th>
@@ -343,25 +342,16 @@ controls the transition between quadratic and linear loss:</p>
 </tr>
 </tbody>
 </table>
-<p>In practice, the default
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1.345</mn></mrow><annotation encoding="application/x-tex">k = 1.345</annotation></semantics></math>
-is a good starting point. Decrease
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-if contamination is severe; increase
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-if you trust most of the data.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare weights across k values</span></span>
 <span><span class="va">w_default</span> <span class="op">&lt;-</span> <span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">weights</span></span>
-<span><span class="va">w_aggressive</span> <span class="op">&lt;-</span> <span class="va">fit_huber_k08</span><span class="op">$</span><span class="va">weights</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Default k=1.345:\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Huber k=1.345:\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Huber k=1.345:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_default</span><span class="op">[</span><span class="op">-</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Mean weight (clean): 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (outlier):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_default</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Aggressive k=0.8:\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_aggressive</span><span class="op">[</span><span class="op">-</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (outlier):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_aggressive</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean weight (outlier): 0.487</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -369,7 +359,7 @@ if you trust most of the data.</p>
 </h2>
 <p>We compare all three methods on clean and contaminated data using a
 train/test split.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># --- Train/test split ---</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">160</span><span class="op">)</span></span>
@@ -396,7 +386,6 @@ train/test split.</p>
 <span><span class="co"># Contaminated data</span></span>
 <span><span class="co"># ==========================================</span></span>
 <span><span class="va">y_tr_contam</span> <span class="op">&lt;-</span> <span class="va">y_contam</span><span class="op">[</span><span class="va">train_idx</span><span class="op">]</span></span>
-<span><span class="va">y_te_contam</span> <span class="op">&lt;-</span> <span class="va">y_contam</span><span class="op">[</span><span class="va">test_idx</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">fit_ols_d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_tr_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">fit_l1_d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.l1.html">fregre.l1</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_tr_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -409,7 +398,7 @@ train/test split.</p>
 <div class="section level3">
 <h3 id="results-table">Results Table<a class="anchor" aria-label="anchor" href="#results-table"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rmse</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">y</span>, <span class="va">yhat</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y</span> <span class="op">-</span> <span class="va">yhat</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">y</span>, <span class="va">yhat</span><span class="op">)</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y</span> <span class="op">-</span> <span class="va">yhat</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
 <span></span>
@@ -433,50 +422,78 @@ train/test split.</p>
 <span>  col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Method"</span>, <span class="st">"RMSE"</span>, <span class="st">"R\u00b2"</span>, <span class="st">"RMSE"</span>, <span class="st">"R\u00b2"</span><span class="op">)</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"Test-set performance on clean vs contaminated training data"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><strong>Expected pattern:</strong></p>
-<ul>
-<li>On <strong>clean data</strong>, all three methods perform similarly.
-OLS is slightly more efficient because it is the maximum likelihood
-estimator under Gaussian errors.</li>
-<li>On <strong>contaminated data</strong>, OLS performance degrades
-sharply: the RMSE increases and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>
-drops. L1 and Huber remain close to their clean-data performance because
-they down-weight the outlier observations.</li>
-</ul>
+<table class="table">
+<caption>Test-set performance on clean vs contaminated training
+data</caption>
+<thead><tr class="header">
+<th align="left">Method</th>
+<th align="right">RMSE</th>
+<th align="right">R²</th>
+<th align="right">RMSE</th>
+<th align="right">R²</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">OLS (fregre.lm)</td>
+<td align="right">0.2559</td>
+<td align="right">-0.0090</td>
+<td align="right">0.3838</td>
+<td align="right">-1.2694</td>
+</tr>
+<tr class="even">
+<td align="left">L1 (fregre.l1)</td>
+<td align="right">0.2574</td>
+<td align="right">-0.0205</td>
+<td align="right">0.2667</td>
+<td align="right">-0.0954</td>
+</tr>
+<tr class="odd">
+<td align="left">Huber (fregre.huber)</td>
+<td align="right">0.2559</td>
+<td align="right">-0.0090</td>
+<td align="right">0.2663</td>
+<td align="right">-0.0923</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level3">
-<h3 id="prediction-with-new-data">Prediction with New Data<a class="anchor" aria-label="anchor" href="#prediction-with-new-data"></a>
+<h3 id="visualizing-predictions">Visualizing Predictions<a class="anchor" aria-label="anchor" href="#visualizing-predictions"></a>
 </h3>
-<p>All three methods support the standard <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>
-generic:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Predict from a robust model on new curves</span></span>
-<span><span class="va">new_curves</span> <span class="op">&lt;-</span> <span class="va">fd</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span>
-<span><span class="va">pred_l1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_l1_contam</span>, <span class="va">new_curves</span><span class="op">)</span></span>
-<span><span class="va">pred_huber</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_huber_contam</span>, <span class="va">new_curves</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Observed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">y_te_clean</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  Predicted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">pred_ols_d</span>, <span class="va">pred_l1_d</span>, <span class="va">pred_hub_d</span><span class="op">)</span>,</span>
+<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"OLS (fregre.lm)"</span>, <span class="st">"L1 (fregre.l1)"</span>, <span class="st">"Huber (fregre.huber)"</span><span class="op">)</span>,</span>
+<span>               each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y_te_clean</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L1 predictions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pred_l1</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Huber predictions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pred_huber</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_pred</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Observed</span>, y <span class="op">=</span> <span class="va">Predicted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span>, color <span class="op">=</span> <span class="st">"#4A90D9"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span> <span class="va">Method</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Observed vs Predicted (Contaminated Training Data)"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"True Response"</span>, y <span class="op">=</span> <span class="st">"Predicted"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="robust-regression_files/figure-html/vis-predictions-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
-<div class="section level3">
-<h3 id="scalar-covariates">Scalar Covariates<a class="anchor" aria-label="anchor" href="#scalar-covariates"></a>
-</h3>
-<p>Both <code><a href="../reference/fregre.l1.html">fregre.l1()</a></code> and <code><a href="../reference/fregre.huber.html">fregre.huber()</a></code> support
-optional scalar covariates, just like <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code>:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Add a scalar covariate (e.g., sample temperature)</span></span>
-<span><span class="va">temperature</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, mean <span class="op">=</span> <span class="fl">25</span>, sd <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">y_with_temp</span> <span class="op">&lt;-</span> <span class="va">y_clean</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">temperature</span></span>
-<span></span>
-<span><span class="va">fit_l1_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.l1.html">fregre.l1</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_with_temp</span>,</span>
-<span>                        scalar.covariates <span class="op">=</span> <span class="va">temperature</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_l1_sc</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Prediction with scalar covariates</span></span>
-<span><span class="va">pred_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_l1_sc</span>, <span class="va">fd</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span>,</span>
-<span>                   scalar.covariates <span class="op">=</span> <span class="va">temperature</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </div>
+<div class="section level2">
+<h2 id="explainability-support">Explainability Support<a class="anchor" aria-label="anchor" href="#explainability-support"></a>
+</h2>
+<p>Both <code><a href="../reference/fregre.l1.html">fregre.l1()</a></code> and <code><a href="../reference/fregre.huber.html">fregre.huber()</a></code> models
+support the full explainability ecosystem: PDP, ALE, SHAP, permutation
+importance, saliency maps, LIME, and Sobol indices — the same tools
+available for <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code>:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># PDP for robust model</span></span>
+<span><span class="va">pdp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.pdp.html">fregre.pdp</a></span><span class="op">(</span><span class="va">fit_l1_contam</span>, <span class="va">fd</span>, component <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"PDP grid values:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pdp</span><span class="op">$</span><span class="va">grid_values</span><span class="op">)</span>, <span class="st">"points\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; PDP grid values: 20 points</span></span>
+<span></span>
+<span><span class="co"># SHAP values</span></span>
+<span><span class="va">shap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.shap.html">fregre.shap</a></span><span class="op">(</span><span class="va">fit_l1_contam</span>, <span class="va">fd</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"SHAP values computed for"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">shap</span><span class="op">$</span><span class="va">shap_values</span><span class="op">)</span>, <span class="st">"observations\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; SHAP values computed for observations</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="when-to-use-robust-regression">When to Use Robust Regression<a class="anchor" aria-label="anchor" href="#when-to-use-robust-regression"></a>
@@ -487,9 +504,6 @@ optional scalar covariates, just like <code><a href="../reference/fregre.lm.html
 be corrupted by gross errors.</li>
 <li>You want maximum resistance to outliers and are willing to accept a
 small loss of efficiency on clean data.</li>
-<li>The error distribution is heavy-tailed (e.g., Cauchy or
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
-with few degrees of freedom).</li>
 </ul>
 <p><strong>Use <code><a href="../reference/fregre.huber.html">fregre.huber()</a></code> when:</strong></p>
 <ul>
@@ -497,40 +511,14 @@ with few degrees of freedom).</li>
 protection against moderate contamination.</li>
 <li>You are unsure whether outliers are present — Huber is a safe
 default that costs very little when the data are clean.</li>
-<li>You want to tune the robustness/efficiency trade-off via the
-parameter
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>.</li>
 </ul>
 <p><strong>Stick with <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> when:</strong></p>
 <ul>
 <li>The data are clean and well-curated.</li>
-<li>You need the full downstream ecosystem: explainability
-(<code>explain()</code>), diagnostics (Cook’s distance, leverage,
-DFBETAS), uncertainty quantification (conformal prediction), and
-cross-validation (<code><a href="../reference/fregre.lm.cv.html">fregre.lm.cv()</a></code>).</li>
-<li>Efficiency is paramount and you trust the Gaussian error
-assumption.</li>
+<li>You need the full downstream ecosystem: diagnostics (Cook’s
+distance, leverage, DFBETAS), uncertainty quantification (conformal
+prediction), and cross-validation (<code><a href="../reference/fregre.lm.cv.html">fregre.lm.cv()</a></code>).</li>
 </ul>
-<div class="section level3">
-<h3 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
-</h3>
-<ul>
-<li>The robust methods protect against outliers in the
-<strong>response</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>.
-They do not address leverage points (outliers in the functional
-predictor
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X(t)</annotation></semantics></math>).
-For functional outlier detection, see
-<code><a href="../articles/outlier-detection.html">vignette("articles/outlier-detection")</a></code>.</li>
-<li>The <code>fregre.robust</code> class does not currently support the
-full explainability and diagnostics ecosystem available for
-<code>fregre.lm</code>.</li>
-<li>Both robust methods rely on IRLS, which may not converge if the data
-are severely ill-conditioned. Check the <code>converged</code> field in
-the output.</li>
-</ul>
-</div>
 </div>
 <div class="section level2">
 <h2 id="mathematical-details">Mathematical Details<a class="anchor" aria-label="anchor" href="#mathematical-details"></a>
@@ -580,8 +568,6 @@ differs by method:</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>k</mi><mi>/</mi><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w_i = \min(1, k/|r_i|)</annotation></semantics></math>
 </li>
 </ul>
-<p>Convergence is declared when the relative change in coefficients
-falls below a tolerance, typically within 10–30 iterations.</p>
 </div>
 </div>
 <div class="section level2">
@@ -601,9 +587,6 @@ and diagnostics for <code><a href="../reference/fregre.lm.html">fregre.lm()</a><
 <li>
 <code><a href="../articles/explainability.html">vignette("articles/explainability")</a></code> — interpreting
 <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> models</li>
-<li>
-<code><a href="../articles/cross-validation.html">vignette("articles/cross-validation")</a></code> —
-cross-validation framework</li>
 </ul>
 </div>
 <div class="section level2">

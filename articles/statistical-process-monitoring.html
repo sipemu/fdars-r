@@ -131,8 +131,7 @@ its Upper Control Limit (UCL).</p></li>
 spectral measurement across the wafer surface. Phase I uses 200
 in-control profiles; Phase II introduces a shift at observation 30.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">50</span>  <span class="co"># grid points</span></span>
 <span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
@@ -162,6 +161,10 @@ in-control profiles; Phase II introduces a shift at observation 30.</p>
 <span></span>
 <span><span class="va">fd_ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_ic</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="va">fd_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_new</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd_ic</span>, main <span class="op">=</span> <span class="st">"Phase I: In-Control Profiles"</span>,</span>
+<span>     xlab <span class="op">=</span> <span class="st">"Measurement Position"</span>, ylab <span class="op">=</span> <span class="st">"Thickness"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="statistical-process-monitoring_files/figure-html/plot-data-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="phase-i-estimating-control-limits">Phase I: Estimating Control Limits<a class="anchor" aria-label="anchor" href="#phase-i-estimating-control-limits"></a>
@@ -172,9 +175,17 @@ computes
 and SPE statistics for each training observation, and estimates control
 limits at significance level
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chart</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.phase1.html">spm.phase1</a></span><span class="op">(</span><span class="va">fd_ic</span>, ncomp <span class="op">=</span> <span class="fl">3</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">chart</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">chart</span><span class="op">)</span></span>
+<span><span class="co">#&gt; SPM Control Chart (Phase I)</span></span>
+<span><span class="co">#&gt;   Components: 3 </span></span>
+<span><span class="co">#&gt;   Alpha: 0.05 </span></span>
+<span><span class="co">#&gt;   T2 UCL: 7.815 </span></span>
+<span><span class="co">#&gt;   SPE UCL: 0.1241 </span></span>
+<span><span class="co">#&gt;   Observations: 200 </span></span>
+<span><span class="co">#&gt;   Grid points: 50 </span></span>
+<span><span class="co">#&gt;   Eigenvalues: 81.71, 24.00,  5.41</span></span></code></pre></div>
 <p>The returned <code>spm.chart</code> object contains:</p>
 <ul>
 <li>
@@ -191,19 +202,32 @@ distribution of Phase I SPE values</li>
 and SPE for each training observation (useful for checking that Phase I
 data is truly in-control)</li>
 </ul>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">chart</span><span class="op">)</span></span></code></pre></div>
+<p><img src="statistical-process-monitoring_files/figure-html/phase1-plot-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="phase-ii-online-monitoring">Phase II: Online Monitoring<a class="anchor" aria-label="anchor" href="#phase-ii-online-monitoring"></a>
 </h2>
 <p>Project new observations onto the Phase I principal components and
 compare to control limits:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">monitor</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.monitor.html">spm.monitor</a></span><span class="op">(</span><span class="va">chart</span>, <span class="va">fd_new</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">)</span></span>
+<span><span class="co">#&gt; SPM Monitoring Result (Phase II)</span></span>
+<span><span class="co">#&gt;   Observations: 50 </span></span>
+<span><span class="co">#&gt;   T2 alarms: 2 of 50 (4%) </span></span>
+<span><span class="co">#&gt;   SPE alarms: 2 of 50 (4%) </span></span>
+<span><span class="co">#&gt;   T2 UCL: 7.815 </span></span>
+<span><span class="co">#&gt;   SPE UCL: 0.1241</span></span>
 <span></span>
 <span><span class="co"># Which observations triggered alarms?</span></span>
 <span><span class="va">alarm_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">$</span><span class="va">t2.alarm</span> <span class="op">|</span> <span class="va">monitor</span><span class="op">$</span><span class="va">spe.alarm</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Alarms at observations:"</span>, <span class="va">alarm_idx</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Alarms at observations:"</span>, <span class="va">alarm_idx</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Alarms at observations: 4 25 46</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">)</span></span></code></pre></div>
+<p><img src="statistical-process-monitoring_files/figure-html/phase2-plot-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The monitoring result contains:</p>
 <table class="table">
 <thead><tr class="header">
@@ -244,11 +268,13 @@ exceed the UCL?</td>
 <p>The Exponentially Weighted Moving Average (EWMA) chart smooths the
 monitoring statistics over time, making it more sensitive to small,
 persistent shifts than the standard Shewhart-type chart:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ewma_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.ewma.html">spm.ewma</a></span><span class="op">(</span><span class="va">chart</span>, <span class="va">fd_new</span>, lambda <span class="op">=</span> <span class="fl">0.2</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EWMA T2 alarms:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ewma_result</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EWMA SPE alarms:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ewma_result</span><span class="op">$</span><span class="va">spe.alarm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; EWMA T2 alarms: 6</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EWMA SPE alarms:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ewma_result</span><span class="op">$</span><span class="va">spe.alarm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; EWMA SPE alarms: 2</span></span></code></pre></div>
 <p>The smoothing parameter
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\lambda \in (0, 1]</annotation></semantics></math>
 controls the memory: -
@@ -265,14 +291,15 @@ detects smaller shifts but responds more slowly</p>
 <p>When multiple functional variables are measured simultaneously (e.g.,
 temperature, pressure, and flow rate profiles), Multivariate FPCA
 extracts joint modes of variation across all variables:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate two correlated functional variables</span></span>
 <span><span class="va">fd_var1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_ic</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="va">fd_var2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X_ic</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_ic</span> <span class="op">*</span> <span class="va">m</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>, <span class="va">n_ic</span>, <span class="va">m</span><span class="op">)</span>,</span>
 <span>                 argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">mfpca_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mfpca.html">mfpca</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fd_var1</span>, <span class="va">fd_var2</span><span class="op">)</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Eigenvalues:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mfpca_result</span><span class="op">$</span><span class="va">eigenvalues</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Eigenvalues:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mfpca_result</span><span class="op">$</span><span class="va">eigenvalues</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Eigenvalues: 69.642 18.471 4.308</span></span></code></pre></div>
 <p>The result contains joint scores and per-variable eigenfunctions,
 which can be used for multivariate SPM via
 <code>mf.spm.phase1()</code>.</p>
@@ -282,15 +309,16 @@ which can be used for multivariate SPM via
 </h2>
 <p>When an alarm fires, contribution analysis identifies <em>which</em>
 region of the curve or <em>which</em> variable caused the alarm:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># T2 contributions show which PC scores are responsible</span></span>
 <span><span class="va">t2_contrib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.contributions.html">spm.contributions</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">$</span><span class="va">scores</span>,</span>
 <span>                                <span class="va">chart</span><span class="op">$</span><span class="va">eigenvalues</span>,</span>
-<span>                                <span class="va">chart</span><span class="op">$</span><span class="va">grid.sizes</span>,</span>
+<span>                                grid.sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>,</span>
 <span>                                type <span class="op">=</span> <span class="st">"t2"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Each row = observation, each column = variable/region contribution</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Contribution of PC1 to observation 35:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">[</span><span class="fl">35</span>, <span class="fl">1</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Contribution of PC1 to observation 35:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">[</span><span class="fl">35</span>, <span class="fl">1</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Contribution of PC1 to observation 35: 2.07</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="comparison-of-methods">Comparison of Methods<a class="anchor" aria-label="anchor" href="#comparison-of-methods"></a>
