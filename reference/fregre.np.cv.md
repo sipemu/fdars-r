@@ -77,6 +77,6 @@ y <- rnorm(50)
 cv_result <- fregre.np.cv(fd, y, kfold = 5)
 cv_result$optimal.h
 #>      95% 
-#> 1.917064 
+#> 1.976385 
 # }
 ```

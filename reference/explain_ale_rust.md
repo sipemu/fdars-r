@@ -1,6 +1,6 @@
-# ALE (Accumulated Local Effects)
+# Accumulated Local Effects
 
-ALE (Accumulated Local Effects)
+Accumulated Local Effects
 
 ## Usage
 

@@ -656,6 +656,10 @@ split and calibrate internally:</p>
 <span>  <span class="va">model_train</span>, <span class="va">train_fd</span>, <span class="va">train_y</span>, <span class="va">test_fd</span>,</span>
 <span>  cal.fraction <span class="op">=</span> <span class="fl">0.25</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: conformal.generic.regression uses the pre-fitted model without</span></span>
+<span><span class="co">#&gt; refitting. Calibration residuals are in-sample, so coverage guarantee is</span></span>
+<span><span class="co">#&gt; broken. Supply calibration.indices (held-out indices) for valid coverage, or</span></span>
+<span><span class="co">#&gt; use conformal.fregre.lm() / cv.conformal.regression() instead.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Generic conformal coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gen_conf</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Generic conformal coverage: 100 %</span></span></code></pre></div>
@@ -725,10 +729,16 @@ split and calibrate internally:</p>
 <td align="left"><code><a href="../reference/conformal.generic.regression.html">conformal.generic.regression()</a></code></td>
 <td align="left">From fitted model</td>
 <td align="left">0 (pre-fitted)</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1</mn><mo>−</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">\geq 1 - \alpha</annotation></semantics></math></td>
+<td align="left">Heuristic
+only<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi></mi><mo>*</mo></msup><annotation encoding="application/x-tex">^*</annotation></semantics></math>
+</td>
 </tr>
 </tbody>
 </table>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi></mi><mo>*</mo></msup><annotation encoding="application/x-tex">^*</annotation></semantics></math>Generic
+conformal uses in-sample calibration residuals (model trained on all
+data). Coverage guarantee is broken. Use split or CV+ for valid
+coverage.</p>
 <hr>
 </div>
 </div>

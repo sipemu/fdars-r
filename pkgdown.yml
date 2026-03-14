@@ -42,15 +42,18 @@ articles:
   articles/learn: learn.html
   articles/outlier-detection: outlier-detection.html
   articles/regression-diagnostics: regression-diagnostics.html
+  articles/robust-regression: robust-regression.html
   articles/scalar-on-function: scalar-on-function.html
+  articles/scalar-on-shape: scalar-on-shape.html
   articles/seasonal-analysis: seasonal-analysis.html
   articles/simulation-toolbox: simulation-toolbox.html
+  articles/statistical-process-monitoring: statistical-process-monitoring.html
   articles/streaming-depth: streaming-depth.html
   articles/tolerance-bands: tolerance-bands.html
   articles/tsrvf: tsrvf.html
   articles/uncertainty-quantification: uncertainty-quantification.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-13T22:25Z
+last_built: 2026-03-14T20:13Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

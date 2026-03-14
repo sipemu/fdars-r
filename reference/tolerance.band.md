@@ -8,7 +8,8 @@ individual curves in the population. Functional Tolerance Band
 ``` r
 tolerance.band(
   fdataobj,
-  method = c("fpca", "conformal", "scb", "exponential", "elastic"),
+  method = c("fpca", "conformal", "scb", "exponential", "elastic", "phase",
+    "elastic.config"),
   coverage = 0.95,
   ncomp = 3,
   nb = 500,
@@ -20,6 +21,8 @@ tolerance.band(
   multiplier = c("gaussian", "rademacher"),
   family = c("gaussian", "binomial", "poisson"),
   max.iter = 10,
+  ncomp.phase = 3,
+  tol = 1e-04,
   seed = NULL
 )
 ```
@@ -33,7 +36,7 @@ tolerance.band(
 - method:
 
   Method to use. One of "fpca" (default), "conformal", "scb",
-  "exponential", or "elastic".
+  "exponential", "elastic", "phase", or "elastic.config".
 
 - coverage:
 
@@ -42,16 +45,18 @@ tolerance.band(
 - ncomp:
 
   Number of FPCA components (default 3). Used by "fpca", "exponential",
-  and "elastic".
+  "elastic", "phase", and "elastic.config" (as amplitude components for
+  "elastic.config").
 
 - nb:
 
   Number of bootstrap replicates (default 500). Used by "fpca", "scb",
-  "exponential", and "elastic".
+  "exponential", "elastic", "phase", and "elastic.config".
 
 - band.type:
 
-  "pointwise" (default) or "simultaneous". Used by "fpca" and "elastic".
+  "pointwise" (default) or "simultaneous". Used by "fpca", "elastic",
+  "phase", and "elastic.config".
 
 - cal.fraction:
 
@@ -83,6 +88,16 @@ tolerance.band(
 - max.iter:
 
   Maximum iterations for elastic method Karcher mean (default 10).
+
+- ncomp.phase:
+
+  Number of FPCA components for the phase band (default 3). Used by
+  "elastic.config".
+
+- tol:
+
+  Convergence tolerance for Karcher mean (default 1e-4). Used by
+  "elastic.config".
 
 - seed:
 
@@ -124,6 +139,14 @@ An object of class 'tolerance.band' with components:
 
   the original fdata input
 
+The "phase" method additionally returns `gamma.lower`, `gamma.upper`,
+and `gamma.center` (warping function bounds), with
+`lower`/`upper`/`center`/`half_width` from the tangent-space band.
+
+The "elastic.config" method additionally returns `phase.lower`,
+`phase.upper`, and `phase.center` (warping function bounds), with the
+primary `lower`/`upper`/`center`/`half_width` from the amplitude band.
+
 Returns NULL with a warning if computation fails.
 
 ## Details
@@ -157,6 +180,20 @@ Available methods:
 
   Tolerance band in elastic (aligned) space. First computes Karcher
   mean, then applies FPCA band on aligned data.
+
+- phase:
+
+  Phase tolerance band for warping function variation. Computes Karcher
+  mean, extracts warping functions, and builds a tolerance band in the
+  tangent (shooting vector) space. Returns both the warping-function
+  bounds and the tangent-space band.
+
+- elastic.config:
+
+  Joint amplitude and phase tolerance band with full configuration
+  control. Separately controls the number of FPCA components for
+  amplitude (`ncomp`) and phase (`ncomp.phase`), plus convergence
+  tolerance (`tol`).
 
 ## References
 

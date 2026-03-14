@@ -2,6 +2,78 @@
 
 All notable changes to fdars are documented in this file.
 
+## \[0.6.0\] - 2026-03-14
+
+### Added
+
+- **Statistical Process Monitoring (SPM)**:
+  - [`spm.phase1()`](https://sipemu.github.io/fdars-r/reference/spm.phase1.md)
+    — Phase I control chart estimation (FPCA + T²/SPE limits)
+  - [`spm.monitor()`](https://sipemu.github.io/fdars-r/reference/spm.monitor.md)
+    — Phase II online monitoring with alarm detection
+  - [`spm.ewma()`](https://sipemu.github.io/fdars-r/reference/spm.ewma.md)
+    — EWMA smoothing for detecting gradual drifts
+  - [`spm.contributions()`](https://sipemu.github.io/fdars-r/reference/spm.contributions.md)
+    — T²/SPE contribution diagnostics for root cause analysis
+  - [`mfpca()`](https://sipemu.github.io/fdars-r/reference/mfpca.md) —
+    Multivariate FPCA for joint analysis of multiple functional
+    variables
+  - [`frcc.phase1()`](https://sipemu.github.io/fdars-r/reference/frcc.phase1.md),
+    [`frcc.monitor()`](https://sipemu.github.io/fdars-r/reference/frcc.monitor.md)
+    — Functional Regression Control Charts
+  - S3 print methods for `spm.chart`, `spm.monitor`, `mfpca`,
+    `frcc.chart`
+- **Scalar-on-shape regression** (phase-invariant functional
+  regression):
+  - [`scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/scalar.on.shape.md)
+    — regression using elastic alignment and index functions
+  - [`predict.scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/predict.scalar.on.shape.md)
+    — prediction for new curves
+  - Index methods: identity, polynomial, Nadaraya-Watson
+  - S3 print method for `scalar.on.shape`
+- **Robust regression** (outlier-resistant functional regression):
+  - [`fregre.l1()`](https://sipemu.github.io/fdars-r/reference/fregre.l1.md)
+    — L1 (least absolute deviations) regression
+  - [`fregre.huber()`](https://sipemu.github.io/fdars-r/reference/fregre.huber.md)
+    — Huber M-estimation with tuning parameter k
+  - [`predict.fregre.robust()`](https://sipemu.github.io/fdars-r/reference/predict.fregre.robust.md)
+    — prediction from robust models
+  - S3 print method for `fregre.robust`
+- **Tolerance band extensions**:
+  - `tolerance.band(method = "phase")` — tolerance bands for warping
+    functions
+  - `tolerance.band(method = "elastic.config")` — joint amplitude +
+    phase elastic bands
+- **Calibration indices for conformal prediction**:
+  - [`conformal.generic.regression()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.regression.md)
+    gains `calibration.indices` parameter
+  - [`conformal.generic.classification()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.classification.md)
+    gains `calibration.indices` parameter
+  - Fixes data leakage when using pre-trained models (GH issue \#20)
+- **New articles with SVG diagrams** (3 new):
+  - Statistical Process Monitoring — Phase I/II control charts, EWMA,
+    FRCC
+  - Scalar-on-Shape Regression — elastic alignment + index function
+    regression
+  - Robust Regression — L1 and Huber M-estimation under contamination
+  - Updated tolerance bands article with phase and elastic.config
+    sections
+
+### Changed
+
+- Upgraded Rust backend (fdars-core) from v0.8.4 to v0.8.5
+- [`depth.RPD()`](https://sipemu.github.io/fdars-r/reference/depth.RPD.md)
+  now uses Rust backend (was pure R)
+- [`semimetric.pca()`](https://sipemu.github.io/fdars-r/reference/semimetric.pca.md),
+  [`semimetric.deriv()`](https://sipemu.github.io/fdars-r/reference/semimetric.deriv.md),
+  [`semimetric.basis()`](https://sipemu.github.io/fdars-r/reference/semimetric.basis.md)
+  now use Rust backends
+
+### Fixed
+
+- Conformal generic data leakage (#20) — `calibration_indices` parameter
+  enables proper train/calibration split with pre-trained models
+
 ## \[0.5.0\] - 2026-03-11
 
 ### Added

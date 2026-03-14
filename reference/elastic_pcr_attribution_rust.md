@@ -1,6 +1,6 @@
-# Elastic PCR amplitude vs phase attribution
+# Elastic PCR attribution (amplitude vs phase importance)
 
-Elastic PCR amplitude vs phase attribution
+Elastic PCR attribution (amplitude vs phase importance)
 
 ## Usage
 

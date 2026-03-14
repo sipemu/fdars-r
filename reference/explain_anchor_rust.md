@@ -28,7 +28,7 @@ explain_anchor_rust(
   fpca_scores_ncol,
   data,
   observation,
-  precision_threshold,
+  precision,
   n_bins
 )
 ```

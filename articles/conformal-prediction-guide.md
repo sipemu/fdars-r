@@ -41,12 +41,17 @@ Choose your conformal method based on three questions:
 
 **3. How much data can you afford?**
 
-| Variant        | Data use                    | \# fits      | Guarantee          | Function suffix                                                                    |
-|:---------------|:----------------------------|:-------------|:-------------------|:-----------------------------------------------------------------------------------|
-| **Split**      | Wastes calibration fraction | 1            | $\geq 1 - \alpha$  | model-specific                                                                     |
-| **CV+**        | All data used               | $K$ folds    | $\geq 1 - 2\alpha$ | `cv.conformal.*()`                                                                 |
-| **Jackknife+** | All data used               | $n$ LOO fits | $\geq 1 - 2\alpha$ | [`jackknife.plus()`](https://sipemu.github.io/fdars-r/reference/jackknife.plus.md) |
-| **Generic**    | Pre-fitted model            | 0            | $\geq 1 - \alpha$  | `conformal.generic.*()`                                                            |
+| Variant        | Data use                    | \# fits      | Guarantee                    | Function suffix                                                                    |
+|:---------------|:----------------------------|:-------------|:-----------------------------|:-----------------------------------------------------------------------------------|
+| **Split**      | Wastes calibration fraction | 1            | $\geq 1 - \alpha$            | model-specific                                                                     |
+| **CV+**        | All data used               | $K$ folds    | $\geq 1 - 2\alpha$           | `cv.conformal.*()`                                                                 |
+| **Jackknife+** | All data used               | $n$ LOO fits | $\geq 1 - 2\alpha$           | [`jackknife.plus()`](https://sipemu.github.io/fdars-r/reference/jackknife.plus.md) |
+| **Generic**    | Pre-fitted model            | 0            | *Heuristic only*$^{\dagger}$ | `conformal.generic.*()`                                                            |
+
+$^{\dagger}$**Caveat:** Generic conformal uses a model trained on ALL
+data including the calibration set, so calibration residuals are
+in-sample. The coverage guarantee is broken. Use split or CV+ methods
+for valid coverage.
 
 ## Complete Function Reference
 
@@ -252,9 +257,16 @@ cat("  Mean width:", round(mean(jk_res$upper - jk_res$lower), 4), "\n")
 ### When to Use Generic Conformal
 
 **Use generic conformal when the model is already fitted** and you want
-to add uncertainty quantification without re-training. This is common in
-production: the model was trained once (possibly expensive), and you
-want prediction intervals for new batches.
+a quick heuristic for prediction intervals without re-training.
+
+> **Important:** Generic conformal uses calibration residuals computed
+> on data the model was trained on (in-sample). This means intervals are
+> typically too narrow and the coverage guarantee
+> `P(y in C) >= 1 - alpha` does **not** hold. For valid coverage, prefer
+> [`conformal.fregre.lm()`](https://sipemu.github.io/fdars-r/reference/conformal.fregre.lm.md),
+> [`cv.conformal.regression()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.regression.md),
+> or
+> [`jackknife.plus()`](https://sipemu.github.io/fdars-r/reference/jackknife.plus.md).
 
 ``` r
 model_fitted <- fregre.lm(fd_train, y_train, ncomp = 5)
@@ -263,6 +275,10 @@ gen_res <- conformal.generic.regression(
   model_fitted, fd_train, y_train, fd_test,
   cal.fraction = 0.25, alpha = 0.10, seed = 42
 )
+#> Warning: conformal.generic.regression uses the pre-fitted model without
+#> refitting. Calibration residuals are in-sample, so coverage guarantee is
+#> broken. Supply calibration.indices (held-out indices) for valid coverage, or
+#> use conformal.fregre.lm() / cv.conformal.regression() instead.
 
 cat("Generic conformal (from fitted model):\n")
 #> Generic conformal (from fitted model):
@@ -426,14 +442,14 @@ ggplot(df_sets, aes(x = .data$Observation, y = .data$Set_Size,
 
 ### Which Method Should I Use?
 
-| Scenario                                       | Recommendation         | Why                                |
-|:-----------------------------------------------|:-----------------------|:-----------------------------------|
-| Large dataset ($n > 200$), fast results needed | **Split**              | 1 fit, strong guarantee            |
-| Small dataset ($n < 100$)                      | **CV+**                | No data waste, tighter intervals   |
-| Need tightest possible intervals               | **Jackknife+**         | LOO calibration, most precise      |
-| Model already trained (production)             | **Generic**            | 0 re-fits, post-hoc UQ             |
-| Nonlinear relationship suspected               | **CV+ with fregre.np** | Distribution-free + flexible model |
-| Classification with few samples                | **CV+ classification** | All data used for calibration      |
+| Scenario                                       | Recommendation         | Why                                               |
+|:-----------------------------------------------|:-----------------------|:--------------------------------------------------|
+| Large dataset ($n > 200$), fast results needed | **Split**              | 1 fit, strong guarantee                           |
+| Small dataset ($n < 100$)                      | **CV+**                | No data waste, tighter intervals                  |
+| Need tightest possible intervals               | **Jackknife+**         | LOO calibration, most precise                     |
+| Model already trained (production)             | **Generic**            | 0 re-fits, heuristic only (no coverage guarantee) |
+| Nonlinear relationship suspected               | **CV+ with fregre.np** | Distribution-free + flexible model                |
+| Classification with few samples                | **CV+ classification** | All data used for calibration                     |
 
 ### Sample Size Requirements
 

@@ -1,6 +1,6 @@
-# FPC SHAP values
+# SHAP values for FPC scores
 
-FPC SHAP values
+SHAP values for FPC scores
 
 ## Usage
 

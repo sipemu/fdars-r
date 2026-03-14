@@ -1,6 +1,6 @@
-# Influence diagnostics
+# Influence diagnostics (leverage, Cook's distance)
 
-Influence diagnostics
+Influence diagnostics (leverage, Cook's distance)
 
 ## Usage
 

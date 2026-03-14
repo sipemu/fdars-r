@@ -830,8 +830,9 @@ consider Bonferroni correction (`alpha / n_methods`) or use the
 magnitudeshape method which jointly tests magnitude and shape.
 
 **Streaming monitoring**: For real-time applications, use
-`streaming_depth_one()` with depth-based p-values to flag anomalies as
-they arrive. See the [streaming depth
+[`streaming_depth_one()`](https://sipemu.github.io/fdars-r/reference/streaming_depth_one.md)
+with depth-based p-values to flag anomalies as they arrive. See the
+[streaming depth
 article](https://sipemu.github.io/fdars-r/articles/streaming-depth.md)
 for details.
 

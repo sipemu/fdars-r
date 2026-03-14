@@ -1,6 +1,6 @@
-# Sobol indices
+# Sobol sensitivity indices
 
-Sobol indices
+Sobol sensitivity indices
 
 ## Usage
 

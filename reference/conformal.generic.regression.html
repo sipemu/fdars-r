@@ -50,6 +50,7 @@ Uses the model's FPCA components for fast prediction without refitting.</p>
 <span>  <span class="va">newdata</span>,</span>
 <span>  scalar.train <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scalar.test <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  calibration.indices <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cal.fraction <span class="op">=</span> <span class="fl">0.25</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -84,8 +85,17 @@ Uses the model's FPCA components for fast prediction without refitting.</p>
 <dd><p>Optional scalar covariates for test.</p></dd>
 
 
+<dt id="arg-calibration-indices">calibration.indices<a class="anchor" aria-label="anchor" href="#arg-calibration-indices"></a></dt>
+<dd><p>Optional integer vector of 1-based indices into the
+training data to use as the calibration set. When provided, these observations
+should have been held out during model fitting so that calibration residuals
+are out-of-sample, restoring the coverage guarantee. If NULL (default),
+calibration indices are randomly selected from all training data (in-sample).</p></dd>
+
+
 <dt id="arg-cal-fraction">cal.fraction<a class="anchor" aria-label="anchor" href="#arg-cal-fraction"></a></dt>
-<dd><p>Fraction of data for calibration (default 0.25).</p></dd>
+<dd><p>Fraction of data for calibration (default 0.25). Ignored
+when <code>calibration.indices</code> is provided.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
@@ -100,6 +110,16 @@ Uses the model's FPCA components for fast prediction without refitting.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Same as <code><a href="conformal.fregre.lm.html">conformal.fregre.lm</a></code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="warning">Warning<a class="anchor" aria-label="anchor" href="#warning"></a></h2>
+
+
+<p>The model was trained on ALL data including the calibration subset, so
+calibration residuals are in-sample and systematically too small. The
+distribution-free coverage guarantee is broken. Use
+<code><a href="conformal.fregre.lm.html">conformal.fregre.lm</a></code> or <code><a href="cv.conformal.regression.html">cv.conformal.regression</a></code>
+for valid coverage.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -108,6 +128,7 @@ Uses the model's FPCA components for fast prediction without refitting.</p>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cp</span> <span class="op">&lt;-</span> <span class="fu">conformal.generic.regression</span><span class="op">(</span><span class="va">model</span>, <span class="va">fd</span>, <span class="va">y</span>, <span class="va">fd</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>conformal.generic.regression uses the pre-fitted model without refitting. Calibration residuals are in-sample, so coverage guarantee is broken. Supply calibration.indices (held-out indices) for valid coverage, or use conformal.fregre.lm() / cv.conformal.regression() instead.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

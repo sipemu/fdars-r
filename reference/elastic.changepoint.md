@@ -106,8 +106,8 @@ cp <- elastic.changepoint(fd, type = "amplitude", n.mc = 100)
 cp
 #> Elastic Changepoint Detection
 #>   Type: amplitude 
-#>   Changepoint at: 26 of 50 curves
-#>   Test statistic: 0.001991 
-#>   p-value: 0.9802 
+#>   Changepoint at: 24 of 50 curves
+#>   Test statistic: 0.003486 
+#>   p-value: 0.7822 
 # }
 ```

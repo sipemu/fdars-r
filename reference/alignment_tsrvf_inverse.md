@@ -7,12 +7,12 @@ Inverse TSRVF: reconstruct curves from tangent vectors
 ``` r
 alignment_tsrvf_inverse(
   tangent_vectors,
-  mean,
+  `_mean`,
   mean_srsf,
   mean_srsf_norm,
   srsf_norms,
-  gammas,
+  `_gammas`,
   argvals,
-  converged
+  `_converged`
 )
 ```

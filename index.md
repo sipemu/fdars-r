@@ -207,6 +207,29 @@ Guide](reference/figures/card-conformal-prediction-guide.svg)
 
 Conformal Prediction Guide
 
+[](https://sipemu.github.io/fdars-r/articles/scalar-on-shape.md)
+
+![Scalar-on-Shape
+Regression](reference/figures/card-scalar-on-shape.svg)
+
+Scalar-on-Shape
+
+[](https://sipemu.github.io/fdars-r/articles/robust-regression.md)
+
+![Robust Regression](reference/figures/card-robust-regression.svg)
+
+Robust Regression
+
+## Process Monitoring
+
+Statistical process control for functional data streams.
+
+[](https://sipemu.github.io/fdars-r/articles/statistical-process-monitoring.md)
+
+![Statistical Process Monitoring](reference/figures/card-spm.svg)
+
+Statistical Process Monitoring
+
 ## Analyze
 
 Infer, cluster, detect outliers, and test functional data.

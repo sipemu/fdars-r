@@ -152,9 +152,16 @@ cat("CV+ coverage:", round(cv_conf$coverage * 100, 1), "%\n")
 ## Generic Conformal Classification
 
 If you already have a fitted `functional.logistic` model, you can
-construct conformal prediction sets without re-fitting. This is useful
-when the model is expensive to train or when you want to conformalize an
-existing model:
+construct conformal prediction sets without re-fitting. Only binary
+classification (2 classes) is supported.
+
+> **Note:** Generic conformal uses in-sample calibration (the model was
+> trained on all data including the calibration set). The coverage
+> guarantee is broken — use this as a fast heuristic only. For valid
+> coverage, prefer
+> [`conformal.classif()`](https://sipemu.github.io/fdars-r/reference/conformal.classif.md)
+> or
+> [`cv.conformal.classification()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.classification.md).
 
 ``` r
 # Binary classification for generic conformal (requires logistic model)
@@ -175,6 +182,10 @@ gen_conf <- conformal.generic.classification(
   score.type = "lac",
   cal.fraction = 0.25, alpha = 0.10, seed = 42
 )
+#> Warning: conformal.generic.classification uses the pre-fitted model without
+#> refitting. Calibration scores are in-sample, so coverage guarantee is broken.
+#> Supply calibration.indices (held-out indices) for valid coverage, or use
+#> conformal.logistic() / cv.conformal.classification() instead.
 
 cat("Generic conformal coverage:", round(gen_conf$coverage * 100, 1), "%\n")
 #> Generic conformal coverage: 100 %
@@ -250,11 +261,11 @@ ggplot(df_score, aes(x = .data$Scoring, y = .data$Set_Size,
 
 ## Method Comparison
 
-| Method  | Function                                                                                                               | Base models           | Coverage           | Sets                       |
-|:--------|:-----------------------------------------------------------------------------------------------------------------------|:----------------------|:-------------------|:---------------------------|
-| Split   | [`conformal.classif()`](https://sipemu.github.io/fdars-r/reference/conformal.classif.md)                               | LDA, QDA, kNN         | $\geq 1 - \alpha$  | Tightest                   |
-| CV+     | [`cv.conformal.classification()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.classification.md)           | LDA, QDA, kNN         | $\geq 1 - 2\alpha$ | Tighter (no split penalty) |
-| Generic | [`conformal.generic.classification()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.classification.md) | Logistic (pre-fitted) | $\geq 1 - \alpha$  | From existing model        |
+| Method  | Function                                                                                                               | Base models                        | Coverage           | Sets                       |
+|:--------|:-----------------------------------------------------------------------------------------------------------------------|:-----------------------------------|:-------------------|:---------------------------|
+| Split   | [`conformal.classif()`](https://sipemu.github.io/fdars-r/reference/conformal.classif.md)                               | LDA, QDA, kNN                      | $\geq 1 - \alpha$  | Tightest                   |
+| CV+     | [`cv.conformal.classification()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.classification.md)           | LDA, QDA, kNN                      | $\geq 1 - 2\alpha$ | Tighter (no split penalty) |
+| Generic | [`conformal.generic.classification()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.classification.md) | Logistic (pre-fitted, binary only) | Heuristic only     | From existing model        |
 
 **Choosing a method:**
 
@@ -262,8 +273,9 @@ ggplot(df_score, aes(x = .data$Scoring, y = .data$Set_Size,
   coverage guarantee ($1 - \alpha$).
 - **CV+** when data is limited and you want tighter sets — all data is
   used for both training and calibration.
-- **Generic** when you already have a fitted logistic model and want to
-  add uncertainty quantification without re-training.
+- **Generic** when you already have a fitted logistic model and want a
+  quick heuristic — but note that coverage is not guaranteed (in-sample
+  calibration).
 
 ## See Also
 

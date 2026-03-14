@@ -1,6 +1,6 @@
-# Friedman H-statistic
+# Friedman H-statistic for interaction detection
 
-Friedman H-statistic
+Friedman H-statistic for interaction detection
 
 ## Usage
 

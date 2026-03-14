@@ -1,6 +1,6 @@
-# LOO-CV / PRESS
+# Leave-one-out cross-validation and PRESS
 
-LOO-CV / PRESS
+Leave-one-out cross-validation and PRESS
 
 ## Usage
 

@@ -231,9 +231,15 @@ calibration.</p>
 <h2 id="generic-conformal-classification">Generic Conformal Classification<a class="anchor" aria-label="anchor" href="#generic-conformal-classification"></a>
 </h2>
 <p>If you already have a fitted <code>functional.logistic</code> model,
-you can construct conformal prediction sets without re-fitting. This is
-useful when the model is expensive to train or when you want to
-conformalize an existing model:</p>
+you can construct conformal prediction sets without re-fitting. Only
+binary classification (2 classes) is supported.</p>
+<blockquote>
+<p><strong>Note:</strong> Generic conformal uses in-sample calibration
+(the model was trained on all data including the calibration set). The
+coverage guarantee is broken — use this as a fast heuristic only. For
+valid coverage, prefer <code><a href="../reference/conformal.classif.html">conformal.classif()</a></code> or
+<code><a href="../reference/cv.conformal.classification.html">cv.conformal.classification()</a></code>.</p>
+</blockquote>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Binary classification for generic conformal (requires logistic model)</span></span>
 <span><span class="co"># functional.logistic expects 0/1 labels</span></span>
@@ -253,6 +259,10 @@ conformalize an existing model:</p>
 <span>  score.type <span class="op">=</span> <span class="st">"lac"</span>,</span>
 <span>  cal.fraction <span class="op">=</span> <span class="fl">0.25</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: conformal.generic.classification uses the pre-fitted model without</span></span>
+<span><span class="co">#&gt; refitting. Calibration scores are in-sample, so coverage guarantee is broken.</span></span>
+<span><span class="co">#&gt; Supply calibration.indices (held-out indices) for valid coverage, or use</span></span>
+<span><span class="co">#&gt; conformal.logistic() / cv.conformal.classification() instead.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Generic conformal coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gen_conf</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Generic conformal coverage: 100 %</span></span>
@@ -377,8 +387,8 @@ QDA, and kNN:</p>
 <tr class="odd">
 <td align="left">Generic</td>
 <td align="left"><code><a href="../reference/conformal.generic.classification.html">conformal.generic.classification()</a></code></td>
-<td align="left">Logistic (pre-fitted)</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1</mn><mo>−</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">\geq 1 - \alpha</annotation></semantics></math></td>
+<td align="left">Logistic (pre-fitted, binary only)</td>
+<td align="left">Heuristic only</td>
 <td align="left">From existing model</td>
 </tr>
 </tbody>
@@ -394,8 +404,8 @@ the strongest coverage guarantee
 — all data is used for both training and calibration.</li>
 <li>
 <strong>Generic</strong> when you already have a fitted logistic
-model and want to add uncertainty quantification without
-re-training.</li>
+model and want a quick heuristic — but note that coverage is not
+guaranteed (in-sample calibration).</li>
 </ul>
 </div>
 <div class="section level2">

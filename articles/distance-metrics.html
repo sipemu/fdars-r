@@ -405,11 +405,11 @@ are the eigenfunctions from functional PCA.</p>
 <code class="sourceCode R"><span><span class="co"># Distance using first 3 PCs</span></span>
 <span><span class="va">dist_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semimetric.pca.html">semimetric.pca</a></span><span class="op">(</span><span class="va">fd</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_pca</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        [,1]  [,2]   [,3]   [,4]</span></span>
-<span><span class="co">#&gt; [1,]  0.000 3.514 10.000  9.950</span></span>
-<span><span class="co">#&gt; [2,]  3.514 0.000  7.198  9.961</span></span>
-<span><span class="co">#&gt; [3,] 10.000 7.198  0.000 10.000</span></span>
-<span><span class="co">#&gt; [4,]  9.950 9.961 10.000  0.000</span></span></code></pre></div>
+<span><span class="co">#&gt;        curve1 curve2 curve3 curve4</span></span>
+<span><span class="co">#&gt; curve1  0.000  3.514 10.000  9.950</span></span>
+<span><span class="co">#&gt; curve2  3.514  0.000  7.198  9.961</span></span>
+<span><span class="co">#&gt; curve3 10.000  7.198  0.000 10.000</span></span>
+<span><span class="co">#&gt; curve4  9.950  9.961 10.000  0.000</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="derivative-based-semimetric-semimetric-deriv">Derivative-Based Semimetric (semimetric.deriv)<a class="anchor" aria-label="anchor" href="#derivative-based-semimetric-semimetric-deriv"></a>
@@ -443,11 +443,11 @@ than their absolute values. It is particularly useful when:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"First derivative distances:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; First derivative distances:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_deriv1</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       [,1]  [,2]  [,3]  [,4]</span></span>
-<span><span class="co">#&gt; [1,] 0.000 2.197 6.279 9.912</span></span>
-<span><span class="co">#&gt; [2,] 2.197 0.000 4.530 9.912</span></span>
-<span><span class="co">#&gt; [3,] 6.279 4.530 0.000 9.912</span></span>
-<span><span class="co">#&gt; [4,] 9.912 9.912 9.912 0.000</span></span></code></pre></div>
+<span><span class="co">#&gt;        curve1 curve2 curve3 curve4</span></span>
+<span><span class="co">#&gt; curve1  0.000  2.197  6.250  9.909</span></span>
+<span><span class="co">#&gt; curve2  2.197  0.000  4.499  9.904</span></span>
+<span><span class="co">#&gt; curve3  6.250  4.499  0.000  9.848</span></span>
+<span><span class="co">#&gt; curve4  9.909  9.904  9.848  0.000</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="basis-semimetric-semimetric-basis">Basis Semimetric (semimetric.basis)<a class="anchor" aria-label="anchor" href="#basis-semimetric-semimetric-basis"></a>
@@ -473,11 +473,11 @@ patterns efficiently.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"B-spline basis distances:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; B-spline basis distances:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dist_bspline</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       [,1]  [,2]  [,3]  [,4]</span></span>
-<span><span class="co">#&gt; [1,] 0.000 1.509 4.015 3.913</span></span>
-<span><span class="co">#&gt; [2,] 1.509 0.000 2.771 3.999</span></span>
-<span><span class="co">#&gt; [3,] 4.015 2.771 0.000 4.289</span></span>
-<span><span class="co">#&gt; [4,] 3.913 3.999 4.289 0.000</span></span></code></pre></div>
+<span><span class="co">#&gt;        curve1 curve2 curve3 curve4</span></span>
+<span><span class="co">#&gt; curve1  0.000  2.530  4.278  4.357</span></span>
+<span><span class="co">#&gt; curve2  2.530  0.000  2.830  4.123</span></span>
+<span><span class="co">#&gt; curve3  4.278  2.830  0.000  2.966</span></span>
+<span><span class="co">#&gt; curve4  4.357  4.123  2.966  0.000</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fourier-semimetric-semimetric-fourier">Fourier Semimetric (semimetric.fourier)<a class="anchor" aria-label="anchor" href="#fourier-semimetric-semimetric-fourier"></a>

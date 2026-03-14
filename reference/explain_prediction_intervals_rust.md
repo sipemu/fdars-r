@@ -1,6 +1,6 @@
-# Prediction intervals
+# Prediction intervals for new observations
 
-Prediction intervals
+Prediction intervals for new observations
 
 ## Usage
 
@@ -26,7 +26,7 @@ explain_prediction_intervals_rust(
   fpca_scores_data,
   fpca_scores_nrow,
   fpca_scores_ncol,
-  data,
+  train_data,
   new_data,
   confidence
 )

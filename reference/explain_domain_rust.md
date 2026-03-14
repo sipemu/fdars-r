@@ -1,6 +1,6 @@
-# Domain selection
+# Domain selection (important intervals)
 
-Domain selection
+Domain selection (important intervals)
 
 ## Usage
 

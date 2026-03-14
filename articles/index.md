@@ -92,6 +92,12 @@
   methods. Includes scalar-on-function regression, logistic
   classification, and PCR.
 
+- [Scalar-on-Shape
+  Regression](https://sipemu.github.io/fdars-r/articles/scalar-on-shape.md):
+
+- [Robust Functional
+  Regression](https://sipemu.github.io/fdars-r/articles/robust-regression.md):
+
 - [Function-on-Scalar
   Regression](https://sipemu.github.io/fdars-r/articles/function-on-scalar.md):
 
@@ -128,6 +134,11 @@
 
 - [Conformal Prediction
   Guide](https://sipemu.github.io/fdars-r/articles/conformal-prediction-guide.md):
+
+### Process Monitoring
+
+- [Statistical Process Monitoring for Functional
+  Data](https://sipemu.github.io/fdars-r/articles/statistical-process-monitoring.md):
 
 ### Analyze
 

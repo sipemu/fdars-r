@@ -1,0 +1,149 @@
+# Scalar-on-Shape Regression
+
+Fits a scalar-on-shape regression model where the response depends on
+the *shape* of the functional predictor, with phase variation removed
+via elastic alignment (Fisher-Rao framework).
+
+## Usage
+
+``` r
+scalar.on.shape(
+  fdataobj,
+  y,
+  nbasis = 11,
+  lambda = 0.001,
+  index.method = c("identity", "polynomial", "nadaraya.watson"),
+  index.param = 2,
+  g.degree = 2,
+  dp.lambda = 0,
+  max.iter.outer = 10,
+  max.iter.inner = 15,
+  tol = 1e-04
+)
+```
+
+## Arguments
+
+- fdataobj:
+
+  An object of class 'fdata'.
+
+- y:
+
+  Scalar response vector (length n).
+
+- nbasis:
+
+  Number of Fourier basis functions for beta (default 11).
+
+- lambda:
+
+  Roughness penalty weight (default 1e-3).
+
+- index.method:
+
+  Index function method: "identity" (default), "polynomial", or
+  "nadaraya.watson".
+
+- index.param:
+
+  Parameter for the index method: polynomial degree (integer) or
+  Nadaraya-Watson bandwidth (numeric). Default 2.
+
+- g.degree:
+
+  Polynomial degree for the amplitude link g (default 2).
+
+- dp.lambda:
+
+  Dynamic programming alignment penalty (default 0).
+
+- max.iter.outer:
+
+  Maximum outer iterations (default 10).
+
+- max.iter.inner:
+
+  Maximum inner iterations (default 15).
+
+- tol:
+
+  Convergence tolerance (default 1e-4).
+
+## Value
+
+An object of class 'scalar.on.shape' (a list) with components:
+
+- beta:
+
+  Estimated shape index function (length m).
+
+- beta.coefficients:
+
+  Fourier coefficients for beta.
+
+- gammas:
+
+  Warping functions (n x m matrix).
+
+- shape.scores:
+
+  Shape scores (length n).
+
+- h.coefficients:
+
+  Index link function coefficients.
+
+- g.coefficients:
+
+  Amplitude link function coefficients.
+
+- fitted.values:
+
+  Fitted response values.
+
+- residuals:
+
+  Residuals.
+
+- sse:
+
+  Residual sum of squares.
+
+- r.squared:
+
+  Coefficient of determination.
+
+- n.iter.outer:
+
+  Number of outer iterations.
+
+- n.iter.inner:
+
+  Number of inner iterations.
+
+- index.method:
+
+  Index method used.
+
+- index.param:
+
+  Index method parameter.
+
+- fdataobj:
+
+  Training fdata object.
+
+- y:
+
+  Training response.
+
+## Examples
+
+``` r
+# \donttest{
+fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+y <- rnorm(50)
+fit <- scalar.on.shape(fd, y, nbasis = 5)
+# }
+```

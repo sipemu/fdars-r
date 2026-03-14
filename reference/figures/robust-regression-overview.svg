@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Title -->
+  <text x="350" y="22" text-anchor="middle" font-size="18.8" font-weight="bold" fill="#D55E00">Robust Functional Regression</text>
+  <text x="350" y="40" text-anchor="middle" font-size="12.5" fill="#888">Resisting outliers in scalar-on-function regression</text>
+
+  <!-- ===== Left panel: OLS (distorted) ===== -->
+  <rect x="10" y="55" width="220" height="210" rx="6" fill="#FEF0E6" stroke="#D55E00" stroke-width="1.2"/>
+  <text x="120" y="76" text-anchor="middle" font-size="14" font-weight="bold" fill="#D55E00">OLS (fregre.lm)</text>
+  <text x="120" y="92" text-anchor="middle" font-size="10" fill="#888">Distorted by outliers</text>
+
+  <!-- Scatter: clean points -->
+  <circle cx="40" cy="200" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="55" cy="188" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="68" cy="178" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="82" cy="165" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="95" cy="158" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="110" cy="148" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="125" cy="140" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="138" cy="132" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="152" cy="125" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="168" cy="118" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="182" cy="112" r="3" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="195" cy="108" r="3" fill="#4A90D9" opacity="0.5"/>
+  <!-- Outliers (red) -->
+  <circle cx="60" cy="115" r="4.5" fill="#D55E00" opacity="0.8"/>
+  <circle cx="140" cy="108" r="4.5" fill="#D55E00" opacity="0.8"/>
+  <!-- OLS fit line (tilted by outliers) -->
+  <line x1="30" y1="186" x2="205" y2="108" stroke="#D55E00" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.7"/>
+  <!-- True line -->
+  <line x1="30" y1="208" x2="205" y2="104" stroke="#2E8B57" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Axes -->
+  <line x1="28" y1="215" x2="210" y2="215" stroke="#999" stroke-width="0.5"/>
+  <line x1="28" y1="215" x2="28" y2="100" stroke="#999" stroke-width="0.5"/>
+  <text x="120" y="230" text-anchor="middle" font-size="8" fill="#666">fitted</text>
+  <text x="120" y="244" text-anchor="middle" font-size="9" fill="#D55E00">OLS pulled toward outliers</text>
+
+  <!-- ===== Right panel: Robust (resistant) ===== -->
+  <rect x="245" y="55" width="445" height="210" rx="6" fill="#F0F6FE" stroke="#4A90D9" stroke-width="1.2"/>
+  <text x="467" y="76" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Robust Methods</text>
+  <text x="467" y="92" text-anchor="middle" font-size="10" fill="#888">Resistant to contamination</text>
+
+  <!-- L1 sub-panel -->
+  <rect x="260" y="100" width="200" height="148" rx="5" fill="white" stroke="#2E8B57" stroke-width="0.8"/>
+  <text x="360" y="118" text-anchor="middle" font-size="12" font-weight="bold" fill="#2E8B57">L1 / LAD (fregre.l1)</text>
+  <line x1="275" y1="124" x2="445" y2="124" stroke="#2E8B57" stroke-width="0.3" opacity="0.5"/>
+
+  <!-- L1 scatter -->
+  <circle cx="282" cy="215" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="296" cy="205" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="310" cy="195" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="322" cy="185" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="336" cy="175" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="350" cy="165" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="364" cy="155" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="378" cy="148" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="392" cy="140" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="406" cy="134" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="420" cy="130" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="435" cy="128" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <!-- Outliers -->
+  <circle cx="304" cy="140" r="3.5" fill="#D55E00" opacity="0.6"/>
+  <circle cx="382" cy="128" r="3.5" fill="#D55E00" opacity="0.6"/>
+  <!-- L1 fit: nearly on true line -->
+  <line x1="272" y1="222" x2="445" y2="124" stroke="#2E8B57" stroke-width="2" opacity="0.8"/>
+
+  <!-- Axes -->
+  <line x1="272" y1="230" x2="445" y2="230" stroke="#999" stroke-width="0.4"/>
+  <line x1="272" y1="230" x2="272" y2="120" stroke="#999" stroke-width="0.4"/>
+  <text x="360" y="243" text-anchor="middle" font-size="8" fill="#2E8B57">Median regression (IRLS)</text>
+
+  <!-- Huber sub-panel -->
+  <rect x="475" y="100" width="200" height="148" rx="5" fill="white" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text x="575" y="118" text-anchor="middle" font-size="12" font-weight="bold" fill="#7B2D8E">Huber (fregre.huber)</text>
+  <line x1="490" y1="124" x2="660" y2="124" stroke="#7B2D8E" stroke-width="0.3" opacity="0.5"/>
+
+  <!-- Huber scatter -->
+  <circle cx="497" cy="215" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="511" cy="205" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="525" cy="195" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="537" cy="185" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="551" cy="175" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="565" cy="165" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="579" cy="155" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="593" cy="148" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="607" cy="140" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="621" cy="134" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="635" cy="130" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="650" cy="128" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <!-- Outliers -->
+  <circle cx="519" cy="140" r="3.5" fill="#D55E00" opacity="0.6"/>
+  <circle cx="597" cy="128" r="3.5" fill="#D55E00" opacity="0.6"/>
+  <!-- Huber fit: nearly on true line -->
+  <line x1="487" y1="222" x2="660" y2="124" stroke="#7B2D8E" stroke-width="2" opacity="0.8"/>
+
+  <!-- Axes -->
+  <line x1="487" y1="230" x2="660" y2="230" stroke="#999" stroke-width="0.4"/>
+  <line x1="487" y1="230" x2="487" y2="120" stroke="#999" stroke-width="0.4"/>
+  <text x="575" y="243" text-anchor="middle" font-size="8" fill="#7B2D8E">Smooth L2/L1 blend (k=1.345)</text>
+
+  <!-- Footer -->
+  <text x="350" y="274" text-anchor="middle" font-size="10" fill="#888">
+    <tspan fill="#4A90D9" font-weight="bold">Clean data</tspan> shown as blue dots;
+    <tspan fill="#D55E00" font-weight="bold">outliers</tspan> shown as orange dots
+  </text>
+
+</svg>

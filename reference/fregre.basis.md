@@ -96,6 +96,6 @@ fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
 y <- rnorm(50)
 result <- fregre.basis(fd, y, lambda = 0.1)
 result$r.squared
-#> [1] 0.2551586
+#> [1] 0.2287846
 # }
 ```

@@ -178,11 +178,18 @@ LOO fits</td>
 <td align="left"><strong>Generic</strong></td>
 <td align="left">Pre-fitted model</td>
 <td align="left">0</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≥</mo><mn>1</mn><mo>−</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">\geq 1 - \alpha</annotation></semantics></math></td>
+<td align="left">
+<em>Heuristic
+only</em><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi></mi><mo>†</mo></msup><annotation encoding="application/x-tex">^\dagger</annotation></semantics></math>
+</td>
 <td align="left"><code>conformal.generic.*()</code></td>
 </tr>
 </tbody>
 </table>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi></mi><mo>†</mo></msup><annotation encoding="application/x-tex">^\dagger</annotation></semantics></math><strong>Caveat:</strong> Generic conformal uses a model trained on ALL
+data including the calibration set, so calibration residuals are
+in-sample. The coverage guarantee is broken. Use split or CV+ methods
+for valid coverage.</p>
 </div>
 <div class="section level2">
 <h2 id="complete-function-reference">Complete Function Reference<a class="anchor" aria-label="anchor" href="#complete-function-reference"></a>
@@ -515,10 +522,17 @@ precise calibration. Best for small-to-moderate datasets
 <h3 id="when-to-use-generic-conformal">When to Use Generic Conformal<a class="anchor" aria-label="anchor" href="#when-to-use-generic-conformal"></a>
 </h3>
 <p><strong>Use generic conformal when the model is already
-fitted</strong> and you want to add uncertainty quantification without
-re-training. This is common in production: the model was trained once
-(possibly expensive), and you want prediction intervals for new
-batches.</p>
+fitted</strong> and you want a quick heuristic for prediction intervals
+without re-training.</p>
+<blockquote>
+<p><strong>Important:</strong> Generic conformal uses calibration
+residuals computed on data the model was trained on (in-sample). This
+means intervals are typically too narrow and the coverage guarantee
+<code>P(y in C) &gt;= 1 - alpha</code> does <strong>not</strong> hold.
+For valid coverage, prefer <code><a href="../reference/conformal.fregre.lm.html">conformal.fregre.lm()</a></code>,
+<code><a href="../reference/cv.conformal.regression.html">cv.conformal.regression()</a></code>, or
+<code><a href="../reference/jackknife.plus.html">jackknife.plus()</a></code>.</p>
+</blockquote>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_fitted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
@@ -526,6 +540,10 @@ batches.</p>
 <span>  <span class="va">model_fitted</span>, <span class="va">fd_train</span>, <span class="va">y_train</span>, <span class="va">fd_test</span>,</span>
 <span>  cal.fraction <span class="op">=</span> <span class="fl">0.25</span>, alpha <span class="op">=</span> <span class="fl">0.10</span>, seed <span class="op">=</span> <span class="fl">42</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: conformal.generic.regression uses the pre-fitted model without</span></span>
+<span><span class="co">#&gt; refitting. Calibration residuals are in-sample, so coverage guarantee is</span></span>
+<span><span class="co">#&gt; broken. Supply calibration.indices (held-out indices) for valid coverage, or</span></span>
+<span><span class="co">#&gt; use conformal.fregre.lm() / cv.conformal.regression() instead.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Generic conformal (from fitted model):\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Generic conformal (from fitted model):</span></span>
@@ -745,7 +763,7 @@ fast results needed</td>
 <tr class="even">
 <td align="left">Model already trained (production)</td>
 <td align="left"><strong>Generic</strong></td>
-<td align="left">0 re-fits, post-hoc UQ</td>
+<td align="left">0 re-fits, heuristic only (no coverage guarantee)</td>
 </tr>
 <tr class="odd">
 <td align="left">Nonlinear relationship suspected</td>

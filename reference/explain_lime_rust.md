@@ -1,6 +1,6 @@
-# LIME explanation
+# LIME local explanation
 
-LIME explanation
+LIME local explanation
 
 ## Usage
 

@@ -1,6 +1,6 @@
-# DFBETAS and DFFITS
+# DFBETAS and DFFITS diagnostics
 
-DFBETAS and DFFITS
+DFBETAS and DFFITS diagnostics
 
 ## Usage
 

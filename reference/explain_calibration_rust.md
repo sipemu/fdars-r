@@ -1,6 +1,6 @@
-# Calibration diagnostics (logistic only)
+# Calibration diagnostics for logistic model
 
-Calibration diagnostics (logistic only)
+Calibration diagnostics for logistic model
 
 ## Usage
 

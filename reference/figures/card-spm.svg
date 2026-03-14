@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Control chart line (T2 statistic) -->
+  <polyline points="10,60 25,55 40,58 55,52 70,63 85,50 100,68 115,45 130,70 145,48 160,85 175,90" stroke="#4169E1" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- UCL line -->
+  <line x1="10" y1="30" x2="190" y2="30" stroke="#DC3545" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+  <!-- Alarm points (above UCL) -->
+  <circle cx="160" cy="85" r="3" fill="#DC3545" opacity="0.8"/>
+  <circle cx="175" cy="90" r="3" fill="#DC3545" opacity="0.8"/>
+  <!-- Normal points -->
+  <circle cx="55" cy="52" r="2" fill="#4169E1" opacity="0.4"/>
+  <circle cx="85" cy="50" r="2" fill="#4169E1" opacity="0.4"/>
+  <circle cx="115" cy="45" r="2" fill="#4169E1" opacity="0.4"/>
+  <!-- Phase I / Phase II divider -->
+  <line x1="120" y1="15" x2="120" y2="105" stroke="#999" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+  <!-- Labels -->
+  <text x="40" y="15" font-size="7" fill="#666" font-family="sans-serif" text-anchor="middle">Phase I</text>
+  <text x="155" y="15" font-size="7" fill="#666" font-family="sans-serif" text-anchor="middle">Phase II</text>
+  <text x="193" y="30" font-size="6" fill="#DC3545" font-family="sans-serif" opacity="0.7">UCL</text>
+  <!-- Mini alarm icon -->
+  <text x="175" y="112" font-size="7" fill="#DC3545" font-family="sans-serif" text-anchor="middle">alarm</text>
+</svg>

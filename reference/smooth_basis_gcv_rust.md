@@ -1,6 +1,6 @@
-# Penalized basis smoothing with GCV-optimal lambda
+# Smooth functional data with GCV-selected penalty
 
-Penalized basis smoothing with GCV-optimal lambda
+Smooth functional data with GCV-selected penalty
 
 ## Usage
 

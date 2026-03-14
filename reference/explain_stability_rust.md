@@ -1,6 +1,6 @@
-# Explanation stability
+# Explanation stability via bootstrap
 
-Explanation stability
+Explanation stability via bootstrap
 
 ## Usage
 

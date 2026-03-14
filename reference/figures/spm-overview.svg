@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" fill="none">
+  <style>
+    .box { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 1.5; rx: 8; }
+    .box-phase1 { fill: #e7f0fd; stroke: #4169E1; stroke-width: 1.5; rx: 8; }
+    .box-phase2 { fill: #fef3e7; stroke: #E8913A; stroke-width: 1.5; rx: 8; }
+    .box-alarm { fill: #fde8e8; stroke: #DC3545; stroke-width: 1.5; rx: 8; }
+    .title { font-family: sans-serif; font-size: 13px; font-weight: bold; fill: #333; }
+    .subtitle { font-family: sans-serif; font-size: 10px; fill: #666; }
+    .label { font-family: sans-serif; font-size: 11px; fill: #333; }
+    .arrow { stroke: #666; stroke-width: 1.5; marker-end: url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Phase I -->
+  <text x="220" y="25" class="title" text-anchor="middle" fill="#4169E1">Phase I: Estimate Control Limits</text>
+
+  <rect x="20" y="45" width="120" height="55" class="box-phase1"/>
+  <text x="80" y="68" class="label" text-anchor="middle">Training Curves</text>
+  <text x="80" y="85" class="subtitle" text-anchor="middle">n x m matrix</text>
+
+  <line x1="145" y1="72" x2="175" y2="72" class="arrow"/>
+
+  <rect x="180" y="45" width="100" height="55" class="box-phase1"/>
+  <text x="230" y="68" class="label" text-anchor="middle">FPCA</text>
+  <text x="230" y="85" class="subtitle" text-anchor="middle">scores, loadings</text>
+
+  <line x1="285" y1="72" x2="315" y2="72" class="arrow"/>
+
+  <rect x="320" y="45" width="110" height="55" class="box-phase1"/>
+  <text x="375" y="63" class="label" text-anchor="middle">T2 &amp; SPE</text>
+  <text x="375" y="80" class="subtitle" text-anchor="middle">Hotelling T2</text>
+  <text x="375" y="93" class="subtitle" text-anchor="middle">Squared Pred. Error</text>
+
+  <!-- Phase II -->
+  <text x="530" y="25" class="title" text-anchor="middle" fill="#E8913A">Phase II: Monitor</text>
+
+  <rect x="460" y="45" width="110" height="55" class="box-phase2"/>
+  <text x="515" y="68" class="label" text-anchor="middle">New Curves</text>
+  <text x="515" y="85" class="subtitle" text-anchor="middle">Project onto PCs</text>
+
+  <line x1="575" y1="72" x2="605" y2="72" class="arrow"/>
+
+  <rect x="610" y="45" width="95" height="55" class="box-phase2"/>
+  <text x="657" y="63" class="label" text-anchor="middle">Compare to</text>
+  <text x="657" y="80" class="label" text-anchor="middle">Control Limits</text>
+  <text x="657" y="93" class="subtitle" text-anchor="middle">UCL (alpha)</text>
+
+  <!-- Control chart visualization -->
+  <rect x="20" y="130" width="300" height="130" class="box" fill="#fff"/>
+  <text x="170" y="150" class="label" text-anchor="middle">T2 Control Chart</text>
+  <!-- UCL line -->
+  <line x1="40" y1="175" x2="300" y2="175" stroke="#DC3545" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+  <text x="305" y="178" font-size="9" fill="#DC3545" font-family="sans-serif">UCL</text>
+  <!-- T2 values -->
+  <polyline points="45,210 65,205 85,215 105,200 125,220 145,195 165,190 185,210 205,185 225,200 245,230 265,240" stroke="#4169E1" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Alarm points -->
+  <circle cx="245" cy="230" r="4" fill="#DC3545" opacity="0.7"/>
+  <circle cx="265" cy="240" r="4" fill="#DC3545" opacity="0.7"/>
+  <!-- Phase divider -->
+  <line x1="200" y1="155" x2="200" y2="255" stroke="#999" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <text x="120" y="252" font-size="9" fill="#4169E1" font-family="sans-serif" text-anchor="middle">in-control</text>
+  <text x="250" y="252" font-size="9" fill="#E8913A" font-family="sans-serif" text-anchor="middle">monitoring</text>
+
+  <!-- EWMA & Contributions -->
+  <rect x="340" y="130" width="170" height="130" class="box"/>
+  <text x="425" y="150" class="label" text-anchor="middle">EWMA Smoothing</text>
+  <polyline points="360,210 380,205 400,200 420,195 440,190 460,185 480,175" stroke="#28A745" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <line x1="360" y1="175" x2="490" y2="175" stroke="#DC3545" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+  <text x="425" y="252" font-size="9" fill="#28A745" font-family="sans-serif" text-anchor="middle">trend detection</text>
+
+  <rect x="530" y="130" width="170" height="130" class="box-alarm"/>
+  <text x="615" y="150" class="label" text-anchor="middle">Contribution Analysis</text>
+  <!-- Bar chart for contributions -->
+  <rect x="555" y="195" width="20" height="50" fill="#DC3545" opacity="0.6"/>
+  <rect x="585" y="215" width="20" height="30" fill="#4169E1" opacity="0.4"/>
+  <rect x="615" y="220" width="20" height="25" fill="#4169E1" opacity="0.4"/>
+  <rect x="645" y="225" width="20" height="20" fill="#4169E1" opacity="0.4"/>
+  <rect x="675" y="230" width="20" height="15" fill="#4169E1" opacity="0.4"/>
+  <text x="615" y="252" font-size="9" fill="#DC3545" font-family="sans-serif" text-anchor="middle">root cause</text>
+</svg>

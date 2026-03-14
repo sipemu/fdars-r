@@ -48,7 +48,8 @@ Functional Tolerance Band</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tolerance.band</span><span class="op">(</span></span>
 <span>  <span class="va">fdataobj</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fpca"</span>, <span class="st">"conformal"</span>, <span class="st">"scb"</span>, <span class="st">"exponential"</span>, <span class="st">"elastic"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fpca"</span>, <span class="st">"conformal"</span>, <span class="st">"scb"</span>, <span class="st">"exponential"</span>, <span class="st">"elastic"</span>, <span class="st">"phase"</span>,</span>
+<span>    <span class="st">"elastic.config"</span><span class="op">)</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  ncomp <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  nb <span class="op">=</span> <span class="fl">500</span>,</span>
@@ -60,6 +61,8 @@ Functional Tolerance Band</p>
 <span>  multiplier <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="st">"rademacher"</span><span class="op">)</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="st">"binomial"</span>, <span class="st">"poisson"</span><span class="op">)</span>,</span>
 <span>  max.iter <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  ncomp.phase <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  tol <span class="op">=</span> <span class="fl">1e-04</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -74,7 +77,7 @@ Functional Tolerance Band</p>
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>Method to use. One of "fpca" (default), "conformal", "scb",
-"exponential", or "elastic".</p></dd>
+"exponential", "elastic", "phase", or "elastic.config".</p></dd>
 
 
 <dt id="arg-coverage">coverage<a class="anchor" aria-label="anchor" href="#arg-coverage"></a></dt>
@@ -83,17 +86,18 @@ Functional Tolerance Band</p>
 
 <dt id="arg-ncomp">ncomp<a class="anchor" aria-label="anchor" href="#arg-ncomp"></a></dt>
 <dd><p>Number of FPCA components (default 3). Used by "fpca",
-"exponential", and "elastic".</p></dd>
+"exponential", "elastic", "phase", and "elastic.config" (as amplitude
+components for "elastic.config").</p></dd>
 
 
 <dt id="arg-nb">nb<a class="anchor" aria-label="anchor" href="#arg-nb"></a></dt>
 <dd><p>Number of bootstrap replicates (default 500). Used by "fpca",
-"scb", "exponential", and "elastic".</p></dd>
+"scb", "exponential", "elastic", "phase", and "elastic.config".</p></dd>
 
 
 <dt id="arg-band-type">band.type<a class="anchor" aria-label="anchor" href="#arg-band-type"></a></dt>
-<dd><p>"pointwise" (default) or "simultaneous". Used by "fpca"
-and "elastic".</p></dd>
+<dd><p>"pointwise" (default) or "simultaneous". Used by "fpca",
+"elastic", "phase", and "elastic.config".</p></dd>
 
 
 <dt id="arg-cal-fraction">cal.fraction<a class="anchor" aria-label="anchor" href="#arg-cal-fraction"></a></dt>
@@ -128,6 +132,16 @@ default is computed.</p></dd>
 <dd><p>Maximum iterations for elastic method Karcher mean (default 10).</p></dd>
 
 
+<dt id="arg-ncomp-phase">ncomp.phase<a class="anchor" aria-label="anchor" href="#arg-ncomp-phase"></a></dt>
+<dd><p>Number of FPCA components for the phase band (default 3).
+Used by "elastic.config".</p></dd>
+
+
+<dt id="arg-tol">tol<a class="anchor" aria-label="anchor" href="#arg-tol"></a></dt>
+<dd><p>Convergence tolerance for Karcher mean (default 1e-4). Used by
+"elastic.config".</p></dd>
+
+
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed for reproducibility (default NULL).</p></dd>
 
@@ -159,7 +173,15 @@ default is computed.</p></dd>
 <dd><p>the original fdata input</p></dd>
 
 
-</dl><p>Returns NULL with a warning if computation fails.</p>
+</dl><p>The "phase" method additionally returns <code>gamma.lower</code>,
+<code>gamma.upper</code>, and <code>gamma.center</code> (warping function bounds),
+with <code>lower</code>/<code>upper</code>/<code>center</code>/<code>half_width</code> from the
+tangent-space band.</p>
+<p>The "elastic.config" method additionally returns <code>phase.lower</code>,
+<code>phase.upper</code>, and <code>phase.center</code> (warping function bounds),
+with the primary <code>lower</code>/<code>upper</code>/<code>center</code>/<code>half_width</code>
+from the amplitude band.</p>
+<p>Returns NULL with a warning if computation fails.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -183,6 +205,18 @@ Applies link function transformation.</p></dd>
 <dt>elastic</dt>
 <dd><p>Tolerance band in elastic (aligned) space. First computes
 Karcher mean, then applies FPCA band on aligned data.</p></dd>
+
+<dt>phase</dt>
+<dd><p>Phase tolerance band for warping function variation.
+Computes Karcher mean, extracts warping functions, and builds a
+tolerance band in the tangent (shooting vector) space. Returns both
+the warping-function bounds and the tangent-space band.</p></dd>
+
+<dt>elastic.config</dt>
+<dd><p>Joint amplitude and phase tolerance band with
+full configuration control. Separately controls the number of FPCA
+components for amplitude (<code>ncomp</code>) and phase (<code>ncomp.phase</code>),
+plus convergence tolerance (<code>tol</code>).</p></dd>
 
 
 </dl></div>

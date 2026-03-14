@@ -1,6 +1,6 @@
-# Expected calibration error (logistic only)
+# Expected Calibration Error for logistic model
 
-Expected calibration error (logistic only)
+Expected Calibration Error for logistic model
 
 ## Usage
 

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Clean data points -->
+  <circle cx="30" cy="85" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="42" cy="78" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="55" cy="70" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="68" cy="62" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="80" cy="55" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="92" cy="48" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="105" cy="42" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <circle cx="118" cy="36" r="2.5" fill="#4A90D9" opacity="0.5"/>
+  <!-- Outliers -->
+  <circle cx="50" cy="30" r="3.5" fill="#D55E00" opacity="0.7"/>
+  <circle cx="95" cy="22" r="3.5" fill="#D55E00" opacity="0.7"/>
+  <!-- OLS line (distorted, dashed) -->
+  <line x1="22" y1="80" x2="125" y2="24" stroke="#D55E00" stroke-width="2" stroke-dasharray="5,3" opacity="0.5"/>
+  <!-- Robust line (correct) -->
+  <line x1="22" y1="92" x2="125" y2="30" stroke="#2E8B57" stroke-width="2.5" opacity="0.7"/>
+  <!-- Labels -->
+  <text x="145" y="32" font-size="7" fill="#D55E00" font-family="sans-serif" opacity="0.7">OLS</text>
+  <text x="135" y="46" font-size="7" fill="#2E8B57" font-family="sans-serif" opacity="0.8">Robust</text>
+  <!-- Shield icon -->
+  <path d="M165 70 L165 85 Q165 100, 180 108 Q195 100, 195 85 L195 70 L180 62 Z" fill="#2E8B57" opacity="0.15" stroke="#2E8B57" stroke-width="1"/>
+  <text x="180" y="92" text-anchor="middle" font-size="12" fill="#2E8B57" font-weight="bold" opacity="0.6">R</text>
+</svg>

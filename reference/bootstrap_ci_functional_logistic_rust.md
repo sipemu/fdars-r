@@ -1,6 +1,6 @@
-# Bootstrap CI for functional logistic model beta(t)
+# Bootstrap confidence intervals for β(t) in functional logistic model
 
-Bootstrap CI for functional logistic model beta(t)
+Bootstrap confidence intervals for β(t) in functional logistic model
 
 ## Usage
 

@@ -1,6 +1,6 @@
-# Functional saliency
+# Functional saliency map
 
-Functional saliency
+Functional saliency map
 
 ## Usage
 

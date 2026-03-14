@@ -1,6 +1,7 @@
-# Penalized basis smoothing
+# Smooth functional data using B-spline or Fourier basis with fixed penalty
 
-Penalized basis smoothing
+Smooth functional data using B-spline or Fourier basis with fixed
+penalty
 
 ## Usage
 

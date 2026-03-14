@@ -1,6 +1,6 @@
-# Prototype criticism
+# Prototype and criticism selection
 
-Prototype criticism
+Prototype and criticism selection
 
 ## Usage
 

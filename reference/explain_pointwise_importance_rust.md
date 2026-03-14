@@ -1,6 +1,6 @@
-# Pointwise importance
+# Pointwise importance of beta(t)
 
-Pointwise importance
+Pointwise importance of beta(t)
 
 ## Usage
 

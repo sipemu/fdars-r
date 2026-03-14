@@ -152,9 +152,9 @@ print(result)
 #> Series length:    400
 #> 
 #> Variance decomposition:
-#>   Trend:     10.9%
-#>   Seasonal:  84.6%
-#>   Remainder: 4.5%
+#>   Trend:     14.4%
+#>   Seasonal:  79.5%
+#>   Remainder: 6.1%
 
 # Plot the decomposition
 plot(result)

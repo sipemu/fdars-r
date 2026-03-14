@@ -37,9 +37,87 @@
 
 <p>All notable changes to fdars are documented in this file.</p>
 <div class="section level2">
-<h2 id="id_050---2026-03-11">[0.5.0] - 2026-03-11<a class="anchor" aria-label="anchor" href="#id_050---2026-03-11"></a></h2>
+<h2 id="id_060---2026-03-14">[0.6.0] - 2026-03-14<a class="anchor" aria-label="anchor" href="#id_060---2026-03-14"></a></h2>
 <div class="section level3">
 <h3 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a></h3>
+<ul><li>
+<strong>Statistical Process Monitoring (SPM)</strong>:
+<ul><li>
+<code><a href="reference/spm.phase1.html">spm.phase1()</a></code> — Phase I control chart estimation (FPCA + T²/SPE limits)</li>
+<li>
+<code><a href="reference/spm.monitor.html">spm.monitor()</a></code> — Phase II online monitoring with alarm detection</li>
+<li>
+<code><a href="reference/spm.ewma.html">spm.ewma()</a></code> — EWMA smoothing for detecting gradual drifts</li>
+<li>
+<code><a href="reference/spm.contributions.html">spm.contributions()</a></code> — T²/SPE contribution diagnostics for root cause analysis</li>
+<li>
+<code><a href="reference/mfpca.html">mfpca()</a></code> — Multivariate FPCA for joint analysis of multiple functional variables</li>
+<li>
+<code><a href="reference/frcc.phase1.html">frcc.phase1()</a></code>, <code><a href="reference/frcc.monitor.html">frcc.monitor()</a></code> — Functional Regression Control Charts</li>
+<li>S3 print methods for <code>spm.chart</code>, <code>spm.monitor</code>, <code>mfpca</code>, <code>frcc.chart</code>
+</li>
+</ul></li>
+<li>
+<strong>Scalar-on-shape regression</strong> (phase-invariant functional regression):
+<ul><li>
+<code><a href="reference/scalar.on.shape.html">scalar.on.shape()</a></code> — regression using elastic alignment and index functions</li>
+<li>
+<code><a href="reference/predict.scalar.on.shape.html">predict.scalar.on.shape()</a></code> — prediction for new curves</li>
+<li>Index methods: identity, polynomial, Nadaraya-Watson</li>
+<li>S3 print method for <code>scalar.on.shape</code>
+</li>
+</ul></li>
+<li>
+<strong>Robust regression</strong> (outlier-resistant functional regression):
+<ul><li>
+<code><a href="reference/fregre.l1.html">fregre.l1()</a></code> — L1 (least absolute deviations) regression</li>
+<li>
+<code><a href="reference/fregre.huber.html">fregre.huber()</a></code> — Huber M-estimation with tuning parameter k</li>
+<li>
+<code><a href="reference/predict.fregre.robust.html">predict.fregre.robust()</a></code> — prediction from robust models</li>
+<li>S3 print method for <code>fregre.robust</code>
+</li>
+</ul></li>
+<li>
+<strong>Tolerance band extensions</strong>:
+<ul><li>
+<code>tolerance.band(method = "phase")</code> — tolerance bands for warping functions</li>
+<li>
+<code>tolerance.band(method = "elastic.config")</code> — joint amplitude + phase elastic bands</li>
+</ul></li>
+<li>
+<strong>Calibration indices for conformal prediction</strong>:
+<ul><li>
+<code><a href="reference/conformal.generic.regression.html">conformal.generic.regression()</a></code> gains <code>calibration.indices</code> parameter</li>
+<li>
+<code><a href="reference/conformal.generic.classification.html">conformal.generic.classification()</a></code> gains <code>calibration.indices</code> parameter</li>
+<li>Fixes data leakage when using pre-trained models (GH issue #20)</li>
+</ul></li>
+<li>
+<strong>New articles with SVG diagrams</strong> (3 new):
+<ul><li>Statistical Process Monitoring — Phase I/II control charts, EWMA, FRCC</li>
+<li>Scalar-on-Shape Regression — elastic alignment + index function regression</li>
+<li>Robust Regression — L1 and Huber M-estimation under contamination</li>
+<li>Updated tolerance bands article with phase and elastic.config sections</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
+<ul><li>Upgraded Rust backend (fdars-core) from v0.8.4 to v0.8.5</li>
+<li>
+<code><a href="reference/depth.RPD.html">depth.RPD()</a></code> now uses Rust backend (was pure R)</li>
+<li>
+<code><a href="reference/semimetric.pca.html">semimetric.pca()</a></code>, <code><a href="reference/semimetric.deriv.html">semimetric.deriv()</a></code>, <code><a href="reference/semimetric.basis.html">semimetric.basis()</a></code> now use Rust backends</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
+<ul><li>Conformal generic data leakage (#20) — <code>calibration_indices</code> parameter enables proper train/calibration split with pre-trained models</li>
+</ul></div>
+</div>
+<div class="section level2">
+<h2 id="id_050---2026-03-11">[0.5.0] - 2026-03-11<a class="anchor" aria-label="anchor" href="#id_050---2026-03-11"></a></h2>
+<div class="section level3">
+<h3 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a></h3>
 <ul><li>
 <strong>Elastic alignment</strong> (Fisher-Rao framework):
 <ul><li>
@@ -302,7 +380,7 @@
 <strong>Pre-built binary packages</strong> for macOS (.tgz) and Windows (.zip) attached to GitHub Releases — install without Rust toolchain</li>
 </ul></div>
 <div class="section level3">
-<h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
+<h3 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a></h3>
 <ul><li>Upgraded Rust backend (fdars-core) to v0.8.0</li>
 <li>All plots use ggplot2; respects <code>theme_set()</code>
 </li>
@@ -328,7 +406,7 @@
 <li>GitHub Actions: pinned R 4.5.2, added Rust toolchain to pkgdown workflow</li>
 </ul></div>
 <div class="section level3">
-<h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
+<h3 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a></h3>
 <ul><li>Changepoint p-values always 1.0 (normalization mismatch in Brownian bridge simulation; replaced with permutation testing)</li>
 <li>
 <code><a href="reference/functional.logistic.html">functional.logistic()</a></code> missing <code>.fpca_scores</code>, <code>beta.se</code>, <code>std.errors</code> from Rust</li>
@@ -346,7 +424,7 @@
 <div class="section level2">
 <h2 id="id_040---2026-03-04">[0.4.0] - 2026-03-04<a class="anchor" aria-label="anchor" href="#id_040---2026-03-04"></a></h2>
 <div class="section level3">
-<h3 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a></h3>
+<h3 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a></h3>
 <ul><li>
 <code>id</code> and <code>metadata</code> slots in fdata objects for storing curve identifiers and associated data</li>
 <li>Outlier plot labeling: <code>plot(outliergram, label = "id")</code> or <code>label = "column_name"</code>
@@ -366,13 +444,13 @@
 <code><a href="reference/plot.fdata2pc.html">plot.fdata2pc()</a></code> for FPCA visualization (components, variance, scores)</li>
 </ul></div>
 <div class="section level3">
-<h3 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a></h3>
+<h3 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a></h3>
 <ul><li>Auto-reduce alpha when <code>show.mean = TRUE</code> in <code><a href="reference/plot.fdata.html">plot.fdata()</a></code>
 </li>
 <li>Renamed <code>fdata.deriv()</code> to <code><a href="reference/deriv.html">deriv()</a></code> for consistency</li>
 </ul></div>
 <div class="section level3">
-<h3 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a></h3>
+<h3 id="fixed-2">Fixed<a class="anchor" aria-label="anchor" href="#fixed-2"></a></h3>
 <ul><li>
 <code><a href="reference/plot.group.distance.html">plot.group.distance()</a></code> error handling</li>
 <li>Release workflow now generates documentation before building</li>
@@ -382,7 +460,7 @@
 <div class="section level2">
 <h2 id="id_030---2026-02-19">[0.3.0] - 2026-02-19<a class="anchor" aria-label="anchor" href="#id_030---2026-02-19"></a></h2>
 <div class="section level3">
-<h3 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a></h3>
+<h3 id="added-3">Added<a class="anchor" aria-label="anchor" href="#added-3"></a></h3>
 <ul><li>Covariance kernel functions: <code><a href="reference/kernel.exponential.html">kernel.exponential()</a></code>, <code><a href="reference/kernel.matern.html">kernel.matern()</a></code>, <code><a href="reference/kernel.gaussian.html">kernel.gaussian()</a></code>, etc.</li>
 <li>
 <code><a href="reference/make.gaussian.process.html">make.gaussian.process()</a></code> for simulating Gaussian process realizations</li>
@@ -418,7 +496,7 @@
 </ul></li>
 </ul></div>
 <div class="section level3">
-<h3 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a></h3>
+<h3 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a></h3>
 <ul><li>Cleaned up API: removed backward compatibility shims</li>
 <li>Renamed functions for consistency (e.g., <code>fdata.mean</code> → <code>mean.fdata</code>)</li>
 <li>All plots now use ggplot2 instead of base R graphics</li>

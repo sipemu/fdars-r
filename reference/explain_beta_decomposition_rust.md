@@ -1,6 +1,6 @@
-# Beta decomposition
+# Beta decomposition by FPC components
 
-Beta decomposition
+Beta decomposition by FPC components
 
 ## Usage
 

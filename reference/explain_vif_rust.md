@@ -1,6 +1,6 @@
-# FPC VIF
+# Variance inflation factors for FPC scores
 
-FPC VIF
+Variance inflation factors for FPC scores
 
 ## Usage
 

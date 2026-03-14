@@ -50,6 +50,6 @@ y <- rnorm(50)
 scalars <- matrix(rnorm(100), nrow = 50, ncol = 2)
 result <- fregre.np.mixed(fd, y, scalar.covariates = scalars)
 result$r.squared
-#> [1] -0.0356435
+#> [1] -0.04731078
 # }
 ```

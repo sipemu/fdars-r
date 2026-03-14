@@ -335,11 +335,11 @@ This semimetric is useful for:
 # Distance using first 3 PCs
 dist_pca <- semimetric.pca(fd, ncomp = 3)
 print(round(as.matrix(dist_pca), 3))
-#>        [,1]  [,2]   [,3]   [,4]
-#> [1,]  0.000 3.514 10.000  9.950
-#> [2,]  3.514 0.000  7.198  9.961
-#> [3,] 10.000 7.198  0.000 10.000
-#> [4,]  9.950 9.961 10.000  0.000
+#>        curve1 curve2 curve3 curve4
+#> curve1  0.000  3.514 10.000  9.950
+#> curve2  3.514  0.000  7.198  9.961
+#> curve3 10.000  7.198  0.000 10.000
+#> curve4  9.950  9.961 10.000  0.000
 ```
 
 ### Derivative-Based Semimetric (semimetric.deriv)
@@ -368,11 +368,11 @@ dist_deriv2 <- semimetric.deriv(fd, nderiv = 2)
 cat("First derivative distances:\n")
 #> First derivative distances:
 print(round(as.matrix(dist_deriv1), 3))
-#>       [,1]  [,2]  [,3]  [,4]
-#> [1,] 0.000 2.197 6.279 9.912
-#> [2,] 2.197 0.000 4.530 9.912
-#> [3,] 6.279 4.530 0.000 9.912
-#> [4,] 9.912 9.912 9.912 0.000
+#>        curve1 curve2 curve3 curve4
+#> curve1  0.000  2.197  6.250  9.909
+#> curve2  2.197  0.000  4.499  9.904
+#> curve3  6.250  4.499  0.000  9.848
+#> curve4  9.909  9.904  9.848  0.000
 ```
 
 ### Basis Semimetric (semimetric.basis)
@@ -401,11 +401,11 @@ dist_fourier <- semimetric.basis(fd, nbasis = 11, basis = "fourier")
 cat("B-spline basis distances:\n")
 #> B-spline basis distances:
 print(round(as.matrix(dist_bspline), 3))
-#>       [,1]  [,2]  [,3]  [,4]
-#> [1,] 0.000 1.509 4.015 3.913
-#> [2,] 1.509 0.000 2.771 3.999
-#> [3,] 4.015 2.771 0.000 4.289
-#> [4,] 3.913 3.999 4.289 0.000
+#>        curve1 curve2 curve3 curve4
+#> curve1  0.000  2.530  4.278  4.357
+#> curve2  2.530  0.000  2.830  4.123
+#> curve3  4.278  2.830  0.000  2.966
+#> curve4  4.357  4.123  2.966  0.000
 ```
 
 ### Fourier Semimetric (semimetric.fourier)

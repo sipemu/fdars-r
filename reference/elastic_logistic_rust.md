@@ -1,6 +1,6 @@
-# Elastic logistic classification
+# Elastic logistic regression
 
-Elastic logistic classification
+Elastic logistic regression
 
 ## Usage
 

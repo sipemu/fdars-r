@@ -274,10 +274,10 @@ cat("Correlation between distance types:\n")
 #> Correlation between distance types:
 cat("  Height vs Velocity:", round(cor(as.vector(dist_height[1:10, 1:10]),
                                         as.vector(dist_velocity[1:10, 1:10])), 3), "\n")
-#>   Height vs Velocity: 0.673
+#>   Height vs Velocity: 0.668
 cat("  Height vs Acceleration:", round(cor(as.vector(dist_height[1:10, 1:10]),
                                             as.vector(dist_acceleration[1:10, 1:10])), 3), "\n")
-#>   Height vs Acceleration: 0.452
+#>   Height vs Acceleration: 0.455
 ```
 
 ### Clustering by Growth Pattern

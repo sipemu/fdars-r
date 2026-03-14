@@ -1,6 +1,6 @@
-# Bootstrap CI for functional linear model beta(t)
+# Bootstrap confidence intervals for β(t) in functional linear model
 
-Bootstrap CI for functional linear model beta(t)
+Bootstrap confidence intervals for β(t) in functional linear model
 
 ## Usage
 

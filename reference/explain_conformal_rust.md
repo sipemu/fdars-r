@@ -1,6 +1,6 @@
-# Conformal prediction
+# Conformal prediction intervals
 
-Conformal prediction
+Conformal prediction intervals
 
 ## Usage
 

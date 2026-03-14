@@ -1,6 +1,6 @@
-# Elastic scalar-on-function regression
+# Elastic regression (function-on-scalar with alignment)
 
-Elastic scalar-on-function regression
+Elastic regression (function-on-scalar with alignment)
 
 ## Usage
 

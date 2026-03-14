@@ -526,6 +526,10 @@ gen_conf <- conformal.generic.regression(
   model_train, train_fd, train_y, test_fd,
   cal.fraction = 0.25, alpha = 0.10, seed = 42
 )
+#> Warning: conformal.generic.regression uses the pre-fitted model without
+#> refitting. Calibration residuals are in-sample, so coverage guarantee is
+#> broken. Supply calibration.indices (held-out indices) for valid coverage, or
+#> use conformal.fregre.lm() / cv.conformal.regression() instead.
 
 cat("Generic conformal coverage:", round(gen_conf$coverage * 100, 1), "%\n")
 #> Generic conformal coverage: 100 %
@@ -559,12 +563,16 @@ ggplot(df_all, aes(x = .data$Method, y = .data$Width, fill = .data$Method)) +
 
 ![](uncertainty-quantification_files/figure-html/compare-conformal-1.png)
 
-| Variant    | Function                                                                                                       | Data use                | \# model fits  | Guarantee          |
-|:-----------|:---------------------------------------------------------------------------------------------------------------|:------------------------|:---------------|:-------------------|
-| Split      | [`conformal.fregre.lm()`](https://sipemu.github.io/fdars-r/reference/conformal.fregre.lm.md)                   | Wastes calibration data | 1              | $\geq 1 - \alpha$  |
-| CV+        | [`cv.conformal.regression()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.regression.md)           | All data used           | $K$            | $\geq 1 - 2\alpha$ |
-| Jackknife+ | [`jackknife.plus()`](https://sipemu.github.io/fdars-r/reference/jackknife.plus.md)                             | All data used           | $n$            | $\geq 1 - 2\alpha$ |
-| Generic    | [`conformal.generic.regression()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.regression.md) | From fitted model       | 0 (pre-fitted) | $\geq 1 - \alpha$  |
+| Variant    | Function                                                                                                       | Data use                | \# model fits  | Guarantee            |
+|:-----------|:---------------------------------------------------------------------------------------------------------------|:------------------------|:---------------|:---------------------|
+| Split      | [`conformal.fregre.lm()`](https://sipemu.github.io/fdars-r/reference/conformal.fregre.lm.md)                   | Wastes calibration data | 1              | $\geq 1 - \alpha$    |
+| CV+        | [`cv.conformal.regression()`](https://sipemu.github.io/fdars-r/reference/cv.conformal.regression.md)           | All data used           | $K$            | $\geq 1 - 2\alpha$   |
+| Jackknife+ | [`jackknife.plus()`](https://sipemu.github.io/fdars-r/reference/jackknife.plus.md)                             | All data used           | $n$            | $\geq 1 - 2\alpha$   |
+| Generic    | [`conformal.generic.regression()`](https://sipemu.github.io/fdars-r/reference/conformal.generic.regression.md) | From fitted model       | 0 (pre-fitted) | Heuristic only$^{*}$ |
+
+$^{*}$Generic conformal uses in-sample calibration residuals (model
+trained on all data). Coverage guarantee is broken. Use split or CV+ for
+valid coverage.
 
 ------------------------------------------------------------------------
 

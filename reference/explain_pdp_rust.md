@@ -1,6 +1,6 @@
-# Functional PDP (Partial Dependence Plot)
+# Partial dependence plot for a single FPC component
 
-Functional PDP (Partial Dependence Plot)
+Partial dependence plot for a single FPC component
 
 ## Usage
 
