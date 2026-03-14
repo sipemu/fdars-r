@@ -326,6 +326,7 @@ reference:
   contents:
   - scalar.on.shape
   - predict.scalar.on.shape
+  - print.scalar.on.shape
 
 - title: Robust Regression
   contents:
@@ -335,6 +336,7 @@ reference:
 
 - title: Statistical Process Monitoring
   contents:
+  - spm
   - spm.phase1
   - spm.monitor
   - spm.ewma
@@ -587,6 +589,8 @@ reference:
   - matches("_rust$")
   - starts_with("dot-")
   - matches("^[a-z].*_[a-z]")
+  - matches("_1d$")
+  - matches("_2d$")
   - -smooth.basis.fd
   - -smooth.basis.gcv
   - -elastic.regression
@@ -598,4 +602,7 @@ reference:
   - -elastic.distance
   - -elastic.decomposition
   - -elastic.align.constrained
+  - -fdata2basis_2d
+  - -basis2fdata_2d
+  - -fosr.2d
 
