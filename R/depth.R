@@ -479,6 +479,10 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
   }
 
   max_deriv <- max(deriv)
+  m <- ncol(fdataobj$data)
+  if (max_deriv >= m) {
+    stop("derivative order ", max_deriv, " too large for data with ", m, " grid points")
+  }
 
   # Use Rust backend
   .Call("wrap__depth_rpd_1d_rust",
