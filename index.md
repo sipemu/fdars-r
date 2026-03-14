@@ -183,6 +183,28 @@ output: github_document
     <div class="fdars-gallery-title">Conformal Prediction Guide</div>
   </a>
 
+  <a class="fdars-gallery-item" href="articles/scalar-on-shape.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-scalar-on-shape.svg" alt="Scalar-on-Shape Regression"></div>
+    <div class="fdars-gallery-title">Scalar-on-Shape</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="articles/robust-regression.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-robust-regression.svg" alt="Robust Regression"></div>
+    <div class="fdars-gallery-title">Robust Regression</div>
+  </a>
+
+</div>
+
+<!-- ===== PROCESS MONITORING ===== -->
+<h2 class="fdars-section-heading fdars-analyze">Process Monitoring</h2>
+<p class="fdars-section-desc">Statistical process control for functional data streams.</p>
+<div class="fdars-gallery">
+
+  <a class="fdars-gallery-item" href="articles/statistical-process-monitoring.html">
+    <div class="fdars-gallery-thumb"><img src="reference/figures/card-spm.svg" alt="Statistical Process Monitoring"></div>
+    <div class="fdars-gallery-title">Statistical Process Monitoring</div>
+  </a>
+
 </div>
 
 <!-- ===== ANALYZE ===== -->

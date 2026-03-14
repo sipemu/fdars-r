@@ -458,6 +458,7 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
 }
 
 # Internal: Random Projection Depth with Derivatives (RPD) implementation
+# Uses Rust backend via fdars-core rpd_depth_1d_seeded
 # @noRd
 .depth.RPD <- function(fdataobj, fdataori = NULL, nproj = 20, deriv = c(0, 1),
                        trim = 0.25, draw = FALSE, ...) {
@@ -477,114 +478,14 @@ depth <- function(fdataobj, fdataori = NULL, method = c("FM", "mode", "RP", "RT"
     stop("depth.RPD not yet implemented for 2D functional data")
   }
 
-  n <- nrow(fdataobj$data)
-  m <- ncol(fdataobj$data)
-  n_ori <- nrow(fdataori$data)
-  argvals <- fdataobj$argvals
-
-  # Ensure deriv orders are valid
   max_deriv <- max(deriv)
-  if (max_deriv >= m) {
-    stop("Derivative order must be less than number of evaluation points")
-  }
 
-  # Compute derivatives for each order
-  derivs_obj <- list()
-  derivs_ori <- list()
-
-  for (d in deriv) {
-    if (d == 0) {
-      derivs_obj[[as.character(d)]] <- fdataobj$data
-      derivs_ori[[as.character(d)]] <- fdataori$data
-    } else {
-      fd_deriv_obj <- deriv(fdataobj, nderiv = d, ...)
-      fd_deriv_ori <- deriv(fdataori, nderiv = d, ...)
-      derivs_obj[[as.character(d)]] <- fd_deriv_obj$data
-      derivs_ori[[as.character(d)]] <- fd_deriv_ori$data
-    }
-  }
-
-  # For each derivative order, the number of points may differ
-  # Use the minimum common dimension
-  m_common <- min(sapply(derivs_obj, ncol))
-
-  # Generate random projection vectors (smooth Gaussian processes)
-  projections <- matrix(rnorm(nproj * m_common), nproj, m_common)
-
-  # Normalize projections
-  for (i in seq_len(nproj)) {
-    projections[i, ] <- projections[i, ] / sqrt(sum(projections[i, ]^2))
-  }
-
-  # Integration weights for inner product
-  argvals_common <- argvals[seq_len(m_common)]
-  h <- diff(argvals_common)
-  weights <- c(h[1]/2, (h[-length(h)] + h[-1])/2, h[length(h)]/2)
-
-  # Compute inner product function
-  inner_prod <- function(curve, proj, w) {
-    sum(curve * proj * w)
-  }
-
-  # Accumulate depth from all projections
-  depths <- rep(0, n)
-
-  for (j in seq_len(nproj)) {
-    proj <- projections[j, ]
-
-    # For each derivative order, project curves
-    n_derivs <- length(deriv)
-    proj_scores_obj <- matrix(0, n, n_derivs)
-    proj_scores_ori <- matrix(0, n_ori, n_derivs)
-
-    for (k in seq_along(deriv)) {
-      d_char <- as.character(deriv[k])
-      data_obj <- derivs_obj[[d_char]][, seq_len(m_common), drop = FALSE]
-      data_ori <- derivs_ori[[d_char]][, seq_len(m_common), drop = FALSE]
-
-      for (i in seq_len(n)) {
-        proj_scores_obj[i, k] <- inner_prod(data_obj[i, ], proj, weights)
-      }
-      for (i in seq_len(n_ori)) {
-        proj_scores_ori[i, k] <- inner_prod(data_ori[i, ], proj, weights)
-      }
-    }
-
-    # Compute multivariate halfspace depth for the projected scores
-    # Using Tukey (location) depth: minimum fraction in any halfspace
-    for (i in seq_len(n)) {
-      x <- proj_scores_obj[i, ]
-
-      # Simple univariate depth if n_derivs == 1
-      if (n_derivs == 1) {
-        vals <- proj_scores_ori[, 1]
-        prop_below <- mean(vals <= x[1])
-        prop_above <- mean(vals >= x[1])
-        d_i <- min(prop_below, prop_above)
-      } else {
-        # Multivariate halfspace depth approximation
-        # Use random directions in the projected space
-        d_i <- 1
-        n_dirs <- 50
-        for (dir_idx in seq_len(n_dirs)) {
-          direction <- rnorm(n_derivs)
-          direction <- direction / sqrt(sum(direction^2))
-
-          proj_x <- sum(x * direction)
-          proj_ref <- proj_scores_ori %*% direction
-
-          prop_below <- mean(proj_ref <= proj_x)
-          prop_above <- mean(proj_ref >= proj_x)
-          d_i <- min(d_i, min(prop_below, prop_above))
-        }
-      }
-
-      depths[i] <- depths[i] + d_i
-    }
-  }
-
-  # Average over projections
-  depths / nproj
+  # Use Rust backend
+  .Call("wrap__depth_rpd_1d_rust",
+        fdataobj$data, fdataori$data,
+        as.numeric(fdataobj$argvals),
+        as.integer(nproj), as.integer(max_deriv),
+        NULL)
 }
 
 #' Compute Functional Median

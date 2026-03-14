@@ -86,6 +86,7 @@ pub(crate) fn compute_xtx(x: &FdMatrix) -> Vec<f64> {
 
 /// Result of function-on-scalar regression.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct FosrResult {
     /// Intercept function μ(t) (length m)
     pub intercept: Vec<f64>,
@@ -107,8 +108,26 @@ pub struct FosrResult {
     pub gcv: f64,
 }
 
+impl FosrResult {
+    /// Reconstruct a `FosrResult` from its constituent fields.
+    pub fn new(
+        intercept: Vec<f64>,
+        beta: FdMatrix,
+        fitted: FdMatrix,
+        residuals: FdMatrix,
+        r_squared_t: Vec<f64>,
+        r_squared: f64,
+        beta_se: FdMatrix,
+        lambda: f64,
+        gcv: f64,
+    ) -> Self {
+        Self { intercept, beta, fitted, residuals, r_squared_t, r_squared, beta_se, lambda, gcv }
+    }
+}
+
 /// Result of FPC-based function-on-scalar regression.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct FosrFpcResult {
     /// Intercept function μ(t) (length m)
     pub intercept: Vec<f64>,
@@ -130,6 +149,7 @@ pub struct FosrFpcResult {
 
 /// Result of functional ANOVA.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct FanovaResult {
     /// Group mean functions (k × m matrix, row g = mean curve of group g)
     pub group_means: FdMatrix,
@@ -195,7 +215,7 @@ fn penalized_solve(
     let l = cholesky_factor(&a, p).ok_or_else(|| FdarError::ComputationFailed {
         operation: "penalized_solve",
         detail: format!(
-            "Cholesky factorization of (X'X + {lambda:.4}*P) failed; matrix is singular or near-singular"
+            "Cholesky factorization of (X'X + {lambda:.4}*P) failed; matrix is singular — try increasing lambda or removing collinear basis columns"
         ),
     })?;
 
@@ -305,6 +325,35 @@ fn drop_intercept_rows(full: &FdMatrix, p: usize, m: usize) -> FdMatrix {
     out
 }
 
+/// Penalized function-on-scalar regression.
+///
+/// Fits the model `X_i(t) = mu(t) + sum_j beta_j(t) * z_ij + epsilon_i(t)`
+/// using pointwise OLS with second-order roughness penalty smoothing.
+///
+/// # Arguments
+/// * `data` - Functional response matrix (n x m)
+/// * `predictors` - Scalar predictor matrix (n x p)
+/// * `lambda` - Roughness penalty (negative for automatic GCV selection)
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::function_on_scalar::fosr;
+///
+/// // 10 curves at 15 grid points, 2 scalar predictors
+/// let data = FdMatrix::from_column_major(
+///     (0..150).map(|i| (i as f64 * 0.1).sin()).collect(),
+///     10, 15,
+/// ).unwrap();
+/// let predictors = FdMatrix::from_column_major(
+///     (0..20).map(|i| i as f64 / 19.0).collect(),
+///     10, 2,
+/// ).unwrap();
+/// let result = fosr(&data, &predictors, 0.1).unwrap();
+/// assert_eq!(result.fitted.shape(), (10, 15));
+/// assert_eq!(result.intercept.len(), 15);
+/// ```
 #[must_use = "expensive computation whose result should not be discarded"]
 pub fn fosr(data: &FdMatrix, predictors: &FdMatrix, lambda: f64) -> Result<FosrResult, FdarError> {
     let (n, m) = data.shape();
@@ -417,9 +466,8 @@ fn select_lambda_gcv(
     let mut best_gcv = f64::INFINITY;
 
     for &lam in &lambdas {
-        let beta = match penalized_solve(xtx, xty, penalty, lam) {
-            Ok(b) => b,
-            Err(_) => continue,
+        let Ok(beta) = penalized_solve(xtx, xty, penalty, lam) else {
+            continue;
         };
         let (_, residuals) = compute_fosr_fitted(design, &beta, data);
         let trace_h = compute_trace_hat(xtx, penalty, lam, p_total, n);
@@ -440,9 +488,8 @@ fn compute_trace_hat(xtx: &[f64], penalty: &[f64], lambda: f64, p: usize, n: usi
     }
     // tr(H) = tr(X A^{-1} X') = Σ_{j=0..p} a^{-1}_{jj} * xtx_{jj}
     // More precisely: tr(X (X'X+λP)^{-1} X') = tr((X'X+λP)^{-1} X'X)
-    let l = match cholesky_factor(&a, p) {
-        Some(l) => l,
-        None => return p as f64, // fallback
+    let Some(l) = cholesky_factor(&a, p) else {
+        return p as f64; // fallback
     };
 
     // Compute A^{-1} X'X via solving A Z = X'X column by column, then trace
@@ -469,9 +516,8 @@ fn compute_beta_se(
     for i in 0..p * p {
         a[i] = xtx[i] + lambda * penalty[i];
     }
-    let l = match cholesky_factor(&a, p) {
-        Some(l) => l,
-        None => return FdMatrix::zeros(p, m),
+    let Some(l) = cholesky_factor(&a, p) else {
+        return FdMatrix::zeros(p, m);
     };
 
     // Diagonal of A^{-1}
@@ -512,7 +558,7 @@ fn regress_scores_on_design(
     let xtx = compute_xtx(design);
     let l = cholesky_factor(&xtx, p_total).ok_or_else(|| FdarError::ComputationFailed {
         operation: "regress_scores_on_design",
-        detail: "Cholesky factorization of X'X failed; design matrix is rank-deficient".to_string(),
+        detail: "Cholesky factorization of X'X failed; design matrix is rank-deficient — remove constant or collinear predictors, or add regularization".to_string(),
     })?;
 
     let gamma_all: Vec<Vec<f64>> = (0..k)
@@ -832,7 +878,7 @@ pub fn fanova(data: &FdMatrix, groups: &[usize], n_perm: usize) -> Result<Fanova
     }
 
     let mut labels: Vec<usize> = groups.to_vec();
-    labels.sort();
+    labels.sort_unstable();
     labels.dedup();
     let n_groups = labels.len();
     if n_groups < 2 {
@@ -856,7 +902,9 @@ pub fn fanova(data: &FdMatrix, groups: &[usize], n_perm: usize) -> Result<Fanova
     for _ in 0..n_perm {
         // Fisher-Yates shuffle with LCG
         for i in (1..n).rev() {
-            rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            rng_state = rng_state
+                .wrapping_mul(6_364_136_223_846_793_005)
+                .wrapping_add(1);
             let j = (rng_state >> 33) as usize % (i + 1);
             perm_groups.swap(i, j);
         }
@@ -897,11 +945,8 @@ impl FosrResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_helpers::uniform_grid;
     use std::f64::consts::PI;
-
-    fn uniform_grid(m: usize) -> Vec<f64> {
-        (0..m).map(|j| j as f64 / (m - 1) as f64).collect()
-    }
 
     fn generate_fosr_data(n: usize, m: usize) -> (FdMatrix, FdMatrix) {
         let t = uniform_grid(m);

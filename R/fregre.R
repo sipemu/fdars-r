@@ -1968,3 +1968,177 @@ rp.stat <- function(proj.x.ord, residuals, n.proj) {
                     as.integer(n.proj))
   list(cvm = result$cvm, ks = result$ks)
 }
+
+# =============================================================================
+# Robust Regression
+# =============================================================================
+
+#' L1 (Least Absolute Deviation) Functional Regression
+#'
+#' Fits a functional linear model using L1 loss (median regression),
+#' which is robust to outliers in the response.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param y Response vector.
+#' @param scalar.covariates Optional matrix of scalar covariates.
+#' @param ncomp Number of FPC components (default 3).
+#'
+#' @return An object of class 'fregre.robust' with components:
+#' \describe{
+#'   \item{intercept}{Intercept}
+#'   \item{beta.t}{Functional coefficient beta(t)}
+#'   \item{fitted.values}{Fitted response values}
+#'   \item{residuals}{Residuals}
+#'   \item{coefficients}{Regression coefficients}
+#'   \item{ncomp}{Number of FPC components used}
+#'   \item{iterations}{Number of IRLS iterations}
+#'   \item{converged}{Whether the algorithm converged}
+#'   \item{weights}{Final IRLS weights}
+#'   \item{r.squared}{R-squared statistic}
+#'   \item{method}{Either "l1" or "huber"}
+#' }
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.l1(fd, y, ncomp = 3)
+#' }
+#'
+#' @export
+fregre.l1 <- function(fdataobj, y, scalar.covariates = NULL, ncomp = 3) {
+  if (!inherits(fdataobj, "fdata")) stop("fdataobj must be of class 'fdata'")
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  result <- .Call("wrap__fregre_l1_rust",
+                  fdataobj$data, as.numeric(y), sc, as.integer(ncomp))
+
+  if (is.null(result)) stop("fregre.l1 failed")
+
+  out <- list(
+    intercept = result$intercept,
+    beta.t = result$beta_t,
+    fitted.values = result$fitted_values,
+    residuals = result$residuals,
+    coefficients = result$coefficients,
+    ncomp = result$ncomp,
+    iterations = result$iterations,
+    converged = result$converged,
+    weights = result$weights,
+    r.squared = result$r_squared,
+    method = "l1",
+    .fpca_mean = result$fpca_mean,
+    .fpca_rotation = matrix(result$fpca_rotation_data,
+                            nrow = result$fpca_rotation_nrow,
+                            ncol = result$fpca_rotation_ncol),
+    .fpca_scores = matrix(result$fpca_scores_data,
+                          nrow = result$fpca_scores_nrow,
+                          ncol = result$fpca_scores_ncol),
+    fdataobj = fdataobj,
+    y = y
+  )
+  class(out) <- "fregre.robust"
+  out
+}
+
+#' Huber M-Estimation Functional Regression
+#'
+#' Fits a functional linear model using Huber's M-estimation,
+#' which provides a smooth compromise between least squares and L1.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param y Response vector.
+#' @param scalar.covariates Optional matrix of scalar covariates.
+#' @param ncomp Number of FPC components (default 3).
+#' @param k Huber tuning parameter (default 1.345 for 95 percent efficiency).
+#'
+#' @return An object of class 'fregre.robust'. See \code{\link{fregre.l1}}.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.huber(fd, y, ncomp = 3)
+#' }
+#'
+#' @export
+fregre.huber <- function(fdataobj, y, scalar.covariates = NULL, ncomp = 3, k = 1.345) {
+  if (!inherits(fdataobj, "fdata")) stop("fdataobj must be of class 'fdata'")
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  result <- .Call("wrap__fregre_huber_rust",
+                  fdataobj$data, as.numeric(y), sc, as.integer(ncomp),
+                  as.numeric(k))
+
+  if (is.null(result)) stop("fregre.huber failed")
+
+  out <- list(
+    intercept = result$intercept,
+    beta.t = result$beta_t,
+    fitted.values = result$fitted_values,
+    residuals = result$residuals,
+    coefficients = result$coefficients,
+    ncomp = result$ncomp,
+    iterations = result$iterations,
+    converged = result$converged,
+    weights = result$weights,
+    r.squared = result$r_squared,
+    method = "huber",
+    k = k,
+    .fpca_mean = result$fpca_mean,
+    .fpca_rotation = matrix(result$fpca_rotation_data,
+                            nrow = result$fpca_rotation_nrow,
+                            ncol = result$fpca_rotation_ncol),
+    .fpca_scores = matrix(result$fpca_scores_data,
+                          nrow = result$fpca_scores_nrow,
+                          ncol = result$fpca_scores_ncol),
+    fdataobj = fdataobj,
+    y = y
+  )
+  class(out) <- "fregre.robust"
+  out
+}
+
+#' Predict from Robust Functional Regression
+#'
+#' @param object A fitted 'fregre.robust' model.
+#' @param newdata An object of class 'fdata' (new curves).
+#' @param scalar.covariates Optional new scalar covariates.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Predicted response values.
+#'
+#' @examples
+#' \donttest{
+#' fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
+#' y <- rnorm(50)
+#' fit <- fregre.l1(fd, y, ncomp = 3)
+#' pred <- predict(fit, fd[1:5, ])
+#' }
+#'
+#' @export
+predict.fregre.robust <- function(object, newdata, scalar.covariates = NULL, ...) {
+  if (!inherits(newdata, "fdata")) stop("newdata must be of class 'fdata'")
+
+  sc <- if (!is.null(scalar.covariates)) as.matrix(scalar.covariates) else NULL
+
+  .Call("wrap__predict_fregre_robust_rust",
+        object$intercept, as.numeric(object$coefficients),
+        as.numeric(object$.fpca_mean),
+        as.numeric(object$.fpca_rotation),
+        as.integer(nrow(object$.fpca_rotation)),
+        as.integer(ncol(object$.fpca_rotation)),
+        as.integer(object$ncomp), newdata$data, sc)
+}
+
+#' @export
+print.fregre.robust <- function(x, ...) {
+  cat("Robust Functional Linear Model (", x$method, ")\n", sep = "")
+  cat("  Components:", x$ncomp, "\n")
+  cat("  R-squared:", round(x$r.squared, 4), "\n")
+  cat("  IRLS iterations:", x$iterations, "\n")
+  cat("  Converged:", x$converged, "\n")
+  invisible(x)
+}

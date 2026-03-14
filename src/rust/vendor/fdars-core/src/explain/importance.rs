@@ -1,6 +1,9 @@
 //! Permutation importance, pointwise importance, and conditional permutation importance.
 
-use super::helpers::*;
+use super::helpers::{
+    clone_scores_matrix, compute_conditioning_bins, compute_score_variance,
+    logistic_accuracy_from_scores, permute_component, project_scores, shuffle_global,
+};
 use crate::error::FdarError;
 use crate::matrix::FdMatrix;
 use crate::scalar_on_function::{sigmoid, FregreLmResult, FunctionalLogisticResult};
@@ -30,6 +33,28 @@ pub struct FpcPermutationImportance {
 /// count.
 /// Returns [`FdarError::InvalidParameter`] if `n_perm` is zero.
 /// Returns [`FdarError::ComputationFailed`] if the total sum of squares is zero.
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::scalar_on_function::fregre_lm;
+/// use fdars_core::explain::fpc_permutation_importance;
+///
+/// let (n, m) = (20, 30);
+/// let data = FdMatrix::from_column_major(
+///     (0..n * m).map(|k| {
+///         let i = (k % n) as f64;
+///         let j = (k / n) as f64;
+///         ((i + 1.0) * j * 0.2).sin()
+///     }).collect(),
+///     n, m,
+/// ).unwrap();
+/// let y: Vec<f64> = (0..n).map(|i| (i as f64 * 0.5).sin()).collect();
+/// let fit = fregre_lm(&data, &y, None, 3).unwrap();
+/// let imp = fpc_permutation_importance(&fit, &data, &y, 10, 42).unwrap();
+/// assert_eq!(imp.importance.len(), 3);
+/// ```
 #[must_use = "expensive computation whose result should not be discarded"]
 pub fn fpc_permutation_importance(
     fit: &FregreLmResult,
@@ -76,7 +101,7 @@ pub fn fpc_permutation_importance(
     if ss_tot == 0.0 {
         return Err(FdarError::ComputationFailed {
             operation: "fpc_permutation_importance",
-            detail: "total sum of squares is zero".into(),
+            detail: "total sum of squares is zero; all response values may be identical — check your data".into(),
         });
     }
     let identity_idx: Vec<usize> = (0..n).collect();
@@ -237,6 +262,7 @@ fn permuted_ss_res_linear(
 
 /// Result of pointwise variable importance analysis.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct PointwiseImportanceResult {
     /// Importance at each grid point (length m).
     pub importance: Vec<f64>,
@@ -393,6 +419,7 @@ fn compute_pointwise_importance_core(
 
 /// Result of conditional permutation importance.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct ConditionalPermutationImportanceResult {
     /// Conditional importance per FPC component, length ncomp.
     pub importance: Vec<f64>,
@@ -466,7 +493,7 @@ pub fn conditional_permutation_importance(
     if ss_tot == 0.0 {
         return Err(FdarError::ComputationFailed {
             operation: "conditional_permutation_importance",
-            detail: "total sum of squares is zero".into(),
+            detail: "total sum of squares is zero; all response values may be identical — check your data".into(),
         });
     }
     let ss_res_base: f64 = fit.residuals.iter().map(|r| r * r).sum();

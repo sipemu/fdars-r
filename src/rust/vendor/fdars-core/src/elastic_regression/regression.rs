@@ -15,6 +15,7 @@ use crate::alignment::srsf_transform;
 
 /// Result of elastic scalar-on-function regression.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct ElasticRegressionResult {
     /// Intercept.
     pub alpha: f64,
@@ -34,6 +35,16 @@ pub struct ElasticRegressionResult {
     pub aligned_srsfs: FdMatrix,
     /// Number of iterations used.
     pub n_iter: usize,
+}
+
+impl ElasticRegressionResult {
+    /// Create a new result for prediction purposes.
+    pub fn new(
+        alpha: f64, beta: Vec<f64>, fitted_values: Vec<f64>, residuals: Vec<f64>,
+        sse: f64, r_squared: f64, gammas: FdMatrix, aligned_srsfs: FdMatrix, n_iter: usize,
+    ) -> Self {
+        Self { alpha, beta, fitted_values, residuals, sse, r_squared, gammas, aligned_srsfs, n_iter }
+    }
 }
 
 /// Alternating alignment + penalized regression for scalar-on-function.
@@ -117,7 +128,10 @@ pub fn elastic_regression(
         )
         .ok_or_else(|| crate::FdarError::ComputationFailed {
             operation: "regression_iteration",
-            detail: format!("iteration {} failed", iter + 1),
+            detail: format!(
+                "iteration {} failed; try increasing lambda or reducing nbasis",
+                iter + 1
+            ),
         })?;
 
         if beta_converged(&beta_new, &beta, tol) && iter > 0 {
@@ -322,7 +336,7 @@ fn build_phi_matrix(
 }
 
 /// Solve penalized OLS: (Φ'Φ + λR)c = Φ'y.
-fn solve_penalized_ols(
+pub(super) fn solve_penalized_ols(
     phi: &DMatrix<f64>,
     r_trimmed: &DMatrix<f64>,
     y_centered: &[f64],

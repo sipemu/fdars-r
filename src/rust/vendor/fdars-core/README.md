@@ -19,28 +19,30 @@ High-performance Functional Data Analysis tools implemented in Rust with R bindi
 
 ### Core Operations
 
-- **Simulation**: Karhunen-Loève expansion with Fourier/Legendre/Wiener eigenfunctions, pointwise and curve-level noise
+- **Simulation**: Karhunen-Loève expansion with Fourier/Legendre/Wiener eigenfunctions, pointwise and curve-level noise; Gaussian process generation with 8 covariance kernels and kernel algebra
 - **Functional Data Operations**: Mean, centering, derivatives, Lp norms, geometric median
+- **Andrews Curves**: Fourier-based bijection mapping multivariate observations to functional curves; FPCA loading visualization
+- **Covariance Kernels**: Gaussian, Exponential, Matérn, Brownian, Periodic, Linear, Polynomial, White Noise with Sum/Product kernel algebra
 - **Smoothing**: Nadaraya-Watson, local linear, local polynomial, k-NN
 - **Basis Representations**: B-splines, Fourier basis, P-splines with GCV/AIC/BIC selection
 
 ### Descriptive Analysis
 
-- **Depth Measures**: Fraiman-Muniz, modal, band, modified band, random projection, random Tukey, functional spatial, kernel functional spatial, modified epigraph index
-- **Distance Metrics**: Lp distances, Hausdorff, DTW, Soft-DTW (with barycenter averaging), elastic (Fisher-Rao), amplitude/phase distances, Fourier-based semimetric, horizontal shift semimetric
+- **Depth Measures**: Fraiman-Muniz, modal, band, modified band, random projection, random Tukey, RPD (random projection with derivatives), functional spatial, kernel functional spatial, modified epigraph index
+- **Distance Metrics**: Lp distances, Hausdorff, DTW, Soft-DTW (with barycenter averaging), elastic (Fisher-Rao), amplitude/phase distances, Fourier-based semimetric, horizontal shift semimetric, PCA-based semimetric, derivative-based semimetric, basis coefficient semimetric, KL divergence
 - **Outlier Detection**: LRT-based outlier detection with bootstrap thresholding
 
 ### Regression
 
-- **Scalar-on-Function Regression**: FPC linear model, nonparametric kernel, functional logistic, CV component selection
-- **Function-on-Scalar Regression**: Penalized pointwise OLS, FPC-based FOSR, functional ANOVA with permutation test
+- **Scalar-on-Function Regression**: FPC linear model, nonparametric kernel, functional logistic, robust (L1/Huber), CV component selection
+- **Function-on-Scalar Regression**: Penalized pointwise OLS, FPC-based FOSR, 2D FOSR for surface-valued responses Y(s,t) with tensor-product penalty, functional ANOVA with permutation test
 - **Regression**: Functional PCA, PLS, ridge regression
 - **Mixed Effects Models**: Functional mixed model via FPCA + iterative GLS/REML, prediction, permutation hypothesis tests
 
 ### Classification & Clustering
 
 - **Clustering**: K-means, fuzzy c-means with silhouette and Calinski-Harabasz validation; GMM with BIC/ICL model selection
-- **Classification**: LDA, QDA, k-NN, kernel, DD-classifier with cross-validation
+- **Classification**: LDA, QDA, k-NN, kernel, DD-classifier with cross-validation; conformal prediction sets for classification
 
 ### Time Series & Alignment
 
@@ -76,6 +78,18 @@ High-performance Functional Data Analysis tools implemented in Rust with R bindi
 - **Regression Depth**: Depth-based diagnostics for coefficients and observations
 - **Stability Analysis**: Bootstrap robustness of β(t), coefficients, and importance rankings
 - **Anchor Explanations**: Beam-search rule extraction in FPC score space
+- **Generic Explainability**: `FpcPredictor` trait unifying regression, binary, and multiclass models with 15 model-agnostic functions (PDP, SHAP, ALE, LIME, permutation importance, Sobol, Friedman H, etc.)
+
+### Statistical Process Monitoring
+
+- **Hotelling T² / SPE**: Control statistics for detecting shifts in FPCA score space and residual space
+- **Phase I / Phase II Framework**: Build control charts from in-control training data, then monitor new observations (`spm_phase1`, `spm_monitor`)
+- **Multivariate FPCA**: Joint FPCA across multiple functional variables with standardization (`mfpca`)
+- **Multivariate SPM**: Phase I/II monitoring for multi-response functional data (`mf_spm_phase1`, `mf_spm_monitor`)
+- **EWMA Monitoring**: Exponentially weighted moving average smoothing on FPCA scores for enhanced sensitivity to small persistent shifts
+- **Functional Regression Control Chart (FRCC)**: Covariate-adjusted monitoring via FOSR residuals
+- **Contribution Diagnostics**: Per-variable T² and SPE decomposition for fault identification
+- **Control Limits**: Chi-squared quantiles for T², moment-matched chi-squared for SPE
 
 ### Elastic Analysis
 
@@ -83,12 +97,14 @@ High-performance Functional Data Analysis tools implemented in Rust with R bindi
 - **Elastic Regression**: Alignment-integrated scalar-on-function regression
 - **Elastic PCR**: Principal component regression with elastic alignment
 - **Elastic Logistic**: Binary classification with elastic alignment
-- **Elastic Changepoint Detection**: Amplitude and phase changepoint tests with permutation
+- **Scalar-on-Shape Regression**: Phase-invariant regression using Fisher-Rao inner product with DP alignment; identity, polynomial, and Nadaraya-Watson index functions (ScoSh / SI-ScoSh)
+- **Elastic Changepoint Detection**: Amplitude and phase changepoint tests with permutation p-values
 - **Elastic Attribution**: Amplitude vs phase importance decomposition
 
 ### Inference
 
-- **Tolerance Bands**: FPCA, conformal prediction, Degras SCB, exponential family bands
+- **Tolerance Bands**: FPCA, conformal prediction, Degras SCB, exponential family bands, elastic amplitude bands, phase tolerance bands on warping functions, joint amplitude + phase bands
+- **Conformal Prediction**: Split-conformal regression intervals (`conformal_fregre_lm`, `conformal_fregre_np`, `conformal_elastic_regression`), Jackknife+ intervals, CV+ intervals, and generic conformal with held-out calibration support
 - **Equivalence Testing**: Functional TOST with bootstrap, one-sample and two-sample tests
 
 ### Specialized

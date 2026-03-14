@@ -68,6 +68,8 @@ Characterize curve-level variability:
 - FPCA bootstrap bands (pointwise and simultaneous)
 - Conformal prediction bands (distribution-free)
 - Elastic tolerance bands (alignment-based, removes phase variability)
+- Phase tolerance bands (warping function variability)
+- Joint elastic bands with config (amplitude + phase)
 - Exponential family bands (for non-Gaussian data)
 - Simultaneous confidence band for the mean (Degras)
 
@@ -79,6 +81,8 @@ Predict scalar outcomes from functional predictors:
 - Nonparametric kernel regression (`fregre.np`)
 - Multiple functional predictors (`fregre.np.multi`)
 - Mixed scalar + functional (`fregre.np.mixed`)
+- L1 robust regression (`fregre.l1`) — resistant to outliers
+- Huber M-estimation (`fregre.huber`) — robust with tuning parameter
 - Cross-validation for model selection (`cv.fdata`)
 
 ### Function-on-Scalar Regression
@@ -98,6 +102,21 @@ Separate amplitude and phase variability via PCA:
 - `vert.fpca()` — amplitude (vertical) FPCA on aligned curves
 - `horiz.fpca()` — phase (horizontal) FPCA on warping functions
 - `joint.fpca()` — combined amplitude + phase FPCA with balance parameter
+
+### Scalar-on-Shape Regression
+Phase-invariant regression using elastic alignment:
+- `scalar.on.shape()` — regression via Fisher-Rao alignment + index functions
+- Index methods: identity, polynomial, Nadaraya-Watson
+- Separates amplitude from phase variability before regression
+
+### Statistical Process Monitoring
+Control charts for functional data streams:
+- `spm.phase1()` — Phase I estimation (FPCA, T²/SPE control limits)
+- `spm.monitor()` — Phase II online monitoring with alarm detection
+- `spm.ewma()` — EWMA smoothing for gradual drift detection
+- `spm.contributions()` — T²/SPE contribution diagnostics
+- `mfpca()` — Multivariate FPCA for multiple functional variables
+- `frcc.phase1()`, `frcc.monitor()` — Functional Regression Control Charts
 
 ### Elastic Changepoint Detection
 Detect structural breaks in functional time series:
@@ -130,6 +149,7 @@ Comprehensive toolkit for understanding functional regression models:
 ### Uncertainty Quantification
 - Prediction intervals with standard errors
 - Conformal prediction intervals (distribution-free)
+- Conformal generic wrappers with `calibration.indices` for pre-trained models
 - Bootstrap-based explanation stability
 
 ### Clustering

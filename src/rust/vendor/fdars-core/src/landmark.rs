@@ -14,6 +14,7 @@ use crate::seasonal::{compute_prominence, find_peaks_1d};
 
 /// Kind of landmark feature to detect.
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[non_exhaustive]
 pub enum LandmarkKind {
     /// Local maximum.
     Peak,
@@ -42,6 +43,7 @@ pub struct Landmark {
 
 /// Result of landmark registration.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct LandmarkResult {
     /// Registered (aligned) curves (n × m).
     pub registered: FdMatrix,
@@ -490,11 +492,8 @@ pub fn detect_and_register(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_helpers::uniform_grid;
     use std::f64::consts::PI;
-
-    fn uniform_grid(n: usize) -> Vec<f64> {
-        (0..n).map(|i| i as f64 / (n - 1) as f64).collect()
-    }
 
     #[test]
     fn test_monotone_warp_identity() {

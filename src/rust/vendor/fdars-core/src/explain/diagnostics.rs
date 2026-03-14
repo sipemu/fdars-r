@@ -1,6 +1,6 @@
 //! VIF, influence diagnostics, DFBETAS/DFFITS, prediction intervals, and LOO-CV.
 
-use super::helpers::*;
+use super::helpers::project_scores;
 use crate::error::FdarError;
 use crate::matrix::FdMatrix;
 use crate::scalar_on_function::{
@@ -14,6 +14,7 @@ use crate::scalar_on_function::{
 
 /// Result of VIF analysis for FPC-based regression.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct VifResult {
     /// VIF values (length ncomp + p_scalar, excludes intercept).
     pub vif: Vec<f64>,
@@ -217,6 +218,7 @@ pub fn influence_diagnostics(
 
 /// Result of DFBETAS/DFFITS influence diagnostics.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct DfbetasDffitsResult {
     /// DFBETAS values (n x p).
     pub dfbetas: FdMatrix,
@@ -289,7 +291,7 @@ pub fn dfbetas_dffits(
     if s < 1e-15 {
         return Err(FdarError::ComputationFailed {
             operation: "dfbetas_dffits",
-            detail: "residual standard error is near zero".into(),
+            detail: "residual standard error is near zero; the model may be overfitting (perfect fit) — try reducing ncomp".into(),
         });
     }
 
@@ -370,6 +372,7 @@ fn compute_obs_influence(
 
 /// Result of prediction interval computation.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct PredictionIntervalResult {
     /// Point predictions y_hat_new (length n_new).
     pub predictions: Vec<f64>,
@@ -505,12 +508,12 @@ fn normal_quantile(p: f64) -> f64 {
     } else {
         (-2.0 * (1.0 - p).ln()).sqrt()
     };
-    let c0 = 2.515517;
-    let c1 = 0.802853;
-    let c2 = 0.010328;
-    let d1 = 1.432788;
-    let d2 = 0.189269;
-    let d3 = 0.001308;
+    let c0 = 2.515_517;
+    let c1 = 0.802_853;
+    let c2 = 0.010_328;
+    let d1 = 1.432_788;
+    let d2 = 0.189_269;
+    let d3 = 0.001_308;
     let val = t - (c0 + c1 * t + c2 * t * t) / (1.0 + d1 * t + d2 * t * t + d3 * t * t * t);
     if p < 0.5 {
         -val
@@ -583,6 +586,7 @@ fn compute_prediction_interval_obs(
 
 /// Result of leave-one-out cross-validation diagnostics.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct LooCvResult {
     /// LOO residuals: e_i / (1 - h_ii), length n.
     pub loo_residuals: Vec<f64>,
@@ -657,7 +661,7 @@ pub fn loo_cv_press(
     if tss == 0.0 {
         return Err(FdarError::ComputationFailed {
             operation: "loo_cv_press",
-            detail: "total sum of squares is zero".into(),
+            detail: "total sum of squares is zero; all response values may be identical — check your data".into(),
         });
     }
 

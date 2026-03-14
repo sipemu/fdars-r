@@ -1,6 +1,10 @@
 //! Sobol sensitivity indices, functional saliency, and domain selection.
 
-use super::helpers::*;
+use super::helpers::{
+    compute_column_means, compute_domain_selection, compute_mean_scalar, compute_saliency_map,
+    compute_score_variance, compute_sobol_component, generate_sobol_matrices, mean_absolute_column,
+    project_scores,
+};
 use crate::error::FdarError;
 use crate::matrix::FdMatrix;
 use crate::scalar_on_function::{sigmoid, FregreLmResult, FunctionalLogisticResult};
@@ -12,6 +16,7 @@ use rand::prelude::*;
 
 /// Sobol first-order and total-order sensitivity indices.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct SobolIndicesResult {
     /// First-order indices S_k, length ncomp.
     pub first_order: Vec<f64>,
@@ -83,7 +88,8 @@ pub fn sobol_indices(
     if var_y == 0.0 {
         return Err(FdarError::ComputationFailed {
             operation: "sobol_indices",
-            detail: "variance of y is zero".into(),
+            detail: "variance of y is zero; all response values may be identical — check your data"
+                .into(),
         });
     }
 
@@ -171,7 +177,7 @@ pub fn sobol_indices_logistic(
     if var_fa < 1e-15 {
         return Err(FdarError::ComputationFailed {
             operation: "sobol_indices_logistic",
-            detail: "variance of predictions is near zero".into(),
+            detail: "variance of predictions is near zero; the model may be constant — check that FPC scores vary across observations".into(),
         });
     }
 
@@ -209,6 +215,7 @@ pub fn sobol_indices_logistic(
 
 /// Functional saliency map result.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct FunctionalSaliencyResult {
     /// Saliency map (n x m).
     pub saliency_map: FdMatrix,
@@ -332,6 +339,7 @@ pub fn functional_saliency_logistic(
 
 /// An important interval in the function domain.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct ImportantInterval {
     /// Start index (inclusive).
     pub start_idx: usize,
@@ -343,6 +351,7 @@ pub struct ImportantInterval {
 
 /// Result of domain selection analysis.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct DomainSelectionResult {
     /// Pointwise importance: |beta(t)|^2, length m.
     pub pointwise_importance: Vec<f64>,

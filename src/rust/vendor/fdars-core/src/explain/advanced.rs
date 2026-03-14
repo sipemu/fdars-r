@@ -1,6 +1,10 @@
 //! Calibration, conformal prediction, regression depth, stability, and anchors.
 
-use super::helpers::*;
+use super::helpers::{
+    anchor_beam_search, beta_depth_from_bootstrap, build_stability_result,
+    calibration_gap_weighted, compute_score_depths, conformal_quantile_and_coverage,
+    predict_from_scores, project_scores, subsample_rows, validate_conformal_inputs,
+};
 use crate::error::FdarError;
 use crate::matrix::FdMatrix;
 use crate::scalar_on_function::{
@@ -14,6 +18,7 @@ use rand::prelude::*;
 
 /// Calibration diagnostics for a functional logistic regression model.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct CalibrationDiagnosticsResult {
     /// Brier score: (1/n) Σ (p_i - y_i)².
     pub brier_score: f64,
@@ -114,6 +119,7 @@ pub fn calibration_diagnostics(
 
 /// Result of expected calibration error analysis.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct EceResult {
     /// Expected calibration error: Σ (n_b/n) |acc_b - conf_b|.
     pub ece: f64,
@@ -208,6 +214,7 @@ pub fn expected_calibration_error(
 
 /// Result of split-conformal prediction.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct ConformalPredictionResult {
     /// Predictions on test data (length n_test).
     pub predictions: Vec<f64>,
@@ -342,6 +349,7 @@ pub fn conformal_prediction_residuals(
 
 /// Type of functional depth measure for regression diagnostics.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum DepthType {
     FraimanMuniz,
     ModifiedBand,
@@ -350,6 +358,7 @@ pub enum DepthType {
 
 /// Result of regression depth analysis.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct RegressionDepthResult {
     /// Depth of β̂ in bootstrap distribution.
     pub beta_depth: f64,
@@ -428,7 +437,7 @@ pub fn regression_depth(
     if score_depths.is_empty() {
         return Err(FdarError::ComputationFailed {
             operation: "regression_depth",
-            detail: "score depth computation returned empty".into(),
+            detail: "score depth computation returned empty; try increasing ncomp or check that the score matrix has sufficient variability".into(),
         });
     }
     let mean_score_depth = score_depths.iter().sum::<f64>() / score_depths.len() as f64;
@@ -510,7 +519,7 @@ pub fn regression_depth_logistic(
     if score_depths.is_empty() {
         return Err(FdarError::ComputationFailed {
             operation: "regression_depth_logistic",
-            detail: "score depth computation returned empty".into(),
+            detail: "score depth computation returned empty; try increasing ncomp or check that the score matrix has sufficient variability".into(),
         });
     }
     let mean_score_depth = score_depths.iter().sum::<f64>() / score_depths.len() as f64;
@@ -537,6 +546,7 @@ pub fn regression_depth_logistic(
 
 /// Result of bootstrap stability analysis.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct StabilityAnalysisResult {
     /// Pointwise std of β(t) across bootstraps (length m).
     pub beta_t_std: Vec<f64>,
@@ -638,7 +648,7 @@ pub fn explanation_stability(
     )
     .ok_or_else(|| FdarError::ComputationFailed {
         operation: "explanation_stability",
-        detail: "insufficient successful bootstrap refits".into(),
+        detail: "insufficient successful bootstrap refits; try increasing n_boot or check that the model fits reliably on subsampled data".into(),
     })
 }
 
@@ -709,7 +719,7 @@ pub fn explanation_stability_logistic(
     )
     .ok_or_else(|| FdarError::ComputationFailed {
         operation: "explanation_stability_logistic",
-        detail: "insufficient successful bootstrap refits".into(),
+        detail: "insufficient successful bootstrap refits; try increasing n_boot or check that the model fits reliably on subsampled data".into(),
     })
 }
 
@@ -743,6 +753,7 @@ pub struct AnchorRule {
 
 /// Result of anchor explanation for one observation.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct AnchorResult {
     /// The anchor rule.
     pub rule: AnchorRule,
@@ -904,7 +915,7 @@ pub fn anchor_explanation_logistic(
                 eta += fit.gamma[j] * sc[(i, j)];
             }
         }
-        let pred_class = if sigmoid(eta) >= 0.5 { 1usize } else { 0usize };
+        let pred_class = usize::from(sigmoid(eta) >= 0.5);
         pred_class == obs_class
     };
 
@@ -952,7 +963,7 @@ fn hosmer_lemeshow_computation(
     let mut bin_counts = Vec::with_capacity(n_groups);
 
     for g in 0..n_groups {
-        let sz = group_size + if g < remainder { 1 } else { 0 };
+        let sz = group_size + usize::from(g < remainder);
         let group = &sorted_idx[start..start + sz];
         start += sz;
 

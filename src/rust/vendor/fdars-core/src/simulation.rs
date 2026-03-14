@@ -28,6 +28,7 @@ use std::f64::consts::PI;
 
 /// Eigenfunction type enum for simulation
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[non_exhaustive]
 pub enum EFunType {
     /// Fourier basis: 1, sqrt(2)*cos(2πkt), sqrt(2)*sin(2πkt)
     Fourier = 0,
@@ -57,6 +58,7 @@ impl EFunType {
 
 /// Eigenvalue decay type for simulation
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[non_exhaustive]
 pub enum EValType {
     /// Linear decay: λ_k = 1/k
     Linear = 0,
@@ -358,6 +360,17 @@ pub fn sim_kl(
 ///
 /// # Returns
 /// Data `FdMatrix` of size `n × len(t)`
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::simulation::{sim_fundata, EFunType, EValType};
+///
+/// let t: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+/// let data = sim_fundata(5, &t, 4, EFunType::Fourier, EValType::Linear, Some(42));
+/// assert_eq!(data.shape(), (5, 20));
+/// assert!(data.as_slice().iter().all(|v| v.is_finite()));
+/// ```
 pub fn sim_fundata(
     n: usize,
     t: &[f64],

@@ -6,6 +6,7 @@ use super::compute_mean_curve;
 
 /// Result of Lomb-Scargle periodogram analysis.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct LombScargleResult {
     /// Test frequencies
     pub frequencies: Vec<f64>,
@@ -105,7 +106,7 @@ pub fn lomb_scargle(
     // Compute Lomb-Scargle power at each frequency
     let mut power = Vec::with_capacity(freqs.len());
 
-    for &freq in freqs.iter() {
+    for &freq in freqs {
         let omega = 2.0 * PI * freq;
         let p = lomb_scargle_single_freq(times, values, mean_y, var_y, omega);
         power.push(p);
@@ -166,7 +167,7 @@ pub(super) fn lomb_scargle_single_freq(
     // Compute tau (phase shift) to make sine and cosine terms orthogonal
     let mut sum_sin2 = 0.0;
     let mut sum_cos2 = 0.0;
-    for &t in times.iter() {
+    for &t in times {
         let arg = 2.0 * omega * t;
         sum_sin2 += arg.sin();
         sum_cos2 += arg.cos();

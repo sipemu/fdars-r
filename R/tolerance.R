@@ -9,14 +9,15 @@
 #'
 #' @param fdataobj An object of class 'fdata'.
 #' @param method Method to use. One of "fpca" (default), "conformal", "scb",
-#'   "exponential", or "elastic".
+#'   "exponential", "elastic", "phase", or "elastic.config".
 #' @param coverage Target coverage probability (default 0.95).
 #' @param ncomp Number of FPCA components (default 3). Used by "fpca",
-#'   "exponential", and "elastic".
+#'   "exponential", "elastic", "phase", and "elastic.config" (as amplitude
+#'   components for "elastic.config").
 #' @param nb Number of bootstrap replicates (default 500). Used by "fpca",
-#'   "scb", "exponential", and "elastic".
-#' @param band.type "pointwise" (default) or "simultaneous". Used by "fpca"
-#'   and "elastic".
+#'   "scb", "exponential", "elastic", "phase", and "elastic.config".
+#' @param band.type "pointwise" (default) or "simultaneous". Used by "fpca",
+#'   "elastic", "phase", and "elastic.config".
 #' @param cal.fraction Calibration fraction for conformal method (default 0.2).
 #' @param score.type Nonconformity score: "supnorm" (default) or "l2".
 #'   Used by "conformal".
@@ -28,6 +29,10 @@
 #' @param family Exponential family: "gaussian" (default), "binomial", or
 #'   "poisson". Used by "exponential".
 #' @param max.iter Maximum iterations for elastic method Karcher mean (default 10).
+#' @param ncomp.phase Number of FPCA components for the phase band (default 3).
+#'   Used by "elastic.config".
+#' @param tol Convergence tolerance for Karcher mean (default 1e-4). Used by
+#'   "elastic.config".
 #' @param seed Random seed for reproducibility (default NULL).
 #'
 #' @return An object of class 'tolerance.band' with components:
@@ -41,6 +46,16 @@
 #'   \item{argvals}{evaluation points}
 #'   \item{fdataobj}{the original fdata input}
 #' }
+#' The "phase" method additionally returns \code{gamma.lower},
+#' \code{gamma.upper}, and \code{gamma.center} (warping function bounds),
+#' with \code{lower}/\code{upper}/\code{center}/\code{half_width} from the
+#' tangent-space band.
+#'
+#' The "elastic.config" method additionally returns \code{phase.lower},
+#' \code{phase.upper}, and \code{phase.center} (warping function bounds),
+#' with the primary \code{lower}/\code{upper}/\code{center}/\code{half_width}
+#' from the amplitude band.
+#'
 #' Returns NULL with a warning if computation fails.
 #'
 #' @details
@@ -56,6 +71,14 @@
 #'     Applies link function transformation.}
 #'   \item{elastic}{Tolerance band in elastic (aligned) space. First computes
 #'     Karcher mean, then applies FPCA band on aligned data.}
+#'   \item{phase}{Phase tolerance band for warping function variation.
+#'     Computes Karcher mean, extracts warping functions, and builds a
+#'     tolerance band in the tangent (shooting vector) space. Returns both
+#'     the warping-function bounds and the tangent-space band.}
+#'   \item{elastic.config}{Joint amplitude and phase tolerance band with
+#'     full configuration control. Separately controls the number of FPCA
+#'     components for amplitude (\code{ncomp}) and phase (\code{ncomp.phase}),
+#'     plus convergence tolerance (\code{tol}).}
 #' }
 #'
 #' @references
@@ -77,7 +100,8 @@
 #' }
 tolerance.band <- function(fdataobj,
                            method = c("fpca", "conformal", "scb",
-                                      "exponential", "elastic"),
+                                      "exponential", "elastic",
+                                      "phase", "elastic.config"),
                            coverage = 0.95,
                            ncomp = 3,
                            nb = 500,
@@ -89,6 +113,8 @@ tolerance.band <- function(fdataobj,
                            multiplier = c("gaussian", "rademacher"),
                            family = c("gaussian", "binomial", "poisson"),
                            max.iter = 10,
+                           ncomp.phase = 3,
+                           tol = 1e-4,
                            seed = NULL) {
   if (!inherits(fdataobj, "fdata")) {
     stop("fdataobj must be of class 'fdata'")
@@ -124,7 +150,59 @@ tolerance.band <- function(fdataobj,
                                           as.integer(nb), coverage, seed_r),
     "elastic" = tolerance_elastic(data, argvals, as.integer(ncomp),
                                   as.integer(nb), coverage, band.type,
-                                  as.integer(max.iter), seed_r)
+                                  as.integer(max.iter), seed_r),
+    "phase" = {
+      res <- tolerance_phase_rust(data, argvals, as.integer(ncomp),
+                                   as.integer(nb), coverage, band.type,
+                                   as.integer(max.iter), seed_r)
+      if (!res$success) {
+        warning("Phase tolerance band computation failed")
+        return(NULL)
+      }
+      result <- list(
+        gamma.lower = res$gamma_lower,
+        gamma.upper = res$gamma_upper,
+        gamma.center = res$gamma_center,
+        lower = res$tangent_lower,
+        upper = res$tangent_upper,
+        center = res$tangent_center,
+        half_width = res$tangent_half_width,
+        method = "phase",
+        coverage = coverage,
+        argvals = argvals,
+        fdataobj = fdataobj
+      )
+      class(result) <- "tolerance.band"
+      return(result)
+    },
+    "elastic.config" = {
+      res <- tolerance_elastic_config_rust(data, argvals,
+                                            as.integer(ncomp),
+                                            as.integer(ncomp.phase),
+                                            as.integer(nb), coverage,
+                                            band.type,
+                                            as.integer(max.iter), tol,
+                                            seed_r)
+      if (!res$success) {
+        warning("Elastic config tolerance band computation failed")
+        return(NULL)
+      }
+      result <- list(
+        lower = res$amp_lower,
+        upper = res$amp_upper,
+        center = res$amp_center,
+        half_width = res$amp_half_width,
+        phase.lower = res$phase_gamma_lower,
+        phase.upper = res$phase_gamma_upper,
+        phase.center = res$phase_gamma_center,
+        method = "elastic.config",
+        coverage = coverage,
+        argvals = argvals,
+        fdataobj = fdataobj
+      )
+      class(result) <- "tolerance.band"
+      return(result)
+    }
   )
 
   if (!res$success) {

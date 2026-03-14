@@ -65,6 +65,8 @@ articles:
   contents:
   - articles/scalar-on-function
   - articles/elastic-regression
+  - articles/scalar-on-shape
+  - articles/robust-regression
   - articles/function-on-scalar
   - articles/functional-classification
   - articles/functional-mixed-models
@@ -74,6 +76,9 @@ articles:
   - articles/uncertainty-quantification
   - articles/conformal-classification
   - articles/conformal-prediction-guide
+- title: Process Monitoring
+  contents:
+  - articles/statistical-process-monitoring
 - title: Analyze
   contents:
   - articles/tolerance-bands
@@ -316,6 +321,27 @@ reference:
   - elastic.pcr
   - predict.elastic.regression
   - predict.elastic.logistic
+
+- title: Scalar-on-Shape Regression
+  contents:
+  - scalar.on.shape
+  - predict.scalar.on.shape
+
+- title: Robust Regression
+  contents:
+  - fregre.l1
+  - fregre.huber
+  - predict.fregre.robust
+
+- title: Statistical Process Monitoring
+  contents:
+  - spm.phase1
+  - spm.monitor
+  - spm.ewma
+  - spm.contributions
+  - mfpca
+  - frcc.phase1
+  - frcc.monitor
 
 - title: Elastic Changepoint
   contents:

@@ -1,12 +1,13 @@
 //! PDP/ICE and beta decomposition.
 
-use super::helpers::*;
+use super::helpers::{ice_to_pdp, logistic_eta_base, make_grid, project_scores};
 use crate::error::FdarError;
 use crate::matrix::FdMatrix;
 use crate::scalar_on_function::{sigmoid, FregreLmResult, FunctionalLogisticResult};
 
 /// Result of a functional partial dependence plot.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct FunctionalPdpResult {
     /// FPC score grid values (length n_grid).
     pub grid_values: Vec<f64>,
@@ -39,6 +40,29 @@ pub struct FunctionalPdpResult {
 /// `fit.fitted_values`.
 /// Returns [`FdarError::InvalidParameter`] if `component >= fit.ncomp` or
 /// `n_grid < 2`.
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::scalar_on_function::fregre_lm;
+/// use fdars_core::explain::functional_pdp;
+///
+/// let (n, m) = (20, 30);
+/// let data = FdMatrix::from_column_major(
+///     (0..n * m).map(|k| {
+///         let i = (k % n) as f64;
+///         let j = (k / n) as f64;
+///         ((i + 1.0) * j * 0.2).sin()
+///     }).collect(),
+///     n, m,
+/// ).unwrap();
+/// let y: Vec<f64> = (0..n).map(|i| (i as f64 * 0.5).sin()).collect();
+/// let fit = fregre_lm(&data, &y, None, 3).unwrap();
+/// let pdp = functional_pdp(&fit, &data, None, 0, 10).unwrap();
+/// assert_eq!(pdp.pdp_curve.len(), 10);
+/// assert_eq!(pdp.ice_curves.shape(), (20, 10));
+/// ```
 #[must_use = "expensive computation whose result should not be discarded"]
 pub fn functional_pdp(
     fit: &FregreLmResult,
@@ -237,7 +261,12 @@ pub fn beta_decomposition(fit: &FregreLmResult) -> Result<BetaDecomposition, Fda
             actual: "0".into(),
         });
     }
-    decompose_beta(&fit.coefficients, &fit.fpca.rotation, ncomp, m)
+    Ok(decompose_beta(
+        &fit.coefficients,
+        &fit.fpca.rotation,
+        ncomp,
+        m,
+    ))
 }
 
 /// Decompose beta(t) for a functional logistic regression.
@@ -265,7 +294,12 @@ pub fn beta_decomposition_logistic(
             actual: "0".into(),
         });
     }
-    decompose_beta(&fit.coefficients, &fit.fpca.rotation, ncomp, m)
+    Ok(decompose_beta(
+        &fit.coefficients,
+        &fit.fpca.rotation,
+        ncomp,
+        m,
+    ))
 }
 
 fn decompose_beta(
@@ -273,7 +307,7 @@ fn decompose_beta(
     rotation: &FdMatrix,
     ncomp: usize,
     m: usize,
-) -> Result<BetaDecomposition, FdarError> {
+) -> BetaDecomposition {
     let mut components = Vec::with_capacity(ncomp);
     let mut coefs = Vec::with_capacity(ncomp);
     let mut norms_sq = Vec::with_capacity(ncomp);
@@ -294,11 +328,11 @@ fn decompose_beta(
         vec![0.0; ncomp]
     };
 
-    Ok(BetaDecomposition {
+    BetaDecomposition {
         components,
         coefficients: coefs,
         variance_proportion,
-    })
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -307,6 +341,7 @@ fn decompose_beta(
 
 /// Direction of a significant region.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum SignificanceDirection {
     Positive,
     Negative,
@@ -314,6 +349,7 @@ pub enum SignificanceDirection {
 
 /// A contiguous interval where the confidence band excludes zero.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct SignificantRegion {
     /// Start index (inclusive).
     pub start_idx: usize,

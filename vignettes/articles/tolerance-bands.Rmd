@@ -301,6 +301,31 @@ cat("Elastic mean half-width:", round(mean(band_elastic$half_width), 4), "\n")
 
 The elastic band is narrower because alignment concentrates variance into amplitude rather than spreading it across both amplitude and phase.
 
+## Phase Tolerance Bands
+
+When curves differ primarily in **timing** (phase variation), a **phase tolerance band** captures the expected range of warping functions. This tells you "how much timing variation is normal":
+
+```{r phase-band, eval = FALSE}
+band_phase <- tolerance.band(fd_phase, method = "phase",
+                             ncomp = 3, coverage = 0.95, nb = 200, seed = 42)
+plot(band_phase)
+```
+
+The result includes `$phase.lower` and `$phase.upper` (warping function bounds) in addition to the standard amplitude band.
+
+## Joint Elastic Tolerance Bands with Config
+
+The `"elastic.config"` method provides fine-grained control over elastic tolerance bands by separately configuring amplitude and phase components:
+
+```{r elastic-config-band, eval = FALSE}
+band_joint <- tolerance.band(fd_phase, method = "elastic.config",
+                             ncomp = 3, coverage = 0.95, nb = 200,
+                             lambda = 0.0, max_iter = 20, seed = 42)
+plot(band_joint)
+```
+
+This returns both amplitude bounds (`$lower`, `$upper`) and phase bounds (`$phase.lower`, `$phase.upper`), allowing you to understand whether new curves deviate in shape, timing, or both.
+
 ## Choosing a Method
 
 | Your goal | Recommended method |
@@ -308,6 +333,8 @@ The elastic band is narrower because alignment concentrates variance into amplit
 | General-purpose tolerance band | FPCA (`method = "fpca"`) |
 | No distributional assumptions | Conformal (`method = "conformal"`) |
 | Data with timing differences | Elastic (`method = "elastic"`) |
+| Phase variation bounds only | Phase (`method = "phase"`) |
+| Separate amplitude + phase bounds | Elastic config (`method = "elastic.config"`) |
 | Count or binary functional data | Exponential (`method = "exponential"`) |
 | Confidence band for the mean | SCB Degras (`method = "scb"`) |
 

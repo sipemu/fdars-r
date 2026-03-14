@@ -2,6 +2,54 @@
 
 All notable changes to fdars are documented in this file.
 
+## [0.6.0] - 2026-03-14
+
+### Added
+
+- **Statistical Process Monitoring (SPM)**:
+  - `spm.phase1()` — Phase I control chart estimation (FPCA + T²/SPE limits)
+  - `spm.monitor()` — Phase II online monitoring with alarm detection
+  - `spm.ewma()` — EWMA smoothing for detecting gradual drifts
+  - `spm.contributions()` — T²/SPE contribution diagnostics for root cause analysis
+  - `mfpca()` — Multivariate FPCA for joint analysis of multiple functional variables
+  - `frcc.phase1()`, `frcc.monitor()` — Functional Regression Control Charts
+  - S3 print methods for `spm.chart`, `spm.monitor`, `mfpca`, `frcc.chart`
+
+- **Scalar-on-shape regression** (phase-invariant functional regression):
+  - `scalar.on.shape()` — regression using elastic alignment and index functions
+  - `predict.scalar.on.shape()` — prediction for new curves
+  - Index methods: identity, polynomial, Nadaraya-Watson
+  - S3 print method for `scalar.on.shape`
+
+- **Robust regression** (outlier-resistant functional regression):
+  - `fregre.l1()` — L1 (least absolute deviations) regression
+  - `fregre.huber()` — Huber M-estimation with tuning parameter k
+  - `predict.fregre.robust()` — prediction from robust models
+  - S3 print method for `fregre.robust`
+
+- **Tolerance band extensions**:
+  - `tolerance.band(method = "phase")` — tolerance bands for warping functions
+  - `tolerance.band(method = "elastic.config")` — joint amplitude + phase elastic bands
+
+- **Calibration indices for conformal prediction**:
+  - `conformal.generic.regression()` gains `calibration.indices` parameter
+  - `conformal.generic.classification()` gains `calibration.indices` parameter
+  - Fixes data leakage when using pre-trained models (GH issue #20)
+
+- **New articles with SVG diagrams** (3 new):
+  - Statistical Process Monitoring — Phase I/II control charts, EWMA, FRCC
+  - Scalar-on-Shape Regression — elastic alignment + index function regression
+  - Robust Regression — L1 and Huber M-estimation under contamination
+  - Updated tolerance bands article with phase and elastic.config sections
+
+### Changed
+- Upgraded Rust backend (fdars-core) from v0.8.4 to v0.8.5
+- `depth.RPD()` now uses Rust backend (was pure R)
+- `semimetric.pca()`, `semimetric.deriv()`, `semimetric.basis()` now use Rust backends
+
+### Fixed
+- Conformal generic data leakage (#20) — `calibration_indices` parameter enables proper train/calibration split with pre-trained models
+
 ## [0.5.0] - 2026-03-11
 
 ### Added

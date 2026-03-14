@@ -9,6 +9,7 @@ use rayon::iter::ParallelIterator;
 
 /// Result of STL decomposition including robustness weights.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct StlResult {
     /// Trend component (n x m)
     pub trend: FdMatrix,
@@ -83,7 +84,38 @@ pub fn stl_decompose_with_config(data: &FdMatrix, period: usize, config: &StlCon
     )
 }
 
-/// STL Decomposition: Seasonal and Trend decomposition using LOESS
+/// STL Decomposition: Seasonal and Trend decomposition using LOESS.
+///
+/// # Arguments
+/// * `data` - Functional data matrix (n x m)
+/// * `period` - Seasonal period length
+/// * `s_window` - Seasonal smoothing window (None for auto)
+/// * `t_window` - Trend smoothing window (None for auto)
+/// * `l_window` - Low-pass filter window (None for auto)
+/// * `robust` - Whether to use robust weights
+/// * `inner_iterations` - Number of inner loop iterations (None for auto)
+/// * `outer_iterations` - Number of outer loop iterations (None for auto)
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::detrend::stl::stl_decompose;
+///
+/// let n = 3;
+/// let m = 40; // must be >= 2 * period
+/// let data = FdMatrix::from_column_major(
+///     (0..n * m).map(|i| {
+///         let t = (i % m) as f64;
+///         (t * std::f64::consts::PI / 5.0).sin() + t * 0.01
+///     }).collect(),
+///     n, m,
+/// ).unwrap();
+/// let result = stl_decompose(&data, 10, None, None, None, false, None, None);
+/// assert_eq!(result.trend.shape(), (n, m));
+/// assert_eq!(result.seasonal.shape(), (n, m));
+/// assert_eq!(result.remainder.shape(), (n, m));
+/// ```
 pub fn stl_decompose(
     data: &FdMatrix,
     period: usize,
@@ -167,7 +199,7 @@ fn stl_single_series(
     let mut trend = vec![0.0; m];
     let mut seasonal = vec![0.0; m];
     let mut weights = vec![1.0; m];
-    for _outer in 0..n_outer {
+    for outer in 0..n_outer {
         for _inner in 0..n_inner {
             let detrended: Vec<f64> = data
                 .iter()
@@ -188,7 +220,7 @@ fn stl_single_series(
                 .collect();
             trend = weighted_loess(&deseasonalized, t_window, &weights);
         }
-        if robust && _outer < n_outer - 1 {
+        if robust && outer < n_outer - 1 {
             let remainder: Vec<f64> = data
                 .iter()
                 .zip(trend.iter())

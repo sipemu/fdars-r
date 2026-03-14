@@ -1,6 +1,6 @@
 [package]
 name = "fdars-core"
-version = "0.8.4"
+version = "0.8.5"
 edition = "2021"
 authors = ["Simon Muller"]
 description = "Functional Data Analysis algorithms in Rust"
@@ -68,6 +68,18 @@ harness = false
 
 [[bench]]
 name = "explain_benchmarks"
+harness = false
+
+[[bench]]
+name = "smoothing_benchmarks"
+harness = false
+
+[[bench]]
+name = "basis_benchmarks"
+harness = false
+
+[[bench]]
+name = "matrix_benchmarks"
 harness = false
 
 [[example]]

@@ -186,6 +186,7 @@ pub fn pcvm_statistic(adot_vec: &[f64], residuals: &[f64]) -> f64 {
 
 /// Result of random projection statistics.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct RpStatResult {
     /// CvM statistics for each projection
     pub cvm: Vec<f64>,
@@ -323,10 +324,7 @@ pub(crate) fn f64_to_usize_clamped(x: f64) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn uniform_grid(n: usize) -> Vec<f64> {
-        (0..n).map(|i| i as f64 / (n - 1) as f64).collect()
-    }
+    use crate::test_helpers::uniform_grid;
 
     #[test]
     fn test_integrate_simpson_constant() {

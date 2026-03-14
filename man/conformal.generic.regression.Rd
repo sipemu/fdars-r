@@ -11,6 +11,7 @@ conformal.generic.regression(
   newdata,
   scalar.train = NULL,
   scalar.test = NULL,
+  calibration.indices = NULL,
   cal.fraction = 0.25,
   alpha = 0.1,
   seed = NULL
@@ -29,7 +30,14 @@ conformal.generic.regression(
 
 \item{scalar.test}{Optional scalar covariates for test.}
 
-\item{cal.fraction}{Fraction of data for calibration (default 0.25).}
+\item{calibration.indices}{Optional integer vector of 1-based indices into the
+training data to use as the calibration set. When provided, these observations
+should have been held out during model fitting so that calibration residuals
+are out-of-sample, restoring the coverage guarantee. If NULL (default),
+calibration indices are randomly selected from all training data (in-sample).}
+
+\item{cal.fraction}{Fraction of data for calibration (default 0.25). Ignored
+when \code{calibration.indices} is provided.}
 
 \item{alpha}{Miscoverage level (default 0.1).}
 
@@ -42,6 +50,15 @@ Same as \code{\link{conformal.fregre.lm}}.
 Split-conformal prediction intervals using a pre-fitted fregre.lm model.
 Uses the model's FPCA components for fast prediction without refitting.
 }
+\section{Warning}{
+
+The model was trained on ALL data including the calibration subset, so
+calibration residuals are in-sample and systematically too small. The
+distribution-free coverage guarantee is broken. Use
+\code{\link{conformal.fregre.lm}} or \code{\link{cv.conformal.regression}}
+for valid coverage.
+}
+
 \examples{
 \donttest{
 fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))

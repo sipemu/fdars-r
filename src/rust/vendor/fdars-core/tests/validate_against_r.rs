@@ -1288,7 +1288,8 @@ fn test_nadaraya_watson() {
     let sine: NoisySineData = load_json("data", "noisy_sine_201");
 
     let actual =
-        fdars_core::smoothing::nadaraya_watson(&sine.x, &sine.y_noisy, &sine.x, 0.05, "gauss");
+        fdars_core::smoothing::nadaraya_watson(&sine.x, &sine.y_noisy, &sine.x, 0.05, "gauss")
+            .unwrap();
     // R now uses exact NW (not locpoly binning) — should match closely
     assert_vec_close(&actual, &exp.nadaraya_watson, 1e-6, "nadaraya_watson");
 }
@@ -1299,7 +1300,8 @@ fn test_local_linear() {
     let sine: NoisySineData = load_json("data", "noisy_sine_201");
 
     let actual =
-        fdars_core::smoothing::local_linear(&sine.x, &sine.y_noisy, &sine.x, 0.05, "gauss");
+        fdars_core::smoothing::local_linear(&sine.x, &sine.y_noisy, &sine.x, 0.05, "gauss")
+            .unwrap();
     // R now uses exact local linear (not locpoly binning) — should match closely
     assert_vec_close(&actual, &exp.local_linear, 1e-6, "local_linear");
 }
@@ -1309,7 +1311,7 @@ fn test_knn_smoother() {
     let exp: SmoothingExpected = load_json("expected", "smoothing_expected");
     let sine: NoisySineData = load_json("data", "noisy_sine_201");
 
-    let actual = fdars_core::smoothing::knn_smoother(&sine.x, &sine.y_noisy, &sine.x, 5);
+    let actual = fdars_core::smoothing::knn_smoother(&sine.x, &sine.y_noisy, &sine.x, 5).unwrap();
     assert_vec_close(&actual, &exp.knn_k5, 1e-4, "knn_k5");
 }
 
@@ -3622,15 +3624,15 @@ fn test_tsrvf_from_alignment_vs_prealigned() {
         FdMatrix::from_column_major(t.aligned_curves_flat.clone(), n_sub, m).unwrap();
     let gammas = FdMatrix::from_column_major(t.gammas_flat.clone(), n_sub, m).unwrap();
 
-    let karcher = fdars_core::alignment::KarcherMeanResult {
-        mean: t.mean_curve.clone(),
-        mean_srsf: t.mean_srsf.clone(),
+    let karcher = fdars_core::alignment::KarcherMeanResult::new(
+        t.mean_curve.clone(),
+        t.mean_srsf.clone(),
         gammas,
         aligned_data,
-        n_iter: 1,
-        converged: true,
-        aligned_srsfs: None,
-    };
+        1,
+        true,
+        None,
+    );
 
     let result = fdars_core::alignment::tsrvf_from_alignment(&karcher, &time);
 
@@ -3711,15 +3713,15 @@ fn test_tsrvf_smoothed_vs_python() {
         FdMatrix::from_column_major(raw.aligned_curves_flat.clone(), n_sub, m).unwrap();
     let gammas = FdMatrix::from_column_major(raw.gammas_flat.clone(), n_sub, m).unwrap();
 
-    let karcher = fdars_core::alignment::KarcherMeanResult {
-        mean: raw.mean_curve.clone(),
-        mean_srsf: raw.mean_srsf.clone(),
+    let karcher = fdars_core::alignment::KarcherMeanResult::new(
+        raw.mean_curve.clone(),
+        raw.mean_srsf.clone(),
         gammas,
         aligned_data,
-        n_iter: 1,
-        converged: true,
-        aligned_srsfs: None,
-    };
+        1,
+        true,
+        None,
+    );
 
     let result = fdars_core::alignment::tsrvf_from_alignment(&karcher, &time);
 
@@ -4810,7 +4812,8 @@ fn test_local_polynomial_vs_r() {
             0.05,
             2,
             "gaussian",
-        );
+        )
+        .unwrap();
 
         // Local polynomial with degree=2 should be close to R's locpoly degree=2
         // R uses FFT-based binning, Rust uses direct computation
@@ -4825,7 +4828,7 @@ fn test_smoothing_matrix_nw_vs_r() {
     let dat: NoisySineData = load_json("data", "noisy_sine_201");
 
     if let Some(ref nw_exp) = exp.smoothing_matrix_nw {
-        let sm = fdars_core::smoothing::smoothing_matrix_nw(&dat.x, 0.05, "gaussian");
+        let sm = fdars_core::smoothing::smoothing_matrix_nw(&dat.x, 0.05, "gaussian").unwrap();
         let m = dat.x.len();
 
         // Total elements should be m*m
@@ -5324,15 +5327,15 @@ fn karcher_from_r(exp: &ElasticFpcaExpected) -> fdars_core::alignment::KarcherMe
     } else {
         None
     };
-    fdars_core::alignment::KarcherMeanResult {
-        mean: exp.mean.clone(),
-        mean_srsf: exp.mean_srsf.clone(),
+    fdars_core::alignment::KarcherMeanResult::new(
+        exp.mean.clone(),
+        exp.mean_srsf.clone(),
         gammas,
         aligned_data,
-        n_iter: 1,
-        converged: true,
+        1,
+        true,
         aligned_srsfs,
-    }
+    )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

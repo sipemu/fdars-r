@@ -547,7 +547,10 @@ ggplot(df_all, aes(x = .data$Method, y = .data$Width, fill = .data$Method)) +
 | Split | `conformal.fregre.lm()` | Wastes calibration data | 1 | $\geq 1 - \alpha$ |
 | CV+ | `cv.conformal.regression()` | All data used | $K$ | $\geq 1 - 2\alpha$ |
 | Jackknife+ | `jackknife.plus()` | All data used | $n$ | $\geq 1 - 2\alpha$ |
-| Generic | `conformal.generic.regression()` | From fitted model | 0 (pre-fitted) | $\geq 1 - \alpha$ |
+| Generic | `conformal.generic.regression()` | From fitted model | 0 (pre-fitted) | Heuristic only$^*$ |
+
+$^*$Generic conformal uses in-sample calibration residuals (model trained on all
+data). Coverage guarantee is broken. Use split or CV+ for valid coverage.
 
 ---
 

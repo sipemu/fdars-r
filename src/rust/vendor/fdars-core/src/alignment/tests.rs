@@ -3,11 +3,8 @@
 use super::*;
 use crate::helpers::{cumulative_trapz, l2_distance, linear_interp, simpsons_weights, trapz};
 use crate::simulation::{sim_fundata, EFunType, EValType};
+use crate::test_helpers::uniform_grid;
 use crate::warping::{inner_product_l2, normalize_warp};
-
-fn uniform_grid(m: usize) -> Vec<f64> {
-    (0..m).map(|i| i as f64 / (m - 1) as f64).collect()
-}
 
 fn make_test_data(n: usize, m: usize, seed: u64) -> FdMatrix {
     let t = uniform_grid(m);
@@ -2519,7 +2516,7 @@ fn test_smooth_aligned_srsfs_preserves_shape() {
         .map(|&t| (2.0 * std::f64::consts::PI * t).sin())
         .collect();
     let bandwidth = 2.0 / (m - 1) as f64;
-    let qi_smooth = nadaraya_watson(&time, &qi, &time, bandwidth, "gaussian");
+    let qi_smooth = nadaraya_watson(&time, &qi, &time, bandwidth, "gaussian").unwrap();
     // Correlation between original and smoothed should be very high
     let mean_orig: f64 = qi.iter().sum::<f64>() / m as f64;
     let mean_smooth: f64 = qi_smooth.iter().sum::<f64>() / m as f64;

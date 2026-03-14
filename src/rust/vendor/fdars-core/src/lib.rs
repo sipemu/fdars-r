@@ -34,7 +34,11 @@ pub mod parallel;
 
 pub use error::FdarError;
 
+#[cfg(test)]
+pub(crate) mod test_helpers;
+
 pub mod alignment;
+pub mod andrews;
 pub mod basis;
 pub mod classification;
 pub mod clustering;
@@ -61,6 +65,12 @@ pub mod tolerance;
 pub mod utility;
 pub mod warping;
 
+// Covariance kernels and Gaussian processes
+pub mod covariance;
+
+// Statistical Process Monitoring
+pub mod spm;
+
 // Elastic analysis modules
 pub mod conformal;
 pub mod elastic;
@@ -75,6 +85,14 @@ pub mod smooth_basis;
 
 // Re-export matrix types
 pub use matrix::{FdCurveSet, FdMatrix};
+
+// Re-export Andrews curves types
+pub use andrews::{andrews_loadings, andrews_transform, AndrewsLoadings, AndrewsResult};
+
+// Re-export covariance kernel types
+pub use covariance::{
+    covariance_matrix, generate_gaussian_process, CovKernel, GaussianProcessResult,
+};
 
 // Re-export alignment types and functions
 pub use alignment::{
@@ -128,10 +146,12 @@ pub use irreg_fdata::{IrregFdata, KernelType};
 
 // Re-export tolerance band types
 pub use tolerance::{
-    conformal_prediction_band, elastic_tolerance_band, equivalence_test,
-    equivalence_test_one_sample, exponential_family_tolerance_band, fpca_tolerance_band,
-    scb_mean_degras, BandType, EquivalenceBootstrap, EquivalenceTestResult, ExponentialFamily,
-    MultiplierDistribution, NonConformityScore, ToleranceBand,
+    conformal_prediction_band, elastic_tolerance_band, elastic_tolerance_band_with_config,
+    equivalence_test, equivalence_test_one_sample, exponential_family_tolerance_band,
+    fpca_tolerance_band, phase_tolerance_band, scb_mean_degras, BandType,
+    ElasticToleranceBandResult, ElasticToleranceConfig, EquivalenceBootstrap,
+    EquivalenceTestResult, ExponentialFamily, MultiplierDistribution, NonConformityScore,
+    PhaseToleranceBand, ToleranceBand,
 };
 
 // Re-export FAMM types
@@ -146,10 +166,11 @@ pub use function_on_scalar_2d::{fosr_2d, predict_fosr_2d, FosrResult2d, Grid2d};
 // Re-export scalar-on-function regression types
 pub use scalar_on_function::{
     bootstrap_ci_fregre_lm, bootstrap_ci_functional_logistic, fregre_basis_cv, fregre_cv,
-    fregre_lm, fregre_np_cv, fregre_np_mixed, functional_logistic, model_selection_ncomp,
-    predict_fregre_lm, predict_fregre_np, predict_functional_logistic, BootstrapCiResult,
-    FregreBasisCvResult, FregreCvResult, FregreLmResult, FregreNpCvResult, FregreNpResult,
-    FunctionalLogisticResult, ModelSelectionResult, SelectionCriterion,
+    fregre_huber, fregre_l1, fregre_lm, fregre_np_cv, fregre_np_mixed, functional_logistic,
+    model_selection_ncomp, predict_fregre_lm, predict_fregre_np, predict_fregre_robust,
+    predict_functional_logistic, BootstrapCiResult, FregreBasisCvResult, FregreCvResult,
+    FregreLmResult, FregreNpCvResult, FregreNpResult, FregreRobustResult, FunctionalLogisticResult,
+    ModelSelectionResult, SelectionCriterion,
 };
 
 // Re-export generic explainability types
@@ -218,8 +239,10 @@ pub use streaming_depth::{
 
 // Re-export smooth basis types
 pub use smooth_basis::{
-    basis_nbasis_cv, bspline_penalty_matrix, fourier_penalty_matrix, smooth_basis,
-    smooth_basis_gcv, BasisCriterion, BasisNbasisCvResult, BasisType, FdPar, SmoothBasisResult,
+    basis_nbasis_cv, basis_nbasis_cv_with_config, bspline_penalty_matrix, fourier_penalty_matrix,
+    smooth_basis, smooth_basis_gcv, smooth_basis_gcv_with_config, BasisCriterion,
+    BasisNbasisCvConfig, BasisNbasisCvResult, BasisType, FdPar, SmoothBasisGcvConfig,
+    SmoothBasisResult,
 };
 
 // Re-export elastic FPCA types
@@ -231,8 +254,18 @@ pub use elastic_fpca::{
 pub use elastic_regression::{
     elastic_logistic, elastic_logistic_with_config, elastic_pcr, elastic_pcr_with_config,
     elastic_regression, elastic_regression_with_config, predict_elastic_logistic,
-    predict_elastic_regression, ElasticConfig, ElasticLogisticResult, ElasticPcrConfig,
-    ElasticPcrResult, ElasticRegressionResult, PcaMethod,
+    predict_elastic_regression, predict_scalar_on_shape, scalar_on_shape, ElasticConfig,
+    ElasticLogisticResult, ElasticPcrConfig, ElasticPcrResult, ElasticRegressionResult,
+    IndexMethod, PcaMethod, ScalarOnShapeConfig, ScalarOnShapeResult,
+};
+
+// Re-export SPM types
+pub use spm::{
+    ewma_scores, frcc_monitor, frcc_phase1, hotelling_t2, mf_spm_monitor, mf_spm_phase1, mfpca,
+    spe_contributions, spe_control_limit, spe_multivariate, spe_univariate, spm_ewma_monitor,
+    spm_monitor, spm_phase1, t2_contributions, t2_control_limit, ControlLimit, EwmaConfig,
+    EwmaMonitorResult, FrccChart, FrccConfig, FrccMonitorResult, MfSpmChart, MfpcaConfig,
+    MfpcaResult, SpmChart, SpmConfig, SpmMonitorResult,
 };
 
 // Re-export elastic changepoint types

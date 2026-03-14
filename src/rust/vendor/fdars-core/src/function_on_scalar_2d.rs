@@ -64,6 +64,7 @@ impl Grid2d {
 
 /// Result of 2D function-on-scalar regression.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct FosrResult2d {
     /// Intercept surface beta_0(s,t), flattened column-major (length m1*m2).
     pub intercept: Vec<f64>,
@@ -91,6 +92,16 @@ pub struct FosrResult2d {
 }
 
 impl FosrResult2d {
+    /// Create a new result for prediction purposes.
+    pub fn new(
+        intercept: Vec<f64>, beta: FdMatrix, fitted: FdMatrix, residuals: FdMatrix,
+        r_squared_pointwise: Vec<f64>, r_squared: f64, beta_se: Option<FdMatrix>,
+        lambda_s: f64, lambda_t: f64, gcv: f64, grid: Grid2d,
+    ) -> Self {
+        Self { intercept, beta, fitted, residuals, r_squared_pointwise, r_squared,
+               beta_se, lambda_s, lambda_t, gcv, grid }
+    }
+
     /// Reshape the j-th coefficient surface into an m1 x m2 matrix.
     ///
     /// # Panics
@@ -315,7 +326,7 @@ fn smooth_coefficient_surface(
     }
     let l = cholesky_factor(&a, m_total).ok_or_else(|| FdarError::ComputationFailed {
         operation: "smooth_coefficient_surface",
-        detail: "Cholesky factorization of (I + P_2d) failed".to_string(),
+        detail: "Cholesky factorization of (I + P_2d) failed; try increasing the smoothing parameter (lambda)".to_string(),
     })?;
     Ok(cholesky_forward_back(&l, beta_raw, m_total))
 }
@@ -386,9 +397,8 @@ fn select_lambdas_gcv(
     };
 
     // Pre-compute OLS inverse and raw beta
-    let l_xtx = match cholesky_factor(xtx, p_total) {
-        Some(l) => l,
-        None => return (0.0, 0.0),
+    let Some(l_xtx) = cholesky_factor(xtx, p_total) else {
+        return (0.0, 0.0);
     };
 
     // beta_ols: p_total x m_total
@@ -425,16 +435,13 @@ fn select_lambdas_gcv(
             let mut ok = true;
             for j in 0..p_total {
                 let raw: Vec<f64> = (0..m_total).map(|g| beta_ols[(j, g)]).collect();
-                match smooth_coefficient_surface(&raw, &p2d, m_total) {
-                    Ok(smoothed) => {
-                        for g in 0..m_total {
-                            beta_smooth[(j, g)] = smoothed[g];
-                        }
+                if let Ok(smoothed) = smooth_coefficient_surface(&raw, &p2d, m_total) {
+                    for g in 0..m_total {
+                        beta_smooth[(j, g)] = smoothed[g];
                     }
-                    Err(_) => {
-                        ok = false;
-                        break;
-                    }
+                } else {
+                    ok = false;
+                    break;
                 }
             }
             if !ok {
@@ -482,6 +489,39 @@ fn select_lambdas_gcv(
 /// either dimension.
 /// Returns [`FdarError::ComputationFailed`] if the Cholesky factorization
 /// fails during OLS or smoothing.
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::function_on_scalar_2d::{fosr_2d, Grid2d};
+///
+/// let m1 = 5;
+/// let m2 = 4;
+/// let n = 20;
+/// let grid = Grid2d::new(
+///     (0..m1).map(|i| i as f64 / (m1 - 1) as f64).collect(),
+///     (0..m2).map(|i| i as f64 / (m2 - 1) as f64).collect(),
+/// );
+/// let data = FdMatrix::from_column_major(
+///     (0..n * m1 * m2).map(|k| {
+///         let i = (k % n) as f64;
+///         let j = (k / n) as f64;
+///         ((i + 1.0) * 0.3 + j * 0.7).sin()
+///     }).collect(),
+///     n, m1 * m2,
+/// ).unwrap();
+/// let predictors = FdMatrix::from_column_major(
+///     (0..n * 2).map(|k| {
+///         let i = (k % n) as f64;
+///         let j = (k / n) as f64;
+///         (i * 0.4 + j * 1.5).cos()
+///     }).collect(),
+///     n, 2,
+/// ).unwrap();
+/// let result = fosr_2d(&data, &predictors, &grid, 0.1, 0.1).unwrap();
+/// assert_eq!(result.fitted.shape(), (n, m1 * m2));
+/// ```
 #[must_use = "expensive computation whose result should not be discarded"]
 pub fn fosr_2d(
     data: &FdMatrix,
@@ -541,7 +581,7 @@ pub fn fosr_2d(
 
     let l_xtx = cholesky_factor(&xtx, p_total).ok_or_else(|| FdarError::ComputationFailed {
         operation: "fosr_2d",
-        detail: "Cholesky factorization of X'X failed; design matrix is rank-deficient".to_string(),
+        detail: "Cholesky factorization of X'X failed; design matrix is rank-deficient — remove constant or collinear predictors, or add regularization".to_string(),
     })?;
 
     // Pointwise OLS: beta_ols[:,g] = (X'X)^{-1} X' y[:,g]

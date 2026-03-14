@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 320" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arrSOS" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="25" text-anchor="middle" font-size="18" font-weight="bold" fill="#333">Scalar-on-Shape Regression Pipeline</text>
+  <text x="350" y="45" text-anchor="middle" font-size="12" fill="#888">Phase-invariant prediction: y&#7522; = g(&#x222B; &#946;(t) q&#7522;(&#947;&#7522;(t)) &#x221A;&#947;&#7522;'(t) dt)</text>
+
+  <!-- ===== Step 1: Raw Curves ===== -->
+  <rect x="10" y="65" width="110" height="110" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.3"/>
+  <text x="65" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#2C5F8A">Raw Curves</text>
+  <text x="65" y="98" text-anchor="middle" font-size="9" fill="#888">X&#7522;(t)</text>
+  <!-- Misaligned curves -->
+  <path d="M 22 150 Q 38 115, 54 130 Q 70 145, 86 120 Q 102 100, 110 135" stroke="#4A90D9" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M 22 145 Q 32 118, 48 125 Q 64 138, 80 115 Q 96 95, 106 130" stroke="#D55E00" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <path d="M 22 155 Q 42 120, 58 135 Q 74 148, 90 125 Q 106 105, 110 140" stroke="#7B2D8E" stroke-width="1.2" fill="none" opacity="0.35"/>
+
+  <!-- Arrow 1 -->
+  <line x1="125" y1="120" x2="148" y2="120" stroke="#555" stroke-width="1.3" marker-end="url(#arrSOS)"/>
+  <text x="137" y="112" text-anchor="middle" font-size="8" fill="#888">SRSF</text>
+
+  <!-- ===== Step 2: SRSF ===== -->
+  <rect x="153" y="65" width="110" height="110" rx="6" fill="#FEF0E6" stroke="#D55E00" stroke-width="1.3"/>
+  <text x="208" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#D55E00">SRSF</text>
+  <text x="208" y="98" text-anchor="middle" font-size="9" fill="#888">q&#7522; = sign(X') &#x221A;|X'|</text>
+  <!-- SRSF curves -->
+  <path d="M 165 145 Q 178 125, 195 135 Q 210 142, 225 128 Q 240 115, 250 130" stroke="#D55E00" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M 165 140 Q 175 120, 190 128 Q 205 138, 220 122 Q 235 108, 248 125" stroke="#D55E00" stroke-width="1.2" fill="none" opacity="0.35"/>
+  <path d="M 165 150 Q 182 128, 198 138 Q 215 148, 230 132 Q 245 118, 253 135" stroke="#D55E00" stroke-width="1.2" fill="none" opacity="0.25"/>
+
+  <!-- Arrow 2 -->
+  <line x1="268" y1="120" x2="291" y2="120" stroke="#555" stroke-width="1.3" marker-end="url(#arrSOS)"/>
+  <text x="280" y="112" text-anchor="middle" font-size="8" fill="#888">DP</text>
+
+  <!-- ===== Step 3: Elastic Alignment ===== -->
+  <rect x="296" y="65" width="110" height="110" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.3"/>
+  <text x="351" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#7B2D8E">Alignment</text>
+  <text x="351" y="98" text-anchor="middle" font-size="9" fill="#888">q&#7522; &#8728; &#947;&#7522; &#x221A;&#947;&#7522;'</text>
+  <!-- Aligned curves (closer together) -->
+  <path d="M 308 145 Q 322 120, 338 132 Q 354 142, 370 125 Q 386 110, 394 130" stroke="#7B2D8E" stroke-width="1.3" fill="none" opacity="0.5"/>
+  <path d="M 308 147 Q 323 122, 339 134 Q 355 143, 371 127 Q 387 112, 395 132" stroke="#7B2D8E" stroke-width="1.3" fill="none" opacity="0.35"/>
+  <path d="M 308 143 Q 321 119, 337 130 Q 353 141, 369 123 Q 385 108, 393 128" stroke="#7B2D8E" stroke-width="1.3" fill="none" opacity="0.25"/>
+
+  <!-- Arrow 3 -->
+  <line x1="411" y1="120" x2="434" y2="120" stroke="#555" stroke-width="1.3" marker-end="url(#arrSOS)"/>
+
+  <!-- ===== Step 4: Shape Scores ===== -->
+  <rect x="439" y="65" width="110" height="110" rx="6" fill="#E8FFF0" stroke="#2E8B57" stroke-width="1.3"/>
+  <text x="494" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E8B57">Shape Scores</text>
+  <text x="494" y="98" text-anchor="middle" font-size="9" fill="#888">&#x222B; &#946;(t) q&#7522;*(t) dt</text>
+  <!-- Score dots on number line -->
+  <line x1="455" y1="135" x2="535" y2="135" stroke="#999" stroke-width="0.6"/>
+  <circle cx="462" cy="135" r="3" fill="#2E8B57" opacity="0.5"/>
+  <circle cx="475" cy="135" r="3" fill="#2E8B57" opacity="0.5"/>
+  <circle cx="488" cy="135" r="3" fill="#2E8B57" opacity="0.5"/>
+  <circle cx="498" cy="135" r="3" fill="#2E8B57" opacity="0.5"/>
+  <circle cx="510" cy="135" r="3" fill="#2E8B57" opacity="0.5"/>
+  <circle cx="524" cy="135" r="3" fill="#2E8B57" opacity="0.5"/>
+  <!-- Beta function mini -->
+  <path d="M 460 162 Q 475 148, 490 155 Q 505 162, 520 150 Q 535 140, 540 155" stroke="#2E8B57" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <text x="494" y="172" text-anchor="middle" font-size="8" fill="#888">&#946;(t)</text>
+
+  <!-- Arrow 4 -->
+  <line x1="554" y1="120" x2="577" y2="120" stroke="#555" stroke-width="1.3" marker-end="url(#arrSOS)"/>
+  <text x="566" y="112" text-anchor="middle" font-size="8" fill="#888">h(&#183;)</text>
+
+  <!-- ===== Step 5: Prediction ===== -->
+  <rect x="582" y="65" width="110" height="110" rx="6" fill="#FFF8E1" stroke="#E6A020" stroke-width="1.3"/>
+  <text x="637" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#B37700">Prediction</text>
+  <text x="637" y="98" text-anchor="middle" font-size="9" fill="#888">&#375;&#7522; = h(score&#7522;)</text>
+  <!-- Scatter: observed vs fitted -->
+  <circle cx="600" cy="155" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="610" cy="148" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="620" cy="140" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="632" cy="130" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="645" cy="125" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="658" cy="118" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <circle cx="670" cy="112" r="2.5" fill="#E6A020" opacity="0.6"/>
+  <!-- Fit line -->
+  <line x1="595" y1="160" x2="675" y2="108" stroke="#B37700" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+  <text x="637" y="168" text-anchor="middle" font-size="8" fill="#888">y vs &#375;</text>
+
+  <!-- ===== Bottom: Three index methods ===== -->
+  <line x1="10" y1="195" x2="690" y2="195" stroke="#eee" stroke-width="1.1"/>
+  <text x="350" y="218" text-anchor="middle" font-size="14" font-weight="bold" fill="#555">Index Function Methods</text>
+
+  <!-- Identity -->
+  <rect x="45" y="232" width="180" height="80" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.1"/>
+  <text x="135" y="252" text-anchor="middle" font-size="11" font-weight="bold" fill="#2C5F8A">Identity</text>
+  <line x1="70" y1="258" x2="200" y2="258" stroke="#4A90D9" stroke-width="0.3" opacity="0.5"/>
+  <text x="135" y="274" text-anchor="middle" font-size="9.5" fill="#555">h(s) = s</text>
+  <text x="135" y="290" text-anchor="middle" font-size="9" fill="#888">Linear: y &#8733; shape score</text>
+  <text x="135" y="305" text-anchor="middle" font-size="8.5" fill="#4A90D9">index.method = "identity"</text>
+
+  <!-- Polynomial -->
+  <rect x="260" y="232" width="180" height="80" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.1"/>
+  <text x="350" y="252" text-anchor="middle" font-size="11" font-weight="bold" fill="#B37700">Polynomial</text>
+  <line x1="285" y1="258" x2="415" y2="258" stroke="#E6A020" stroke-width="0.3" opacity="0.5"/>
+  <text x="350" y="274" text-anchor="middle" font-size="9.5" fill="#555">h(s) = &#8721; a&#8342; s&#8342;</text>
+  <text x="350" y="290" text-anchor="middle" font-size="9" fill="#888">Nonlinear: polynomial link</text>
+  <text x="350" y="305" text-anchor="middle" font-size="8.5" fill="#B37700">index.method = "polynomial"</text>
+
+  <!-- Nadaraya-Watson -->
+  <rect x="475" y="232" width="180" height="80" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.1"/>
+  <text x="565" y="252" text-anchor="middle" font-size="11" font-weight="bold" fill="#7B2D8E">Nadaraya-Watson</text>
+  <line x1="500" y1="258" x2="630" y2="258" stroke="#7B2D8E" stroke-width="0.3" opacity="0.5"/>
+  <text x="565" y="274" text-anchor="middle" font-size="9.5" fill="#555">h(s) = kernel smooth</text>
+  <text x="565" y="290" text-anchor="middle" font-size="9" fill="#888">Fully nonparametric link</text>
+  <text x="565" y="305" text-anchor="middle" font-size="8.5" fill="#7B2D8E">index.method = "nadaraya.watson"</text>
+</svg>

@@ -15,6 +15,7 @@ use rayon::iter::ParallelIterator;
 /// B-spline and Fourier basis systems. For penalized smoothing with additional
 /// parameters (order, period), see [`BasisType`](crate::smooth_basis::BasisType).
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[non_exhaustive]
 pub enum ProjectionBasisType {
     /// B-spline basis (order 4 / cubic).
     Bspline,
@@ -48,6 +49,7 @@ impl ProjectionBasisType {
 
 /// Result of basis projection.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub struct BasisProjectionResult {
     /// Coefficient matrix (n_samples x n_basis)
     pub coefficients: FdMatrix,
@@ -77,6 +79,22 @@ fn evaluate_projection_basis(
 /// * `argvals` - Evaluation points
 /// * `nbasis` - Number of basis functions
 /// * `basis_type` - Basis type to use
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::basis::projection::{fdata_to_basis, ProjectionBasisType};
+///
+/// let argvals: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+/// let data = FdMatrix::from_column_major(
+///     argvals.iter().map(|&t| (t * 6.0).sin()).collect(),
+///     1, 20,
+/// ).unwrap();
+/// let result = fdata_to_basis(&data, &argvals, 7, ProjectionBasisType::Fourier).unwrap();
+/// assert_eq!(result.coefficients.nrows(), 1);
+/// assert_eq!(result.n_basis, 7);
+/// ```
 pub fn fdata_to_basis(
     data: &FdMatrix,
     argvals: &[f64],

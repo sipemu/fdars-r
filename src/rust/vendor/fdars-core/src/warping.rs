@@ -59,7 +59,9 @@ pub fn gam_to_psi_smooth(gam: &[f64], h: f64) -> Vec<f64> {
     // Smooth gamma with Nadaraya-Watson (bandwidth = 2 grid spacings).
     // This removes DP kinks while preserving the overall warp shape.
     let bandwidth = 2.0 * h;
-    let gam_smooth = nadaraya_watson(&time, gam, &time, bandwidth, "gaussian");
+    // nadaraya_watson cannot fail here: time/gam are non-empty (m >= 3) and bandwidth > 0.
+    let gam_smooth = nadaraya_watson(&time, gam, &time, bandwidth, "gaussian")
+        .expect("smoothing valid warp data should not fail");
 
     gradient_uniform(&gam_smooth, h)
         .iter()
@@ -179,10 +181,7 @@ pub fn phase_distance(gamma: &[f64], argvals: &[f64]) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn uniform_grid(m: usize) -> Vec<f64> {
-        (0..m).map(|i| i as f64 / (m - 1) as f64).collect()
-    }
+    use crate::test_helpers::uniform_grid;
 
     #[test]
     fn test_gam_psi_round_trip() {

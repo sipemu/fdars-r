@@ -6,7 +6,8 @@
 \usage{
 tolerance.band(
   fdataobj,
-  method = c("fpca", "conformal", "scb", "exponential", "elastic"),
+  method = c("fpca", "conformal", "scb", "exponential", "elastic", "phase",
+    "elastic.config"),
   coverage = 0.95,
   ncomp = 3,
   nb = 500,
@@ -18,6 +19,8 @@ tolerance.band(
   multiplier = c("gaussian", "rademacher"),
   family = c("gaussian", "binomial", "poisson"),
   max.iter = 10,
+  ncomp.phase = 3,
+  tol = 1e-04,
   seed = NULL
 )
 }
@@ -25,18 +28,19 @@ tolerance.band(
 \item{fdataobj}{An object of class 'fdata'.}
 
 \item{method}{Method to use. One of "fpca" (default), "conformal", "scb",
-"exponential", or "elastic".}
+"exponential", "elastic", "phase", or "elastic.config".}
 
 \item{coverage}{Target coverage probability (default 0.95).}
 
 \item{ncomp}{Number of FPCA components (default 3). Used by "fpca",
-"exponential", and "elastic".}
+"exponential", "elastic", "phase", and "elastic.config" (as amplitude
+components for "elastic.config").}
 
 \item{nb}{Number of bootstrap replicates (default 500). Used by "fpca",
-"scb", "exponential", and "elastic".}
+"scb", "exponential", "elastic", "phase", and "elastic.config".}
 
-\item{band.type}{"pointwise" (default) or "simultaneous". Used by "fpca"
-and "elastic".}
+\item{band.type}{"pointwise" (default) or "simultaneous". Used by "fpca",
+"elastic", "phase", and "elastic.config".}
 
 \item{cal.fraction}{Calibration fraction for conformal method (default 0.2).}
 
@@ -56,6 +60,12 @@ default is computed.}
 
 \item{max.iter}{Maximum iterations for elastic method Karcher mean (default 10).}
 
+\item{ncomp.phase}{Number of FPCA components for the phase band (default 3).
+Used by "elastic.config".}
+
+\item{tol}{Convergence tolerance for Karcher mean (default 1e-4). Used by
+"elastic.config".}
+
 \item{seed}{Random seed for reproducibility (default NULL).}
 }
 \value{
@@ -70,6 +80,16 @@ An object of class 'tolerance.band' with components:
 \item{argvals}{evaluation points}
 \item{fdataobj}{the original fdata input}
 }
+The "phase" method additionally returns \code{gamma.lower},
+\code{gamma.upper}, and \code{gamma.center} (warping function bounds),
+with \code{lower}/\code{upper}/\code{center}/\code{half_width} from the
+tangent-space band.
+
+The "elastic.config" method additionally returns \code{phase.lower},
+\code{phase.upper}, and \code{phase.center} (warping function bounds),
+with the primary \code{lower}/\code{upper}/\code{center}/\code{half_width}
+from the amplitude band.
+
 Returns NULL with a warning if computation fails.
 }
 \description{
@@ -92,6 +112,14 @@ Uses multiplier bootstrap for critical values.}
 Applies link function transformation.}
 \item{elastic}{Tolerance band in elastic (aligned) space. First computes
 Karcher mean, then applies FPCA band on aligned data.}
+\item{phase}{Phase tolerance band for warping function variation.
+Computes Karcher mean, extracts warping functions, and builds a
+tolerance band in the tangent (shooting vector) space. Returns both
+the warping-function bounds and the tangent-space band.}
+\item{elastic.config}{Joint amplitude and phase tolerance band with
+full configuration control. Separately controls the number of FPCA
+components for amplitude (\code{ncomp}) and phase (\code{ncomp.phase}),
+plus convergence tolerance (\code{tol}).}
 }
 }
 \examples{

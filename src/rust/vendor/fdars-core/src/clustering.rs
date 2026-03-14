@@ -28,6 +28,72 @@ pub struct KmeansResult {
     pub converged: bool,
 }
 
+impl KmeansResult {
+    /// Assign new observations to the nearest cluster center.
+    ///
+    /// For each row in `data`, computes the weighted L2 distance to each
+    /// cluster center using Simpson's integration weights derived from
+    /// `argvals`, and assigns the observation to the cluster with the
+    /// minimum distance.
+    ///
+    /// # Arguments
+    /// * `data` - Matrix (n_new x m) of new observations
+    /// * `argvals` - Evaluation points (length m)
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FdarError::InvalidDimension`] if the number of columns in
+    /// `data` does not match the number of columns in the cluster centers, or
+    /// if `argvals.len()` does not match the number of columns.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fdars_core::matrix::FdMatrix;
+    /// use fdars_core::clustering::kmeans_fd;
+    ///
+    /// let argvals: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+    /// let data = FdMatrix::from_column_major(
+    ///     (0..200).map(|i| (i as f64 * 0.1).sin()).collect(),
+    ///     10, 20,
+    /// ).unwrap();
+    /// let result = kmeans_fd(&data, &argvals, 2, 100, 1e-6, 42).unwrap();
+    ///
+    /// // Predict cluster assignments for new data
+    /// let new_data = FdMatrix::from_column_major(
+    ///     (0..60).map(|i| (i as f64 * 0.1).sin()).collect(),
+    ///     3, 20,
+    /// ).unwrap();
+    /// let assignments = result.predict(&new_data, &argvals).unwrap();
+    /// assert_eq!(assignments.len(), 3);
+    /// assert!(assignments.iter().all(|&c| c < 2));
+    /// ```
+    pub fn predict(&self, data: &FdMatrix, argvals: &[f64]) -> Result<Vec<usize>, FdarError> {
+        let (n, m) = data.shape();
+        let m_centers = self.centers.ncols();
+        let k = self.centers.nrows();
+        if m != m_centers {
+            return Err(FdarError::InvalidDimension {
+                parameter: "data",
+                expected: format!("{m_centers} columns"),
+                actual: format!("{m} columns"),
+            });
+        }
+        if argvals.len() != m {
+            return Err(FdarError::InvalidDimension {
+                parameter: "argvals",
+                expected: format!("{m}"),
+                actual: format!("{}", argvals.len()),
+            });
+        }
+
+        let weights = simpsons_weights(argvals);
+        let curves = data.to_row_major();
+        let centers = self.centers.to_row_major();
+        Ok(assign_clusters(&curves, n, m, &centers, k, &weights))
+    }
+}
+
 /// K-means++ initialization: select initial centers with probability proportional to D^2.
 ///
 /// Uses incremental distance tracking: maintains a `min_dist_sq` vector and only
@@ -456,6 +522,24 @@ fn kmeans_iterate(
 /// * `max_iter` - Maximum iterations
 /// * `tol` - Convergence tolerance
 /// * `seed` - Random seed
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::clustering::kmeans_fd;
+///
+/// // 10 curves at 20 evaluation points
+/// let argvals: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+/// let data = FdMatrix::from_column_major(
+///     (0..200).map(|i| (i as f64 * 0.1).sin()).collect(),
+///     10, 20,
+/// ).unwrap();
+/// let result = kmeans_fd(&data, &argvals, 2, 100, 1e-6, 42).unwrap();
+/// assert_eq!(result.cluster.len(), 10);
+/// assert_eq!(result.centers.nrows(), 2);
+/// assert!(result.converged);
+/// ```
 #[must_use = "expensive computation whose result should not be discarded"]
 pub fn kmeans_fd(
     data: &FdMatrix,
@@ -528,10 +612,103 @@ pub struct FuzzyCmeansResult {
     pub membership: FdMatrix,
     /// Cluster centers (k x m)
     pub centers: FdMatrix,
+    /// Fuzziness parameter used during fitting
+    pub fuzziness: f64,
     /// Number of iterations
     pub iter: usize,
     /// Whether the algorithm converged
     pub converged: bool,
+}
+
+impl FuzzyCmeansResult {
+    /// Compute fuzzy membership values for new observations.
+    ///
+    /// For each new observation, computes the weighted L2 distance to each
+    /// cluster center and derives fuzzy membership values using the same
+    /// fuzziness parameter used during fitting.
+    ///
+    /// Each row of the returned matrix sums to 1.0, with values in \[0, 1\]
+    /// indicating the degree of membership in each cluster.
+    ///
+    /// # Arguments
+    /// * `data` - Matrix (n_new x m) of new observations
+    /// * `argvals` - Evaluation points (length m)
+    ///
+    /// # Errors
+    ///
+    /// Returns [`FdarError::InvalidDimension`] if the number of columns in
+    /// `data` does not match the number of columns in the cluster centers, or
+    /// if `argvals.len()` does not match the number of columns.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fdars_core::matrix::FdMatrix;
+    /// use fdars_core::clustering::fuzzy_cmeans_fd;
+    ///
+    /// let argvals: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+    /// let data = FdMatrix::from_column_major(
+    ///     (0..200).map(|i| (i as f64 * 0.1).sin()).collect(),
+    ///     10, 20,
+    /// ).unwrap();
+    /// let result = fuzzy_cmeans_fd(&data, &argvals, 2, 2.0, 100, 1e-6, 42).unwrap();
+    ///
+    /// // Predict membership for new data
+    /// let new_data = FdMatrix::from_column_major(
+    ///     (0..60).map(|i| (i as f64 * 0.1).sin()).collect(),
+    ///     3, 20,
+    /// ).unwrap();
+    /// let membership = result.predict(&new_data, &argvals).unwrap();
+    /// assert_eq!(membership.shape(), (3, 2));
+    /// // Each row should sum to 1
+    /// for i in 0..3 {
+    ///     let sum: f64 = (0..2).map(|c| membership[(i, c)]).sum();
+    ///     assert!((sum - 1.0).abs() < 1e-6);
+    /// }
+    /// ```
+    pub fn predict(&self, data: &FdMatrix, argvals: &[f64]) -> Result<FdMatrix, FdarError> {
+        let (n, m) = data.shape();
+        let m_centers = self.centers.ncols();
+        let k = self.centers.nrows();
+        if m != m_centers {
+            return Err(FdarError::InvalidDimension {
+                parameter: "data",
+                expected: format!("{m_centers} columns"),
+                actual: format!("{m} columns"),
+            });
+        }
+        if argvals.len() != m {
+            return Err(FdarError::InvalidDimension {
+                parameter: "argvals",
+                expected: format!("{m}"),
+                actual: format!("{}", argvals.len()),
+            });
+        }
+
+        let weights = simpsons_weights(argvals);
+        let curves = data.to_row_major();
+        let centers = self.centers.to_row_major();
+        let exponent = 2.0 / (self.fuzziness - 1.0);
+
+        let mut membership = FdMatrix::zeros(n, k);
+        let mut distances = vec![0.0; k];
+        let mut memberships = vec![0.0; k];
+
+        for i in 0..n {
+            let curve = &curves[i * m..(i + 1) * m];
+            for c in 0..k {
+                distances[c] = l2_distance(curve, &centers[c * m..(c + 1) * m], &weights);
+            }
+
+            compute_fuzzy_membership_into(&distances, k, exponent, &mut memberships);
+
+            for c in 0..k {
+                membership[(i, c)] = memberships[c];
+            }
+        }
+
+        Ok(membership)
+    }
 }
 
 /// Fuzzy c-means clustering for functional data.
@@ -632,12 +809,31 @@ pub fn fuzzy_cmeans_fd(
     Ok(FuzzyCmeansResult {
         membership,
         centers: centers_mat,
+        fuzziness,
         iter,
         converged,
     })
 }
 
 /// Compute silhouette score for clustering result.
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::clustering::silhouette_score;
+///
+/// let argvals: Vec<f64> = (0..10).map(|i| i as f64 / 9.0).collect();
+/// let data = FdMatrix::from_column_major(
+///     (0..60).map(|i| (i as f64 * 0.1).sin()).collect(),
+///     6, 10,
+/// ).unwrap();
+/// let cluster = vec![0, 0, 0, 1, 1, 1];
+/// let scores = silhouette_score(&data, &argvals, &cluster);
+/// assert_eq!(scores.len(), 6);
+/// // Silhouette scores are in [-1, 1]
+/// assert!(scores.iter().all(|&s| s >= -1.0 - 1e-10 && s <= 1.0 + 1e-10));
+/// ```
 #[must_use = "expensive computation whose result should not be discarded"]
 pub fn silhouette_score(data: &FdMatrix, argvals: &[f64], cluster: &[usize]) -> Vec<f64> {
     let n = data.nrows();
@@ -731,12 +927,8 @@ pub fn calinski_harabasz(data: &FdMatrix, argvals: &[f64], cluster: &[usize]) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_helpers::uniform_grid;
     use std::f64::consts::PI;
-
-    /// Generate a uniform grid of points
-    fn uniform_grid(n: usize) -> Vec<f64> {
-        (0..n).map(|i| i as f64 / (n - 1) as f64).collect()
-    }
 
     /// Generate two clearly separated clusters of curves as an FdMatrix
     fn generate_two_clusters(n_per_cluster: usize, m: usize) -> (FdMatrix, Vec<f64>) {
@@ -1159,5 +1351,183 @@ mod tests {
         let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
         assert_eq!(result.cluster.len(), 2);
         assert_ne!(result.cluster[0], result.cluster[1]);
+    }
+
+    // ============== KmeansResult::predict tests ==============
+
+    #[test]
+    fn test_kmeans_predict_shape() {
+        let m = 30;
+        let n_per = 5;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
+
+        let new_data = FdMatrix::zeros(3, m);
+        let assignments = result.predict(&new_data, &t).unwrap();
+        assert_eq!(assignments.len(), 3);
+    }
+
+    #[test]
+    fn test_kmeans_predict_reproduces_training() {
+        let m = 30;
+        let n_per = 10;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
+
+        // Predicting on training data should reproduce original assignments
+        let predicted = result.predict(&data, &t).unwrap();
+        assert_eq!(predicted, result.cluster);
+    }
+
+    #[test]
+    fn test_kmeans_predict_correct_cluster() {
+        let m = 30;
+        let n_per = 10;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
+
+        // Create a new curve clearly in cluster 0 (low amplitude sine)
+        let mut new_data = FdMatrix::zeros(1, m);
+        for j in 0..m {
+            new_data[(0, j)] = (2.0 * PI * t[j]).sin();
+        }
+        let pred = result.predict(&new_data, &t).unwrap();
+        assert_eq!(pred[0], result.cluster[0]); // same cluster as first training group
+
+        // Create a new curve clearly in cluster 1 (shifted up by 5)
+        let mut new_data2 = FdMatrix::zeros(1, m);
+        for j in 0..m {
+            new_data2[(0, j)] = (2.0 * PI * t[j]).sin() + 5.0;
+        }
+        let pred2 = result.predict(&new_data2, &t).unwrap();
+        assert_eq!(pred2[0], result.cluster[n_per]); // same cluster as second group
+    }
+
+    #[test]
+    fn test_kmeans_predict_dimension_mismatch() {
+        let m = 30;
+        let n_per = 5;
+        let (data, t) = generate_two_clusters(n_per, m);
+        let result = kmeans_fd(&data, &t, 2, 100, 1e-6, 42).unwrap();
+
+        // Wrong number of columns
+        let wrong_data = FdMatrix::zeros(3, 20);
+        assert!(result.predict(&wrong_data, &t).is_err());
+
+        // Wrong argvals length
+        let new_data = FdMatrix::zeros(3, m);
+        let wrong_t: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+        assert!(result.predict(&new_data, &wrong_t).is_err());
+    }
+
+    // ============== FuzzyCmeansResult::predict tests ==============
+
+    #[test]
+    fn test_fuzzy_predict_shape() {
+        let m = 30;
+        let n_per = 5;
+        let k = 2;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = fuzzy_cmeans_fd(&data, &t, k, 2.0, 100, 1e-6, 42).unwrap();
+
+        let new_data = FdMatrix::zeros(3, m);
+        let membership = result.predict(&new_data, &t).unwrap();
+        assert_eq!(membership.shape(), (3, k));
+    }
+
+    #[test]
+    fn test_fuzzy_predict_membership_sums_to_one() {
+        let m = 30;
+        let n_per = 5;
+        let k = 2;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = fuzzy_cmeans_fd(&data, &t, k, 2.0, 100, 1e-6, 42).unwrap();
+
+        let new_data = FdMatrix::zeros(4, m);
+        let membership = result.predict(&new_data, &t).unwrap();
+
+        for i in 0..4 {
+            let sum: f64 = (0..k).map(|c| membership[(i, c)]).sum();
+            assert!(
+                (sum - 1.0).abs() < 1e-6,
+                "Row {} membership should sum to 1, got {}",
+                i,
+                sum
+            );
+        }
+    }
+
+    #[test]
+    fn test_fuzzy_predict_membership_in_range() {
+        let m = 30;
+        let n_per = 5;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = fuzzy_cmeans_fd(&data, &t, 2, 2.0, 100, 1e-6, 42).unwrap();
+
+        let new_data = FdMatrix::zeros(4, m);
+        let membership = result.predict(&new_data, &t).unwrap();
+
+        for &mem in membership.as_slice() {
+            assert!((0.0..=1.0 + 1e-10).contains(&mem));
+        }
+    }
+
+    #[test]
+    fn test_fuzzy_predict_reproduces_training() {
+        let m = 30;
+        let n_per = 5;
+        let n = 2 * n_per;
+        let k = 2;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = fuzzy_cmeans_fd(&data, &t, k, 2.0, 100, 1e-6, 42).unwrap();
+
+        // Predicting on training data should reproduce similar memberships
+        let predicted = result.predict(&data, &t).unwrap();
+        for i in 0..n {
+            for c in 0..k {
+                assert!(
+                    (predicted[(i, c)] - result.membership[(i, c)]).abs() < 1e-4,
+                    "Membership mismatch at ({}, {}): {} vs {}",
+                    i,
+                    c,
+                    predicted[(i, c)],
+                    result.membership[(i, c)]
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_fuzzy_predict_dimension_mismatch() {
+        let m = 30;
+        let n_per = 5;
+        let (data, t) = generate_two_clusters(n_per, m);
+        let result = fuzzy_cmeans_fd(&data, &t, 2, 2.0, 100, 1e-6, 42).unwrap();
+
+        // Wrong number of columns
+        let wrong_data = FdMatrix::zeros(3, 20);
+        assert!(result.predict(&wrong_data, &t).is_err());
+
+        // Wrong argvals length
+        let new_data = FdMatrix::zeros(3, m);
+        let wrong_t: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+        assert!(result.predict(&new_data, &wrong_t).is_err());
+    }
+
+    #[test]
+    fn test_fuzzy_predict_fuzziness_stored() {
+        let m = 30;
+        let n_per = 5;
+        let (data, t) = generate_two_clusters(n_per, m);
+
+        let result = fuzzy_cmeans_fd(&data, &t, 2, 2.5, 100, 1e-6, 42).unwrap();
+        assert!((result.fuzziness - 2.5).abs() < 1e-10);
     }
 }

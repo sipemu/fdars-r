@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.81"
 name = "fdars-core"
-version = "0.8.4"
+version = "0.8.5"
 authors = ["Simon Muller"]
 build = false
 autolib = false
@@ -184,9 +184,22 @@ path = "tests/validate_against_r.rs"
 name = "validate_new_modules"
 path = "tests/validate_new_modules.rs"
 
+[[test]]
+name = "validate_phase_bands"
+path = "tests/validate_phase_bands.rs"
+
+[[test]]
+name = "validate_spm_math"
+path = "tests/validate_spm_math.rs"
+
 [[bench]]
 name = "alignment_benchmarks"
 path = "benches/alignment_benchmarks.rs"
+harness = false
+
+[[bench]]
+name = "basis_benchmarks"
+path = "benches/basis_benchmarks.rs"
 harness = false
 
 [[bench]]
@@ -205,6 +218,11 @@ path = "benches/explain_benchmarks.rs"
 harness = false
 
 [[bench]]
+name = "matrix_benchmarks"
+path = "benches/matrix_benchmarks.rs"
+harness = false
+
+[[bench]]
 name = "regression_benchmarks"
 path = "benches/regression_benchmarks.rs"
 harness = false
@@ -212,6 +230,11 @@ harness = false
 [[bench]]
 name = "seasonal_benchmarks"
 path = "benches/seasonal_benchmarks.rs"
+harness = false
+
+[[bench]]
+name = "smoothing_benchmarks"
+path = "benches/smoothing_benchmarks.rs"
 harness = false
 
 [dependencies.anofox-regression]

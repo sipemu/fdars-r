@@ -388,61 +388,43 @@ semimetric.pca <- function(fdataobj, fdataref = NULL, ncomp = 2, ...) {
     stop("fdataobj must be of class 'fdata'")
   }
 
-  # Data is already flattened [n, m1*m2] for 2D fdata
-  is_2d <- isTRUE(fdataobj$fdata2d)
-  data1 <- fdataobj$data
-  n1 <- nrow(fdataobj$data)
+  if (isTRUE(fdataobj$fdata2d)) {
+    stop("semimetric.pca Rust backend not yet implemented for 2D functional data")
+  }
 
-  # Compute PCA on combined data
   if (is.null(fdataref)) {
-    combined <- data1
-    n2 <- n1
-    same_data <- TRUE
+    # Self-distances (symmetric)
+    D <- .Call("wrap__semimetric_pca_self_1d", fdataobj$data, as.integer(ncomp))
   } else {
     if (!inherits(fdataref, "fdata")) {
       stop("fdataref must be of class 'fdata'")
     }
-    if (isTRUE(fdataobj$fdata2d) != isTRUE(fdataref$fdata2d)) {
+
+    if (isTRUE(fdataref$fdata2d)) {
       stop("Cannot compute distances between 1D and 2D functional data")
     }
-    if (is_2d) {
-      if (!identical(fdataobj$dims, fdataref$dims)) {
-        stop("fdataobj and fdataref must have the same grid dimensions")
-      }
-    } else {
-      if (ncol(fdataobj$data) != ncol(fdataref$data)) {
-        stop("fdataobj and fdataref must have the same number of evaluation points")
-      }
+
+    if (ncol(fdataobj$data) != ncol(fdataref$data)) {
+      stop("fdataobj and fdataref must have the same number of evaluation points")
     }
-    data2 <- fdataref$data
-    n2 <- nrow(fdataref$data)
-    combined <- rbind(data1, data2)
-    same_data <- FALSE
+
+    D <- .Call("wrap__semimetric_pca_cross_1d", fdataobj$data, fdataref$data, as.integer(ncomp))
   }
 
-  # Center the data
-  centered <- scale(combined, center = TRUE, scale = FALSE)
+  # Convert to proper matrix with dimnames
+  D <- as.matrix(D)
 
-  # Compute SVD
-  svd_result <- svd(centered, nu = ncomp, nv = ncomp)
-
-  # Get PC scores
-  scores <- centered %*% svd_result$v[, seq_len(ncomp), drop = FALSE]
-
-  # Compute distances
-  scores1 <- scores[seq_len(n1), , drop = FALSE]
-  if (same_data) {
-    scores2 <- scores1
-  } else {
-    scores2 <- scores[(n1 + 1):(n1 + n2), , drop = FALSE]
+  # Add row and column names if available
+  if (!is.null(rownames(fdataobj$data))) {
+    rownames(D) <- rownames(fdataobj$data)
   }
 
-  # Euclidean distance in PC space
-  D <- matrix(0, n1, n2)
-  for (i in seq_len(n1)) {
-    for (j in seq_len(n2)) {
-      D[i, j] <- sqrt(sum((scores1[i, ] - scores2[j, ])^2))
+  if (is.null(fdataref)) {
+    if (!is.null(rownames(fdataobj$data))) {
+      colnames(D) <- rownames(fdataobj$data)
     }
+  } else if (!is.null(rownames(fdataref$data))) {
+    colnames(D) <- rownames(fdataref$data)
   }
 
   D
@@ -479,12 +461,10 @@ semimetric.deriv <- function(fdataobj, fdataref = NULL, nderiv = 1, lp = 2, ...)
   is_2d <- isTRUE(fdataobj$fdata2d)
 
   if (is_2d) {
-    # 2D case: deriv returns a list of derivatives (ds, dt, dsdt)
-    # Use the sum of all derivative Lp distances
+    # 2D case: use R fallback (deriv returns a list of derivatives)
     fdataobj_derivs <- deriv(fdataobj, nderiv = nderiv, ...)
 
     if (is.null(fdataref)) {
-      # Self-distances - combine derivative distances
       D_ds <- metric.lp(fdataobj_derivs$ds, lp = lp)
       D_dt <- metric.lp(fdataobj_derivs$dt, lp = lp)
       D <- sqrt(D_ds^2 + D_dt^2)
@@ -502,13 +482,15 @@ semimetric.deriv <- function(fdataobj, fdataref = NULL, nderiv = 1, lp = 2, ...)
       D <- sqrt(D_ds^2 + D_dt^2)
     }
   } else {
-    # 1D case
-    # Compute derivative of fdataobj
-    fdataobj_deriv <- deriv(fdataobj, nderiv = nderiv, ...)
+    # 1D case: use Rust backend
+    argvals <- as.numeric(fdataobj$argvals)
+    # Empty weights vector means Rust uses Simpson's rule weights only
+    weights <- numeric(0)
 
     if (is.null(fdataref)) {
-      # Self-distances
-      D <- metric.lp(fdataobj_deriv, lp = lp)
+      # Self-distances (symmetric)
+      D <- .Call("wrap__semimetric_deriv_self_1d", fdataobj$data, argvals,
+                 as.integer(nderiv), weights)
     } else {
       if (!inherits(fdataref, "fdata")) {
         stop("fdataref must be of class 'fdata'")
@@ -518,10 +500,28 @@ semimetric.deriv <- function(fdataobj, fdataref = NULL, nderiv = 1, lp = 2, ...)
         stop("Cannot compute distances between 1D and 2D functional data")
       }
 
-      # Compute derivative of fdataref
-      fdataref_deriv <- deriv(fdataref, nderiv = nderiv, ...)
+      if (ncol(fdataobj$data) != ncol(fdataref$data)) {
+        stop("fdataobj and fdataref must have the same number of evaluation points")
+      }
 
-      D <- metric.lp(fdataobj_deriv, fdataref_deriv, lp = lp)
+      D <- .Call("wrap__semimetric_deriv_cross_1d", fdataobj$data, fdataref$data,
+                 argvals, as.integer(nderiv), weights)
+    }
+
+    # Convert to proper matrix with dimnames
+    D <- as.matrix(D)
+
+    # Add row and column names if available
+    if (!is.null(rownames(fdataobj$data))) {
+      rownames(D) <- rownames(fdataobj$data)
+    }
+
+    if (is.null(fdataref)) {
+      if (!is.null(rownames(fdataobj$data))) {
+        colnames(D) <- rownames(fdataobj$data)
+      }
+    } else if (!is.null(rownames(fdataref$data))) {
+      colnames(D) <- rownames(fdataref$data)
     }
   }
 
@@ -563,47 +563,15 @@ semimetric.basis <- function(fdataobj, fdataref = NULL, nbasis = 5, basis = "bsp
   }
 
   basis <- match.arg(basis, c("bspline", "fourier"))
-  argvals <- fdataobj$argvals
-  rangeval <- fdataobj$rangeval
-  m <- length(argvals)
+  argvals <- as.numeric(fdataobj$argvals)
 
-  # Create basis matrix
-  if (basis == "bspline") {
-    # B-spline basis using polynomial representation
-    degree <- 3
-    knots <- seq(rangeval[1], rangeval[2], length.out = nbasis - degree + 1)
-    # Use R's built-in splineDesign for B-splines
-    B <- splines::bs(argvals, knots = knots[2:(length(knots)-1)],
-                     degree = degree, intercept = TRUE, Boundary.knots = rangeval)
-    B <- as.matrix(B)
-  } else {
-    # Fourier basis
-    B <- matrix(0, m, nbasis)
-    t_scaled <- (argvals - rangeval[1]) / (rangeval[2] - rangeval[1])
-
-    B[, 1] <- 1  # constant term
-    k <- 2
-    for (freq in 1:((nbasis - 1) %/% 2)) {
-      if (k <= nbasis) {
-        B[, k] <- sin(2 * pi * freq * t_scaled)
-        k <- k + 1
-      }
-      if (k <= nbasis) {
-        B[, k] <- cos(2 * pi * freq * t_scaled)
-        k <- k + 1
-      }
-    }
-  }
-
-  # Compute basis coefficients for fdataobj via least squares
-  # data[n x m], B[m x nbasis], coef[n x nbasis]
-  # coef = data %*% B %*% (B'B)^-1
-  BtB_inv <- solve(crossprod(B))
-  coef1 <- fdataobj$data %*% B %*% BtB_inv
+  # Map basis type string to integer: "bspline" = 0, "fourier" = 1
+  basis_type <- if (basis == "bspline") 0L else 1L
 
   if (is.null(fdataref)) {
-    coef2 <- coef1
-    same_data <- TRUE
+    # Self-distances (symmetric)
+    D <- .Call("wrap__semimetric_basis_self_1d", fdataobj$data, argvals,
+               as.integer(nbasis), basis_type)
   } else {
     if (!inherits(fdataref, "fdata")) {
       stop("fdataref must be of class 'fdata'")
@@ -611,19 +579,29 @@ semimetric.basis <- function(fdataobj, fdataref = NULL, nbasis = 5, basis = "bsp
     if (isTRUE(fdataref$fdata2d)) {
       stop("semimetric.basis not yet implemented for 2D functional data")
     }
-    coef2 <- fdataref$data %*% B %*% BtB_inv
-    same_data <- FALSE
+
+    if (ncol(fdataobj$data) != ncol(fdataref$data)) {
+      stop("fdataobj and fdataref must have the same number of evaluation points")
+    }
+
+    D <- .Call("wrap__semimetric_basis_cross_1d", fdataobj$data, fdataref$data,
+               argvals, as.integer(nbasis), basis_type)
   }
 
-  # Compute L2 distance in coefficient space
-  n1 <- nrow(coef1)
-  n2 <- nrow(coef2)
+  # Convert to proper matrix with dimnames
+  D <- as.matrix(D)
 
-  D <- matrix(0, n1, n2)
-  for (i in seq_len(n1)) {
-    for (j in seq_len(n2)) {
-      D[i, j] <- sqrt(sum((coef1[i, ] - coef2[j, ])^2))
+  # Add row and column names if available
+  if (!is.null(rownames(fdataobj$data))) {
+    rownames(D) <- rownames(fdataobj$data)
+  }
+
+  if (is.null(fdataref)) {
+    if (!is.null(rownames(fdataobj$data))) {
+      colnames(D) <- rownames(fdataobj$data)
     }
+  } else if (!is.null(rownames(fdataref$data))) {
+    colnames(D) <- rownames(fdataref$data)
   }
 
   D

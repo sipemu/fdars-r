@@ -3,6 +3,7 @@
 //! This module provides kernel-based smoothing methods including
 //! Nadaraya-Watson, local linear, and local polynomial regression.
 
+use crate::error::FdarError;
 use crate::slice_maybe_parallel;
 #[cfg(feature = "parallel")]
 use rayon::iter::ParallelIterator;
@@ -51,21 +52,62 @@ fn get_kernel(kernel_type: &str) -> fn(f64) -> f64 {
 ///
 /// # Returns
 /// Smoothed values at x_new
+///
+/// # Errors
+/// Returns [`FdarError::InvalidDimension`] if `x` is empty, `x_new` is empty,
+/// or `x` and `y` have different lengths.
+/// Returns [`FdarError::InvalidParameter`] if `bandwidth` is not positive.
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::smoothing::nadaraya_watson;
+///
+/// let x: Vec<f64> = (0..20).map(|i| i as f64 / 19.0).collect();
+/// let y: Vec<f64> = x.iter().map(|&xi| (xi * 6.0).sin()).collect();
+/// let smoothed = nadaraya_watson(&x, &y, &x, 0.1, "gaussian").unwrap();
+/// assert_eq!(smoothed.len(), 20);
+/// assert!(smoothed.iter().all(|v| v.is_finite()));
+/// ```
 pub fn nadaraya_watson(
     x: &[f64],
     y: &[f64],
     x_new: &[f64],
     bandwidth: f64,
     kernel: &str,
-) -> Vec<f64> {
+) -> Result<Vec<f64>, FdarError> {
     let n = x.len();
-    if n == 0 || y.len() != n || x_new.is_empty() || bandwidth <= 0.0 {
-        return vec![0.0; x_new.len()];
+    if n == 0 {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if y.len() != n {
+        return Err(FdarError::InvalidDimension {
+            parameter: "y",
+            expected: format!("length {n} (matching x)"),
+            actual: format!("length {}", y.len()),
+        });
+    }
+    if x_new.is_empty() {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x_new",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if bandwidth <= 0.0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "bandwidth",
+            message: format!("must be positive, got {bandwidth}"),
+        });
     }
 
     let kernel_fn = get_kernel(kernel);
 
-    slice_maybe_parallel!(x_new)
+    Ok(slice_maybe_parallel!(x_new)
         .map(|&x0| {
             let mut num = 0.0;
             let mut denom = 0.0;
@@ -83,7 +125,7 @@ pub fn nadaraya_watson(
                 0.0
             }
         })
-        .collect()
+        .collect())
 }
 
 /// Local linear regression smoother.
@@ -97,15 +139,63 @@ pub fn nadaraya_watson(
 ///
 /// # Returns
 /// Smoothed values at x_new
-pub fn local_linear(x: &[f64], y: &[f64], x_new: &[f64], bandwidth: f64, kernel: &str) -> Vec<f64> {
+///
+/// # Errors
+/// Returns [`FdarError::InvalidDimension`] if `x` is empty, `x_new` is empty,
+/// or `x` and `y` have different lengths.
+/// Returns [`FdarError::InvalidParameter`] if `bandwidth` is not positive.
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::smoothing::local_linear;
+///
+/// let x: Vec<f64> = (0..30).map(|i| i as f64 / 29.0).collect();
+/// let y: Vec<f64> = x.iter().map(|&xi| 2.0 * xi + 1.0).collect();
+/// let smoothed = local_linear(&x, &y, &x, 0.2, "gaussian").unwrap();
+/// assert_eq!(smoothed.len(), 30);
+/// // Local linear should fit linear data well in the interior
+/// assert!((smoothed[15] - (2.0 * x[15] + 1.0)).abs() < 0.1);
+/// ```
+pub fn local_linear(
+    x: &[f64],
+    y: &[f64],
+    x_new: &[f64],
+    bandwidth: f64,
+    kernel: &str,
+) -> Result<Vec<f64>, FdarError> {
     let n = x.len();
-    if n == 0 || y.len() != n || x_new.is_empty() || bandwidth <= 0.0 {
-        return vec![0.0; x_new.len()];
+    if n == 0 {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if y.len() != n {
+        return Err(FdarError::InvalidDimension {
+            parameter: "y",
+            expected: format!("length {n} (matching x)"),
+            actual: format!("length {}", y.len()),
+        });
+    }
+    if x_new.is_empty() {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x_new",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if bandwidth <= 0.0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "bandwidth",
+            message: format!("must be positive, got {bandwidth}"),
+        });
     }
 
     let kernel_fn = get_kernel(kernel);
 
-    slice_maybe_parallel!(x_new)
+    Ok(slice_maybe_parallel!(x_new)
         .map(|&x0| {
             // Compute weighted moments
             let mut s0 = 0.0;
@@ -136,7 +226,7 @@ pub fn local_linear(x: &[f64], y: &[f64], x_new: &[f64], bandwidth: f64, kernel:
                 0.0
             }
         })
-        .collect()
+        .collect())
 }
 
 /// Accumulate weighted normal equations (X'WX and X'Wy) for local polynomial fit.
@@ -259,6 +349,11 @@ pub fn solve_gaussian_pub(a: &mut [f64], b: &mut [f64], p: usize) -> Vec<f64> {
 ///
 /// # Returns
 /// Smoothed values at x_new
+///
+/// # Errors
+/// Returns [`FdarError::InvalidDimension`] if `x` is empty, `x_new` is empty,
+/// or `x` and `y` have different lengths.
+/// Returns [`FdarError::InvalidParameter`] if `bandwidth` is not positive.
 pub fn local_polynomial(
     x: &[f64],
     y: &[f64],
@@ -266,10 +361,34 @@ pub fn local_polynomial(
     bandwidth: f64,
     degree: usize,
     kernel: &str,
-) -> Vec<f64> {
+) -> Result<Vec<f64>, FdarError> {
     let n = x.len();
-    if n == 0 || y.len() != n || x_new.is_empty() || bandwidth <= 0.0 {
-        return vec![0.0; x_new.len()];
+    if n == 0 {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if y.len() != n {
+        return Err(FdarError::InvalidDimension {
+            parameter: "y",
+            expected: format!("length {n} (matching x)"),
+            actual: format!("length {}", y.len()),
+        });
+    }
+    if x_new.is_empty() {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x_new",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if bandwidth <= 0.0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "bandwidth",
+            message: format!("must be positive, got {bandwidth}"),
+        });
     }
     if degree == 0 {
         return nadaraya_watson(x, y, x_new, bandwidth, kernel);
@@ -282,14 +401,14 @@ pub fn local_polynomial(
     let kernel_fn = get_kernel(kernel);
     let p = degree + 1; // Number of coefficients
 
-    slice_maybe_parallel!(x_new)
+    Ok(slice_maybe_parallel!(x_new)
         .map(|&x0| {
             let (mut xtx, mut xty) =
                 accumulate_weighted_normal_equations(x, y, x0, bandwidth, p, kernel_fn);
             let coefs = solve_gaussian(&mut xtx, &mut xty, p);
             coefs[0]
         })
-        .collect()
+        .collect())
 }
 
 /// k-Nearest Neighbors smoother.
@@ -302,15 +421,44 @@ pub fn local_polynomial(
 ///
 /// # Returns
 /// Smoothed values at x_new
-pub fn knn_smoother(x: &[f64], y: &[f64], x_new: &[f64], k: usize) -> Vec<f64> {
+///
+/// # Errors
+/// Returns [`FdarError::InvalidDimension`] if `x` is empty, `x_new` is empty,
+/// or `x` and `y` have different lengths.
+/// Returns [`FdarError::InvalidParameter`] if `k` is zero.
+pub fn knn_smoother(x: &[f64], y: &[f64], x_new: &[f64], k: usize) -> Result<Vec<f64>, FdarError> {
     let n = x.len();
-    if n == 0 || y.len() != n || x_new.is_empty() || k == 0 {
-        return vec![0.0; x_new.len()];
+    if n == 0 {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if y.len() != n {
+        return Err(FdarError::InvalidDimension {
+            parameter: "y",
+            expected: format!("length {n} (matching x)"),
+            actual: format!("length {}", y.len()),
+        });
+    }
+    if x_new.is_empty() {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x_new",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if k == 0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "k",
+            message: "must be at least 1".to_string(),
+        });
     }
 
     let k = k.min(n);
 
-    slice_maybe_parallel!(x_new)
+    Ok(slice_maybe_parallel!(x_new)
         .map(|&x0| {
             // Compute distances
             let mut distances: Vec<(usize, f64)> = x
@@ -326,16 +474,30 @@ pub fn knn_smoother(x: &[f64], y: &[f64], x_new: &[f64], k: usize) -> Vec<f64> {
             let sum: f64 = distances.iter().take(k).map(|(i, _)| y[*i]).sum();
             sum / k as f64
         })
-        .collect()
+        .collect())
 }
 
 /// Compute smoothing matrix for Nadaraya-Watson.
 ///
 /// Returns the smoother matrix S such that y_hat = S * y.
-pub fn smoothing_matrix_nw(x: &[f64], bandwidth: f64, kernel: &str) -> Vec<f64> {
+///
+/// # Errors
+/// Returns [`FdarError::InvalidDimension`] if `x` is empty.
+/// Returns [`FdarError::InvalidParameter`] if `bandwidth` is not positive.
+pub fn smoothing_matrix_nw(x: &[f64], bandwidth: f64, kernel: &str) -> Result<Vec<f64>, FdarError> {
     let n = x.len();
-    if n == 0 || bandwidth <= 0.0 {
-        return Vec::new();
+    if n == 0 {
+        return Err(FdarError::InvalidDimension {
+            parameter: "x",
+            expected: "non-empty slice".to_string(),
+            actual: "empty".to_string(),
+        });
+    }
+    if bandwidth <= 0.0 {
+        return Err(FdarError::InvalidParameter {
+            parameter: "bandwidth",
+            message: format!("must be positive, got {bandwidth}"),
+        });
     }
 
     let kernel_fn = get_kernel(kernel);
@@ -355,7 +517,7 @@ pub fn smoothing_matrix_nw(x: &[f64], bandwidth: f64, kernel: &str) -> Vec<f64> 
         }
     }
 
-    s
+    Ok(s)
 }
 
 // ─── Cross-Validation for Kernel Smoothers ──────────────────────────────────
@@ -400,10 +562,10 @@ pub fn cv_smoother(x: &[f64], y: &[f64], bandwidth: f64, kernel: &str) -> f64 {
     }
 
     // Get the smoother matrix S
-    let mut s = smoothing_matrix_nw(x, bandwidth, kernel);
-    if s.is_empty() {
-        return f64::INFINITY;
-    }
+    let mut s = match smoothing_matrix_nw(x, bandwidth, kernel) {
+        Ok(s) => s,
+        Err(_) => return f64::INFINITY,
+    };
 
     // Zero the diagonal → S_cv (LOO smoother)
     for i in 0..n {
@@ -448,10 +610,10 @@ pub fn gcv_smoother(x: &[f64], y: &[f64], bandwidth: f64, kernel: &str) -> f64 {
         return f64::INFINITY;
     }
 
-    let s = smoothing_matrix_nw(x, bandwidth, kernel);
-    if s.is_empty() {
-        return f64::INFINITY;
-    }
+    let s = match smoothing_matrix_nw(x, bandwidth, kernel) {
+        Ok(s) => s,
+        Err(_) => return f64::INFINITY,
+    };
 
     // y_hat = S * y
     let mut rss = 0.0;
@@ -485,6 +647,18 @@ pub fn gcv_smoother(x: &[f64], y: &[f64], bandwidth: f64, kernel: &str) -> f64 {
 /// * `criterion` — CV or GCV
 /// * `kernel` — Kernel type
 /// * `n_grid` — Number of grid points (default: 50)
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::smoothing::{optim_bandwidth, CvCriterion};
+///
+/// let x: Vec<f64> = (0..25).map(|i| i as f64 / 24.0).collect();
+/// let y: Vec<f64> = x.iter().map(|&xi| xi * xi).collect();
+/// let result = optim_bandwidth(&x, &y, None, CvCriterion::Gcv, "gaussian", 20);
+/// assert!(result.h_opt > 0.0);
+/// assert!(result.value.is_finite());
+/// ```
 pub fn optim_bandwidth(
     x: &[f64],
     y: &[f64],
@@ -662,10 +836,7 @@ pub fn knn_lcv(x: &[f64], y: &[f64], max_k: usize) -> Vec<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn uniform_grid(n: usize) -> Vec<f64> {
-        (0..n).map(|i| i as f64 / (n - 1) as f64).collect()
-    }
+    use crate::test_helpers::uniform_grid;
 
     // ============== Nadaraya-Watson tests ==============
 
@@ -674,7 +845,7 @@ mod tests {
         let x = uniform_grid(20);
         let y: Vec<f64> = vec![5.0; 20];
 
-        let y_smooth = nadaraya_watson(&x, &y, &x, 0.1, "gaussian");
+        let y_smooth = nadaraya_watson(&x, &y, &x, 0.1, "gaussian").unwrap();
 
         // Smoothing constant data should return constant
         for &yi in &y_smooth {
@@ -690,7 +861,7 @@ mod tests {
         let x = uniform_grid(50);
         let y: Vec<f64> = x.iter().map(|&xi| 2.0 * xi + 1.0).collect();
 
-        let y_smooth = nadaraya_watson(&x, &y, &x, 0.2, "gaussian");
+        let y_smooth = nadaraya_watson(&x, &y, &x, 0.2, "gaussian").unwrap();
 
         // Linear data should be approximately preserved (with some edge effects)
         for i in 10..40 {
@@ -710,8 +881,8 @@ mod tests {
             .map(|&xi| (2.0 * std::f64::consts::PI * xi).sin())
             .collect();
 
-        let y_gauss = nadaraya_watson(&x, &y, &x, 0.1, "gaussian");
-        let y_epan = nadaraya_watson(&x, &y, &x, 0.1, "epanechnikov");
+        let y_gauss = nadaraya_watson(&x, &y, &x, 0.1, "gaussian").unwrap();
+        let y_epan = nadaraya_watson(&x, &y, &x, 0.1, "epanechnikov").unwrap();
 
         // Both should produce valid output
         assert_eq!(y_gauss.len(), 30);
@@ -732,16 +903,16 @@ mod tests {
     #[test]
     fn test_nw_invalid_input() {
         // Empty input
-        let result = nadaraya_watson(&[], &[], &[0.5], 0.1, "gaussian");
-        assert_eq!(result, vec![0.0]);
+        assert!(nadaraya_watson(&[], &[], &[0.5], 0.1, "gaussian").is_err());
 
         // Mismatched lengths
-        let result = nadaraya_watson(&[0.0, 1.0], &[1.0], &[0.5], 0.1, "gaussian");
-        assert_eq!(result, vec![0.0]);
+        assert!(nadaraya_watson(&[0.0, 1.0], &[1.0], &[0.5], 0.1, "gaussian").is_err());
 
         // Zero bandwidth
-        let result = nadaraya_watson(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0.0, "gaussian");
-        assert_eq!(result, vec![0.0]);
+        assert!(nadaraya_watson(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0.0, "gaussian").is_err());
+
+        // Empty x_new
+        assert!(nadaraya_watson(&[0.0, 1.0], &[1.0, 2.0], &[], 0.1, "gaussian").is_err());
     }
 
     // ============== Local linear tests ==============
@@ -751,7 +922,7 @@ mod tests {
         let x = uniform_grid(20);
         let y: Vec<f64> = vec![3.0; 20];
 
-        let y_smooth = local_linear(&x, &y, &x, 0.15, "gaussian");
+        let y_smooth = local_linear(&x, &y, &x, 0.15, "gaussian").unwrap();
 
         for &yi in &y_smooth {
             assert!((yi - 3.0).abs() < 0.1, "Constant should remain constant");
@@ -763,7 +934,7 @@ mod tests {
         let x = uniform_grid(30);
         let y: Vec<f64> = x.iter().map(|&xi| 3.0 * xi + 2.0).collect();
 
-        let y_smooth = local_linear(&x, &y, &x, 0.2, "gaussian");
+        let y_smooth = local_linear(&x, &y, &x, 0.2, "gaussian").unwrap();
 
         // Local linear should fit linear data exactly (in interior)
         for i in 5..25 {
@@ -777,11 +948,9 @@ mod tests {
 
     #[test]
     fn test_ll_invalid_input() {
-        let result = local_linear(&[], &[], &[0.5], 0.1, "gaussian");
-        assert_eq!(result, vec![0.0]);
+        assert!(local_linear(&[], &[], &[0.5], 0.1, "gaussian").is_err());
 
-        let result = local_linear(&[0.0, 1.0], &[1.0, 2.0], &[0.5], -0.1, "gaussian");
-        assert_eq!(result, vec![0.0]);
+        assert!(local_linear(&[0.0, 1.0], &[1.0, 2.0], &[0.5], -0.1, "gaussian").is_err());
     }
 
     // ============== Local polynomial tests ==============
@@ -791,8 +960,8 @@ mod tests {
         let x = uniform_grid(25);
         let y: Vec<f64> = x.iter().map(|&xi| xi * xi).collect();
 
-        let y_ll = local_linear(&x, &y, &x, 0.15, "gaussian");
-        let y_lp = local_polynomial(&x, &y, &x, 0.15, 1, "gaussian");
+        let y_ll = local_linear(&x, &y, &x, 0.15, "gaussian").unwrap();
+        let y_lp = local_polynomial(&x, &y, &x, 0.15, 1, "gaussian").unwrap();
 
         for i in 0..25 {
             assert!(
@@ -807,7 +976,7 @@ mod tests {
         let x = uniform_grid(40);
         let y: Vec<f64> = x.iter().map(|&xi| xi * xi).collect();
 
-        let y_smooth = local_polynomial(&x, &y, &x, 0.15, 2, "gaussian");
+        let y_smooth = local_polynomial(&x, &y, &x, 0.15, 2, "gaussian").unwrap();
 
         // Local quadratic should fit quadratic data well in interior
         for i in 8..32 {
@@ -822,13 +991,13 @@ mod tests {
     #[test]
     fn test_lp_invalid_input() {
         // Zero degree delegates to Nadaraya-Watson (not zeros)
-        let result = local_polynomial(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0.1, 0, "gaussian");
-        let nw = nadaraya_watson(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0.1, "gaussian");
+        let result =
+            local_polynomial(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0.1, 0, "gaussian").unwrap();
+        let nw = nadaraya_watson(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0.1, "gaussian").unwrap();
         assert_eq!(result, nw);
 
         // Empty input
-        let result = local_polynomial(&[], &[], &[0.5], 0.1, 2, "gaussian");
-        assert_eq!(result, vec![0.0]);
+        assert!(local_polynomial(&[], &[], &[0.5], 0.1, 2, "gaussian").is_err());
     }
 
     // ============== KNN smoother tests ==============
@@ -838,7 +1007,7 @@ mod tests {
         let x = vec![0.0, 0.5, 1.0];
         let y = vec![1.0, 2.0, 3.0];
 
-        let result = knn_smoother(&x, &y, &[0.1, 0.6, 0.9], 1);
+        let result = knn_smoother(&x, &y, &[0.1, 0.6, 0.9], 1).unwrap();
 
         // k=1 should return the nearest neighbor's y value
         assert!((result[0] - 1.0).abs() < 1e-10, "0.1 nearest to 0.0 -> 1.0");
@@ -852,7 +1021,7 @@ mod tests {
         let y = vec![1.0, 2.0, 3.0, 4.0, 5.0];
         let expected_mean = 3.0;
 
-        let result = knn_smoother(&x, &y, &[0.5], 5);
+        let result = knn_smoother(&x, &y, &[0.5], 5).unwrap();
 
         assert!(
             (result[0] - expected_mean).abs() < 1e-10,
@@ -862,11 +1031,9 @@ mod tests {
 
     #[test]
     fn test_knn_invalid_input() {
-        let result = knn_smoother(&[], &[], &[0.5], 3);
-        assert_eq!(result, vec![0.0]);
+        assert!(knn_smoother(&[], &[], &[0.5], 3).is_err());
 
-        let result = knn_smoother(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0);
-        assert_eq!(result, vec![0.0]);
+        assert!(knn_smoother(&[0.0, 1.0], &[1.0, 2.0], &[0.5], 0).is_err());
     }
 
     // ============== Smoothing matrix tests ==============
@@ -874,7 +1041,7 @@ mod tests {
     #[test]
     fn test_smoothing_matrix_row_stochastic() {
         let x = uniform_grid(10);
-        let s = smoothing_matrix_nw(&x, 0.2, "gaussian");
+        let s = smoothing_matrix_nw(&x, 0.2, "gaussian").unwrap();
 
         assert_eq!(s.len(), 100);
 
@@ -892,11 +1059,9 @@ mod tests {
 
     #[test]
     fn test_smoothing_matrix_invalid_input() {
-        let result = smoothing_matrix_nw(&[], 0.1, "gaussian");
-        assert!(result.is_empty());
+        assert!(smoothing_matrix_nw(&[], 0.1, "gaussian").is_err());
 
-        let result = smoothing_matrix_nw(&[0.0, 1.0], 0.0, "gaussian");
-        assert!(result.is_empty());
+        assert!(smoothing_matrix_nw(&[0.0, 1.0], 0.0, "gaussian").is_err());
     }
 
     #[test]
@@ -904,7 +1069,7 @@ mod tests {
         let x = vec![0.0, 0.25, 0.5, 0.75, 1.0];
         let mut y = vec![0.0, 1.0, 2.0, 1.0, 0.0];
         y[2] = f64::NAN;
-        let result = nadaraya_watson(&x, &y, &x, 0.3, "gaussian");
+        let result = nadaraya_watson(&x, &y, &x, 0.3, "gaussian").unwrap();
         assert_eq!(result.len(), x.len());
         // NaN should propagate but not panic
     }
@@ -915,7 +1080,7 @@ mod tests {
         let x = vec![0.5];
         let y = vec![3.0];
         let x_new = vec![0.5];
-        let result = nadaraya_watson(&x, &y, &x_new, 0.3, "gaussian");
+        let result = nadaraya_watson(&x, &y, &x_new, 0.3, "gaussian").unwrap();
         assert_eq!(result.len(), 1);
         assert!(
             (result[0] - 3.0).abs() < 1e-6,
@@ -929,7 +1094,7 @@ mod tests {
         let x = vec![0.0, 0.0, 0.5, 1.0, 1.0];
         let y = vec![1.0, 2.0, 3.0, 4.0, 5.0];
         let x_new = vec![0.0, 0.5, 1.0];
-        let result = nadaraya_watson(&x, &y, &x_new, 0.3, "gaussian");
+        let result = nadaraya_watson(&x, &y, &x_new, 0.3, "gaussian").unwrap();
         assert_eq!(result.len(), 3);
         for v in &result {
             assert!(v.is_finite());
@@ -1083,7 +1248,7 @@ mod tests {
         let x = uniform_grid(20);
         let y = vec![5.0; 20];
 
-        let y_smooth = nadaraya_watson(&x, &y, &x, 0.2, "tricube");
+        let y_smooth = nadaraya_watson(&x, &y, &x, 0.2, "tricube").unwrap();
 
         for &yi in &y_smooth {
             assert!(
@@ -1098,7 +1263,7 @@ mod tests {
         let x = uniform_grid(50);
         let y: Vec<f64> = x.iter().map(|&xi| 2.0 * xi + 1.0).collect();
 
-        let y_smooth = nadaraya_watson(&x, &y, &x, 0.2, "tricube");
+        let y_smooth = nadaraya_watson(&x, &y, &x, 0.2, "tricube").unwrap();
 
         // Interior points should be approximately correct
         for i in 10..40 {
@@ -1118,8 +1283,8 @@ mod tests {
             .map(|&xi| (2.0 * std::f64::consts::PI * xi).sin())
             .collect();
 
-        let y_gauss = nadaraya_watson(&x, &y, &x, 0.15, "gaussian");
-        let y_tri = nadaraya_watson(&x, &y, &x, 0.15, "tricube");
+        let y_gauss = nadaraya_watson(&x, &y, &x, 0.15, "gaussian").unwrap();
+        let y_tri = nadaraya_watson(&x, &y, &x, 0.15, "tricube").unwrap();
 
         assert_eq!(y_gauss.len(), y_tri.len());
 
@@ -1142,8 +1307,8 @@ mod tests {
             .map(|&xi| (2.0 * std::f64::consts::PI * xi).sin())
             .collect();
 
-        let y_epan = nadaraya_watson(&x, &y, &x, 0.15, "epanechnikov");
-        let y_tri = nadaraya_watson(&x, &y, &x, 0.15, "tricube");
+        let y_epan = nadaraya_watson(&x, &y, &x, 0.15, "epanechnikov").unwrap();
+        let y_tri = nadaraya_watson(&x, &y, &x, 0.15, "tricube").unwrap();
 
         // Both compact support kernels should produce finite output
         assert!(y_epan.iter().all(|v| v.is_finite()));
@@ -1162,7 +1327,7 @@ mod tests {
         let x = uniform_grid(20);
         let y = vec![3.0; 20];
 
-        let y_smooth = local_linear(&x, &y, &x, 0.2, "tricube");
+        let y_smooth = local_linear(&x, &y, &x, 0.2, "tricube").unwrap();
 
         for &yi in &y_smooth {
             assert!(
@@ -1177,7 +1342,7 @@ mod tests {
         let x = uniform_grid(30);
         let y: Vec<f64> = x.iter().map(|&xi| 3.0 * xi + 2.0).collect();
 
-        let y_smooth = local_linear(&x, &y, &x, 0.2, "tricube");
+        let y_smooth = local_linear(&x, &y, &x, 0.2, "tricube").unwrap();
 
         // Local linear should fit linear data well in the interior
         for i in 5..25 {
@@ -1194,8 +1359,8 @@ mod tests {
         let x = uniform_grid(30);
         let y: Vec<f64> = x.iter().map(|&xi| xi * xi).collect();
 
-        let y_gauss = local_linear(&x, &y, &x, 0.15, "gaussian");
-        let y_tri = local_linear(&x, &y, &x, 0.15, "tricube");
+        let y_gauss = local_linear(&x, &y, &x, 0.15, "gaussian").unwrap();
+        let y_tri = local_linear(&x, &y, &x, 0.15, "tricube").unwrap();
 
         assert_eq!(y_gauss.len(), y_tri.len());
         assert!(y_tri.iter().all(|v| v.is_finite()));
@@ -1212,7 +1377,7 @@ mod tests {
         let x = uniform_grid(40);
         let y: Vec<f64> = x.iter().map(|&xi| xi * xi).collect();
 
-        let y_smooth = local_polynomial(&x, &y, &x, 0.15, 2, "tricube");
+        let y_smooth = local_polynomial(&x, &y, &x, 0.15, 2, "tricube").unwrap();
 
         // Local quadratic with tricube should fit well in interior
         for i in 8..32 {
@@ -1240,7 +1405,7 @@ mod tests {
     #[test]
     fn test_smoothing_matrix_tricube() {
         let x = uniform_grid(10);
-        let s = smoothing_matrix_nw(&x, 0.2, "tricube");
+        let s = smoothing_matrix_nw(&x, 0.2, "tricube").unwrap();
 
         assert_eq!(s.len(), 100);
 

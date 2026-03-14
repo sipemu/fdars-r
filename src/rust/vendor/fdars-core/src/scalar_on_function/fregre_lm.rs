@@ -1,4 +1,13 @@
-use super::*;
+use super::{
+    build_design_matrix, cholesky_factor, compute_beta_se, compute_fitted, compute_ols_std_errors,
+    compute_r_squared, compute_xtx, ols_solve, recover_beta_t, resolve_ncomp,
+    validate_fregre_inputs, FregreCvResult, FregreLmResult, ModelSelectionResult,
+    SelectionCriterion,
+};
+use crate::cv::create_folds;
+use crate::error::FdarError;
+use crate::matrix::FdMatrix;
+use crate::regression::fdata_to_pc_1d;
 
 // ---------------------------------------------------------------------------
 // fregre_lm: FPC-based functional linear model
@@ -27,6 +36,29 @@ use super::*;
 ///
 /// # Returns
 /// [`FregreLmResult`] with estimated coefficients, fitted values, and diagnostics
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::scalar_on_function::fregre_lm;
+///
+/// // 20 curves at 30 evaluation points (each curve has a different frequency)
+/// let (n, m) = (20, 30);
+/// let data = FdMatrix::from_column_major(
+///     (0..n * m).map(|k| {
+///         let i = (k % n) as f64;
+///         let j = (k / n) as f64;
+///         ((i + 1.0) * j * 0.2).sin()
+///     }).collect(),
+///     n, m,
+/// ).unwrap();
+/// let y: Vec<f64> = (0..n).map(|i| (i as f64 * 0.5).sin()).collect();
+/// let fit = fregre_lm(&data, &y, None, 3).unwrap();
+/// assert_eq!(fit.fitted_values.len(), 20);
+/// assert_eq!(fit.beta_t.len(), 30);
+/// assert!(fit.r_squared >= 0.0 && fit.r_squared <= 1.0);
+/// ```
 #[must_use = "expensive computation whose result should not be discarded"]
 pub fn fregre_lm(
     data: &FdMatrix,
@@ -68,8 +100,8 @@ pub fn fregre_lm(
         .sum::<f64>()
         / n as f64;
 
-    let beta_t = recover_beta_t(&coeffs[1..1 + ncomp], &fpca.rotation, m);
-    let beta_se = compute_beta_se(&std_errors[1..1 + ncomp], &fpca.rotation, m);
+    let beta_t = recover_beta_t(&coeffs[1..=ncomp], &fpca.rotation, m);
+    let beta_se = compute_beta_se(&std_errors[1..=ncomp], &fpca.rotation, m);
     let gamma: Vec<f64> = coeffs[1 + ncomp..].to_vec();
 
     let nf = n as f64;
@@ -152,9 +184,8 @@ fn cv_error_for_k(
             m
         });
 
-        let fit = match fregre_lm(&train_data, &train_y, train_sc.as_ref(), k) {
-            Ok(f) => f,
-            Err(_) => continue,
+        let Ok(fit) = fregre_lm(&train_data, &train_y, train_sc.as_ref(), k) else {
+            continue;
         };
 
         let predictions = predict_fregre_lm(&fit, &test_data, test_sc.as_ref());
@@ -174,7 +205,7 @@ fn cv_error_for_k(
     } else {
         Err(FdarError::ComputationFailed {
             operation: "CV error computation",
-            detail: "no valid folds produced predictions".to_string(),
+            detail: "no valid folds produced predictions; try reducing ncomp or increasing the number of observations".to_string(),
         })
     }
 }
@@ -237,7 +268,7 @@ pub fn fregre_cv(
     if k_values.is_empty() {
         return Err(FdarError::ComputationFailed {
             operation: "fregre_cv",
-            detail: "no valid K values produced CV errors".to_string(),
+            detail: "no valid K values produced CV errors; all candidate ncomp values failed — check data for zero-variance columns or increase n".to_string(),
         });
     }
 
@@ -302,7 +333,7 @@ pub fn model_selection_ncomp(
     if criteria.is_empty() {
         return Err(FdarError::ComputationFailed {
             operation: "model_selection_ncomp",
-            detail: "no valid models could be fitted".to_string(),
+            detail: "no valid models could be fitted; all candidate ncomp values failed — check data for degeneracy or reduce the range".to_string(),
         });
     }
 
@@ -336,6 +367,29 @@ pub fn model_selection_ncomp(
 /// * `fit` - A fitted [`FregreLmResult`]
 /// * `new_data` - New functional predictor matrix (n_new × m)
 /// * `new_scalar` - Optional new scalar covariates (n_new × p)
+///
+/// # Examples
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::scalar_on_function::{fregre_lm, predict_fregre_lm};
+///
+/// let (n, m) = (20, 30);
+/// let data = FdMatrix::from_column_major(
+///     (0..n * m).map(|k| {
+///         let i = (k % n) as f64;
+///         let j = (k / n) as f64;
+///         ((i + 1.0) * j * 0.2).sin()
+///     }).collect(),
+///     n, m,
+/// ).unwrap();
+/// let y: Vec<f64> = (0..n).map(|i| (i as f64 * 0.5).sin()).collect();
+/// let fit = fregre_lm(&data, &y, None, 3).unwrap();
+///
+/// // Predict on same data
+/// let predictions = predict_fregre_lm(&fit, &data, None);
+/// assert_eq!(predictions.len(), 20);
+/// ```
 pub fn predict_fregre_lm(
     fit: &FregreLmResult,
     new_data: &FdMatrix,

@@ -17,6 +17,7 @@ use rand::prelude::*;
 
 /// Result of elastic amplitude/phase attribution.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub struct ElasticAttributionResult {
     /// Per-observation amplitude contribution (length n).
     pub amplitude_contribution: Vec<f64>,
@@ -148,7 +149,7 @@ fn attribution_joint(
         .as_ref()
         .ok_or_else(|| FdarError::ComputationFailed {
             operation: "elastic_pcr_attribution",
-            detail: "joint_fpca result missing from ElasticPcrResult".into(),
+            detail: "joint_fpca result missing from ElasticPcrResult; ensure elastic_pcr was called with PcaMethod::Combined".into(),
         })?;
     let km = &result.karcher;
     let (n, m) = km.aligned_data.shape();
@@ -349,10 +350,10 @@ fn fitted_with_permuted_scores(
             } else {
                 amp_scores[(i, k)]
             };
-            let phase_i = if !permute_amplitude {
-                phase_scores[(perm_idx[i], k)]
-            } else {
+            let phase_i = if permute_amplitude {
                 phase_scores[(i, k)]
+            } else {
+                phase_scores[(perm_idx[i], k)]
             };
             fitted[i] += coefficients[k] * (amp_i + phase_i);
         }

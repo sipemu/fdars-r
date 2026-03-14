@@ -529,13 +529,26 @@ jackknife.plus <- function(fdataobj, y, newdata,
 #' Split-conformal prediction intervals using a pre-fitted fregre.lm model.
 #' Uses the model's FPCA components for fast prediction without refitting.
 #'
+#' @section Warning:
+#' The model was trained on ALL data including the calibration subset, so
+#' calibration residuals are in-sample and systematically too small. The
+#' distribution-free coverage guarantee is broken. Use
+#' \code{\link{conformal.fregre.lm}} or \code{\link{cv.conformal.regression}}
+#' for valid coverage.
+#'
 #' @param model A fitted \code{fregre.lm} model object.
 #' @param fdataobj An object of class 'fdata' (training data).
 #' @param y Response vector (training).
 #' @param newdata An object of class 'fdata' (test data).
 #' @param scalar.train Optional scalar covariates for training.
 #' @param scalar.test Optional scalar covariates for test.
-#' @param cal.fraction Fraction of data for calibration (default 0.25).
+#' @param calibration.indices Optional integer vector of 1-based indices into the
+#'   training data to use as the calibration set. When provided, these observations
+#'   should have been held out during model fitting so that calibration residuals
+#'   are out-of-sample, restoring the coverage guarantee. If NULL (default),
+#'   calibration indices are randomly selected from all training data (in-sample).
+#' @param cal.fraction Fraction of data for calibration (default 0.25). Ignored
+#'   when \code{calibration.indices} is provided.
 #' @param alpha Miscoverage level (default 0.1).
 #' @param seed Random seed.
 #'
@@ -553,15 +566,30 @@ jackknife.plus <- function(fdataobj, y, newdata,
 conformal.generic.regression <- function(model, fdataobj, y, newdata,
                                            scalar.train = NULL,
                                            scalar.test = NULL,
+                                           calibration.indices = NULL,
                                            cal.fraction = 0.25,
                                            alpha = 0.1, seed = NULL) {
   if (!inherits(fdataobj, "fdata")) stop("fdataobj must be of class 'fdata'")
   if (!inherits(newdata, "fdata")) stop("newdata must be of class 'fdata'")
   if (!inherits(model, "fregre.lm")) stop("model must be of class 'fregre.lm'")
+  if (is.null(calibration.indices)) {
+    warning("conformal.generic.regression uses the pre-fitted model without refitting. ",
+            "Calibration residuals are in-sample, so coverage guarantee is broken. ",
+            "Supply calibration.indices (held-out indices) for valid coverage, ",
+            "or use conformal.fregre.lm() / cv.conformal.regression() instead.",
+            call. = FALSE)
+  }
   if (is.null(seed)) seed <- sample.int(.Machine$integer.max, 1)
 
   st <- if (!is.null(scalar.train)) as.matrix(scalar.train) else NULL
   ste <- if (!is.null(scalar.test)) as.matrix(scalar.test) else NULL
+
+  # Convert calibration indices to 0-based integer vector for Rust
+  cal_idx <- if (!is.null(calibration.indices)) {
+    as.integer(calibration.indices - 1L)
+  } else {
+    NULL
+  }
 
   # Extract FPCA components from the model
   fpca_mean <- as.numeric(model$.fpca_mean)
@@ -575,6 +603,7 @@ conformal.generic.regression <- function(model, fdataobj, y, newdata,
                   fdataobj$data, as.numeric(y), newdata$data,
                   st, ste, fpca_mean, fpca_rotation, fpca_scores,
                   as.integer(ncomp), coefficients, gamma,
+                  cal_idx,
                   as.numeric(cal.fraction), as.numeric(alpha),
                   as.integer(seed))
 
@@ -585,15 +614,29 @@ conformal.generic.regression <- function(model, fdataobj, y, newdata,
 #' Generic Conformal Classification
 #'
 #' Split-conformal prediction sets using a pre-fitted functional.logistic model.
+#' Only supports binary classification (2 classes).
+#'
+#' @section Warning:
+#' The model was trained on ALL data including the calibration subset, so
+#' calibration scores are in-sample and the coverage guarantee is broken.
+#' Use \code{\link{conformal.logistic}} or
+#' \code{\link{cv.conformal.classification}} for valid coverage.
+#' For multiclass problems, use \code{\link{conformal.classif}}.
 #'
 #' @param model A fitted model object from \code{\link{functional.logistic}}.
 #' @param fdataobj An object of class 'fdata' (training data).
-#' @param y Binary response (0/1).
+#' @param y Binary response (0/1). Only binary (2-class) classification is
+#'   supported; for multiclass use \code{\link{conformal.classif}}.
 #' @param newdata An object of class 'fdata' (test data).
 #' @param scalar.train Optional scalar covariates for training.
 #' @param scalar.test Optional scalar covariates for test.
 #' @param score.type Nonconformity score: "lac" or "aps" (default "lac").
-#' @param cal.fraction Calibration fraction (default 0.25).
+#' @param calibration.indices Optional integer vector of 1-based indices into the
+#'   training data to use as the calibration set. When provided, these observations
+#'   should have been held out during model fitting so that calibration scores
+#'   are out-of-sample, restoring the coverage guarantee.
+#' @param cal.fraction Calibration fraction (default 0.25). Ignored
+#'   when \code{calibration.indices} is provided.
 #' @param alpha Miscoverage level (default 0.1).
 #' @param seed Random seed.
 #'
@@ -612,6 +655,7 @@ conformal.generic.classification <- function(model, fdataobj, y, newdata,
                                                scalar.train = NULL,
                                                scalar.test = NULL,
                                                score.type = c("lac", "aps"),
+                                               calibration.indices = NULL,
                                                cal.fraction = 0.25,
                                                alpha = 0.1, seed = NULL) {
   if (!inherits(fdataobj, "fdata")) stop("fdataobj must be of class 'fdata'")
@@ -619,11 +663,30 @@ conformal.generic.classification <- function(model, fdataobj, y, newdata,
   if (!inherits(model, "fregre.logistic")) {
     stop("model must be of class 'fregre.logistic'")
   }
+  n_classes <- length(unique(y))
+  if (n_classes > 2) {
+    stop("conformal.generic.classification only supports binary classification (2 classes). ",
+         "For multiclass, use conformal.classif() or cv.conformal.classification().")
+  }
+  if (is.null(calibration.indices)) {
+    warning("conformal.generic.classification uses the pre-fitted model without refitting. ",
+            "Calibration scores are in-sample, so coverage guarantee is broken. ",
+            "Supply calibration.indices (held-out indices) for valid coverage, ",
+            "or use conformal.logistic() / cv.conformal.classification() instead.",
+            call. = FALSE)
+  }
   score.type <- match.arg(score.type)
   if (is.null(seed)) seed <- sample.int(.Machine$integer.max, 1)
 
   st <- if (!is.null(scalar.train)) as.matrix(scalar.train) else NULL
   ste <- if (!is.null(scalar.test)) as.matrix(scalar.test) else NULL
+
+  # Convert calibration indices to 0-based integer vector for Rust
+  cal_idx <- if (!is.null(calibration.indices)) {
+    as.integer(calibration.indices - 1L)
+  } else {
+    NULL
+  }
 
   # Extract FPCA components from the model
   fpca_mean <- as.numeric(model$.fpca_mean)
@@ -639,7 +702,7 @@ conformal.generic.classification <- function(model, fdataobj, y, newdata,
                   st, ste, fpca_mean, fpca_rotation, fpca_scores,
                   as.integer(ncomp), as.numeric(intercept),
                   coefficients, gamma,
-                  score.type,
+                  score.type, cal_idx,
                   as.numeric(cal.fraction), as.numeric(alpha),
                   as.integer(seed))
 
