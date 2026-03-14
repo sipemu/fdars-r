@@ -48,7 +48,7 @@ fi
 # These are shipped without the dot prefix to avoid R CMD check hidden files NOTE
 for f in src/rust/vendor/*/cargo-checksum.json; do
     if [ -f "$f" ]; then
-        mv "$f" "$(dirname "$f")/.cargo-checksum.json"
+        cp "$f" "$(dirname "$f")/.cargo-checksum.json"
     fi
 done
 
