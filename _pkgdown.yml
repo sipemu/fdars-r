@@ -581,7 +581,27 @@ reference:
   - fdars-package
 
 - title: Internal
-  desc: Internal functions (no public API)
+  desc: Low-level Rust wrappers and internal functions
   contents:
+  - starts_with("explain_")
+  - starts_with("elastic_")
+  - starts_with("smooth_basis")
+  - matches("_rust$")
   - starts_with("dot-")
+  - matches("^[a-z].*_[a-z]")
+  - matches("_\\dd$")
+  - -smooth.basis.fd
+  - -smooth.basis.gcv
+  - -elastic.regression
+  - -elastic.logistic
+  - -elastic.pcr
+  - -elastic.changepoint
+  - -elastic.attribution
+  - -elastic.align
+  - -elastic.distance
+  - -elastic.decomposition
+  - -elastic.align.constrained
+  - -fdata2basis_2d
+  - -basis2fdata_2d
+  - -fosr.2d
 
