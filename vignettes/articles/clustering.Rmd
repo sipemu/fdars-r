@@ -130,7 +130,7 @@ cat("Total WSS - Linf:", km_linf$tot.withinss, "\n")
 
 For flexibility, pass a metric function:
 
-```{r custom-metrics}
+```{r custom-metrics, eval = FALSE}
 # Dynamic Time Warping
 km_dtw <- cluster.kmeans(fd, ncl = 3, metric = metric.DTW, seed = 123)
 
