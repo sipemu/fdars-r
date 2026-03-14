@@ -13,6 +13,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r setup, include = FALSE}
+library(fdars)
+library(ggplot2)
+theme_set(theme_minimal())
+```
+
 ## Introduction
 
 Standard least-squares regression estimates the conditional mean of the
@@ -62,8 +68,7 @@ spectra and a scalar property (e.g., moisture content). We then contaminate
 10% of the responses with large measurement errors to mimic real-world
 outliers.
 
-```{r simulate-data, eval = FALSE}
-library(fdars)
+```{r simulate-data}
 set.seed(42)
 
 # --- Dimensions ---
@@ -108,58 +113,67 @@ y_contam[outlier_idx] <- y_contam[outlier_idx] + rnorm(n_outlier, mean = 0, sd =
 The contaminated observations have errors roughly 25 times larger than the
 noise standard deviation, simulating gross measurement mistakes.
 
+```{r plot-spectra}
+plot(fd, main = "NIR Absorbance Spectra",
+     xlab = "Wavelength (nm)", ylab = "Absorbance")
+```
+
+```{r plot-responses}
+df_y <- data.frame(
+  idx = 1:n,
+  clean = y_clean,
+  contaminated = y_contam,
+  is_outlier = seq_len(n) %in% outlier_idx
+)
+ggplot(df_y, aes(x = clean, y = contaminated, color = is_outlier)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  scale_color_manual(values = c("FALSE" = "#2E8B57", "TRUE" = "#D55E00"),
+                     labels = c("Clean", "Outlier")) +
+  labs(title = "Clean vs Contaminated Responses",
+       x = "Clean y", y = "Contaminated y", color = "")
+```
+
 ## OLS Regression --- Baseline
 
 We first fit ordinary least squares via `fregre.lm()` on both the clean and
 contaminated data.
 
-```{r ols-fit, eval = FALSE}
+```{r ols-fit}
 # --- Clean data ---
 fit_ols_clean <- fregre.lm(fd, y_clean, ncomp = 5)
-print(fit_ols_clean)
 
 # --- Contaminated data ---
 fit_ols_contam <- fregre.lm(fd, y_contam, ncomp = 5)
-print(fit_ols_contam)
+
+cat("OLS R-squared (clean):", round(fit_ols_clean$r.squared, 4), "\n")
+cat("OLS R-squared (contaminated):", round(fit_ols_contam$r.squared, 4), "\n")
 ```
 
 On clean data, OLS performs well. On contaminated data, the 20 outliers pull
 the coefficient estimates away from their true values, inflating the residuals
-for *all* observations --- including the clean ones. The $R^2$ drops and the
-RMSE increases substantially.
+for *all* observations --- including the clean ones.
 
 ## L1 (LAD) Regression
 
 `fregre.l1()` minimises the sum of absolute residuals rather than squared
-residuals:
-
-$$\hat{\boldsymbol{\gamma}} = \arg\min_{\boldsymbol{\gamma}} \sum_{i=1}^{n} \lvert y_i - \alpha - \boldsymbol{\xi}_i^{\top}\boldsymbol{\gamma} \rvert$$
-
-where $\boldsymbol{\xi}_i$ is the vector of FPC scores for observation $i$.
-Because the absolute value penalises large residuals linearly (not
+residuals. Because the absolute value penalises large residuals linearly (not
 quadratically), outliers exert much less influence on the fit.
 
-The optimisation is carried out via IRLS (iteratively reweighted least
-squares), which re-weights each observation inversely proportional to its
-current residual magnitude at each iteration.
-
-```{r l1-fit, eval = FALSE}
+```{r l1-fit}
 # --- Clean data ---
 fit_l1_clean <- fregre.l1(fd, y_clean, ncomp = 5)
-print(fit_l1_clean)
 
 # --- Contaminated data ---
 fit_l1_contam <- fregre.l1(fd, y_contam, ncomp = 5)
-print(fit_l1_contam)
-```
 
-On the contaminated data, the L1 fit remains close to the clean-data fit.
-The IRLS weights for the 20 outlier observations will be much smaller than
-those for the clean observations, effectively down-weighting their influence.
+cat("L1 R-squared (clean):", round(fit_l1_clean$r.squared, 4), "\n")
+cat("L1 R-squared (contaminated):", round(fit_l1_contam$r.squared, 4), "\n")
+```
 
 ### Examining the IRLS Weights
 
-```{r l1-weights, eval = FALSE}
+```{r l1-weights}
 # Observations with small weights are effectively identified as outliers
 w <- fit_l1_contam$weights
 cat("Mean weight (clean obs):", round(mean(w[-outlier_idx]), 3), "\n")
@@ -177,31 +191,18 @@ $$\rho_k(r) = \begin{cases} \frac{1}{2} r^2 & \text{if } |r| \leq k \\ k |r| - \
 
 where $k > 0$ is a tuning parameter. For small residuals ($|r| \leq k$),
 the loss is quadratic (like OLS); for large residuals ($|r| > k$), the loss
-is linear (like L1). This means:
+is linear (like L1).
 
-- Small residuals are treated as in standard OLS, preserving efficiency.
-- Large residuals are down-weighted, providing outlier resistance.
-- The default $k = 1.345$ achieves 95% asymptotic efficiency under Gaussian
-  errors while still providing substantial robustness.
-
-```{r huber-fit, eval = FALSE}
+```{r huber-fit}
 # --- Default k = 1.345 ---
 fit_huber_contam <- fregre.huber(fd, y_contam, ncomp = 5)
-print(fit_huber_contam)
 
-# --- More aggressive robustness with smaller k ---
-fit_huber_k08 <- fregre.huber(fd, y_contam, ncomp = 5, k = 0.8)
-print(fit_huber_k08)
-
-# --- Nearly OLS with large k ---
-fit_huber_k5 <- fregre.huber(fd, y_contam, ncomp = 5, k = 5.0)
-print(fit_huber_k5)
+cat("Huber R-squared (contaminated):", round(fit_huber_contam$r.squared, 4), "\n")
+cat("Iterations:", fit_huber_contam$iterations, "\n")
+cat("Converged:", fit_huber_contam$converged, "\n")
 ```
 
 ### The Tuning Parameter $k$
-
-The parameter $k$ controls the transition between quadratic and linear
-loss:
 
 | $k$ | Behaviour | Efficiency (Gaussian) | Robustness |
 |-----|-----------|----------------------|------------|
@@ -211,21 +212,13 @@ loss:
 | 2.0 | Mild | ~98% | Moderate |
 | $\infty$ | Identical to OLS | 100% | None |
 
-In practice, the default $k = 1.345$ is a good starting point. Decrease $k$
-if contamination is severe; increase $k$ if you trust most of the data.
-
-```{r huber-weights, eval = FALSE}
+```{r huber-weights}
 # Compare weights across k values
 w_default <- fit_huber_contam$weights
-w_aggressive <- fit_huber_k08$weights
 
-cat("Default k=1.345:\n")
+cat("Huber k=1.345:\n")
 cat("  Mean weight (clean):", round(mean(w_default[-outlier_idx]), 3), "\n")
 cat("  Mean weight (outlier):", round(mean(w_default[outlier_idx]), 3), "\n")
-
-cat("Aggressive k=0.8:\n")
-cat("  Mean weight (clean):", round(mean(w_aggressive[-outlier_idx]), 3), "\n")
-cat("  Mean weight (outlier):", round(mean(w_aggressive[outlier_idx]), 3), "\n")
 ```
 
 ## Comparison: OLS vs L1 vs Huber
@@ -233,7 +226,7 @@ cat("  Mean weight (outlier):", round(mean(w_aggressive[outlier_idx]), 3), "\n")
 We compare all three methods on clean and contaminated data using a
 train/test split.
 
-```{r comparison, eval = FALSE}
+```{r comparison}
 # --- Train/test split ---
 set.seed(123)
 train_idx <- sample(n, 160)
@@ -260,7 +253,6 @@ pred_hub_c <- predict(fit_hub_c, fd_test)
 # Contaminated data
 # ==========================================
 y_tr_contam <- y_contam[train_idx]
-y_te_contam <- y_contam[test_idx]
 
 fit_ols_d <- fregre.lm(fd_train, y_tr_contam, ncomp = 5)
 fit_l1_d <- fregre.l1(fd_train, y_tr_contam, ncomp = 5)
@@ -274,7 +266,7 @@ pred_hub_d <- predict(fit_hub_d, fd_test)
 
 ### Results Table
 
-```{r results-table, eval = FALSE}
+```{r results-table}
 rmse <- function(y, yhat) sqrt(mean((y - yhat)^2))
 r2 <- function(y, yhat) 1 - sum((y - yhat)^2) / sum((y - mean(y))^2)
 
@@ -300,46 +292,39 @@ knitr::kable(results,
 )
 ```
 
-**Expected pattern:**
+### Visualizing Predictions
 
-- On **clean data**, all three methods perform similarly. OLS is slightly
-  more efficient because it is the maximum likelihood estimator under
-  Gaussian errors.
-- On **contaminated data**, OLS performance degrades sharply: the RMSE
-  increases and $R^2$ drops. L1 and Huber remain close to their clean-data
-  performance because they down-weight the outlier observations.
+```{r vis-predictions}
+df_pred <- data.frame(
+  Observed = rep(y_te_clean, 3),
+  Predicted = c(pred_ols_d, pred_l1_d, pred_hub_d),
+  Method = rep(c("OLS (fregre.lm)", "L1 (fregre.l1)", "Huber (fregre.huber)"),
+               each = length(y_te_clean))
+)
 
-### Prediction with New Data
-
-All three methods support the standard `predict()` generic:
-
-```{r prediction, eval = FALSE}
-# Predict from a robust model on new curves
-new_curves <- fd[1:5, ]
-pred_l1 <- predict(fit_l1_contam, new_curves)
-pred_huber <- predict(fit_huber_contam, new_curves)
-
-cat("L1 predictions:", round(pred_l1, 3), "\n")
-cat("Huber predictions:", round(pred_huber, 3), "\n")
+ggplot(df_pred, aes(x = Observed, y = Predicted)) +
+  geom_point(alpha = 0.7, color = "#4A90D9") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  facet_wrap(~ Method) +
+  labs(title = "Observed vs Predicted (Contaminated Training Data)",
+       x = "True Response", y = "Predicted")
 ```
 
-### Scalar Covariates
+## Explainability Support
 
-Both `fregre.l1()` and `fregre.huber()` support optional scalar covariates,
-just like `fregre.lm()`:
+Both `fregre.l1()` and `fregre.huber()` models support the full
+explainability ecosystem: PDP, ALE, SHAP, permutation importance,
+saliency maps, LIME, and Sobol indices --- the same tools available for
+`fregre.lm()`:
 
-```{r scalar-covariates, eval = FALSE}
-# Add a scalar covariate (e.g., sample temperature)
-temperature <- rnorm(n, mean = 25, sd = 3)
-y_with_temp <- y_clean + 0.5 * temperature
+```{r explainability}
+# PDP for robust model
+pdp <- fregre.pdp(fit_l1_contam, fd, component = 1)
+cat("PDP grid values:", length(pdp$grid_values), "points\n")
 
-fit_l1_sc <- fregre.l1(fd, y_with_temp,
-                        scalar.covariates = temperature, ncomp = 5)
-print(fit_l1_sc)
-
-# Prediction with scalar covariates
-pred_sc <- predict(fit_l1_sc, fd[1:5, ],
-                   scalar.covariates = temperature[1:5])
+# SHAP values
+shap <- fregre.shap(fit_l1_contam, fd)
+cat("SHAP values computed for", nrow(shap$shap_values), "observations\n")
 ```
 
 ## When to Use Robust Regression
@@ -350,8 +335,6 @@ pred_sc <- predict(fit_l1_sc, fd[1:5, ],
   corrupted by gross errors.
 - You want maximum resistance to outliers and are willing to accept a
   small loss of efficiency on clean data.
-- The error distribution is heavy-tailed (e.g., Cauchy or $t$ with few
-  degrees of freedom).
 
 **Use `fregre.huber()` when:**
 
@@ -359,28 +342,13 @@ pred_sc <- predict(fit_l1_sc, fd[1:5, ],
   protection against moderate contamination.
 - You are unsure whether outliers are present --- Huber is a safe default
   that costs very little when the data are clean.
-- You want to tune the robustness/efficiency trade-off via the parameter
-  $k$.
 
 **Stick with `fregre.lm()` when:**
 
 - The data are clean and well-curated.
-- You need the full downstream ecosystem: explainability (`explain()`),
-  diagnostics (Cook's distance, leverage, DFBETAS), uncertainty
-  quantification (conformal prediction), and cross-validation
-  (`fregre.lm.cv()`).
-- Efficiency is paramount and you trust the Gaussian error assumption.
-
-### Limitations
-
-- The robust methods protect against outliers in the **response** $y$. They
-  do not address leverage points (outliers in the functional predictor
-  $X(t)$). For functional outlier detection, see
-  `vignette("articles/outlier-detection")`.
-- The `fregre.robust` class does not currently support the full
-  explainability and diagnostics ecosystem available for `fregre.lm`.
-- Both robust methods rely on IRLS, which may not converge if the data are
-  severely ill-conditioned. Check the `converged` field in the output.
+- You need the full downstream ecosystem: diagnostics (Cook's distance,
+  leverage, DFBETAS), uncertainty quantification (conformal prediction),
+  and cross-validation (`fregre.lm.cv()`).
 
 ## Mathematical Details
 
@@ -413,9 +381,6 @@ The weight function $\psi(r)/r$ differs by method:
 - **L1:** $w_i = 1/|r_i|$ (with a floor to avoid division by zero)
 - **Huber:** $w_i = \min(1, k/|r_i|)$
 
-Convergence is declared when the relative change in coefficients falls below
-a tolerance, typically within 10--30 iterations.
-
 ## See Also
 
 - `vignette("articles/scalar-on-function")` --- overview of all
@@ -425,7 +390,6 @@ a tolerance, typically within 10--30 iterations.
 - `vignette("articles/regression-diagnostics")` --- influence and
   diagnostics for `fregre.lm()`
 - `vignette("articles/explainability")` --- interpreting `fregre.lm()` models
-- `vignette("articles/cross-validation")` --- cross-validation framework
 
 ## References
 

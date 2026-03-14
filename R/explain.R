@@ -7,23 +7,31 @@
 
 # Internal helper: extract model components for Rust explain wrappers
 .fit_args <- function(model) {
-  if (!inherits(model, "fregre.lm")) {
-    stop("model must be of class 'fregre.lm'")
+  if (!inherits(model, "fregre.lm") && !inherits(model, "fregre.robust")) {
+    stop("model must be of class 'fregre.lm' or 'fregre.robust'")
+  }
+  n <- length(model$residuals)
+  m <- ncol(model$fdataobj$data)
+  # beta.t: fregre.lm stores as fdata, fregre.robust as plain numeric
+  beta_t <- if (inherits(model$beta.t, "fdata")) {
+    as.numeric(model$beta.t$data)
+  } else {
+    as.numeric(model$beta.t)
   }
   list(
     intercept = model$intercept,
-    beta_t = as.numeric(model$beta.t$data),
-    beta_se = if (!is.null(model$beta.se)) as.numeric(model$beta.se) else rep(0, ncol(model$fdataobj$data)),
+    beta_t = beta_t,
+    beta_se = if (!is.null(model$beta.se)) as.numeric(model$beta.se) else rep(0, m),
     gamma = if (!is.null(model$gamma)) as.numeric(model$gamma) else numeric(0),
     fitted_values = as.numeric(model$fitted.values),
     residuals = as.numeric(model$residuals),
     r_squared = model$r.squared,
-    r_squared_adj = model$r.squared.adj,
-    std_errors = as.numeric(model$std.errors),
+    r_squared_adj = if (!is.null(model$r.squared.adj)) model$r.squared.adj else model$r.squared,
+    std_errors = if (!is.null(model$std.errors)) as.numeric(model$std.errors) else rep(0, model$ncomp + 1L),
     ncomp = as.integer(model$ncomp),
     coefficients = as.numeric(model$coefficients),
-    residual_se = model$residual.se,
-    gcv = model$gcv,
+    residual_se = if (!is.null(model$residual.se)) model$residual.se else sqrt(sum(model$residuals^2) / max(n - model$ncomp - 1L, 1L)),
+    gcv = if (!is.null(model$gcv)) model$gcv else 0,
     fpca_mean = as.numeric(model$.fpca_mean),
     fpca_rotation_data = as.numeric(model$.fpca_rotation),
     fpca_rotation_nrow = as.integer(nrow(model$.fpca_rotation)),

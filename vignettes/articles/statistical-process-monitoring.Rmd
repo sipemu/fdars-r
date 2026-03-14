@@ -13,6 +13,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r setup, include = FALSE}
+library(fdars)
+library(ggplot2)
+theme_set(theme_minimal())
+```
+
 ## Introduction
 
 Statistical Process Monitoring (SPM) extends classical control charts to
@@ -51,8 +57,7 @@ We simulate semiconductor wafer thickness profiles: each curve is a spectral
 measurement across the wafer surface. Phase I uses 200 in-control profiles;
 Phase II introduces a shift at observation 30.
 
-```{r simulate, eval = FALSE}
-library(fdars)
+```{r simulate}
 set.seed(42)
 
 m <- 50  # grid points
@@ -85,13 +90,18 @@ fd_ic <- fdata(X_ic, argvals = t_grid)
 fd_new <- fdata(X_new, argvals = t_grid)
 ```
 
+```{r plot-data}
+plot(fd_ic, main = "Phase I: In-Control Profiles",
+     xlab = "Measurement Position", ylab = "Thickness")
+```
+
 ## Phase I: Estimating Control Limits
 
 `spm.phase1()` performs FPCA on the in-control data, computes $T^2$ and SPE
 statistics for each training observation, and estimates control limits at
 significance level $\alpha$.
 
-```{r phase1, eval = FALSE}
+```{r phase1}
 chart <- spm.phase1(fd_ic, ncomp = 3, alpha = 0.05, seed = 42)
 print(chart)
 ```
@@ -105,18 +115,26 @@ The returned `spm.chart` object contains:
 - **Phase I statistics** — $T^2$ and SPE for each training observation
   (useful for checking that Phase I data is truly in-control)
 
+```{r phase1-plot}
+plot(chart)
+```
+
 ## Phase II: Online Monitoring
 
 Project new observations onto the Phase I principal components and compare
 to control limits:
 
-```{r phase2, eval = FALSE}
+```{r phase2}
 monitor <- spm.monitor(chart, fd_new)
 print(monitor)
 
 # Which observations triggered alarms?
 alarm_idx <- which(monitor$t2.alarm | monitor$spe.alarm)
 cat("Alarms at observations:", alarm_idx, "\n")
+```
+
+```{r phase2-plot}
+plot(monitor)
 ```
 
 The monitoring result contains:
@@ -135,7 +153,7 @@ The Exponentially Weighted Moving Average (EWMA) chart smooths the monitoring
 statistics over time, making it more sensitive to small, persistent shifts
 than the standard Shewhart-type chart:
 
-```{r ewma, eval = FALSE}
+```{r ewma}
 ewma_result <- spm.ewma(chart, fd_new, lambda = 0.2, alpha = 0.05)
 
 cat("EWMA T2 alarms:", sum(ewma_result$t2.alarm), "\n")
@@ -153,7 +171,7 @@ When multiple functional variables are measured simultaneously (e.g.,
 temperature, pressure, and flow rate profiles), Multivariate FPCA
 extracts joint modes of variation across all variables:
 
-```{r mfpca, eval = FALSE}
+```{r mfpca}
 # Simulate two correlated functional variables
 fd_var1 <- fdata(X_ic, argvals = t_grid)
 fd_var2 <- fdata(X_ic + matrix(rnorm(n_ic * m, sd = 0.5), n_ic, m),
@@ -171,11 +189,11 @@ can be used for multivariate SPM via `mf.spm.phase1()`.
 When an alarm fires, contribution analysis identifies *which* region of
 the curve or *which* variable caused the alarm:
 
-```{r contributions, eval = FALSE}
+```{r contributions}
 # T2 contributions show which PC scores are responsible
 t2_contrib <- spm.contributions(monitor$scores,
                                 chart$eigenvalues,
-                                chart$grid.sizes,
+                                grid.sizes = c(m),
                                 type = "t2")
 
 # Each row = observation, each column = variable/region contribution

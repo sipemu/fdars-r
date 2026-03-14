@@ -624,6 +624,82 @@ frcc.monitor <- function(chart, newdata, new.predictors) {
 }
 
 # =============================================================================
+# Plot methods
+# =============================================================================
+
+#' Plot an SPM Phase I control chart
+#'
+#' Displays T-squared and SPE statistics for Phase I observations with
+#' upper control limits.
+#'
+#' @param x An object of class \code{spm.chart}.
+#' @param ... Additional arguments (ignored).
+#' @export
+plot.spm.chart <- function(x, ...) {
+  n <- length(x$t2.phase1)
+  obs <- seq_len(n)
+
+  oldpar <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))
+  on.exit(par(oldpar))
+
+  # T2 chart
+  cols_t2 <- ifelse(x$t2.phase1 > x$t2.ucl, "#D55E00", "#4A90D9")
+  plot(obs, x$t2.phase1, type = "h", lwd = 2, col = cols_t2,
+       xlab = "Observation", ylab = expression(T^2),
+       main = "Phase I: Hotelling T-squared")
+  abline(h = x$t2.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
+  legend("topright", legend = paste("UCL =", format(x$t2.ucl, digits = 4)),
+         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
+
+  # SPE chart
+  cols_spe <- ifelse(x$spe.phase1 > x$spe.ucl, "#D55E00", "#2E8B57")
+  plot(obs, x$spe.phase1, type = "h", lwd = 2, col = cols_spe,
+       xlab = "Observation", ylab = "SPE",
+       main = "Phase I: Squared Prediction Error")
+  abline(h = x$spe.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
+  legend("topright", legend = paste("UCL =", format(x$spe.ucl, digits = 4)),
+         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
+
+  invisible(x)
+}
+
+#' Plot SPM Phase II monitoring results
+#'
+#' Displays T-squared and SPE monitoring statistics with upper control limits.
+#' Alarm observations are highlighted in red.
+#'
+#' @param x An object of class \code{spm.monitor}.
+#' @param ... Additional arguments (ignored).
+#' @export
+plot.spm.monitor <- function(x, ...) {
+  n <- length(x$t2)
+  obs <- seq_len(n)
+
+  oldpar <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))
+  on.exit(par(oldpar))
+
+  # T2 chart
+  cols_t2 <- ifelse(x$t2.alarm, "#D55E00", "#4A90D9")
+  plot(obs, x$t2, type = "h", lwd = 2, col = cols_t2,
+       xlab = "Observation", ylab = expression(T^2),
+       main = "Phase II Monitoring: T-squared")
+  abline(h = x$t2.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
+  legend("topright", legend = paste("UCL =", format(x$t2.ucl, digits = 4)),
+         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
+
+  # SPE chart
+  cols_spe <- ifelse(x$spe.alarm, "#D55E00", "#2E8B57")
+  plot(obs, x$spe, type = "h", lwd = 2, col = cols_spe,
+       xlab = "Observation", ylab = "SPE",
+       main = "Phase II Monitoring: SPE")
+  abline(h = x$spe.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
+  legend("topright", legend = paste("UCL =", format(x$spe.ucl, digits = 4)),
+         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
+
+  invisible(x)
+}
+
+# =============================================================================
 # Print methods
 # =============================================================================
 
