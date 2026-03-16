@@ -621,52 +621,41 @@ scale_minmax.irregFdata <- function(fdataobj, min = 0, max = 1) {
 
 #' Plot method for irregFdata objects
 #' @param x An irregFdata object.
-#' @param ... Additional arguments passed to \code{plot}.
-#' @param col Colors for curves.
-#' @param lty Line type.
-#' @param lwd Line width.
-#' @param main Plot title.
-#' @param xlab X-axis label.
-#' @param ylab Y-axis label.
-#' @param add Logical. If TRUE, add to existing plot.
-#' @param alpha Transparency for many curves.
-#' @return Invisibly returns the input object \code{x}.
+#' @param ... Additional arguments (ignored).
+#' @param alpha Transparency for lines.
+#' @return A \code{ggplot} object.
 #' @export
-plot.irregFdata <- function(x, ..., col = NULL, lty = 1, lwd = 1,
-                             main = NULL, xlab = NULL, ylab = NULL,
-                             add = FALSE, alpha = 0.7) {
-  if (is.null(main)) main <- x$names$main
-  if (is.null(xlab)) xlab <- x$names$xlab
-  if (is.null(ylab)) ylab <- x$names$ylab
-
+plot.irregFdata <- function(x, ..., alpha = 0.7) {
   n <- x$n
-  if (is.null(col)) {
-    if (n <= 10) {
-      col <- seq_len(n)
-    } else {
-      # Use semi-transparent gray for many curves
-      col <- rgb(0.3, 0.3, 0.3, alpha = alpha)
-    }
+  df_list <- lapply(seq_len(n), function(i) {
+    data.frame(
+      t = x$argvals[[i]],
+      X = x$X[[i]],
+      id = x$id[i],
+      stringsAsFactors = FALSE
+    )
+  })
+  df <- do.call(rbind, df_list)
+  df$id <- factor(df$id, levels = x$id)
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(
+    x = .data$t, y = .data$X, group = .data$id
+  )) +
+    ggplot2::geom_line(alpha = alpha) +
+    ggplot2::geom_point(size = 0.5, alpha = alpha) +
+    ggplot2::labs(
+      title = x$names$main,
+      x = x$names$xlab,
+      y = x$names$ylab
+    ) +
+    ggplot2::theme_minimal()
+
+  if (n <= 10) {
+    p <- p + ggplot2::aes(color = .data$id) +
+      ggplot2::guides(color = ggplot2::guide_legend(title = "Observation"))
   }
-  col <- rep_len(col, n)
 
-  # Determine plot range
-  all_x <- unlist(x$argvals)
-  all_y <- unlist(x$X)
-  xlim <- range(all_x, na.rm = TRUE)
-  ylim <- range(all_y, na.rm = TRUE)
-
-  if (!add) {
-    plot(NULL, xlim = xlim, ylim = ylim, main = main,
-         xlab = xlab, ylab = ylab, ...)
-  }
-
-  for (i in seq_len(n)) {
-    lines(x$argvals[[i]], x$X[[i]], col = col[i], lty = lty, lwd = lwd)
-    points(x$argvals[[i]], x$X[[i]], col = col[i], pch = 16, cex = 0.5)
-  }
-
-  invisible(x)
+  p
 }
 
 #' Autoplot method for irregFdata objects

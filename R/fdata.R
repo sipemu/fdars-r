@@ -2772,7 +2772,7 @@ print.group.distance <- function(x, digits = 3, ...) {
 #'   available matrix from the group.distance object.
 #' @param ... Additional arguments.
 #'
-#' @return A ggplot object (for heatmap) or NULL (for dendrogram, uses base graphics).
+#' @return A ggplot object.
 #' @export
 plot.group.distance <- function(x, type = c("heatmap", "dendrogram"),
                                 which = NULL, ...) {
@@ -2827,18 +2827,70 @@ plot.group.distance <- function(x, type = c("heatmap", "dendrogram"),
     p
 
   } else {
-    # Dendrogram using base R
+    # Dendrogram using ggplot2
     if (which == "depth") {
-      # Convert similarity to distance for clustering
       dist_mat <- 1 - mat
     } else {
       dist_mat <- mat
     }
 
     hc <- hclust(as.dist(dist_mat), method = "complete")
-    plot(hc, main = paste("Hierarchical Clustering -", which),
-         xlab = "Group", ylab = "Distance")
-    invisible(NULL)
+    dend_data <- as.dendrogram(hc)
+
+    # Extract segment data from dendrogram
+    .dend_segments <- function(d, ht = attr(d, "height"), pos = NULL) {
+      if (is.leaf(d)) {
+        return(list(segments = NULL, leaf_pos = attr(d, "label"),
+                    x = if (is.null(pos)) 1 else pos))
+      }
+      members <- attr(d, "members")
+      left <- d[[1]]; right <- d[[2]]
+      n_left <- attr(left, "members") %||% 1L
+      n_right <- attr(right, "members") %||% 1L
+      start <- if (is.null(pos)) 1 else pos
+      left_res <- .dend_segments(left, attr(left, "height"), start)
+      right_res <- .dend_segments(right, attr(right, "height"),
+                                   start + n_left)
+      x_left <- left_res$x; x_right <- right_res$x
+      segs <- rbind(
+        left_res$segments, right_res$segments,
+        data.frame(x = x_left, y = attr(left, "height"),
+                   xend = x_left, yend = ht),
+        data.frame(x = x_right, y = attr(right, "height"),
+                   xend = x_right, yend = ht),
+        data.frame(x = x_left, y = ht, xend = x_right, yend = ht)
+      )
+      list(segments = segs,
+           x = (x_left + x_right) / 2)
+    }
+
+    seg_info <- .dend_segments(dend_data)
+    seg_df <- seg_info$segments
+    leaf_labels <- labels(hc)
+    leaf_x <- seq_along(leaf_labels)
+    label_df <- data.frame(x = leaf_x, label = leaf_labels[hc$order])
+
+    p <- ggplot2::ggplot() +
+      ggplot2::geom_segment(
+        data = seg_df,
+        ggplot2::aes(x = .data$x, y = .data$y,
+                     xend = .data$xend, yend = .data$yend),
+        color = "#4A4A4A"
+      ) +
+      ggplot2::scale_x_continuous(
+        breaks = label_df$x, labels = label_df$label
+      ) +
+      ggplot2::labs(
+        title = paste("Hierarchical Clustering -", which),
+        x = "Group", y = "Distance"
+      ) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        panel.grid.major.x = ggplot2::element_blank(),
+        panel.grid.minor.x = ggplot2::element_blank()
+      )
+
+    p
   }
 }
 

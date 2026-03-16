@@ -637,30 +637,55 @@ frcc.monitor <- function(chart, newdata, new.predictors) {
 #' @export
 plot.spm.chart <- function(x, ...) {
   n <- length(x$t2.phase1)
-  obs <- seq_len(n)
+  df <- data.frame(
+    obs = rep(seq_len(n), 2),
+    value = c(x$t2.phase1, x$spe.phase1),
+    panel = factor(
+      rep(c("Hotelling T\u00b2", "Squared Prediction Error"), each = n),
+      levels = c("Hotelling T\u00b2", "Squared Prediction Error")
+    ),
+    ucl = rep(c(x$t2.ucl, x$spe.ucl), each = n)
+  )
+  df$alarm <- df$value > df$ucl
 
-  oldpar <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))
-  on.exit(par(oldpar))
+  ucl_df <- data.frame(
+    panel = factor(
+      c("Hotelling T\u00b2", "Squared Prediction Error"),
+      levels = c("Hotelling T\u00b2", "Squared Prediction Error")
+    ),
+    ucl = c(x$t2.ucl, x$spe.ucl),
+    label = paste("UCL =", format(c(x$t2.ucl, x$spe.ucl), digits = 4))
+  )
 
-  # T2 chart
-  cols_t2 <- ifelse(x$t2.phase1 > x$t2.ucl, "#D55E00", "#4A90D9")
-  plot(obs, x$t2.phase1, type = "h", lwd = 2, col = cols_t2,
-       xlab = "Observation", ylab = expression(T^2),
-       main = "Phase I: Hotelling T-squared")
-  abline(h = x$t2.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
-  legend("topright", legend = paste("UCL =", format(x$t2.ucl, digits = 4)),
-         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$obs, y = .data$value)) +
+    ggplot2::geom_segment(
+      ggplot2::aes(xend = .data$obs, y = 0, yend = .data$value,
+                   color = .data$alarm),
+      linewidth = 0.8
+    ) +
+    ggplot2::geom_hline(
+      data = ucl_df,
+      ggplot2::aes(yintercept = .data$ucl),
+      linetype = "dashed", color = "#D55E00", linewidth = 0.7
+    ) +
+    ggplot2::geom_text(
+      data = ucl_df,
+      ggplot2::aes(x = -Inf, y = .data$ucl, label = .data$label),
+      hjust = -0.05, vjust = -0.5, size = 3, color = "#D55E00"
+    ) +
+    ggplot2::scale_color_manual(
+      values = c("FALSE" = "#4A90D9", "TRUE" = "#D55E00"),
+      guide = "none"
+    ) +
+    ggplot2::facet_wrap(~ .data$panel, ncol = 1, scales = "free_y") +
+    ggplot2::labs(
+      title = "Phase I Control Chart",
+      x = "Observation", y = "Statistic"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(strip.text = ggplot2::element_text(face = "bold"))
 
-  # SPE chart
-  cols_spe <- ifelse(x$spe.phase1 > x$spe.ucl, "#D55E00", "#2E8B57")
-  plot(obs, x$spe.phase1, type = "h", lwd = 2, col = cols_spe,
-       xlab = "Observation", ylab = "SPE",
-       main = "Phase I: Squared Prediction Error")
-  abline(h = x$spe.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
-  legend("topright", legend = paste("UCL =", format(x$spe.ucl, digits = 4)),
-         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
-
-  invisible(x)
+  p
 }
 
 #' Plot SPM Phase II monitoring results
@@ -673,30 +698,55 @@ plot.spm.chart <- function(x, ...) {
 #' @export
 plot.spm.monitor <- function(x, ...) {
   n <- length(x$t2)
-  obs <- seq_len(n)
+  df <- data.frame(
+    obs = rep(seq_len(n), 2),
+    value = c(x$t2, x$spe),
+    panel = factor(
+      rep(c("Hotelling T\u00b2", "Squared Prediction Error"), each = n),
+      levels = c("Hotelling T\u00b2", "Squared Prediction Error")
+    ),
+    ucl = rep(c(x$t2.ucl, x$spe.ucl), each = n),
+    alarm = c(x$t2.alarm, x$spe.alarm)
+  )
 
-  oldpar <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))
-  on.exit(par(oldpar))
+  ucl_df <- data.frame(
+    panel = factor(
+      c("Hotelling T\u00b2", "Squared Prediction Error"),
+      levels = c("Hotelling T\u00b2", "Squared Prediction Error")
+    ),
+    ucl = c(x$t2.ucl, x$spe.ucl),
+    label = paste("UCL =", format(c(x$t2.ucl, x$spe.ucl), digits = 4))
+  )
 
-  # T2 chart
-  cols_t2 <- ifelse(x$t2.alarm, "#D55E00", "#4A90D9")
-  plot(obs, x$t2, type = "h", lwd = 2, col = cols_t2,
-       xlab = "Observation", ylab = expression(T^2),
-       main = "Phase II Monitoring: T-squared")
-  abline(h = x$t2.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
-  legend("topright", legend = paste("UCL =", format(x$t2.ucl, digits = 4)),
-         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$obs, y = .data$value)) +
+    ggplot2::geom_segment(
+      ggplot2::aes(xend = .data$obs, y = 0, yend = .data$value,
+                   color = .data$alarm),
+      linewidth = 0.8
+    ) +
+    ggplot2::geom_hline(
+      data = ucl_df,
+      ggplot2::aes(yintercept = .data$ucl),
+      linetype = "dashed", color = "#D55E00", linewidth = 0.7
+    ) +
+    ggplot2::geom_text(
+      data = ucl_df,
+      ggplot2::aes(x = -Inf, y = .data$ucl, label = .data$label),
+      hjust = -0.05, vjust = -0.5, size = 3, color = "#D55E00"
+    ) +
+    ggplot2::scale_color_manual(
+      values = c("FALSE" = "#4A90D9", "TRUE" = "#D55E00"),
+      guide = "none"
+    ) +
+    ggplot2::facet_wrap(~ .data$panel, ncol = 1, scales = "free_y") +
+    ggplot2::labs(
+      title = "Phase II Monitoring",
+      x = "Observation", y = "Statistic"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(strip.text = ggplot2::element_text(face = "bold"))
 
-  # SPE chart
-  cols_spe <- ifelse(x$spe.alarm, "#D55E00", "#2E8B57")
-  plot(obs, x$spe, type = "h", lwd = 2, col = cols_spe,
-       xlab = "Observation", ylab = "SPE",
-       main = "Phase II Monitoring: SPE")
-  abline(h = x$spe.ucl, col = "#D55E00", lty = 2, lwd = 1.5)
-  legend("topright", legend = paste("UCL =", format(x$spe.ucl, digits = 4)),
-         col = "#D55E00", lty = 2, bty = "n", cex = 0.8)
-
-  invisible(x)
+  p
 }
 
 # =============================================================================

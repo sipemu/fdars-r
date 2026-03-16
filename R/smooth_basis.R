@@ -172,36 +172,65 @@ print.smooth.basis <- function(x, ...) {
 #' @export
 plot.smooth.basis <- function(x, type = c("fit", "residuals", "gcv"), ...) {
   type <- match.arg(type)
+  argvals <- as.numeric(x$fdataobj$argvals)
+  n <- nrow(x$fdataobj$data)
+  m <- length(argvals)
 
   if (type == "fit") {
-    n <- nrow(x$fdataobj$data)
-    argvals <- x$fdataobj$argvals
-    cols <- grDevices::adjustcolor(rep("grey60", n), alpha.f = 0.3)
+    df_raw <- data.frame(
+      curve_id = rep(seq_len(n), each = m),
+      t = rep(argvals, n),
+      value = as.vector(t(x$fdataobj$data))
+    )
+    df_smooth <- data.frame(
+      curve_id = rep(seq_len(n), each = m),
+      t = rep(argvals, n),
+      value = as.vector(t(x$fitted$data))
+    )
 
-    plot(NULL, xlim = range(argvals), ylim = range(x$fdataobj$data),
-         xlab = x$fdataobj$names$xlab %||% "t",
-         ylab = x$fdataobj$names$ylab %||% "x(t)",
-         main = "Smooth Basis Fit", ...)
-    for (i in seq_len(n)) {
-      graphics::lines(argvals, x$fdataobj$data[i, ], col = cols[i])
-    }
-    for (i in seq_len(n)) {
-      graphics::lines(argvals, x$fitted$data[i, ], col = "steelblue", lwd = 0.5)
-    }
-    graphics::legend("topright", legend = c("Raw", "Smoothed"),
-                     col = c("grey60", "steelblue"), lty = 1, lwd = c(1, 1.5))
+    p <- ggplot2::ggplot() +
+      ggplot2::geom_line(
+        data = df_raw,
+        ggplot2::aes(x = .data$t, y = .data$value,
+                     group = .data$curve_id),
+        color = "grey60", alpha = 0.3
+      ) +
+      ggplot2::geom_line(
+        data = df_smooth,
+        ggplot2::aes(x = .data$t, y = .data$value,
+                     group = .data$curve_id),
+        color = "steelblue", linewidth = 0.5
+      ) +
+      ggplot2::labs(
+        title = "Smooth Basis Fit",
+        x = x$fdataobj$names$xlab %||% "t",
+        y = x$fdataobj$names$ylab %||% "x(t)"
+      ) +
+      ggplot2::theme_minimal()
+
+    return(p)
+
   } else if (type == "residuals") {
     resid <- x$fdataobj$data - x$fitted$data
-    argvals <- x$fdataobj$argvals
-    plot(NULL, xlim = range(argvals), ylim = range(resid),
-         xlab = x$fdataobj$names$xlab %||% "t",
-         ylab = "Residual",
-         main = "Smoothing Residuals", ...)
-    for (i in seq_len(nrow(resid))) {
-      graphics::lines(argvals, resid[i, ],
-                      col = grDevices::adjustcolor("steelblue", alpha.f = 0.3))
-    }
-    graphics::abline(h = 0, lty = 2)
+    df <- data.frame(
+      curve_id = rep(seq_len(n), each = m),
+      t = rep(argvals, n),
+      value = as.vector(t(resid))
+    )
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(
+      x = .data$t, y = .data$value, group = .data$curve_id
+    )) +
+      ggplot2::geom_line(color = "steelblue", alpha = 0.3) +
+      ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+      ggplot2::labs(
+        title = "Smoothing Residuals",
+        x = x$fdataobj$names$xlab %||% "t",
+        y = "Residual"
+      ) +
+      ggplot2::theme_minimal()
+
+    return(p)
   }
 
   invisible(x)

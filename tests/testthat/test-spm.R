@@ -280,7 +280,7 @@ test_that("plot.spm.chart runs without error", {
   fd <- .test_spm_data()
   chart <- spm.phase1(fd, ncomp = 3)
   pdf(NULL)  # suppress plot device
-  expect_invisible(plot(chart))
+  expect_no_error(plot(chart))
   dev.off()
 })
 
@@ -290,6 +290,6 @@ test_that("plot.spm.monitor runs without error", {
   new_fd <- .test_spm_data(n = 20, seed = 99)
   result <- spm.monitor(chart, new_fd)
   pdf(NULL)
-  expect_invisible(plot(result))
+  expect_no_error(plot(result))
   dev.off()
 })

@@ -47,40 +47,42 @@ regresses the scalar response on the shape of each curve.
 
 ## Simulating Data with Phase Variation
 
-We simulate a biomechanics-inspired scenario: 100 ground reaction force
-curves with both amplitude and phase variation. The scalar response (e.g.,
-vertical jump height) depends on the *shape* of the force curve, not its
-timing or scale.
+We simulate a biomechanics-inspired scenario: 200 force--time curves where
+each curve is a single bump (e.g., a ground reaction force impulse during
+a vertical jump). The bump's **location** varies across subjects (phase
+variation from different jump timings), but the scalar response --- vertical
+jump height --- depends on the bump's **width** (a shape feature that is
+invariant to when the jump occurred).
+
+This creates a challenging problem for standard FPCA-based regression: the
+first several principal components capture the dominant *phase* variation
+(where the bump is), not the *shape* variation (how wide it is). The shape
+signal is buried in higher-order components that are hard to select in
+practice.
 
 ```{r sim-data}
 set.seed(42)
 
-n <- 100
-m <- 80
+n <- 200
+m <- 60
 t_grid <- seq(0, 1, length.out = m)
 
 X <- matrix(0, n, m)
 y <- numeric(n)
 
 for (i in 1:n) {
-  # Shape variation: relative height of the two peaks
-  shape_param <- rnorm(1, 0, 0.5)
+  # Shape: bump width (this predicts jump height)
+  width_param <- rnorm(1, 0, 1)
+  width <- 0.06 + 0.015 * width_param
 
-  # Phase variation: random nonlinear warp
-  a <- runif(1, 0.6, 1.8)
-  b <- runif(1, 0.6, 1.8)
-  gamma <- pbeta(t_grid, a, b)
+  # Phase: bump center varies continuously (dominant variation)
+  center <- runif(1, 0.25, 0.75)
 
-  # Build the curve: shape variation + warp + noise
-  base <- 0.8 * exp(-40 * (t_grid - 0.3)^2) * (1 + 0.3 * shape_param) +
-          1.2 * exp(-30 * (t_grid - 0.7)^2) * (1 - 0.2 * shape_param)
+  X[i, ] <- exp(-(t_grid - center)^2 / (2 * width^2)) +
+            rnorm(m, sd = 0.015)
 
-  # Apply phase warp
-  X[i, ] <- approx(t_grid, base, xout = gamma, rule = 2)$y +
-            rnorm(m, sd = 0.03)
-
-  # Response depends on shape, not timing
-  y[i] <- 3 * shape_param + rnorm(1, sd = 0.5)
+  # Response depends only on width (shape), not center (phase)
+  y[i] <- 3 * width_param + rnorm(1, sd = 0.3)
 }
 
 fd <- fdata(X, argvals = t_grid)
@@ -90,6 +92,10 @@ fd <- fdata(X, argvals = t_grid)
 plot(fd, main = "Simulated Ground Reaction Force Curves",
      xlab = "Normalized Time", ylab = "Force (BW)")
 ```
+
+Note how the bumps are located at different positions along the time axis ---
+this is phase variation. The response $y$ depends only on bump *width*, a
+shape feature that standard FPCA mixes with phase.
 
 ## Fitting the Model
 
@@ -138,7 +144,7 @@ ggplot(df_scores, aes(x = score, y = y)) +
 ```{r predict-sos}
 # Hold-out evaluation
 set.seed(123)
-train_idx <- sample(n, 70)
+train_idx <- sample(n, 140)
 test_idx <- setdiff(1:n, train_idx)
 
 fd_train <- fd[train_idx, ]
@@ -159,13 +165,16 @@ cat("Test R2:", round(1 - sum((y_test - y_pred)^2) /
 
 ## Comparison with Other Methods
 
-We compare three regression approaches on our phase-variable data.
+We compare three regression approaches on our phase-variable data. The key
+question is: can each method extract the shape signal (bump width) when the
+dominant variation is phase (bump location)?
 
 ### Standard Regression (Ignoring Phase)
 
 `fregre.lm()` treats the raw (misaligned) curves as input. Because FPCA
 captures the dominant *phase* variation first, the shape signal that drives
-$y$ is buried in higher-order components.
+$y$ is buried in higher-order components. With a practical choice of 5
+components, fregre.lm struggles to find the signal.
 
 ```{r fit-standard}
 fit_std <- fregre.lm(fd_train, y_train, ncomp = 5)
@@ -176,11 +185,16 @@ cat("fregre.lm RMSE (test):",
     round(sqrt(mean((y_test - pred_std)^2)), 4), "\n")
 ```
 
+To understand *why* `fregre.lm()` fails, consider the FPCA decomposition:
+the first few eigenfunctions capture *where* the bump is (phase), not *how
+wide* it is (shape). The shape information only appears in higher-order
+components that are typically discarded.
+
 ### Elastic Regression (Alignment-Aware)
 
 `elastic.regression()` jointly aligns curves and fits a coefficient function.
-It captures amplitude variation after alignment, but does not extract a
-phase-invariant shape score.
+It captures amplitude variation after alignment but is not specifically
+designed to isolate shape features.
 
 ```{r fit-elastic}
 fit_elastic <- elastic.regression(fd_train, y_train, ncomp.beta = 5,
@@ -207,7 +221,7 @@ r2_test <- function(actual, predicted) {
 }
 
 comparison <- data.frame(
-  Method = c("fregre.lm (standard)",
+  Method = c("fregre.lm (ncomp=5)",
              "elastic.regression",
              "scalar.on.shape"),
   Handles_Phase = c("No", "Yes (alignment)", "Yes (shape score)"),
@@ -222,14 +236,22 @@ comparison <- data.frame(
 knitr::kable(comparison, caption = "Method comparison on phase-variable data")
 ```
 
+`scalar.on.shape()` achieves the best predictive accuracy because it directly
+targets the phase-invariant shape feature. Standard regression with 5
+components captures almost none of the signal, while elastic regression
+provides an intermediate result.
+
 ### Visualizing Predictions
 
 ```{r vis-predictions}
 df_pred <- data.frame(
   Observed = rep(y_test, 3),
   Predicted = c(pred_std, pred_elastic, pred_sos),
-  Method = rep(c("fregre.lm", "elastic.regression", "scalar.on.shape"),
-               each = length(y_test))
+  Method = factor(rep(c("fregre.lm (ncomp=5)", "elastic.regression",
+                         "scalar.on.shape"),
+                       each = length(y_test)),
+                  levels = c("fregre.lm (ncomp=5)", "elastic.regression",
+                             "scalar.on.shape"))
 )
 
 ggplot(df_pred, aes(x = Observed, y = Predicted)) +
@@ -239,6 +261,37 @@ ggplot(df_pred, aes(x = Observed, y = Predicted)) +
   labs(title = "Observed vs Predicted by Method",
        x = "Observed", y = "Predicted")
 ```
+
+### Why Standard Regression Fails
+
+To see why more components don't fully solve the problem for `fregre.lm()`,
+consider what happens as we increase `ncomp`:
+
+```{r ncomp-sweep}
+ncomp_vals <- c(3, 5, 8, 12)
+r2_sweep <- sapply(ncomp_vals, function(k) {
+  fit <- fregre.lm(fd_train, y_train, ncomp = k)
+  pred <- predict(fit, fd_test)
+  r2_test(y_test, pred)
+})
+
+df_sweep <- data.frame(ncomp = ncomp_vals, test_r2 = r2_sweep)
+ggplot(df_sweep, aes(x = ncomp, y = test_r2)) +
+  geom_line(color = "#4A90D9", linewidth = 1) +
+  geom_point(color = "#4A90D9", size = 3) +
+  geom_hline(yintercept = r2_test(y_test, pred_sos),
+             linetype = "dashed", color = "#D55E00") +
+  annotate("text", x = max(ncomp_vals), y = r2_test(y_test, pred_sos),
+           label = "scalar.on.shape", vjust = -0.5, color = "#D55E00") +
+  labs(title = "fregre.lm Performance vs Number of Components",
+       x = "Number of FPC Components", y = expression("Test R"^2)) +
+  ylim(-0.2, 1)
+```
+
+`fregre.lm()` eventually catches up with many components, but requires 8--12
+to begin matching `scalar.on.shape()`. In practice, selecting the right
+number of components is difficult, and using too many risks overfitting. The
+phase-invariant approach avoids this model selection problem entirely.
 
 ## Tuning Parameters
 

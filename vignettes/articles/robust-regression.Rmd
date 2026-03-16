@@ -65,8 +65,8 @@ OLS loss with a robust loss, solved via iteratively reweighted least squares
 We simulate a near-infrared (NIR) spectroscopy scenario: 200 absorbance
 spectra measured at 100 wavelengths, with a linear relationship between the
 spectra and a scalar property (e.g., moisture content). We then contaminate
-10% of the responses with large measurement errors to mimic real-world
-outliers.
+15% of the responses with large *one-sided* errors --- simulating systematic
+measurement faults such as detector saturation or sample mislabelling.
 
 ```{r simulate-data}
 set.seed(42)
@@ -77,41 +77,38 @@ m <- 100          # number of wavelength channels
 t_grid <- seq(900, 1700, length.out = m)   # NIR wavelength range (nm)
 
 # --- Generate smooth spectra ---
-# Each spectrum is a sum of three smooth components plus noise,
-# mimicking overlapping absorption bands.
+# Each spectrum is a sum of three smooth absorption bands plus noise.
+# The amplitude of each band varies across samples.
 X <- matrix(0, n, m)
+amp1 <- rnorm(n, 1.0, 0.5)   # dominant band at 1200 nm
+amp2 <- rnorm(n, 0.5, 0.15)  # secondary band at 1400 nm
+amp3 <- rnorm(n, 0.3, 0.08)  # minor band at 1600 nm
+
 for (i in 1:n) {
-  a1 <- rnorm(1, 1.0, 0.3)
-  a2 <- rnorm(1, 0.5, 0.2)
-  a3 <- rnorm(1, 0.3, 0.1)
-  X[i, ] <- a1 * dnorm(t_grid, 1200, 80) * 200 +
-            a2 * dnorm(t_grid, 1400, 60) * 200 +
-            a3 * dnorm(t_grid, 1600, 50) * 200 +
+  X[i, ] <- amp1[i] * dnorm(t_grid, 1200, 80) * 200 +
+            amp2[i] * dnorm(t_grid, 1400, 60) * 200 +
+            amp3[i] * dnorm(t_grid, 1600, 50) * 200 +
             rnorm(m, sd = 0.01)
 }
 
 fd <- fdata(X, argvals = t_grid)
 
-# --- True coefficient function ---
-# Response depends on the 1200 nm and 1400 nm absorption bands.
-beta_true <- 0.6 * dnorm(t_grid, 1200, 80) * 200 -
-             0.4 * dnorm(t_grid, 1400, 60) * 200
-
 # --- Clean response ---
-y_clean <- numeric(n)
-for (i in 1:n) {
-  y_clean[i] <- sum(beta_true * X[i, ]) / m + rnorm(1, sd = 0.3)
-}
+# Moisture content depends linearly on the 1200 nm and 1400 nm band amplitudes.
+y_clean <- 2.0 * amp1 - 1.5 * amp2 + rnorm(n, sd = 0.3)
 
-# --- Contaminated response (10% outliers) ---
+# --- Contaminated response (15% one-sided outliers) ---
+# Simulates detector saturation: affected readings are biased *upward*.
 y_contam <- y_clean
-n_outlier <- round(0.10 * n)   # 20 outliers
+n_outlier <- round(0.15 * n)   # 30 outliers
 outlier_idx <- sample(n, n_outlier)
-y_contam[outlier_idx] <- y_contam[outlier_idx] + rnorm(n_outlier, mean = 0, sd = 8)
+y_contam[outlier_idx] <- y_contam[outlier_idx] + runif(n_outlier, 5, 15)
 ```
 
-The contaminated observations have errors roughly 25 times larger than the
-noise standard deviation, simulating gross measurement mistakes.
+The contamination is one-sided (all positive), which is the worst case for OLS:
+the bias systematically shifts the coefficient estimates. Clean errors have
+$\sigma = 0.3$; outlier shifts range from 5 to 15 --- roughly 15--50 times
+the noise scale.
 
 ```{r plot-spectra}
 plot(fd, main = "NIR Absorbance Spectra",
@@ -150,9 +147,10 @@ cat("OLS R-squared (clean):", round(fit_ols_clean$r.squared, 4), "\n")
 cat("OLS R-squared (contaminated):", round(fit_ols_contam$r.squared, 4), "\n")
 ```
 
-On clean data, OLS performs well. On contaminated data, the 20 outliers pull
-the coefficient estimates away from their true values, inflating the residuals
-for *all* observations --- including the clean ones.
+On clean data, OLS performs well (R² > 0.9). On contaminated data, the 30
+one-sided outliers systematically bias the coefficient estimates, inflating
+the residuals for *all* observations --- even the clean ones. This is the
+hallmark of OLS fragility: outliers have unbounded influence.
 
 ## L1 (LAD) Regression
 

@@ -186,19 +186,99 @@ can be used for multivariate SPM via `mf.spm.phase1()`.
 
 ## Contribution Diagnostics
 
-When an alarm fires, contribution analysis identifies *which* region of
-the curve or *which* variable caused the alarm:
+When an alarm fires, the next question is: **what went wrong?** Contribution
+analysis decomposes the aggregate $T^2$ and SPE statistics into per-variable
+(or per-grid-region) contributions, pinpointing which part of the curve
+triggered the alarm.
 
-```{r contributions}
-# T2 contributions show which PC scores are responsible
+### T-squared Contributions
+
+$T^2$ contributions break down the Hotelling statistic into additive terms,
+one per principal component. A large contribution from PC $k$ means that the
+curve's score on the $k$-th eigenfunction is unusually far from the in-control
+mean. This tells you *which mode of variation* shifted:
+
+```{r contributions-t2}
+# T2 contributions: one value per PC per observation
 t2_contrib <- spm.contributions(monitor$scores,
                                 chart$eigenvalues,
                                 grid.sizes = c(m),
                                 type = "t2")
 
-# Each row = observation, each column = variable/region contribution
-cat("Contribution of PC1 to observation 35:", round(t2_contrib[35, 1], 3), "\n")
+# Identify the first alarming observation
+alarm_idx <- which(monitor$t2.alarm | monitor$spe.alarm)
+first_alarm <- alarm_idx[1]
+cat("First alarm at observation:", first_alarm, "\n")
+cat("T2 contributions (per PC):", round(t2_contrib[first_alarm, ], 3), "\n")
 ```
+
+```{r plot-t2-contrib}
+# Visualize T2 contributions for all monitoring observations
+n_mon <- nrow(t2_contrib)
+n_pc <- ncol(t2_contrib)
+df_t2 <- data.frame(
+  obs = rep(seq_len(n_mon), n_pc),
+  contribution = as.vector(t2_contrib),
+  pc = factor(rep(paste0("PC", seq_len(n_pc)), each = n_mon))
+)
+
+ggplot(df_t2, aes(x = obs, y = contribution, fill = pc)) +
+  geom_col(position = "stack", width = 1) +
+  geom_vline(xintercept = 29.5, linetype = "dashed", color = "red", linewidth = 0.5) +
+  annotate("text", x = 29.5, y = max(rowSums(t2_contrib)) * 0.9,
+           label = "Shift onset", hjust = 1.1, color = "red", size = 3) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = expression("T"^2 * " Contributions by Principal Component"),
+       x = "Monitoring Observation", y = expression("Contribution to T"^2),
+       fill = "Component") +
+  theme(legend.position = "bottom")
+```
+
+Since we injected a shift in the first eigenfunction direction ($\sin(2\pi t)$),
+PC 1 should dominate the $T^2$ contributions after the shift onset at
+observation 30.
+
+### Identifying the Dominant Component
+
+We can extract which principal component drives the alarm for each
+observation. This is especially useful for directing root-cause investigation:
+
+```{r dominant-pc}
+# Which PC has the largest T2 contribution per observation?
+dominant_pc <- apply(t2_contrib, 1, which.max)
+
+df_dom <- data.frame(
+  obs = seq_len(nrow(t2_contrib)),
+  dominant = factor(paste0("PC", dominant_pc)),
+  alarm = monitor$t2.alarm | monitor$spe.alarm
+)
+
+ggplot(df_dom, aes(x = obs, fill = dominant)) +
+  geom_bar(width = 1) +
+  geom_vline(xintercept = 29.5, linetype = "dashed", color = "red") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Dominant PC per Observation",
+       subtitle = "Which component drives the T\u00b2 statistic",
+       x = "Monitoring Observation", y = "Count",
+       fill = "Dominant PC") +
+  theme(legend.position = "bottom")
+```
+
+After the shift onset (observation 30), PC 1 dominates because we injected
+a shift aligned with the first eigenfunction ($\sin 2\pi t$).
+
+### Interpreting Contributions in Practice
+
+| Diagnostic | What it tells you | Typical action |
+|-----------|-------------------|----------------|
+| **T2 dominated by PC 1** | Shift in the dominant mode of variation | Check for process mean shift |
+| **T2 dominated by higher PCs** | Shift in a minor mode | Check for subtle process changes |
+| **SPE spike in a specific region** | New variation not in the model | Inspect that region for sensor fault |
+| **SPE uniformly elevated** | Global model inadequacy | Consider adding more PCs |
+
+In a multi-variable setting (using `mf.spm.phase1()`), the contributions are
+further broken down by variable, allowing you to identify which sensor or
+measurement channel is responsible for the alarm.
 
 ## Comparison of Methods
 
