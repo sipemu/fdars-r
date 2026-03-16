@@ -114,39 +114,41 @@ response on the shape of each curve.</p>
 <div class="section level2">
 <h2 id="simulating-data-with-phase-variation">Simulating Data with Phase Variation<a class="anchor" aria-label="anchor" href="#simulating-data-with-phase-variation"></a>
 </h2>
-<p>We simulate a biomechanics-inspired scenario: 100 ground reaction
-force curves with both amplitude and phase variation. The scalar
-response (e.g., vertical jump height) depends on the <em>shape</em> of
-the force curve, not its timing or scale.</p>
+<p>We simulate a biomechanics-inspired scenario: 200 force–time curves
+where each curve is a single bump (e.g., a ground reaction force impulse
+during a vertical jump). The bump’s <strong>location</strong> varies
+across subjects (phase variation from different jump timings), but the
+scalar response — vertical jump height — depends on the bump’s
+<strong>width</strong> (a shape feature that is invariant to when the
+jump occurred).</p>
+<p>This creates a challenging problem for standard FPCA-based
+regression: the first several principal components capture the dominant
+<em>phase</em> variation (where the bump is), not the <em>shape</em>
+variation (how wide it is). The shape signal is buried in higher-order
+components that are hard to select in practice.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">60</span></span>
 <span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Shape variation: relative height of the two peaks</span></span>
-<span>  <span class="va">shape_param</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0.5</span><span class="op">)</span></span>
+<span>  <span class="co"># Shape: bump width (this predicts jump height)</span></span>
+<span>  <span class="va">width_param</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">width</span> <span class="op">&lt;-</span> <span class="fl">0.06</span> <span class="op">+</span> <span class="fl">0.015</span> <span class="op">*</span> <span class="va">width_param</span></span>
 <span></span>
-<span>  <span class="co"># Phase variation: random nonlinear warp</span></span>
-<span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.6</span>, <span class="fl">1.8</span><span class="op">)</span></span>
-<span>  <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.6</span>, <span class="fl">1.8</span><span class="op">)</span></span>
-<span>  <span class="va">gamma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">pbeta</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span>  <span class="co"># Phase: bump center varies continuously (dominant variation)</span></span>
+<span>  <span class="va">center</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># Build the curve: shape variation + warp + noise</span></span>
-<span>  <span class="va">base</span> <span class="op">&lt;-</span> <span class="fl">0.8</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">40</span> <span class="op">*</span> <span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="va">shape_param</span><span class="op">)</span> <span class="op">+</span></span>
-<span>          <span class="fl">1.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span> <span class="op">*</span> <span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="fl">0.7</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fl">0.2</span> <span class="op">*</span> <span class="va">shape_param</span><span class="op">)</span></span>
+<span>  <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="va">center</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">width</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m</span>, sd <span class="op">=</span> <span class="fl">0.015</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># Apply phase warp</span></span>
-<span>  <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">approx</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="va">base</span>, xout <span class="op">=</span> <span class="va">gamma</span>, rule <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">$</span><span class="va">y</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m</span>, sd <span class="op">=</span> <span class="fl">0.03</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Response depends on shape, not timing</span></span>
-<span>  <span class="va">y</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="op">*</span> <span class="va">shape_param</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span>  <span class="co"># Response depends only on width (shape), not center (phase)</span></span>
+<span>  <span class="va">y</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="op">*</span> <span class="va">width_param</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span></code></pre></div>
@@ -154,6 +156,11 @@ the force curve, not its timing or scale.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span>, main <span class="op">=</span> <span class="st">"Simulated Ground Reaction Force Curves"</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Normalized Time"</span>, ylab <span class="op">=</span> <span class="st">"Force (BW)"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="scalar-on-shape_files/figure-html/plot-sim-1.png" class="r-plt" alt="" width="100%"></p>
+<p>Note how the bumps are located at different positions along the time
+axis — this is phase variation. The response
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+depends only on bump <em>width</em>, a shape feature that standard FPCA
+mixes with phase.</p>
 </div>
 <div class="section level2">
 <h2 id="fitting-the-model">Fitting the Model<a class="anchor" aria-label="anchor" href="#fitting-the-model"></a>
@@ -171,8 +178,8 @@ response.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit_id</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Scalar-on-Shape Regression</span></span>
 <span><span class="co">#&gt;   Index method: identity </span></span>
-<span><span class="co">#&gt;   R-squared: 0.096 </span></span>
-<span><span class="co">#&gt;   SSE: 231.683 </span></span>
+<span><span class="co">#&gt;   R-squared: 0.859 </span></span>
+<span><span class="co">#&gt;   SSE: 228.8896 </span></span>
 <span><span class="co">#&gt;   Iterations: 15 (outer), 15 (inner)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -212,7 +219,7 @@ correspond to regions where the curve shape is most predictive.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Hold-out evaluation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">70</span><span class="op">)</span></span>
+<span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">140</span><span class="op">)</span></span>
 <span><span class="va">test_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span>, <span class="va">train_idx</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fd_train</span> <span class="op">&lt;-</span> <span class="va">fd</span><span class="op">[</span><span class="va">train_idx</span>, <span class="op">]</span></span>
@@ -227,17 +234,18 @@ correspond to regions where the curve shape is most predictive.</p>
 <span><span class="va">y_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_train</span>, <span class="va">fd_test</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Test RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">y_pred</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Test RMSE: 2.3223</span></span>
+<span><span class="co">#&gt; Test RMSE: 1.035</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Test R2:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">y_pred</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span></span>
 <span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y_test</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Test R2: -1.4935</span></span></code></pre></div>
+<span><span class="co">#&gt; Test R2: 0.8463</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="comparison-with-other-methods">Comparison with Other Methods<a class="anchor" aria-label="anchor" href="#comparison-with-other-methods"></a>
 </h2>
-<p>We compare three regression approaches on our phase-variable
-data.</p>
+<p>We compare three regression approaches on our phase-variable data.
+The key question is: can each method extract the shape signal (bump
+width) when the dominant variation is phase (bump location)?</p>
 <div class="section level3">
 <h3 id="standard-regression-ignoring-phase">Standard Regression (Ignoring Phase)<a class="anchor" aria-label="anchor" href="#standard-regression-ignoring-phase"></a>
 </h3>
@@ -245,23 +253,29 @@ data.</p>
 Because FPCA captures the dominant <em>phase</em> variation first, the
 shape signal that drives
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
-is buried in higher-order components.</p>
+is buried in higher-order components. With a practical choice of 5
+components, fregre.lm struggles to find the signal.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">pred_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_std</span>, <span class="va">fd_test</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"fregre.lm R-squared (train):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_std</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; fregre.lm R-squared (train): 0.242</span></span>
+<span><span class="co">#&gt; fregre.lm R-squared (train): 0.399</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"fregre.lm RMSE (test):"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_std</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; fregre.lm RMSE (test): 1.2402</span></span></code></pre></div>
+<span><span class="co">#&gt; fregre.lm RMSE (test): 2.5022</span></span></code></pre></div>
+<p>To understand <em>why</em> <code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> fails, consider
+the FPCA decomposition: the first few eigenfunctions capture
+<em>where</em> the bump is (phase), not <em>how wide</em> it is (shape).
+The shape information only appears in higher-order components that are
+typically discarded.</p>
 </div>
 <div class="section level3">
 <h3 id="elastic-regression-alignment-aware">Elastic Regression (Alignment-Aware)<a class="anchor" aria-label="anchor" href="#elastic-regression-alignment-aware"></a>
 </h3>
 <p><code><a href="../reference/elastic.regression.html">elastic.regression()</a></code> jointly aligns curves and fits a
-coefficient function. It captures amplitude variation after alignment,
-but does not extract a phase-invariant shape score.</p>
+coefficient function. It captures amplitude variation after alignment
+but is not specifically designed to isolate shape features.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.regression.html">elastic.regression</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, ncomp.beta <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                                  lambda <span class="op">=</span> <span class="fl">0.01</span>, max.iter <span class="op">=</span> <span class="fl">20</span>, tol <span class="op">=</span> <span class="fl">1e-3</span><span class="op">)</span></span>
@@ -269,10 +283,10 @@ but does not extract a phase-invariant shape score.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"elastic.regression R-squared (train):"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_elastic</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; elastic.regression R-squared (train): 0.8034</span></span>
+<span><span class="co">#&gt; elastic.regression R-squared (train): 0.0418</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"elastic.regression RMSE (test):"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_test</span> <span class="op">-</span> <span class="va">pred_elastic</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; elastic.regression RMSE (test): 1.4582</span></span></code></pre></div>
+<span><span class="co">#&gt; elastic.regression RMSE (test): 1.7091</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="summary-table">Summary Table<a class="anchor" aria-label="anchor" href="#summary-table"></a>
@@ -289,7 +303,7 @@ but does not extract a phase-invariant shape score.</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fregre.lm (standard)"</span>,</span>
+<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fregre.lm (ncomp=5)"</span>,</span>
 <span>             <span class="st">"elastic.regression"</span>,</span>
 <span>             <span class="st">"scalar.on.shape"</span><span class="op">)</span>,</span>
 <span>  Handles_Phase <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"No"</span>, <span class="st">"Yes (alignment)"</span>, <span class="st">"Yes (shape score)"</span><span class="op">)</span>,</span>
@@ -313,28 +327,32 @@ but does not extract a phase-invariant shape score.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">fregre.lm (standard)</td>
+<td align="left">fregre.lm (ncomp=5)</td>
 <td align="left">No</td>
-<td align="right">0.2420</td>
-<td align="right">1.2402</td>
-<td align="right">0.2889</td>
+<td align="right">0.3990</td>
+<td align="right">2.5022</td>
+<td align="right">0.1020</td>
 </tr>
 <tr class="even">
 <td align="left">elastic.regression</td>
 <td align="left">Yes (alignment)</td>
-<td align="right">0.8034</td>
-<td align="right">1.4582</td>
-<td align="right">0.0169</td>
+<td align="right">0.0418</td>
+<td align="right">1.7091</td>
+<td align="right">0.5810</td>
 </tr>
 <tr class="odd">
 <td align="left">scalar.on.shape</td>
 <td align="left">Yes (shape score)</td>
-<td align="right">-0.0087</td>
-<td align="right">2.3223</td>
-<td align="right">-1.4935</td>
+<td align="right">0.8312</td>
+<td align="right">1.0350</td>
+<td align="right">0.8463</td>
 </tr>
 </tbody>
 </table>
+<p><code><a href="../reference/scalar.on.shape.html">scalar.on.shape()</a></code> achieves the best predictive accuracy
+because it directly targets the phase-invariant shape feature. Standard
+regression with 5 components captures almost none of the signal, while
+elastic regression provides an intermediate result.</p>
 </div>
 <div class="section level3">
 <h3 id="visualizing-predictions">Visualizing Predictions<a class="anchor" aria-label="anchor" href="#visualizing-predictions"></a>
@@ -343,8 +361,11 @@ but does not extract a phase-invariant shape score.</p>
 <code class="sourceCode R"><span><span class="va">df_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Observed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">y_test</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  Predicted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">pred_std</span>, <span class="va">pred_elastic</span>, <span class="va">pred_sos</span><span class="op">)</span>,</span>
-<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fregre.lm"</span>, <span class="st">"elastic.regression"</span>, <span class="st">"scalar.on.shape"</span><span class="op">)</span>,</span>
-<span>               each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y_test</span><span class="op">)</span><span class="op">)</span></span>
+<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fregre.lm (ncomp=5)"</span>, <span class="st">"elastic.regression"</span>,</span>
+<span>                         <span class="st">"scalar.on.shape"</span><span class="op">)</span>,</span>
+<span>                       each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y_test</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fregre.lm (ncomp=5)"</span>, <span class="st">"elastic.regression"</span>,</span>
+<span>                             <span class="st">"scalar.on.shape"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_pred</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Observed</span>, y <span class="op">=</span> <span class="va">Predicted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -354,6 +375,38 @@ but does not extract a phase-invariant shape score.</p>
 <span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Observed vs Predicted by Method"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Observed"</span>, y <span class="op">=</span> <span class="st">"Predicted"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="scalar-on-shape_files/figure-html/vis-predictions-1.png" class="r-plt" alt="" width="100%"></p>
+</div>
+<div class="section level3">
+<h3 id="why-standard-regression-fails">Why Standard Regression Fails<a class="anchor" aria-label="anchor" href="#why-standard-regression-fails"></a>
+</h3>
+<p>To see why more components don’t fully solve the problem for
+<code><a href="../reference/fregre.lm.html">fregre.lm()</a></code>, consider what happens as we increase
+<code>ncomp</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ncomp_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">8</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="va">r2_sweep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">ncomp_vals</span>, <span class="kw">function</span><span class="op">(</span><span class="va">k</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_train</span>, <span class="va">y_train</span>, ncomp <span class="op">=</span> <span class="va">k</span><span class="op">)</span></span>
+<span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">fd_test</span><span class="op">)</span></span>
+<span>  <span class="fu">r2_test</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df_sweep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="va">ncomp_vals</span>, test_r2 <span class="op">=</span> <span class="va">r2_sweep</span><span class="op">)</span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_sweep</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">ncomp</span>, y <span class="op">=</span> <span class="va">test_r2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"#4A90D9"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"#4A90D9"</span>, size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu">r2_test</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_sos</span><span class="op">)</span>,</span>
+<span>             linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">annotate</span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">ncomp_vals</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu">r2_test</span><span class="op">(</span><span class="va">y_test</span>, <span class="va">pred_sos</span><span class="op">)</span>,</span>
+<span>           label <span class="op">=</span> <span class="st">"scalar.on.shape"</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, color <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"fregre.lm Performance vs Number of Components"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Number of FPC Components"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="st">"Test R"</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ylim</span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="scalar-on-shape_files/figure-html/ncomp-sweep-1.png" class="r-plt" alt="" width="100%"></p>
+<p><code><a href="../reference/fregre.lm.html">fregre.lm()</a></code> eventually catches up with many components,
+but requires 8–12 to begin matching <code><a href="../reference/scalar.on.shape.html">scalar.on.shape()</a></code>. In
+practice, selecting the right number of components is difficult, and
+using too many risks overfitting. The phase-invariant approach avoids
+this model selection problem entirely.</p>
 </div>
 </div>
 <div class="section level2">

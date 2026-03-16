@@ -307,18 +307,135 @@ which can be used for multivariate SPM via
 <div class="section level2">
 <h2 id="contribution-diagnostics">Contribution Diagnostics<a class="anchor" aria-label="anchor" href="#contribution-diagnostics"></a>
 </h2>
-<p>When an alarm fires, contribution analysis identifies <em>which</em>
-region of the curve or <em>which</em> variable caused the alarm:</p>
+<p>When an alarm fires, the next question is: <strong>what went
+wrong?</strong> Contribution analysis decomposes the aggregate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>T</mi><mn>2</mn></msup><annotation encoding="application/x-tex">T^2</annotation></semantics></math>
+and SPE statistics into per-variable (or per-grid-region) contributions,
+pinpointing which part of the curve triggered the alarm.</p>
+<div class="section level3">
+<h3 id="t-squared-contributions">T-squared Contributions<a class="anchor" aria-label="anchor" href="#t-squared-contributions"></a>
+</h3>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>T</mi><mn>2</mn></msup><annotation encoding="application/x-tex">T^2</annotation></semantics></math>
+contributions break down the Hotelling statistic into additive terms,
+one per principal component. A large contribution from PC
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+means that the curve’s score on the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th
+eigenfunction is unusually far from the in-control mean. This tells you
+<em>which mode of variation</em> shifted:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># T2 contributions show which PC scores are responsible</span></span>
+<code class="sourceCode R"><span><span class="co"># T2 contributions: one value per PC per observation</span></span>
 <span><span class="va">t2_contrib</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.contributions.html">spm.contributions</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">$</span><span class="va">scores</span>,</span>
 <span>                                <span class="va">chart</span><span class="op">$</span><span class="va">eigenvalues</span>,</span>
 <span>                                grid.sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>,</span>
 <span>                                type <span class="op">=</span> <span class="st">"t2"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Each row = observation, each column = variable/region contribution</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Contribution of PC1 to observation 35:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">[</span><span class="fl">35</span>, <span class="fl">1</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Contribution of PC1 to observation 35: 2.07</span></span></code></pre></div>
+<span><span class="co"># Identify the first alarming observation</span></span>
+<span><span class="va">alarm_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">$</span><span class="va">t2.alarm</span> <span class="op">|</span> <span class="va">monitor</span><span class="op">$</span><span class="va">spe.alarm</span><span class="op">)</span></span>
+<span><span class="va">first_alarm</span> <span class="op">&lt;-</span> <span class="va">alarm_idx</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"First alarm at observation:"</span>, <span class="va">first_alarm</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; First alarm at observation: 4</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"T2 contributions (per PC):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">[</span><span class="va">first_alarm</span>, <span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; T2 contributions (per PC): 10.813</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Visualize T2 contributions for all monitoring observations</span></span>
+<span><span class="va">n_mon</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">)</span></span>
+<span><span class="va">n_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">)</span></span>
+<span><span class="va">df_t2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_mon</span><span class="op">)</span>, <span class="va">n_pc</span><span class="op">)</span>,</span>
+<span>  contribution <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">)</span>,</span>
+<span>  pc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PC"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_pc</span><span class="op">)</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">n_mon</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_t2</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">obs</span>, y <span class="op">=</span> <span class="va">contribution</span>, fill <span class="op">=</span> <span class="va">pc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span>, width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">29.5</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">annotate</span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">29.5</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.9</span>,</span>
+<span>           label <span class="op">=</span> <span class="st">"Shift onset"</span>, hjust <span class="op">=</span> <span class="fl">1.1</span>, color <span class="op">=</span> <span class="st">"red"</span>, size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="st">"T"</span><span class="op">^</span><span class="fl">2</span> <span class="op">*</span> <span class="st">" Contributions by Principal Component"</span><span class="op">)</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Monitoring Observation"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="st">"Contribution to T"</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>       fill <span class="op">=</span> <span class="st">"Component"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="statistical-process-monitoring_files/figure-html/plot-t2-contrib-1.png" class="r-plt" alt="" width="100%"></p>
+<p>Since we injected a shift in the first eigenfunction direction
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>sin</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mi>π</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\sin(2\pi t)</annotation></semantics></math>),
+PC 1 should dominate the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>T</mi><mn>2</mn></msup><annotation encoding="application/x-tex">T^2</annotation></semantics></math>
+contributions after the shift onset at observation 30.</p>
+</div>
+<div class="section level3">
+<h3 id="identifying-the-dominant-component">Identifying the Dominant Component<a class="anchor" aria-label="anchor" href="#identifying-the-dominant-component"></a>
+</h3>
+<p>We can extract which principal component drives the alarm for each
+observation. This is especially useful for directing root-cause
+investigation:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Which PC has the largest T2 contribution per observation?</span></span>
+<span><span class="va">dominant_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">t2_contrib</span>, <span class="fl">1</span>, <span class="va">which.max</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df_dom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  dominant <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PC"</span>, <span class="va">dominant_pc</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  alarm <span class="op">=</span> <span class="va">monitor</span><span class="op">$</span><span class="va">t2.alarm</span> <span class="op">|</span> <span class="va">monitor</span><span class="op">$</span><span class="va">spe.alarm</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_dom</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">obs</span>, fill <span class="op">=</span> <span class="va">dominant</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_bar</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">29.5</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Dominant PC per Observation"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Which component drives the T\u00b2 statistic"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Monitoring Observation"</span>, y <span class="op">=</span> <span class="st">"Count"</span>,</span>
+<span>       fill <span class="op">=</span> <span class="st">"Dominant PC"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="statistical-process-monitoring_files/figure-html/dominant-pc-1.png" class="r-plt" alt="" width="100%"></p>
+<p>After the shift onset (observation 30), PC 1 dominates because we
+injected a shift aligned with the first eigenfunction
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>sin</mo><mn>2</mn><mi>π</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\sin 2\pi t</annotation></semantics></math>).</p>
+</div>
+<div class="section level3">
+<h3 id="interpreting-contributions-in-practice">Interpreting Contributions in Practice<a class="anchor" aria-label="anchor" href="#interpreting-contributions-in-practice"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="23%">
+<col width="41%">
+<col width="34%">
+</colgroup>
+<thead><tr class="header">
+<th>Diagnostic</th>
+<th>What it tells you</th>
+<th>Typical action</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>T2 dominated by PC 1</strong></td>
+<td>Shift in the dominant mode of variation</td>
+<td>Check for process mean shift</td>
+</tr>
+<tr class="even">
+<td><strong>T2 dominated by higher PCs</strong></td>
+<td>Shift in a minor mode</td>
+<td>Check for subtle process changes</td>
+</tr>
+<tr class="odd">
+<td><strong>SPE spike in a specific region</strong></td>
+<td>New variation not in the model</td>
+<td>Inspect that region for sensor fault</td>
+</tr>
+<tr class="even">
+<td><strong>SPE uniformly elevated</strong></td>
+<td>Global model inadequacy</td>
+<td>Consider adding more PCs</td>
+</tr>
+</tbody>
+</table>
+<p>In a multi-variable setting (using <code>mf.spm.phase1()</code>), the
+contributions are further broken down by variable, allowing you to
+identify which sensor or measurement channel is responsible for the
+alarm.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="comparison-of-methods">Comparison of Methods<a class="anchor" aria-label="anchor" href="#comparison-of-methods"></a>

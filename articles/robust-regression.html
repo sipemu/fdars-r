@@ -155,8 +155,9 @@ it retains 95% asymptotic efficiency under Gaussian errors.</li>
 <p>We simulate a near-infrared (NIR) spectroscopy scenario: 200
 absorbance spectra measured at 100 wavelengths, with a linear
 relationship between the spectra and a scalar property (e.g., moisture
-content). We then contaminate 10% of the responses with large
-measurement errors to mimic real-world outliers.</p>
+content). We then contaminate 15% of the responses with large
+<em>one-sided</em> errors — simulating systematic measurement faults
+such as detector saturation or sample mislabelling.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
@@ -166,40 +167,38 @@ measurement errors to mimic real-world outliers.</p>
 <span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">900</span>, <span class="fl">1700</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span>   <span class="co"># NIR wavelength range (nm)</span></span>
 <span></span>
 <span><span class="co"># --- Generate smooth spectra ---</span></span>
-<span><span class="co"># Each spectrum is a sum of three smooth components plus noise,</span></span>
-<span><span class="co"># mimicking overlapping absorption bands.</span></span>
+<span><span class="co"># Each spectrum is a sum of three smooth absorption bands plus noise.</span></span>
+<span><span class="co"># The amplitude of each band varies across samples.</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">m</span><span class="op">)</span></span>
+<span><span class="va">amp1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1.0</span>, <span class="fl">0.5</span><span class="op">)</span>   <span class="co"># dominant band at 1200 nm</span></span>
+<span><span class="va">amp2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0.5</span>, <span class="fl">0.15</span><span class="op">)</span>  <span class="co"># secondary band at 1400 nm</span></span>
+<span><span class="va">amp3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0.3</span>, <span class="fl">0.08</span><span class="op">)</span>  <span class="co"># minor band at 1600 nm</span></span>
+<span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">a1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.0</span>, <span class="fl">0.3</span><span class="op">)</span></span>
-<span>  <span class="va">a2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span><span class="op">)</span></span>
-<span>  <span class="va">a3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span><span class="op">)</span></span>
-<span>  <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">a1</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1200</span>, <span class="fl">80</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span> <span class="op">+</span></span>
-<span>            <span class="va">a2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1400</span>, <span class="fl">60</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span> <span class="op">+</span></span>
-<span>            <span class="va">a3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1600</span>, <span class="fl">50</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span> <span class="op">+</span></span>
+<span>  <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">amp1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1200</span>, <span class="fl">80</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span> <span class="op">+</span></span>
+<span>            <span class="va">amp2</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1400</span>, <span class="fl">60</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span> <span class="op">+</span></span>
+<span>            <span class="va">amp3</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1600</span>, <span class="fl">50</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">m</span>, sd <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">X</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># --- True coefficient function ---</span></span>
-<span><span class="co"># Response depends on the 1200 nm and 1400 nm absorption bands.</span></span>
-<span><span class="va">beta_true</span> <span class="op">&lt;-</span> <span class="fl">0.6</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1200</span>, <span class="fl">80</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span> <span class="op">-</span></span>
-<span>             <span class="fl">0.4</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, <span class="fl">1400</span>, <span class="fl">60</span><span class="op">)</span> <span class="op">*</span> <span class="fl">200</span></span>
-<span></span>
 <span><span class="co"># --- Clean response ---</span></span>
-<span><span class="va">y_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">y_clean</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">beta_true</span> <span class="op">*</span> <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="va">m</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="co"># Moisture content depends linearly on the 1200 nm and 1400 nm band amplitudes.</span></span>
+<span><span class="va">y_clean</span> <span class="op">&lt;-</span> <span class="fl">2.0</span> <span class="op">*</span> <span class="va">amp1</span> <span class="op">-</span> <span class="fl">1.5</span> <span class="op">*</span> <span class="va">amp2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># --- Contaminated response (10% outliers) ---</span></span>
+<span><span class="co"># --- Contaminated response (15% one-sided outliers) ---</span></span>
+<span><span class="co"># Simulates detector saturation: affected readings are biased *upward*.</span></span>
 <span><span class="va">y_contam</span> <span class="op">&lt;-</span> <span class="va">y_clean</span></span>
-<span><span class="va">n_outlier</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">0.10</span> <span class="op">*</span> <span class="va">n</span><span class="op">)</span>   <span class="co"># 20 outliers</span></span>
+<span><span class="va">n_outlier</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">0.15</span> <span class="op">*</span> <span class="va">n</span><span class="op">)</span>   <span class="co"># 30 outliers</span></span>
 <span><span class="va">outlier_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">n</span>, <span class="va">n_outlier</span><span class="op">)</span></span>
-<span><span class="va">y_contam</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">y_contam</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_outlier</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
-<p>The contaminated observations have errors roughly 25 times larger
-than the noise standard deviation, simulating gross measurement
-mistakes.</p>
+<span><span class="va">y_contam</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">y_contam</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_outlier</span>, <span class="fl">5</span>, <span class="fl">15</span><span class="op">)</span></span></code></pre></div>
+<p>The contamination is one-sided (all positive), which is the worst
+case for OLS: the bias systematically shifts the coefficient estimates.
+Clean errors have
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.3</mn></mrow><annotation encoding="application/x-tex">\sigma = 0.3</annotation></semantics></math>;
+outlier shifts range from 5 to 15 — roughly 15–50 times the noise
+scale.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fd</span>, main <span class="op">=</span> <span class="st">"NIR Absorbance Spectra"</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Wavelength (nm)"</span>, ylab <span class="op">=</span> <span class="st">"Absorbance"</span><span class="op">)</span></span></code></pre></div>
@@ -233,13 +232,14 @@ both the clean and contaminated data.</p>
 <span><span class="va">fit_ols_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"OLS R-squared (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_ols_clean</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; OLS R-squared (clean): 0.0453</span></span>
+<span><span class="co">#&gt; OLS R-squared (clean): 0.9264</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"OLS R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_ols_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; OLS R-squared (contaminated): 0.0191</span></span></code></pre></div>
-<p>On clean data, OLS performs well. On contaminated data, the 20
-outliers pull the coefficient estimates away from their true values,
-inflating the residuals for <em>all</em> observations — including the
-clean ones.</p>
+<span><span class="co">#&gt; OLS R-squared (contaminated): 0.0744</span></span></code></pre></div>
+<p>On clean data, OLS performs well (R² &gt; 0.9). On contaminated data,
+the 30 one-sided outliers systematically bias the coefficient estimates,
+inflating the residuals for <em>all</em> observations — even the clean
+ones. This is the hallmark of OLS fragility: outliers have unbounded
+influence.</p>
 </div>
 <div class="section level2">
 <h2 id="l1-lad-regression">L1 (LAD) Regression<a class="anchor" aria-label="anchor" href="#l1-lad-regression"></a>
@@ -256,9 +256,9 @@ influence on the fit.</p>
 <span><span class="va">fit_l1_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.l1.html">fregre.l1</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L1 R-squared (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_l1_clean</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; L1 R-squared (clean): 0.0273</span></span>
+<span><span class="co">#&gt; L1 R-squared (clean): 0.9246</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L1 R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; L1 R-squared (contaminated): 0.005</span></span></code></pre></div>
+<span><span class="co">#&gt; L1 R-squared (contaminated): -0.0834</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="examining-the-irls-weights">Examining the IRLS Weights<a class="anchor" aria-label="anchor" href="#examining-the-irls-weights"></a>
 </h3>
@@ -266,13 +266,13 @@ influence on the fit.</p>
 <code class="sourceCode R"><span><span class="co"># Observations with small weights are effectively identified as outliers</span></span>
 <span><span class="va">w</span> <span class="op">&lt;-</span> <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">weights</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean weight (clean obs):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="op">-</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Mean weight (clean obs): 27791.38</span></span>
+<span><span class="co">#&gt; Mean weight (clean obs): 35310.64</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean weight (outlier obs):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Mean weight (outlier obs): 1.173</span></span>
+<span><span class="co">#&gt; Mean weight (outlier obs): 0.115</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">iterations</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Iterations: 100</span></span>
+<span><span class="co">#&gt; Iterations: 69</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Converged: FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt; Converged: TRUE</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -293,9 +293,9 @@ the loss is linear (like L1).</p>
 <span><span class="va">fit_huber_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.huber.html">fregre.huber</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Huber R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Huber R-squared (contaminated): 0.0071</span></span>
+<span><span class="co">#&gt; Huber R-squared (contaminated): -0.0464</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">iterations</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Iterations: 6</span></span>
+<span><span class="co">#&gt; Iterations: 7</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Converged: TRUE</span></span></code></pre></div>
 <div class="section level3">
@@ -351,7 +351,7 @@ the loss is linear (like L1).</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_default</span><span class="op">[</span><span class="op">-</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Mean weight (clean): 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (outlier):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_default</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Mean weight (outlier): 0.487</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean weight (outlier): 0.159</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -435,24 +435,24 @@ data</caption>
 <tbody>
 <tr class="odd">
 <td align="left">OLS (fregre.lm)</td>
-<td align="right">0.2559</td>
-<td align="right">-0.0090</td>
-<td align="right">0.3838</td>
-<td align="right">-1.2694</td>
+<td align="right">0.2732</td>
+<td align="right">0.9424</td>
+<td align="right">1.6255</td>
+<td align="right">-1.0393</td>
 </tr>
 <tr class="even">
 <td align="left">L1 (fregre.l1)</td>
-<td align="right">0.2574</td>
-<td align="right">-0.0205</td>
-<td align="right">0.2667</td>
-<td align="right">-0.0954</td>
+<td align="right">0.2591</td>
+<td align="right">0.9482</td>
+<td align="right">0.2760</td>
+<td align="right">0.9412</td>
 </tr>
 <tr class="odd">
 <td align="left">Huber (fregre.huber)</td>
-<td align="right">0.2559</td>
-<td align="right">-0.0090</td>
-<td align="right">0.2663</td>
-<td align="right">-0.0923</td>
+<td align="right">0.2732</td>
+<td align="right">0.9424</td>
+<td align="right">0.3880</td>
+<td align="right">0.8838</td>
 </tr>
 </tbody>
 </table>
