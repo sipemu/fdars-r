@@ -27,124 +27,59 @@ Pipeline](../reference/figures/scalar-on-shape-overview.svg)
 | Curves misaligned, response depends on *shape* (phase-invariant) | [`scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/scalar.on.shape.md)       |
 | Unknown alignment quality                                        | Compare all three                                                                          |
 
-**Key insight:**
-[`elastic.regression()`](https://sipemu.github.io/fdars-r/reference/elastic.regression.md)
-aligns curves then regresses on amplitude.
-[`scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/scalar.on.shape.md)
-goes further — it extracts a *phase-invariant shape score* via the
-Fisher-Rao inner product, then maps that score to the response through a
-flexible index function. This makes it robust even when the predictive
-signal lives entirely in shape.
-
-## The Scalar-on-Shape Model
-
-### Mathematical Formulation
-
-Given functional observations $X_{1}(t),\ldots,X_{n}(t)$ and scalar
-responses $y_{1},\ldots,y_{n}$, the model proceeds in four stages.
-
-**1. SRSF transformation.** Each curve is mapped to its square-root
-slope function (SRSF):
-
-$$q_{i}(t) = \text{sign}\left( X_{i}\prime(t) \right)\sqrt{\left| X_{i}\prime(t) \right|}$$
-
-The SRSF representation makes the ${\mathbb{L}}^{2}$ distance between
-transformed curves equal to the Fisher-Rao distance between original
-curves.
-
-**2. Elastic alignment.** Each SRSF $q_{i}$ is aligned to a shape index
-function $\beta(t)$ via dynamic programming, producing optimal warping
-functions $\gamma_{i} \in \Gamma$:
-
-$$q_{i}^{*}( \cdot ) = \left( q_{i} \circ \gamma_{i} \right)\sqrt{{\dot{\gamma}}_{i}}$$
-
-**3. Shape scores.** Each aligned curve is projected onto the shape
-index function:
-
-$$s_{i} = \langle q_{i}^{*},\beta\rangle = \int_{0}^{1}q_{i}^{*}(t)\,\beta(t)\, dt$$
-
-These scalar shape scores capture *how much* of the common shape pattern
-each curve exhibits, invariant to timing.
-
-**4. Index function.** The response is linked to the shape score through
-a flexible function $h$:
-
-$${\widehat{y}}_{i} = h\left( s_{i} \right)$$
-
-The index function $h$ can be the identity (linear), a polynomial, or a
-Nadaraya-Watson kernel smoother.
-
-### Iterative Optimization
-
-The shape index $\beta(t)$, warping functions $\gamma_{i}$, and link
-function $h$ are estimated jointly by alternating:
-
-1.  Fix $\beta$ and $h$, update each $\gamma_{i}$ via DP alignment
-2.  Fix $\gamma_{i}$’s, update $\beta$ via penalized least squares on
-    the Fourier basis
-3.  Fix $\beta$ and $\gamma_{i}$’s, update $h$ (polynomial fit or kernel
-    smooth)
-
-The algorithm converges when the relative change in SSE falls below
-`tol`.
-
 ## Simulating Data with Phase Variation
 
-We simulate a biomechanics-inspired scenario: 100 ground reaction force
-curves with both amplitude and phase variation. The scalar response
-(e.g., vertical jump height) depends on the *shape* of the force curve,
-not its timing or scale.
+We simulate a biomechanics-inspired scenario: 200 force–time curves
+where each curve is a single bump (e.g., a ground reaction force impulse
+during a vertical jump). The bump’s **location** varies across subjects
+(phase variation from different jump timings), but the scalar response —
+vertical jump height — depends on the bump’s **width** (a shape feature
+that is invariant to when the jump occurred).
+
+This creates a challenging problem for standard FPCA-based regression:
+the first several principal components capture the dominant *phase*
+variation (where the bump is), not the *shape* variation (how wide it
+is). The shape signal is buried in higher-order components that are hard
+to select in practice.
 
 ``` r
-library(fdars)
-library(ggplot2)
-theme_set(theme_minimal())
 set.seed(42)
 
-n <- 100
-m <- 80
+n <- 200
+m <- 60
 t_grid <- seq(0, 1, length.out = m)
-
-# Template: ground reaction force profile with two peaks
-template <- function(s) {
-  0.8 * exp(-40 * (s - 0.3)^2) + 1.2 * exp(-30 * (s - 0.7)^2)
-}
 
 X <- matrix(0, n, m)
 y <- numeric(n)
 
 for (i in 1:n) {
-  # Shape variation: relative height of the two peaks
-  shape_param <- rnorm(1, 0, 0.5)
+  # Shape: bump width (this predicts jump height)
+  width_param <- rnorm(1, 0, 1)
+  width <- 0.06 + 0.015 * width_param
 
-  # Phase variation: random nonlinear warp
-  a <- runif(1, 0.6, 1.8)
-  b <- runif(1, 0.6, 1.8)
-  gamma <- pbeta(t_grid, a, b)
+  # Phase: bump center varies continuously (dominant variation)
+  center <- runif(1, 0.25, 0.75)
 
-  # Build the curve: shape variation + warp + noise
-  base <- 0.8 * exp(-40 * (t_grid - 0.3)^2) * (1 + 0.3 * shape_param) +
-          1.2 * exp(-30 * (t_grid - 0.7)^2) * (1 - 0.2 * shape_param)
+  X[i, ] <- exp(-(t_grid - center)^2 / (2 * width^2)) +
+            rnorm(m, sd = 0.015)
 
-  # Apply phase warp
-  X[i, ] <- approx(t_grid, base, xout = gamma, rule = 2)$y +
-            rnorm(m, sd = 0.03)
-
-  # Response depends on shape, not timing
-  y[i] <- 3 * shape_param + rnorm(1, sd = 0.5)
+  # Response depends only on width (shape), not center (phase)
+  y[i] <- 3 * width_param + rnorm(1, sd = 0.3)
 }
 
 fd <- fdata(X, argvals = t_grid)
 ```
 
-The response $y$ depends on `shape_param`, which controls the relative
-height of the two peaks. The nonlinear warping (`pbeta`) shifts peak
-*locations* randomly, creating phase variation that is unrelated to $y$.
-
 ``` r
 plot(fd, main = "Simulated Ground Reaction Force Curves",
      xlab = "Normalized Time", ylab = "Force (BW)")
 ```
+
+![](scalar-on-shape_files/figure-html/plot-sim-1.png)
+
+Note how the bumps are located at different positions along the time
+axis — this is phase variation. The response $y$ depends only on bump
+*width*, a shape feature that standard FPCA mixes with phase.
 
 ## Fitting the Model
 
@@ -158,50 +93,12 @@ fit_id <- scalar.on.shape(fd, y, nbasis = 11, lambda = 1e-3,
                           index.method = "identity",
                           max.iter.outer = 15, tol = 1e-4)
 print(fit_id)
+#> Scalar-on-Shape Regression
+#>   Index method: identity 
+#>   R-squared: 0.859 
+#>   SSE: 228.8896 
+#>   Iterations: 15 (outer), 15 (inner)
 ```
-
-### Polynomial Index (Nonlinear Link)
-
-When the relationship between shape score and response may be nonlinear,
-use a polynomial index with `index.method = "polynomial"`:
-
-``` r
-fit_poly <- scalar.on.shape(fd, y, nbasis = 11, lambda = 1e-3,
-                            index.method = "polynomial",
-                            index.param = 3,  # cubic polynomial
-                            max.iter.outer = 15, tol = 1e-4)
-print(fit_poly)
-```
-
-### Nadaraya-Watson Index (Fully Nonparametric Link)
-
-For maximum flexibility, the Nadaraya-Watson kernel smoother makes no
-parametric assumptions about $h$:
-
-``` r
-fit_nw <- scalar.on.shape(fd, y, nbasis = 11, lambda = 1e-3,
-                          index.method = "nadaraya.watson",
-                          index.param = 0.5,  # bandwidth
-                          max.iter.outer = 15, tol = 1e-4)
-print(fit_nw)
-```
-
-### Comparing Index Methods
-
-``` r
-comp_index <- data.frame(
-  Method = c("Identity (linear)", "Polynomial (cubic)", "Nadaraya-Watson"),
-  R2 = round(c(fit_id$r.squared, fit_poly$r.squared, fit_nw$r.squared), 4),
-  SSE = round(c(fit_id$sse, fit_poly$sse, fit_nw$sse), 2),
-  Outer_Iter = c(fit_id$n.iter.outer, fit_poly$n.iter.outer,
-                 fit_nw$n.iter.outer)
-)
-knitr::kable(comp_index, caption = "Index method comparison")
-```
-
-When the true relationship is linear (as in our simulation), the
-identity index should perform well. Polynomial and NW indices add
-flexibility at the cost of potential overfitting on small samples.
 
 ### Examining the Fitted Model
 
@@ -214,6 +111,8 @@ ggplot(df_beta, aes(x = t, y = beta)) +
        subtitle = "beta(t): the shape pattern that predicts y",
        x = "Normalized Time", y = expression(beta(t)))
 ```
+
+![](scalar-on-shape_files/figure-html/examine-fit-1.png)
 
 The shape index $\widehat{\beta}(t)$ reveals *which aspects of curve
 shape* drive the response. Peaks in $\beta(t)$ correspond to regions
@@ -229,14 +128,17 @@ ggplot(df_scores, aes(x = score, y = y)) +
   labs(title = "Shape Scores vs Response",
        subtitle = paste("R-squared =", round(fit_id$r.squared, 3)),
        x = "Shape Score", y = "Response (y)")
+#> `geom_smooth()` using formula = 'y ~ x'
 ```
+
+![](scalar-on-shape_files/figure-html/examine-scores-1.png)
 
 ### Prediction
 
 ``` r
 # Hold-out evaluation
 set.seed(123)
-train_idx <- sample(n, 70)
+train_idx <- sample(n, 140)
 test_idx <- setdiff(1:n, train_idx)
 
 fd_train <- fd[train_idx, ]
@@ -251,37 +153,50 @@ fit_train <- scalar.on.shape(fd_train, y_train, nbasis = 11, lambda = 1e-3,
 y_pred <- predict(fit_train, fd_test)
 
 cat("Test RMSE:", round(sqrt(mean((y_test - y_pred)^2)), 4), "\n")
+#> Test RMSE: 1.035
 cat("Test R2:", round(1 - sum((y_test - y_pred)^2) /
                           sum((y_test - mean(y_test))^2), 4), "\n")
+#> Test R2: 0.8463
 ```
 
 ## Comparison with Other Methods
 
-We compare three regression approaches on our phase-variable data to
-demonstrate when scalar-on-shape regression is the right tool.
+We compare three regression approaches on our phase-variable data. The
+key question is: can each method extract the shape signal (bump width)
+when the dominant variation is phase (bump location)?
 
 ### Standard Regression (Ignoring Phase)
 
 [`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md)
 treats the raw (misaligned) curves as input. Because FPCA captures the
 dominant *phase* variation first, the shape signal that drives $y$ is
-buried in higher-order components.
+buried in higher-order components. With a practical choice of 5
+components, fregre.lm struggles to find the signal.
 
 ``` r
 fit_std <- fregre.lm(fd_train, y_train, ncomp = 5)
 pred_std <- predict(fit_std, fd_test)
 
 cat("fregre.lm R-squared (train):", round(fit_std$r.squared, 4), "\n")
+#> fregre.lm R-squared (train): 0.399
 cat("fregre.lm RMSE (test):",
     round(sqrt(mean((y_test - pred_std)^2)), 4), "\n")
+#> fregre.lm RMSE (test): 2.5022
 ```
+
+To understand *why*
+[`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md)
+fails, consider the FPCA decomposition: the first few eigenfunctions
+capture *where* the bump is (phase), not *how wide* it is (shape). The
+shape information only appears in higher-order components that are
+typically discarded.
 
 ### Elastic Regression (Alignment-Aware)
 
 [`elastic.regression()`](https://sipemu.github.io/fdars-r/reference/elastic.regression.md)
 jointly aligns curves and fits a coefficient function. It captures
-amplitude variation after alignment, but does not extract a
-phase-invariant shape score.
+amplitude variation after alignment but is not specifically designed to
+isolate shape features.
 
 ``` r
 fit_elastic <- elastic.regression(fd_train, y_train, ncomp.beta = 5,
@@ -290,28 +205,17 @@ pred_elastic <- predict(fit_elastic, fd_test)
 
 cat("elastic.regression R-squared (train):",
     round(fit_elastic$r.squared, 4), "\n")
+#> elastic.regression R-squared (train): 0.0418
 cat("elastic.regression RMSE (test):",
     round(sqrt(mean((y_test - pred_elastic)^2)), 4), "\n")
-```
-
-### Scalar-on-Shape (Full Phase-Invariant)
-
-[`scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/scalar.on.shape.md)
-extracts a phase-invariant shape score via the Fisher-Rao inner product,
-giving it the cleanest signal when $y$ depends on shape.
-
-``` r
-pred_sos <- predict(fit_train, fd_test)
-
-cat("scalar.on.shape R-squared (train):",
-    round(fit_train$r.squared, 4), "\n")
-cat("scalar.on.shape RMSE (test):",
-    round(sqrt(mean((y_test - pred_sos)^2)), 4), "\n")
+#> elastic.regression RMSE (test): 1.7091
 ```
 
 ### Summary Table
 
 ``` r
+pred_sos <- predict(fit_train, fd_test)
+
 rmse_std <- sqrt(mean((y_test - pred_std)^2))
 rmse_elastic <- sqrt(mean((y_test - pred_elastic)^2))
 rmse_sos <- sqrt(mean((y_test - pred_sos)^2))
@@ -321,7 +225,7 @@ r2_test <- function(actual, predicted) {
 }
 
 comparison <- data.frame(
-  Method = c("fregre.lm (standard)",
+  Method = c("fregre.lm (ncomp=5)",
              "elastic.regression",
              "scalar.on.shape"),
   Handles_Phase = c("No", "Yes (alignment)", "Yes (shape score)"),
@@ -336,14 +240,31 @@ comparison <- data.frame(
 knitr::kable(comparison, caption = "Method comparison on phase-variable data")
 ```
 
+| Method              | Handles_Phase     | Train_R2 | Test_RMSE | Test_R2 |
+|:--------------------|:------------------|---------:|----------:|--------:|
+| fregre.lm (ncomp=5) | No                |   0.3990 |    2.5022 |  0.1020 |
+| elastic.regression  | Yes (alignment)   |   0.0418 |    1.7091 |  0.5810 |
+| scalar.on.shape     | Yes (shape score) |   0.8312 |    1.0350 |  0.8463 |
+
+Method comparison on phase-variable data
+
+[`scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/scalar.on.shape.md)
+achieves the best predictive accuracy because it directly targets the
+phase-invariant shape feature. Standard regression with 5 components
+captures almost none of the signal, while elastic regression provides an
+intermediate result.
+
 ### Visualizing Predictions
 
 ``` r
 df_pred <- data.frame(
   Observed = rep(y_test, 3),
   Predicted = c(pred_std, pred_elastic, pred_sos),
-  Method = rep(c("fregre.lm", "elastic.regression", "scalar.on.shape"),
-               each = length(y_test))
+  Method = factor(rep(c("fregre.lm (ncomp=5)", "elastic.regression",
+                         "scalar.on.shape"),
+                       each = length(y_test)),
+                  levels = c("fregre.lm (ncomp=5)", "elastic.regression",
+                             "scalar.on.shape"))
 )
 
 ggplot(df_pred, aes(x = Observed, y = Predicted)) +
@@ -354,29 +275,44 @@ ggplot(df_pred, aes(x = Observed, y = Predicted)) +
        x = "Observed", y = "Predicted")
 ```
 
-## When to Use Which Method
+![](scalar-on-shape_files/figure-html/vis-predictions-1.png)
 
-| Criterion            |              `fregre.lm`               |      `elastic.regression`      |        `scalar.on.shape`         |
-|----------------------|:--------------------------------------:|:------------------------------:|:--------------------------------:|
-| **Phase variation**  |               Ignores it               |     Removes via alignment      |    Invariant via shape score     |
-| **Signal source**    |            Raw curve values            |   Amplitude after alignment    | Shape (Fisher-Rao inner product) |
-| **Link to response** |          Linear (FPC scores)           |  Linear ($\beta(t)$ integral)  |    Identity / polynomial / NW    |
-| **Diagnostics**      | Full (explainability, influence, etc.) |      R-squared, residuals      |       R-squared, residuals       |
-| **Speed**            |                  Fast                  | Moderate (iterative alignment) |  Moderate (iterative alignment)  |
-| **Best for**         |          Well-aligned curves           |  Misaligned; amplitude signal  |     Misaligned; shape signal     |
+### Why Standard Regression Fails
 
-**Decision rule:**
+To see why more components don’t fully solve the problem for
+[`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md),
+consider what happens as we increase `ncomp`:
 
-1.  If curves are well-aligned or phase variation is small, use
-    [`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md).
-    It has the richest diagnostics and explainability support.
-2.  If curves are misaligned and the response depends on *amplitude*
-    (overall scale or height differences), use
-    [`elastic.regression()`](https://sipemu.github.io/fdars-r/reference/elastic.regression.md).
-3.  If curves are misaligned and the response depends on *shape* (the
-    functional form after removing timing and scale), use
-    [`scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/scalar.on.shape.md).
-4.  When unsure, fit all three and compare hold-out RMSE.
+``` r
+ncomp_vals <- c(3, 5, 8, 12)
+r2_sweep <- sapply(ncomp_vals, function(k) {
+  fit <- fregre.lm(fd_train, y_train, ncomp = k)
+  pred <- predict(fit, fd_test)
+  r2_test(y_test, pred)
+})
+
+df_sweep <- data.frame(ncomp = ncomp_vals, test_r2 = r2_sweep)
+ggplot(df_sweep, aes(x = ncomp, y = test_r2)) +
+  geom_line(color = "#4A90D9", linewidth = 1) +
+  geom_point(color = "#4A90D9", size = 3) +
+  geom_hline(yintercept = r2_test(y_test, pred_sos),
+             linetype = "dashed", color = "#D55E00") +
+  annotate("text", x = max(ncomp_vals), y = r2_test(y_test, pred_sos),
+           label = "scalar.on.shape", vjust = -0.5, color = "#D55E00") +
+  labs(title = "fregre.lm Performance vs Number of Components",
+       x = "Number of FPC Components", y = expression("Test R"^2)) +
+  ylim(-0.2, 1)
+```
+
+![](scalar-on-shape_files/figure-html/ncomp-sweep-1.png)
+
+[`fregre.lm()`](https://sipemu.github.io/fdars-r/reference/fregre.lm.md)
+eventually catches up with many components, but requires 8–12 to begin
+matching
+[`scalar.on.shape()`](https://sipemu.github.io/fdars-r/reference/scalar.on.shape.md).
+In practice, selecting the right number of components is difficult, and
+using too many risks overfitting. The phase-invariant approach avoids
+this model selection problem entirely.
 
 ## Tuning Parameters
 
@@ -386,8 +322,6 @@ ggplot(df_pred, aes(x = Observed, y = Predicted)) +
 | `lambda`         | 1e-3         | Roughness penalty on $\beta(t)$             | Increase to smooth $\beta$; decrease to capture detail |
 | `index.method`   | `"identity"` | Link function type                          | Start with identity; try polynomial if nonlinear       |
 | `index.param`    | 2            | Polynomial degree or NW bandwidth           | Higher = more flexible (risk of overfitting)           |
-| `g.degree`       | 2            | Amplitude link polynomial degree            | Usually left at default                                |
-| `dp.lambda`      | 0            | DP alignment penalty                        | Increase to discourage extreme warps                   |
 | `max.iter.outer` | 10           | Outer loop iterations                       | 10–20 usually sufficient                               |
 | `tol`            | 1e-4         | Convergence threshold (relative SSE change) | Tighter = more iterations, better fit                  |
 
@@ -402,10 +336,6 @@ ggplot(df_pred, aes(x = Observed, y = Predicted)) +
   Functional Data Using Phase and Amplitude Separation. *Computational
   Statistics & Data Analysis*, 61, 50–66.
 
-- Xie, W., Kurtek, S., Bharath, K. and Sun, Y. (2017). A Geometric
-  Approach to Visualization of Variability in Functional Data. *Journal
-  of the American Statistical Association*, 112(519), 979–993.
-
 ## See Also
 
 - [`vignette("articles/elastic-regression")`](https://sipemu.github.io/fdars-r/articles/elastic-regression.md)
@@ -414,5 +344,3 @@ ggplot(df_pred, aes(x = Observed, y = Predicted)) +
   — standard scalar-on-function regression methods
 - [`vignette("articles/elastic-alignment")`](https://sipemu.github.io/fdars-r/articles/elastic-alignment.md)
   — curve alignment without regression
-- `vignette("elastic-fpca")` — elastic FPCA for amplitude/phase
-  separation

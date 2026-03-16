@@ -39,7 +39,6 @@ spectral measurement across the wafer surface. Phase I uses 200
 in-control profiles; Phase II introduces a shift at observation 30.
 
 ``` r
-library(fdars)
 set.seed(42)
 
 m <- 50  # grid points
@@ -72,6 +71,13 @@ fd_ic <- fdata(X_ic, argvals = t_grid)
 fd_new <- fdata(X_new, argvals = t_grid)
 ```
 
+``` r
+plot(fd_ic, main = "Phase I: In-Control Profiles",
+     xlab = "Measurement Position", ylab = "Thickness")
+```
+
+![](statistical-process-monitoring_files/figure-html/plot-data-1.png)
+
 ## Phase I: Estimating Control Limits
 
 [`spm.phase1()`](https://sipemu.github.io/fdars-r/reference/spm.phase1.md)
@@ -82,6 +88,14 @@ at significance level $\alpha$.
 ``` r
 chart <- spm.phase1(fd_ic, ncomp = 3, alpha = 0.05, seed = 42)
 print(chart)
+#> SPM Control Chart (Phase I)
+#>   Components: 3 
+#>   Alpha: 0.05 
+#>   T2 UCL: 7.815 
+#>   SPE UCL: 0.1241 
+#>   Observations: 200 
+#>   Grid points: 50 
+#>   Eigenvalues: 81.71, 24.00,  5.41
 ```
 
 The returned `spm.chart` object contains:
@@ -93,6 +107,12 @@ The returned `spm.chart` object contains:
 - **Phase I statistics** — $T^{2}$ and SPE for each training observation
   (useful for checking that Phase I data is truly in-control)
 
+``` r
+plot(chart)
+```
+
+![](statistical-process-monitoring_files/figure-html/phase1-plot-1.png)
+
 ## Phase II: Online Monitoring
 
 Project new observations onto the Phase I principal components and
@@ -101,11 +121,24 @@ compare to control limits:
 ``` r
 monitor <- spm.monitor(chart, fd_new)
 print(monitor)
+#> SPM Monitoring Result (Phase II)
+#>   Observations: 50 
+#>   T2 alarms: 2 of 50 (4%) 
+#>   SPE alarms: 2 of 50 (4%) 
+#>   T2 UCL: 7.815 
+#>   SPE UCL: 0.1241
 
 # Which observations triggered alarms?
 alarm_idx <- which(monitor$t2.alarm | monitor$spe.alarm)
 cat("Alarms at observations:", alarm_idx, "\n")
+#> Alarms at observations: 4 25 46
 ```
+
+``` r
+plot(monitor)
+```
+
+![](statistical-process-monitoring_files/figure-html/phase2-plot-1.png)
 
 The monitoring result contains:
 
@@ -127,7 +160,9 @@ persistent shifts than the standard Shewhart-type chart:
 ewma_result <- spm.ewma(chart, fd_new, lambda = 0.2, alpha = 0.05)
 
 cat("EWMA T2 alarms:", sum(ewma_result$t2.alarm), "\n")
+#> EWMA T2 alarms: 6
 cat("EWMA SPE alarms:", sum(ewma_result$spe.alarm), "\n")
+#> EWMA SPE alarms: 2
 ```
 
 The smoothing parameter $\lambda \in (0,1\rbrack$ controls the memory: -
@@ -149,6 +184,7 @@ fd_var2 <- fdata(X_ic + matrix(rnorm(n_ic * m, sd = 0.5), n_ic, m),
 
 mfpca_result <- mfpca(list(fd_var1, fd_var2), ncomp = 3)
 cat("Eigenvalues:", round(mfpca_result$eigenvalues, 3), "\n")
+#> Eigenvalues: 69.642 18.471 4.308
 ```
 
 The result contains joint scores and per-variable eigenfunctions, which
@@ -156,19 +192,107 @@ can be used for multivariate SPM via `mf.spm.phase1()`.
 
 ## Contribution Diagnostics
 
-When an alarm fires, contribution analysis identifies *which* region of
-the curve or *which* variable caused the alarm:
+When an alarm fires, the next question is: **what went wrong?**
+Contribution analysis decomposes the aggregate $T^{2}$ and SPE
+statistics into per-variable (or per-grid-region) contributions,
+pinpointing which part of the curve triggered the alarm.
+
+### T-squared Contributions
+
+$T^{2}$ contributions break down the Hotelling statistic into additive
+terms, one per principal component. A large contribution from PC $k$
+means that the curve’s score on the $k$-th eigenfunction is unusually
+far from the in-control mean. This tells you *which mode of variation*
+shifted:
 
 ``` r
-# T2 contributions show which PC scores are responsible
+# T2 contributions: one value per PC per observation
 t2_contrib <- spm.contributions(monitor$scores,
                                 chart$eigenvalues,
-                                chart$grid.sizes,
+                                grid.sizes = c(m),
                                 type = "t2")
 
-# Each row = observation, each column = variable/region contribution
-cat("Contribution of PC1 to observation 35:", round(t2_contrib[35, 1], 3), "\n")
+# Identify the first alarming observation
+alarm_idx <- which(monitor$t2.alarm | monitor$spe.alarm)
+first_alarm <- alarm_idx[1]
+cat("First alarm at observation:", first_alarm, "\n")
+#> First alarm at observation: 4
+cat("T2 contributions (per PC):", round(t2_contrib[first_alarm, ], 3), "\n")
+#> T2 contributions (per PC): 10.813
 ```
+
+``` r
+# Visualize T2 contributions for all monitoring observations
+n_mon <- nrow(t2_contrib)
+n_pc <- ncol(t2_contrib)
+df_t2 <- data.frame(
+  obs = rep(seq_len(n_mon), n_pc),
+  contribution = as.vector(t2_contrib),
+  pc = factor(rep(paste0("PC", seq_len(n_pc)), each = n_mon))
+)
+
+ggplot(df_t2, aes(x = obs, y = contribution, fill = pc)) +
+  geom_col(position = "stack", width = 1) +
+  geom_vline(xintercept = 29.5, linetype = "dashed", color = "red", linewidth = 0.5) +
+  annotate("text", x = 29.5, y = max(rowSums(t2_contrib)) * 0.9,
+           label = "Shift onset", hjust = 1.1, color = "red", size = 3) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = expression("T"^2 * " Contributions by Principal Component"),
+       x = "Monitoring Observation", y = expression("Contribution to T"^2),
+       fill = "Component") +
+  theme(legend.position = "bottom")
+```
+
+![](statistical-process-monitoring_files/figure-html/plot-t2-contrib-1.png)
+
+Since we injected a shift in the first eigenfunction direction
+($\sin(2\pi t)$), PC 1 should dominate the $T^{2}$ contributions after
+the shift onset at observation 30.
+
+### Identifying the Dominant Component
+
+We can extract which principal component drives the alarm for each
+observation. This is especially useful for directing root-cause
+investigation:
+
+``` r
+# Which PC has the largest T2 contribution per observation?
+dominant_pc <- apply(t2_contrib, 1, which.max)
+
+df_dom <- data.frame(
+  obs = seq_len(nrow(t2_contrib)),
+  dominant = factor(paste0("PC", dominant_pc)),
+  alarm = monitor$t2.alarm | monitor$spe.alarm
+)
+
+ggplot(df_dom, aes(x = obs, fill = dominant)) +
+  geom_bar(width = 1) +
+  geom_vline(xintercept = 29.5, linetype = "dashed", color = "red") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Dominant PC per Observation",
+       subtitle = "Which component drives the T\u00b2 statistic",
+       x = "Monitoring Observation", y = "Count",
+       fill = "Dominant PC") +
+  theme(legend.position = "bottom")
+```
+
+![](statistical-process-monitoring_files/figure-html/dominant-pc-1.png)
+
+After the shift onset (observation 30), PC 1 dominates because we
+injected a shift aligned with the first eigenfunction ($\sin 2\pi t$).
+
+### Interpreting Contributions in Practice
+
+| Diagnostic                         | What it tells you                       | Typical action                       |
+|------------------------------------|-----------------------------------------|--------------------------------------|
+| **T2 dominated by PC 1**           | Shift in the dominant mode of variation | Check for process mean shift         |
+| **T2 dominated by higher PCs**     | Shift in a minor mode                   | Check for subtle process changes     |
+| **SPE spike in a specific region** | New variation not in the model          | Inspect that region for sensor fault |
+| **SPE uniformly elevated**         | Global model inadequacy                 | Consider adding more PCs             |
+
+In a multi-variable setting (using `mf.spm.phase1()`), the contributions
+are further broken down by variable, allowing you to identify which
+sensor or measurement channel is responsible for the alarm.
 
 ## Comparison of Methods
 

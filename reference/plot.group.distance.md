@@ -30,5 +30,4 @@ plot(x, type = c("heatmap", "dendrogram"), which = NULL, ...)
 
 ## Value
 
-A ggplot object (for heatmap) or NULL (for dendrogram, uses base
-graphics).
+A ggplot object.

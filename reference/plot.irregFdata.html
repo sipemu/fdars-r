@@ -41,18 +41,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'irregFdata'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  <span class="va">...</span>,</span>
-<span>  col <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  lty <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  lwd <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  main <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  xlab <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ylab <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  add <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="fl">0.7</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,44 +53,16 @@
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments passed to <code>plot</code>.</p></dd>
-
-
-<dt id="arg-col">col<a class="anchor" aria-label="anchor" href="#arg-col"></a></dt>
-<dd><p>Colors for curves.</p></dd>
-
-
-<dt id="arg-lty">lty<a class="anchor" aria-label="anchor" href="#arg-lty"></a></dt>
-<dd><p>Line type.</p></dd>
-
-
-<dt id="arg-lwd">lwd<a class="anchor" aria-label="anchor" href="#arg-lwd"></a></dt>
-<dd><p>Line width.</p></dd>
-
-
-<dt id="arg-main">main<a class="anchor" aria-label="anchor" href="#arg-main"></a></dt>
-<dd><p>Plot title.</p></dd>
-
-
-<dt id="arg-xlab">xlab<a class="anchor" aria-label="anchor" href="#arg-xlab"></a></dt>
-<dd><p>X-axis label.</p></dd>
-
-
-<dt id="arg-ylab">ylab<a class="anchor" aria-label="anchor" href="#arg-ylab"></a></dt>
-<dd><p>Y-axis label.</p></dd>
-
-
-<dt id="arg-add">add<a class="anchor" aria-label="anchor" href="#arg-add"></a></dt>
-<dd><p>Logical. If TRUE, add to existing plot.</p></dd>
+<dd><p>Additional arguments (ignored).</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Transparency for many curves.</p></dd>
+<dd><p>Transparency for lines.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Invisibly returns the input object <code>x</code>.</p>
+    <p>A <code>ggplot</code> object.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

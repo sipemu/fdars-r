@@ -433,6 +433,10 @@
   : EWMA-Based SPM Monitoring
 - [`spm.contributions()`](https://sipemu.github.io/fdars-r/reference/spm.contributions.md)
   : SPM Contribution Diagnostics
+- [`plot(`*`<spm.chart>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.spm.chart.md)
+  : Plot an SPM Phase I control chart
+- [`plot(`*`<spm.monitor>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.spm.monitor.md)
+  : Plot SPM Phase II monitoring results
 - [`mfpca()`](https://sipemu.github.io/fdars-r/reference/mfpca.md) :
   Multivariate Functional Principal Component Analysis
 - [`frcc.phase1()`](https://sipemu.github.io/fdars-r/reference/frcc.phase1.md)
