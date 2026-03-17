@@ -1811,7 +1811,7 @@ confidence bands:
 
 ```{r warp-stats}
 km <- karcher.mean(fd_cv, max.iter = 15)
-ws <- warp.statistics(km, confidence.level = 0.95)
+ws <- warp.statistics(km)
 ws
 ```
 
@@ -1861,7 +1861,9 @@ For pairwise diagnostics, use `alignment.diagnostics.pairwise()` to check a
 single pair alignment:
 
 ```{r pairwise-diag}
-pair <- elastic.pair(fd_cv$data[1, ], fd_cv$data[2, ], av)
+f1 <- fdata(matrix(fd_cv$data[1, ], nrow = 1), argvals = av)
+f2 <- fdata(matrix(fd_cv$data[2, ], nrow = 1), argvals = av)
+pair <- elastic.pair(f1, f2)
 diag_pair <- alignment.diagnostics.pairwise(
   fd_cv$data[1, ], fd_cv$data[2, ],
   list(gamma = pair$gamma, f.aligned = pair$f.aligned, distance = pair$distance),
