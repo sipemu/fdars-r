@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120">
+  <rect width="200" height="120" rx="4" fill="#f5f5f5"/>
+  <!-- Solid portion of curve (observed) -->
+  <path d="M 15,70 Q 40,30 65,55 Q 90,80 115,45" fill="none" stroke="#4169E1" stroke-width="2.5"/>
+  <!-- Dashed portion (completed/predicted) -->
+  <path d="M 115,45 Q 135,25 155,40 Q 170,50 185,35" fill="none" stroke="#4169E1" stroke-width="2" stroke-dasharray="6,4"/>
+  <!-- Transition marker -->
+  <circle cx="115" cy="45" r="3" fill="#4169E1"/>
+  <!-- Inset control chart box -->
+  <rect x="140" y="72" width="50" height="38" rx="4" fill="white" stroke="#ccc" stroke-width="0.8"/>
+  <!-- Tiny monitoring line -->
+  <polyline points="147,95 152,90 157,92 162,88 167,86 172,83 177,80 182,78"
+    fill="none" stroke="#2E8B57" stroke-width="1.2"/>
+  <!-- Tiny UCL -->
+  <line x1="147" y1="78" x2="183" y2="78" stroke="#DC3545" stroke-width="0.8" stroke-dasharray="3,2"/>
+</svg>
