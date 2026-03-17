@@ -649,7 +649,8 @@ f1 <- exp(-((argvals - 0.3)^2) / 0.02)
 f2 <- 2 * exp(-((argvals - 0.5)^2) / 0.02) + 1  # scaled + shifted
 
 # Elastic distance (sensitive to scale and translation)
-d_elastic <- elastic.distance(f1, f2, argvals)
+fd_pair <- fdata(rbind(f1, f2), argvals = argvals)
+d_elastic <- elastic.distance(fd_pair)[1, 2]
 
 # Shape distance (invariant to reparameterization + translation + scale)
 d_shape <- shape.distance(f1, f2, argvals, quotient = "scale")
