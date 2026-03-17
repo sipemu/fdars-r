@@ -382,6 +382,10 @@ reference:
   - elastic.kmeans
   - elastic.hclust
   - elastic.cutree
+  - plot.elastic.kmeans
+  - plot.elastic.hclust
+  - print.elastic.kmeans
+  - print.elastic.hclust
 
 - title: Shape Analysis
   contents:
@@ -389,6 +393,8 @@ reference:
   - shape.distance
   - shape.mean
   - shape.distance.matrix
+  - plot.shape.mean
+  - print.shape.mean
 
 - title: Alignment Extensions
   contents:
@@ -400,6 +406,14 @@ reference:
   - elastic.pair.penalized
   - alignment.diagnostics
   - alignment.diagnostics.pairwise
+  - plot.lambda.cv
+  - plot.warp.statistics
+  - plot.phase.boxplot
+  - plot.alignment.diagnostics
+  - print.lambda.cv
+  - print.warp.statistics
+  - print.phase.boxplot
+  - print.alignment.diagnostics
 
 - title: Elastic Changepoint
   contents:

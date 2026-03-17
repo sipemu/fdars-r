@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 ```{r setup, include = FALSE}
 library(fdars)
 library(ggplot2)
+library(patchwork)
 theme_set(theme_minimal())
 ```
 
