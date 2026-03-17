@@ -15,6 +15,7 @@ frcc.monitor(chart, newdata, new.predictors)
 }
 \value{
 An object of class \code{spm.monitor} with components:
+\describe{
 \item{t2}{T-squared values}
 \item{spe}{SPE values}
 \item{t2.alarm}{Logical: TRUE where T-squared exceeds UCL}
@@ -22,6 +23,7 @@ An object of class \code{spm.monitor} with components:
 \item{residual.scores}{Residual FPC scores}
 \item{t2.ucl}{T-squared control limit}
 \item{spe.ucl}{SPE control limit}
+}
 }
 \description{
 Predicts the functional response from the FOSR model, computes

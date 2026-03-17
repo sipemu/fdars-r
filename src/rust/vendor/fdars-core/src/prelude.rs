@@ -48,7 +48,10 @@ pub use crate::elastic_regression::{
 
 // Statistical Process Monitoring
 pub use crate::spm::{
-    ControlLimit, EwmaMonitorResult, FrccChart, MfSpmChart, MfpcaResult, SpmChart, SpmMonitorResult,
+    AmewmaMonitorResult, ArlResult, ControlLimit, CusumMonitorResult, ElasticSpmChart,
+    ElasticSpmMonitorResult, EwmaMonitorResult, FrccChart, FrccMonitorResult,
+    IterativePhase1Result, MewmaMonitorResult, MfSpmChart, MfpcaResult, PartialMonitorResult,
+    ProfileChart, ProfileMonitorResult, SpmChart, SpmMonitorResult,
 };
 
 // Tolerance bands
@@ -60,7 +63,10 @@ pub use crate::tolerance::{
 pub use crate::cv::{CvMetrics, CvType};
 
 // Alignment
-pub use crate::alignment::{AlignmentResult, KarcherMeanResult};
+pub use crate::alignment::{
+    AlignmentResult, ElasticClusterResult, KarcherMeanResult, LambdaCvResult, PhaseBoxplot,
+    ShapeMeanResult, WarpStatistics,
+};
 
 // Irregular functional data
 pub use crate::irreg_fdata::IrregFdata;

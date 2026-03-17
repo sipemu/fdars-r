@@ -331,8 +331,8 @@ pub fn predict_scalar_on_shape(
 }
 
 impl ScalarOnShapeResult {
-    /// Construct a new result (needed for external reconstruction via R bindings).
-    pub fn new(
+    /// Construct from pre-computed parts (for FFI reconstruction).
+    pub fn from_parts(
         beta: Vec<f64>,
         beta_coefficients: Vec<f64>,
         gammas: FdMatrix,
@@ -348,9 +348,19 @@ impl ScalarOnShapeResult {
         index_method: IndexMethod,
     ) -> Self {
         Self {
-            beta, beta_coefficients, gammas, shape_scores,
-            h_coefficients, g_coefficients, fitted_values, residuals,
-            sse, r_squared, n_iter_outer, n_iter_inner, index_method,
+            beta,
+            beta_coefficients,
+            gammas,
+            shape_scores,
+            h_coefficients,
+            g_coefficients,
+            fitted_values,
+            residuals,
+            sse,
+            r_squared,
+            n_iter_outer,
+            n_iter_inner,
+            index_method,
         }
     }
 

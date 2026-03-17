@@ -4,42 +4,17 @@
 \alias{plot.irregFdata}
 \title{Plot method for irregFdata objects}
 \usage{
-\method{plot}{irregFdata}(
-  x,
-  ...,
-  col = NULL,
-  lty = 1,
-  lwd = 1,
-  main = NULL,
-  xlab = NULL,
-  ylab = NULL,
-  add = FALSE,
-  alpha = 0.7
-)
+\method{plot}{irregFdata}(x, ..., alpha = 0.7)
 }
 \arguments{
 \item{x}{An irregFdata object.}
 
-\item{...}{Additional arguments passed to \code{plot}.}
+\item{...}{Additional arguments (ignored).}
 
-\item{col}{Colors for curves.}
-
-\item{lty}{Line type.}
-
-\item{lwd}{Line width.}
-
-\item{main}{Plot title.}
-
-\item{xlab}{X-axis label.}
-
-\item{ylab}{Y-axis label.}
-
-\item{add}{Logical. If TRUE, add to existing plot.}
-
-\item{alpha}{Transparency for many curves.}
+\item{alpha}{Transparency for lines.}
 }
 \value{
-Invisibly returns the input object \code{x}.
+A \code{ggplot} object.
 }
 \description{
 Plot method for irregFdata objects

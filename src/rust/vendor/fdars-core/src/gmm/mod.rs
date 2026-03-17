@@ -63,15 +63,35 @@ pub struct GmmResult {
 }
 
 impl GmmResult {
-    /// Create a new GmmResult for prediction purposes.
-    pub fn new(
-        cluster: Vec<usize>, membership: FdMatrix, means: Vec<Vec<f64>>,
-        covariances: Vec<Vec<f64>>, weights: Vec<f64>, log_likelihood: f64,
-        bic: f64, icl: f64, iterations: usize, converged: bool,
-        k: usize, d: usize,
+    /// Construct from pre-computed parts (for FFI reconstruction).
+    pub fn from_parts(
+        cluster: Vec<usize>,
+        membership: FdMatrix,
+        means: Vec<Vec<f64>>,
+        covariances: Vec<Vec<f64>>,
+        weights: Vec<f64>,
+        log_likelihood: f64,
+        bic: f64,
+        icl: f64,
+        iterations: usize,
+        converged: bool,
+        k: usize,
+        d: usize,
     ) -> Self {
-        Self { cluster, membership, means, covariances, weights, log_likelihood,
-               bic, icl, iterations, converged, k, d }
+        Self {
+            cluster,
+            membership,
+            means,
+            covariances,
+            weights,
+            log_likelihood,
+            bic,
+            icl,
+            iterations,
+            converged,
+            k,
+            d,
+        }
     }
 }
 

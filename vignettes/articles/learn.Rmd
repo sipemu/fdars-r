@@ -115,6 +115,11 @@ knitr::opts_chunk$set(
     <div class="fdars-gallery-title">Comparing Methods</div>
   </a>
 
+  <a class="fdars-gallery-item" href="shape-analysis.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-shape-analysis.svg" alt="Shape Analysis"></div>
+    <div class="fdars-gallery-title">Shape Analysis</div>
+  </a>
+
 </div>
 
 <!-- ===== REGRESSION ===== -->
@@ -199,6 +204,16 @@ knitr::opts_chunk$set(
     <div class="fdars-gallery-title">Statistical Process Monitoring</div>
   </a>
 
+  <a class="fdars-gallery-item" href="advanced-spm.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-advanced-spm.svg" alt="Advanced SPM"></div>
+    <div class="fdars-gallery-title">Advanced Process Monitoring</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="profile-partial-monitoring.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-profile-partial.svg" alt="Profile & Partial Monitoring"></div>
+    <div class="fdars-gallery-title">Profile & Partial Monitoring</div>
+  </a>
+
 </div>
 
 <!-- ===== ANALYZE ===== -->
@@ -224,6 +239,11 @@ knitr::opts_chunk$set(
   <a class="fdars-gallery-item" href="gmm-clustering.html">
     <div class="fdars-gallery-thumb"><img src="../reference/figures/card-gmm-clustering.svg" alt="GMM Clustering"></div>
     <div class="fdars-gallery-title">GMM Clustering</div>
+  </a>
+
+  <a class="fdars-gallery-item" href="elastic-clustering.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-elastic-clustering.svg" alt="Elastic Clustering"></div>
+    <div class="fdars-gallery-title">Elastic Clustering</div>
   </a>
 
   <a class="fdars-gallery-item" href="outlier-detection.html">

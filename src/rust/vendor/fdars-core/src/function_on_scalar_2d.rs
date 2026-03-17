@@ -92,14 +92,33 @@ pub struct FosrResult2d {
 }
 
 impl FosrResult2d {
-    /// Create a new result for prediction purposes.
-    pub fn new(
-        intercept: Vec<f64>, beta: FdMatrix, fitted: FdMatrix, residuals: FdMatrix,
-        r_squared_pointwise: Vec<f64>, r_squared: f64, beta_se: Option<FdMatrix>,
-        lambda_s: f64, lambda_t: f64, gcv: f64, grid: Grid2d,
+    /// Construct from pre-computed parts (for FFI reconstruction).
+    pub fn from_parts(
+        intercept: Vec<f64>,
+        beta: FdMatrix,
+        fitted: FdMatrix,
+        residuals: FdMatrix,
+        r_squared_pointwise: Vec<f64>,
+        r_squared: f64,
+        beta_se: Option<FdMatrix>,
+        lambda_s: f64,
+        lambda_t: f64,
+        gcv: f64,
+        grid: Grid2d,
     ) -> Self {
-        Self { intercept, beta, fitted, residuals, r_squared_pointwise, r_squared,
-               beta_se, lambda_s, lambda_t, gcv, grid }
+        Self {
+            intercept,
+            beta,
+            fitted,
+            residuals,
+            r_squared_pointwise,
+            r_squared,
+            beta_se,
+            lambda_s,
+            lambda_t,
+            gcv,
+            grid,
+        }
     }
 
     /// Reshape the j-th coefficient surface into an m1 x m2 matrix.

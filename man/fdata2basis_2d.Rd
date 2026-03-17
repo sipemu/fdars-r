@@ -4,7 +4,12 @@
 \alias{fdata2basis_2d}
 \title{Convert 2D Functional Data to Tensor Product Basis Coefficients}
 \usage{
-fdata2basis_2d(fdataobj, nbasis.s = 10, nbasis.t = 10, type = c("bspline", "fourier"))
+fdata2basis_2d(
+  fdataobj,
+  nbasis.s = 10,
+  nbasis.t = 10,
+  type = c("bspline", "fourier")
+)
 }
 \arguments{
 \item{fdataobj}{A 2D fdata object (surfaces).}

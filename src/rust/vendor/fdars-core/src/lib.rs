@@ -97,15 +97,22 @@ pub use covariance::{
 // Re-export alignment types and functions
 pub use alignment::{
     align_to_target, alignment_quality, amplitude_distance, amplitude_self_distance_matrix,
-    compose_warps, elastic_align_pair, elastic_align_pair_constrained, elastic_align_pair_nd,
+    compose_warps, cut_dendrogram, diagnose_alignment, diagnose_pairwise, elastic_align_pair,
+    elastic_align_pair_constrained, elastic_align_pair_nd, elastic_align_pair_penalized,
     elastic_align_pair_with_landmarks, elastic_cross_distance_matrix, elastic_decomposition,
-    elastic_distance, elastic_distance_nd, elastic_self_distance_matrix, karcher_mean,
-    pairwise_consistency, phase_distance_pair, phase_self_distance_matrix, reparameterize_curve,
-    srsf_inverse, srsf_inverse_nd, srsf_transform, srsf_transform_nd, tsrvf_from_alignment,
+    elastic_distance, elastic_distance_nd, elastic_hierarchical, elastic_kmeans,
+    elastic_self_distance_matrix, invert_warp, karcher_mean, lambda_cv, orbit_representative,
+    pairwise_consistency, phase_boxplot, phase_distance_pair, phase_self_distance_matrix,
+    reparameterize_curve, shape_distance, shape_mean, shape_self_distance_matrix, srsf_inverse,
+    srsf_inverse_nd, srsf_transform, srsf_transform_nd, tsrvf_from_alignment,
     tsrvf_from_alignment_with_method, tsrvf_inverse, tsrvf_transform, tsrvf_transform_with_method,
-    warp_complexity, warp_smoothness, AlignmentQuality, AlignmentResult, AlignmentResultNd,
-    AlignmentSetResult, ConstrainedAlignmentResult, DecompositionResult, KarcherMeanResult,
-    TransportMethod, TsrvfResult,
+    warp_complexity, warp_inverse_error, warp_smoothness, warp_statistics, AlignmentDiagnostic,
+    AlignmentDiagnosticSummary, AlignmentQuality, AlignmentResult, AlignmentResultNd,
+    AlignmentSetResult, ConstrainedAlignmentResult, DecompositionResult, DiagnosticConfig,
+    ElasticClusterConfig, ElasticClusterMethod, ElasticClusterResult, ElasticDendrogram,
+    KarcherMeanResult, LambdaCvConfig, LambdaCvResult, OrbitRepresentative, PhaseBoxplot,
+    ShapeDistanceResult, ShapeMeanResult, ShapeQuotient, TransportMethod, TsrvfResult,
+    WarpPenaltyType, WarpStatistics,
 };
 
 // Re-export commonly used items
@@ -261,11 +268,22 @@ pub use elastic_regression::{
 
 // Re-export SPM types
 pub use spm::{
-    ewma_scores, frcc_monitor, frcc_phase1, hotelling_t2, mf_spm_monitor, mf_spm_phase1, mfpca,
-    spe_contributions, spe_control_limit, spe_multivariate, spe_univariate, spm_ewma_monitor,
-    spm_monitor, spm_phase1, t2_contributions, t2_control_limit, ControlLimit, EwmaConfig,
-    EwmaMonitorResult, FrccChart, FrccConfig, FrccMonitorResult, MfSpmChart, MfpcaConfig,
-    MfpcaResult, SpmChart, SpmConfig, SpmMonitorResult,
+    arl0_ewma_t2, arl0_spe, arl0_t2, arl1_t2, elastic_spm_monitor, elastic_spm_phase1,
+    evaluate_rules, ewma_scores, frcc_monitor, frcc_phase1, hotelling_t2, hotelling_t2_regularized,
+    mf_spm_monitor, mf_spm_phase1, mfpca, nelson_rules, profile_monitor, profile_phase1,
+    select_ncomp, spe_contributions, spe_control_limit, spe_limit_robust,
+    spe_moment_match_diagnostic, spe_multivariate, spe_univariate, spm_amewma_monitor,
+    spm_cusum_monitor, spm_cusum_monitor_with_restart, spm_ewma_monitor, spm_mewma_monitor,
+    spm_monitor, spm_monitor_partial, spm_monitor_partial_batch, spm_phase1, spm_phase1_iterative,
+    t2_contributions, t2_contributions_mfpca, t2_control_limit, t2_limit_robust,
+    t2_pc_contributions, t2_pc_significance, western_electric_rules, AmewmaConfig,
+    AmewmaMonitorResult, ArlConfig, ArlResult, ChartRule, ControlLimit, ControlLimitMethod,
+    CusumConfig, CusumMonitorResult, DomainCompletion, ElasticSpmChart, ElasticSpmConfig,
+    ElasticSpmMonitorResult, EwmaConfig, EwmaMonitorResult, FrccChart, FrccConfig,
+    FrccMonitorResult, IterativePhase1Config, IterativePhase1Result, MewmaConfig,
+    MewmaMonitorResult, MfSpmChart, MfpcaConfig, MfpcaResult, NcompMethod, PartialDomainConfig,
+    PartialMonitorResult, ProfileChart, ProfileMonitorConfig, ProfileMonitorResult, RuleViolation,
+    SpmChart, SpmConfig, SpmMonitorResult,
 };
 
 // Re-export elastic changepoint types

@@ -13,6 +13,7 @@ spm.monitor(chart, newdata)
 }
 \value{
 An object of class \code{spm.monitor} with components:
+\describe{
 \item{t2}{T-squared values for new observations}
 \item{spe}{SPE values for new observations}
 \item{t2.alarm}{Logical vector: TRUE where T-squared exceeds UCL}
@@ -20,6 +21,7 @@ An object of class \code{spm.monitor} with components:
 \item{scores}{FPC score matrix for new observations}
 \item{t2.ucl}{T-squared control limit}
 \item{spe.ucl}{SPE control limit}
+}
 }
 \description{
 Projects new functional observations through a trained SPM chart and

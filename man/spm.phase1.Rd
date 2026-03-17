@@ -20,6 +20,7 @@ functional data (at least 4 observations).}
 }
 \value{
 An object of class \code{spm.chart} with components:
+\describe{
 \item{eigenvalues}{Eigenvalues from FPCA}
 \item{t2.phase1}{T-squared values for calibration set}
 \item{spe.phase1}{SPE values for calibration set}
@@ -30,6 +31,7 @@ An object of class \code{spm.chart} with components:
 \item{spe.description}{Description of SPE limit}
 \item{fdataobj}{Original fdata object}
 \item{.rust}{Internal fields for Phase II monitoring}
+}
 }
 \description{
 Builds an FPCA-based control chart from in-control functional data.

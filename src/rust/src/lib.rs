@@ -93,6 +93,89 @@ fn simpsons_weights_2d(argvals_s: &[f64], argvals_t: &[f64]) -> Vec<f64> {
 }
 
 // =============================================================================
+// Classification probability helper (for conformal prediction)
+// =============================================================================
+
+/// Compute class probabilities from a ClassifMethod and score matrix.
+/// Replaces the now-private `classif_predict_probs` from fdars-core.
+fn classif_probs_from_method(
+    method: &classification::ClassifMethod,
+    scores: &FdMatrix,
+) -> Vec<Vec<f64>> {
+    let n = scores.nrows();
+    let d = scores.ncols();
+
+    fn softmax(v: &[f64]) -> Vec<f64> {
+        let max = v.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let exps: Vec<f64> = v.iter().map(|&x| (x - max).exp()).collect();
+        let sum: f64 = exps.iter().sum();
+        exps.iter().map(|&e| e / sum).collect()
+    }
+
+    fn mahalanobis_sq(x: &[f64], mu: &[f64], chol: &[f64], d: usize) -> f64 {
+        // Solve L * z = (x - mu)
+        let diff: Vec<f64> = x.iter().zip(mu).map(|(a, b)| a - b).collect();
+        let mut z = diff.clone();
+        for i in 0..d {
+            for j in 0..i {
+                z[i] -= chol[i * d + j] * z[j];
+            }
+            z[i] /= chol[i * d + i];
+        }
+        z.iter().map(|v| v * v).sum()
+    }
+
+    match method {
+        classification::ClassifMethod::Lda { class_means, cov_chol, priors, n_classes } => {
+            let g = *n_classes;
+            (0..n).map(|i| {
+                let x: Vec<f64> = (0..d).map(|j| scores[(i, j)]).collect();
+                let disc: Vec<f64> = (0..g).map(|c| {
+                    priors[c].max(1e-15).ln() - 0.5 * mahalanobis_sq(&x, &class_means[c], cov_chol, d)
+                }).collect();
+                softmax(&disc)
+            }).collect()
+        }
+        classification::ClassifMethod::Qda { class_means, class_chols, class_log_dets, priors, n_classes } => {
+            let g = *n_classes;
+            (0..n).map(|i| {
+                let x: Vec<f64> = (0..d).map(|j| scores[(i, j)]).collect();
+                let disc: Vec<f64> = (0..g).map(|c| {
+                    priors[c].max(1e-15).ln() - 0.5 * (class_log_dets[c] + mahalanobis_sq(&x, &class_means[c], &class_chols[c], d))
+                }).collect();
+                softmax(&disc)
+            }).collect()
+        }
+        classification::ClassifMethod::Knn { training_scores, training_labels, k, n_classes } => {
+            let g = *n_classes;
+            let n_train = training_scores.nrows();
+            (0..n).map(|i| {
+                let x: Vec<f64> = (0..d).map(|j| scores[(i, j)]).collect();
+                let mut dists: Vec<(f64, usize)> = (0..n_train).map(|t| {
+                    let dist: f64 = (0..d).map(|j| {
+                        let diff = x[j] - training_scores[(t, j)];
+                        diff * diff
+                    }).sum();
+                    (dist, training_labels[t])
+                }).collect();
+                dists.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+                let mut counts = vec![0.0; g];
+                for &(_, label) in dists.iter().take(*k) {
+                    if label < g { counts[label] += 1.0; }
+                }
+                let sum: f64 = counts.iter().sum();
+                if sum > 0.0 { counts.iter().map(|&c| c / sum).collect() }
+                else { vec![1.0 / g as f64; g] }
+            }).collect()
+        }
+        _ => {
+            // Fallback for future ClassifMethod variants
+            (0..n).map(|_| vec![1.0]).collect()
+        }
+    }
+}
+
+// =============================================================================
 // fdata functions
 // =============================================================================
 
@@ -10234,9 +10317,19 @@ fn predict_gmm_rust(
         .collect();
 
     // Build a GmmResult for prediction
-    let gmm_result = gmm::GmmResult::new(
-        vec![0; 1], FdMatrix::zeros(1, ku), means_vec, covs,
-        weights, 0.0, 0.0, 0.0, 0, true, ku, du,
+    let gmm_result = gmm::GmmResult::from_parts(
+        vec![0; 1],
+        FdMatrix::zeros(1, ku),
+        means_vec,
+        covs,
+        weights,
+        0.0,
+        0.0,
+        0.0,
+        0,
+        true,
+        ku,
+        du,
     );
 
     let bt = fdars_core::basis::ProjectionBasisType::from_i32(basis_type);
@@ -12900,9 +12993,18 @@ fn predict_fosr_2d_rust(
     let grid = fdars_core::function_on_scalar_2d::Grid2d::new(argvals_s, argvals_t);
     let m = grid.total();
 
-    let fosr_result = fdars_core::function_on_scalar_2d::FosrResult2d::new(
-        intercept.clone(), beta.clone(), FdMatrix::zeros(1, m), FdMatrix::zeros(1, m),
-        vec![0.0; m], 0.0, None, lambda_s, lambda_t, 0.0, grid,
+    let fosr_result = fdars_core::function_on_scalar_2d::FosrResult2d::from_parts(
+        intercept.clone(),
+        beta.clone(),
+        FdMatrix::zeros(1, m),
+        FdMatrix::zeros(1, m),
+        vec![0.0; m],
+        0.0,
+        None,
+        lambda_s,
+        lambda_t,
+        0.0,
+        grid,
     );
 
     match fdars_core::function_on_scalar_2d::predict_fosr_2d(&fosr_result, &pred) {
@@ -12983,9 +13085,16 @@ fn predict_elastic_regression_rust(
     let as_ = aligned_srsfs_data.as_real_slice().unwrap();
     let aligned_srsfs = FdMatrix::from_slice(as_, aligned_srsfs_data.nrows(), aligned_srsfs_data.ncols()).expect("Invalid aligned_srsfs");
 
-    let fit = elastic_regression::ElasticRegressionResult::new(
-        alpha, beta, fitted_values, residuals, sse, r_squared,
-        gammas, aligned_srsfs, n_iter as usize,
+    let fit = elastic_regression::ElasticRegressionResult::from_parts(
+        alpha,
+        beta,
+        fitted_values,
+        residuals,
+        sse,
+        r_squared,
+        gammas,
+        aligned_srsfs,
+        n_iter as usize,
     );
 
     let nds = new_data.as_real_slice().unwrap();
@@ -13017,9 +13126,16 @@ fn predict_elastic_logistic_rust(
     let aligned_srsfs = FdMatrix::from_slice(as_, aligned_srsfs_data.nrows(), aligned_srsfs_data.ncols()).expect("Invalid aligned_srsfs");
 
     let pred_usize: Vec<usize> = predicted_classes.iter().map(|&x| x as usize).collect();
-    let fit = elastic_regression::ElasticLogisticResult::new(
-        alpha, beta, probabilities, pred_usize, accuracy, loss,
-        gammas, aligned_srsfs, n_iter as usize,
+    let fit = elastic_regression::ElasticLogisticResult::from_parts(
+        alpha,
+        beta,
+        probabilities,
+        pred_usize,
+        accuracy,
+        loss,
+        gammas,
+        aligned_srsfs,
+        n_iter as usize,
     );
 
     let nds = new_data.as_real_slice().unwrap();
@@ -13539,8 +13655,23 @@ fn cv_conformal_classif_rust(
             "knn" => classification::fclassif_knn_fit(train_d, train_y, train_sc, nc, kn).ok()?,
             _ => classification::fclassif_lda_fit(train_d, train_y, train_sc, nc).ok()?,
         };
-        let scores_mat = fit.project(pred_d);
-        let probs = classification::classif_predict_probs(&fit, &scores_mat);
+        // Project: center and multiply by rotation
+        let n_pred = pred_d.nrows();
+        let m = pred_d.ncols();
+        let nc_fit = fit.ncomp;
+        let mut scores_data = vec![0.0; n_pred * nc_fit];
+        for i in 0..n_pred {
+            for j in 0..nc_fit {
+                let mut s = 0.0;
+                for k in 0..m {
+                    s += (pred_d[(i, k)] - fit.fpca_mean[k]) * fit.fpca_rotation[(k, j)];
+                }
+                scores_data[i * nc_fit + j] = s;
+            }
+        }
+        let scores_mat = FdMatrix::from_slice(&scores_data, n_pred, nc_fit).unwrap();
+        // Compute probabilities from ClassifMethod
+        let probs = classif_probs_from_method(&fit.method, &scores_mat);
         Some((probs, vec![]))
     };
 
@@ -14277,10 +14408,20 @@ fn predict_scalar_on_shape_rust(
         _ => fdars_core::elastic_regression::IndexMethod::Identity,
     };
 
-    let fit = fdars_core::elastic_regression::ScalarOnShapeResult::new(
-        beta, beta_coefficients, gm, shape_scores,
-        h_coefficients, g_coefficients, fitted_values, residuals,
-        sse, r_squared, n_iter_outer as usize, n_iter_inner as usize, idx,
+    let fit = fdars_core::elastic_regression::ScalarOnShapeResult::from_parts(
+        beta,
+        beta_coefficients,
+        gm,
+        shape_scores,
+        h_coefficients,
+        g_coefficients,
+        fitted_values,
+        residuals,
+        sse,
+        r_squared,
+        n_iter_outer as usize,
+        n_iter_inner as usize,
+        idx,
     );
 
     let nds = new_data.as_real_slice().unwrap();
@@ -14383,8 +14524,8 @@ fn spm_monitor_rust(
         centered: cen,
     };
 
-    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
-    let spe_limit = ControlLimit::new(spe_ucl, spe_alpha, spe_description.to_string());
+    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
     let config = fdars_core::spm::SpmConfig {
         ncomp: nc,
         alpha: config_alpha,
@@ -14392,8 +14533,8 @@ fn spm_monitor_rust(
         seed: config_seed as u64,
     };
 
-    let chart = SpmChart::new(
-        fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config,
+    let chart = SpmChart::from_parts(
+        fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config, true,
     );
 
     match fdars_core::spm::spm_monitor(&chart, &nd, &argvals) {
@@ -14459,8 +14600,7 @@ fn mfpca_rust(data_list: List, ncomp: i32, weighted: bool) -> Robj {
                 eigenvalues = Robj::from(result.eigenvalues.clone()),
                 means = Robj::from(means_list),
                 scales = Robj::from(result.scales.clone()),
-                grid_sizes = Robj::from(grid_sizes_i32),
-                combined_rotation = fdmatrix_to_robj(&result.combined_rotation)
+                grid_sizes = Robj::from(grid_sizes_i32)
             ))
         }
         Err(e) => {
@@ -14510,8 +14650,8 @@ fn spm_ewma_rust(
         centered: cen,
     };
 
-    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
-    let spe_limit = ControlLimit::new(spe_ucl, spe_alpha, spe_description.to_string());
+    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
     let config = fdars_core::spm::SpmConfig {
         ncomp: nc,
         alpha: config_alpha,
@@ -14519,14 +14659,15 @@ fn spm_ewma_rust(
         seed: config_seed as u64,
     };
 
-    let chart = SpmChart::new(
-        fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config,
+    let chart = SpmChart::from_parts(
+        fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config, true,
     );
 
     let ewma_config = fdars_core::spm::EwmaConfig {
         lambda,
         ncomp: ewma_ncomp as usize,
         alpha: ewma_alpha,
+        exact_covariance: false,
     };
 
     match fdars_core::spm::spm_ewma_monitor(&chart, &sd, &argvals, &ewma_config) {
@@ -14636,6 +14777,7 @@ fn frcc_phase1_rust(
         alpha,
         tuning_fraction,
         seed: seed as u64,
+        min_r_squared: 0.0,
     };
 
     match fdars_core::spm::frcc_phase1(&y, &pred, &argvals, &config) {
@@ -14714,16 +14856,16 @@ fn frcc_monitor_rust(
     let fbs = fosr_beta.as_real_slice().unwrap();
     let fb = FdMatrix::from_slice(fbs, fosr_beta.nrows(), fosr_beta.ncols()).expect("Invalid fosr_beta");
 
-    let fosr = fdars_core::function_on_scalar::FosrResult::new(
+    let fosr = fdars_core::function_on_scalar::FosrResult::from_parts(
         fosr_intercept,
         fb,
-        FdMatrix::zeros(1, 1), // fitted (not needed for prediction)
-        FdMatrix::zeros(1, 1), // residuals
-        vec![],                // r_squared_t
-        0.0,                   // r_squared
-        FdMatrix::zeros(1, 1), // beta_se
+        FdMatrix::zeros(1, 1),
+        FdMatrix::zeros(1, 1),
+        vec![],
+        0.0,
+        FdMatrix::zeros(1, 1),
         fosr_lambda,
-        0.0,                   // gcv
+        0.0,
     );
 
     // Reconstruct residual FPCA
@@ -14744,8 +14886,8 @@ fn frcc_monitor_rust(
         centered: rc,
     };
 
-    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
-    let spe_limit = ControlLimit::new(spe_ucl, spe_alpha, spe_description.to_string());
+    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
 
     let frcc_config = fdars_core::spm::FrccConfig {
         ncomp: nc,
@@ -14753,10 +14895,11 @@ fn frcc_monitor_rust(
         alpha: config_alpha,
         tuning_fraction: config_tuning_fraction,
         seed: config_seed as u64,
+        min_r_squared: 0.0,
     };
 
-    let chart = fdars_core::spm::FrccChart::new(
-        fosr, residual_fpca, eigenvalues, t2_limit, spe_limit, frcc_config,
+    let chart = fdars_core::spm::FrccChart::from_parts(
+        fosr, residual_fpca, eigenvalues, t2_limit, spe_limit, 0.0, frcc_config,
     );
 
     match fdars_core::spm::frcc_monitor(&chart, &ny, &np, &argvals) {
@@ -14773,6 +14916,1591 @@ fn frcc_monitor_rust(
         }
         Err(e) => {
             rprintln!("frcc_monitor failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+// =============================================================================
+// Phase 6-9: Alignment & Shape Analysis Wrappers
+// =============================================================================
+
+/// Lambda cross-validation for elastic alignment regularisation
+#[extendr]
+fn alignment_lambda_cv_rust(data: RMatrix<f64>, argvals: Vec<f64>, lambdas: Vec<f64>, n_folds: i32, max_iter: i32, tol: f64, seed: i32) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(NULL);
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let config = alignment::LambdaCvConfig {
+        lambdas,
+        n_folds: n_folds as usize,
+        max_iter: max_iter as usize,
+        tol,
+        seed: seed as u64,
+    };
+    match alignment::lambda_cv(&fd, &argvals, &config) {
+        Ok(res) => {
+            list!(
+                best_lambda = res.best_lambda,
+                cv_scores = res.cv_scores,
+                lambdas = res.lambdas
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("alignment_lambda_cv failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Warp statistics: mean, variance, confidence bands, Karcher mean warp
+#[extendr]
+fn alignment_warp_statistics_rust(gammas: RMatrix<f64>, argvals: Vec<f64>, confidence_level: f64) -> Robj {
+    let n = gammas.nrows();
+    let m = gammas.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return r!(NULL);
+    }
+    let data_slice = gammas.as_real_slice().unwrap();
+    let gammas_fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match alignment::warp_statistics(&gammas_fd, &argvals, confidence_level) {
+        Ok(res) => {
+            list!(
+                mean = res.mean,
+                variance = res.variance,
+                std_dev = res.std_dev,
+                lower_band = res.lower_band,
+                upper_band = res.upper_band,
+                karcher_mean_warp = res.karcher_mean_warp,
+                geodesic_distances = res.geodesic_distances
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("alignment_warp_statistics failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Phase boxplot for warping functions
+#[extendr]
+fn alignment_phase_boxplot_rust(gammas: RMatrix<f64>, argvals: Vec<f64>, factor: f64) -> Robj {
+    let n = gammas.nrows();
+    let m = gammas.ncols();
+    if n < 3 || m < 2 || argvals.len() != m {
+        return r!(NULL);
+    }
+    let data_slice = gammas.as_real_slice().unwrap();
+    let gammas_fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match alignment::phase_boxplot(&gammas_fd, &argvals, factor) {
+        Ok(res) => {
+            let outlier_indices_r: Vec<i32> = res.outlier_indices.iter().map(|&i| (i + 1) as i32).collect();
+            list!(
+                median = res.median,
+                median_index = (res.median_index + 1) as i32,
+                central_lower = res.central_lower,
+                central_upper = res.central_upper,
+                whisker_lower = res.whisker_lower,
+                whisker_upper = res.whisker_upper,
+                depths = res.depths,
+                outlier_indices = outlier_indices_r,
+                factor = res.factor
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("alignment_phase_boxplot failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Invert a warping function
+#[extendr]
+fn alignment_invert_warp_rust(gamma: Vec<f64>, argvals: Vec<f64>) -> Robj {
+    if gamma.len() != argvals.len() || argvals.len() < 2 {
+        return r!(NULL);
+    }
+    match alignment::invert_warp(&gamma, &argvals) {
+        Ok(inv) => Robj::from(inv),
+        Err(e) => {
+            rprintln!("alignment_invert_warp failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Warp inverse error: max |gamma(gamma_inv(t)) - t|
+#[extendr]
+fn alignment_warp_inverse_error_rust(gamma: Vec<f64>, argvals: Vec<f64>) -> Robj {
+    if gamma.len() != argvals.len() || argvals.len() < 2 {
+        return Robj::from(f64::NAN);
+    }
+    match alignment::invert_warp(&gamma, &argvals) {
+        Ok(gamma_inv) => {
+            let err = alignment::warp_inverse_error(&gamma, &gamma_inv, &argvals);
+            Robj::from(err)
+        }
+        Err(e) => {
+            rprintln!("alignment_warp_inverse_error failed: {:?}", e);
+            Robj::from(f64::NAN)
+        }
+    }
+}
+
+/// Penalized elastic alignment with configurable penalty type
+#[extendr]
+fn alignment_elastic_pair_penalized_rust(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, penalty_type: &str, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(gamma = Vec::<f64>::new(), f_aligned = Vec::<f64>::new(), distance = f64::NAN).into();
+    }
+    let pt = match penalty_type {
+        "first_order" => alignment::WarpPenaltyType::FirstOrder,
+        "second_order" => alignment::WarpPenaltyType::SecondOrder,
+        "combined" => alignment::WarpPenaltyType::Combined { second_order_weight: lambda.max(0.01) },
+        _ => alignment::WarpPenaltyType::FirstOrder,
+    };
+    let res = alignment::elastic_align_pair_penalized(&f1, &f2, &argvals, lambda, pt);
+    list!(gamma = res.gamma, f_aligned = res.f_aligned, distance = res.distance).into()
+}
+
+/// Diagnose alignment quality for all curves after Karcher mean computation
+#[extendr]
+fn alignment_diagnose_rust(
+    data: RMatrix<f64>,
+    karcher_mean: Vec<f64>,
+    karcher_mean_srsf: Vec<f64>,
+    gammas: RMatrix<f64>,
+    aligned_data: RMatrix<f64>,
+    n_iter: i32,
+    converged: bool,
+    argvals: Vec<f64>,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(NULL);
+    }
+
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid data dimensions");
+
+    let gs = gammas.as_real_slice().unwrap();
+    let gammas_fd = FdMatrix::from_slice(gs, gammas.nrows(), gammas.ncols()).expect("Invalid gammas dimensions");
+
+    let as_ = aligned_data.as_real_slice().unwrap();
+    let aligned_fd = FdMatrix::from_slice(as_, aligned_data.nrows(), aligned_data.ncols()).expect("Invalid aligned_data dimensions");
+
+    let karcher = alignment::KarcherMeanResult::new(
+        karcher_mean,
+        karcher_mean_srsf,
+        gammas_fd,
+        aligned_fd,
+        n_iter as usize,
+        converged,
+        None,
+    );
+
+    let config = alignment::DiagnosticConfig::default();
+    match alignment::diagnose_alignment(&fd, &karcher, &argvals, &config) {
+        Ok(summary) => {
+            // Build per-curve diagnostic lists
+            let diag_list: Vec<Robj> = summary.diagnostics.iter().map(|d| {
+                let issues_vec: Vec<String> = d.issues.clone();
+                list!(
+                    curve_index = (d.curve_index + 1) as i32,
+                    warp_complexity = d.warp_complexity,
+                    warp_smoothness = d.warp_smoothness,
+                    is_under_aligned = if d.is_under_aligned { 1i32 } else { 0i32 },
+                    is_over_aligned = if d.is_over_aligned { 1i32 } else { 0i32 },
+                    has_non_monotone = if d.has_non_monotone { 1i32 } else { 0i32 },
+                    residual = d.residual,
+                    distance_ratio = d.distance_ratio,
+                    flagged = if d.flagged { 1i32 } else { 0i32 },
+                    issues = issues_vec
+                ).into()
+            }).collect();
+
+            let flagged_r: Vec<i32> = summary.flagged_indices.iter().map(|&i| (i + 1) as i32).collect();
+
+            list!(
+                diagnostics = List::from_values(diag_list),
+                flagged_indices = flagged_r,
+                n_flagged = summary.n_flagged as i32,
+                health_score = summary.health_score
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("alignment_diagnose failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Diagnose a single pairwise alignment
+#[extendr]
+fn alignment_diagnose_pairwise_rust(
+    f1: Vec<f64>,
+    f2: Vec<f64>,
+    gamma: Vec<f64>,
+    f_aligned: Vec<f64>,
+    distance: f64,
+    argvals: Vec<f64>,
+) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return r!(NULL);
+    }
+
+    let alignment_result = alignment::AlignmentResult::from_parts(gamma, f_aligned, distance);
+
+    let config = alignment::DiagnosticConfig::default();
+    let d = alignment::diagnose_pairwise(&f1, &f2, &alignment_result, &argvals, &config);
+
+    let issues_vec: Vec<String> = d.issues.clone();
+    list!(
+        curve_index = (d.curve_index + 1) as i32,
+        warp_complexity = d.warp_complexity,
+        warp_smoothness = d.warp_smoothness,
+        is_under_aligned = if d.is_under_aligned { 1i32 } else { 0i32 },
+        is_over_aligned = if d.is_over_aligned { 1i32 } else { 0i32 },
+        has_non_monotone = if d.has_non_monotone { 1i32 } else { 0i32 },
+        residual = d.residual,
+        distance_ratio = d.distance_ratio,
+        flagged = if d.flagged { 1i32 } else { 0i32 },
+        issues = issues_vec
+    ).into()
+}
+
+/// Compute the orbit representative of a curve in a quotient space
+#[extendr]
+fn alignment_orbit_representative_rust(f: Vec<f64>, argvals: Vec<f64>, quotient: &str) -> Robj {
+    if f.len() != argvals.len() || argvals.len() < 2 {
+        return r!(NULL);
+    }
+    let q = match quotient {
+        "reparameterization" => alignment::ShapeQuotient::Reparameterization,
+        "translation" => alignment::ShapeQuotient::ReparameterizationTranslation,
+        "scale" => alignment::ShapeQuotient::ReparameterizationTranslationScale,
+        _ => alignment::ShapeQuotient::Reparameterization,
+    };
+    match alignment::orbit_representative(&f, &argvals, q) {
+        Ok(res) => {
+            list!(
+                representative = res.representative,
+                representative_srsf = res.representative_srsf,
+                gamma = res.gamma,
+                translation = res.translation,
+                scale = res.scale
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("alignment_orbit_representative failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Elastic shape distance between two curves
+#[extendr]
+fn alignment_shape_distance_rust(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, quotient: &str, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return r!(NULL);
+    }
+    let q = match quotient {
+        "reparameterization" => alignment::ShapeQuotient::Reparameterization,
+        "translation" => alignment::ShapeQuotient::ReparameterizationTranslation,
+        "scale" => alignment::ShapeQuotient::ReparameterizationTranslationScale,
+        _ => alignment::ShapeQuotient::Reparameterization,
+    };
+    match alignment::shape_distance(&f1, &f2, &argvals, q, lambda) {
+        Ok(res) => {
+            list!(
+                distance = res.distance,
+                gamma = res.gamma,
+                f2_aligned = res.f2_aligned
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("alignment_shape_distance failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Shape mean (Karcher mean in quotient space)
+#[extendr]
+fn alignment_shape_mean_rust(data: RMatrix<f64>, argvals: Vec<f64>, quotient: &str, lambda: f64, max_iter: i32, tol: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(NULL);
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let q = match quotient {
+        "reparameterization" => alignment::ShapeQuotient::Reparameterization,
+        "translation" => alignment::ShapeQuotient::ReparameterizationTranslation,
+        "scale" => alignment::ShapeQuotient::ReparameterizationTranslationScale,
+        _ => alignment::ShapeQuotient::Reparameterization,
+    };
+    match alignment::shape_mean(&fd, &argvals, q, lambda, max_iter as usize, tol) {
+        Ok(res) => {
+            list!(
+                mean = res.mean,
+                mean_srsf = res.mean_srsf,
+                gammas = fdmatrix_to_robj(&res.gammas),
+                aligned_data = fdmatrix_to_robj(&res.aligned_data),
+                n_iter = res.n_iter as i32,
+                converged = res.converged
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("alignment_shape_mean failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Shape self-distance matrix
+#[extendr]
+fn alignment_shape_self_distance_matrix_rust(data: RMatrix<f64>, argvals: Vec<f64>, quotient: &str, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(RMatrix::new_matrix(0, 0, |_, _| 0.0));
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let q = match quotient {
+        "reparameterization" => alignment::ShapeQuotient::Reparameterization,
+        "translation" => alignment::ShapeQuotient::ReparameterizationTranslation,
+        "scale" => alignment::ShapeQuotient::ReparameterizationTranslationScale,
+        _ => alignment::ShapeQuotient::Reparameterization,
+    };
+    match alignment::shape_self_distance_matrix(&fd, &argvals, q, lambda) {
+        Ok(result) => fdmatrix_to_robj(&result),
+        Err(e) => {
+            rprintln!("alignment_shape_self_distance_matrix failed: {:?}", e);
+            r!(RMatrix::new_matrix(0, 0, |_, _| 0.0))
+        }
+    }
+}
+
+/// Elastic k-means clustering
+#[extendr]
+fn elastic_kmeans_rust(
+    data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    k: i32,
+    max_iter: i32,
+    tol: f64,
+    karcher_max_iter: i32,
+    karcher_tol: f64,
+    lambda: f64,
+    seed: i32,
+) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return r!(NULL);
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let config = alignment::ElasticClusterConfig {
+        k: k as usize,
+        lambda,
+        max_iter: max_iter as usize,
+        tol,
+        karcher_max_iter: karcher_max_iter as usize,
+        karcher_tol,
+        seed: seed as u64,
+    };
+    match alignment::elastic_kmeans(&fd, &argvals, &config) {
+        Ok(res) => {
+            // Convert 0-indexed labels to 1-indexed for R
+            let labels_r: Vec<i32> = res.labels.iter().map(|&l| (l + 1) as i32).collect();
+
+            // Convert centers (KarcherMeanResult) to R list
+            let centers_list: Vec<Robj> = res.centers.iter().map(|c| {
+                list!(
+                    mean = c.mean.clone(),
+                    mean_srsf = c.mean_srsf.clone(),
+                    gammas = fdmatrix_to_robj(&c.gammas),
+                    aligned_data = fdmatrix_to_robj(&c.aligned_data),
+                    n_iter = c.n_iter as i32,
+                    converged = c.converged
+                ).into()
+            }).collect();
+
+            list!(
+                labels = labels_r,
+                centers = List::from_values(centers_list),
+                within_distances = res.within_distances,
+                total_within_distance = res.total_within_distance,
+                n_iter = res.n_iter as i32,
+                converged = res.converged
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("elastic_kmeans failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Elastic hierarchical clustering
+#[extendr]
+fn elastic_hierarchical_rust(data: RMatrix<f64>, argvals: Vec<f64>, method: &str, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return r!(NULL);
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let cluster_method = match method {
+        "complete" => alignment::ElasticClusterMethod::HierarchicalComplete,
+        "single" => alignment::ElasticClusterMethod::HierarchicalSingle,
+        "average" => alignment::ElasticClusterMethod::HierarchicalAverage,
+        _ => alignment::ElasticClusterMethod::HierarchicalSingle,
+    };
+    match alignment::elastic_hierarchical(&fd, &argvals, cluster_method, lambda) {
+        Ok(dendro) => {
+            // Convert merges to a 3-column matrix (i, j, distance) with 1-indexed
+            let n_merges = dendro.merges.len();
+            let merges_mat = RMatrix::new_matrix(n_merges, 3, |i, j| {
+                match j {
+                    0 => (dendro.merges[i].0 + 1) as f64,
+                    1 => (dendro.merges[i].1 + 1) as f64,
+                    2 => dendro.merges[i].2,
+                    _ => 0.0,
+                }
+            });
+            list!(
+                merges = merges_mat,
+                distance_matrix = fdmatrix_to_robj(&dendro.distance_matrix)
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("elastic_hierarchical failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Cut a hierarchical dendrogram to get cluster labels
+#[extendr]
+fn elastic_cut_dendrogram_rust(merges_data: RMatrix<f64>, distance_matrix: RMatrix<f64>, k: i32) -> Robj {
+    let n_merges = merges_data.nrows();
+    let n = distance_matrix.nrows();
+    let m_dist = distance_matrix.ncols();
+    if n == 0 || n != m_dist || n_merges == 0 {
+        return r!(NULL);
+    }
+
+    // Reconstruct merges from the 3-column matrix (1-indexed back to 0-indexed)
+    let merges_slice = merges_data.as_real_slice().unwrap();
+    let mut merges: Vec<(usize, usize, f64)> = Vec::with_capacity(n_merges);
+    for i in 0..n_merges {
+        let ci = merges_slice[i] as usize - 1;           // column 0
+        let cj = merges_slice[n_merges + i] as usize - 1; // column 1
+        let dist = merges_slice[2 * n_merges + i];         // column 2
+        merges.push((ci, cj, dist));
+    }
+
+    // Reconstruct distance_matrix
+    let dist_slice = distance_matrix.as_real_slice().unwrap();
+    let dist_fd = FdMatrix::from_slice(dist_slice, n, n).expect("Invalid distance matrix dimensions");
+
+    let dendro = alignment::ElasticDendrogram::from_parts(merges, dist_fd);
+
+    match alignment::cut_dendrogram(&dendro, k as usize) {
+        Ok(labels) => {
+            // Convert 0-indexed labels to 1-indexed for R
+            let labels_r: Vec<i32> = labels.iter().map(|&l| (l + 1) as i32).collect();
+            Robj::from(labels_r)
+        }
+        Err(e) => {
+            rprintln!("elastic_cut_dendrogram failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+// =============================================================================
+// SPM v0.9.0 wrappers: ncomp, contrib, rules, bootstrap, ARL, CUSUM,
+// MEWMA, AMEWMA, iterative, profile, partial, elastic SPM
+// =============================================================================
+
+/// Helper: reconstruct an SpmChart from its serialized parts.
+fn reconstruct_spm_chart(
+    rotation: RMatrix<f64>, mean: Vec<f64>, singular_values: Vec<f64>,
+    centered: RMatrix<f64>, eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    spe_ucl: f64, spe_alpha: f64, spe_description: &str,
+    ncomp: i32, config_alpha: f64, config_tuning_fraction: f64, config_seed: i32,
+) -> fdars_core::spm::phase::SpmChart {
+    use fdars_core::regression::FpcaResult;
+    use fdars_core::spm::phase::SpmChart;
+    use fdars_core::spm::ControlLimit;
+
+    let rs = rotation.as_real_slice().unwrap();
+    let rot = FdMatrix::from_slice(rs, rotation.nrows(), rotation.ncols()).expect("Invalid rotation");
+    let cs = centered.as_real_slice().unwrap();
+    let cen = FdMatrix::from_slice(cs, centered.nrows(), centered.ncols()).expect("Invalid centered");
+
+    let n_tune = centered.nrows();
+    let nc = ncomp as usize;
+    let scores_placeholder = FdMatrix::zeros(n_tune, nc);
+
+    let fpca = FpcaResult {
+        singular_values,
+        rotation: rot,
+        scores: scores_placeholder,
+        mean,
+        centered: cen,
+    };
+
+    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
+    let config = fdars_core::spm::SpmConfig {
+        ncomp: nc,
+        alpha: config_alpha,
+        tuning_fraction: config_tuning_fraction,
+        seed: config_seed as u64,
+    };
+
+    SpmChart::from_parts(
+        fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config, true,
+    )
+}
+
+// --- Phase 1: ncomp, contrib, rules, bootstrap ---
+
+/// Select the number of principal components.
+#[extendr]
+fn spm_select_ncomp_rust(eigenvalues: Vec<f64>, method: &str, threshold: f64) -> Robj {
+    use fdars_core::spm::ncomp::{select_ncomp, NcompMethod};
+
+    let method_enum = match method {
+        "variance90" | "cumulative_variance" => NcompMethod::CumulativeVariance(threshold),
+        "kaiser" => NcompMethod::Kaiser,
+        "elbow" => NcompMethod::Elbow,
+        "fixed" => NcompMethod::Fixed(threshold as usize),
+        _ => NcompMethod::CumulativeVariance(threshold),
+    };
+
+    match select_ncomp(&eigenvalues, &method_enum) {
+        Ok(k) => r!(k as i32),
+        Err(e) => {
+            rprintln!("select_ncomp failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Per-PC T-squared contributions for a single observation or batch.
+#[extendr]
+fn spm_t2_pc_contrib_rust(scores: RMatrix<f64>, eigenvalues: Vec<f64>) -> Robj {
+    let n = scores.nrows();
+    let nc = scores.ncols();
+    let ss = scores.as_real_slice().unwrap();
+    let sc = FdMatrix::from_slice(ss, n, nc).expect("Invalid scores");
+
+    match fdars_core::spm::t2_pc_contributions(&sc, &eigenvalues) {
+        Ok(contrib) => fdmatrix_to_robj(&contrib),
+        Err(e) => {
+            rprintln!("t2_pc_contributions failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Evaluate control chart rules (Western Electric, Nelson, or custom).
+#[extendr]
+fn spm_evaluate_rules_rust(values: Vec<f64>, center: f64, sigma: f64, rule_set: &str) -> Robj {
+    use fdars_core::spm::rules::{western_electric_rules, nelson_rules, evaluate_rules, ChartRule};
+
+    let violations = match rule_set {
+        "western_electric" => western_electric_rules(&values, center, sigma),
+        "nelson" => nelson_rules(&values, center, sigma),
+        _ => evaluate_rules(&values, center, sigma, &[
+            ChartRule::WE1, ChartRule::WE2, ChartRule::WE3, ChartRule::WE4,
+        ]),
+    };
+
+    match violations {
+        Ok(viols) => {
+            let rule_names: Vec<String> = viols.iter().map(|v| {
+                match &v.rule {
+                    ChartRule::WE1 => "WE1".to_string(),
+                    ChartRule::WE2 => "WE2".to_string(),
+                    ChartRule::WE3 => "WE3".to_string(),
+                    ChartRule::WE4 => "WE4".to_string(),
+                    ChartRule::Nelson5 => "Nelson5".to_string(),
+                    ChartRule::Nelson6 => "Nelson6".to_string(),
+                    ChartRule::Nelson7 => "Nelson7".to_string(),
+                    ChartRule::CustomRun { n_points, k_sigma } =>
+                        format!("CustomRun({},{})", n_points, k_sigma),
+                    _ => "Unknown".to_string(),
+                }
+            }).collect();
+
+            let indices_list = List::from_values(
+                viols.iter().map(|v| {
+                    let idx: Vec<i32> = v.indices.iter().map(|&i| (i + 1) as i32).collect();
+                    Robj::from(idx)
+                })
+            );
+
+            r!(list!(
+                rules = Robj::from(rule_names),
+                indices = Robj::from(indices_list)
+            ))
+        }
+        Err(e) => {
+            rprintln!("evaluate_rules failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Robust T-squared control limit.
+#[extendr]
+fn spm_t2_limit_robust_rust(t2_values: Vec<f64>, ncomp: i32, alpha: f64,
+                             method: &str, n_bootstrap: i32, seed: i32) -> Robj {
+    use fdars_core::spm::bootstrap::{t2_limit_robust, ControlLimitMethod};
+
+    let method_enum = match method {
+        "parametric" => ControlLimitMethod::Parametric,
+        "empirical" => ControlLimitMethod::Empirical,
+        "bootstrap" => ControlLimitMethod::Bootstrap {
+            n_bootstrap: n_bootstrap as usize,
+            seed: seed as u64,
+        },
+        "kde" => ControlLimitMethod::KernelDensity { bandwidth: None },
+        _ => ControlLimitMethod::Parametric,
+    };
+
+    match t2_limit_robust(&t2_values, ncomp as usize, alpha, &method_enum) {
+        Ok(limit) => {
+            r!(list!(
+                ucl = limit.ucl,
+                alpha = limit.alpha,
+                description = limit.description.clone()
+            ))
+        }
+        Err(e) => {
+            rprintln!("t2_limit_robust failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Robust SPE control limit.
+#[extendr]
+fn spm_spe_limit_robust_rust(spe_values: Vec<f64>, alpha: f64,
+                              method: &str, n_bootstrap: i32, seed: i32) -> Robj {
+    use fdars_core::spm::bootstrap::{spe_limit_robust, ControlLimitMethod};
+
+    let method_enum = match method {
+        "parametric" => ControlLimitMethod::Parametric,
+        "empirical" => ControlLimitMethod::Empirical,
+        "bootstrap" => ControlLimitMethod::Bootstrap {
+            n_bootstrap: n_bootstrap as usize,
+            seed: seed as u64,
+        },
+        "kde" => ControlLimitMethod::KernelDensity { bandwidth: None },
+        _ => ControlLimitMethod::Parametric,
+    };
+
+    match spe_limit_robust(&spe_values, alpha, &method_enum) {
+        Ok(limit) => {
+            r!(list!(
+                ucl = limit.ucl,
+                alpha = limit.alpha,
+                description = limit.description.clone()
+            ))
+        }
+        Err(e) => {
+            rprintln!("spe_limit_robust failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+// --- Phase 2: ARL and CUSUM ---
+
+/// In-control ARL for T-squared chart.
+#[extendr]
+fn spm_arl0_t2_rust(eigenvalues: Vec<f64>, ucl: f64,
+                     n_sim: i32, max_rl: i32, seed: i32) -> Robj {
+    use fdars_core::spm::arl::{arl0_t2, ArlConfig};
+
+    let config = ArlConfig {
+        n_simulations: n_sim as usize,
+        max_run_length: max_rl as usize,
+        seed: seed as u64,
+    };
+
+    match arl0_t2(&eigenvalues, ucl, &config) {
+        Ok(result) => {
+            let rl_i32: Vec<i32> = result.run_lengths.iter().map(|&r| r as i32).collect();
+            r!(list!(
+                arl = result.arl,
+                std_dev = result.std_dev,
+                median_rl = result.median_rl,
+                run_lengths = Robj::from(rl_i32)
+            ))
+        }
+        Err(e) => {
+            rprintln!("arl0_t2 failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Out-of-control ARL for T-squared chart.
+#[extendr]
+fn spm_arl1_t2_rust(eigenvalues: Vec<f64>, ucl: f64, shift: Vec<f64>,
+                     n_sim: i32, max_rl: i32, seed: i32) -> Robj {
+    use fdars_core::spm::arl::{arl1_t2, ArlConfig};
+
+    let config = ArlConfig {
+        n_simulations: n_sim as usize,
+        max_run_length: max_rl as usize,
+        seed: seed as u64,
+    };
+
+    match arl1_t2(&eigenvalues, ucl, &shift, &config) {
+        Ok(result) => {
+            let rl_i32: Vec<i32> = result.run_lengths.iter().map(|&r| r as i32).collect();
+            r!(list!(
+                arl = result.arl,
+                std_dev = result.std_dev,
+                median_rl = result.median_rl,
+                run_lengths = Robj::from(rl_i32)
+            ))
+        }
+        Err(e) => {
+            rprintln!("arl1_t2 failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// In-control ARL for EWMA-T-squared chart.
+#[extendr]
+fn spm_arl0_ewma_t2_rust(eigenvalues: Vec<f64>, ucl: f64, lambda: f64,
+                          n_sim: i32, max_rl: i32, seed: i32) -> Robj {
+    use fdars_core::spm::arl::{arl0_ewma_t2, ArlConfig};
+
+    let config = ArlConfig {
+        n_simulations: n_sim as usize,
+        max_run_length: max_rl as usize,
+        seed: seed as u64,
+    };
+
+    match arl0_ewma_t2(&eigenvalues, ucl, lambda, &config) {
+        Ok(result) => {
+            let rl_i32: Vec<i32> = result.run_lengths.iter().map(|&r| r as i32).collect();
+            r!(list!(
+                arl = result.arl,
+                std_dev = result.std_dev,
+                median_rl = result.median_rl,
+                run_lengths = Robj::from(rl_i32)
+            ))
+        }
+        Err(e) => {
+            rprintln!("arl0_ewma_t2 failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// In-control ARL for SPE chart.
+#[extendr]
+fn spm_arl0_spe_rust(spe_df: f64, spe_scale: f64, ucl: f64,
+                      n_sim: i32, max_rl: i32, seed: i32) -> Robj {
+    use fdars_core::spm::arl::{arl0_spe, ArlConfig};
+
+    let config = ArlConfig {
+        n_simulations: n_sim as usize,
+        max_run_length: max_rl as usize,
+        seed: seed as u64,
+    };
+
+    match arl0_spe(spe_df, spe_scale, ucl, &config) {
+        Ok(result) => {
+            let rl_i32: Vec<i32> = result.run_lengths.iter().map(|&r| r as i32).collect();
+            r!(list!(
+                arl = result.arl,
+                std_dev = result.std_dev,
+                median_rl = result.median_rl,
+                run_lengths = Robj::from(rl_i32)
+            ))
+        }
+        Err(e) => {
+            rprintln!("arl0_spe failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// CUSUM monitoring on sequential functional data.
+#[extendr]
+fn spm_cusum_monitor_rust(
+    sequential_data: RMatrix<f64>, argvals: Vec<f64>,
+    rotation: RMatrix<f64>, mean: Vec<f64>, singular_values: Vec<f64>,
+    centered: RMatrix<f64>, eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    spe_ucl: f64, spe_alpha: f64, spe_description: &str,
+    chart_ncomp: i32, config_alpha: f64, config_tuning_fraction: f64, config_seed: i32,
+    k: f64, h: f64, cusum_ncomp: i32, cusum_alpha: f64, multivariate: bool,
+) -> Robj {
+    let chart = reconstruct_spm_chart(
+        rotation, mean, singular_values, centered, eigenvalues,
+        t2_ucl, t2_alpha, t2_description,
+        spe_ucl, spe_alpha, spe_description,
+        chart_ncomp, config_alpha, config_tuning_fraction, config_seed,
+    );
+
+    let n = sequential_data.nrows();
+    let m = sequential_data.ncols();
+    let sds = sequential_data.as_real_slice().unwrap();
+    let sd = FdMatrix::from_slice(sds, n, m).expect("Invalid sequential_data");
+
+    let cusum_config = fdars_core::spm::CusumConfig {
+        k,
+        h,
+        ncomp: cusum_ncomp as usize,
+        alpha: cusum_alpha,
+        multivariate,
+        restart: false,
+    };
+
+    match fdars_core::spm::spm_cusum_monitor(&chart, &sd, &argvals, &cusum_config) {
+        Ok(result) => {
+            let alarm_int: Vec<i32> = result.alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            let spe_alarm_int: Vec<i32> = result.spe_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            r!(list!(
+                cusum_statistic = Robj::from(result.cusum_statistic),
+                ucl = result.ucl,
+                alarm = Robj::from(alarm_int),
+                scores = fdmatrix_to_robj(&result.scores),
+                spe = Robj::from(result.spe),
+                spe_limit = result.spe_limit,
+                spe_alarm = Robj::from(spe_alarm_int)
+            ))
+        }
+        Err(e) => {
+            rprintln!("spm_cusum_monitor failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// CUSUM monitoring with restart after each alarm.
+#[extendr]
+fn spm_cusum_monitor_restart_rust(
+    sequential_data: RMatrix<f64>, argvals: Vec<f64>,
+    rotation: RMatrix<f64>, mean: Vec<f64>, singular_values: Vec<f64>,
+    centered: RMatrix<f64>, eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    spe_ucl: f64, spe_alpha: f64, spe_description: &str,
+    chart_ncomp: i32, config_alpha: f64, config_tuning_fraction: f64, config_seed: i32,
+    k: f64, h: f64, cusum_ncomp: i32, cusum_alpha: f64, multivariate: bool,
+) -> Robj {
+    let chart = reconstruct_spm_chart(
+        rotation, mean, singular_values, centered, eigenvalues,
+        t2_ucl, t2_alpha, t2_description,
+        spe_ucl, spe_alpha, spe_description,
+        chart_ncomp, config_alpha, config_tuning_fraction, config_seed,
+    );
+
+    let n = sequential_data.nrows();
+    let m = sequential_data.ncols();
+    let sds = sequential_data.as_real_slice().unwrap();
+    let sd = FdMatrix::from_slice(sds, n, m).expect("Invalid sequential_data");
+
+    let cusum_config = fdars_core::spm::CusumConfig {
+        k,
+        h,
+        ncomp: cusum_ncomp as usize,
+        alpha: cusum_alpha,
+        multivariate,
+        restart: true,
+    };
+
+    match fdars_core::spm::spm_cusum_monitor_with_restart(&chart, &sd, &argvals, &cusum_config) {
+        Ok(result) => {
+            let alarm_int: Vec<i32> = result.alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            let spe_alarm_int: Vec<i32> = result.spe_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            r!(list!(
+                cusum_statistic = Robj::from(result.cusum_statistic),
+                ucl = result.ucl,
+                alarm = Robj::from(alarm_int),
+                scores = fdmatrix_to_robj(&result.scores),
+                spe = Robj::from(result.spe),
+                spe_limit = result.spe_limit,
+                spe_alarm = Robj::from(spe_alarm_int)
+            ))
+        }
+        Err(e) => {
+            rprintln!("spm_cusum_monitor_with_restart failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+// --- Phase 3: MEWMA, AMEWMA, Iterative ---
+
+/// MEWMA monitoring on sequential functional data.
+#[extendr]
+fn spm_mewma_monitor_rust(
+    sequential_data: RMatrix<f64>, argvals: Vec<f64>,
+    rotation: RMatrix<f64>, mean: Vec<f64>, singular_values: Vec<f64>,
+    centered: RMatrix<f64>, eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    spe_ucl: f64, spe_alpha: f64, spe_description: &str,
+    chart_ncomp: i32, config_alpha: f64, config_tuning_fraction: f64, config_seed: i32,
+    lambda: f64, mewma_ncomp: i32, mewma_alpha: f64, asymptotic: bool,
+) -> Robj {
+    let chart = reconstruct_spm_chart(
+        rotation, mean, singular_values, centered, eigenvalues,
+        t2_ucl, t2_alpha, t2_description,
+        spe_ucl, spe_alpha, spe_description,
+        chart_ncomp, config_alpha, config_tuning_fraction, config_seed,
+    );
+
+    let n = sequential_data.nrows();
+    let m = sequential_data.ncols();
+    let sds = sequential_data.as_real_slice().unwrap();
+    let sd = FdMatrix::from_slice(sds, n, m).expect("Invalid sequential_data");
+
+    let mewma_config = fdars_core::spm::MewmaConfig {
+        lambda,
+        ncomp: mewma_ncomp as usize,
+        alpha: mewma_alpha,
+        asymptotic,
+    };
+
+    match fdars_core::spm::spm_mewma_monitor(&chart, &sd, &argvals, &mewma_config) {
+        Ok(result) => {
+            let alarm_int: Vec<i32> = result.alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            let spe_alarm_int: Vec<i32> = result.spe_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            r!(list!(
+                smoothed_scores = fdmatrix_to_robj(&result.smoothed_scores),
+                mewma_statistic = Robj::from(result.mewma_statistic),
+                ucl = result.ucl,
+                alarm = Robj::from(alarm_int),
+                spe = Robj::from(result.spe),
+                spe_limit = result.spe_limit,
+                spe_alarm = Robj::from(spe_alarm_int)
+            ))
+        }
+        Err(e) => {
+            rprintln!("spm_mewma_monitor failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Adaptive EWMA (AMEWMA) monitoring on sequential functional data.
+#[extendr]
+fn spm_amewma_monitor_rust(
+    sequential_data: RMatrix<f64>, argvals: Vec<f64>,
+    rotation: RMatrix<f64>, mean: Vec<f64>, singular_values: Vec<f64>,
+    centered: RMatrix<f64>, eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    spe_ucl: f64, spe_alpha: f64, spe_description: &str,
+    chart_ncomp: i32, config_alpha: f64, config_tuning_fraction: f64, config_seed: i32,
+    lambda_min: f64, lambda_max: f64, lambda_init: f64, eta: f64,
+    amewma_ncomp: i32, amewma_alpha: f64,
+) -> Robj {
+    let chart = reconstruct_spm_chart(
+        rotation, mean, singular_values, centered, eigenvalues,
+        t2_ucl, t2_alpha, t2_description,
+        spe_ucl, spe_alpha, spe_description,
+        chart_ncomp, config_alpha, config_tuning_fraction, config_seed,
+    );
+
+    let n = sequential_data.nrows();
+    let m = sequential_data.ncols();
+    let sds = sequential_data.as_real_slice().unwrap();
+    let sd = FdMatrix::from_slice(sds, n, m).expect("Invalid sequential_data");
+
+    let amewma_config = fdars_core::spm::AmewmaConfig {
+        lambda_min,
+        lambda_max,
+        lambda_init,
+        eta,
+        ncomp: amewma_ncomp as usize,
+        alpha: amewma_alpha,
+        error_clip: None,
+    };
+
+    match fdars_core::spm::spm_amewma_monitor(&chart, &sd, &argvals, &amewma_config) {
+        Ok(result) => {
+            let alarm_int: Vec<i32> = result.alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            r!(list!(
+                smoothed_scores = fdmatrix_to_robj(&result.smoothed_scores),
+                t2_statistic = Robj::from(result.t2_statistic),
+                lambda_t = Robj::from(result.lambda_t),
+                ucl = result.ucl,
+                alarm = Robj::from(alarm_int)
+            ))
+        }
+        Err(e) => {
+            rprintln!("spm_amewma_monitor failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Iterative Phase I chart construction.
+#[extendr]
+fn spm_phase1_iterative_rust(data: RMatrix<f64>, argvals: Vec<f64>,
+                              ncomp: i32, alpha: f64, tuning_fraction: f64, seed: i32,
+                              max_iterations: i32, max_removal_fraction: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+
+    let config = fdars_core::spm::IterativePhase1Config {
+        spm: fdars_core::spm::SpmConfig {
+            ncomp: ncomp as usize,
+            alpha,
+            tuning_fraction,
+            seed: seed as u64,
+        },
+        max_iterations: max_iterations as usize,
+        remove_t2_outliers: true,
+        remove_spe_outliers: true,
+        max_removal_fraction,
+    };
+
+    match fdars_core::spm::spm_phase1_iterative(&fd, &argvals, &config) {
+        Ok(result) => {
+            let chart = &result.chart;
+            let removed_i32: Vec<i32> = result.removed_indices.iter().map(|&i| (i + 1) as i32).collect();
+
+            // Convert removal_history to a list of integer vectors (1-indexed)
+            let history_list = List::from_values(
+                result.removal_history.iter().map(|v| {
+                    let vi: Vec<i32> = v.iter().map(|&i| (i + 1) as i32).collect();
+                    Robj::from(vi)
+                })
+            );
+
+            r!(list!(
+                rotation = fdmatrix_to_robj(&chart.fpca.rotation),
+                scores = fdmatrix_to_robj(&chart.fpca.scores),
+                mean = Robj::from(chart.fpca.mean.clone()),
+                singular_values = Robj::from(chart.fpca.singular_values.clone()),
+                centered = fdmatrix_to_robj(&chart.fpca.centered),
+                eigenvalues = Robj::from(chart.eigenvalues.clone()),
+                t2_phase1 = Robj::from(chart.t2_phase1.clone()),
+                spe_phase1 = Robj::from(chart.spe_phase1.clone()),
+                t2_ucl = chart.t2_limit.ucl,
+                t2_alpha = chart.t2_limit.alpha,
+                t2_description = chart.t2_limit.description.clone(),
+                spe_ucl = chart.spe_limit.ucl,
+                spe_alpha = chart.spe_limit.alpha,
+                spe_description = chart.spe_limit.description.clone(),
+                ncomp = chart.eigenvalues.len() as i32,
+                config_ncomp = config.spm.ncomp as i32,
+                config_alpha = config.spm.alpha,
+                config_tuning_fraction = config.spm.tuning_fraction,
+                config_seed = config.spm.seed as i32,
+                n_iterations = result.n_iterations as i32,
+                removed_indices = Robj::from(removed_i32),
+                n_remaining = result.n_remaining as i32,
+                removal_history = Robj::from(history_list),
+                removal_rates = Robj::from(result.removal_rates)
+            ))
+        }
+        Err(e) => {
+            rprintln!("spm_phase1_iterative failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+// --- Phase 4: Profile and Partial ---
+
+/// Profile monitoring Phase I.
+#[extendr]
+fn spm_profile_phase1_rust(y_curves: RMatrix<f64>, predictors: RMatrix<f64>, argvals: Vec<f64>,
+                            fosr_lambda: f64, ncomp: i32, alpha: f64,
+                            window_size: i32, step_size: i32) -> Robj {
+    let n = y_curves.nrows();
+    let m = y_curves.ncols();
+    let ys = y_curves.as_real_slice().unwrap();
+    let y = FdMatrix::from_slice(ys, n, m).expect("Invalid y_curves");
+
+    let ps = predictors.as_real_slice().unwrap();
+    let pred = FdMatrix::from_slice(ps, predictors.nrows(), predictors.ncols()).expect("Invalid predictors");
+
+    let config = fdars_core::spm::ProfileMonitorConfig {
+        fosr_lambda,
+        ncomp: ncomp as usize,
+        alpha,
+        window_size: window_size as usize,
+        step_size: step_size as usize,
+    };
+
+    match fdars_core::spm::profile_phase1(&y, &pred, &argvals, &config) {
+        Ok(chart) => {
+            r!(list!(
+                // Reference FOSR
+                ref_fosr_intercept = Robj::from(chart.reference_fosr.intercept.clone()),
+                ref_fosr_beta = fdmatrix_to_robj(&chart.reference_fosr.beta),
+                ref_fosr_lambda = chart.reference_fosr.lambda,
+                // Beta FPCA
+                beta_rotation = fdmatrix_to_robj(&chart.beta_fpca.rotation),
+                beta_scores = fdmatrix_to_robj(&chart.beta_fpca.scores),
+                beta_mean = Robj::from(chart.beta_fpca.mean.clone()),
+                beta_singular_values = Robj::from(chart.beta_fpca.singular_values.clone()),
+                beta_centered = fdmatrix_to_robj(&chart.beta_fpca.centered),
+                // Eigenvalues & limits
+                eigenvalues = Robj::from(chart.eigenvalues.clone()),
+                t2_ucl = chart.t2_limit.ucl,
+                t2_alpha = chart.t2_limit.alpha,
+                t2_description = chart.t2_limit.description.clone(),
+                // Diagnostics
+                lag1_autocorrelation = chart.lag1_autocorrelation,
+                effective_n_windows = chart.effective_n_windows,
+                // Config
+                config_fosr_lambda = config.fosr_lambda,
+                config_ncomp = config.ncomp as i32,
+                config_alpha = config.alpha,
+                config_window_size = config.window_size as i32,
+                config_step_size = config.step_size as i32
+            ))
+        }
+        Err(e) => {
+            rprintln!("profile_phase1 failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Profile monitoring Phase II.
+#[extendr]
+fn spm_profile_monitor_rust(
+    new_y: RMatrix<f64>, new_predictors: RMatrix<f64>, argvals: Vec<f64>,
+    // Beta FPCA fields for chart reconstruction
+    beta_rotation: RMatrix<f64>, beta_mean: Vec<f64>,
+    beta_singular_values: Vec<f64>, beta_centered: RMatrix<f64>,
+    // Reference FOSR fields
+    ref_fosr_intercept: Vec<f64>, ref_fosr_beta: RMatrix<f64>, ref_fosr_lambda: f64,
+    // Eigenvalues & limits
+    eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    lag1_autocorrelation: f64, effective_n_windows: f64,
+    // Config
+    fosr_lambda: f64, ncomp: i32, alpha: f64,
+    window_size: i32, step_size: i32,
+) -> Robj {
+    use fdars_core::regression::FpcaResult;
+    use fdars_core::spm::ControlLimit;
+    use fdars_core::spm::profile::{ProfileChart, ProfileMonitorConfig, profile_monitor};
+
+    let n = new_y.nrows();
+    let m = new_y.ncols();
+    let nys = new_y.as_real_slice().unwrap();
+    let ny = FdMatrix::from_slice(nys, n, m).expect("Invalid new_y");
+
+    let nps = new_predictors.as_real_slice().unwrap();
+    let np = FdMatrix::from_slice(nps, new_predictors.nrows(), new_predictors.ncols()).expect("Invalid new_predictors");
+
+    // Reconstruct beta FPCA
+    let brs = beta_rotation.as_real_slice().unwrap();
+    let br = FdMatrix::from_slice(brs, beta_rotation.nrows(), beta_rotation.ncols()).expect("Invalid beta_rotation");
+    let bcs = beta_centered.as_real_slice().unwrap();
+    let bc = FdMatrix::from_slice(bcs, beta_centered.nrows(), beta_centered.ncols()).expect("Invalid beta_centered");
+
+    let n_windows = beta_centered.nrows();
+    let nc = eigenvalues.len().min(ncomp as usize);
+    let beta_scores_placeholder = FdMatrix::zeros(n_windows, nc);
+
+    let beta_fpca = FpcaResult {
+        singular_values: beta_singular_values,
+        rotation: br,
+        scores: beta_scores_placeholder,
+        mean: beta_mean,
+        centered: bc,
+    };
+
+    // Reconstruct reference FOSR (minimal, just intercept + beta needed)
+    let fbs = ref_fosr_beta.as_real_slice().unwrap();
+    let fb = FdMatrix::from_slice(fbs, ref_fosr_beta.nrows(), ref_fosr_beta.ncols()).expect("Invalid ref_fosr_beta");
+
+    let reference_fosr = fdars_core::function_on_scalar::FosrResult::from_parts(
+        ref_fosr_intercept,
+        fb,
+        FdMatrix::zeros(1, 1),
+        FdMatrix::zeros(1, 1),
+        vec![],
+        0.0,
+        FdMatrix::zeros(1, 1),
+        ref_fosr_lambda,
+        0.0,
+    );
+
+    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
+
+    let monitor_config = ProfileMonitorConfig {
+        fosr_lambda,
+        ncomp: ncomp as usize,
+        alpha,
+        window_size: window_size as usize,
+        step_size: step_size as usize,
+    };
+
+    let chart = ProfileChart::from_parts(
+        reference_fosr, beta_fpca, eigenvalues, t2_limit,
+        lag1_autocorrelation, effective_n_windows, monitor_config.clone(),
+    );
+
+    match profile_monitor(&chart, &ny, &np, &argvals, &monitor_config) {
+        Ok(result) => {
+            let t2_alarm_int: Vec<i32> = result.t2_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            r!(list!(
+                betas = fdmatrix_to_robj(&result.betas),
+                t2 = Robj::from(result.t2),
+                t2_alarm = Robj::from(t2_alarm_int),
+                beta_scores = fdmatrix_to_robj(&result.beta_scores)
+            ))
+        }
+        Err(e) => {
+            rprintln!("profile_monitor failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Monitor a single partially-observed curve.
+#[extendr]
+fn spm_monitor_partial_rust(
+    partial_values: Vec<f64>, argvals: Vec<f64>, n_observed: i32,
+    rotation: RMatrix<f64>, mean: Vec<f64>, singular_values: Vec<f64>,
+    centered: RMatrix<f64>, eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    spe_ucl: f64, spe_alpha: f64, spe_description: &str,
+    chart_ncomp: i32, config_alpha: f64, config_tuning_fraction: f64, config_seed: i32,
+    partial_ncomp: i32, partial_alpha: f64, completion_method: &str,
+) -> Robj {
+    let chart = reconstruct_spm_chart(
+        rotation, mean, singular_values, centered, eigenvalues,
+        t2_ucl, t2_alpha, t2_description,
+        spe_ucl, spe_alpha, spe_description,
+        chart_ncomp, config_alpha, config_tuning_fraction, config_seed,
+    );
+
+    let completion = match completion_method {
+        "partial_projection" => fdars_core::spm::DomainCompletion::PartialProjection,
+        "conditional_expectation" | "blup" => fdars_core::spm::DomainCompletion::ConditionalExpectation,
+        "zero_pad" => fdars_core::spm::DomainCompletion::ZeroPad,
+        _ => fdars_core::spm::DomainCompletion::ConditionalExpectation,
+    };
+
+    let config = fdars_core::spm::PartialDomainConfig {
+        ncomp: partial_ncomp as usize,
+        alpha: partial_alpha,
+        completion,
+        regularization_eps: 1e-10,
+    };
+
+    match fdars_core::spm::spm_monitor_partial(&chart, &partial_values, &argvals, n_observed as usize, &config) {
+        Ok(result) => {
+            let completed = match result.completed_curve {
+                Some(ref c) => Robj::from(c.clone()),
+                None => r!(NULL),
+            };
+            r!(list!(
+                scores = Robj::from(result.scores),
+                t2 = result.t2,
+                t2_alarm = if result.t2_alarm { 1 } else { 0 },
+                domain_fraction = result.domain_fraction,
+                completed_curve = completed
+            ))
+        }
+        Err(e) => {
+            rprintln!("spm_monitor_partial failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Monitor a batch of partially-observed curves.
+#[extendr]
+fn spm_monitor_partial_batch_rust(
+    partial_data_list: List, n_observed_vec: Vec<i32>, argvals: Vec<f64>,
+    rotation: RMatrix<f64>, mean: Vec<f64>, singular_values: Vec<f64>,
+    centered: RMatrix<f64>, eigenvalues: Vec<f64>,
+    t2_ucl: f64, t2_alpha: f64, t2_description: &str,
+    spe_ucl: f64, spe_alpha: f64, spe_description: &str,
+    chart_ncomp: i32, config_alpha: f64, config_tuning_fraction: f64, config_seed: i32,
+    partial_ncomp: i32, partial_alpha: f64, completion_method: &str,
+) -> Robj {
+    let chart = reconstruct_spm_chart(
+        rotation, mean, singular_values, centered, eigenvalues,
+        t2_ucl, t2_alpha, t2_description,
+        spe_ucl, spe_alpha, spe_description,
+        chart_ncomp, config_alpha, config_tuning_fraction, config_seed,
+    );
+
+    let completion = match completion_method {
+        "partial_projection" => fdars_core::spm::DomainCompletion::PartialProjection,
+        "conditional_expectation" | "blup" => fdars_core::spm::DomainCompletion::ConditionalExpectation,
+        "zero_pad" => fdars_core::spm::DomainCompletion::ZeroPad,
+        _ => fdars_core::spm::DomainCompletion::ConditionalExpectation,
+    };
+
+    let config = fdars_core::spm::PartialDomainConfig {
+        ncomp: partial_ncomp as usize,
+        alpha: partial_alpha,
+        completion,
+        regularization_eps: 1e-10,
+    };
+
+    // Collect partial data from the R list
+    let mut partial_vecs: Vec<Vec<f64>> = Vec::with_capacity(partial_data_list.len());
+    for (_, item) in partial_data_list.iter() {
+        let v: Vec<f64> = item.as_real_vector().expect("partial_data_list elements must be numeric vectors");
+        partial_vecs.push(v);
+    }
+
+    // Build the slice-of-tuples that spm_monitor_partial_batch expects
+    let partial_data: Vec<(&[f64], usize)> = partial_vecs.iter().zip(n_observed_vec.iter())
+        .map(|(v, &n_obs)| (v.as_slice(), n_obs as usize))
+        .collect();
+
+    match fdars_core::spm::spm_monitor_partial_batch(&chart, &partial_data, &argvals, &config) {
+        Ok(results) => {
+            let result_list = List::from_values(
+                results.iter().map(|result| {
+                    let completed = match result.completed_curve {
+                        Some(ref c) => Robj::from(c.clone()),
+                        None => r!(NULL),
+                    };
+                    r!(list!(
+                        scores = Robj::from(result.scores.clone()),
+                        t2 = result.t2,
+                        t2_alarm = if result.t2_alarm { 1 } else { 0 },
+                        domain_fraction = result.domain_fraction,
+                        completed_curve = completed
+                    ))
+                })
+            );
+            Robj::from(result_list)
+        }
+        Err(e) => {
+            rprintln!("spm_monitor_partial_batch failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+// --- Phase 5: Elastic SPM ---
+
+/// Elastic SPM Phase I.
+#[extendr]
+fn elastic_spm_phase1_rust(data: RMatrix<f64>, argvals: Vec<f64>,
+                            ncomp: i32, alpha: f64, tuning_fraction: f64, seed: i32,
+                            align_lambda: f64, monitor_phase: bool, warp_ncomp: i32) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    let ds = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(ds, n, m).expect("Invalid data");
+
+    let config = fdars_core::spm::ElasticSpmConfig {
+        spm: fdars_core::spm::SpmConfig {
+            ncomp: ncomp as usize,
+            alpha,
+            tuning_fraction,
+            seed: seed as u64,
+        },
+        align_lambda,
+        monitor_phase,
+        warp_ncomp: warp_ncomp as usize,
+        max_karcher_iterations: 20,
+        karcher_tolerance: 1e-4,
+    };
+
+    match fdars_core::spm::elastic_spm_phase1(&fd, &argvals, &config) {
+        Ok(chart) => {
+            // Amplitude chart fields
+            let amp = &chart.amplitude_chart;
+            let mut result_list = list!(
+                karcher_mean = Robj::from(chart.karcher_mean.clone()),
+                mean_alignment_residual = chart.mean_alignment_residual,
+                // Amplitude chart
+                amp_rotation = fdmatrix_to_robj(&amp.fpca.rotation),
+                amp_scores = fdmatrix_to_robj(&amp.fpca.scores),
+                amp_mean = Robj::from(amp.fpca.mean.clone()),
+                amp_singular_values = Robj::from(amp.fpca.singular_values.clone()),
+                amp_centered = fdmatrix_to_robj(&amp.fpca.centered),
+                amp_eigenvalues = Robj::from(amp.eigenvalues.clone()),
+                amp_t2_phase1 = Robj::from(amp.t2_phase1.clone()),
+                amp_spe_phase1 = Robj::from(amp.spe_phase1.clone()),
+                amp_t2_ucl = amp.t2_limit.ucl,
+                amp_t2_alpha = amp.t2_limit.alpha,
+                amp_t2_description = amp.t2_limit.description.clone(),
+                amp_spe_ucl = amp.spe_limit.ucl,
+                amp_spe_alpha = amp.spe_limit.alpha,
+                amp_spe_description = amp.spe_limit.description.clone(),
+                amp_ncomp = amp.eigenvalues.len() as i32,
+                // Config
+                config_ncomp = config.spm.ncomp as i32,
+                config_alpha = config.spm.alpha,
+                config_tuning_fraction = config.spm.tuning_fraction,
+                config_seed = config.spm.seed as i32,
+                config_align_lambda = config.align_lambda,
+                config_monitor_phase = if config.monitor_phase { 1 } else { 0 },
+                config_warp_ncomp = config.warp_ncomp as i32
+            );
+
+            // Phase chart fields (if monitoring phase)
+            if let Some(ref phase) = chart.phase_chart {
+                let phase_list = list!(
+                    rotation = fdmatrix_to_robj(&phase.fpca.rotation),
+                    scores = fdmatrix_to_robj(&phase.fpca.scores),
+                    mean = Robj::from(phase.fpca.mean.clone()),
+                    singular_values = Robj::from(phase.fpca.singular_values.clone()),
+                    centered = fdmatrix_to_robj(&phase.fpca.centered),
+                    eigenvalues = Robj::from(phase.eigenvalues.clone()),
+                    t2_phase1 = Robj::from(phase.t2_phase1.clone()),
+                    spe_phase1 = Robj::from(phase.spe_phase1.clone()),
+                    t2_ucl = phase.t2_limit.ucl,
+                    t2_alpha = phase.t2_limit.alpha,
+                    t2_description = phase.t2_limit.description.clone(),
+                    spe_ucl = phase.spe_limit.ucl,
+                    spe_alpha = phase.spe_limit.alpha,
+                    spe_description = phase.spe_limit.description.clone(),
+                    ncomp = phase.eigenvalues.len() as i32
+                );
+                result_list.set_attrib("phase_chart", Robj::from(phase_list)).ok();
+            }
+
+            r!(result_list)
+        }
+        Err(e) => {
+            rprintln!("elastic_spm_phase1 failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Elastic SPM Phase II monitoring.
+#[extendr]
+fn elastic_spm_monitor_rust(
+    new_data: RMatrix<f64>, argvals: Vec<f64>,
+    karcher_mean: Vec<f64>, align_lambda: f64, monitor_phase: bool, warp_ncomp: i32,
+    // Amplitude chart fields
+    amp_rotation: RMatrix<f64>, amp_mean: Vec<f64>, amp_singular_values: Vec<f64>,
+    amp_centered: RMatrix<f64>, amp_eigenvalues: Vec<f64>,
+    amp_t2_ucl: f64, amp_t2_alpha: f64, amp_t2_description: &str,
+    amp_spe_ucl: f64, amp_spe_alpha: f64, amp_spe_description: &str,
+    amp_ncomp: i32, amp_config_alpha: f64, amp_config_tuning_fraction: f64, amp_config_seed: i32,
+    // Phase chart fields (can be NULL if monitor_phase is false)
+    phase_rotation: Robj, phase_mean: Robj, phase_singular_values: Robj,
+    phase_centered: Robj, phase_eigenvalues: Robj,
+    phase_t2_ucl: f64, phase_t2_alpha: f64, phase_t2_description: &str,
+    phase_spe_ucl: f64, phase_spe_alpha: f64, phase_spe_description: &str,
+    phase_ncomp: i32, phase_config_alpha: f64, phase_config_tuning_fraction: f64, phase_config_seed: i32,
+) -> Robj {
+    use fdars_core::spm::elastic_spm::{ElasticSpmChart, ElasticSpmConfig, elastic_spm_monitor};
+
+    let n = new_data.nrows();
+    let m = new_data.ncols();
+    let nds = new_data.as_real_slice().unwrap();
+    let nd = FdMatrix::from_slice(nds, n, m).expect("Invalid new_data");
+
+    // Reconstruct amplitude chart
+    let amplitude_chart = reconstruct_spm_chart(
+        amp_rotation, amp_mean, amp_singular_values, amp_centered, amp_eigenvalues,
+        amp_t2_ucl, amp_t2_alpha, amp_t2_description,
+        amp_spe_ucl, amp_spe_alpha, amp_spe_description,
+        amp_ncomp, amp_config_alpha, amp_config_tuning_fraction, amp_config_seed,
+    );
+
+    // Reconstruct phase chart if monitoring phase
+    let phase_chart = if monitor_phase && !phase_rotation.is_null() {
+        let pr: RMatrix<f64> = phase_rotation.try_into().expect("phase_rotation must be matrix");
+        let pm: Vec<f64> = phase_mean.as_real_vector().expect("phase_mean must be numeric");
+        let psv: Vec<f64> = phase_singular_values.as_real_vector().expect("phase_singular_values must be numeric");
+        let pc: RMatrix<f64> = phase_centered.try_into().expect("phase_centered must be matrix");
+        let pe: Vec<f64> = phase_eigenvalues.as_real_vector().expect("phase_eigenvalues must be numeric");
+
+        Some(reconstruct_spm_chart(
+            pr, pm, psv, pc, pe,
+            phase_t2_ucl, phase_t2_alpha, phase_t2_description,
+            phase_spe_ucl, phase_spe_alpha, phase_spe_description,
+            phase_ncomp, phase_config_alpha, phase_config_tuning_fraction, phase_config_seed,
+        ))
+    } else {
+        None
+    };
+
+    let spm_config = fdars_core::spm::SpmConfig {
+        ncomp: amp_ncomp as usize,
+        alpha: amp_config_alpha,
+        tuning_fraction: amp_config_tuning_fraction,
+        seed: amp_config_seed as u64,
+    };
+
+    let elastic_config = ElasticSpmConfig {
+        spm: spm_config,
+        align_lambda,
+        monitor_phase,
+        warp_ncomp: warp_ncomp as usize,
+        max_karcher_iterations: 20,
+        karcher_tolerance: 1e-4,
+    };
+
+    let elastic_chart = ElasticSpmChart::from_parts(
+        karcher_mean, amplitude_chart, phase_chart, elastic_config, 0.0,
+    );
+
+    match elastic_spm_monitor(&elastic_chart, &nd, &argvals) {
+        Ok(result) => {
+            let amp_t2_alarm_int: Vec<i32> = result.amplitude.t2_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+            let amp_spe_alarm_int: Vec<i32> = result.amplitude.spe_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+
+            let mut result_list = list!(
+                amp_t2 = Robj::from(result.amplitude.t2),
+                amp_spe = Robj::from(result.amplitude.spe),
+                amp_t2_alarm = Robj::from(amp_t2_alarm_int),
+                amp_spe_alarm = Robj::from(amp_spe_alarm_int),
+                amp_scores = fdmatrix_to_robj(&result.amplitude.scores),
+                aligned_data = fdmatrix_to_robj(&result.aligned_data),
+                warping_functions = fdmatrix_to_robj(&result.warping_functions)
+            );
+
+            if let Some(ref phase_result) = result.phase {
+                let ph_t2_alarm_int: Vec<i32> = phase_result.t2_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+                let ph_spe_alarm_int: Vec<i32> = phase_result.spe_alarm.iter().map(|&b| if b { 1 } else { 0 }).collect();
+                let phase_list = list!(
+                    t2 = Robj::from(phase_result.t2.clone()),
+                    spe = Robj::from(phase_result.spe.clone()),
+                    t2_alarm = Robj::from(ph_t2_alarm_int),
+                    spe_alarm = Robj::from(ph_spe_alarm_int),
+                    scores = fdmatrix_to_robj(&phase_result.scores)
+                );
+                result_list.set_attrib("phase", Robj::from(phase_list)).ok();
+            }
+
+            r!(result_list)
+        }
+        Err(e) => {
+            rprintln!("elastic_spm_monitor failed: {:?}", e);
             r!(NULL)
         }
     }
@@ -14976,6 +16704,29 @@ extendr_module! {
     fn alignment_constrained;
     fn alignment_with_landmarks;
 
+    // Lambda CV, warp statistics, phase boxplots
+    fn alignment_lambda_cv_rust;
+    fn alignment_warp_statistics_rust;
+    fn alignment_phase_boxplot_rust;
+
+    // Warp inversion, penalized alignment, diagnostics
+    fn alignment_invert_warp_rust;
+    fn alignment_warp_inverse_error_rust;
+    fn alignment_elastic_pair_penalized_rust;
+    fn alignment_diagnose_rust;
+    fn alignment_diagnose_pairwise_rust;
+
+    // Shape analysis
+    fn alignment_orbit_representative_rust;
+    fn alignment_shape_distance_rust;
+    fn alignment_shape_mean_rust;
+    fn alignment_shape_self_distance_matrix_rust;
+
+    // Elastic clustering
+    fn elastic_kmeans_rust;
+    fn elastic_hierarchical_rust;
+    fn elastic_cut_dendrogram_rust;
+
     // Tolerance band functions
     fn tolerance_fpca;
     fn tolerance_conformal;
@@ -15154,4 +16905,38 @@ extendr_module! {
     fn spm_spe_contrib_rust;
     fn frcc_phase1_rust;
     fn frcc_monitor_rust;
+
+    // SPM v0.9.0: ncomp, contrib, rules, bootstrap
+    fn spm_select_ncomp_rust;
+    fn spm_t2_pc_contrib_rust;
+    fn spm_evaluate_rules_rust;
+    fn spm_t2_limit_robust_rust;
+    fn spm_spe_limit_robust_rust;
+
+    // SPM v0.9.0: ARL
+    fn spm_arl0_t2_rust;
+    fn spm_arl1_t2_rust;
+    fn spm_arl0_ewma_t2_rust;
+    fn spm_arl0_spe_rust;
+
+    // SPM v0.9.0: CUSUM
+    fn spm_cusum_monitor_rust;
+    fn spm_cusum_monitor_restart_rust;
+
+    // SPM v0.9.0: MEWMA, AMEWMA, Iterative
+    fn spm_mewma_monitor_rust;
+    fn spm_amewma_monitor_rust;
+    fn spm_phase1_iterative_rust;
+
+    // SPM v0.9.0: Profile monitoring
+    fn spm_profile_phase1_rust;
+    fn spm_profile_monitor_rust;
+
+    // SPM v0.9.0: Partial-domain monitoring
+    fn spm_monitor_partial_rust;
+    fn spm_monitor_partial_batch_rust;
+
+    // SPM v0.9.0: Elastic SPM
+    fn elastic_spm_phase1_rust;
+    fn elastic_spm_monitor_rust;
 }

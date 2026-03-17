@@ -18,12 +18,14 @@ before SVD (default TRUE).}
 }
 \value{
 An object of class \code{mfpca} with components:
+\describe{
 \item{scores}{Score matrix (n x ncomp)}
 \item{eigenfunctions}{List of eigenfunction matrices, one per variable}
 \item{eigenvalues}{Eigenvalues (length ncomp)}
 \item{means}{List of mean functions, one per variable}
 \item{scales}{Per-variable standard deviations}
 \item{grid.sizes}{Grid sizes per variable}
+}
 }
 \description{
 Extends univariate FPCA to handle multiple functional variables

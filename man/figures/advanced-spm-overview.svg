@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="320" viewBox="0 0 720 320">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+  <!-- Phase I: Blue boxes -->
+  <rect x="10" y="40" width="130" height="50" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="75" y="62" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Component</text>
+  <text x="75" y="78" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Selection</text>
+  <line x1="140" y1="65" x2="170" y2="65" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="170" y="40" width="130" height="50" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="235" y="62" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Robust</text>
+  <text x="235" y="78" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Limits</text>
+  <line x1="300" y1="65" x2="330" y2="65" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="330" y="40" width="130" height="50" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="395" y="62" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Iterative</text>
+  <text x="395" y="78" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Phase I</text>
+
+  <!-- Phase I label -->
+  <text x="235" y="24" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4169E1" font-weight="bold">PHASE I</text>
+
+  <!-- Arrow down from Phase I to Phase II -->
+  <line x1="395" y1="90" x2="395" y2="140" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Phase II: Orange boxes -->
+  <rect x="330" y="140" width="130" height="50" rx="8" fill="#fef3e7" stroke="#E8913A" stroke-width="1.5"/>
+  <text x="395" y="158" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Monitoring</text>
+  <text x="395" y="174" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">CUSUM / MEWMA</text>
+  <text x="395" y="186" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">AMEWMA</text>
+  <line x1="460" y1="165" x2="490" y2="165" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Phase II label -->
+  <text x="555" y="124" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#E8913A" font-weight="bold">PHASE II</text>
+
+  <rect x="490" y="140" width="130" height="50" rx="8" fill="#fef3e7" stroke="#E8913A" stroke-width="1.5"/>
+  <text x="555" y="162" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Rules</text>
+  <text x="555" y="178" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Evaluation</text>
+
+  <!-- Arrow down to Evaluation -->
+  <line x1="555" y1="190" x2="555" y2="240" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Evaluation: Green box -->
+  <rect x="490" y="240" width="130" height="50" rx="8" fill="#f0faf0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="555" y="262" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">ARL</text>
+  <text x="555" y="278" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Assessment</text>
+
+  <!-- Evaluation label -->
+  <text x="555" y="305" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#2E8B57" font-weight="bold">EVALUATION</text>
+</svg>

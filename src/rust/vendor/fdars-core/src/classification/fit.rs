@@ -450,7 +450,7 @@ impl FpcPredictor for ClassifFit {
 ///
 /// Returns `n × g` probability vectors suitable for conformal classification.
 /// For each observation, the probabilities sum to 1.
-pub fn classif_predict_probs(fit: &ClassifFit, scores: &FdMatrix) -> Vec<Vec<f64>> {
+pub(crate) fn classif_predict_probs(fit: &ClassifFit, scores: &FdMatrix) -> Vec<Vec<f64>> {
     let n = scores.nrows();
     let d = scores.ncols();
     match &fit.method {

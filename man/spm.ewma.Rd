@@ -21,6 +21,7 @@ Smaller values give more smoothing; lambda = 1 gives raw scores.}
 }
 \value{
 A list with components:
+\describe{
 \item{smoothed.scores}{EWMA-smoothed score matrix}
 \item{t2}{T-squared values on smoothed scores}
 \item{spe}{SPE values (unsmoothed)}
@@ -28,6 +29,7 @@ A list with components:
 \item{spe.limit}{SPE control limit}
 \item{t2.alarm}{Logical: TRUE where T-squared exceeds limit}
 \item{spe.alarm}{Logical: TRUE where SPE exceeds limit}
+}
 }
 \description{
 Applies Exponentially Weighted Moving Average (EWMA) smoothing to FPC

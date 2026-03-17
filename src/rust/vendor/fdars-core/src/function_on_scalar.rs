@@ -108,23 +108,6 @@ pub struct FosrResult {
     pub gcv: f64,
 }
 
-impl FosrResult {
-    /// Reconstruct a `FosrResult` from its constituent fields.
-    pub fn new(
-        intercept: Vec<f64>,
-        beta: FdMatrix,
-        fitted: FdMatrix,
-        residuals: FdMatrix,
-        r_squared_t: Vec<f64>,
-        r_squared: f64,
-        beta_se: FdMatrix,
-        lambda: f64,
-        gcv: f64,
-    ) -> Self {
-        Self { intercept, beta, fitted, residuals, r_squared_t, r_squared, beta_se, lambda, gcv }
-    }
-}
-
 /// Result of FPC-based function-on-scalar regression.
 #[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
@@ -932,6 +915,31 @@ pub fn fanova(data: &FdMatrix, groups: &[usize], n_perm: usize) -> Result<Fanova
 }
 
 impl FosrResult {
+    /// Construct from pre-computed parts (for FFI reconstruction).
+    pub fn from_parts(
+        intercept: Vec<f64>,
+        beta: FdMatrix,
+        fitted: FdMatrix,
+        residuals: FdMatrix,
+        r_squared_t: Vec<f64>,
+        r_squared: f64,
+        beta_se: FdMatrix,
+        lambda: f64,
+        gcv: f64,
+    ) -> Self {
+        Self {
+            intercept,
+            beta,
+            fitted,
+            residuals,
+            r_squared_t,
+            r_squared,
+            beta_se,
+            lambda,
+            gcv,
+        }
+    }
+
     /// Predict functional responses for new predictors. Delegates to [`predict_fosr`].
     pub fn predict(&self, new_predictors: &FdMatrix) -> FdMatrix {
         predict_fosr(self, new_predictors)

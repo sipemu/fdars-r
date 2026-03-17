@@ -1774,6 +1774,103 @@ for (domain in list(c(0, 1), c(0, 2*pi), c(0, 10), c(-1, 1))) {
 }
 ```
 
+## Lambda Selection via Cross-Validation
+
+The regularization parameter `lambda` controls the trade-off between alignment
+quality and warp smoothness. Use `elastic.lambda.cv()` to select it
+automatically via K-fold cross-validation:
+
+```{r lambda-cv}
+set.seed(42)
+n <- 30; m <- 50
+av <- seq(0, 1, length.out = m)
+X <- matrix(0, n, m)
+for (i in 1:n) {
+  shift <- runif(1, -0.1, 0.1)
+  X[i, ] <- sin(2 * pi * (av + shift)) + rnorm(m, sd = 0.1)
+}
+fd_cv <- fdata(X, argvals = av)
+
+cv_result <- elastic.lambda.cv(fd_cv,
+                                lambdas = 10^seq(-3, 1, length.out = 10),
+                                n.folds = 5, seed = 42)
+cv_result
+```
+
+```{r lambda-cv-plot, fig.height=4}
+plot(cv_result)
+```
+
+The optimal lambda minimizes the CV reconstruction error.
+
+## Warp Statistics
+
+After computing a Karcher mean, examine the warping functions with
+`warp.statistics()`. This provides pointwise mean, standard deviation, and
+confidence bands:
+
+```{r warp-stats}
+km <- karcher.mean(fd_cv, max.iter = 15)
+ws <- warp.statistics(km, confidence.level = 0.95)
+ws
+```
+
+```{r warp-stats-plot, fig.height=4}
+plot(ws)
+```
+
+The plot shows the mean warp (solid) with a 95% confidence band (shaded).
+Warps far from the identity indicate strong phase variation at those domain
+locations.
+
+## Phase Boxplots
+
+Phase boxplots provide a functional boxplot of the warping functions,
+identifying outlier warps:
+
+```{r phase-boxplot}
+pb <- phase.boxplot(km, factor = 1.5)
+pb
+```
+
+```{r phase-boxplot-plot, fig.height=4}
+plot(pb)
+```
+
+The central 50% region (darker shading) contains the typical warps, while
+curves outside the whiskers are flagged as phase outliers.
+
+## Registration Diagnostics
+
+`alignment.diagnostics()` assesses per-curve alignment quality, detecting
+under-alignment, over-alignment, and non-monotone warps:
+
+```{r diagnostics}
+diag <- alignment.diagnostics(fd_cv, km)
+diag
+```
+
+```{r diagnostics-plot, fig.height=4}
+plot(diag)
+```
+
+The health score (fraction of non-flagged curves) provides a quick summary.
+Flagged curves may need manual inspection or different alignment parameters.
+
+For pairwise diagnostics, use `alignment.diagnostics.pairwise()` to check a
+single pair alignment:
+
+```{r pairwise-diag}
+pair <- elastic.pair(fd_cv$data[1, ], fd_cv$data[2, ], av)
+diag_pair <- alignment.diagnostics.pairwise(
+  fd_cv$data[1, ], fd_cv$data[2, ],
+  list(gamma = pair$gamma, f.aligned = pair$f.aligned, distance = pair$distance),
+  av
+)
+cat("Flagged:", diag_pair$flagged, "\n")
+cat("Distance ratio:", round(diag_pair$distance_ratio, 3), "\n")
+```
+
 ## References
 
 - Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011). Shape analysis of elastic curves in Euclidean spaces. *IEEE Transactions on Pattern Analysis and Machine Intelligence*, 33(7):1415--1428.

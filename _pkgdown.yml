@@ -61,6 +61,7 @@ articles:
   - articles/landmark-registration
   - articles/tsrvf
   - articles/alignment-comparison
+  - articles/shape-analysis
 - title: Regression
   contents:
   - articles/scalar-on-function
@@ -79,12 +80,15 @@ articles:
 - title: Process Monitoring
   contents:
   - articles/statistical-process-monitoring
+  - articles/advanced-spm
+  - articles/profile-partial-monitoring
 - title: Analyze
   contents:
   - articles/tolerance-bands
   - articles/equivalence-testing
   - articles/clustering
   - articles/gmm-clustering
+  - articles/elastic-clustering
   - articles/outlier-detection
   - articles/seasonal-analysis
   - articles/covariance-functions
@@ -346,6 +350,56 @@ reference:
   - mfpca
   - frcc.phase1
   - frcc.monitor
+
+- title: Advanced SPM
+  contents:
+  - spm.ncomp.select
+  - spm.rules
+  - spm.limit.robust
+  - spm.pc.contributions
+  - spm.arl
+  - spm.arl.ewma
+  - spm.cusum
+  - plot.spm.cusum
+  - spm.mewma
+  - plot.spm.mewma
+  - spm.amewma
+  - plot.spm.amewma
+  - spm.phase1.iterative
+
+- title: Profile & Partial Monitoring
+  contents:
+  - spm.profile.phase1
+  - spm.profile.monitor
+  - spm.monitor.partial
+  - spm.monitor.partial.batch
+  - spm.elastic.phase1
+  - plot.spm.elastic.chart
+  - spm.elastic.monitor
+
+- title: Elastic Clustering
+  contents:
+  - elastic.kmeans
+  - elastic.hclust
+  - elastic.cutree
+
+- title: Shape Analysis
+  contents:
+  - shape.representative
+  - shape.distance
+  - shape.mean
+  - shape.distance.matrix
+
+- title: Alignment Extensions
+  contents:
+  - elastic.lambda.cv
+  - warp.statistics
+  - phase.boxplot
+  - warp.inverse
+  - warp.inverse.error
+  - elastic.pair.penalized
+  - alignment.diagnostics
+  - alignment.diagnostics.pairwise
 
 - title: Elastic Changepoint
   contents:

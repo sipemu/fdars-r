@@ -17,7 +17,7 @@ available matrix from the group.distance object.}
 \item{...}{Additional arguments.}
 }
 \value{
-A ggplot object (for heatmap) or NULL (for dendrogram, uses base graphics).
+A ggplot object.
 }
 \description{
 Plot method for group.distance

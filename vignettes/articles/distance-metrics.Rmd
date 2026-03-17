@@ -632,6 +632,43 @@ fit_np <- fregre.np(fd_large, y, metric = metric.lp)
 - `vignette("elastic-alignment", package = "fdars")` — elastic curve alignment using SRVF
 - `vignette("articles/scalar-on-function")` — scalar-on-function regression methods
 
+## Shape Distances
+
+Beyond elastic distance, **shape distance** factors out additional nuisance
+transformations (vertical translation, scaling) on top of reparameterization.
+This is useful when curves represent geometric shapes where absolute position
+and scale are irrelevant.
+
+```{r shape-distance}
+set.seed(42)
+m <- 50
+argvals <- seq(0, 1, length.out = m)
+
+# Two bumps at different scales and positions
+f1 <- exp(-((argvals - 0.3)^2) / 0.02)
+f2 <- 2 * exp(-((argvals - 0.5)^2) / 0.02) + 1  # scaled + shifted
+
+# Elastic distance (sensitive to scale and translation)
+d_elastic <- elastic.distance(f1, f2, argvals)
+
+# Shape distance (invariant to reparameterization + translation + scale)
+d_shape <- shape.distance(f1, f2, argvals, quotient = "scale")
+
+cat("Elastic distance:", round(d_elastic, 3), "\n")
+cat("Shape distance:  ", round(d_shape$distance, 3), "\n")
+```
+
+The shape distance is smaller because it factors out the scale and translation
+differences, comparing only the intrinsic shape. Use `shape.distance.matrix()`
+for all-pairs computation:
+
+```{r shape-matrix, eval = FALSE}
+dist_mat <- shape.distance.matrix(fd, quotient = "scale")
+```
+
+For a full tutorial on shape analysis, see
+`vignette("articles/shape-analysis")`.
+
 ## References
 
 - Berndt, D.J. and Clifford, J. (1994). Using Dynamic Time Warping to Find

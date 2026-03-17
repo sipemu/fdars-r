@@ -4,7 +4,13 @@
 \alias{basis2fdata_2d}
 \title{Reconstruct 2D Functional Data from Tensor Product Basis Coefficients}
 \usage{
-basis2fdata_2d(coefs, argvals, nbasis.s, nbasis.t, type = c("bspline", "fourier"))
+basis2fdata_2d(
+  coefs,
+  argvals,
+  nbasis.s,
+  nbasis.t,
+  type = c("bspline", "fourier")
+)
 }
 \arguments{
 \item{coefs}{Coefficient matrix \code{[n x (nbasis.s * nbasis.t)]}.}

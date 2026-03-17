@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-03-17
+
+### Added
+
+#### SPM Module — 12 new submodules
+
+- **Automatic ncomp selection** (`spm/ncomp.rs`): `select_ncomp` with cumulative variance, elbow detection, and fixed methods. New type: `NcompMethod`
+- **Per-PC T² contributions** (`spm/contrib.rs`): `t2_pc_contributions` returns an n × ncomp matrix whose rows sum to the Hotelling T² value, enabling per-component fault attribution
+- **Runs/zone rules** (`spm/rules.rs`): Western Electric (WE1–WE4) and Nelson (5–7) pattern detection rules for control charts; custom run rules. New types: `ChartRule`, `RuleViolation`. Functions: `evaluate_rules`, `western_electric_rules`, `nelson_rules`
+- **Bootstrap/robust control limits** (`spm/bootstrap.rs`): empirical quantile, bootstrap resampling, and Gaussian KDE alternatives to parametric chi-squared limits. New type: `ControlLimitMethod`. Functions: `t2_limit_robust`, `spe_limit_robust`
+- **ARL computation** (`spm/arl.rs`): Monte Carlo average run length simulation for T², EWMA-T², and SPE charts with parallelized replicates. New types: `ArlConfig`, `ArlResult`. Functions: `arl0_t2`, `arl1_t2`, `arl0_ewma_t2`, `arl0_spe`
+- **MEWMA monitoring** (`spm/mewma.rs`): multivariate EWMA with asymptotic or exact time-dependent covariance and chi-squared UCL. New types: `MewmaConfig`, `MewmaMonitorResult`. Function: `spm_mewma_monitor`
+- **Profile monitoring** (`spm/profile.rs`): rolling-window FOSR coefficient monitoring via FPCA and T² for detecting changes in predictor–response relationships. New types: `ProfileMonitorConfig`, `ProfileChart`, `ProfileMonitorResult`. Functions: `profile_phase1`, `profile_monitor`
+- **Partial-domain monitoring** (`spm/partial.rs`): monitor incomplete functional observations using conditional expectation (BLUP), partial projection, or zero-padding. New types: `DomainCompletion`, `PartialDomainConfig`, `PartialMonitorResult`. Functions: `spm_monitor_partial`, `spm_monitor_partial_batch`
+- **Phase-aware (elastic) SPM** (`spm/elastic_spm.rs`): separates amplitude and phase variation via Karcher mean alignment, then monitors each component independently. New types: `ElasticSpmConfig`, `ElasticSpmChart`, `ElasticSpmMonitorResult`. Functions: `elastic_spm_phase1`, `elastic_spm_monitor`
+- **CUSUM monitoring** (`spm/cusum.rs`): multivariate (Crosier's MCUSUM) and per-component univariate CUSUM charts for detecting small sustained shifts; optional automatic restart after alarms. New types: `CusumConfig`, `CusumMonitorResult`. Functions: `spm_cusum_monitor`, `spm_cusum_monitor_with_restart`
+- **Adaptive EWMA (AMFEWMA)** (`spm/amewma.rs`): dynamically adjusts smoothing parameter λ_t based on prediction error magnitude — small λ for persistent shifts, large λ for sudden shifts. New types: `AmewmaConfig`, `AmewmaMonitorResult`. Function: `spm_amewma_monitor`
+- **Iterative Phase I** (`spm/iterative.rs`): repeatedly builds charts, removes out-of-control observations, and re-estimates until convergence for robust chart construction from contaminated data. New types: `IterativePhase1Config`, `IterativePhase1Result`. Function: `spm_phase1_iterative`
+
+#### Alignment Module — 8 new features
+
+- **Lambda cross-validation** (`alignment/lambda_cv.rs`): K-fold CV for optimal alignment regularization parameter selection. New types: `LambdaCvConfig`, `LambdaCvResult`. Function: `lambda_cv`
+- **Warp statistics** (`alignment/warp_stats.rs`): pointwise mean, standard deviation, confidence bands, and Karcher mean warp on the Hilbert sphere with geodesic distances. New type: `WarpStatistics`. Function: `warp_statistics`
+- **Phase box plots** (`alignment/phase_boxplot.rs`): functional box plots for warping functions using modified band depth, with central region, whiskers, and outlier detection. New type: `PhaseBoxplot`. Function: `phase_boxplot`
+- **Elastic clustering** (`alignment/clustering.rs`): k-means++ with Karcher mean centers and agglomerative hierarchical clustering (single/complete/average linkage) using elastic distances. New types: `ElasticClusterConfig`, `ElasticClusterMethod`, `ElasticClusterResult`, `ElasticDendrogram`. Functions: `elastic_kmeans`, `elastic_hierarchical`, `cut_dendrogram`
+- **Registration diagnostics** (`alignment/diagnostics.rs`): detect registration failures via warp complexity, smoothness, and amplitude improvement metrics with configurable thresholds. New types: `AlignmentDiagnostic`, `AlignmentDiagnosticSummary`, `DiagnosticConfig`. Functions: `diagnose_alignment`, `diagnose_pairwise`
+- **Elastic shape analysis** (`alignment/shape.rs`): quotient space operations under reparameterization, translation, and scale invariance — orbit representatives, shape distances, shape means, and distance matrices. New types: `ShapeQuotient`, `OrbitRepresentative`, `ShapeDistanceResult`, `ShapeMeanResult`. Functions: `orbit_representative`, `shape_distance`, `shape_mean`, `shape_self_distance_matrix`
+- **Warp inversion** (`alignment/srsf.rs`): `invert_warp` computes γ⁻¹ via monotone interpolation; `warp_inverse_error` measures ‖γ∘γ⁻¹ − id‖∞
+- **Penalized alignment** (`alignment/pairwise.rs`): `WarpPenaltyType` enum (first-order, second-order, combined) and `elastic_align_pair_penalized` for curvature-penalized registration
+
+#### Test & documentation
+
+- 98 new tests across SPM (55) and alignment (43); total: 2,436 tests (1,752 unit + 684 integration/doc)
+- A-grade documentation on all 19 SPM files: equation/page citations, error bounds, `#[must_use]` attributes
+- All new types and functions re-exported in `lib.rs` and `prelude.rs`
+
 ## [0.8.5] - 2026-03-14
 
 ### Added

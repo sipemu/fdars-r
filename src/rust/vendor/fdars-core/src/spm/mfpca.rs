@@ -3,6 +3,40 @@
 //! Extends univariate FPCA to handle multiple functional variables
 //! observed on potentially different grids. Variables are optionally
 //! weighted by their inverse standard deviation before joint SVD.
+//!
+//! # Algorithm
+//!
+//! 1. Center each variable by its column means.
+//! 2. Standardize each variable by its scale (sqrt of mean column variance)
+//!    when `weighted = true`. This ensures variables on different scales
+//!    contribute equally to the joint decomposition.
+//! 3. Horizontally concatenate the centered/scaled variables into an
+//!    n × (sum m_p) matrix and perform truncated SVD.
+//! 4. Extract scores as U * S and eigenfunctions from V. Eigenfunctions
+//!    are back-scaled by the per-variable scale factor when reconstructing,
+//!    so that reconstruction returns values on the original measurement scale.
+//!
+//! # Projection accuracy
+//!
+//! The projection error ||X - X_hat||² is bounded by sum_{l > ncomp} lambda_l
+//! (the sum of discarded eigenvalues). This provides an a priori error bound
+//! for choosing ncomp: retain enough components so that the discarded
+//! eigenvalue tail is acceptably small relative to the total variance.
+//!
+//! # Scale threshold
+//!
+//! Variables with scale < 1e-12 (relative to the maximum scale across all
+//! variables) are treated as constant and receive unit weight (scale = 1.0).
+//! This prevents numerical issues from near-zero denominators in the
+//! standardization step.
+//!
+//! # References
+//!
+//! - Happ, C. & Greven, S. (2018). Multivariate functional principal component
+//!   analysis for data observed on different (dimensional) domains. *Journal of
+//!   the American Statistical Association*, 113(522), 649-659. The weighting
+//!   scheme follows Section 2.2 (standardization by variable-specific scale)
+//!   and the eigendecomposition is described in Section 2.3, Eq. 3-5.
 
 use crate::error::FdarError;
 use crate::matrix::FdMatrix;
@@ -42,24 +76,13 @@ pub struct MfpcaResult {
     pub scales: Vec<f64>,
     /// Grid sizes per variable.
     pub grid_sizes: Vec<usize>,
-    /// Combined rotation matrix (sum(m_p) x ncomp) — used for projection.
-    pub combined_rotation: FdMatrix,
+    /// Combined rotation matrix (sum(m_p) x ncomp) — internal use for projection.
+    pub(super) combined_rotation: FdMatrix,
+    /// Threshold below which a variable's scale is treated as 1.0 (avoids division by near-zero).
+    pub(super) scale_threshold: f64,
 }
 
 impl MfpcaResult {
-    /// Reconstruct an `MfpcaResult` from its constituent fields.
-    pub fn new(
-        scores: FdMatrix,
-        eigenfunctions: Vec<FdMatrix>,
-        eigenvalues: Vec<f64>,
-        means: Vec<Vec<f64>>,
-        scales: Vec<f64>,
-        grid_sizes: Vec<usize>,
-        combined_rotation: FdMatrix,
-    ) -> Self {
-        Self { scores, eigenfunctions, eigenvalues, means, scales, grid_sizes, combined_rotation }
-    }
-
     /// Project new multivariate functional data onto the MFPCA score space.
     ///
     /// Each element of `new_data` is an n_new x m_p matrix for variable p.
@@ -74,6 +97,18 @@ impl MfpcaResult {
                 parameter: "new_data",
                 expected: format!("{} variables", self.means.len()),
                 actual: format!("{} variables", new_data.len()),
+            });
+        }
+
+        // Early check: total columns across all variables must match the
+        // combined rotation matrix rows (i.e., the sum of training grid sizes).
+        let total_input_cols: usize = new_data.iter().map(|v| v.ncols()).sum();
+        let expected_total: usize = self.grid_sizes.iter().sum();
+        if total_input_cols != expected_total {
+            return Err(FdarError::InvalidDimension {
+                parameter: "new_data",
+                expected: format!("{expected_total} total columns across all variables"),
+                actual: format!("{total_input_cols} total columns"),
             });
         }
 
@@ -100,7 +135,7 @@ impl MfpcaResult {
                     actual: format!("{} rows for variable {p}", var.nrows()),
                 });
             }
-            let scale = if self.scales[p] > 1e-15 {
+            let scale = if self.scales[p] >= self.scale_threshold {
                 self.scales[p]
             } else {
                 1.0
@@ -163,7 +198,7 @@ impl MfpcaResult {
         let mut result = Vec::with_capacity(self.means.len());
         let mut col_offset = 0;
         for (p, m_p) in self.grid_sizes.iter().enumerate() {
-            let scale = if self.scales[p] > 1e-15 {
+            let scale = if self.scales[p] >= self.scale_threshold {
                 self.scales[p]
             } else {
                 1.0
@@ -186,6 +221,19 @@ impl MfpcaResult {
 /// # Arguments
 /// * `variables` - Slice of n x m_p matrices, one per functional variable
 /// * `config` - MFPCA configuration
+///
+/// # Example
+///
+/// ```
+/// use fdars_core::matrix::FdMatrix;
+/// use fdars_core::spm::mfpca::{mfpca, MfpcaConfig};
+/// let var1 = FdMatrix::from_column_major(vec![1.0,2.0,3.0,4.0,5.0,6.0], 3, 2).unwrap();
+/// let var2 = FdMatrix::from_column_major(vec![0.5,1.5,2.5,3.5,4.5,5.5], 3, 2).unwrap();
+/// let config = MfpcaConfig { ncomp: 2, weighted: true };
+/// let result = mfpca(&[&var1, &var2], &config).unwrap();
+/// assert_eq!(result.eigenvalues.len(), 2);
+/// assert!(result.eigenvalues[0] >= result.eigenvalues[1]);
+/// ```
 ///
 /// # Errors
 ///
@@ -252,12 +300,19 @@ pub fn mfpca(variables: &[&FdMatrix], config: &MfpcaConfig) -> Result<MfpcaResul
         scales.push(scale);
     }
 
+    // Use relative threshold for scale: 1e-12 * max(scales).
+    // Variables with scale below this threshold contribute negligible variance
+    // and are effectively constant. Treating them as unscaled avoids division
+    // by near-zero values.
+    let max_scale = scales.iter().cloned().fold(0.0_f64, f64::max);
+    let scale_threshold = 1e-12 * max_scale.max(1e-15); // floor to avoid 0
+
     // Step 2: Build stacked matrix (n x total_cols)
     let mut stacked = FdMatrix::zeros(n, total_cols);
     let mut col_offset = 0;
     for (p, var) in variables.iter().enumerate() {
         let m_p = grid_sizes[p];
-        let scale = if config.weighted && scales[p] > 1e-15 {
+        let scale = if config.weighted && scales[p] > scale_threshold {
             scales[p]
         } else {
             1.0
@@ -339,5 +394,6 @@ pub fn mfpca(variables: &[&FdMatrix], config: &MfpcaConfig) -> Result<MfpcaResul
         scales,
         grid_sizes,
         combined_rotation,
+        scale_threshold,
     })
 }

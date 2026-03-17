@@ -162,7 +162,7 @@ pub(crate) fn build_feature_matrix(
 
 pub use cv::fclassif_cv;
 pub use dd::fclassif_dd;
-pub use fit::classif_predict_probs;
+pub(crate) use fit::classif_predict_probs;
 pub use fit::{
     fclassif_cv_with_config, fclassif_knn_fit, fclassif_lda_fit, fclassif_qda_fit, ClassifCvConfig,
     ClassifFit, ClassifMethod,

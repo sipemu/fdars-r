@@ -38,18 +38,6 @@ pub struct TsrvfResult {
     pub converged: bool,
 }
 
-impl TsrvfResult {
-    /// Create a new TsrvfResult.
-    pub fn new(
-        tangent_vectors: FdMatrix, mean: Vec<f64>, mean_srsf: Vec<f64>,
-        mean_srsf_norm: f64, srsf_norms: Vec<f64>, initial_values: Vec<f64>,
-        gammas: FdMatrix, converged: bool,
-    ) -> Self {
-        Self { tangent_vectors, mean, mean_srsf, mean_srsf_norm,
-               srsf_norms, initial_values, gammas, converged }
-    }
-}
-
 /// Method for transporting tangent vectors on the Hilbert sphere.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[non_exhaustive]

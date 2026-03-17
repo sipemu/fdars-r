@@ -31,6 +31,7 @@ frcc.phase1(
 }
 \value{
 An object of class \code{frcc.chart} with components:
+\describe{
 \item{eigenvalues}{Eigenvalues from residual FPCA}
 \item{t2.ucl}{T-squared control limit}
 \item{spe.ucl}{SPE control limit}
@@ -38,6 +39,7 @@ An object of class \code{frcc.chart} with components:
 \item{fdataobj}{Original fdata object}
 \item{predictors}{Original predictor matrix}
 \item{.rust}{Internal fields for Phase II monitoring}
+}
 }
 \description{
 Monitors a functional response after adjusting for known scalar covariates
