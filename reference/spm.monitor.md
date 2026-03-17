@@ -76,9 +76,9 @@ mon <- spm.monitor(chart, fd_new)
 mon
 #> SPM Monitoring Result (Phase II)
 #>   Observations: 10 
-#>   T2 alarms: 0 of 10 (0%) 
+#>   T2 alarms: 9 of 10 (90%) 
 #>   SPE alarms: 10 of 10 (100%) 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 1.862 
+#>   SPE UCL: 1.897 
 # }
 ```

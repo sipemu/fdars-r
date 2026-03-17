@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120">
+  <defs>
+    <marker id="sha" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#888"/>
+    </marker>
+  </defs>
+  <rect width="200" height="120" rx="4" fill="#f5f5f5"/>
+  <!-- Blue curve (original, larger, slightly rotated) -->
+  <path d="M 20,85 Q 35,30 55,50 Q 70,65 85,35" fill="none" stroke="#4169E1" stroke-width="2.2"/>
+  <!-- Arrow suggesting alignment -->
+  <line x1="92" y1="55" x2="112" y2="55" stroke="#888" stroke-width="1.5" marker-end="url(#sha)"/>
+  <!-- Purple curve (aligned/canonical, slightly smaller) -->
+  <path d="M 120,80 Q 135,40 150,55 Q 162,65 175,42" fill="none" stroke="#7B2D8E" stroke-width="2.2"/>
+  <!-- Small labels -->
+  <text x="52" y="105" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4169E1">original</text>
+  <text x="148" y="105" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#7B2D8E">aligned</text>
+</svg>

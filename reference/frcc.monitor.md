@@ -81,9 +81,9 @@ mon <- frcc.monitor(chart, fd_new, X_new)
 mon
 #> SPM Monitoring Result (Phase II)
 #>   Observations: 10 
-#>   T2 alarms: 1 of 10 (10%) 
+#>   T2 alarms: 2 of 10 (20%) 
 #>   SPE alarms: 10 of 10 (100%) 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 1.171 
+#>   SPE UCL: 1.265 
 # }
 ```

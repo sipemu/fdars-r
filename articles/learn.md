@@ -116,6 +116,12 @@ TSRVF (Tangent Space)
 
 Comparing Methods
 
+[](https://sipemu.github.io/fdars-r/articles/shape-analysis.md)
+
+![Shape Analysis](../reference/figures/card-shape-analysis.svg)
+
+Shape Analysis
+
 ## Regression
 
 Regression, classification, and mixed models for functional data.
@@ -215,6 +221,19 @@ Statistical process control for functional data streams.
 
 Statistical Process Monitoring
 
+[](https://sipemu.github.io/fdars-r/articles/advanced-spm.md)
+
+![Advanced SPM](../reference/figures/card-advanced-spm.svg)
+
+Advanced Process Monitoring
+
+[](https://sipemu.github.io/fdars-r/articles/profile-partial-monitoring.md)
+
+![Profile & Partial
+Monitoring](../reference/figures/card-profile-partial.svg)
+
+Profile & Partial Monitoring
+
 ## Analyze
 
 Infer, cluster, detect outliers, and test functional data.
@@ -243,6 +262,12 @@ Clustering
 ![GMM Clustering](../reference/figures/card-gmm-clustering.svg)
 
 GMM Clustering
+
+[](https://sipemu.github.io/fdars-r/articles/elastic-clustering.md)
+
+![Elastic Clustering](../reference/figures/card-elastic-clustering.svg)
+
+Elastic Clustering
 
 [](https://sipemu.github.io/fdars-r/articles/outlier-detection.md)
 

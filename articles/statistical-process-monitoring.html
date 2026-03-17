@@ -182,10 +182,10 @@ limits at significance level
 <span><span class="co">#&gt;   Components: 3 </span></span>
 <span><span class="co">#&gt;   Alpha: 0.05 </span></span>
 <span><span class="co">#&gt;   T2 UCL: 7.815 </span></span>
-<span><span class="co">#&gt;   SPE UCL: 0.1241 </span></span>
+<span><span class="co">#&gt;   SPE UCL: 0.12 </span></span>
 <span><span class="co">#&gt;   Observations: 200 </span></span>
 <span><span class="co">#&gt;   Grid points: 50 </span></span>
-<span><span class="co">#&gt;   Eigenvalues: 81.71, 24.00,  5.41</span></span></code></pre></div>
+<span><span class="co">#&gt;   Eigenvalues: 78.73, 23.13,  5.81</span></span></code></pre></div>
 <p>The returned <code>spm.chart</code> object contains:</p>
 <ul>
 <li>
@@ -216,15 +216,15 @@ compare to control limits:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SPM Monitoring Result (Phase II)</span></span>
 <span><span class="co">#&gt;   Observations: 50 </span></span>
-<span><span class="co">#&gt;   T2 alarms: 2 of 50 (4%) </span></span>
-<span><span class="co">#&gt;   SPE alarms: 2 of 50 (4%) </span></span>
+<span><span class="co">#&gt;   T2 alarms: 3 of 50 (6%) </span></span>
+<span><span class="co">#&gt;   SPE alarms: 5 of 50 (10%) </span></span>
 <span><span class="co">#&gt;   T2 UCL: 7.815 </span></span>
-<span><span class="co">#&gt;   SPE UCL: 0.1241</span></span>
+<span><span class="co">#&gt;   SPE UCL: 0.12</span></span>
 <span></span>
 <span><span class="co"># Which observations triggered alarms?</span></span>
 <span><span class="va">alarm_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">$</span><span class="va">t2.alarm</span> <span class="op">|</span> <span class="va">monitor</span><span class="op">$</span><span class="va">spe.alarm</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Alarms at observations:"</span>, <span class="va">alarm_idx</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Alarms at observations: 4 25 46</span></span></code></pre></div>
+<span><span class="co">#&gt; Alarms at observations: 4 16 26 34 44 46</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">)</span></span></code></pre></div>
 <p><img src="statistical-process-monitoring_files/figure-html/phase2-plot-1.png" class="r-plt" alt="" width="100%"></p>
@@ -272,9 +272,9 @@ persistent shifts than the standard Shewhart-type chart:</p>
 <code class="sourceCode R"><span><span class="va">ewma_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.ewma.html">spm.ewma</a></span><span class="op">(</span><span class="va">chart</span>, <span class="va">fd_new</span>, lambda <span class="op">=</span> <span class="fl">0.2</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EWMA T2 alarms:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ewma_result</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; EWMA T2 alarms: 6</span></span>
+<span><span class="co">#&gt; EWMA T2 alarms: 9</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EWMA SPE alarms:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ewma_result</span><span class="op">$</span><span class="va">spe.alarm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; EWMA SPE alarms: 2</span></span></code></pre></div>
+<span><span class="co">#&gt; EWMA SPE alarms: 5</span></span></code></pre></div>
 <p>The smoothing parameter
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\lambda \in (0, 1]</annotation></semantics></math>
 controls the memory: -
@@ -336,7 +336,7 @@ eigenfunction is unusually far from the in-control mean. This tells you
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"First alarm at observation:"</span>, <span class="va">first_alarm</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; First alarm at observation: 4</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"T2 contributions (per PC):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">[</span><span class="va">first_alarm</span>, <span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; T2 contributions (per PC): 10.813</span></span></code></pre></div>
+<span><span class="co">#&gt; T2 contributions (per PC): 10.563</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize T2 contributions for all monitoring observations</span></span>
 <span><span class="va">n_mon</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">)</span></span>
@@ -438,6 +438,49 @@ alarm.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="elastic-spm">Elastic SPM<a class="anchor" aria-label="anchor" href="#elastic-spm"></a>
+</h2>
+<p>When functional data exhibit <strong>phase variation</strong> (timing
+differences between curves), standard SPM charts based on Euclidean FPCA
+can produce false alarms. Elastic SPM separates amplitude and phase
+components, monitoring each with its own control chart.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Phase I: build elastic chart</span></span>
+<span><span class="va">chart_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.elastic.phase1.html">spm.elastic.phase1</a></span><span class="op">(</span><span class="va">fd_train</span>, ncomp <span class="op">=</span> <span class="fl">3</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>                                     monitor.phase <span class="op">=</span> <span class="cn">TRUE</span>, warp.ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Phase II: monitor new data</span></span>
+<span><span class="va">mon_elastic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.elastic.monitor.html">spm.elastic.monitor</a></span><span class="op">(</span><span class="va">chart_elastic</span>, <span class="va">fd_test</span><span class="op">)</span></span></code></pre></div>
+<p>The elastic chart produces dual T²/SPE statistics for both amplitude
+and phase. Amplitude alarms indicate changes in curve shape; phase
+alarms indicate changes in timing or dynamics.</p>
+<p>For a comprehensive tutorial on elastic SPM and advanced monitoring
+methods, see <code><a href="../articles/advanced-spm.html">vignette("articles/advanced-spm")</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="partial-domain-monitoring">Partial Domain Monitoring<a class="anchor" aria-label="anchor" href="#partial-domain-monitoring"></a>
+</h2>
+<p>In many applications, we need to monitor curves <strong>before they
+are fully observed</strong> — for example, monitoring a batch process
+while it is still running. Partial domain monitoring completes the
+unobserved portion of the curve and projects it through the existing
+control chart.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Monitor a curve observed over only the first 70% of the domain</span></span>
+<span><span class="va">partial_values</span> <span class="op">&lt;-</span> <span class="va">new_curve</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">35</span><span class="op">]</span>  <span class="co"># first 35 of 50 grid points</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.monitor.partial.html">spm.monitor.partial</a></span><span class="op">(</span><span class="va">chart</span>, partial.data <span class="op">=</span> <span class="va">partial_values</span>,</span>
+<span>                               n.observed <span class="op">=</span> <span class="fl">35</span>,</span>
+<span>                               completion <span class="op">=</span> <span class="st">"conditional"</span><span class="op">)</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">t2</span>        <span class="co"># T² statistic</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">t2.alarm</span>  <span class="co"># whether alarm is triggered</span></span></code></pre></div>
+<p>Three completion methods are available: <code>"conditional"</code>
+(BLUP, recommended), <code>"projection"</code> (scaled inner products),
+and <code>"zero_pad"</code> (mean padding).</p>
+<p>For profile monitoring with covariates and batch processing of
+partial curves, see
+<code><a href="../articles/profile-partial-monitoring.html">vignette("articles/profile-partial-monitoring")</a></code>.</p>
+</div>
+<div class="section level2">
 <h2 id="comparison-of-methods">Comparison of Methods<a class="anchor" aria-label="anchor" href="#comparison-of-methods"></a>
 </h2>
 <table style="width:100%;" class="table">
@@ -453,7 +496,7 @@ alarm.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><strong>T2</strong></td>
+<td><strong>T²</strong></td>
 <td>Mean shifts in the PC score space</td>
 <td>Location changes in dominant modes</td>
 </tr>
@@ -471,6 +514,31 @@ alarm.</p>
 <td><strong>FRCC</strong></td>
 <td>Shifts in the relationship between curves and covariates</td>
 <td>Regression-based monitoring</td>
+</tr>
+<tr class="odd">
+<td><strong>CUSUM</strong></td>
+<td>Small sustained shifts</td>
+<td>Drift detection with tunable sensitivity</td>
+</tr>
+<tr class="even">
+<td><strong>MEWMA</strong></td>
+<td>Multivariate small shifts</td>
+<td>Persistent shifts across multiple components</td>
+</tr>
+<tr class="odd">
+<td><strong>AMEWMA</strong></td>
+<td>Shifts of unknown size</td>
+<td>Adaptive smoothing for mixed shift sizes</td>
+</tr>
+<tr class="even">
+<td><strong>Elastic</strong></td>
+<td>Phase/amplitude changes</td>
+<td>Phase-variable processes</td>
+</tr>
+<tr class="odd">
+<td><strong>Partial</strong></td>
+<td>Early detection mid-curve</td>
+<td>In-progress batch monitoring</td>
 </tr>
 </tbody>
 </table>

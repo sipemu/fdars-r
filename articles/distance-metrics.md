@@ -717,6 +717,47 @@ fit_np <- fregre.np(fd_large, y, metric = metric.lp)
 - [`vignette("articles/scalar-on-function")`](https://sipemu.github.io/fdars-r/articles/scalar-on-function.md)
   — scalar-on-function regression methods
 
+## Shape Distances
+
+Beyond elastic distance, **shape distance** factors out additional
+nuisance transformations (vertical translation, scaling) on top of
+reparameterization. This is useful when curves represent geometric
+shapes where absolute position and scale are irrelevant.
+
+``` r
+set.seed(42)
+m <- 50
+argvals <- seq(0, 1, length.out = m)
+
+# Two bumps at different scales and positions
+f1 <- exp(-((argvals - 0.3)^2) / 0.02)
+f2 <- 2 * exp(-((argvals - 0.5)^2) / 0.02) + 1  # scaled + shifted
+
+# Elastic distance (sensitive to scale and translation)
+fd_pair <- fdata(rbind(f1, f2), argvals = argvals)
+d_elastic <- elastic.distance(fd_pair)[1, 2]
+
+# Shape distance (invariant to reparameterization + translation + scale)
+d_shape <- shape.distance(f1, f2, argvals, quotient = "scale")
+
+cat("Elastic distance:", round(d_elastic, 3), "\n")
+#> Elastic distance: 0.596
+cat("Shape distance:  ", round(d_shape$distance, 3), "\n")
+#> Shape distance:   0.237
+```
+
+The shape distance is smaller because it factors out the scale and
+translation differences, comparing only the intrinsic shape. Use
+[`shape.distance.matrix()`](https://sipemu.github.io/fdars-r/reference/shape.distance.matrix.md)
+for all-pairs computation:
+
+``` r
+dist_mat <- shape.distance.matrix(fd, quotient = "scale")
+```
+
+For a full tutorial on shape analysis, see
+[`vignette("articles/shape-analysis")`](https://sipemu.github.io/fdars-r/articles/shape-analysis.md).
+
 ## References
 
 - Berndt, D.J. and Clifford, J. (1994). Using Dynamic Time Warping to

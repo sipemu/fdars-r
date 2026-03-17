@@ -2,6 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  articles/advanced-spm: advanced-spm.html
   articles/alignment-comparison: alignment-comparison.html
   articles/andrews-transformation: andrews-transformation.html
   articles/basis-representation: basis-representation.html
@@ -15,6 +16,7 @@ articles:
   articles/distance-metrics: distance-metrics.html
   articles/elastic-alignment: elastic-alignment.html
   articles/elastic-changepoint: elastic-changepoint.html
+  articles/elastic-clustering: elastic-clustering.html
   articles/elastic-fpca: elastic-fpca.html
   articles/elastic-regression: elastic-regression.html
   articles/equivalence-testing: equivalence-testing.html
@@ -41,11 +43,13 @@ articles:
   articles/landmark-registration: landmark-registration.html
   articles/learn: learn.html
   articles/outlier-detection: outlier-detection.html
+  articles/profile-partial-monitoring: profile-partial-monitoring.html
   articles/regression-diagnostics: regression-diagnostics.html
   articles/robust-regression: robust-regression.html
   articles/scalar-on-function: scalar-on-function.html
   articles/scalar-on-shape: scalar-on-shape.html
   articles/seasonal-analysis: seasonal-analysis.html
+  articles/shape-analysis: shape-analysis.html
   articles/simulation-toolbox: simulation-toolbox.html
   articles/statistical-process-monitoring: statistical-process-monitoring.html
   articles/streaming-depth: streaming-depth.html
@@ -53,7 +57,7 @@ articles:
   articles/tsrvf: tsrvf.html
   articles/uncertainty-quantification: uncertainty-quantification.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-16T10:41Z
+last_built: 2026-03-17T16:05Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

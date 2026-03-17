@@ -91,6 +91,6 @@ fd_seq <- fdata(X_seq, argvals = argvals)
 ewma_result <- spm.ewma(chart, fd_seq, lambda = 0.2)
 ewma_result$t2.alarm
 #>  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-#> [13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+#> [13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
 # }
 ```

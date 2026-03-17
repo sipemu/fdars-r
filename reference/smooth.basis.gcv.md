@@ -61,8 +61,8 @@ sm
 #> Penalized Basis Smoothing
 #>   Basis type: bspline 
 #>   Number of basis functions: 6 
-#>   Lambda: 15.64 
-#>   EDF: 2.1 
-#>   GCV: 1.19421 
+#>   Lambda: 18.79 
+#>   EDF: 2 
+#>   GCV: 1.27404 
 # }
 ```

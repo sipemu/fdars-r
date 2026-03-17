@@ -1994,6 +1994,139 @@ for (domain in list(c(0, 1), c(0, 2*pi), c(0, 10), c(-1, 1))) {
 #>   [-1, 1]: VR = 76.1%
 ```
 
+## Lambda Selection via Cross-Validation
+
+The regularization parameter `lambda` controls the trade-off between
+alignment quality and warp smoothness. Use
+[`elastic.lambda.cv()`](https://sipemu.github.io/fdars-r/reference/elastic.lambda.cv.md)
+to select it automatically via K-fold cross-validation:
+
+``` r
+set.seed(42)
+n <- 30; m <- 50
+av <- seq(0, 1, length.out = m)
+X <- matrix(0, n, m)
+for (i in 1:n) {
+  shift <- runif(1, -0.1, 0.1)
+  X[i, ] <- sin(2 * pi * (av + shift)) + rnorm(m, sd = 0.1)
+}
+fd_cv <- fdata(X, argvals = av)
+
+cv_result <- elastic.lambda.cv(fd_cv,
+                                lambdas = 10^seq(-3, 1, length.out = 10),
+                                n.folds = 5, seed = 42)
+cv_result
+#> Lambda Cross-Validation
+#>   Candidates tested: 10 
+#>   Best lambda: 0.007743 
+#>   Best CV score: 1.098
+```
+
+``` r
+plot(cv_result)
+```
+
+![](elastic-alignment_files/figure-html/lambda-cv-plot-1.png)
+
+The optimal lambda minimizes the CV reconstruction error.
+
+## Warp Statistics
+
+After computing a Karcher mean, examine the warping functions with
+[`warp.statistics()`](https://sipemu.github.io/fdars-r/reference/warp.statistics.md).
+This provides pointwise mean, standard deviation, and confidence bands:
+
+``` r
+km <- karcher.mean(fd_cv, max.iter = 15)
+ws <- warp.statistics(km)
+ws
+#> Warping Function Statistics
+#>   Grid points: 50 
+#>   Curves: 30 
+#>   Mean geodesic distance: 0.2698 
+#>   Max geodesic distance: 0.3903
+```
+
+``` r
+plot(ws)
+```
+
+![](elastic-alignment_files/figure-html/warp-stats-plot-1.png)
+
+The plot shows the mean warp (solid) with a 95% confidence band
+(shaded). Warps far from the identity indicate strong phase variation at
+those domain locations.
+
+## Phase Boxplots
+
+Phase boxplots provide a functional boxplot of the warping functions,
+identifying outlier warps:
+
+``` r
+pb <- phase.boxplot(km, factor = 1.5)
+pb
+#> Phase Boxplot (Warping Functions)
+#>   Grid points: 50 
+#>   Curves: 30 
+#>   Median index: 11 
+#>   Outliers: 0 
+#>   Factor: 1.5
+```
+
+``` r
+plot(pb)
+```
+
+![](elastic-alignment_files/figure-html/phase-boxplot-plot-1.png)
+
+The central 50% region (darker shading) contains the typical warps,
+while curves outside the whiskers are flagged as phase outliers.
+
+## Registration Diagnostics
+
+[`alignment.diagnostics()`](https://sipemu.github.io/fdars-r/reference/alignment.diagnostics.md)
+assesses per-curve alignment quality, detecting under-alignment,
+over-alignment, and non-monotone warps:
+
+``` r
+diag <- alignment.diagnostics(fd_cv, km)
+diag
+#> Alignment Diagnostics
+#>   Curves: 30 
+#>   Flagged: 30 of 30 (100%) 
+#>   Health score: 0 
+#>   Flagged indices: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+```
+
+``` r
+plot(diag)
+```
+
+![](elastic-alignment_files/figure-html/diagnostics-plot-1.png)
+
+The health score (fraction of non-flagged curves) provides a quick
+summary. Flagged curves may need manual inspection or different
+alignment parameters.
+
+For pairwise diagnostics, use
+[`alignment.diagnostics.pairwise()`](https://sipemu.github.io/fdars-r/reference/alignment.diagnostics.pairwise.md)
+to check a single pair alignment:
+
+``` r
+f1 <- fdata(matrix(fd_cv$data[1, ], nrow = 1), argvals = av)
+f2 <- fdata(matrix(fd_cv$data[2, ], nrow = 1), argvals = av)
+pair <- elastic.pair(f1, f2)
+diag_pair <- alignment.diagnostics.pairwise(
+  fd_cv$data[1, ], fd_cv$data[2, ],
+  list(gamma = pair$gamma, f.aligned = pair$f.aligned, distance = pair$distance),
+  av
+)
+cat("Flagged:", diag_pair$flagged, "\n")
+#> Flagged: TRUE
+cat("Distance ratio:", round(diag_pair$distance.ratio, 3), "\n")
+#> Distance ratio: 0.548
+```
+
 ## References
 
 - Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011).

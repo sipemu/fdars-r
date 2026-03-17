@@ -79,6 +79,8 @@
   Analysis](https://sipemu.github.io/fdars-r/articles/tsrvf.md):
 - [Comparing Alignment
   Methods](https://sipemu.github.io/fdars-r/articles/alignment-comparison.md):
+- [Shape
+  Analysis](https://sipemu.github.io/fdars-r/articles/shape-analysis.md):
 
 ### Regression
 
@@ -139,6 +141,10 @@
 
 - [Statistical Process Monitoring for Functional
   Data](https://sipemu.github.io/fdars-r/articles/statistical-process-monitoring.md):
+- [Advanced Statistical Process
+  Monitoring](https://sipemu.github.io/fdars-r/articles/advanced-spm.md):
+- [Profile and Partial-Domain
+  Monitoring](https://sipemu.github.io/fdars-r/articles/profile-partial-monitoring.md):
 
 ### Analyze
 
@@ -153,6 +159,9 @@
 
 - [Model-Based Clustering with Gaussian
   Mixtures](https://sipemu.github.io/fdars-r/articles/gmm-clustering.md):
+
+- [Elastic
+  Clustering](https://sipemu.github.io/fdars-r/articles/elastic-clustering.md):
 
 - [Outlier
   Detection](https://sipemu.github.io/fdars-r/articles/outlier-detection.md):

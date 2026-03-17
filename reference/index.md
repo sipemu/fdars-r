@@ -444,6 +444,119 @@
 - [`frcc.monitor()`](https://sipemu.github.io/fdars-r/reference/frcc.monitor.md)
   : Monitor New Data Against FRCC Chart (Phase II)
 
+## Advanced SPM
+
+- [`spm.ncomp.select()`](https://sipemu.github.io/fdars-r/reference/spm.ncomp.select.md)
+  : Select Number of Principal Components
+- [`spm.rules()`](https://sipemu.github.io/fdars-r/reference/spm.rules.md)
+  : Evaluate Control Chart Rules
+- [`spm.limit.robust()`](https://sipemu.github.io/fdars-r/reference/spm.limit.robust.md)
+  : Robust Control Limits via Alternative Methods
+- [`spm.pc.contributions()`](https://sipemu.github.io/fdars-r/reference/spm.pc.contributions.md)
+  : Per-PC Contributions to T-Squared Statistic
+- [`spm.arl()`](https://sipemu.github.io/fdars-r/reference/spm.arl.md) :
+  Estimate Average Run Length (ARL)
+- [`spm.arl.ewma()`](https://sipemu.github.io/fdars-r/reference/spm.arl.ewma.md)
+  : Estimate ARL for EWMA-T-Squared Chart
+- [`spm.cusum()`](https://sipemu.github.io/fdars-r/reference/spm.cusum.md)
+  : CUSUM Monitoring for Functional Data
+- [`plot(`*`<spm.cusum>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.spm.cusum.md)
+  : Plot CUSUM monitoring results
+- [`spm.mewma()`](https://sipemu.github.io/fdars-r/reference/spm.mewma.md)
+  : MEWMA Monitoring for Functional Data
+- [`plot(`*`<spm.mewma>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.spm.mewma.md)
+  : Plot MEWMA monitoring results
+- [`spm.amewma()`](https://sipemu.github.io/fdars-r/reference/spm.amewma.md)
+  : Adaptive MEWMA (AMEWMA) Monitoring for Functional Data
+- [`plot(`*`<spm.amewma>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.spm.amewma.md)
+  : Plot AMEWMA monitoring results
+- [`spm.phase1.iterative()`](https://sipemu.github.io/fdars-r/reference/spm.phase1.iterative.md)
+  : Iterative Phase I Chart Construction
+
+## Profile & Partial Monitoring
+
+- [`spm.profile.phase1()`](https://sipemu.github.io/fdars-r/reference/spm.profile.phase1.md)
+  : Profile Monitoring Phase I
+- [`spm.profile.monitor()`](https://sipemu.github.io/fdars-r/reference/spm.profile.monitor.md)
+  : Monitor New Data Against Profile Chart (Phase II)
+- [`spm.monitor.partial()`](https://sipemu.github.io/fdars-r/reference/spm.monitor.partial.md)
+  : Monitor a Partially-Observed Curve
+- [`spm.monitor.partial.batch()`](https://sipemu.github.io/fdars-r/reference/spm.monitor.partial.batch.md)
+  : Monitor a Batch of Partially-Observed Curves
+- [`spm.elastic.phase1()`](https://sipemu.github.io/fdars-r/reference/spm.elastic.phase1.md)
+  : Elastic SPM Phase I Chart
+- [`plot(`*`<spm.elastic.chart>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.spm.elastic.chart.md)
+  : Plot Elastic SPM Phase I Chart
+- [`spm.elastic.monitor()`](https://sipemu.github.io/fdars-r/reference/spm.elastic.monitor.md)
+  : Elastic SPM Phase II Monitoring
+
+## Elastic Clustering
+
+- [`elastic.kmeans()`](https://sipemu.github.io/fdars-r/reference/elastic.kmeans.md)
+  : Elastic Clustering for Functional Data
+- [`elastic.hclust()`](https://sipemu.github.io/fdars-r/reference/elastic.hclust.md)
+  : Elastic Hierarchical Clustering
+- [`elastic.cutree()`](https://sipemu.github.io/fdars-r/reference/elastic.cutree.md)
+  : Cut Elastic Dendrogram
+- [`plot(`*`<elastic.kmeans>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.elastic.kmeans.md)
+  : Plot Elastic K-Means Result
+- [`plot(`*`<elastic.hclust>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.elastic.hclust.md)
+  : Plot Elastic Hierarchical Clustering Result
+- [`print(`*`<elastic.kmeans>`*`)`](https://sipemu.github.io/fdars-r/reference/print.elastic.kmeans.md)
+  : Print Elastic K-Means Result
+- [`print(`*`<elastic.hclust>`*`)`](https://sipemu.github.io/fdars-r/reference/print.elastic.hclust.md)
+  : Print Elastic Hierarchical Clustering Result
+
+## Shape Analysis
+
+- [`shape.representative()`](https://sipemu.github.io/fdars-r/reference/shape.representative.md)
+  : Shape Representative (Orbit Representative)
+- [`shape.distance()`](https://sipemu.github.io/fdars-r/reference/shape.distance.md)
+  : Shape Distance Between Two Curves
+- [`shape.mean()`](https://sipemu.github.io/fdars-r/reference/shape.mean.md)
+  : Shape Mean (Karcher Mean in Quotient Space)
+- [`shape.distance.matrix()`](https://sipemu.github.io/fdars-r/reference/shape.distance.matrix.md)
+  : Shape Distance Matrix
+- [`plot(`*`<shape.mean>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.shape.mean.md)
+  : Plot Shape Mean
+- [`print(`*`<shape.mean>`*`)`](https://sipemu.github.io/fdars-r/reference/print.shape.mean.md)
+  : Print Shape Mean
+
+## Alignment Extensions
+
+- [`elastic.lambda.cv()`](https://sipemu.github.io/fdars-r/reference/elastic.lambda.cv.md)
+  : Cross-Validation for Elastic Alignment Regularization Parameter
+- [`warp.statistics()`](https://sipemu.github.io/fdars-r/reference/warp.statistics.md)
+  : Warping Function Statistics
+- [`phase.boxplot()`](https://sipemu.github.io/fdars-r/reference/phase.boxplot.md)
+  : Phase Boxplot for Warping Functions
+- [`warp.inverse()`](https://sipemu.github.io/fdars-r/reference/warp.inverse.md)
+  : Invert a Warping Function
+- [`warp.inverse.error()`](https://sipemu.github.io/fdars-r/reference/warp.inverse.error.md)
+  : Warp Inverse Error
+- [`elastic.pair.penalized()`](https://sipemu.github.io/fdars-r/reference/elastic.pair.penalized.md)
+  : Penalized Elastic Pairwise Alignment
+- [`alignment.diagnostics()`](https://sipemu.github.io/fdars-r/reference/alignment.diagnostics.md)
+  : Alignment Diagnostics
+- [`alignment.diagnostics.pairwise()`](https://sipemu.github.io/fdars-r/reference/alignment.diagnostics.pairwise.md)
+  : Pairwise Alignment Diagnostics
+- [`plot(`*`<lambda.cv>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.lambda.cv.md)
+  : Plot Lambda CV Result
+- [`plot(`*`<warp.statistics>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.warp.statistics.md)
+  : Plot Warp Statistics
+- [`plot(`*`<phase.boxplot>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.phase.boxplot.md)
+  : Plot Phase Boxplot
+- [`plot(`*`<alignment.diagnostics>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.alignment.diagnostics.md)
+  : Plot Alignment Diagnostics
+- [`print(`*`<lambda.cv>`*`)`](https://sipemu.github.io/fdars-r/reference/print.lambda.cv.md)
+  : Print Lambda CV Result
+- [`print(`*`<warp.statistics>`*`)`](https://sipemu.github.io/fdars-r/reference/print.warp.statistics.md)
+  : Print Warp Statistics
+- [`print(`*`<phase.boxplot>`*`)`](https://sipemu.github.io/fdars-r/reference/print.phase.boxplot.md)
+  : Print Phase Boxplot
+- [`print(`*`<alignment.diagnostics>`*`)`](https://sipemu.github.io/fdars-r/reference/print.alignment.diagnostics.md)
+  : Print Alignment Diagnostics
+
 ## Elastic Changepoint
 
 - [`elastic.changepoint()`](https://sipemu.github.io/fdars-r/reference/elastic.changepoint.md)

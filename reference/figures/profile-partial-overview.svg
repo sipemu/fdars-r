@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="280" viewBox="0 0 700 280">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Profile Monitoring track (top) -->
+  <text x="20" y="30" font-family="sans-serif" font-size="11" fill="#4169E1" font-weight="bold">PROFILE MONITORING</text>
+
+  <rect x="20" y="42" width="120" height="44" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="80" y="68" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Covariates</text>
+  <line x1="140" y1="64" x2="165" y2="64" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="165" y="42" width="120" height="44" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="225" y="68" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">FOSR</text>
+  <line x1="285" y1="64" x2="310" y2="64" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="310" y="42" width="140" height="44" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="380" y="62" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Residual</text>
+  <text x="380" y="78" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">FPCA</text>
+
+  <!-- Arrow from profile track to Monitor -->
+  <line x1="450" y1="64" x2="540" y2="140" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Partial Monitoring track (bottom) -->
+  <text x="20" y="170" font-family="sans-serif" font-size="11" fill="#E8913A" font-weight="bold">PARTIAL MONITORING</text>
+
+  <rect x="20" y="182" width="130" height="44" rx="8" fill="#fef3e7" stroke="#E8913A" stroke-width="1.5"/>
+  <text x="85" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Incomplete</text>
+  <text x="85" y="216" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Curve</text>
+  <line x1="150" y1="204" x2="175" y2="204" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="175" y="182" width="130" height="44" rx="8" fill="#fef3e7" stroke="#E8913A" stroke-width="1.5"/>
+  <text x="240" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Domain</text>
+  <text x="240" y="216" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Completion</text>
+  <line x1="305" y1="204" x2="330" y2="204" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="330" y="182" width="120" height="44" rx="8" fill="#fef3e7" stroke="#E8913A" stroke-width="1.5"/>
+  <text x="390" y="208" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Project</text>
+
+  <!-- Arrow from partial track to Monitor -->
+  <line x1="450" y1="204" x2="540" y2="160" stroke="#666" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Shared Monitor box (green) -->
+  <rect x="540" y="120" width="140" height="50" rx="8" fill="#f0faf0" stroke="#2E8B57" stroke-width="2"/>
+  <text x="610" y="150" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#2E8B57" font-weight="bold">Monitor</text>
+</svg>

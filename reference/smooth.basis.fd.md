@@ -105,6 +105,6 @@ sm
 #>   Number of basis functions: 6 
 #>   Lambda: 0.1 
 #>   EDF: 2.2 
-#>   GCV: 1.31118 
+#>   GCV: 1.37371 
 # }
 ```

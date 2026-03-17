@@ -108,6 +108,6 @@ fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
 y <- rep(1:2, each = 25)
 fit <- fclassif(fd, y, method = "lda", ncomp = 3)
 fit$accuracy
-#> [1] 0.46
+#> [1] 0.58
 # }
 ```

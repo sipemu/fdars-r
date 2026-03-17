@@ -92,10 +92,10 @@ print(chart)
 #>   Components: 3 
 #>   Alpha: 0.05 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 0.1241 
+#>   SPE UCL: 0.12 
 #>   Observations: 200 
 #>   Grid points: 50 
-#>   Eigenvalues: 81.71, 24.00,  5.41
+#>   Eigenvalues: 78.73, 23.13,  5.81
 ```
 
 The returned `spm.chart` object contains:
@@ -123,15 +123,15 @@ monitor <- spm.monitor(chart, fd_new)
 print(monitor)
 #> SPM Monitoring Result (Phase II)
 #>   Observations: 50 
-#>   T2 alarms: 2 of 50 (4%) 
-#>   SPE alarms: 2 of 50 (4%) 
+#>   T2 alarms: 3 of 50 (6%) 
+#>   SPE alarms: 5 of 50 (10%) 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 0.1241
+#>   SPE UCL: 0.12
 
 # Which observations triggered alarms?
 alarm_idx <- which(monitor$t2.alarm | monitor$spe.alarm)
 cat("Alarms at observations:", alarm_idx, "\n")
-#> Alarms at observations: 4 25 46
+#> Alarms at observations: 4 16 26 34 44 46
 ```
 
 ``` r
@@ -160,9 +160,9 @@ persistent shifts than the standard Shewhart-type chart:
 ewma_result <- spm.ewma(chart, fd_new, lambda = 0.2, alpha = 0.05)
 
 cat("EWMA T2 alarms:", sum(ewma_result$t2.alarm), "\n")
-#> EWMA T2 alarms: 6
+#> EWMA T2 alarms: 9
 cat("EWMA SPE alarms:", sum(ewma_result$spe.alarm), "\n")
-#> EWMA SPE alarms: 2
+#> EWMA SPE alarms: 5
 ```
 
 The smoothing parameter $\lambda \in (0,1\rbrack$ controls the memory: -
@@ -218,7 +218,7 @@ first_alarm <- alarm_idx[1]
 cat("First alarm at observation:", first_alarm, "\n")
 #> First alarm at observation: 4
 cat("T2 contributions (per PC):", round(t2_contrib[first_alarm, ], 3), "\n")
-#> T2 contributions (per PC): 10.813
+#> T2 contributions (per PC): 10.563
 ```
 
 ``` r
@@ -294,14 +294,68 @@ In a multi-variable setting (using `mf.spm.phase1()`), the contributions
 are further broken down by variable, allowing you to identify which
 sensor or measurement channel is responsible for the alarm.
 
+## Elastic SPM
+
+When functional data exhibit **phase variation** (timing differences
+between curves), standard SPM charts based on Euclidean FPCA can produce
+false alarms. Elastic SPM separates amplitude and phase components,
+monitoring each with its own control chart.
+
+``` r
+# Phase I: build elastic chart
+chart_elastic <- spm.elastic.phase1(fd_train, ncomp = 3, alpha = 0.05,
+                                     monitor.phase = TRUE, warp.ncomp = 3)
+
+# Phase II: monitor new data
+mon_elastic <- spm.elastic.monitor(chart_elastic, fd_test)
+```
+
+The elastic chart produces dual T²/SPE statistics for both amplitude and
+phase. Amplitude alarms indicate changes in curve shape; phase alarms
+indicate changes in timing or dynamics.
+
+For a comprehensive tutorial on elastic SPM and advanced monitoring
+methods, see
+[`vignette("articles/advanced-spm")`](https://sipemu.github.io/fdars-r/articles/advanced-spm.md).
+
+## Partial Domain Monitoring
+
+In many applications, we need to monitor curves **before they are fully
+observed** — for example, monitoring a batch process while it is still
+running. Partial domain monitoring completes the unobserved portion of
+the curve and projects it through the existing control chart.
+
+``` r
+# Monitor a curve observed over only the first 70% of the domain
+partial_values <- new_curve[1:35]  # first 35 of 50 grid points
+result <- spm.monitor.partial(chart, partial.data = partial_values,
+                               n.observed = 35,
+                               completion = "conditional")
+result$t2        # T² statistic
+result$t2.alarm  # whether alarm is triggered
+```
+
+Three completion methods are available: `"conditional"` (BLUP,
+recommended), `"projection"` (scaled inner products), and `"zero_pad"`
+(mean padding).
+
+For profile monitoring with covariates and batch processing of partial
+curves, see
+[`vignette("articles/profile-partial-monitoring")`](https://sipemu.github.io/fdars-r/articles/profile-partial-monitoring.md).
+
 ## Comparison of Methods
 
-| Method   | Detects                                                  | Best for                             |
-|----------|----------------------------------------------------------|--------------------------------------|
-| **T2**   | Mean shifts in the PC score space                        | Location changes in dominant modes   |
-| **SPE**  | Changes not captured by the PCs                          | New types of variation, sensor drift |
-| **EWMA** | Small persistent shifts                                  | Gradual process degradation          |
-| **FRCC** | Shifts in the relationship between curves and covariates | Regression-based monitoring          |
+| Method      | Detects                                                  | Best for                                     |
+|-------------|----------------------------------------------------------|----------------------------------------------|
+| **T²**      | Mean shifts in the PC score space                        | Location changes in dominant modes           |
+| **SPE**     | Changes not captured by the PCs                          | New types of variation, sensor drift         |
+| **EWMA**    | Small persistent shifts                                  | Gradual process degradation                  |
+| **FRCC**    | Shifts in the relationship between curves and covariates | Regression-based monitoring                  |
+| **CUSUM**   | Small sustained shifts                                   | Drift detection with tunable sensitivity     |
+| **MEWMA**   | Multivariate small shifts                                | Persistent shifts across multiple components |
+| **AMEWMA**  | Shifts of unknown size                                   | Adaptive smoothing for mixed shift sizes     |
+| **Elastic** | Phase/amplitude changes                                  | Phase-variable processes                     |
+| **Partial** | Early detection mid-curve                                | In-progress batch monitoring                 |
 
 ## See Also
 

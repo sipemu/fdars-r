@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="250" viewBox="0 0 700 250">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: Raw Curves (blue) -->
+  <rect x="15" y="85" width="120" height="50" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="75" y="114" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#333">Raw Curves</text>
+  <line x1="135" y1="110" x2="165" y2="110" stroke="#666" stroke-width="1.5" marker-end="url(#ar)"/>
+
+  <!-- Step 2: Elastic Distance Matrix (blue) -->
+  <rect x="165" y="85" width="140" height="50" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="235" y="106" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Elastic Distance</text>
+  <text x="235" y="122" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Matrix</text>
+  <line x1="305" y1="110" x2="335" y2="110" stroke="#666" stroke-width="1.5" marker-end="url(#ar)"/>
+
+  <!-- Step 3: Clustering methods (blue) -->
+  <rect x="335" y="85" width="140" height="50" rx="8" fill="#e7f0fd" stroke="#4169E1" stroke-width="1.5"/>
+  <text x="405" y="106" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">K-Means /</text>
+  <text x="405" y="122" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Hierarchical</text>
+  <line x1="475" y1="110" x2="505" y2="110" stroke="#666" stroke-width="1.5" marker-end="url(#ar)"/>
+
+  <!-- Step 4: Results (green, two sub-boxes) -->
+  <rect x="505" y="60" width="180" height="100" rx="8" fill="#f0faf0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="595" y="90" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Cluster</text>
+  <text x="595" y="106" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Assignments</text>
+  <line x1="530" y1="118" x2="660" y2="118" stroke="#2E8B57" stroke-width="0.8" stroke-dasharray="4,3"/>
+  <text x="595" y="138" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Aligned Mean</text>
+  <text x="595" y="154" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#333">Curves</text>
+
+  <!-- Labels -->
+  <text x="235" y="45" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4169E1" font-weight="bold">COMPUTATION</text>
+  <text x="595" y="45" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#2E8B57" font-weight="bold">RESULTS</text>
+</svg>

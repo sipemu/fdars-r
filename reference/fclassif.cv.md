@@ -87,6 +87,6 @@ fd <- fdata(matrix(rnorm(500), 50, 10), argvals = seq(0, 1, length.out = 10))
 y <- rep(1:2, each = 25)
 cv <- fclassif.cv(fd, y, method = "lda", ncomp = 3, nfold = 5)
 cv$error.rate
-#> [1] 0.58
+#> [1] 0.8
 # }
 ```

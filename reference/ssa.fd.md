@@ -128,23 +128,23 @@ print(result)
 #> Window length:    50
 #> N components:     10
 #> Detected period:  2.00
-#> Confidence:       0.5321
+#> Confidence:       0.5145
 #> 
 #> Number of curves: 1
 #> Series length:    200
 #> 
 #> Top component contributions:
-#>   Component 1: 39.4%
-#>   Component 2: 35.2%
-#>   Component 3: 11.2%
-#>   Component 4: 0.9%
+#>   Component 1: 40.8%
+#>   Component 2: 36.3%
+#>   Component 3: 10.8%
+#>   Component 4: 0.7%
 #>   Component 5: 0.7%
-#>   Cumulative:   87.4%
+#>   Cumulative:   89.3%
 #> 
 #> Variance decomposition:
-#>   Trend:    82.8%
-#>   Seasonal: 6.6%
-#>   Noise:    10.5%
+#>   Trend:    85.7%
+#>   Seasonal: 4.9%
+#>   Noise:    9.4%
 
 # Plot components
 plot(result)
