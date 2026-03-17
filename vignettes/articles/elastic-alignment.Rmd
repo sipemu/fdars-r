@@ -1870,7 +1870,7 @@ diag_pair <- alignment.diagnostics.pairwise(
   av
 )
 cat("Flagged:", diag_pair$flagged, "\n")
-cat("Distance ratio:", round(diag_pair$distance_ratio, 3), "\n")
+cat("Distance ratio:", round(diag_pair$distance.ratio, 3), "\n")
 ```
 
 ## References
