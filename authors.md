@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/sipemu/fdars-r/blob/v0.6.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/sipemu/fdars-r/blob/main/DESCRIPTION)
 
 Müller S (2026). *fdars: Functional Data Analysis in 'Rust'*. R package
 version 0.6.0, <https://sipemu.github.io/fdars-r/>.
