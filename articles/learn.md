@@ -6,39 +6,44 @@ Get started, preprocess, and simulate functional data.
 
 [](https://sipemu.github.io/fdars-r/articles/introduction.md)
 
-![Introduction](../reference/figures/card-introduction.svg)
+![Introduction to fdars](../reference/figures/card-introduction.svg)
 
 Introduction to fdars
 
 [](https://sipemu.github.io/fdars-r/articles/custom-plotting.md)
 
-![Custom Plotting](../reference/figures/card-custom-plotting.svg)
+![Custom Plotting with
+ggplot2](../reference/figures/card-custom-plotting.svg)
 
-Custom Plotting
+Custom Plotting with ggplot2
 
 [](https://sipemu.github.io/fdars-r/articles/intro-to-smoothing.md)
 
-![Smoothing](../reference/figures/card-intro-to-smoothing.svg)
+![Introduction to Smoothing Functional
+Data](../reference/figures/card-intro-to-smoothing.svg)
 
-Introduction to Smoothing
+Introduction to Smoothing Functional Data
 
 [](https://sipemu.github.io/fdars-r/articles/working-with-derivatives.md)
 
-![Derivatives](../reference/figures/card-working-with-derivatives.svg)
+![Working with
+Derivatives](../reference/figures/card-working-with-derivatives.svg)
 
 Working with Derivatives
 
 [](https://sipemu.github.io/fdars-r/articles/simulation-toolbox.md)
 
-![Simulation](../reference/figures/card-simulation-toolbox.svg)
+![Simulating Functional
+Data](../reference/figures/card-simulation-toolbox.svg)
 
-Simulation Toolbox
+Simulating Functional Data
 
 [](https://sipemu.github.io/fdars-r/articles/irregular-sampling.md)
 
-![Irregular Sampling](../reference/figures/card-irregular-sampling.svg)
+![Working with Irregular Functional
+Data](../reference/figures/card-irregular-sampling.svg)
 
-Irregular Sampling
+Working with Irregular Functional Data
 
 ## Represent
 
@@ -46,40 +51,10 @@ Decompose, transform, rank, and measure functional data.
 
 [](https://sipemu.github.io/fdars-r/articles/fpca.md)
 
-![FPCA](../reference/figures/card-fpca.svg)
+![Functional Principal Component Analysis
+(FPCA)](../reference/figures/card-fpca.svg)
 
-Functional PCA
-
-[](https://sipemu.github.io/fdars-r/articles/basis-representation.md)
-
-![Basis
-Representation](../reference/figures/card-basis-representation.svg)
-
-Basis Representation
-
-[](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md)
-
-![Andrews Curves](../reference/figures/card-andrews-transformation.svg)
-
-Andrews Curves
-
-[](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
-
-![Depth Functions](../reference/figures/card-depth-functions.svg)
-
-Depth Functions
-
-[](https://sipemu.github.io/fdars-r/articles/streaming-depth.md)
-
-![Streaming Depth](../reference/figures/card-streaming-depth.svg)
-
-Streaming Depth
-
-[](https://sipemu.github.io/fdars-r/articles/distance-metrics.md)
-
-![Distance Metrics](../reference/figures/card-distance-metrics.svg)
-
-Distance Metrics
+Functional Principal Component Analysis (FPCA)
 
 [](https://sipemu.github.io/fdars-r/articles/elastic-fpca.md)
 
@@ -87,15 +62,51 @@ Distance Metrics
 
 Elastic FPCA
 
+[](https://sipemu.github.io/fdars-r/articles/basis-representation.md)
+
+![Finding the Best Basis
+Representation](../reference/figures/card-basis-representation.svg)
+
+Finding the Best Basis Representation
+
+[](https://sipemu.github.io/fdars-r/articles/andrews-transformation.md)
+
+![Andrews Transformation: From Tables to
+Curves](../reference/figures/card-andrews-transformation.svg)
+
+Andrews Transformation: From Tables to Curves
+
+[](https://sipemu.github.io/fdars-r/articles/depth-functions.md)
+
+![Functional Depth
+Functions](../reference/figures/card-depth-functions.svg)
+
+Functional Depth Functions
+
+[](https://sipemu.github.io/fdars-r/articles/streaming-depth.md)
+
+![Streaming Depth
+Computation](../reference/figures/card-streaming-depth.svg)
+
+Streaming Depth Computation
+
+[](https://sipemu.github.io/fdars-r/articles/distance-metrics.md)
+
+![Distance Metrics and
+Semimetrics](../reference/figures/card-distance-metrics.svg)
+
+Distance Metrics and Semimetrics
+
 ## Align
 
 Register and align curves to remove phase variability.
 
 [](https://sipemu.github.io/fdars-r/articles/elastic-alignment.md)
 
-![Elastic Alignment](../reference/figures/card-elastic-alignment.svg)
+![Elastic Curve
+Alignment](../reference/figures/card-elastic-alignment.svg)
 
-Elastic Alignment
+Elastic Curve Alignment
 
 [](https://sipemu.github.io/fdars-r/articles/landmark-registration.md)
 
@@ -106,15 +117,17 @@ Landmark Registration
 
 [](https://sipemu.github.io/fdars-r/articles/tsrvf.md)
 
-![TSRVF](../reference/figures/card-tsrvf.svg)
+![TSRVF: Linearized Elastic
+Analysis](../reference/figures/card-tsrvf.svg)
 
-TSRVF (Tangent Space)
+TSRVF: Linearized Elastic Analysis
 
 [](https://sipemu.github.io/fdars-r/articles/alignment-comparison.md)
 
-![Comparing Methods](../reference/figures/card-alignment-comparison.svg)
+![Comparing Alignment
+Methods](../reference/figures/card-alignment-comparison.svg)
 
-Comparing Methods
+Comparing Alignment Methods
 
 [](https://sipemu.github.io/fdars-r/articles/shape-analysis.md)
 
@@ -133,6 +146,26 @@ Regression](../reference/figures/card-scalar-on-function.svg)
 
 Scalar-on-Function Regression
 
+[](https://sipemu.github.io/fdars-r/articles/elastic-regression.md)
+
+![Elastic Regression](../reference/figures/card-elastic-regression.svg)
+
+Elastic Regression
+
+[](https://sipemu.github.io/fdars-r/articles/scalar-on-shape.md)
+
+![Scalar-on-Shape
+Regression](../reference/figures/card-scalar-on-shape.svg)
+
+Scalar-on-Shape Regression
+
+[](https://sipemu.github.io/fdars-r/articles/robust-regression.md)
+
+![Robust Functional
+Regression](../reference/figures/card-robust-regression.svg)
+
+Robust Functional Regression
+
 [](https://sipemu.github.io/fdars-r/articles/function-on-scalar.md)
 
 ![Function-on-Scalar
@@ -142,27 +175,24 @@ Function-on-Scalar Regression
 
 [](https://sipemu.github.io/fdars-r/articles/functional-classification.md)
 
-![Classification](../reference/figures/card-functional-classification.svg)
+![Supervised Classification of Functional
+Data](../reference/figures/card-functional-classification.svg)
 
-Classification
+Supervised Classification of Functional Data
 
 [](https://sipemu.github.io/fdars-r/articles/functional-mixed-models.md)
 
-![Mixed Models](../reference/figures/card-functional-mixed-models.svg)
+![Functional Mixed Models for Repeated
+Measures](../reference/figures/card-functional-mixed-models.svg)
 
-Mixed Models
+Functional Mixed Models for Repeated Measures
 
 [](https://sipemu.github.io/fdars-r/articles/cross-validation.md)
 
-![Cross-Validation](../reference/figures/card-cross-validation.svg)
+![Cross-Validation for Functional
+Data](../reference/figures/card-cross-validation.svg)
 
-Cross-Validation
-
-[](https://sipemu.github.io/fdars-r/articles/elastic-regression.md)
-
-![Elastic Regression](../reference/figures/card-elastic-regression.svg)
-
-Elastic Regression
+Cross-Validation for Functional Data
 
 [](https://sipemu.github.io/fdars-r/articles/explainability.md)
 
@@ -186,10 +216,10 @@ Uncertainty Quantification
 
 [](https://sipemu.github.io/fdars-r/articles/conformal-classification.md)
 
-![Conformal
+![Conformal Prediction for
 Classification](../reference/figures/card-conformal-classification.svg)
 
-Conformal Classification
+Conformal Prediction for Classification
 
 [](https://sipemu.github.io/fdars-r/articles/conformal-prediction-guide.md)
 
@@ -198,41 +228,30 @@ Guide](../reference/figures/card-conformal-prediction-guide.svg)
 
 Conformal Prediction Guide
 
-[](https://sipemu.github.io/fdars-r/articles/scalar-on-shape.md)
-
-![Scalar-on-Shape
-Regression](../reference/figures/card-scalar-on-shape.svg)
-
-Scalar-on-Shape
-
-[](https://sipemu.github.io/fdars-r/articles/robust-regression.md)
-
-![Robust Regression](../reference/figures/card-robust-regression.svg)
-
-Robust Regression
-
 ## Process Monitoring
 
 Statistical process control for functional data streams.
 
 [](https://sipemu.github.io/fdars-r/articles/statistical-process-monitoring.md)
 
-![Statistical Process Monitoring](../reference/figures/card-spm.svg)
+![Statistical Process Monitoring for Functional
+Data](../reference/figures/card-statistical-process-monitoring.svg)
 
-Statistical Process Monitoring
+Statistical Process Monitoring for Functional Data
 
 [](https://sipemu.github.io/fdars-r/articles/advanced-spm.md)
 
-![Advanced SPM](../reference/figures/card-advanced-spm.svg)
+![Advanced Statistical Process
+Monitoring](../reference/figures/card-advanced-spm.svg)
 
-Advanced Process Monitoring
+Advanced Statistical Process Monitoring
 
 [](https://sipemu.github.io/fdars-r/articles/profile-partial-monitoring.md)
 
-![Profile & Partial
-Monitoring](../reference/figures/card-profile-partial.svg)
+![Profile and Partial-Domain
+Monitoring](../reference/figures/card-profile-partial-monitoring.svg)
 
-Profile & Partial Monitoring
+Profile and Partial-Domain Monitoring
 
 ## Analyze
 
@@ -240,28 +259,30 @@ Infer, cluster, detect outliers, and test functional data.
 
 [](https://sipemu.github.io/fdars-r/articles/tolerance-bands.md)
 
-![Tolerance Bands](../reference/figures/card-tolerance-bands.svg)
+![Functional Tolerance
+Bands](../reference/figures/card-tolerance-bands.svg)
 
-Tolerance Bands
+Functional Tolerance Bands
 
 [](https://sipemu.github.io/fdars-r/articles/equivalence-testing.md)
 
-![Equivalence
+![Functional Equivalence
 Testing](../reference/figures/card-equivalence-testing.svg)
 
-Equivalence Testing
+Functional Equivalence Testing
 
 [](https://sipemu.github.io/fdars-r/articles/clustering.md)
 
-![Clustering](../reference/figures/card-clustering.svg)
+![Functional Clustering](../reference/figures/card-clustering.svg)
 
-Clustering
+Functional Clustering
 
 [](https://sipemu.github.io/fdars-r/articles/gmm-clustering.md)
 
-![GMM Clustering](../reference/figures/card-gmm-clustering.svg)
+![Model-Based Clustering with Gaussian
+Mixtures](../reference/figures/card-gmm-clustering.svg)
 
-GMM Clustering
+Model-Based Clustering with Gaussian Mixtures
 
 [](https://sipemu.github.io/fdars-r/articles/elastic-clustering.md)
 
@@ -277,20 +298,21 @@ Outlier Detection
 
 [](https://sipemu.github.io/fdars-r/articles/seasonal-analysis.md)
 
-![Seasonal Analysis](../reference/figures/card-seasonal-analysis.svg)
+![Seasonal Analysis of Functional
+Data](../reference/figures/card-seasonal-analysis.svg)
 
-Seasonal Analysis
+Seasonal Analysis of Functional Data
 
 [](https://sipemu.github.io/fdars-r/articles/covariance-functions.md)
 
-![Covariance
-Functions](../reference/figures/card-covariance-functions.svg)
+![Covariance Functions and Gaussian Process
+Generation](../reference/figures/card-covariance-functions.svg)
 
-Covariance Functions
+Covariance Functions and Gaussian Process Generation
 
 [](https://sipemu.github.io/fdars-r/articles/elastic-changepoint.md)
 
-![Elastic
-Changepoint](../reference/figures/card-elastic-changepoint.svg)
+![Elastic Changepoint
+Detection](../reference/figures/card-elastic-changepoint.svg)
 
-Elastic Changepoint
+Elastic Changepoint Detection
