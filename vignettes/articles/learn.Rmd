@@ -10,261 +10,118 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{=html}
-<!-- ===== LEARN ===== -->
-<h2 class="fdars-section-heading fdars-learn">Learn</h2>
-<p class="fdars-section-desc">Get started, preprocess, and simulate functional data.</p>
-<div class="fdars-gallery">
+```{r generate-gallery, echo = FALSE, results = "asis"}
+# Auto-generate gallery from _pkgdown.yml — single source of truth.
+# To add an article to this page, just add it to _pkgdown.yml articles sections
+# and create a card SVG at man/figures/card-<slug>.svg.
 
-  <a class="fdars-gallery-item" href="introduction.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-introduction.svg" alt="Introduction"></div>
-    <div class="fdars-gallery-title">Introduction to fdars</div>
-  </a>
+# Find package root (works in pkgdown, devtools, and standalone rendering)
+pkg_root <- tryCatch(
+  rprojroot::find_package_root_file(),
+  error = function(e) normalizePath(file.path(getwd(), "..", ".."))
+)
 
-  <a class="fdars-gallery-item" href="custom-plotting.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-custom-plotting.svg" alt="Custom Plotting"></div>
-    <div class="fdars-gallery-title">Custom Plotting</div>
-  </a>
+pkg_yml <- yaml::yaml.load_file(file.path(pkg_root, "_pkgdown.yml"))
 
-  <a class="fdars-gallery-item" href="intro-to-smoothing.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-intro-to-smoothing.svg" alt="Smoothing"></div>
-    <div class="fdars-gallery-title">Introduction to Smoothing</div>
-  </a>
+# Section metadata: CSS class and description for each section title
+section_meta <- list(
+  "Learn" = list(
+    css = "fdars-learn",
+    desc = "Get started, preprocess, and simulate functional data."
+  ),
+  "Represent" = list(
+    css = "fdars-represent",
+    desc = "Decompose, transform, rank, and measure functional data."
+  ),
+  "Align" = list(
+    css = "fdars-align",
+    desc = "Register and align curves to remove phase variability."
+  ),
+  "Regression" = list(
+    css = "fdars-regression",
+    desc = "Regression, classification, and mixed models for functional data."
+  ),
+  "Process Monitoring" = list(
+    css = "fdars-analyze",
+    desc = "Statistical process control for functional data streams."
+  ),
+  "Analyze" = list(
+    css = "fdars-analyze",
+    desc = "Infer, cluster, detect outliers, and test functional data."
+  )
+)
 
-  <a class="fdars-gallery-item" href="working-with-derivatives.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-working-with-derivatives.svg" alt="Derivatives"></div>
-    <div class="fdars-gallery-title">Working with Derivatives</div>
-  </a>
+skip_sections <- c("Navigation", "Examples")
 
-  <a class="fdars-gallery-item" href="simulation-toolbox.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-simulation-toolbox.svg" alt="Simulation"></div>
-    <div class="fdars-gallery-title">Simulation Toolbox</div>
-  </a>
+slug_from_entry <- function(entry) sub("^articles/", "", entry)
 
-  <a class="fdars-gallery-item" href="irregular-sampling.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-irregular-sampling.svg" alt="Irregular Sampling"></div>
-    <div class="fdars-gallery-title">Irregular Sampling</div>
-  </a>
+find_rmd <- function(slug) {
+  candidates <- c(
+    file.path(pkg_root, "vignettes", "articles", paste0(slug, ".Rmd")),
+    file.path(pkg_root, "vignettes", paste0(slug, ".Rmd"))
+  )
+  found <- candidates[file.exists(candidates)]
+  if (length(found)) found[1] else NA_character_
+}
 
-</div>
+rmd_title <- function(path) {
+  if (is.na(path)) return(NULL)
+  lines <- readLines(path, n = 20, warn = FALSE)
+  delims <- which(lines == "---")
+  if (length(delims) < 2) return(NULL)
+  yml <- yaml::yaml.load(paste(lines[(delims[1] + 1):(delims[2] - 1)],
+                                collapse = "\n"))
+  yml$title
+}
 
-<!-- ===== REPRESENT ===== -->
-<h2 class="fdars-section-heading fdars-represent">Represent</h2>
-<p class="fdars-section-desc">Decompose, transform, rank, and measure functional data.</p>
-<div class="fdars-gallery">
+find_card <- function(slug) {
+  card_name <- paste0("card-", slug, ".svg")
+  if (file.exists(file.path(pkg_root, "man", "figures", card_name))) {
+    card_name
+  } else {
+    NULL
+  }
+}
 
-  <a class="fdars-gallery-item" href="fpca.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-fpca.svg" alt="FPCA"></div>
-    <div class="fdars-gallery-title">Functional PCA</div>
-  </a>
+html <- character()
 
-  <a class="fdars-gallery-item" href="basis-representation.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-basis-representation.svg" alt="Basis Representation"></div>
-    <div class="fdars-gallery-title">Basis Representation</div>
-  </a>
+for (section in pkg_yml$articles) {
+  title <- section$title
+  if (title %in% skip_sections) next
+  meta <- section_meta[[title]]
+  if (is.null(meta)) next
 
-  <a class="fdars-gallery-item" href="andrews-transformation.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-andrews-transformation.svg" alt="Andrews Curves"></div>
-    <div class="fdars-gallery-title">Andrews Curves</div>
-  </a>
+  html <- c(html, sprintf(
+    '<h2 class="fdars-section-heading %s">%s</h2>', meta$css, title
+  ))
+  html <- c(html, sprintf(
+    '<p class="fdars-section-desc">%s</p>', meta$desc
+  ))
+  html <- c(html, '<div class="fdars-gallery">')
 
-  <a class="fdars-gallery-item" href="depth-functions.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-depth-functions.svg" alt="Depth Functions"></div>
-    <div class="fdars-gallery-title">Depth Functions</div>
-  </a>
+  for (entry in section$contents) {
+    slug <- slug_from_entry(entry)
+    rmd_path <- find_rmd(slug)
+    art_title <- rmd_title(rmd_path)
+    if (is.null(art_title)) art_title <- tools::toTitleCase(gsub("-", " ", slug))
+    card_file <- find_card(slug)
+    href <- paste0(slug, ".html")
 
-  <a class="fdars-gallery-item" href="streaming-depth.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-streaming-depth.svg" alt="Streaming Depth"></div>
-    <div class="fdars-gallery-title">Streaming Depth</div>
-  </a>
+    if (is.null(card_file)) {
+      html <- c(html, sprintf(
+        '<a class="fdars-gallery-item" href="%s"><div class="fdars-gallery-thumb"></div><div class="fdars-gallery-title">%s</div></a>',
+        href, art_title
+      ))
+    } else {
+      html <- c(html, sprintf(
+        '<a class="fdars-gallery-item" href="%s"><div class="fdars-gallery-thumb"><img src="../reference/figures/%s" alt="%s"></div><div class="fdars-gallery-title">%s</div></a>',
+        href, card_file, art_title, art_title
+      ))
+    }
+  }
 
-  <a class="fdars-gallery-item" href="distance-metrics.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-distance-metrics.svg" alt="Distance Metrics"></div>
-    <div class="fdars-gallery-title">Distance Metrics</div>
-  </a>
+  html <- c(html, '</div>')
+}
 
-  <a class="fdars-gallery-item" href="elastic-fpca.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-elastic-fpca.svg" alt="Elastic FPCA"></div>
-    <div class="fdars-gallery-title">Elastic FPCA</div>
-  </a>
-
-</div>
-
-<!-- ===== ALIGN ===== -->
-<h2 class="fdars-section-heading fdars-align">Align</h2>
-<p class="fdars-section-desc">Register and align curves to remove phase variability.</p>
-<div class="fdars-gallery">
-
-  <a class="fdars-gallery-item" href="elastic-alignment.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-elastic-alignment.svg" alt="Elastic Alignment"></div>
-    <div class="fdars-gallery-title">Elastic Alignment</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="landmark-registration.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-landmark-registration.svg" alt="Landmark Registration"></div>
-    <div class="fdars-gallery-title">Landmark Registration</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="tsrvf.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-tsrvf.svg" alt="TSRVF"></div>
-    <div class="fdars-gallery-title">TSRVF (Tangent Space)</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="alignment-comparison.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-alignment-comparison.svg" alt="Comparing Methods"></div>
-    <div class="fdars-gallery-title">Comparing Methods</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="shape-analysis.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-shape-analysis.svg" alt="Shape Analysis"></div>
-    <div class="fdars-gallery-title">Shape Analysis</div>
-  </a>
-
-</div>
-
-<!-- ===== REGRESSION ===== -->
-<h2 class="fdars-section-heading fdars-regression">Regression</h2>
-<p class="fdars-section-desc">Regression, classification, and mixed models for functional data.</p>
-<div class="fdars-gallery">
-
-  <a class="fdars-gallery-item" href="scalar-on-function.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-scalar-on-function.svg" alt="Scalar-on-Function Regression"></div>
-    <div class="fdars-gallery-title">Scalar-on-Function Regression</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="function-on-scalar.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-function-on-scalar.svg" alt="Function-on-Scalar Regression"></div>
-    <div class="fdars-gallery-title">Function-on-Scalar Regression</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="functional-classification.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-functional-classification.svg" alt="Classification"></div>
-    <div class="fdars-gallery-title">Classification</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="functional-mixed-models.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-functional-mixed-models.svg" alt="Mixed Models"></div>
-    <div class="fdars-gallery-title">Mixed Models</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="cross-validation.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-cross-validation.svg" alt="Cross-Validation"></div>
-    <div class="fdars-gallery-title">Cross-Validation</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="elastic-regression.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-elastic-regression.svg" alt="Elastic Regression"></div>
-    <div class="fdars-gallery-title">Elastic Regression</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="explainability.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-explainability.svg" alt="Model Explainability"></div>
-    <div class="fdars-gallery-title">Model Explainability</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="regression-diagnostics.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-regression-diagnostics.svg" alt="Regression Diagnostics"></div>
-    <div class="fdars-gallery-title">Regression Diagnostics</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="uncertainty-quantification.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-uncertainty-quantification.svg" alt="Uncertainty Quantification"></div>
-    <div class="fdars-gallery-title">Uncertainty Quantification</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="conformal-classification.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-conformal-classification.svg" alt="Conformal Classification"></div>
-    <div class="fdars-gallery-title">Conformal Classification</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="conformal-prediction-guide.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-conformal-prediction-guide.svg" alt="Conformal Prediction Guide"></div>
-    <div class="fdars-gallery-title">Conformal Prediction Guide</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="scalar-on-shape.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-scalar-on-shape.svg" alt="Scalar-on-Shape Regression"></div>
-    <div class="fdars-gallery-title">Scalar-on-Shape</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="robust-regression.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-robust-regression.svg" alt="Robust Regression"></div>
-    <div class="fdars-gallery-title">Robust Regression</div>
-  </a>
-
-</div>
-
-<!-- ===== PROCESS MONITORING ===== -->
-<h2 class="fdars-section-heading fdars-analyze">Process Monitoring</h2>
-<p class="fdars-section-desc">Statistical process control for functional data streams.</p>
-<div class="fdars-gallery">
-
-  <a class="fdars-gallery-item" href="statistical-process-monitoring.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-spm.svg" alt="Statistical Process Monitoring"></div>
-    <div class="fdars-gallery-title">Statistical Process Monitoring</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="advanced-spm.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-advanced-spm.svg" alt="Advanced SPM"></div>
-    <div class="fdars-gallery-title">Advanced Process Monitoring</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="profile-partial-monitoring.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-profile-partial.svg" alt="Profile & Partial Monitoring"></div>
-    <div class="fdars-gallery-title">Profile & Partial Monitoring</div>
-  </a>
-
-</div>
-
-<!-- ===== ANALYZE ===== -->
-<h2 class="fdars-section-heading fdars-analyze">Analyze</h2>
-<p class="fdars-section-desc">Infer, cluster, detect outliers, and test functional data.</p>
-<div class="fdars-gallery">
-
-  <a class="fdars-gallery-item" href="tolerance-bands.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-tolerance-bands.svg" alt="Tolerance Bands"></div>
-    <div class="fdars-gallery-title">Tolerance Bands</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="equivalence-testing.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-equivalence-testing.svg" alt="Equivalence Testing"></div>
-    <div class="fdars-gallery-title">Equivalence Testing</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="clustering.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-clustering.svg" alt="Clustering"></div>
-    <div class="fdars-gallery-title">Clustering</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="gmm-clustering.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-gmm-clustering.svg" alt="GMM Clustering"></div>
-    <div class="fdars-gallery-title">GMM Clustering</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="elastic-clustering.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-elastic-clustering.svg" alt="Elastic Clustering"></div>
-    <div class="fdars-gallery-title">Elastic Clustering</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="outlier-detection.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-outlier-detection.svg" alt="Outlier Detection"></div>
-    <div class="fdars-gallery-title">Outlier Detection</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="seasonal-analysis.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-seasonal-analysis.svg" alt="Seasonal Analysis"></div>
-    <div class="fdars-gallery-title">Seasonal Analysis</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="covariance-functions.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-covariance-functions.svg" alt="Covariance Functions"></div>
-    <div class="fdars-gallery-title">Covariance Functions</div>
-  </a>
-
-  <a class="fdars-gallery-item" href="elastic-changepoint.html">
-    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-elastic-changepoint.svg" alt="Elastic Changepoint"></div>
-    <div class="fdars-gallery-title">Elastic Changepoint</div>
-  </a>
-
-</div>
+cat(paste(html, collapse = "\n"))
 ```
