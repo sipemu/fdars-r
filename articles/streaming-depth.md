@@ -388,9 +388,9 @@ for (n_size in sizes) {
   cat(sprintf("  N = %4d: %.4f sec\n", n_size, t_elapsed))
 }
 #>   N =   50: 0.0000 sec
-#>   N =  100: 0.0000 sec
+#>   N =  100: 0.0010 sec
 #>   N =  500: 0.0010 sec
-#>   N = 1000: 0.0020 sec
+#>   N = 1000: 0.0040 sec
 ```
 
 For large reference samples with many incoming queries, the streaming
