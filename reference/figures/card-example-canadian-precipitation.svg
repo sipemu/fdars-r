@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Canada map outline (simplified) -->
+  <path d="M20 45 Q40 35, 60 38 Q80 32, 95 35 Q110 30, 120 38 Q130 34, 140 40" stroke="#999" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <!-- Station dots with region colors -->
+  <circle cx="35" cy="55" r="2.5" fill="#4169E1" opacity="0.7"/>
+  <circle cx="55" cy="60" r="2.5" fill="#4169E1" opacity="0.7"/>
+  <circle cx="80" cy="50" r="2.5" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="100" cy="55" r="2.5" fill="#2E8B57" opacity="0.7"/>
+  <circle cx="120" cy="42" r="2.5" fill="#7B2D8E" opacity="0.7"/>
+  <circle cx="30" cy="42" r="2.5" fill="#E8913A" opacity="0.7"/>
+  <!-- Three precipitation profile insets -->
+  <!-- Pacific (blue) - wet winter -->
+  <rect x="10" y="72" width="55" height="40" rx="3" fill="#e7f0fd" stroke="#4169E1" stroke-width="0.5"/>
+  <path d="M15 105 Q22 80, 30 95 Q38 100, 45 98 Q52 85, 60 105" stroke="#4169E1" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <text x="37" y="82" font-size="6" fill="#4169E1" text-anchor="middle" font-family="sans-serif">Pacific</text>
+  <!-- Continental (green) - summer peak -->
+  <rect x="72" y="72" width="55" height="40" rx="3" fill="#f0faf0" stroke="#2E8B57" stroke-width="0.5"/>
+  <path d="M77 105 Q84 100, 92 88 Q100 82, 108 90 Q116 100, 122 105" stroke="#2E8B57" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <text x="99" y="82" font-size="6" fill="#2E8B57" text-anchor="middle" font-family="sans-serif">Continental</text>
+  <!-- Arctic (purple) - flat low -->
+  <rect x="134" y="72" width="55" height="40" rx="3" fill="#f3edf7" stroke="#7B2D8E" stroke-width="0.5"/>
+  <path d="M139 102 Q146 100, 154 99 Q162 98, 170 99 Q178 100, 184 102" stroke="#7B2D8E" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <text x="161" y="82" font-size="6" fill="#7B2D8E" text-anchor="middle" font-family="sans-serif">Arctic</text>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- NIR spectra silhouette (left side) -->
+  <path d="M10 65 Q20 60, 30 50 Q38 44, 46 48 Q54 52, 62 45 Q70 40, 78 50" stroke="#4169E1" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+  <path d="M10 70 Q20 65, 30 55 Q38 48, 46 52 Q54 56, 62 48 Q70 44, 78 54" stroke="#4169E1" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+  <path d="M10 60 Q20 55, 30 45 Q38 38, 46 42 Q54 46, 62 40 Q70 35, 78 44" stroke="#4169E1" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+  <path d="M10 75 Q20 72, 30 62 Q38 55, 46 58 Q54 62, 62 55 Q70 50, 78 60" stroke="#DC3545" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+  <path d="M10 78 Q20 75, 30 65 Q38 58, 46 62 Q54 66, 62 58 Q70 54, 78 64" stroke="#DC3545" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+  <!-- Arrow -->
+  <line x1="82" y1="55" x2="94" y2="55" stroke="#333" stroke-width="1.2" opacity="0.4"/>
+  <polygon points="92,51 98,55 92,59" fill="#333" opacity="0.4"/>
+  <!-- T² control chart (right side) -->
+  <!-- UCL line -->
+  <line x1="100" y1="35" x2="190" y2="35" stroke="#DC3545" stroke-width="1" stroke-dasharray="4,2" opacity="0.7"/>
+  <text x="192" y="37" font-size="5" fill="#DC3545" font-family="sans-serif">UCL</text>
+  <!-- In-control points -->
+  <circle cx="105" cy="65" r="1.5" fill="#4169E1" opacity="0.5"/>
+  <circle cx="112" cy="58" r="1.5" fill="#4169E1" opacity="0.5"/>
+  <circle cx="119" cy="62" r="1.5" fill="#4169E1" opacity="0.5"/>
+  <circle cx="126" cy="55" r="1.5" fill="#4169E1" opacity="0.5"/>
+  <circle cx="133" cy="60" r="1.5" fill="#4169E1" opacity="0.5"/>
+  <circle cx="140" cy="57" r="1.5" fill="#4169E1" opacity="0.5"/>
+  <!-- Drift / out-of-control points -->
+  <circle cx="147" cy="50" r="1.5" fill="#E8913A" opacity="0.6"/>
+  <circle cx="154" cy="45" r="1.5" fill="#E8913A" opacity="0.6"/>
+  <circle cx="161" cy="40" r="1.5" fill="#DC3545" opacity="0.8"/>
+  <circle cx="168" cy="30" r="2" fill="#DC3545" opacity="0.9"/>
+  <circle cx="175" cy="25" r="2" fill="#DC3545" opacity="0.9"/>
+  <circle cx="182" cy="28" r="2" fill="#DC3545" opacity="0.9"/>
+  <!-- CUSUM line overlay -->
+  <path d="M105 80 L112 78 L119 77 L126 76 L133 75 L140 74 L147 70 L154 64 L161 55 L168 42 L175 30 L182 25" stroke="#2E8B57" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <!-- Alarm annotation -->
+  <line x1="161" y1="85" x2="161" y2="42" stroke="#DC3545" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+  <text x="161" y="92" font-size="5" fill="#DC3545" text-anchor="middle" font-family="sans-serif">alarm</text>
+</svg>
