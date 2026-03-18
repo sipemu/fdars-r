@@ -41,6 +41,7 @@ articles:
   - articles/example-phoneme-shape
   - articles/example-canadian-precipitation
   - articles/example-tecator-monitoring
+  - articles/example-explainability-regions
 - title: Learn
   contents:
   - introduction

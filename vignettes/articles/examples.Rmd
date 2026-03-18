@@ -143,5 +143,15 @@ knitr::opts_chunk$set(
     </div>
   </a>
 
+  <a class="fdars-gallery-item" href="example-explainability-regions.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-explainability-regions.svg" alt="Explainability Regions"></div>
+    <div class="fdars-gallery-title">Explainability: Recovering Predictive Regions</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-regression">Pointwise</span>
+      <span class="fdars-tag fdars-tag-regression">Domain</span>
+      <span class="fdars-tag fdars-tag-regression">Regions</span>
+    </div>
+  </a>
+
 </div>
 ```
