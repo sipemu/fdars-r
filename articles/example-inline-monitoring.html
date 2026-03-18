@@ -134,6 +134,11 @@ strength?</li>
 <td>Tabulate FPR and detection rates</td>
 <td>Operating characteristic of the monitoring system</td>
 </tr>
+<tr class="odd">
+<td>7. Precision &amp; F1</td>
+<td>Compute precision, recall, and F1 score</td>
+<td>Trade-off between alarm quality and detection rate</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -629,7 +634,278 @@ For large sudden shifts, all three methods perform similarly.</p></li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="practical-implications">8. Practical Implications<a class="anchor" aria-label="anchor" href="#practical-implications"></a>
+<h2 id="precision-recall-and-f1-score">8. Precision, Recall, and F1 Score<a class="anchor" aria-label="anchor" href="#precision-recall-and-f1-score"></a>
+</h2>
+<p>Detection rate (recall) alone does not tell the full story. A method
+that flags everything achieves 100% recall but floods the operator with
+false alarms. <strong>Precision</strong> measures how many alarms are
+genuine faults, and the <strong>F1 score</strong> balances precision and
+recall into a single metric.</p>
+<p>For each shift level, we combine the false alarms from in-control
+monitoring (FP) with the true alarms from faulty monitoring (TP):</p>
+<ul>
+<li>
+<strong>Precision</strong> = TP / (TP + FP) – fraction of alarms
+that are real faults</li>
+<li>
+<strong>Recall</strong> = TP / (TP + FN) – fraction of faults that
+trigger an alarm</li>
+<li>
+<strong>F1</strong> = 2 * Precision * Recall / (Precision +
+Recall)</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># False positive counts from in-control monitoring (Section 3)</span></span>
+<span><span class="va">fp_shewhart</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mon_ic</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span></span>
+<span><span class="va">fp_cusum</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">cusum_ic</span><span class="op">$</span><span class="va">alarm</span><span class="op">)</span></span>
+<span><span class="va">fp_mewma</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mewma_ic</span><span class="op">$</span><span class="va">alarm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fp_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Shewhart <span class="op">=</span> <span class="va">fp_shewhart</span>, CUSUM <span class="op">=</span> <span class="va">fp_cusum</span>, MEWMA <span class="op">=</span> <span class="va">fp_mewma</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compute precision, recall, F1 for each shift &gt; 0</span></span>
+<span><span class="va">pr_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">shift_levels</span><span class="op">[</span><span class="va">shift_levels</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Shewhart"</span>, <span class="st">"CUSUM"</span>, <span class="st">"MEWMA"</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">meth</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">row</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">shift</span> <span class="op">==</span> <span class="va">s</span> <span class="op">&amp;</span> <span class="va">results</span><span class="op">$</span><span class="va">method</span> <span class="op">==</span> <span class="va">meth</span>, <span class="op">]</span></span>
+<span>    <span class="va">tp</span> <span class="op">&lt;-</span> <span class="va">row</span><span class="op">$</span><span class="va">n_alarm</span></span>
+<span>    <span class="va">fn</span> <span class="op">&lt;-</span> <span class="va">row</span><span class="op">$</span><span class="va">n_total</span> <span class="op">-</span> <span class="va">tp</span></span>
+<span>    <span class="va">fp</span> <span class="op">&lt;-</span> <span class="va">fp_counts</span><span class="op">[</span><span class="va">meth</span><span class="op">]</span></span>
+<span></span>
+<span>    <span class="va">precision</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="op">(</span><span class="va">tp</span> <span class="op">+</span> <span class="va">fp</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="va">tp</span> <span class="op">/</span> <span class="op">(</span><span class="va">tp</span> <span class="op">+</span> <span class="va">fp</span><span class="op">)</span> <span class="kw">else</span> <span class="fl">0</span></span>
+<span>    <span class="va">recall</span>    <span class="op">&lt;-</span> <span class="va">row</span><span class="op">$</span><span class="va">detection_rate</span></span>
+<span>    <span class="va">f1</span>        <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="op">(</span><span class="va">precision</span> <span class="op">+</span> <span class="va">recall</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fl">2</span> <span class="op">*</span> <span class="va">precision</span> <span class="op">*</span> <span class="va">recall</span> <span class="op">/</span> <span class="op">(</span><span class="va">precision</span> <span class="op">+</span> <span class="va">recall</span><span class="op">)</span></span>
+<span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>      <span class="fl">0</span></span>
+<span>    <span class="op">}</span></span>
+<span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>      shift <span class="op">=</span> <span class="va">s</span>,</span>
+<span>      shift_label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">s</span>, <span class="st">"x sigma"</span><span class="op">)</span>,</span>
+<span>      method <span class="op">=</span> <span class="va">meth</span>,</span>
+<span>      TP <span class="op">=</span> <span class="va">tp</span>, FP <span class="op">=</span> <span class="va">fp</span>, FN <span class="op">=</span> <span class="va">fn</span>,</span>
+<span>      Precision <span class="op">=</span> <span class="va">precision</span>,</span>
+<span>      Recall <span class="op">=</span> <span class="va">recall</span>,</span>
+<span>      F1 <span class="op">=</span> <span class="va">f1</span>,</span>
+<span>      stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pr_results</span><span class="op">$</span><span class="va">method</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pr_results</span><span class="op">$</span><span class="va">method</span>,</span>
+<span>                             levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Shewhart"</span>, <span class="st">"CUSUM"</span>, <span class="st">"MEWMA"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pr_results</span><span class="op">$</span><span class="va">shift_label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pr_results</span><span class="op">$</span><span class="va">shift_label</span>,</span>
+<span>                                  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">shift_levels</span><span class="op">[</span><span class="va">shift_levels</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span>,</span>
+<span>                                                  <span class="st">"x sigma"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pr_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Shift <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">shift_label</span>,</span>
+<span>  Method <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">method</span>,</span>
+<span>  TP <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">TP</span>,</span>
+<span>  FP <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">FP</span>,</span>
+<span>  FN <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">FN</span>,</span>
+<span>  Precision <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f%%"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">Precision</span><span class="op">)</span>,</span>
+<span>  Recall <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f%%"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">Recall</span><span class="op">)</span>,</span>
+<span>  F1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f"</span>, <span class="va">pr_results</span><span class="op">$</span><span class="va">F1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">pr_table</span>,</span>
+<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Precision, recall, and F1 score by fault magnitude and method"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Precision, recall, and F1 score by fault magnitude and
+method</caption>
+<thead><tr class="header">
+<th align="left">Shift</th>
+<th align="left">Method</th>
+<th align="right">TP</th>
+<th align="right">FP</th>
+<th align="right">FN</th>
+<th align="right">Precision</th>
+<th align="right">Recall</th>
+<th align="right">F1</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">0.5x sigma</td>
+<td align="left">Shewhart</td>
+<td align="right">96</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">100.0%</td>
+<td align="right">96.0%</td>
+<td align="right">0.980</td>
+</tr>
+<tr class="even">
+<td align="left">0.5x sigma</td>
+<td align="left">CUSUM</td>
+<td align="right">99</td>
+<td align="right">25</td>
+<td align="right">1</td>
+<td align="right">79.8%</td>
+<td align="right">99.0%</td>
+<td align="right">0.884</td>
+</tr>
+<tr class="odd">
+<td align="left">0.5x sigma</td>
+<td align="left">MEWMA</td>
+<td align="right">100</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">87.0%</td>
+<td align="right">100.0%</td>
+<td align="right">0.930</td>
+</tr>
+<tr class="even">
+<td align="left">1x sigma</td>
+<td align="left">Shewhart</td>
+<td align="right">100</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">100.0%</td>
+<td align="right">100.0%</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">1x sigma</td>
+<td align="left">CUSUM</td>
+<td align="right">100</td>
+<td align="right">25</td>
+<td align="right">0</td>
+<td align="right">80.0%</td>
+<td align="right">100.0%</td>
+<td align="right">0.889</td>
+</tr>
+<tr class="even">
+<td align="left">1x sigma</td>
+<td align="left">MEWMA</td>
+<td align="right">100</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">87.0%</td>
+<td align="right">100.0%</td>
+<td align="right">0.930</td>
+</tr>
+<tr class="odd">
+<td align="left">2x sigma</td>
+<td align="left">Shewhart</td>
+<td align="right">100</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">100.0%</td>
+<td align="right">100.0%</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="even">
+<td align="left">2x sigma</td>
+<td align="left">CUSUM</td>
+<td align="right">100</td>
+<td align="right">25</td>
+<td align="right">0</td>
+<td align="right">80.0%</td>
+<td align="right">100.0%</td>
+<td align="right">0.889</td>
+</tr>
+<tr class="odd">
+<td align="left">2x sigma</td>
+<td align="left">MEWMA</td>
+<td align="right">100</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">87.0%</td>
+<td align="right">100.0%</td>
+<td align="right">0.930</td>
+</tr>
+<tr class="even">
+<td align="left">3x sigma</td>
+<td align="left">Shewhart</td>
+<td align="right">100</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">100.0%</td>
+<td align="right">100.0%</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">3x sigma</td>
+<td align="left">CUSUM</td>
+<td align="right">100</td>
+<td align="right">25</td>
+<td align="right">0</td>
+<td align="right">80.0%</td>
+<td align="right">100.0%</td>
+<td align="right">0.889</td>
+</tr>
+<tr class="even">
+<td align="left">3x sigma</td>
+<td align="left">MEWMA</td>
+<td align="right">100</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">87.0%</td>
+<td align="right">100.0%</td>
+<td align="right">0.930</td>
+</tr>
+</tbody>
+</table>
+<p>At small shifts (0.5x sigma), precision is typically high (few false
+alarms relative to the few detections) but recall is low. As the shift
+grows, recall increases sharply. Precision remains high because the FP
+count is fixed (determined by the in-control calibration), while TP
+grows with shift magnitude.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Reshape for plotting</span></span>
+<span><span class="va">pr_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>shift <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">shift</span>, method <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">method</span>,</span>
+<span>             metric <span class="op">=</span> <span class="st">"Precision"</span>, value <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">Precision</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>shift <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">shift</span>, method <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">method</span>,</span>
+<span>             metric <span class="op">=</span> <span class="st">"Recall"</span>, value <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">Recall</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>shift <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">shift</span>, method <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">method</span>,</span>
+<span>             metric <span class="op">=</span> <span class="st">"F1"</span>, value <span class="op">=</span> <span class="va">pr_results</span><span class="op">$</span><span class="va">F1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">pr_long</span><span class="op">$</span><span class="va">metric</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pr_long</span><span class="op">$</span><span class="va">metric</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Precision"</span>, <span class="st">"Recall"</span>, <span class="st">"F1"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pr_long</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">shift</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">value</span>,</span>
+<span>                     color <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">method</span>, linetype <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">metric</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/percent_format.html" class="external-link">percent_format</a></span><span class="op">(</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Shewhart <span class="op">=</span> <span class="st">"#4A90D9"</span>,</span>
+<span>                                CUSUM <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
+<span>                                MEWMA <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Precision <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>                                    Recall <span class="op">=</span> <span class="st">"solid"</span>,</span>
+<span>                                    F1 <span class="op">=</span> <span class="st">"dotdash"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Precision, Recall, and F1 vs Fault Magnitude"</span>,</span>
+<span>       x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="st">"Shift magnitude ("</span> <span class="op">*</span> <span class="va">sigma</span> <span class="op">*</span> <span class="st">")"</span><span class="op">)</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Score"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"Method"</span>, linetype <span class="op">=</span> <span class="st">"Metric"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example-inline-monitoring_files/figure-html/pr-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pr_results</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">shift_label</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">F1</span>,</span>
+<span>                        fill <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>position <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_dodge.html" class="external-link">position_dodge</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>, width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Shewhart <span class="op">=</span> <span class="st">"#4A90D9"</span>,</span>
+<span>                                CUSUM <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
+<span>                                MEWMA <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"F1 Score by Fault Magnitude and Method"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Balances precision (alarm quality) and recall (detection rate)"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Fault Magnitude"</span>, y <span class="op">=</span> <span class="st">"F1 Score"</span>,</span>
+<span>       fill <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example-inline-monitoring_files/figure-html/f1-bar-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The F1 score reveals the practical trade-off: at small shifts, F1 is
+low because recall is poor (most faults go undetected). At large shifts,
+F1 approaches 1.0 as both precision and recall converge to near-perfect
+values. The <strong>crossover point</strong> – the shift magnitude where
+F1 exceeds 0.5 – indicates the minimum fault size the monitoring system
+handles effectively.</p>
+</div>
+<div class="section level2">
+<h2 id="practical-implications">9. Practical Implications<a class="anchor" aria-label="anchor" href="#practical-implications"></a>
 </h2>
 <p>In a real manufacturing setting, this analysis answers critical
 questions:</p>
@@ -649,7 +925,7 @@ is sufficient and the simplest to implement. If quality degrades
 gradually (drift, fouling), CUSUM or MEWMA provides earlier
 warning.</p></li>
 </ul>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Side-by-side bar chart of detection rates</span></span>
 <span><span class="va">df_bar</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">shift</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span></span>
 <span></span>
@@ -695,6 +971,10 @@ for Shewhart, CUSUM, and MEWMA charts.</li>
 <strong>The power curve</strong> provides the operating
 characteristic of the monitoring system – an essential tool for deciding
 whether the chart is sensitive enough for the application at hand.</li>
+<li>
+<strong>Precision-recall and F1 scores</strong> quantify the
+trade-off between alarm quality and detection completeness, identifying
+the minimum fault size where monitoring becomes effective.</li>
 </ol>
 <p>This simulation-based approach can be adapted to any manufacturing
 context by changing the mean function, eigenstructure, and fault model
