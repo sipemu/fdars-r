@@ -29,6 +29,7 @@ articles:
   articles/example-canadian-seasonal: example-canadian-seasonal.html
   articles/example-canadian-weather: example-canadian-weather.html
   articles/example-cross-validation: example-cross-validation.html
+  articles/example-explainability-regions: example-explainability-regions.html
   articles/example-phoneme-shape: example-phoneme-shape.html
   articles/example-sonar-tsrvf: example-sonar-tsrvf.html
   articles/example-tecator-monitoring: example-tecator-monitoring.html
@@ -60,7 +61,7 @@ articles:
   articles/tsrvf: tsrvf.html
   articles/uncertainty-quantification: uncertainty-quantification.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-18T06:26Z
+last_built: 2026-03-18T06:44Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

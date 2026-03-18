@@ -33,6 +33,8 @@
   Profiles](https://sipemu.github.io/fdars-r/articles/example-canadian-precipitation.md):
 - [Tecator Spectra: Inline Quality
   Monitoring](https://sipemu.github.io/fdars-r/articles/example-tecator-monitoring.md):
+- [Explainability: Recovering Predictive
+  Regions](https://sipemu.github.io/fdars-r/articles/example-explainability-regions.md):
 
 ### Learn
 

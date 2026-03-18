@@ -115,3 +115,12 @@ Monitoring](../reference/figures/card-example-tecator-monitoring.svg)
 Tecator: Inline Quality Monitoring
 
 SPM CUSUM Quality
+
+[](https://sipemu.github.io/fdars-r/articles/example-explainability-regions.md)
+
+![Explainability
+Regions](../reference/figures/card-example-explainability-regions.svg)
+
+Explainability: Recovering Predictive Regions
+
+Pointwise Domain Regions

@@ -179,7 +179,7 @@ shape differences even when curves have the same magnitude.
 d_rpd <- depth.RPD(fd, nproj = 20, deriv = c(0, 1))
 cat("RPD depth - outlier 29:", round(d_rpd[n - 1], 4),
     "  outlier 30:", round(d_rpd[n], 4), "\n")
-#> RPD depth - outlier 29: 0.2306   outlier 30: 0.1887
+#> RPD depth - outlier 29: 0.1839   outlier 30: 0.2242
 ```
 
 ## Kernel and Spatial Methods
