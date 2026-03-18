@@ -124,3 +124,12 @@ Regions](../reference/figures/card-example-explainability-regions.svg)
 Explainability: Recovering Predictive Regions
 
 Pointwise Domain Regions
+
+[](https://sipemu.github.io/fdars-r/articles/example-inline-monitoring.md)
+
+![Inline Quality
+Monitoring](../reference/figures/card-example-inline-monitoring.svg)
+
+Inline Monitoring: Detection Power & False Alarms
+
+SPM Power FPR

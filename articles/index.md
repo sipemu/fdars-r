@@ -35,6 +35,8 @@
   Monitoring](https://sipemu.github.io/fdars-r/articles/example-tecator-monitoring.md):
 - [Explainability: Recovering Predictive
   Regions](https://sipemu.github.io/fdars-r/articles/example-explainability-regions.md):
+- [Inline Quality Monitoring: Detection Power and False Alarm
+  Analysis](https://sipemu.github.io/fdars-r/articles/example-inline-monitoring.md):
 
 ### Learn
 

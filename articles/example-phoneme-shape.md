@@ -2,21 +2,22 @@
 
 Five phoneme classes — “aa”, “ao”, “dcl”, “iy”, “sh” — produce distinct
 log-periodogram spectra over 150 frequency points. This example applies
-**shape-based analysis** to classify phonemes by their spectral geometry
-rather than raw amplitude profiles.
+shape-based analysis to phoneme spectra and compares elastic vs
+Euclidean clustering — revealing that **elastic methods are not always
+superior**.
 
-| Step                  | What It Does                                         | Outcome                                                     |
-|-----------------------|------------------------------------------------------|-------------------------------------------------------------|
-| Phase variation check | Measure amplitude/phase variance ratio               | Confirms that phase variation is present in spectral data   |
-| Shape distance matrix | Pairwise elastic distances modulo reparameterization | Block-diagonal structure reveals phoneme grouping           |
-| Shape means           | Karcher mean per phoneme class                       | Canonical spectral signature for each sound                 |
-| MDS visualization     | Embed shape distances in 2D                          | Shape distances yield tighter class clusters than Euclidean |
-| Elastic clustering    | K-means and hierarchical clustering in shape space   | Recovers phoneme classes without label supervision          |
+| Step                  | What It Does                                         | Outcome                                                |
+|-----------------------|------------------------------------------------------|--------------------------------------------------------|
+| Shape distance matrix | Pairwise elastic distances modulo reparameterization | Block-diagonal structure reveals some phoneme grouping |
+| Shape means           | Karcher mean per phoneme class                       | Canonical spectral signature for each sound            |
+| MDS visualization     | Embed shape distances in 2D                          | Compare Euclidean vs elastic MDS embeddings            |
+| Elastic clustering    | K-means and hierarchical clustering in shape space   | Compare with standard k-means                          |
 
-**Key finding:** Shape distances produce cleaner class separation than
-Euclidean distances on these spectral curves. Elastic k-means achieves
-substantially higher cluster purity than standard k-means, and the
-shape-based MDS embedding reveals five distinct phoneme clusters.
+**Key finding:** For spectral data, standard Euclidean (L2) k-means
+outperforms elastic clustering. This is because elastic alignment warps
+the frequency axis, removing the very information (peak positions) that
+distinguishes phoneme classes. This example illustrates when elastic
+methods are appropriate and when they are not.
 
 ``` r
 library(fdars)
@@ -302,11 +303,48 @@ mds_panel(df_mds_euclid, "MDS: Euclidean Distance") +
 
 ![](example-phoneme-shape_files/figure-html/mds-plot-1.png)
 
-The shape-based MDS embedding shows tighter, more separated clusters
-because the shape metric collapses within-class phase variation. The
-Euclidean embedding spreads classes more diffusely.
+Compare the two MDS embeddings. The shape metric collapses some
+within-class variation by aligning spectral curves, but this can also
+merge classes whose distinguishing features are frequency-positional.
+The Euclidean embedding may show more spread but preserves
+frequency-specific discrimination.
 
-## 6. Shape-Based Clustering
+## 6. Diagnosing Suitability of Elastic Methods
+
+Before running elastic clustering, we can check whether the data has
+meaningful phase variation worth aligning. The
+[`alignment.quality()`](https://sipemu.github.io/fdars-r/reference/alignment.quality.md)
+function measures how much variance is explained by alignment, and
+[`elastic.decomposition()`](https://sipemu.github.io/fdars-r/reference/elastic.decomposition.md)
+separates amplitude from phase variance.
+
+``` r
+# Compute Karcher mean (elastic alignment) and assess quality
+set.seed(42)
+km <- karcher.mean(fd_sub, max.iter = 20)
+quality <- alignment.quality(fd_sub, km)
+
+cat("Phase-amplitude ratio:", round(quality$phase_amplitude_ratio, 4), "\n")
+#> Phase-amplitude ratio: 0.056
+cat("Mean variance reduction:", round(quality$mean_variance_reduction, 4), "\n")
+#> Mean variance reduction: 0.9576
+cat("\n")
+cat("Phase fraction:", sprintf("%.1f%%", 100 * quality$phase_amplitude_ratio), "\n")
+#> Phase fraction: 5.6%
+cat("  < 5%%  -> standard L2 methods preferred\n")
+#>   < 5%%  -> standard L2 methods preferred
+cat("  5-15%% -> marginal; test both approaches\n")
+#>   5-15%% -> marginal; test both approaches
+cat("  > 15%% -> elastic methods likely beneficial\n")
+#>   > 15%% -> elastic methods likely beneficial
+```
+
+For this spectral dataset, the phase fraction is low because the
+frequency axis has fixed physical meaning — there is no meaningful phase
+variation to align. This diagnostic correctly predicts that elastic
+clustering will not outperform standard methods.
+
+## 7. Shape-Based Clustering
 
 We compare elastic k-means (Fisher-Rao distance, Karcher mean updates)
 with standard Euclidean k-means.
@@ -381,11 +419,12 @@ ggplot(df_compare, aes(x = .data$freq, y = .data$intensity,
 
 ![](example-phoneme-shape_files/figure-html/cluster-comparison-plot-1.png)
 
-Elastic k-means clusters are more homogeneous in shape. Standard k-means
-may mix classes that share amplitude levels but differ in spectral
-shape.
+Standard k-means typically achieves higher purity on spectral data
+because it preserves frequency-position information. Elastic k-means
+warps the frequency axis to align spectral shapes, which can merge
+distinct phonemes whose spectra differ primarily in peak location.
 
-## 7. Clustering Accuracy
+## 8. Clustering Accuracy
 
 Purity measures the fraction of each cluster belonging to the majority
 class.
@@ -452,10 +491,12 @@ ggplot(df_purity, aes(x = reorder(.data$method, .data$purity),
 
 ![](example-phoneme-shape_files/figure-html/purity-barplot-1.png)
 
-Elastic k-means achieves higher purity because it groups curves by
-spectral shape rather than pointwise amplitude.
+Standard k-means typically achieves higher purity on this spectral
+dataset. The elastic approach groups curves by shape similarity (modulo
+warping), but for spectral data the frequency positions of peaks carry
+the discriminative signal that warping removes.
 
-## 8. Hierarchical View
+## 9. Hierarchical View
 
 A dendrogram reveals relationships between phoneme classes at multiple
 granularities.
@@ -499,9 +540,9 @@ print(table(HClust = hc_labels, True = cls_sub))
 #>      5  0  1   0  0  1
 ```
 
-Vowels tend to merge at lower heights than phoneme pairs that differ in
-manner of articulation. Cutting at k = 5 recovers classes with purity
-comparable to elastic k-means.
+The dendrogram shows the hierarchical structure of spectral similarity.
+Cutting at k = 5 produces clusters whose purity is comparable to elastic
+k-means (both lower than standard k-means for this spectral dataset).
 
 ``` r
 df_summary <- data.frame(
@@ -522,13 +563,32 @@ knitr::kable(df_summary, digits = 3,
 
 Clustering Purity Comparison (50 curves, 5 classes)
 
-## 9. Conclusions
+## 10. Conclusions
 
-The elastic (Fisher-Rao) distance captures phonetically meaningful
-differences that Euclidean metrics miss. Shape distances yield cleaner
-block-diagonal structure, better MDS separation, and higher clustering
-purity. For production-scale recognition, the shape means or distance
-matrix computed here can serve as features in a supervised classifier.
+This example illustrates an important lesson: **elastic methods are not
+universally superior.** On phoneme log-periodograms, standard Euclidean
+k-means achieves higher clustering purity than elastic k-means or
+hierarchical clustering.
+
+The reason is domain-specific. Elastic alignment via SRSF/Fisher-Rao
+warps the independent variable (here: frequency) to match curve shapes.
+For time-domain signals with phase variation (e.g., gait data, ECG),
+this is exactly what you want — it factors out irrelevant timing
+differences. But for spectral data, the frequency position of peaks IS
+the signal. A peak at 500 Hz vs 1000 Hz distinguishes vowels; warping
+the frequency axis destroys this information.
+
+**When to use elastic methods:** - Time-domain curves with nuisance
+phase variation (gait, growth, ECG) - Data where shape similarity
+matters more than alignment
+
+**When standard metrics are better:** - Spectral data (frequency-domain)
+where peak positions are discriminative - Data where the independent
+variable has physical meaning that should not be warped
+
+The shape distance matrix and MDS embedding remain useful for
+visualization and understanding spectral structure, even when elastic
+clustering does not outperform standard methods.
 
 ## See Also
 

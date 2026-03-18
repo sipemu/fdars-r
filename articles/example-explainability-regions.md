@@ -313,6 +313,20 @@ The windowed approach produces broader intervals that may extend
 slightly beyond the true region boundaries. This is a trade-off: larger
 windows produce stabler estimates at the cost of spatial resolution.
 
+> **Methodological limitation of domain importance.** The
+> `fregre.domain` algorithm uses
+> $\widehat{\beta}\left( t_{i} \right)^{2}$ as pointwise importance. In
+> FPC-based regression with several components, the estimated
+> $\widehat{\beta}(t)$ is smooth and spread out – the signal from
+> localized regions gets diffused across the FPC reconstruction. The
+> default `threshold = 0.1` requires a sliding window to contain 10% of
+> total squared-beta importance, which is too aggressive when the beta
+> curve is diffuse: with tiny values (~0.007) spread across the domain,
+> only the strongest region barely exceeds this threshold. Lowering the
+> threshold helps, but the method is fundamentally limited for detecting
+> sharp, localized regions when the underlying basis functions (Fourier
+> FPCs) are nonlocal.
+
 ## 6. Significant Regions
 
 Significant regions identify contiguous intervals where
@@ -345,7 +359,11 @@ if (!is.null(sig) && length(sig$start_idx) > 0) {
   cat("No significant regions detected at alpha = 0.05.\n")
   df_sig <- NULL
 }
-#> No significant regions detected at alpha = 0.05.
+#> Significant regions found: 3 
+#> 
+#>   Region 1: t = [0.000, 0.586] (positive)
+#>   Region 2: t = [0.596, 0.960] (negative)
+#>   Region 3: t = [0.970, 1.000] (positive)
 ```
 
 ``` r
@@ -497,7 +515,8 @@ if (!is.null(df_sig) && nrow(df_sig) > 0) {
 } else {
   cat("No significant regions to compare.\n")
 }
-#> No significant regions to compare.
+#> Region A [0.20, 0.35]: 100.0% covered by significant regions
+#> Region B [0.65, 0.80]: 100.0% covered by significant regions
 ```
 
 ## 8. Sensitivity to Noise
@@ -563,9 +582,9 @@ p_noise
 n_low <- if (!is.null(sig) && length(sig$start_idx) > 0) length(sig$start_idx) else 0
 n_high <- if (!is.null(sig_noisy) && length(sig_noisy$start_idx) > 0) length(sig_noisy$start_idx) else 0
 cat("Significant regions at low noise:", n_low, "\n")
-#> Significant regions at low noise: 0
+#> Significant regions at low noise: 3
 cat("Significant regions at high noise:", n_high, "\n")
-#> Significant regions at high noise: 0
+#> Significant regions at high noise: 5
 ```
 
 With higher noise, the estimated $\widehat{\beta}(t)$ becomes noisier

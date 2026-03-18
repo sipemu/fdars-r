@@ -429,6 +429,18 @@ $$D\left( t_{j} \right) = \sum\limits_{{|t_{l} - t_{j}|} \leq w/2}\left| \wideha
 
 Larger `window.width` values produce smoother importance curves.
 
+> **Methodological limitation.** Domain importance uses
+> $\widehat{\beta}\left( t_{i} \right)^{2}$ as pointwise importance. In
+> FPC-based regression, the estimated $\widehat{\beta}(t)$ is smooth and
+> spread out – signal from localized regions gets diffused across the
+> FPC reconstruction. The default `threshold = 0.1` (10% of total
+> importance in one window) can be too aggressive for diffuse betas.
+> Lowering the threshold helps, but the method is fundamentally limited
+> for detecting sharp, localized regions when the basis functions are
+> nonlocal. See the [Explainability Regions
+> example](https://sipemu.github.io/fdars-r/articles/example-explainability-regions.md)
+> for a detailed validation.
+
 ``` r
 dom <- fregre.domain(model, window.width = 5)
 
@@ -471,9 +483,53 @@ if (is.null(sig) || length(sig$start_idx) == 0) {
                 sig$direction[i]))
   }
 }
-#> No significant regions detected at alpha = 0.05.
-#> This can happen when the signal is spread across many FPCs or
-#> when pointwise tests lack power. Try bootstrap CI instead.
+#> Significant regions found: 47 
+#>   Region 2: t = [0.000, 0.000] (positive)
+#>   Region 3: t = [0.010, 0.010] (negative)
+#>   Region 4: t = [0.020, 0.020] (positive)
+#>   Region 5: t = [0.040, 0.051] (negative)
+#>   Region 6: t = [0.061, 0.141] (positive)
+#>   Region 7: t = [0.152, 0.192] (negative)
+#>   Region 8: t = [0.202, 0.232] (positive)
+#>   Region 9: t = [0.242, 0.242] (negative)
+#>   Region 10: t = [0.253, 0.273] (positive)
+#>   Region 11: t = [0.283, 0.283] (negative)
+#>   Region 12: t = [0.293, 0.303] (positive)
+#>   Region 13: t = [0.313, 0.313] (negative)
+#>   Region 14: t = [0.323, 0.354] (positive)
+#>   Region 15: t = [0.364, 0.364] (negative)
+#>   Region 16: t = [0.384, 0.404] (negative)
+#>   Region 17: t = [0.414, 0.455] (positive)
+#>   Region 18: t = [0.465, 0.475] (negative)
+#>   Region 19: t = [0.485, 0.485] (positive)
+#>   Region 20: t = [0.495, 0.525] (negative)
+#>   Region 21: t = [0.535, 0.535] (positive)
+#>   Region 22: t = [0.545, 0.556] (negative)
+#>   Region 23: t = [0.566, 0.596] (positive)
+#>   Region 24: t = [0.606, 0.606] (negative)
+#>   Region 25: t = [0.616, 0.626] (positive)
+#>   Region 26: t = [0.636, 0.646] (negative)
+#>   Region 27: t = [0.657, 0.657] (positive)
+#>   Region 28: t = [0.667, 0.677] (negative)
+#>   Region 29: t = [0.697, 0.697] (negative)
+#>   Region 30: t = [0.707, 0.707] (positive)
+#>   Region 31: t = [0.717, 0.717] (negative)
+#>   Region 32: t = [0.727, 0.727] (positive)
+#>   Region 33: t = [0.737, 0.737] (negative)
+#>   Region 34: t = [0.758, 0.758] (negative)
+#>   Region 35: t = [0.768, 0.768] (positive)
+#>   Region 36: t = [0.778, 0.798] (negative)
+#>   Region 37: t = [0.808, 0.808] (positive)
+#>   Region 38: t = [0.818, 0.818] (negative)
+#>   Region 39: t = [0.828, 0.838] (positive)
+#>   Region 40: t = [0.848, 0.848] (negative)
+#>   Region 41: t = [0.859, 0.869] (positive)
+#>   Region 42: t = [0.879, 0.879] (negative)
+#>   Region 43: t = [0.889, 0.899] (positive)
+#>   Region 44: t = [0.919, 0.919] (negative)
+#>   Region 45: t = [0.929, 0.929] (positive)
+#>   Region 46: t = [0.939, 0.980] (negative)
+#>   Region 47: t = [0.990, 0.990] (positive)
 ```
 
 ------------------------------------------------------------------------
