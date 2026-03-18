@@ -24,7 +24,7 @@ This provides an ideal test bed for the full suite of seasonal analysis tools.
 |---|---|---|
 | Data preparation | Build 8-year series from Edmonton's annual cycle + trend + noise | `fdata` object with 2,920 daily values |
 | Period detection | `detect.period()`, `sazed()`, `autoperiod()`, `cfd.autoperiod()` | All methods find period ≈ 365 days |
-| Spectral analysis | `lomb.scargle()`, `detect.periods()` | Annual (365 d) cycle and harmonics |
+| Spectral analysis | `lomb.scargle()`, `detect.periods()` | Multiple periodicities: annual cycle + harmonics with periods, confidence, and strength |
 | Matrix Profile | `matrix.profile()` | Shape-based motif confirms annual pattern |
 | Decomposition | `stl.fd()`, `ssa.fd()`, `decompose()` | Trend + seasonal + remainder compared |
 | Seasonal strength | `seasonal.strength()` (3 methods), `classify.seasonality()` | StableSeasonal classification |
@@ -170,14 +170,33 @@ plot(ls_result)
 
 ```{r detect-periods}
 # Detect multiple concurrent periodicities
-multi <- detect.periods(fd_temp, max_periods = 3, min_confidence = 0.2)
-print(multi)
+multi <- detect.periods(fd_temp, max_periods = 5, min_confidence = 0.2)
+
+cat(sprintf("Number of periods detected: %d\n\n", multi$n_periods))
+
+if (multi$n_periods > 0) {
+  period_table <- data.frame(
+    Period = round(multi$periods, 1),
+    Confidence = round(multi$confidence, 3),
+    Strength = round(multi$strength, 3),
+    Amplitude = round(multi$amplitude, 2),
+    Harmonic = ifelse(
+      abs(multi$periods - 365) < 30, "fundamental",
+      ifelse(abs(multi$periods - 365/2) < 20, "2nd harmonic",
+        ifelse(abs(multi$periods - 365/3) < 15, "3rd harmonic",
+          ifelse(abs(multi$periods - 365/4) < 10, "4th harmonic", ""))))
+  )
+  knitr::kable(period_table,
+               caption = "Detected periodicities (fundamental + harmonics)")
+}
 ```
 
-The dominant peak at period ≈ 365 corresponds to the annual cycle.
-`detect.periods()` may also find harmonics (half-year, quarter-year) which
-arise from the asymmetric shape of the temperature curve — the winter trough
-is broader and flatter than the sharp summer peak.
+`detect.periods()` searches for up to `max_periods` concurrent periodicities.
+The dominant period at ≈ 365 days is the fundamental annual cycle. Additional
+harmonics (half-year, quarter-year) arise from the **asymmetric shape** of the
+temperature waveform: the winter trough is broader and flatter than the sharp
+summer peak. Any non-sinusoidal periodic signal will produce harmonics — their
+presence confirms that the annual cycle is real and not a sinusoid.
 
 ## Matrix Profile
 
@@ -630,8 +649,9 @@ increase crosses a threshold.
   FFT) converge on the 365-day annual cycle. Cross-method agreement provides
   high confidence in the result.
 - **Spectral analysis:** The Lomb-Scargle periodogram shows a strong 365-day
-  peak; `detect.periods()` may also find harmonics from the asymmetric
-  annual waveform.
+  peak. `detect.periods()` identifies the fundamental annual cycle and its
+  harmonics (half-year, quarter-year), each with period, confidence, and
+  strength — confirming the non-sinusoidal shape of the seasonal pattern.
 - **Matrix Profile** confirms the annual motif using non-parametric shape
   matching — robust even with year-to-year noise.
 - **Decomposition:** STL, SSA, and classical decomposition all extract a

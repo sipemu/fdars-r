@@ -41,6 +41,7 @@ The goal is to quantify two fundamental properties of a monitoring system:
 | 4. Fault injection | Add mean shifts of 0x, 0.5x, 1x, 2x, 3x sigma | Five Phase II datasets |
 | 5. Detection power | Monitor each fault level with Shewhart, CUSUM, and MEWMA | Detection rate per method and fault strength |
 | 6. Summary | Tabulate FPR and detection rates | Operating characteristic of the monitoring system |
+| 7. Precision & F1 | Compute precision, recall, and F1 score | Trade-off between alarm quality and detection rate |
 
 ## 1. Generate In-Control Data
 
@@ -487,7 +488,142 @@ knitr::kable(
    accumulate evidence over consecutive observations. For large sudden
    shifts, all three methods perform similarly.
 
-## 8. Practical Implications
+## 8. Precision, Recall, and F1 Score
+
+Detection rate (recall) alone does not tell the full story. A method that
+flags everything achieves 100% recall but floods the operator with false
+alarms. **Precision** measures how many alarms are genuine faults, and the
+**F1 score** balances precision and recall into a single metric.
+
+For each shift level, we combine the false alarms from in-control monitoring
+(FP) with the true alarms from faulty monitoring (TP):
+
+- **Precision** = TP / (TP + FP) -- fraction of alarms that are real faults
+- **Recall** = TP / (TP + FN) -- fraction of faults that trigger an alarm
+- **F1** = 2 * Precision * Recall / (Precision + Recall)
+
+```{r precision-recall-compute}
+# False positive counts from in-control monitoring (Section 3)
+fp_shewhart <- sum(mon_ic$t2.alarm)
+fp_cusum    <- sum(cusum_ic$alarm)
+fp_mewma    <- sum(mewma_ic$alarm)
+
+fp_counts <- c(Shewhart = fp_shewhart, CUSUM = fp_cusum, MEWMA = fp_mewma)
+
+# Compute precision, recall, F1 for each shift > 0
+pr_results <- do.call(rbind, lapply(shift_levels[shift_levels > 0], function(s) {
+  do.call(rbind, lapply(c("Shewhart", "CUSUM", "MEWMA"), function(meth) {
+    row <- results[results$shift == s & results$method == meth, ]
+    tp <- row$n_alarm
+    fn <- row$n_total - tp
+    fp <- fp_counts[meth]
+
+    precision <- if ((tp + fp) > 0) tp / (tp + fp) else 0
+    recall    <- row$detection_rate
+    f1        <- if ((precision + recall) > 0) {
+      2 * precision * recall / (precision + recall)
+    } else {
+      0
+    }
+
+    data.frame(
+      shift = s,
+      shift_label = paste0(s, "x sigma"),
+      method = meth,
+      TP = tp, FP = fp, FN = fn,
+      Precision = precision,
+      Recall = recall,
+      F1 = f1,
+      stringsAsFactors = FALSE
+    )
+  }))
+}))
+
+pr_results$method <- factor(pr_results$method,
+                             levels = c("Shewhart", "CUSUM", "MEWMA"))
+pr_results$shift_label <- factor(pr_results$shift_label,
+                                  levels = paste0(shift_levels[shift_levels > 0],
+                                                  "x sigma"))
+```
+
+```{r pr-table}
+pr_table <- data.frame(
+  Shift = pr_results$shift_label,
+  Method = pr_results$method,
+  TP = pr_results$TP,
+  FP = pr_results$FP,
+  FN = pr_results$FN,
+  Precision = sprintf("%.1f%%", 100 * pr_results$Precision),
+  Recall = sprintf("%.1f%%", 100 * pr_results$Recall),
+  F1 = sprintf("%.3f", pr_results$F1)
+)
+
+knitr::kable(
+  pr_table,
+  align = c("l", "l", "r", "r", "r", "r", "r", "r"),
+  caption = "Precision, recall, and F1 score by fault magnitude and method"
+)
+```
+
+At small shifts (0.5x sigma), precision is typically high (few false alarms
+relative to the few detections) but recall is low. As the shift grows,
+recall increases sharply. Precision remains high because the FP count is
+fixed (determined by the in-control calibration), while TP grows with
+shift magnitude.
+
+```{r pr-plot, fig.height = 5}
+# Reshape for plotting
+pr_long <- rbind(
+  data.frame(shift = pr_results$shift, method = pr_results$method,
+             metric = "Precision", value = pr_results$Precision),
+  data.frame(shift = pr_results$shift, method = pr_results$method,
+             metric = "Recall", value = pr_results$Recall),
+  data.frame(shift = pr_results$shift, method = pr_results$method,
+             metric = "F1", value = pr_results$F1)
+)
+pr_long$metric <- factor(pr_long$metric, levels = c("Precision", "Recall", "F1"))
+
+ggplot(pr_long, aes(x = .data$shift, y = .data$value,
+                     color = .data$method, linetype = .data$metric)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+  scale_color_manual(values = c(Shewhart = "#4A90D9",
+                                CUSUM = "#D55E00",
+                                MEWMA = "#009E73")) +
+  scale_linetype_manual(values = c(Precision = "dashed",
+                                    Recall = "solid",
+                                    F1 = "dotdash")) +
+  labs(title = "Precision, Recall, and F1 vs Fault Magnitude",
+       x = expression("Shift magnitude (" * sigma * ")"),
+       y = "Score",
+       color = "Method", linetype = "Metric") +
+  theme(legend.position = "bottom")
+```
+
+```{r f1-bar, fig.height = 4}
+ggplot(pr_results, aes(x = .data$shift_label, y = .data$F1,
+                        fill = .data$method)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_fill_manual(values = c(Shewhart = "#4A90D9",
+                                CUSUM = "#D55E00",
+                                MEWMA = "#009E73")) +
+  labs(title = "F1 Score by Fault Magnitude and Method",
+       subtitle = "Balances precision (alarm quality) and recall (detection rate)",
+       x = "Fault Magnitude", y = "F1 Score",
+       fill = "Method") +
+  theme(legend.position = "bottom")
+```
+
+The F1 score reveals the practical trade-off: at small shifts, F1 is low
+because recall is poor (most faults go undetected). At large shifts,
+F1 approaches 1.0 as both precision and recall converge to near-perfect
+values. The **crossover point** -- the shift magnitude where F1 exceeds 0.5
+-- indicates the minimum fault size the monitoring system handles
+effectively.
+
+## 9. Practical Implications
 
 In a real manufacturing setting, this analysis answers critical questions:
 
@@ -543,6 +679,9 @@ system using artificial data with controlled fault magnitudes:
 5. **The power curve** provides the operating characteristic of the
    monitoring system -- an essential tool for deciding whether the chart
    is sensitive enough for the application at hand.
+6. **Precision-recall and F1 scores** quantify the trade-off between alarm
+   quality and detection completeness, identifying the minimum fault size
+   where monitoring becomes effective.
 
 This simulation-based approach can be adapted to any manufacturing
 context by changing the mean function, eigenstructure, and fault model
