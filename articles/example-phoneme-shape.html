@@ -63,8 +63,9 @@
     
 <p>Five phoneme classes — “aa”, “ao”, “dcl”, “iy”, “sh” — produce
 distinct log-periodogram spectra over 150 frequency points. This example
-applies <strong>shape-based analysis</strong> to classify phonemes by
-their spectral geometry rather than raw amplitude profiles.</p>
+applies shape-based analysis to phoneme spectra and compares elastic vs
+Euclidean clustering — revealing that <strong>elastic methods are not
+always superior</strong>.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -78,37 +79,32 @@ their spectral geometry rather than raw amplitude profiles.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Phase variation check</td>
-<td>Measure amplitude/phase variance ratio</td>
-<td>Confirms that phase variation is present in spectral data</td>
-</tr>
-<tr class="even">
 <td>Shape distance matrix</td>
 <td>Pairwise elastic distances modulo reparameterization</td>
-<td>Block-diagonal structure reveals phoneme grouping</td>
+<td>Block-diagonal structure reveals some phoneme grouping</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Shape means</td>
 <td>Karcher mean per phoneme class</td>
 <td>Canonical spectral signature for each sound</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MDS visualization</td>
 <td>Embed shape distances in 2D</td>
-<td>Shape distances yield tighter class clusters than Euclidean</td>
+<td>Compare Euclidean vs elastic MDS embeddings</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Elastic clustering</td>
 <td>K-means and hierarchical clustering in shape space</td>
-<td>Recovers phoneme classes without label supervision</td>
+<td>Compare with standard k-means</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Key finding:</strong> Shape distances produce cleaner class
-separation than Euclidean distances on these spectral curves. Elastic
-k-means achieves substantially higher cluster purity than standard
-k-means, and the shape-based MDS embedding reveals five distinct phoneme
-clusters.</p>
+<p><strong>Key finding:</strong> For spectral data, standard Euclidean
+(L2) k-means outperforms elastic clustering. This is because elastic
+alignment warps the frequency axis, removing the very information (peak
+positions) that distinguishes phoneme classes. This example illustrates
+when elastic methods are appropriate and when they are not.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sipemu.github.io/fdars-r/">fdars</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -362,16 +358,50 @@ showing distinct spectral profiles.</p>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-phoneme-shape_files/figure-html/mds-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The shape-based MDS embedding shows tighter, more separated clusters
-because the shape metric collapses within-class phase variation. The
-Euclidean embedding spreads classes more diffusely.</p>
+<p>Compare the two MDS embeddings. The shape metric collapses some
+within-class variation by aligning spectral curves, but this can also
+merge classes whose distinguishing features are frequency-positional.
+The Euclidean embedding may show more spread but preserves
+frequency-specific discrimination.</p>
 </div>
 <div class="section level2">
-<h2 id="shape-based-clustering">6. Shape-Based Clustering<a class="anchor" aria-label="anchor" href="#shape-based-clustering"></a>
+<h2 id="diagnosing-suitability-of-elastic-methods">6. Diagnosing Suitability of Elastic Methods<a class="anchor" aria-label="anchor" href="#diagnosing-suitability-of-elastic-methods"></a>
+</h2>
+<p>Before running elastic clustering, we can check whether the data has
+meaningful phase variation worth aligning. The
+<code><a href="../reference/alignment.quality.html">alignment.quality()</a></code> function measures how much variance is
+explained by alignment, and <code><a href="../reference/elastic.decomposition.html">elastic.decomposition()</a></code>
+separates amplitude from phase variance.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Compute Karcher mean (elastic alignment) and assess quality</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/karcher.mean.html">karcher.mean</a></span><span class="op">(</span><span class="va">fd_sub</span>, max.iter <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">quality</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/alignment.quality.html">alignment.quality</a></span><span class="op">(</span><span class="va">fd_sub</span>, <span class="va">km</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase-amplitude ratio:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">quality</span><span class="op">$</span><span class="va">phase_amplitude_ratio</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Phase-amplitude ratio: 0.056</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean variance reduction:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">quality</span><span class="op">$</span><span class="va">mean_variance_reduction</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Mean variance reduction: 0.9576</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase fraction:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f%%"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="va">quality</span><span class="op">$</span><span class="va">phase_amplitude_ratio</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Phase fraction: 5.6%</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  &lt; 5%%  -&gt; standard L2 methods preferred\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   &lt; 5%%  -&gt; standard L2 methods preferred</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  5-15%% -&gt; marginal; test both approaches\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   5-15%% -&gt; marginal; test both approaches</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  &gt; 15%% -&gt; elastic methods likely beneficial\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   &gt; 15%% -&gt; elastic methods likely beneficial</span></span></code></pre></div>
+<p>For this spectral dataset, the phase fraction is low because the
+frequency axis has fixed physical meaning — there is no meaningful phase
+variation to align. This diagnostic correctly predicts that elastic
+clustering will not outperform standard methods.</p>
+</div>
+<div class="section level2">
+<h2 id="shape-based-clustering">7. Shape-Based Clustering<a class="anchor" aria-label="anchor" href="#shape-based-clustering"></a>
 </h2>
 <p>We compare elastic k-means (Fisher-Rao distance, Karcher mean
 updates) with standard Euclidean k-means.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Elastic k-means on the subset</span></span>
@@ -384,7 +414,7 @@ updates) with standard Euclidean k-means.</p>
 <span><span class="co">#&gt;   Converged: TRUE </span></span>
 <span><span class="co">#&gt;   Total within-cluster distance: 383.3 </span></span>
 <span><span class="co">#&gt;   Cluster sizes: 43, 1, 1, 2, 3</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ekm</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Elastic K-Means Clusters (k = 5)"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Frequency"</span>, y <span class="op">=</span> <span class="st">"Log-Periodogram (dB)"</span><span class="op">)</span></span></code></pre></div>
@@ -392,13 +422,13 @@ updates) with standard Euclidean k-means.</p>
 <p>The elastic k-means plot shows each cluster’s Karcher mean (red) with
 member curves in grey. Each cluster captures a distinct spectral shape
 corresponding to a phoneme class.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Standard Euclidean k-means for comparison</span></span>
 <span><span class="va">km_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster.kmeans.html">cluster.kmeans</a></span><span class="op">(</span><span class="va">fd_sub</span>, ncl <span class="op">=</span> <span class="fl">5</span>, metric <span class="op">=</span> <span class="st">"L2"</span>,</span>
 <span>                          nstart <span class="op">=</span> <span class="fl">10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Side-by-side cluster assignments</span></span>
 <span><span class="va">m_sub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fd_sub</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">argvals_sub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">fd_sub</span><span class="op">$</span><span class="va">argvals</span><span class="op">)</span></span>
@@ -430,16 +460,17 @@ corresponding to a phoneme class.</p>
 <span>       color <span class="op">=</span> <span class="st">"Cluster"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-phoneme-shape_files/figure-html/cluster-comparison-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>Elastic k-means clusters are more homogeneous in shape. Standard
-k-means may mix classes that share amplitude levels but differ in
-spectral shape.</p>
+<p>Standard k-means typically achieves higher purity on spectral data
+because it preserves frequency-position information. Elastic k-means
+warps the frequency axis to align spectral shapes, which can merge
+distinct phonemes whose spectra differ primarily in peak location.</p>
 </div>
 <div class="section level2">
-<h2 id="clustering-accuracy">7. Clustering Accuracy<a class="anchor" aria-label="anchor" href="#clustering-accuracy"></a>
+<h2 id="clustering-accuracy">8. Clustering Accuracy<a class="anchor" aria-label="anchor" href="#clustering-accuracy"></a>
 </h2>
 <p>Purity measures the fraction of each cluster belonging to the
 majority class.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">purity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">clusters</span>, <span class="va">true_classes</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">clusters</span>, <span class="va">true_classes</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">tab</span>, <span class="fl">1</span>, <span class="va">max</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">tab</span><span class="op">)</span></span>
@@ -452,7 +483,7 @@ majority class.</p>
 <span><span class="co">#&gt; Elastic k-means purity:  0.34</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Standard k-means purity:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">purity_standard</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Standard k-means purity: 0.8</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--- Elastic K-Means ---\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; --- Elastic K-Means ---</span></span>
@@ -476,7 +507,7 @@ majority class.</p>
 <span><span class="co">#&gt;        3  9  0   0  0  0</span></span>
 <span><span class="co">#&gt;        4  0  0   0  7  4</span></span>
 <span><span class="co">#&gt;        5  0  2   0  3  6</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_purity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Standard K-Means"</span>, <span class="st">"Elastic K-Means"</span><span class="op">)</span>,</span>
 <span>  purity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">purity_standard</span>, <span class="va">purity_elastic</span><span class="op">)</span></span>
@@ -494,28 +525,30 @@ majority class.</p>
 <span>       x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">"Purity"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-phoneme-shape_files/figure-html/purity-barplot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>Elastic k-means achieves higher purity because it groups curves by
-spectral shape rather than pointwise amplitude.</p>
+<p>Standard k-means typically achieves higher purity on this spectral
+dataset. The elastic approach groups curves by shape similarity (modulo
+warping), but for spectral data the frequency positions of peaks carry
+the discriminative signal that warping removes.</p>
 </div>
 <div class="section level2">
-<h2 id="hierarchical-view">8. Hierarchical View<a class="anchor" aria-label="anchor" href="#hierarchical-view"></a>
+<h2 id="hierarchical-view">9. Hierarchical View<a class="anchor" aria-label="anchor" href="#hierarchical-view"></a>
 </h2>
 <p>A dendrogram reveals relationships between phoneme classes at
 multiple granularities.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ehc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.hclust.html">elastic.hclust</a></span><span class="op">(</span><span class="va">fd_sub</span>, method <span class="op">=</span> <span class="st">"complete"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ehc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Elastic Hierarchical Clustering</span></span>
 <span><span class="co">#&gt;   Curves: 50 x 150 grid points</span></span>
 <span><span class="co">#&gt;   Method: complete </span></span>
 <span><span class="co">#&gt;   Merge steps: 49</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ehc</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Elastic Hierarchical Clustering Dendrogram"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Complete linkage on Fisher-Rao distances"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-phoneme-shape_files/figure-html/plot-dendrogram-1.png" class="r-plt" alt="" width="100%"></p>
 <pre><code><span><span class="co">#&gt; NULL</span></span></code></pre>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hc_labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/elastic.cutree.html">elastic.cutree</a></span><span class="op">(</span><span class="va">ehc</span>, k <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">purity_hc</span> <span class="op">&lt;-</span> <span class="fu">purity</span><span class="op">(</span><span class="va">hc_labels</span>, <span class="va">cls_sub</span><span class="op">)</span></span>
@@ -533,10 +566,11 @@ multiple granularities.</p>
 <span><span class="co">#&gt;      3  1  4   6  5  4</span></span>
 <span><span class="co">#&gt;      4  0  1   0  2  1</span></span>
 <span><span class="co">#&gt;      5  0  1   0  0  1</span></span></code></pre></div>
-<p>Vowels tend to merge at lower heights than phoneme pairs that differ
-in manner of articulation. Cutting at k = 5 recovers classes with purity
-comparable to elastic k-means.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<p>The dendrogram shows the hierarchical structure of spectral
+similarity. Cutting at k = 5 produces clusters whose purity is
+comparable to elastic k-means (both lower than standard k-means for this
+spectral dataset).</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Standard K-Means (L2)"</span>, <span class="st">"Elastic K-Means"</span>,</span>
 <span>             <span class="st">"Elastic Hierarchical"</span><span class="op">)</span>,</span>
@@ -568,14 +602,29 @@ comparable to elastic k-means.</p>
 </table>
 </div>
 <div class="section level2">
-<h2 id="conclusions">9. Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
+<h2 id="conclusions">10. Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
 </h2>
-<p>The elastic (Fisher-Rao) distance captures phonetically meaningful
-differences that Euclidean metrics miss. Shape distances yield cleaner
-block-diagonal structure, better MDS separation, and higher clustering
-purity. For production-scale recognition, the shape means or distance
-matrix computed here can serve as features in a supervised
-classifier.</p>
+<p>This example illustrates an important lesson: <strong>elastic methods
+are not universally superior.</strong> On phoneme log-periodograms,
+standard Euclidean k-means achieves higher clustering purity than
+elastic k-means or hierarchical clustering.</p>
+<p>The reason is domain-specific. Elastic alignment via SRSF/Fisher-Rao
+warps the independent variable (here: frequency) to match curve shapes.
+For time-domain signals with phase variation (e.g., gait data, ECG),
+this is exactly what you want — it factors out irrelevant timing
+differences. But for spectral data, the frequency position of peaks IS
+the signal. A peak at 500 Hz vs 1000 Hz distinguishes vowels; warping
+the frequency axis destroys this information.</p>
+<p><strong>When to use elastic methods:</strong> - Time-domain curves
+with nuisance phase variation (gait, growth, ECG) - Data where shape
+similarity matters more than alignment</p>
+<p><strong>When standard metrics are better:</strong> - Spectral data
+(frequency-domain) where peak positions are discriminative - Data where
+the independent variable has physical meaning that should not be
+warped</p>
+<p>The shape distance matrix and MDS embedding remain useful for
+visualization and understanding spectral structure, even when elastic
+clustering does not outperform standard methods.</p>
 </div>
 <div class="section level2">
 <h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>

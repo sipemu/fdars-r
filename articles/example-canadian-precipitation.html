@@ -589,11 +589,164 @@ individually versus together?</p>
 <span>       x <span class="op">=</span> <span class="st">"Day of year"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">R</span><span class="op">^</span><span class="fl">2</span> <span class="op">*</span> <span class="st">"(t)"</span><span class="op">)</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Model"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-canadian-precipitation_files/figure-html/model-comparison-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>Longitude typically contributes more explanatory power for
-precipitation than latitude, particularly in winter months when the
-Pacific moisture gradient dominates. Combining both predictors yields
-the best fit. This contrasts with temperature, where latitude is the
-dominant predictor.</p>
+<p>At first glance, the joint model appears to perform
+<strong>worse</strong> than either single-predictor model. However, this
+is a <strong>regularization artifact</strong>: the same
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda = 1</annotation></semantics></math>
+is applied to all three models, but the joint model has two coefficient
+functions to estimate, making it more sensitive to the penalty
+strength.</p>
+<div class="section level3">
+<h3 id="lambda-sensitivity">Lambda Sensitivity<a class="anchor" aria-label="anchor" href="#lambda-sensitivity"></a>
+</h3>
+<p>We can verify this by refitting the models across a range of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+values:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lambdas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">1</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">sens_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">lambdas</span>, <span class="kw">function</span><span class="op">(</span><span class="va">lam</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fit_l</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.html">fosr</a></span><span class="op">(</span><span class="va">fd_s</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">geo</span><span class="op">$</span><span class="va">latitude</span><span class="op">)</span>, lambda <span class="op">=</span> <span class="va">lam</span><span class="op">)</span></span>
+<span>  <span class="va">fit_o</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.html">fosr</a></span><span class="op">(</span><span class="va">fd_s</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">geo</span><span class="op">$</span><span class="va">longitude</span><span class="op">)</span>, lambda <span class="op">=</span> <span class="va">lam</span><span class="op">)</span></span>
+<span>  <span class="va">fit_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fosr.html">fosr</a></span><span class="op">(</span><span class="va">fd_s</span>, <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">geo</span><span class="op">$</span><span class="va">latitude</span>, <span class="va">geo</span><span class="op">$</span><span class="va">longitude</span><span class="op">)</span>, lambda <span class="op">=</span> <span class="va">lam</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Lambda <span class="op">=</span> <span class="va">lam</span>,</span>
+<span>    Model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Latitude only"</span>, <span class="st">"Longitude only"</span>, <span class="st">"Latitude + Longitude"</span><span class="op">)</span>,</span>
+<span>    R2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_l</span><span class="op">$</span><span class="va">r.squared</span>, <span class="va">fit_o</span><span class="op">$</span><span class="va">r.squared</span>, <span class="va">fit_b</span><span class="op">$</span><span class="va">r.squared</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">sens_df</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lambda"</span>, <span class="st">"Model"</span>, <span class="st">"R-squared"</span><span class="op">)</span>,</span>
+<span>             digits <span class="op">=</span> <span class="fl">4</span>, caption <span class="op">=</span> <span class="st">"R-squared across lambda values"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>R-squared across lambda values</caption>
+<thead><tr class="header">
+<th align="right">Lambda</th>
+<th align="left">Model</th>
+<th align="right">R-squared</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.01</td>
+<td align="left">Latitude only</td>
+<td align="right">0.4082</td>
+</tr>
+<tr class="even">
+<td align="right">0.01</td>
+<td align="left">Longitude only</td>
+<td align="right">0.2510</td>
+</tr>
+<tr class="odd">
+<td align="right">0.01</td>
+<td align="left">Latitude + Longitude</td>
+<td align="right">0.4581</td>
+</tr>
+<tr class="even">
+<td align="right">0.10</td>
+<td align="left">Latitude only</td>
+<td align="right">0.4082</td>
+</tr>
+<tr class="odd">
+<td align="right">0.10</td>
+<td align="left">Longitude only</td>
+<td align="right">0.2510</td>
+</tr>
+<tr class="even">
+<td align="right">0.10</td>
+<td align="left">Latitude + Longitude</td>
+<td align="right">0.4430</td>
+</tr>
+<tr class="odd">
+<td align="right">1.00</td>
+<td align="left">Latitude only</td>
+<td align="right">0.4082</td>
+</tr>
+<tr class="even">
+<td align="right">1.00</td>
+<td align="left">Longitude only</td>
+<td align="right">0.2510</td>
+</tr>
+<tr class="odd">
+<td align="right">1.00</td>
+<td align="left">Latitude + Longitude</td>
+<td align="right">0.1209</td>
+</tr>
+<tr class="even">
+<td align="right">10.00</td>
+<td align="left">Latitude only</td>
+<td align="right">0.4082</td>
+</tr>
+<tr class="odd">
+<td align="right">10.00</td>
+<td align="left">Longitude only</td>
+<td align="right">0.2510</td>
+</tr>
+<tr class="even">
+<td align="right">10.00</td>
+<td align="left">Latitude + Longitude</td>
+<td align="right">-0.3900</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">sens_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">Lambda</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">R2</span>,</span>
+<span>                    fill <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Latitude only"</span> <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
+<span>                                <span class="st">"Longitude only"</span> <span class="op">=</span> <span class="st">"#0072B2"</span>,</span>
+<span>                                <span class="st">"Latitude + Longitude"</span> <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"FOSR R-squared is Sensitive to Lambda"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"At low lambda, the joint model wins; at high lambda, it loses"</span>,</span>
+<span>       x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">R</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>       fill <span class="op">=</span> <span class="st">"Model"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example-canadian-precipitation_files/figure-html/lambda-sensitivity-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<p>With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">\lambda = 0.01</annotation></semantics></math>,
+the joint model outperforms both single-predictor models (as expected
+when predictors carry complementary information). With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda = 1</annotation></semantics></math>,
+the heavier penalty shrinks the two coefficient functions more
+aggressively, degrading the fit. The single-predictor models are less
+affected because they have only one coefficient function to
+penalize.</p>
+</div>
+<div class="section level3">
+<h3 id="station-geography">Station Geography<a class="anchor" aria-label="anchor" href="#station-geography"></a>
+</h3>
+<p>The moderate correlation between latitude and longitude (r = -0.53)
+contributes to the sensitivity. Canadian stations cluster along a
+northwest-to-southeast pattern:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">r_lat_lon</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">geo</span><span class="op">$</span><span class="va">latitude</span>, <span class="va">geo</span><span class="op">$</span><span class="va">longitude</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">station_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Latitude <span class="op">=</span> <span class="va">geo</span><span class="op">$</span><span class="va">latitude</span>,</span>
+<span>  Longitude <span class="op">=</span> <span class="va">geo</span><span class="op">$</span><span class="va">longitude</span>,</span>
+<span>  Region <span class="op">=</span> <span class="va">region</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">station_df</span>,</span>
+<span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Longitude</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Latitude</span>,</span>
+<span>           color <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Region</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">region_colors</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">TRUE</span>, color <span class="op">=</span> <span class="st">"grey40"</span>,</span>
+<span>              linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>              inherit.aes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Longitude</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Latitude</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Station Locations (r = %.2f)"</span>, <span class="va">r_lat_lon</span><span class="op">)</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"NW-SE clustering increases penalty sensitivity in joint model"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"Region"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
+<p><img src="example-canadian-precipitation_files/figure-html/station-scatter-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The practical takeaway: when comparing FOSR models with different
+numbers of predictors, either (a) select
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+separately for each model via cross-validation, or (b) compare models at
+the same, well-chosen
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="conclusion">10. Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
@@ -602,12 +755,18 @@ dominant predictor.</p>
 the geographic determinants of precipitation seasonality:</p>
 <ul>
 <li>
-<strong>Longitude dominates</strong> for precipitation, reflecting
-the west-to-east moisture gradient from the Pacific. The longitude
-coefficient function peaks in winter.</li>
+<strong>Latitude dominates</strong> for precipitation in this
+dataset, with higher-latitude stations tending to be drier overall.</li>
 <li>
-<strong>Latitude plays a secondary role</strong>, with
-higher-latitude stations tending to be drier overall.</li>
+<strong>Longitude plays a secondary role</strong>, reflecting the
+west-to-east moisture gradient from the Pacific.</li>
+<li>
+<strong>Lambda sensitivity</strong>: the joint model’s apparent
+underperformance is a regularization artifact. At low
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>,
+latitude + longitude together outperform either alone. Always select
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+per model specification.</li>
 <li>
 <strong>Functional ANOVA</strong> confirms highly significant
 regional differences in precipitation profiles, with Pacific stations

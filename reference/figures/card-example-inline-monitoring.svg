@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Power curve: detection rate vs shift magnitude -->
+  <!-- Axes -->
+  <line x1="25" y1="100" x2="185" y2="100" stroke="#999" stroke-width="0.5"/>
+  <line x1="25" y1="100" x2="25" y2="15" stroke="#999" stroke-width="0.5"/>
+  <!-- Nominal alpha line -->
+  <line x1="25" y1="95" x2="185" y2="95" stroke="#DC3545" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <!-- Shewhart power curve -->
+  <polyline points="25,95 65,85 105,55 145,28 185,20" stroke="#4169E1" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <circle cx="25" cy="95" r="2" fill="#4169E1"/>
+  <circle cx="65" cy="85" r="2" fill="#4169E1"/>
+  <circle cx="105" cy="55" r="2" fill="#4169E1"/>
+  <circle cx="145" cy="28" r="2" fill="#4169E1"/>
+  <circle cx="185" cy="20" r="2" fill="#4169E1"/>
+  <!-- CUSUM power curve -->
+  <polyline points="25,94 65,75 105,40 145,22 185,18" stroke="#E8913A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <circle cx="25" cy="94" r="2" fill="#E8913A"/>
+  <circle cx="65" cy="75" r="2" fill="#E8913A"/>
+  <circle cx="105" cy="40" r="2" fill="#E8913A"/>
+  <circle cx="145" cy="22" r="2" fill="#E8913A"/>
+  <circle cx="185" cy="18" r="2" fill="#E8913A"/>
+  <!-- Labels -->
+  <text x="105" y="112" font-size="6" fill="#666" text-anchor="middle" font-family="sans-serif">shift magnitude</text>
+  <text x="10" y="55" font-size="5" fill="#666" text-anchor="middle" font-family="sans-serif" transform="rotate(-90,10,55)">detection</text>
+  <text x="40" y="92" font-size="5" fill="#DC3545" font-family="sans-serif">alpha</text>
+</svg>

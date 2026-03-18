@@ -402,6 +402,23 @@ importance threshold.</p>
 <p>The windowed approach produces broader intervals that may extend
 slightly beyond the true region boundaries. This is a trade-off: larger
 windows produce stabler estimates at the cost of spatial resolution.</p>
+<blockquote>
+<p><strong>Methodological limitation of domain importance.</strong> The
+<code>fregre.domain</code> algorithm uses
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\hat{\beta}(t_i)^2</annotation></semantics></math>
+as pointwise importance. In FPC-based regression with several
+components, the estimated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{\beta}(t)</annotation></semantics></math>
+is smooth and spread out – the signal from localized regions gets
+diffused across the FPC reconstruction. The default
+<code>threshold = 0.1</code> requires a sliding window to contain 10% of
+total squared-beta importance, which is too aggressive when the beta
+curve is diffuse: with tiny values (~0.007) spread across the domain,
+only the strongest region barely exceeds this threshold. Lowering the
+threshold helps, but the method is fundamentally limited for detecting
+sharp, localized regions when the underlying basis functions (Fourier
+FPCs) are nonlocal.</p>
+</blockquote>
 </div>
 <div class="section level2">
 <h2 id="significant-regions">6. Significant Regions<a class="anchor" aria-label="anchor" href="#significant-regions"></a>
@@ -436,7 +453,11 @@ domain point.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"No significant regions detected at alpha = 0.05.\n"</span><span class="op">)</span></span>
 <span>  <span class="va">df_sig</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; No significant regions detected at alpha = 0.05.</span></span></code></pre></div>
+<span><span class="co">#&gt; Significant regions found: 3 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Region 1: t = [0.000, 0.586] (positive)</span></span>
+<span><span class="co">#&gt;   Region 2: t = [0.596, 0.960] (negative)</span></span>
+<span><span class="co">#&gt;   Region 3: t = [0.970, 1.000] (positive)</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_sig</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="va">argvals</span>, beta <span class="op">=</span> <span class="va">beta_hat</span><span class="op">)</span>,</span>
 <span>                <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">t</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">beta</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -583,7 +604,8 @@ regions.</p>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"No significant regions to compare.\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; No significant regions to compare.</span></span></code></pre></div>
+<span><span class="co">#&gt; Region A [0.20, 0.35]: 100.0% covered by significant regions</span></span>
+<span><span class="co">#&gt; Region B [0.65, 0.80]: 100.0% covered by significant regions</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -647,9 +669,9 @@ instead of
 <code class="sourceCode R"><span><span class="va">n_low</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">sig</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sig</span><span class="op">$</span><span class="va">start_idx</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sig</span><span class="op">$</span><span class="va">start_idx</span><span class="op">)</span> <span class="kw">else</span> <span class="fl">0</span></span>
 <span><span class="va">n_high</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">sig_noisy</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sig_noisy</span><span class="op">$</span><span class="va">start_idx</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sig_noisy</span><span class="op">$</span><span class="va">start_idx</span><span class="op">)</span> <span class="kw">else</span> <span class="fl">0</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Significant regions at low noise:"</span>, <span class="va">n_low</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Significant regions at low noise: 0</span></span>
+<span><span class="co">#&gt; Significant regions at low noise: 3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Significant regions at high noise:"</span>, <span class="va">n_high</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Significant regions at high noise: 0</span></span></code></pre></div>
+<span><span class="co">#&gt; Significant regions at high noise: 5</span></span></code></pre></div>
 <p>With higher noise, the estimated
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>β</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{\beta}(t)</annotation></semantics></math>
 becomes noisier and the standard errors increase, so fewer regions (or
