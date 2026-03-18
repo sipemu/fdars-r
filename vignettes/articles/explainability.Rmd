@@ -421,6 +421,16 @@ $$D(t_j) = \sum_{|t_l - t_j| \leq w/2} |\hat{\beta}(t_l)|.$$
 
 Larger `window.width` values produce smoother importance curves.
 
+> **Methodological limitation.** Domain importance uses $\hat{\beta}(t_i)^2$
+> as pointwise importance. In FPC-based regression, the estimated $\hat{\beta}(t)$
+> is smooth and spread out -- signal from localized regions gets diffused
+> across the FPC reconstruction. The default `threshold = 0.1` (10% of total
+> importance in one window) can be too aggressive for diffuse betas. Lowering the
+> threshold helps, but the method is fundamentally limited for detecting sharp,
+> localized regions when the basis functions are nonlocal. See the
+> [Explainability Regions example](example-explainability-regions.html) for a
+> detailed validation.
+
 ```{r domain}
 dom <- fregre.domain(model, window.width = 5)
 

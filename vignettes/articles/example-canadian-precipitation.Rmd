@@ -443,21 +443,101 @@ ggplot(rsq_comp_df, aes(x = .data$Day, y = .data$R2, color = .data$Model)) +
        color = "Model")
 ```
 
-Longitude typically contributes more explanatory power for precipitation than
-latitude, particularly in winter months when the Pacific moisture gradient
-dominates. Combining both predictors yields the best fit. This contrasts with
-temperature, where latitude is the dominant predictor.
+At first glance, the joint model appears to perform **worse** than either
+single-predictor model. However, this is a **regularization artifact**:
+the same $\lambda = 1$ is applied to all three models, but the joint model
+has two coefficient functions to estimate, making it more sensitive to the
+penalty strength.
+
+### Lambda Sensitivity
+
+We can verify this by refitting the models across a range of $\lambda$
+values:
+
+```{r lambda-sensitivity}
+lambdas <- c(0.01, 0.1, 1, 10)
+sens_df <- do.call(rbind, lapply(lambdas, function(lam) {
+  fit_l <- fosr(fd_s, as.matrix(geo$latitude), lambda = lam)
+  fit_o <- fosr(fd_s, as.matrix(geo$longitude), lambda = lam)
+  fit_b <- fosr(fd_s, cbind(geo$latitude, geo$longitude), lambda = lam)
+  data.frame(
+    Lambda = lam,
+    Model = c("Latitude only", "Longitude only", "Latitude + Longitude"),
+    R2 = c(fit_l$r.squared, fit_o$r.squared, fit_b$r.squared)
+  )
+}))
+
+knitr::kable(sens_df, col.names = c("Lambda", "Model", "R-squared"),
+             digits = 4, caption = "R-squared across lambda values")
+```
+
+```{r lambda-sensitivity-plot, fig.height = 4}
+ggplot(sens_df, aes(x = factor(.data$Lambda), y = .data$R2,
+                    fill = .data$Model)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("Latitude only" = "#D55E00",
+                                "Longitude only" = "#0072B2",
+                                "Latitude + Longitude" = "#009E73")) +
+  labs(title = "FOSR R-squared is Sensitive to Lambda",
+       subtitle = "At low lambda, the joint model wins; at high lambda, it loses",
+       x = expression(lambda), y = expression(R^2),
+       fill = "Model") +
+  theme(legend.position = "bottom")
+```
+
+With $\lambda = 0.01$, the joint model outperforms both single-predictor
+models (as expected when predictors carry complementary information).
+With $\lambda = 1$, the heavier penalty shrinks the two coefficient
+functions more aggressively, degrading the fit. The single-predictor
+models are less affected because they have only one coefficient function
+to penalize.
+
+### Station Geography
+
+The moderate correlation between latitude and longitude (r = -0.53)
+contributes to the sensitivity. Canadian stations cluster along a
+northwest-to-southeast pattern:
+
+```{r station-scatter, fig.height = 5}
+r_lat_lon <- cor(geo$latitude, geo$longitude)
+
+station_df <- data.frame(
+  Latitude = geo$latitude,
+  Longitude = geo$longitude,
+  Region = region
+)
+
+ggplot(station_df,
+       aes(x = .data$Longitude, y = .data$Latitude,
+           color = .data$Region)) +
+  geom_point(size = 3) +
+  scale_color_manual(values = region_colors) +
+  geom_smooth(method = "lm", se = TRUE, color = "grey40",
+              linetype = "dashed", linewidth = 0.5,
+              inherit.aes = FALSE,
+              aes(x = .data$Longitude, y = .data$Latitude)) +
+  labs(title = sprintf("Station Locations (r = %.2f)", r_lat_lon),
+       subtitle = "NW-SE clustering increases penalty sensitivity in joint model",
+       x = "Longitude", y = "Latitude",
+       color = "Region")
+```
+
+The practical takeaway: when comparing FOSR models with different numbers
+of predictors, either (a) select $\lambda$ separately for each model via
+cross-validation, or (b) compare models at the same, well-chosen $\lambda$.
 
 ## 10. Conclusion
 
 This analysis demonstrates how function-on-scalar regression reveals the
 geographic determinants of precipitation seasonality:
 
-- **Longitude dominates** for precipitation, reflecting the west-to-east
-  moisture gradient from the Pacific. The longitude coefficient function
-  peaks in winter.
-- **Latitude plays a secondary role**, with higher-latitude stations tending
-  to be drier overall.
+- **Latitude dominates** for precipitation in this dataset, with
+  higher-latitude stations tending to be drier overall.
+- **Longitude plays a secondary role**, reflecting the west-to-east
+  moisture gradient from the Pacific.
+- **Lambda sensitivity**: the joint model's apparent underperformance is a
+  regularization artifact. At low $\lambda$, latitude + longitude together
+  outperform either alone. Always select $\lambda$ per model specification.
 - **Functional ANOVA** confirms highly significant regional differences in
   precipitation profiles, with Pacific stations having the most distinctive
   pattern.

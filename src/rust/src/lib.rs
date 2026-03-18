@@ -9539,9 +9539,11 @@ fn fregre_lm_rust(
             let resid = Robj::from(r.residuals.clone());
             let std_err = Robj::from(r.std_errors.clone());
             let coefs = Robj::from(r.coefficients.clone());
+            let beta_se = Robj::from(r.beta_se.clone());
             r!(list!(
                 intercept = r.intercept,
                 beta_t = beta_t,
+                beta_se = beta_se,
                 gamma = gamma,
                 fitted_values = fitted,
                 residuals = resid,

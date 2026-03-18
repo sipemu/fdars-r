@@ -42,6 +42,7 @@ articles:
   - articles/example-canadian-precipitation
   - articles/example-tecator-monitoring
   - articles/example-explainability-regions
+  - articles/example-inline-monitoring
 - title: Learn
   contents:
   - introduction
