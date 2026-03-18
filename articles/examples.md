@@ -88,3 +88,30 @@ Classification](../reference/figures/card-example-sonar-tsrvf.svg)
 Sonar: Mine vs Rock via Elastic TSRVF
 
 TSRVF Alignment Classification
+
+[](https://sipemu.github.io/fdars-r/articles/example-phoneme-shape.md)
+
+![Phoneme Shape
+Analysis](../reference/figures/card-example-phoneme-shape.svg)
+
+Phoneme: Shape-Based Sound Classification
+
+Shape Clustering Classification
+
+[](https://sipemu.github.io/fdars-r/articles/example-canadian-precipitation.md)
+
+![Canadian Precipitation
+FOSR](../reference/figures/card-example-canadian-precipitation.svg)
+
+Canadian Precipitation: Geographic FOSR
+
+FOSR Regression Climate
+
+[](https://sipemu.github.io/fdars-r/articles/example-tecator-monitoring.md)
+
+![Tecator Quality
+Monitoring](../reference/figures/card-example-tecator-monitoring.svg)
+
+Tecator: Inline Quality Monitoring
+
+SPM CUSUM Quality

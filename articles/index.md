@@ -27,6 +27,12 @@
   Help?](https://sipemu.github.io/fdars-r/articles/example-sonar-tsrvf.md):
 - [Cross-Validation: Honest Model Comparison with OOF
   Predictions](https://sipemu.github.io/fdars-r/articles/example-cross-validation.md):
+- [Phoneme Recognition: Shape-Based Sound
+  Classification](https://sipemu.github.io/fdars-r/articles/example-phoneme-shape.md):
+- [Canadian Precipitation: Geographic Effects on Rainfall
+  Profiles](https://sipemu.github.io/fdars-r/articles/example-canadian-precipitation.md):
+- [Tecator Spectra: Inline Quality
+  Monitoring](https://sipemu.github.io/fdars-r/articles/example-tecator-monitoring.md):
 
 ### Learn
 
