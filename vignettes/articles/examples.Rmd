@@ -113,5 +113,35 @@ knitr::opts_chunk$set(
     </div>
   </a>
 
+  <a class="fdars-gallery-item" href="example-phoneme-shape.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-phoneme-shape.svg" alt="Phoneme Shape Analysis"></div>
+    <div class="fdars-gallery-title">Phoneme: Shape-Based Sound Classification</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-align">Shape</span>
+      <span class="fdars-tag fdars-tag-analyze">Clustering</span>
+      <span class="fdars-tag fdars-tag-regression">Classification</span>
+    </div>
+  </a>
+
+  <a class="fdars-gallery-item" href="example-canadian-precipitation.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-canadian-precipitation.svg" alt="Canadian Precipitation FOSR"></div>
+    <div class="fdars-gallery-title">Canadian Precipitation: Geographic FOSR</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-regression">FOSR</span>
+      <span class="fdars-tag fdars-tag-regression">Regression</span>
+      <span class="fdars-tag fdars-tag-analyze">Climate</span>
+    </div>
+  </a>
+
+  <a class="fdars-gallery-item" href="example-tecator-monitoring.html">
+    <div class="fdars-gallery-thumb"><img src="../reference/figures/card-example-tecator-monitoring.svg" alt="Tecator Quality Monitoring"></div>
+    <div class="fdars-gallery-title">Tecator: Inline Quality Monitoring</div>
+    <div class="fdars-gallery-tags">
+      <span class="fdars-tag fdars-tag-analyze">SPM</span>
+      <span class="fdars-tag fdars-tag-analyze">CUSUM</span>
+      <span class="fdars-tag fdars-tag-analyze">Quality</span>
+    </div>
+  </a>
+
 </div>
 ```

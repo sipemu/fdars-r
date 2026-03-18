@@ -38,6 +38,9 @@ articles:
   - articles/example-andrews-wine-qc
   - articles/example-sonar-tsrvf
   - articles/example-cross-validation
+  - articles/example-phoneme-shape
+  - articles/example-canadian-precipitation
+  - articles/example-tecator-monitoring
 - title: Learn
   contents:
   - introduction

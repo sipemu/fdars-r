@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none">
+  <!-- Five spectral curves in distinct colors (phoneme classes) -->
+  <path d="M15 80 Q30 75, 45 60 Q55 50, 70 45 Q85 40, 100 50 Q115 58, 130 55" stroke="#4169E1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 85 Q30 78, 45 65 Q55 55, 70 48 Q85 43, 100 53 Q115 62, 130 58" stroke="#4169E1" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 70 Q30 55, 45 40 Q55 35, 70 40 Q85 50, 100 55 Q115 50, 130 45" stroke="#DC3545" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 68 Q30 52, 45 38 Q55 33, 70 38 Q85 48, 100 52 Q115 47, 130 42" stroke="#DC3545" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 90 Q30 85, 45 80 Q55 70, 70 60 Q85 55, 100 60 Q115 65, 130 62" stroke="#2E8B57" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 55 Q30 50, 45 55 Q55 65, 70 70 Q85 65, 100 58 Q115 52, 130 50" stroke="#E8913A" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <path d="M15 60 Q30 65, 45 70 Q55 75, 70 72 Q85 65, 100 60 Q115 55, 130 52" stroke="#7B2D8E" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Arrow to shape means -->
+  <line x1="135" y1="58" x2="148" y2="58" stroke="#333" stroke-width="1.5" opacity="0.4"/>
+  <polygon points="146,54 153,58 146,62" fill="#333" opacity="0.4"/>
+  <!-- Shape mean curves (bold, converged) -->
+  <path d="M155 72 Q162 65, 170 55 Q178 48, 186 52" stroke="#4169E1" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M155 62 Q162 48, 170 40 Q178 45, 186 42" stroke="#DC3545" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M155 82 Q162 76, 170 68 Q178 63, 186 65" stroke="#2E8B57" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M155 52 Q162 50, 170 56 Q178 60, 186 55" stroke="#E8913A" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M155 58 Q162 62, 170 65 Q178 60, 186 58" stroke="#7B2D8E" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- Cluster dots at bottom -->
+  <circle cx="160" cy="95" r="3" fill="#4169E1" opacity="0.6"/>
+  <circle cx="168" cy="98" r="3" fill="#DC3545" opacity="0.6"/>
+  <circle cx="176" cy="93" r="3" fill="#2E8B57" opacity="0.6"/>
+  <circle cx="184" cy="97" r="3" fill="#E8913A" opacity="0.6"/>
+  <circle cx="172" cy="102" r="3" fill="#7B2D8E" opacity="0.6"/>
+</svg>
