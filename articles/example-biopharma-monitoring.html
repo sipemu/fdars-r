@@ -78,23 +78,20 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>A biopharmaceutical manufacturer monitors 100,000 L penicillin
-fed-batch fermentations. Each batch produces time-series trajectories
-for temperature, dissolved oxygen, and penicillin concentration. Batches
-are run under three control strategies (recipe-driven,
-operator-controlled, advanced process control), and some batches
-experience process faults. The goals are:</p>
+<p>This article analyzes 100 batches of industrial-scale penicillin
+fermentation data from the <strong>IndPenSim</strong> simulator
+(Goldrick et al., 2015). Each batch produces time-series trajectories
+for temperature, dissolved oxygen, penicillin concentration, sugar feed
+rate, pH, and other process variables over 167-290 hours. Batches
+operate under three control strategies, and 10 batches contain
+intentional process faults.</p>
 <ol style="list-style-type: decimal">
 <li>Characterize batch-to-batch variability via FPCA</li>
 <li>Build a monitoring chart from normal batches and detect faults</li>
 <li>Compare control strategy tightness</li>
 <li>Predict final yield from early-stage process trajectories</li>
+<li>Identify which controllable variables most influence yield</li>
 </ol>
-<p>This article uses synthetic data that mimics the structure of the <a href="https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing" class="external-link">IndPenSim</a>
-dataset (Goldrick et al., 2015). The simulation reproduces the key
-features: logistic penicillin production curves, controlled fermentation
-temperature, dissolved oxygen consumption during growth, and realistic
-batch-to-batch variability under different control strategies.</p>
 <table class="table">
 <colgroup>
 <col width="21%">
@@ -108,9 +105,9 @@ batch-to-batch variability under different control strategies.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>1. Simulate batches</td>
-<td>Generate 100 batch trajectories under 4 control regimes</td>
-<td>Penicillin, temperature, DO2 as <code>fdata</code>
+<td>1. Load real data</td>
+<td>Read IndPenSim 100-batch dataset, interpolate to common grid</td>
+<td>6 process variables as <code>fdata</code>
 </td>
 </tr>
 <tr class="even">
@@ -135,140 +132,107 @@ batch-to-batch variability under different control strategies.</p>
 </tr>
 <tr class="even">
 <td>6. Yield prediction</td>
-<td>Functional regression: early trajectory to final yield</td>
-<td>Early warning model</td>
+<td>Compare regression methods, CV-select optimal ncomp</td>
+<td>Yield prediction from early data</td>
+</tr>
+<tr class="odd">
+<td>7. Yield drivers</td>
+<td>Screen 5 process variables, importance ranking</td>
+<td>Actionable recommendations for operators</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Dataset reference:</strong> Goldrick S. et al. (2015),
-<em>The development of an industrial-scale fed-batch fermentation
-simulation</em>, Journal of Biotechnology, 193:70-82. The full 100-batch
-dataset (2.5 GB, 39 process variables + 2200 Raman channels) is
-available on <a href="https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing" class="external-link">Kaggle</a>.</p>
+<p><strong>Dataset:</strong> Goldrick S. et al. (2015), <em>The
+development of an industrial-scale fed-batch fermentation
+simulation</em>, Journal of Biotechnology, 193:70-82. Data from <a href="https://data.mendeley.com/datasets/pdnjz7zz5x/2" class="external-link">Mendeley Data</a>
+(DOI: 10.17632/pdnjz7zz5x.2, CC BY 4.0). Also available on <a href="https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing" class="external-link">Kaggle</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="simulating-batch-fermentation-data">1. Simulating Batch Fermentation Data<a class="anchor" aria-label="anchor" href="#simulating-batch-fermentation-data"></a>
+<h2 id="loading-the-indpensim-data">1. Loading the IndPenSim Data<a class="anchor" aria-label="anchor" href="#loading-the-indpensim-data"></a>
 </h2>
-<p>We simulate 100 batches on a common 200-hour time grid. The
-penicillin production curve follows logistic kinetics; temperature is
-controlled near a setpoint with group-specific tightness; dissolved
-oxygen dips during the exponential growth phase and recovers as growth
-slows.</p>
+<p>The preprocessed RDS file contains 113,935 rows across 100 batches
+with 14 key process variables (Raman spectra excluded for efficiency).
+Batches have variable lengths (167-290 hours), so we interpolate to a
+common 167-hour grid that all batches cover.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Simulation parameters</span></span>
-<span><span class="va">n_batches</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">201</span>                                  <span class="co"># time points (every 1 hour)</span></span>
-<span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">200</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Load preprocessed data (see data-raw/ for extraction from Mendeley ZIP)</span></span>
+<span><span class="co"># pkgdown builds articles from the package root directory</span></span>
+<span><span class="va">data_dir</span> <span class="op">&lt;-</span> <span class="st">"data-raw"</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.exists</a></span><span class="op">(</span><span class="va">data_dir</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Fallback: walk up from vignettes/articles/</span></span>
+<span>  <span class="va">data_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">".."</span>, <span class="st">".."</span>, <span class="st">"data-raw"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">raw</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"indpensim_process.rds"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"indpensim_stats.rds"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Control strategy groups</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Total rows:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">raw</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Total rows: 113935</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Batches:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">raw</span><span class="op">$</span><span class="va">batch</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Batches: 100</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Variables:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">raw</span><span class="op">)</span>, <span class="st">"batch"</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Variables: time_h, aeration_Fg, agitator_RPM, sugar_feed_Fs, substrate_S, DO2, penicillin_P, volume_V, pH, temperature_T, heat_Q, CO2_offgas, OUR, CER</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Common time grid: 0 to 167 hours (min batch duration), 201 points</span></span>
+<span><span class="va">n_batches</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">201</span></span>
+<span><span class="va">t_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">167</span>, length.out <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Control strategy groups (from IndPenSim design)</span></span>
 <span><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Recipe"</span>,   <span class="fl">30</span><span class="op">)</span>,                    <span class="co"># batches 1-30</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Operator"</span>, <span class="fl">30</span><span class="op">)</span>,                    <span class="co"># batches 31-60</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"APC"</span>,      <span class="fl">30</span><span class="op">)</span>,                    <span class="co"># batches 61-90 (Advanced Process Control)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Fault"</span>,    <span class="fl">10</span><span class="op">)</span>                     <span class="co"># batches 91-100</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Recipe"</span>,   <span class="fl">30</span><span class="op">)</span>,    <span class="co"># batches 1-30: recipe-driven</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Operator"</span>, <span class="fl">30</span><span class="op">)</span>,    <span class="co"># batches 31-60: operator-controlled</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"APC"</span>,      <span class="fl">30</span><span class="op">)</span>,    <span class="co"># batches 61-90: Raman-based APC</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Fault"</span>,    <span class="fl">10</span><span class="op">)</span>     <span class="co"># batches 91-100: intentional faults</span></span>
 <span><span class="op">)</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Recipe"</span>, <span class="st">"Operator"</span>, <span class="st">"APC"</span>, <span class="st">"Fault"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Smooth basis for correlated noise</span></span>
-<span><span class="va">M_basis</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
-<span><span class="va">phi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eFun.html">eFun</a></span><span class="op">(</span><span class="va">t_grid</span>, M <span class="op">=</span> <span class="va">M_basis</span>, type <span class="op">=</span> <span class="st">"Fourier"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Group-specific parameters:</span></span>
-<span><span class="co">#   Pmax: max penicillin concentration (g/L)</span></span>
-<span><span class="co">#   tmid: inflection point of logistic growth (hours)</span></span>
-<span><span class="co">#   noise: trajectory noise level</span></span>
-<span><span class="va">group_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Recipe   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Pmax_mu <span class="op">=</span> <span class="fl">50</span>, Pmax_sd <span class="op">=</span> <span class="fl">3</span>, tmid_mu <span class="op">=</span> <span class="fl">80</span>, tmid_sd <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>                  T_sd <span class="op">=</span> <span class="fl">0.3</span>, DO2_sd <span class="op">=</span> <span class="fl">0.3</span>, pen_noise <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,</span>
-<span>  Operator <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Pmax_mu <span class="op">=</span> <span class="fl">47</span>, Pmax_sd <span class="op">=</span> <span class="fl">5</span>, tmid_mu <span class="op">=</span> <span class="fl">85</span>, tmid_sd <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>                  T_sd <span class="op">=</span> <span class="fl">0.8</span>, DO2_sd <span class="op">=</span> <span class="fl">0.6</span>, pen_noise <span class="op">=</span> <span class="fl">2.0</span><span class="op">)</span>,</span>
-<span>  APC      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Pmax_mu <span class="op">=</span> <span class="fl">52</span>, Pmax_sd <span class="op">=</span> <span class="fl">2</span>, tmid_mu <span class="op">=</span> <span class="fl">78</span>, tmid_sd <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>                  T_sd <span class="op">=</span> <span class="fl">0.15</span>, DO2_sd <span class="op">=</span> <span class="fl">0.2</span>, pen_noise <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span>,</span>
-<span>  Fault    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Pmax_mu <span class="op">=</span> <span class="fl">45</span>, Pmax_sd <span class="op">=</span> <span class="fl">6</span>, tmid_mu <span class="op">=</span> <span class="fl">88</span>, tmid_sd <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>                  T_sd <span class="op">=</span> <span class="fl">0.5</span>, DO2_sd <span class="op">=</span> <span class="fl">0.5</span>, pen_noise <span class="op">=</span> <span class="fl">2.5</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pen_data</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_batches</span>, <span class="va">m</span><span class="op">)</span></span>
-<span><span class="va">temp_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_batches</span>, <span class="va">m</span><span class="op">)</span></span>
-<span><span class="va">do2_data</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_batches</span>, <span class="va">m</span><span class="op">)</span></span>
-<span><span class="va">yields</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="va">n_batches</span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_batches</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">gp</span> <span class="op">&lt;-</span> <span class="va">group_params</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">groups</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span>  <span class="co"># Per-batch kinetic parameters</span></span>
-<span>  <span class="va">Pmax_i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">gp</span><span class="op">$</span><span class="va">Pmax_mu</span>, <span class="va">gp</span><span class="op">$</span><span class="va">Pmax_sd</span><span class="op">)</span></span>
-<span>  <span class="va">tmid_i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">gp</span><span class="op">$</span><span class="va">tmid_mu</span>, <span class="va">gp</span><span class="op">$</span><span class="va">tmid_sd</span><span class="op">)</span></span>
-<span>  <span class="va">k_i</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.06</span>, <span class="fl">0.005</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Penicillin: logistic growth + smooth noise</span></span>
-<span>  <span class="va">pen_mean</span> <span class="op">&lt;-</span> <span class="va">Pmax_i</span> <span class="op">/</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">k_i</span> <span class="op">*</span> <span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="va">tmid_i</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">pen_noise</span> <span class="op">&lt;-</span> <span class="va">phi</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">M_basis</span><span class="op">)</span> <span class="op">*</span> <span class="va">gp</span><span class="op">$</span><span class="va">pen_noise</span> <span class="op">*</span></span>
-<span>                         <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">M_basis</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">pen_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">pen_mean</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">pen_noise</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Temperature: controlled at 298 K + noise</span></span>
-<span>  <span class="va">temp_noise</span> <span class="op">&lt;-</span> <span class="va">phi</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">M_basis</span><span class="op">)</span> <span class="op">*</span> <span class="va">gp</span><span class="op">$</span><span class="va">T_sd</span> <span class="op">*</span></span>
-<span>                          <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">M_basis</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">temp_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">298</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">temp_noise</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Dissolved oxygen: dip during growth, recover</span></span>
-<span>  <span class="va">do2_mean</span> <span class="op">&lt;-</span> <span class="fl">8</span> <span class="op">-</span> <span class="fl">4.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="va">tmid_i</span> <span class="op">+</span> <span class="fl">10</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="fl">25</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">do2_noise</span> <span class="op">&lt;-</span> <span class="va">phi</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">M_basis</span><span class="op">)</span> <span class="op">*</span> <span class="va">gp</span><span class="op">$</span><span class="va">DO2_sd</span> <span class="op">*</span></span>
-<span>                         <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">M_basis</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">do2_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">do2_mean</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">do2_noise</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">yields</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">pen_data</span><span class="op">[</span><span class="va">i</span>, <span class="va">m</span><span class="op">]</span></span>
+<span><span class="co"># Interpolate each batch to the common grid</span></span>
+<span><span class="va">interp_var</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">raw</span>, <span class="va">varname</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="va">n_batches</span>, <span class="va">m</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_batches</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">batch</span> <span class="op">==</span> <span class="va">b</span>, <span class="op">]</span></span>
+<span>    <span class="va">mat</span><span class="op">[</span><span class="va">b</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">approx</a></span><span class="op">(</span><span class="va">batch</span><span class="op">$</span><span class="va">time_h</span>, <span class="va">batch</span><span class="op">[[</span><span class="va">varname</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>                         xout <span class="op">=</span> <span class="va">t_grid</span>, rule <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">$</span><span class="va">y</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">mat</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># --- Inject specific faults into batches 91-100 ---</span></span>
+<span><span class="va">pen_data</span>  <span class="op">&lt;-</span> <span class="fu">interp_var</span><span class="op">(</span><span class="va">raw</span>, <span class="st">"penicillin_P"</span><span class="op">)</span></span>
+<span><span class="va">temp_data</span> <span class="op">&lt;-</span> <span class="fu">interp_var</span><span class="op">(</span><span class="va">raw</span>, <span class="st">"temperature_T"</span><span class="op">)</span></span>
+<span><span class="va">do2_data</span>  <span class="op">&lt;-</span> <span class="fu">interp_var</span><span class="op">(</span><span class="va">raw</span>, <span class="st">"DO2"</span><span class="op">)</span></span>
+<span><span class="va">fs_data</span>   <span class="op">&lt;-</span> <span class="fu">interp_var</span><span class="op">(</span><span class="va">raw</span>, <span class="st">"sugar_feed_Fs"</span><span class="op">)</span></span>
+<span><span class="va">ph_data</span>   <span class="op">&lt;-</span> <span class="fu">interp_var</span><span class="op">(</span><span class="va">raw</span>, <span class="st">"pH"</span><span class="op">)</span></span>
+<span><span class="va">fg_data</span>   <span class="op">&lt;-</span> <span class="fu">interp_var</span><span class="op">(</span><span class="va">raw</span>, <span class="st">"aeration_Fg"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Batches 91-93: temperature drift (+4 K over last 80 hours)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">91</span><span class="op">:</span><span class="fl">93</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">drift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="fl">120</span><span class="op">)</span> <span class="op">/</span> <span class="fl">80</span><span class="op">)</span> <span class="op">*</span> <span class="fl">4</span></span>
-<span>  <span class="va">temp_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">temp_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">+</span> <span class="va">drift</span></span>
-<span><span class="op">}</span></span>
+<span><span class="co"># Yields: total penicillin in kg (from batch statistics)</span></span>
+<span><span class="va">total_yields</span> <span class="op">&lt;-</span> <span class="va">stats</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co"># Final penicillin concentration at t=167h (direct fermentation performance)</span></span>
+<span><span class="va">final_pen</span> <span class="op">&lt;-</span> <span class="va">pen_data</span><span class="op">[</span>, <span class="va">m</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Batches 94-96: dissolved oxygen crash (sudden drop at ~100 h)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">94</span><span class="op">:</span><span class="fl">96</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">t_fault</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">90</span><span class="op">:</span><span class="fl">110</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span>  <span class="va">drop</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">pnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, mean <span class="op">=</span> <span class="va">t_fault</span>, sd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span>  <span class="va">do2_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">do2_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">+</span> <span class="va">drop</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># Batches 97-99: substrate feed fault (penicillin production stalls at ~120 h)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">97</span><span class="op">:</span><span class="fl">99</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">t_stall</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">110</span><span class="op">:</span><span class="fl">130</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span>  <span class="va">pen_data</span><span class="op">[</span><span class="va">i</span>, <span class="va">t_grid</span> <span class="op">&gt;</span> <span class="va">t_stall</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">pen_data</span><span class="op">[</span><span class="va">i</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="va">t_stall</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
-<span>  <span class="va">yields</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">pen_data</span><span class="op">[</span><span class="va">i</span>, <span class="va">m</span><span class="op">]</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># Batch 100: combined fault (temperature drift + DO2 crash)</span></span>
-<span><span class="va">temp_data</span><span class="op">[</span><span class="fl">100</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">temp_data</span><span class="op">[</span><span class="fl">100</span>, <span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="op">(</span><span class="va">t_grid</span> <span class="op">-</span> <span class="fl">100</span><span class="op">)</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span> <span class="op">*</span> <span class="fl">5</span></span>
-<span><span class="va">do2_data</span><span class="op">[</span><span class="fl">100</span>, <span class="op">]</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">do2_data</span><span class="op">[</span><span class="fl">100</span>, <span class="op">]</span> <span class="op">-</span></span>
-<span>                          <span class="fl">3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">pnorm</a></span><span class="op">(</span><span class="va">t_grid</span>, mean <span class="op">=</span> <span class="fl">105</span>, sd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Grid: 0.2 to 167 hours,"</span>, <span class="va">m</span>, <span class="st">"points\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Grid: 0.2 to 167 hours, 201 points</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Penicillin range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"g/L\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Penicillin range: 0 28.94 g/L</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Temperature range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">temp_data</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"K\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Temperature range: 297.35 302.17 K</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"DO2 range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">do2_data</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"mg/L\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; DO2 range: 2.45 16.47 mg/L</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Final pen conc range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">final_pen</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"g/L\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Final pen conc range: 5.72 28.94 g/L</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Convert to fdata objects</span></span>
-<span><span class="va">fd_pen</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span>,  argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">fd_pen</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span>,  argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="va">fd_temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">temp_data</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="va">fd_do2</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">do2_data</span>,  argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Batches:"</span>, <span class="va">n_batches</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Batches: 100</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Time points per batch:"</span>, <span class="va">m</span>, <span class="st">"(0-200 hours)\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Time points per batch: 201 (0-200 hours)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Control strategies:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Control strategies: Recipe, Operator, APC, Fault</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Fault batches: 91-100\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fault batches: 91-100</span></span></code></pre></div>
+<span><span class="va">fd_fs</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">fs_data</span>,   argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<span><span class="va">fd_ph</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">ph_data</span>,   argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<span><span class="va">fd_fg</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">fg_data</span>,   argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="batch-trajectory-exploration">2. Batch Trajectory Exploration<a class="anchor" aria-label="anchor" href="#batch-trajectory-exploration"></a>
 </h2>
-<p>Each batch produces a penicillin production curve over 200 hours. We
-plot all trajectories colored by control strategy.</p>
+<p>Each batch produces a penicillin production curve. We plot all 100
+trajectories colored by control strategy.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Build long data frame for plotting</span></span>
-<span><span class="va">build_df</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">varname</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">build_df</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fd</span>, <span class="va">varname</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fd</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">t_grid</span>, each <span class="op">=</span> <span class="va">n</span><span class="op">)</span>,</span>
@@ -294,28 +258,13 @@ plot all trajectories colored by control strategy.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.data</span><span class="op">$</span><span class="va">variable</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Recipe <span class="op">=</span> <span class="st">"#4A90D9"</span>, Operator <span class="op">=</span> <span class="st">"#E69F00"</span>,</span>
 <span>                                APC <span class="op">=</span> <span class="st">"#009E73"</span>, Fault <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"100 Batch Trajectories by Control Strategy"</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"100 IndPenSim Batch Trajectories by Control Strategy"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Time (hours)"</span>, y <span class="op">=</span> <span class="cn">NULL</span>, color <span class="op">=</span> <span class="st">"Strategy"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
 <span>        strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-biopharma-monitoring_files/figure-html/trajectory-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<p>Key observations:</p>
-<ul>
-<li>
-<strong>Penicillin</strong> follows a logistic growth curve; APC
-batches (green) are tightest, operator batches (yellow) show the most
-scatter.</li>
-<li>
-<strong>Temperature</strong> is held near 298 K; fault batches (red)
-show clear drift.</li>
-<li>
-<strong>Dissolved oxygen</strong> dips during the growth phase;
-fault batches show abnormal profiles (early crash, sustained
-depression).</li>
-</ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Mean penicillin curves per group</span></span>
-<span><span class="va">group_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">group_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">groups</span> <span class="op">==</span> <span class="va">g</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    time <span class="op">=</span> <span class="va">t_grid</span>,</span>
@@ -333,9 +282,9 @@ depression).</li>
 <span>       x <span class="op">=</span> <span class="st">"Time (hours)"</span>, y <span class="op">=</span> <span class="st">"Penicillin (g/L)"</span>, color <span class="op">=</span> <span class="st">"Strategy"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-biopharma-monitoring_files/figure-html/group-means-1.png" class="r-plt" alt="" width="100%"></p>
-<p>APC batches reach the highest mean yield with the fastest onset,
-reflecting tighter glucose feed control. Fault batches plateau earlier
-due to injected process deviations.</p>
+<p>APC batches (Raman-guided advanced process control) achieve the
+highest mean penicillin concentration. Fault batches show depressed or
+abnormal production curves.</p>
 </div>
 <div class="section level2">
 <h2 id="fpca-modes-of-batch-variation">3. FPCA: Modes of Batch Variation<a class="anchor" aria-label="anchor" href="#fpca-modes-of-batch-variation"></a>
@@ -343,17 +292,15 @@ due to injected process deviations.</p>
 <p>We apply FPCA to the 90 non-fault penicillin trajectories (batches
 1-90) to extract the dominant modes of variation.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># FPCA via spm.phase1 on non-fault batches</span></span>
-<span><span class="va">fd_normal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">fd_normal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="va">chart_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.phase1.html">spm.phase1</a></span><span class="op">(</span><span class="va">fd_normal</span>, ncomp <span class="op">=</span> <span class="fl">8</span>, alpha <span class="op">=</span> <span class="fl">0.01</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Cumulative variance</span></span>
 <span><span class="va">eig</span> <span class="op">&lt;-</span> <span class="va">chart_all</span><span class="op">$</span><span class="va">eigenvalues</span></span>
 <span><span class="va">cum_var</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">eig</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">eig</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ncomp_sel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.ncomp.select.html">spm.ncomp.select</a></span><span class="op">(</span><span class="va">eig</span>, method <span class="op">=</span> <span class="st">"variance90"</span>, threshold <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Selected components (90% variance):"</span>, <span class="va">ncomp_sel</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Selected components (90% variance): 2</span></span></code></pre></div>
+<span><span class="co">#&gt; Selected components (90% variance): 1</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_scree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  pc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">eig</span><span class="op">)</span>,</span>
@@ -379,13 +326,8 @@ due to injected process deviations.</p>
 <span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre></div>
 <p><img src="example-biopharma-monitoring_files/figure-html/scree-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The first few components capture almost all batch-to-batch variation.
-The dominant mode typically represents variation in maximum yield
-(vertical shift of the logistic plateau), while the second mode captures
-timing differences (horizontal shift of the growth onset).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Standard PCA on centered batch trajectories</span></span>
-<span><span class="va">pca_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pca_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">df_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  PC1 <span class="op">=</span> <span class="va">pca_res</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
@@ -397,26 +339,16 @@ timing differences (horizontal shift of the growth onset).</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2.5</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/stat_ellipse.html" class="external-link">stat_ellipse</a></span><span class="op">(</span>level <span class="op">=</span> <span class="fl">0.9</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Recipe <span class="op">=</span> <span class="st">"#4A90D9"</span>, Operator <span class="op">=</span> <span class="st">"#E69F00"</span>,</span>
-<span>                                APC <span class="op">=</span> <span class="st">"#009E73"</span>, Fault <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                                APC <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"FPC Score Plot: Batch Variability by Control Strategy"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"90% confidence ellipses"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"FPC 1 (yield level)"</span>, y <span class="op">=</span> <span class="st">"FPC 2 (growth timing)"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Strategy"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-biopharma-monitoring_files/figure-html/fpca-scores-1.png" class="r-plt" alt="" width="100%"></p>
-<p>The score plot reveals clear separation between control
-strategies:</p>
-<ul>
-<li>
-<strong>APC</strong> batches (green) cluster tightly near the center
-– consistent process performance with low variability.</li>
-<li>
-<strong>Operator</strong> batches (yellow) show the widest scatter –
-human intervention introduces batch-to-batch inconsistency.</li>
-<li>
-<strong>Recipe</strong> batches (blue) fall between the two –
-predictable but less optimized than APC.</li>
-</ul>
+<p>The score plot reveals the control strategy fingerprint. APC batches
+(Raman-guided control) typically cluster more tightly than recipe or
+operator-controlled batches.</p>
 </div>
 <div class="section level2">
 <h2 id="process-monitoring-phase-i-calibration">4. Process Monitoring: Phase I Calibration<a class="anchor" aria-label="anchor" href="#process-monitoring-phase-i-calibration"></a>
@@ -428,13 +360,13 @@ predictable but less optimized than APC.</li>
 <span><span class="va">chart</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.phase1.html">spm.phase1</a></span><span class="op">(</span><span class="va">fd_recipe</span>, ncomp <span class="op">=</span> <span class="va">ncomp_sel</span>, alpha <span class="op">=</span> <span class="fl">0.01</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">chart</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SPM Control Chart (Phase I)</span></span>
-<span><span class="co">#&gt;   Components: 2 </span></span>
+<span><span class="co">#&gt;   Components: 1 </span></span>
 <span><span class="co">#&gt;   Alpha: 0.01 </span></span>
-<span><span class="co">#&gt;   T2 UCL: 9.21 </span></span>
-<span><span class="co">#&gt;   SPE UCL: 506.9 </span></span>
+<span><span class="co">#&gt;   T2 UCL: 6.635 </span></span>
+<span><span class="co">#&gt;   SPE UCL: 287.6 </span></span>
 <span><span class="co">#&gt;   Observations: 30 </span></span>
 <span><span class="co">#&gt;   Grid points: 201 </span></span>
-<span><span class="co">#&gt;   Eigenvalues: 1007,  264</span></span></code></pre></div>
+<span><span class="co">#&gt;   Eigenvalues: 853</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">chart</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-biopharma-monitoring_files/figure-html/phase1-plot-1.png" class="r-plt" alt="" width="100%"></p>
@@ -442,21 +374,18 @@ predictable but less optimized than APC.</li>
 <div class="section level2">
 <h2 id="fault-detection-monitoring-batches-91-100">5. Fault Detection: Monitoring Batches 91-100<a class="anchor" aria-label="anchor" href="#fault-detection-monitoring-batches-91-100"></a>
 </h2>
-<p>We now monitor the 10 fault batches against the recipe-derived
-control limits using Shewhart, CUSUM, and MEWMA charts.</p>
+<p>We monitor the 10 fault batches against the recipe-derived control
+limits using Shewhart, CUSUM, and MEWMA charts.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fd_fault</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">91</span><span class="op">:</span><span class="fl">100</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="va">n_fault</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
 <span></span>
-<span><span class="co"># Shewhart</span></span>
 <span><span class="va">mon_fault</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.monitor.html">spm.monitor</a></span><span class="op">(</span><span class="va">chart</span>, <span class="va">fd_fault</span><span class="op">)</span></span>
 <span><span class="va">n_det_shew</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mon_fault</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># CUSUM</span></span>
 <span><span class="va">cusum_fault</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.cusum.html">spm.cusum</a></span><span class="op">(</span><span class="va">chart</span>, <span class="va">fd_fault</span>, k <span class="op">=</span> <span class="fl">0.5</span>, h <span class="op">=</span> <span class="fl">5.0</span><span class="op">)</span></span>
 <span><span class="va">n_det_cusum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">cusum_fault</span><span class="op">$</span><span class="va">alarm</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># MEWMA</span></span>
 <span><span class="va">mewma_fault</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.mewma.html">spm.mewma</a></span><span class="op">(</span><span class="va">chart</span>, <span class="va">fd_fault</span>, lambda <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
 <span><span class="va">n_det_mewma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mewma_fault</span><span class="op">$</span><span class="va">alarm</span><span class="op">)</span></span>
 <span></span>
@@ -465,9 +394,9 @@ control limits using Shewhart, CUSUM, and MEWMA charts.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Shewhart:"</span>, <span class="va">n_det_shew</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"(%.0f%%)\n"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="va">n_det_shew</span> <span class="op">/</span> <span class="va">n_fault</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Shewhart: 5 (50%)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  CUSUM:   "</span>, <span class="va">n_det_cusum</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"(%.0f%%)\n"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="va">n_det_cusum</span> <span class="op">/</span> <span class="va">n_fault</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   CUSUM:    9 (90%)</span></span>
+<span><span class="co">#&gt;   CUSUM:    6 (60%)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  MEWMA:   "</span>, <span class="va">n_det_mewma</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"(%.0f%%)\n"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="va">n_det_mewma</span> <span class="op">/</span> <span class="va">n_fault</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   MEWMA:    10 (100%)</span></span></code></pre></div>
+<span><span class="co">#&gt;   MEWMA:    7 (70%)</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_fault</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">91</span><span class="op">:</span><span class="fl">100</span>, <span class="fl">3</span><span class="op">)</span>,</span>
@@ -495,10 +424,8 @@ control limits using Shewhart, CUSUM, and MEWMA charts.</p>
 <div class="section level3">
 <h3 id="false-positive-check">False Positive Check<a class="anchor" aria-label="anchor" href="#false-positive-check"></a>
 </h3>
-<p>We also monitor 30 fresh operator batches (31-60) as a non-fault
-comparison. While they differ from the recipe baseline, they should
-produce moderate alarm rates – not the high detection seen for true
-faults.</p>
+<p>We also monitor 30 operator batches (31-60) as a non-fault
+comparison.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fd_operator</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">31</span><span class="op">:</span><span class="fl">60</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
 <span><span class="va">mon_op</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.monitor.html">spm.monitor</a></span><span class="op">(</span><span class="va">chart</span>, <span class="va">fd_operator</span><span class="op">)</span></span>
@@ -512,8 +439,6 @@ faults.</p>
 <div class="section level3">
 <h3 id="precision-recall-and-f1">Precision, Recall, and F1<a class="anchor" aria-label="anchor" href="#precision-recall-and-f1"></a>
 </h3>
-<p>We compute precision, recall, and F1 treating fault batches as
-positives and operator batches as the non-fault reference.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fp_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  Shewhart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mon_op</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span>,</span>
@@ -560,31 +485,31 @@ positives and operator batches as the non-fault reference.</p>
 <td align="left">Shewhart</td>
 <td align="left">Shewhart</td>
 <td align="right">5</td>
-<td align="right">12</td>
+<td align="right">0</td>
 <td align="right">5</td>
-<td align="right">29.4%</td>
+<td align="right">100.0%</td>
 <td align="right">50.0%</td>
-<td align="right">0.370</td>
+<td align="right">0.667</td>
 </tr>
 <tr class="even">
 <td align="left">CUSUM</td>
 <td align="left">CUSUM</td>
-<td align="right">9</td>
-<td align="right">27</td>
-<td align="right">1</td>
-<td align="right">25.0%</td>
-<td align="right">90.0%</td>
-<td align="right">0.391</td>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">100.0%</td>
+<td align="right">60.0%</td>
+<td align="right">0.750</td>
 </tr>
 <tr class="odd">
 <td align="left">MEWMA</td>
 <td align="left">MEWMA</td>
-<td align="right">10</td>
-<td align="right">28</td>
-<td align="right">0</td>
-<td align="right">26.3%</td>
-<td align="right">100.0%</td>
-<td align="right">0.417</td>
+<td align="right">7</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">87.5%</td>
+<td align="right">70.0%</td>
+<td align="right">0.778</td>
 </tr>
 </tbody>
 </table>
@@ -617,9 +542,7 @@ positives and operator batches as the non-fault reference.</p>
 <div class="section level2">
 <h2 id="control-strategy-comparison">6. Control Strategy Comparison<a class="anchor" aria-label="anchor" href="#control-strategy-comparison"></a>
 </h2>
-<p>How does each control strategy compare on process consistency? We
-compute the pointwise standard deviation of the penicillin trajectories
-within each non-fault group.</p>
+<p>How does each control strategy compare on process consistency?</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Recipe"</span>, <span class="st">"Operator"</span>, <span class="st">"APC"</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">groups</span> <span class="op">==</span> <span class="va">g</span><span class="op">)</span></span>
@@ -641,73 +564,216 @@ within each non-fault group.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Strategy <span class="op">=</span> <span class="va">g</span>,</span>
 <span>    N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">idx</span><span class="op">)</span>,</span>
-<span>    Mean_Yield <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">yields</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>    SD_Yield <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/sd.html">sd</a></span><span class="op">(</span><span class="va">yields</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>    CV_Yield <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f%%"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="../reference/sd.html">sd</a></span><span class="op">(</span><span class="va">yields</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">yields</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>    Total_Yield <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.2f M kg"</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">total_yields</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1e6</span><span class="op">)</span>,</span>
+<span>    Final_Pen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f g/L"</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">final_pen</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    CV_Pen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f%%"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="../reference/sd.html">sd</a></span><span class="op">(</span><span class="va">final_pen</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">final_pen</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">strat_summary</span>,</span>
+<span>             col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Strategy"</span>, <span class="st">"N"</span>, <span class="st">"Mean Total Yield"</span>,</span>
+<span>                           <span class="st">"Mean Final Pen"</span>, <span class="st">"CV (Final Pen)"</span><span class="op">)</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"Yield statistics by control strategy"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>Yield statistics by control strategy</caption>
 <thead><tr class="header">
 <th align="left">Strategy</th>
 <th align="right">N</th>
-<th align="right">Mean_Yield</th>
-<th align="right">SD_Yield</th>
-<th align="left">CV_Yield</th>
+<th align="left">Mean Total Yield</th>
+<th align="left">Mean Final Pen</th>
+<th align="left">CV (Final Pen)</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">Recipe</td>
 <td align="right">30</td>
-<td align="right">51.3</td>
-<td align="right">3.05</td>
-<td align="left">5.9%</td>
+<td align="left">2.91 M kg</td>
+<td align="left">23.8 g/L</td>
+<td align="left">16.7%</td>
 </tr>
 <tr class="even">
 <td align="left">Operator</td>
 <td align="right">30</td>
-<td align="right">45.0</td>
-<td align="right">4.84</td>
-<td align="left">10.8%</td>
+<td align="left">2.83 M kg</td>
+<td align="left">23.1 g/L</td>
+<td align="left">17.8%</td>
 </tr>
 <tr class="odd">
 <td align="left">APC</td>
 <td align="right">30</td>
-<td align="right">51.3</td>
-<td align="right">1.67</td>
-<td align="left">3.2%</td>
+<td align="left">3.48 M kg</td>
+<td align="left">24.5 g/L</td>
+<td align="left">7.3%</td>
 </tr>
 </tbody>
 </table>
-<p>APC achieves the highest mean yield with the lowest coefficient of
-variation (CV). Operator control shows the widest spread – human
-decision-making adds variability that automated control eliminates.</p>
 </div>
 <div class="section level2">
 <h2 id="yield-prediction-from-early-process-data">7. Yield Prediction from Early Process Data<a class="anchor" aria-label="anchor" href="#yield-prediction-from-early-process-data"></a>
 </h2>
-<p>Can we predict final penicillin yield from the first 100 hours of a
-batch? Early prediction enables intervention before a low-yield batch
-completes.</p>
+<p>Can we predict final penicillin concentration at harvest from the
+first 80 hours of the trajectory? Early prediction enables intervention
+before a low-yield batch completes.</p>
+<p>We use <strong>final penicillin concentration</strong> (g/L at
+t=167h) rather than total yield (kg). Total yield includes penicillin
+harvested via broth dumping during the batch, which depends on
+operational decisions rather than fermentation kinetics (the two are
+only weakly correlated, r=0.11).</p>
+<div class="section level3">
+<h3 id="method-comparison">Method Comparison<a class="anchor" aria-label="anchor" href="#method-comparison"></a>
+</h3>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Functional predictor: first 100 hours of penicillin trajectory</span></span>
-<span><span class="va">early_idx</span> <span class="op">&lt;-</span> <span class="va">t_grid</span> <span class="op">&lt;=</span> <span class="fl">100</span></span>
+<code class="sourceCode R"><span><span class="va">early_idx</span> <span class="op">&lt;-</span> <span class="va">t_grid</span> <span class="op">&lt;=</span> <span class="fl">80</span></span>
 <span><span class="va">fd_early</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="va">early_idx</span><span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">[</span><span class="va">early_idx</span><span class="op">]</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Scalar response: final yield</span></span>
-<span><span class="va">y_normal</span> <span class="op">&lt;-</span> <span class="va">yields</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># Functional linear regression</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_early</span>, <span class="va">y_normal</span>, ncomp <span class="op">=</span> <span class="va">ncomp_sel</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"R-squared:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R-squared: 0.689</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"GCV:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">gcv</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; GCV: 6.782</span></span></code></pre></div>
+<span><span class="va">y_normal</span> <span class="op">&lt;-</span> <span class="va">final_pen</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span><span class="op">]</span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">comp_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nc</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_early</span>, <span class="va">y_normal</span>, ncomp <span class="op">=</span> <span class="va">nc</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Method <span class="op">=</span> <span class="st">"fregre.lm (PCR)"</span>, ncomp <span class="op">=</span> <span class="va">nc</span>,</span>
+<span>             R2 <span class="op">=</span> <span class="va">fit</span><span class="op">$</span><span class="va">r.squared</span>, GCV <span class="op">=</span> <span class="va">fit</span><span class="op">$</span><span class="va">gcv</span>,</span>
+<span>             RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cv_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.cv.html">fregre.lm.cv</a></span><span class="op">(</span><span class="va">fd_early</span>, <span class="va">y_normal</span>, k.range <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
+<span><span class="va">comp_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">comp_results</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Method <span class="op">=</span> <span class="st">"fregre.lm.cv (10-fold)"</span>, ncomp <span class="op">=</span> <span class="va">cv_fit</span><span class="op">$</span><span class="va">optimal.k</span>,</span>
+<span>  R2 <span class="op">=</span> <span class="va">cv_fit</span><span class="op">$</span><span class="va">model</span><span class="op">$</span><span class="va">r.squared</span>, GCV <span class="op">=</span> <span class="va">cv_fit</span><span class="op">$</span><span class="va">model</span><span class="op">$</span><span class="va">gcv</span>,</span>
+<span>  RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cv_fit</span><span class="op">$</span><span class="va">model</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">nc</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fit_h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.huber.html">fregre.huber</a></span><span class="op">(</span><span class="va">fd_early</span>, <span class="va">y_normal</span>, ncomp <span class="op">=</span> <span class="va">nc</span><span class="op">)</span></span>
+<span>  <span class="va">comp_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">comp_results</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Method <span class="op">=</span> <span class="st">"fregre.huber (robust)"</span>, ncomp <span class="op">=</span> <span class="va">nc</span>,</span>
+<span>    R2 <span class="op">=</span> <span class="va">fit_h</span><span class="op">$</span><span class="va">r.squared</span>, GCV <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>    RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fit_h</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">fit_l1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.l1.html">fregre.l1</a></span><span class="op">(</span><span class="va">fd_early</span>, <span class="va">y_normal</span><span class="op">)</span></span>
+<span><span class="va">comp_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">comp_results</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Method <span class="op">=</span> <span class="st">"fregre.l1 (L1)"</span>, ncomp <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  R2 <span class="op">=</span> <span class="va">fit_l1</span><span class="op">$</span><span class="va">r.squared</span>, GCV <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fit_l1</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_np</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.np.html">fregre.np</a></span><span class="op">(</span><span class="va">fd_early</span>, <span class="va">y_normal</span><span class="op">)</span></span>
+<span><span class="va">resid_np</span> <span class="op">&lt;-</span> <span class="va">y_normal</span> <span class="op">-</span> <span class="va">fit_np</span><span class="op">$</span><span class="va">fitted.values</span></span>
+<span><span class="va">comp_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">comp_results</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Method <span class="op">=</span> <span class="st">"fregre.np (kernel)"</span>, ncomp <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  R2 <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">resid_np</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_normal</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y_normal</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, GCV <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">resid_np</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">comp_display</span> <span class="op">&lt;-</span> <span class="va">comp_results</span></span>
+<span><span class="va">comp_display</span><span class="op">$</span><span class="va">ncomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">comp_display</span><span class="op">$</span><span class="va">ncomp</span><span class="op">)</span>, <span class="st">"--"</span>,</span>
+<span>                              <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">comp_display</span><span class="op">$</span><span class="va">ncomp</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">comp_display</span><span class="op">$</span><span class="va">R2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f"</span>, <span class="va">comp_display</span><span class="op">$</span><span class="va">R2</span><span class="op">)</span></span>
+<span><span class="va">comp_display</span><span class="op">$</span><span class="va">GCV</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">comp_display</span><span class="op">$</span><span class="va">GCV</span><span class="op">)</span>, <span class="st">"--"</span>,</span>
+<span>                            <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f"</span>, <span class="va">comp_display</span><span class="op">$</span><span class="va">GCV</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">comp_display</span><span class="op">$</span><span class="va">RMSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f"</span>, <span class="va">comp_display</span><span class="op">$</span><span class="va">RMSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">comp_display</span>,</span>
+<span>             col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Method"</span>, <span class="st">"ncomp"</span>, <span class="st">"R-squared"</span>, <span class="st">"GCV"</span>, <span class="st">"RMSE"</span><span class="op">)</span>,</span>
+<span>             align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span>,</span>
+<span>             caption <span class="op">=</span> <span class="st">"Yield prediction: method comparison (first 80h -&gt; final penicillin conc.)"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Yield prediction: method comparison (first 80h -&gt; final
+penicillin conc.)</caption>
+<thead><tr class="header">
+<th align="left">Method</th>
+<th align="right">ncomp</th>
+<th align="right">R-squared</th>
+<th align="right">GCV</th>
+<th align="right">RMSE</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">fregre.lm (PCR)</td>
+<td align="right">2</td>
+<td align="right">0.450</td>
+<td align="right">7.176</td>
+<td align="right">2.559</td>
+</tr>
+<tr class="even">
+<td align="left">fregre.lm (PCR)</td>
+<td align="right">3</td>
+<td align="right">0.485</td>
+<td align="right">6.857</td>
+<td align="right">2.475</td>
+</tr>
+<tr class="odd">
+<td align="left">fregre.lm (PCR)</td>
+<td align="right">4</td>
+<td align="right">0.502</td>
+<td align="right">6.848</td>
+<td align="right">2.434</td>
+</tr>
+<tr class="even">
+<td align="left">fregre.lm (PCR)</td>
+<td align="right">5</td>
+<td align="right">0.516</td>
+<td align="right">6.843</td>
+<td align="right">2.401</td>
+</tr>
+<tr class="odd">
+<td align="left">fregre.lm (PCR)</td>
+<td align="right">6</td>
+<td align="right">0.527</td>
+<td align="right">6.854</td>
+<td align="right">2.372</td>
+</tr>
+<tr class="even">
+<td align="left">fregre.lm.cv (10-fold)</td>
+<td align="right">3</td>
+<td align="right">0.485</td>
+<td align="right">6.857</td>
+<td align="right">2.475</td>
+</tr>
+<tr class="odd">
+<td align="left">fregre.huber (robust)</td>
+<td align="right">3</td>
+<td align="right">0.421</td>
+<td align="right">–</td>
+<td align="right">2.625</td>
+</tr>
+<tr class="even">
+<td align="left">fregre.huber (robust)</td>
+<td align="right">5</td>
+<td align="right">0.457</td>
+<td align="right">–</td>
+<td align="right">2.543</td>
+</tr>
+<tr class="odd">
+<td align="left">fregre.l1 (L1)</td>
+<td align="right">–</td>
+<td align="right">0.382</td>
+<td align="right">–</td>
+<td align="right">2.713</td>
+</tr>
+<tr class="even">
+<td align="left">fregre.np (kernel)</td>
+<td align="right">–</td>
+<td align="right">0.257</td>
+<td align="right">–</td>
+<td align="right">2.974</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="best-model-cv-selected-pcr">Best Model: CV-Selected PCR<a class="anchor" aria-label="anchor" href="#best-model-cv-selected-pcr"></a>
+</h3>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="va">cv_fit</span><span class="op">$</span><span class="va">model</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Optimal ncomp:"</span>, <span class="va">cv_fit</span><span class="op">$</span><span class="va">optimal.k</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Optimal ncomp: 3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"R-squared:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; R-squared: 0.485</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"g/L\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; RMSE: 2.48 g/L</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  observed <span class="op">=</span> <span class="va">y_normal</span>,</span>
 <span>  predicted <span class="op">=</span> <span class="va">fit</span><span class="op">$</span><span class="va">fitted.values</span>,</span>
@@ -720,13 +786,15 @@ completes.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey40"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Recipe <span class="op">=</span> <span class="st">"#4A90D9"</span>, Operator <span class="op">=</span> <span class="st">"#E69F00"</span>,</span>
 <span>                                APC <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Yield Prediction: Observed vs Fitted"</span>,</span>
-<span>       subtitle <span class="op">=</span> <span class="st">"Using first 100 hours of penicillin trajectory"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Observed yield (g/L)"</span>, y <span class="op">=</span> <span class="st">"Predicted yield (g/L)"</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Yield Prediction: Observed vs Fitted (CV-optimal model)"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"R-squared = %.3f (ncomp = %d, first 80 hours)"</span>,</span>
+<span>                           <span class="va">fit</span><span class="op">$</span><span class="va">r.squared</span>, <span class="va">cv_fit</span><span class="op">$</span><span class="va">optimal.k</span><span class="op">)</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Observed final pen. conc. (g/L)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Predicted final pen. conc. (g/L)"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Strategy"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="example-biopharma-monitoring_files/figure-html/yield-fit-plot-1.png" class="r-plt" alt="" width="100%"></p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">beta_t</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">df_beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    time <span class="op">=</span> <span class="va">t_grid</span><span class="op">[</span><span class="va">early_idx</span><span class="op">]</span>,</span>
@@ -740,63 +808,307 @@ completes.</p>
 <span>         subtitle <span class="op">=</span> <span class="st">"Weight each time point contributes to yield prediction"</span>,</span>
 <span>         x <span class="op">=</span> <span class="st">"Time (hours)"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html" class="external-link">hat</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>The coefficient function reveals <strong>when</strong> the process
-trajectory is most predictive of final yield. Regions with large
-absolute beta values indicate critical phases where process deviations
-have the greatest impact on the outcome. For penicillin fermentation,
-the transition from lag to exponential growth (around the inflection
-point) is typically the most informative.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pcr_rows</span> <span class="op">&lt;-</span> <span class="va">comp_results</span><span class="op">[</span><span class="va">comp_results</span><span class="op">$</span><span class="va">Method</span> <span class="op">==</span> <span class="st">"fregre.lm (PCR)"</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pcr_rows</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">ncomp</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">R2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">0.8</span>, color <span class="op">=</span> <span class="st">"#4A90D9"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span>, color <span class="op">=</span> <span class="st">"#4A90D9"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.9</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"#D55E00"</span>,</span>
+<span>             linewidth <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">2.5</span>, y <span class="op">=</span> <span class="fl">0.92</span>, label <span class="op">=</span> <span class="st">"R-squared = 0.9"</span>,</span>
+<span>           color <span class="op">=</span> <span class="st">"#D55E00"</span>, size <span class="op">=</span> <span class="fl">3.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/percent_format.html" class="external-link">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"R-squared vs Number of Components (PCR)"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"More components capture yield-relevant variation"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Number of FPC Components"</span>, y <span class="op">=</span> <span class="st">"R-squared"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="example-biopharma-monitoring_files/figure-html/r2-ncomp-plot-1.png" class="r-plt" alt="" width="100%"></p>
+<p><strong>Key insight for practitioners:</strong> The number of
+components optimal for <em>monitoring</em> (capturing bulk variance)
+differs from what is optimal for <em>regression</em> (predicting a
+specific response). Always use cross-validation
+(<code>fregre.lm.cv</code>) rather than a variance threshold when the
+goal is prediction.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="conclusions">8. Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
+<h2 id="identifying-yield-drivers-which-variable-should-the-operator-adjust">8. Identifying Yield Drivers: Which Variable Should the Operator
+Adjust?<a class="anchor" aria-label="anchor" href="#identifying-yield-drivers-which-variable-should-the-operator-adjust"></a>
 </h2>
-<ul>
-<li><p><strong>Control strategy matters.</strong> APC batches show the
-tightest clustering in FPCA score space and the lowest yield
-variability. Operator-controlled batches have the highest scatter,
-confirming that automated control reduces batch-to-batch
-inconsistency.</p></li>
-<li><p><strong>Fault detection works.</strong> Building a Phase I chart
-from normal (recipe) batches and monitoring fault batches achieves high
-recall. CUSUM and MEWMA may catch faults that the Shewhart chart misses
-when the deviation is gradual (temperature drift, slow DO2
-decline).</p></li>
-<li><p><strong>Early yield prediction is feasible.</strong> Functional
-regression using only the first 100 hours (50% of the batch) predicts
-final yield with reasonable accuracy, enabling early intervention for
-underperforming batches.</p></li>
-<li><p><strong>FDA provides interpretable summaries.</strong> FPCA
-eigenfunctions describe meaningful modes of variation (yield level,
-growth timing). The coefficient function from regression shows exactly
-which time windows drive yield prediction.</p></li>
-</ul>
-<p>This workflow – FPCA for characterization, SPM for monitoring, and
-functional regression for prediction – applies to any batch
-manufacturing process where time-series trajectories are recorded.</p>
+<p>An operator needs to know which <strong>controllable</strong>
+variables most influence yield, and <strong>when</strong> during the
+batch to focus control efforts. We screen five process variables:
+temperature, dissolved oxygen, sugar feed rate, aeration rate, and
+pH.</p>
+<div class="section level3">
+<h3 id="variable-screening">Variable Screening<a class="anchor" aria-label="anchor" href="#variable-screening"></a>
+</h3>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y_driver</span> <span class="op">&lt;-</span> <span class="va">final_pen</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Fit fregre.lm for each controllable variable -&gt; final pen. conc.</span></span>
+<span><span class="co"># Use ncomp=5 where possible, fall back to lower if needed</span></span>
+<span><span class="va">vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  Temperature <span class="op">=</span> <span class="va">fd_temp</span>,</span>
+<span>  `Dissolved O2` <span class="op">=</span> <span class="va">fd_do2</span>,</span>
+<span>  `Sugar Feed` <span class="op">=</span> <span class="va">fd_fs</span>,</span>
+<span>  `Aeration Rate` <span class="op">=</span> <span class="va">fd_fg</span>,</span>
+<span>  pH <span class="op">=</span> <span class="va">fd_ph</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">screen_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">vars</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">vname</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fd_v</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">vars</span><span class="op">[[</span><span class="va">vname</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<span>  <span class="co"># Try ncomp 5, fall back to 3, then 1</span></span>
+<span>  <span class="va">fit_v</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">nc</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">fit_v</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_v</span>, <span class="va">y_driver</span>, ncomp <span class="op">=</span> <span class="va">nc</span><span class="op">)</span>,</span>
+<span>                       error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">)</span><span class="op">)</span> <span class="kw">break</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Predictor <span class="op">=</span> <span class="va">vname</span>, ncomp <span class="op">=</span> <span class="va">nc</span>,</span>
+<span>             R2 <span class="op">=</span> <span class="va">fit_v</span><span class="op">$</span><span class="va">r.squared</span>,</span>
+<span>             RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Add penicillin (first 80h) as reference</span></span>
+<span><span class="va">fd_pen_ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="va">early_idx</span><span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">[</span><span class="va">early_idx</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">fit_ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_pen_ref</span>, <span class="va">y_driver</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">screen_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">screen_results</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Predictor <span class="op">=</span> <span class="st">"Penicillin (0-80h)"</span>, ncomp <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  R2 <span class="op">=</span> <span class="va">fit_ref</span><span class="op">$</span><span class="va">r.squared</span>,</span>
+<span>  RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fit_ref</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">screen_results</span> <span class="op">&lt;-</span> <span class="va">screen_results</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">screen_results</span><span class="op">$</span><span class="va">R2</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">screen_display</span> <span class="op">&lt;-</span> <span class="va">screen_results</span></span>
+<span><span class="va">screen_display</span><span class="op">$</span><span class="va">R2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f"</span>, <span class="va">screen_display</span><span class="op">$</span><span class="va">R2</span><span class="op">)</span></span>
+<span><span class="va">screen_display</span><span class="op">$</span><span class="va">RMSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.2f"</span>, <span class="va">screen_display</span><span class="op">$</span><span class="va">RMSE</span><span class="op">)</span></span>
+<span><span class="va">screen_display</span><span class="op">$</span><span class="va">ncomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">screen_display</span><span class="op">$</span><span class="va">ncomp</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">screen_display</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>             col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Predictor"</span>, <span class="st">"ncomp"</span>, <span class="st">"R-squared"</span>, <span class="st">"RMSE (g/L)"</span><span class="op">)</span>,</span>
+<span>             caption <span class="op">=</span> <span class="st">"Variable screening: which process variable best predicts final pen. conc.?"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Variable screening: which process variable best predicts final
+pen. conc.?</caption>
+<thead><tr class="header">
+<th align="left">Predictor</th>
+<th align="left">ncomp</th>
+<th align="left">R-squared</th>
+<th align="left">RMSE (g/L)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Dissolved O2</td>
+<td align="left">5</td>
+<td align="left">0.568</td>
+<td align="left">2.27</td>
+</tr>
+<tr class="even">
+<td align="left">Penicillin (0-80h)</td>
+<td align="left">5</td>
+<td align="left">0.516</td>
+<td align="left">2.40</td>
+</tr>
+<tr class="odd">
+<td align="left">Sugar Feed</td>
+<td align="left">3</td>
+<td align="left">0.176</td>
+<td align="left">3.13</td>
+</tr>
+<tr class="even">
+<td align="left">pH</td>
+<td align="left">5</td>
+<td align="left">0.090</td>
+<td align="left">3.29</td>
+</tr>
+<tr class="odd">
+<td align="left">Temperature</td>
+<td align="left">5</td>
+<td align="left">0.028</td>
+<td align="left">3.40</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="section level2">
-<h2 id="using-real-indpensim-data">Using Real IndPenSim Data<a class="anchor" aria-label="anchor" href="#using-real-indpensim-data"></a>
-</h2>
-<p>To use the actual Kaggle dataset instead of synthetic data, download
-the CSV from <a href="https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing" class="external-link">Kaggle</a>
-and replace the simulation section with:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Read the full dataset (2.5 GB, ~113k rows x 2239 columns)</span></span>
-<span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"100_Batches_IndPenSim_V3.csv"</span><span class="op">)</span></span>
+<div class="section level3">
+<h3 id="combined-model-relative-importance">Combined Model: Relative Importance<a class="anchor" aria-label="anchor" href="#combined-model-relative-importance"></a>
+</h3>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Extract FPC scores (4 components each) for controllable variables</span></span>
+<span><span class="va">pca_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  Temp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">temp_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, center <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  DO2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">do2_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, center <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  Fs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">fs_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, center <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  Fg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">fg_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, center <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  pH <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">ph_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, center <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Split by batch and extract key process variables</span></span>
-<span><span class="va">batch_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">raw</span><span class="op">$</span><span class="va">Batch_ref</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">t_common</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">200</span>, length.out <span class="op">=</span> <span class="fl">201</span><span class="op">)</span></span>
+<span><span class="va">nc</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">X_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">cbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pca_list</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nm</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">n_avail</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">nc</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">pca_list</span><span class="op">[[</span><span class="va">nm</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">scores</span> <span class="op">&lt;-</span> <span class="va">pca_list</span><span class="op">[[</span><span class="va">nm</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_avail</span><span class="op">)</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">scores</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">nm</span>, <span class="st">"_PC"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_avail</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">scores</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">pen_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">100</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_common</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">batch_ids</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">raw</span><span class="op">[</span><span class="va">raw</span><span class="op">$</span><span class="va">Batch_ref</span> <span class="op">==</span> <span class="va">batch_ids</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="op">]</span></span>
-<span>  <span class="va">pen_data</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">approx</a></span><span class="op">(</span><span class="va">batch</span><span class="op">$</span><span class="va">Time..h.</span>, <span class="va">batch</span><span class="op">$</span><span class="va">Penicillin.concentration.P.g.L.</span>,</span>
-<span>                           xout <span class="op">=</span> <span class="va">t_common</span><span class="op">)</span><span class="op">$</span><span class="va">y</span></span>
+<span><span class="va">fit_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y_driver</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">X_combined</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Combined model R-squared:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_combined</span><span class="op">)</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Combined model R-squared: 0.571</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Adjusted R-squared:      "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_combined</span><span class="op">)</span><span class="op">$</span><span class="va">adj.r.squared</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Adjusted R-squared:       0.504</span></span>
+<span></span>
+<span><span class="co"># Standardized importance per variable</span></span>
+<span><span class="va">coefs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_combined</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">sds_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">X_combined</span>, <span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span></span>
+<span><span class="va">std_imp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">coefs</span> <span class="op">*</span> <span class="va">sds_x</span> <span class="op">/</span> <span class="fu"><a href="../reference/sd.html">sd</a></span><span class="op">(</span><span class="va">y_driver</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">var_imp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pca_list</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nm</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"^"</span>, <span class="va">nm</span>, <span class="st">"_"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">std_imp</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">std_imp</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">total_imp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">var_imp</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">imp_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Variable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">var_imp</span><span class="op">)</span>,</span>
+<span>  Importance <span class="op">=</span> <span class="va">var_imp</span>,</span>
+<span>  Share <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f%%"</span>, <span class="fl">100</span> <span class="op">*</span> <span class="va">var_imp</span> <span class="op">/</span> <span class="va">total_imp</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">imp_df</span> <span class="op">&lt;-</span> <span class="va">imp_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">imp_df</span><span class="op">$</span><span class="va">Importance</span><span class="op">)</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">imp_df</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>, digits <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>             caption <span class="op">=</span> <span class="st">"Relative importance in combined model (standardized coefficients)"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Relative importance in combined model (standardized
+coefficients)</caption>
+<thead><tr class="header">
+<th align="left">Variable</th>
+<th align="right">Importance</th>
+<th align="left">Share</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">DO2</td>
+<td align="right">0.908</td>
+<td align="left">NA%</td>
+</tr>
+<tr class="even">
+<td align="left">Fs</td>
+<td align="right">0.441</td>
+<td align="left">NA%</td>
+</tr>
+<tr class="odd">
+<td align="left">pH</td>
+<td align="right">0.122</td>
+<td align="left">NA%</td>
+</tr>
+<tr class="even">
+<td align="left">Temp</td>
+<td align="right">0.092</td>
+<td align="left">NA%</td>
+</tr>
+<tr class="odd">
+<td align="left">Fg</td>
+<td align="right">NA</td>
+<td align="left">NA%</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">imp_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">Variable</span>, <span class="va">.data</span><span class="op">$</span><span class="va">Importance</span><span class="op">)</span>,</span>
+<span>                    y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">Importance</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"#4A90D9"</span>, width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Variable Importance for Yield Prediction"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Summed standardized coefficients across FPC components"</span>,</span>
+<span>       x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Importance"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_col()`).</span></span></code></pre></div>
+<p><img src="example-biopharma-monitoring_files/figure-html/importance-bar-1.png" class="r-plt" alt="" width="100%"></p>
+</div>
+<div class="section level3">
+<h3 id="coefficient-functions">Coefficient Functions<a class="anchor" aria-label="anchor" href="#coefficient-functions"></a>
+</h3>
+<p>The beta function from each single-predictor model shows
+<strong>which time windows</strong> are most predictive.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">beta_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">vname</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">vars</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fd_v</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">vars</span><span class="op">[[</span><span class="va">vname</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span>, <span class="op">]</span>, argvals <span class="op">=</span> <span class="va">t_grid</span><span class="op">)</span></span>
+<span>  <span class="va">fit_v</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">nc_try</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">fit_v</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd_v</span>, <span class="va">y_driver</span>, ncomp <span class="op">=</span> <span class="va">nc_try</span><span class="op">)</span>,</span>
+<span>                       error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">)</span><span class="op">)</span> <span class="kw">break</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">$</span><span class="va">beta_t</span><span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">$</span><span class="va">beta_t</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">t_grid</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">beta_list</span><span class="op">[[</span><span class="va">vname</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>      time <span class="op">=</span> <span class="va">t_grid</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">fit_v</span><span class="op">$</span><span class="va">beta_t</span><span class="op">)</span>, variable <span class="op">=</span> <span class="va">vname</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">fd_pen</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fdata.html">fdata</a></span><span class="op">(</span><span class="va">pen_data</span>, argvals <span class="op">=</span> <span class="va">t_common</span><span class="op">)</span></span>
-<span><span class="co"># Then proceed with FPCA, monitoring, and regression as above</span></span></code></pre></div>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">beta_list</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">df_betas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">beta_list</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_betas</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">time</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">beta</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, color <span class="op">=</span> <span class="st">"grey50"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.data</span><span class="op">$</span><span class="va">variable</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="st">"Coefficient Functions "</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html" class="external-link">hat</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="op">*</span></span>
+<span>                             <span class="st">" for Yield Prediction"</span><span class="op">)</span>,</span>
+<span>         subtitle <span class="op">=</span> <span class="st">"Regions with large |beta| = critical control windows"</span>,</span>
+<span>         x <span class="op">=</span> <span class="st">"Time (hours)"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html" class="external-link">hat</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>The beta functions reveal <strong>when</strong> each process variable
+has the strongest association with total yield. Time windows where
+|beta(t)| is large are where operators should focus control efforts for
+maximum yield impact.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="conclusions">9. Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
+</h2>
+<ul>
+<li><p><strong>Control strategy differences are clear in real
+data.</strong> APC batches (Raman-guided) achieve the highest and most
+consistent penicillin concentrations, while recipe and
+operator-controlled batches show wider variability. The FPCA score plot
+visually separates the strategies.</p></li>
+<li><p><strong>Fault detection on real data is partial but
+meaningful.</strong> Not all 10 fault batches are detected via
+penicillin trajectory monitoring alone – some fault types (e.g., sensor
+errors) may not manifest in the penicillin curve. Multivariate
+monitoring (combining temperature, DO2, and penicillin) would improve
+detection coverage.</p></li>
+<li><p><strong>Early yield prediction is moderately successful.</strong>
+Using the first 80 hours of the penicillin trajectory to predict final
+concentration at harvest achieves R-squared ~0.5 – useful as an early
+warning but not a precise forecast. Note: total yield (kg, including
+harvested broth) is weakly correlated with final concentration (r=0.11)
+and harder to predict from trajectory shape alone.</p></li>
+<li><p><strong>Dissolved oxygen is the strongest controllable yield
+driver</strong> among the five variables screened. The coefficient
+functions and importance ranking identify which variables matter most
+and when during the batch.</p></li>
+<li><p><strong>FDA provides interpretable summaries.</strong> FPCA
+captures the dominant modes of batch variation; coefficient functions
+show exactly when and where each variable drives yield
+prediction.</p></li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="data-source">Data Source<a class="anchor" aria-label="anchor" href="#data-source"></a>
+</h2>
+<p>The IndPenSim dataset (Goldrick et al., 2015) was downloaded from <a href="https://data.mendeley.com/datasets/pdnjz7zz5x/2" class="external-link">Mendeley Data</a>
+(DOI: 10.17632/pdnjz7zz5x.2, CC BY 4.0). The full dataset contains
+113,935 time points across 100 batches with 39 process variables and
+2,200 Raman spectral channels. This article uses 14 key process
+variables extracted to <code>data-raw/indpensim_process.rds</code> (2.1
+MB).</p>
 </div>
 <div class="section level2">
 <h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
