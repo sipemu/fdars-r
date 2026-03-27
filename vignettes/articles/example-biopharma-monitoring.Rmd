@@ -62,7 +62,12 @@ have variable lengths (167-290 hours), so we interpolate to a common
 
 ```{r load-data}
 # Load preprocessed data (see data-raw/ for extraction from Mendeley ZIP)
-data_dir <- file.path(here::here(), "data-raw")
+# pkgdown builds articles from the package root directory
+data_dir <- "data-raw"
+if (!dir.exists(data_dir)) {
+  # Fallback: walk up from vignettes/articles/
+  data_dir <- file.path("..", "..", "data-raw")
+}
 raw   <- readRDS(file.path(data_dir, "indpensim_process.rds"))
 stats <- readRDS(file.path(data_dir, "indpensim_stats.rds"))
 
