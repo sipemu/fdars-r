@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120">
+  <rect width="200" height="120" rx="6" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+  <!-- Logistic curves (batch trajectories) -->
+  <path d="M20,95 C40,93 60,80 80,50 C100,25 120,18 160,16" fill="none" stroke="#4A90D9" stroke-width="1.5" opacity="0.5"/>
+  <path d="M20,98 C45,95 65,78 85,48 C105,22 125,15 160,13" fill="none" stroke="#4A90D9" stroke-width="1.5" opacity="0.3"/>
+  <path d="M20,92 C38,90 58,75 78,45 C98,20 118,14 160,12" fill="none" stroke="#009E73" stroke-width="1.5" opacity="0.5"/>
+  <path d="M20,96 C42,94 62,82 82,55 C102,30 122,22 160,20" fill="none" stroke="#E69F00" stroke-width="1.5" opacity="0.5"/>
+  <!-- Fault batch (stalled) -->
+  <path d="M20,97 C40,95 70,80 90,55 L160,55" fill="none" stroke="#D55E00" stroke-width="2" opacity="0.8" stroke-dasharray="4,3"/>
+  <!-- UCL line -->
+  <line x1="20" y1="30" x2="160" y2="30" stroke="#D55E00" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <!-- Axes -->
+  <line x1="18" y1="100" x2="165" y2="100" stroke="#666" stroke-width="0.8"/>
+  <line x1="18" y1="8" x2="18" y2="100" stroke="#666" stroke-width="0.8"/>
+  <!-- Labels -->
+  <text x="100" y="112" text-anchor="middle" font-size="8" fill="#666" font-family="sans-serif">Time (h)</text>
+  <text x="180" y="18" font-size="7" fill="#D55E00" font-family="sans-serif">Fault</text>
+  <text x="180" y="58" font-size="7" fill="#009E73" font-family="sans-serif">APC</text>
+</svg>

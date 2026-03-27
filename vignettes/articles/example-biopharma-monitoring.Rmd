@@ -1,0 +1,633 @@
+---
+title: "Biopharmaceutical Batch Monitoring: Penicillin Fermentation"
+output: rmarkdown::html_vignette
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  out.width = "100%"
+)
+```
+
+```{r setup}
+library(fdars)
+library(ggplot2)
+library(patchwork)
+theme_set(theme_minimal())
+set.seed(2024)
+```
+
+## Overview
+
+A biopharmaceutical manufacturer monitors 100,000 L penicillin fed-batch
+fermentations. Each batch produces time-series trajectories for temperature,
+dissolved oxygen, and penicillin concentration. Batches are run under three
+control strategies (recipe-driven, operator-controlled, advanced process
+control), and some batches experience process faults. The goals are:
+
+1. Characterize batch-to-batch variability via FPCA
+2. Build a monitoring chart from normal batches and detect faults
+3. Compare control strategy tightness
+4. Predict final yield from early-stage process trajectories
+
+This article uses synthetic data that mimics the structure of the
+[IndPenSim](https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing)
+dataset (Goldrick et al., 2015). The simulation reproduces the key features:
+logistic penicillin production curves, controlled fermentation temperature,
+dissolved oxygen consumption during growth, and realistic batch-to-batch
+variability under different control strategies.
+
+| Step | What It Does | Outcome |
+|------|-------------|---------|
+| 1. Simulate batches | Generate 100 batch trajectories under 4 control regimes | Penicillin, temperature, DO2 as `fdata` |
+| 2. Exploratory analysis | Spaghetti plots and group means by control strategy | Visual comparison of regimes |
+| 3. FPCA | Extract dominant modes of batch variation | Eigenfunction interpretation |
+| 4. Process monitoring | Phase I from recipe batches, Phase II fault detection | T-squared chart + detection rates |
+| 5. Precision & F1 | Evaluate monitoring quality | Precision-recall trade-off |
+| 6. Yield prediction | Functional regression: early trajectory to final yield | Early warning model |
+
+**Dataset reference:** Goldrick S. et al. (2015), *The development of an
+industrial-scale fed-batch fermentation simulation*, Journal of Biotechnology,
+193:70-82. The full 100-batch dataset (2.5 GB, 39 process variables + 2200
+Raman channels) is available on
+[Kaggle](https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing).
+
+## 1. Simulating Batch Fermentation Data
+
+We simulate 100 batches on a common 200-hour time grid. The penicillin
+production curve follows logistic kinetics; temperature is controlled near
+a setpoint with group-specific tightness; dissolved oxygen dips during the
+exponential growth phase and recovers as growth slows.
+
+```{r batch-parameters}
+# Simulation parameters
+n_batches <- 100
+m <- 201                                  # time points (every 1 hour)
+t_grid <- seq(0, 200, length.out = m)
+
+# Control strategy groups
+groups <- factor(c(
+  rep("Recipe",   30),                    # batches 1-30
+  rep("Operator", 30),                    # batches 31-60
+  rep("APC",      30),                    # batches 61-90 (Advanced Process Control)
+  rep("Fault",    10)                     # batches 91-100
+), levels = c("Recipe", "Operator", "APC", "Fault"))
+
+# Smooth basis for correlated noise
+M_basis <- 6
+phi <- eFun(t_grid, M = M_basis, type = "Fourier")
+```
+
+```{r generate-batches}
+# Group-specific parameters:
+#   Pmax: max penicillin concentration (g/L)
+#   tmid: inflection point of logistic growth (hours)
+#   noise: trajectory noise level
+group_params <- list(
+  Recipe   = list(Pmax_mu = 50, Pmax_sd = 3, tmid_mu = 80, tmid_sd = 3,
+                  T_sd = 0.3, DO2_sd = 0.3, pen_noise = 1.2),
+  Operator = list(Pmax_mu = 47, Pmax_sd = 5, tmid_mu = 85, tmid_sd = 5,
+                  T_sd = 0.8, DO2_sd = 0.6, pen_noise = 2.0),
+  APC      = list(Pmax_mu = 52, Pmax_sd = 2, tmid_mu = 78, tmid_sd = 2,
+                  T_sd = 0.15, DO2_sd = 0.2, pen_noise = 0.6),
+  Fault    = list(Pmax_mu = 45, Pmax_sd = 6, tmid_mu = 88, tmid_sd = 6,
+                  T_sd = 0.5, DO2_sd = 0.5, pen_noise = 2.5)
+)
+
+pen_data  <- matrix(0, n_batches, m)
+temp_data <- matrix(0, n_batches, m)
+do2_data  <- matrix(0, n_batches, m)
+yields    <- numeric(n_batches)
+
+for (i in seq_len(n_batches)) {
+  gp <- group_params[[as.character(groups[i])]]
+
+  # Per-batch kinetic parameters
+  Pmax_i <- rnorm(1, gp$Pmax_mu, gp$Pmax_sd)
+  tmid_i <- rnorm(1, gp$tmid_mu, gp$tmid_sd)
+  k_i    <- rnorm(1, 0.06, 0.005)
+
+  # Penicillin: logistic growth + smooth noise
+  pen_mean <- Pmax_i / (1 + exp(-k_i * (t_grid - tmid_i)))
+  pen_noise <- phi %*% (rnorm(M_basis) * gp$pen_noise *
+                         exp(-(seq_len(M_basis)) / 2))
+  pen_data[i, ] <- pmax(0, pen_mean + as.numeric(pen_noise))
+
+  # Temperature: controlled at 298 K + noise
+  temp_noise <- phi %*% (rnorm(M_basis) * gp$T_sd *
+                          exp(-(seq_len(M_basis)) / 2))
+  temp_data[i, ] <- 298 + as.numeric(temp_noise)
+
+  # Dissolved oxygen: dip during growth, recover
+  do2_mean <- 8 - 4.5 * exp(-((t_grid - tmid_i + 10)^2) / (2 * 25^2))
+  do2_noise <- phi %*% (rnorm(M_basis) * gp$DO2_sd *
+                         exp(-(seq_len(M_basis)) / 2))
+  do2_data[i, ] <- pmax(0, do2_mean + as.numeric(do2_noise))
+
+  yields[i] <- pen_data[i, m]
+}
+
+# --- Inject specific faults into batches 91-100 ---
+
+# Batches 91-93: temperature drift (+4 K over last 80 hours)
+for (i in 91:93) {
+  drift <- pmax(0, (t_grid - 120) / 80) * 4
+  temp_data[i, ] <- temp_data[i, ] + drift
+}
+
+# Batches 94-96: dissolved oxygen crash (sudden drop at ~100 h)
+for (i in 94:96) {
+  t_fault <- sample(90:110, 1)
+  drop <- -3 * pnorm(t_grid, mean = t_fault, sd = 5)
+  do2_data[i, ] <- pmax(0, do2_data[i, ] + drop)
+}
+
+# Batches 97-99: substrate feed fault (penicillin production stalls at ~120 h)
+for (i in 97:99) {
+  t_stall <- sample(110:130, 1)
+  pen_data[i, t_grid > t_stall] <- pen_data[i, which.min(abs(t_grid - t_stall))]
+  yields[i] <- pen_data[i, m]
+}
+
+# Batch 100: combined fault (temperature drift + DO2 crash)
+temp_data[100, ] <- temp_data[100, ] + pmax(0, (t_grid - 100) / 100) * 5
+do2_data[100, ]  <- pmax(0, do2_data[100, ] -
+                          3 * pnorm(t_grid, mean = 105, sd = 5))
+```
+
+```{r create-fdata}
+# Convert to fdata objects
+fd_pen  <- fdata(pen_data,  argvals = t_grid)
+fd_temp <- fdata(temp_data, argvals = t_grid)
+fd_do2  <- fdata(do2_data,  argvals = t_grid)
+
+cat("Batches:", n_batches, "\n")
+cat("Time points per batch:", m, "(0-200 hours)\n")
+cat("Control strategies:", paste(levels(groups), collapse = ", "), "\n")
+cat("Fault batches: 91-100\n")
+```
+
+## 2. Batch Trajectory Exploration
+
+Each batch produces a penicillin production curve over 200 hours. We plot
+all trajectories colored by control strategy.
+
+```{r trajectory-plot, fig.height = 7}
+# Build long data frame for plotting
+build_df <- function(fd, varname) {
+  n <- nrow(fd$data)
+  data.frame(
+    time = rep(t_grid, each = n),
+    value = as.vector(t(fd$data)),
+    batch = rep(seq_len(n), times = m),
+    group = rep(groups, times = m),
+    variable = varname
+  )
+}
+
+df_all <- rbind(
+  build_df(fd_pen, "Penicillin (g/L)"),
+  build_df(fd_temp, "Temperature (K)"),
+  build_df(fd_do2, "Dissolved O2 (mg/L)")
+)
+df_all$variable <- factor(df_all$variable,
+                           levels = c("Penicillin (g/L)", "Temperature (K)",
+                                      "Dissolved O2 (mg/L)"))
+
+ggplot(df_all, aes(x = .data$time, y = .data$value,
+                    group = .data$batch, color = .data$group)) +
+  geom_line(alpha = 0.25, linewidth = 0.3) +
+  facet_wrap(~ .data$variable, ncol = 1, scales = "free_y") +
+  scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
+                                APC = "#009E73", Fault = "#D55E00")) +
+  labs(title = "100 Batch Trajectories by Control Strategy",
+       x = "Time (hours)", y = NULL, color = "Strategy") +
+  theme(legend.position = "bottom",
+        strip.text = element_text(face = "bold"))
+```
+
+Key observations:
+
+- **Penicillin** follows a logistic growth curve; APC batches (green) are
+  tightest, operator batches (yellow) show the most scatter.
+- **Temperature** is held near 298 K; fault batches (red) show clear drift.
+- **Dissolved oxygen** dips during the growth phase; fault batches show
+  abnormal profiles (early crash, sustained depression).
+
+```{r group-means, fig.height = 4}
+# Mean penicillin curves per group
+group_means <- do.call(rbind, lapply(levels(groups), function(g) {
+  idx <- which(groups == g)
+  data.frame(
+    time = t_grid,
+    mean_pen = colMeans(pen_data[idx, , drop = FALSE]),
+    group = g
+  )
+}))
+
+ggplot(group_means, aes(x = .data$time, y = .data$mean_pen,
+                         color = .data$group)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
+                                APC = "#009E73", Fault = "#D55E00")) +
+  labs(title = "Mean Penicillin Production by Control Strategy",
+       x = "Time (hours)", y = "Penicillin (g/L)", color = "Strategy") +
+  theme(legend.position = "bottom")
+```
+
+APC batches reach the highest mean yield with the fastest onset, reflecting
+tighter glucose feed control. Fault batches plateau earlier due to injected
+process deviations.
+
+## 3. FPCA: Modes of Batch Variation
+
+We apply FPCA to the 90 non-fault penicillin trajectories (batches 1-90) to
+extract the dominant modes of variation.
+
+```{r fpca-chart}
+# FPCA via spm.phase1 on non-fault batches
+fd_normal <- fdata(pen_data[1:90, ], argvals = t_grid)
+chart_all <- spm.phase1(fd_normal, ncomp = 8, alpha = 0.01, seed = 42)
+
+# Cumulative variance
+eig <- chart_all$eigenvalues
+cum_var <- cumsum(eig) / sum(eig)
+
+ncomp_sel <- spm.ncomp.select(eig, method = "variance90", threshold = 0.9)
+cat("Selected components (90% variance):", ncomp_sel, "\n")
+```
+
+```{r scree, fig.height = 4}
+df_scree <- data.frame(
+  pc = seq_along(eig),
+  eigenvalue = eig,
+  cum_var = cum_var
+)
+
+p1 <- ggplot(df_scree, aes(x = .data$pc, y = .data$eigenvalue)) +
+  geom_col(fill = "#4A90D9", width = 0.6) +
+  geom_vline(xintercept = ncomp_sel + 0.5, linetype = "dashed",
+             color = "#D55E00") +
+  labs(title = "Scree Plot", x = "Component", y = "Eigenvalue")
+
+p2 <- ggplot(df_scree, aes(x = .data$pc, y = .data$cum_var)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2) +
+  geom_hline(yintercept = 0.9, linetype = "dashed", color = "#D55E00") +
+  geom_vline(xintercept = ncomp_sel + 0.5, linetype = "dashed",
+             color = "#D55E00", alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Cumulative Variance", x = "Component",
+       y = "Variance Explained")
+
+p1 + p2
+```
+
+The first few components capture almost all batch-to-batch variation. The
+dominant mode typically represents variation in maximum yield (vertical shift
+of the logistic plateau), while the second mode captures timing differences
+(horizontal shift of the growth onset).
+
+```{r fpca-scores, fig.height = 5}
+# Standard PCA on centered batch trajectories
+pca_res <- prcomp(pen_data[1:90, ], center = TRUE, scale. = FALSE)
+
+df_scores <- data.frame(
+  PC1 = pca_res$x[, 1],
+  PC2 = pca_res$x[, 2],
+  group = groups[1:90]
+)
+
+ggplot(df_scores, aes(x = .data$PC1, y = .data$PC2, color = .data$group)) +
+  geom_point(size = 2.5, alpha = 0.7) +
+  stat_ellipse(level = 0.9, linetype = "dashed", linewidth = 0.6) +
+  scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
+                                APC = "#009E73", Fault = "#D55E00")) +
+  labs(title = "FPC Score Plot: Batch Variability by Control Strategy",
+       subtitle = "90% confidence ellipses",
+       x = "FPC 1 (yield level)", y = "FPC 2 (growth timing)",
+       color = "Strategy") +
+  theme(legend.position = "bottom")
+```
+
+The score plot reveals clear separation between control strategies:
+
+- **APC** batches (green) cluster tightly near the center -- consistent
+  process performance with low variability.
+- **Operator** batches (yellow) show the widest scatter -- human
+  intervention introduces batch-to-batch inconsistency.
+- **Recipe** batches (blue) fall between the two -- predictable but
+  less optimized than APC.
+
+## 4. Process Monitoring: Phase I Calibration
+
+We build a T-squared control chart from the recipe-driven batches (1-30),
+which represent the baseline "in-control" process.
+
+```{r phase1}
+fd_recipe <- fdata(pen_data[1:30, ], argvals = t_grid)
+chart <- spm.phase1(fd_recipe, ncomp = ncomp_sel, alpha = 0.01, seed = 42)
+print(chart)
+```
+
+```{r phase1-plot}
+plot(chart)
+```
+
+## 5. Fault Detection: Monitoring Batches 91-100
+
+We now monitor the 10 fault batches against the recipe-derived control
+limits using Shewhart, CUSUM, and MEWMA charts.
+
+```{r monitor-faults}
+fd_fault <- fdata(pen_data[91:100, ], argvals = t_grid)
+n_fault <- 10
+
+# Shewhart
+mon_fault <- spm.monitor(chart, fd_fault)
+n_det_shew <- sum(mon_fault$t2.alarm)
+
+# CUSUM
+cusum_fault <- spm.cusum(chart, fd_fault, k = 0.5, h = 5.0)
+n_det_cusum <- sum(cusum_fault$alarm)
+
+# MEWMA
+mewma_fault <- spm.mewma(chart, fd_fault, lambda = 0.2)
+n_det_mewma <- sum(mewma_fault$alarm)
+
+cat("Fault detection (out of", n_fault, "fault batches):\n")
+cat("  Shewhart:", n_det_shew, sprintf("(%.0f%%)\n", 100 * n_det_shew / n_fault))
+cat("  CUSUM:   ", n_det_cusum, sprintf("(%.0f%%)\n", 100 * n_det_cusum / n_fault))
+cat("  MEWMA:   ", n_det_mewma, sprintf("(%.0f%%)\n", 100 * n_det_mewma / n_fault))
+```
+
+```{r fault-panel, fig.height = 5}
+df_fault <- data.frame(
+  batch = rep(91:100, 3),
+  value = c(mon_fault$t2, cusum_fault$cusum.statistic,
+            mewma_fault$mewma.statistic),
+  ucl = rep(c(chart$t2.ucl, cusum_fault$ucl, mewma_fault$ucl), each = n_fault),
+  alarm = c(mon_fault$t2.alarm, cusum_fault$alarm, mewma_fault$alarm),
+  method = factor(rep(c("Shewhart T2", "CUSUM", "MEWMA"), each = n_fault),
+                  levels = c("Shewhart T2", "CUSUM", "MEWMA"))
+)
+
+ggplot(df_fault, aes(x = .data$batch, y = .data$value)) +
+  geom_col(aes(fill = .data$alarm), width = 0.7) +
+  geom_hline(aes(yintercept = .data$ucl), linetype = "dashed",
+             color = "#D55E00", linewidth = 0.6) +
+  scale_fill_manual(values = c("FALSE" = "#4A90D9", "TRUE" = "#D55E00"),
+                    labels = c("In-control", "Alarm")) +
+  facet_wrap(~ .data$method, scales = "free_y", ncol = 1) +
+  labs(title = "Monitoring Fault Batches (91-100)",
+       x = "Batch", y = "Statistic", fill = "") +
+  scale_x_continuous(breaks = 91:100) +
+  theme(strip.text = element_text(face = "bold"),
+        legend.position = "bottom")
+```
+
+### False Positive Check
+
+We also monitor 30 fresh operator batches (31-60) as a non-fault comparison.
+While they differ from the recipe baseline, they should produce moderate
+alarm rates -- not the high detection seen for true faults.
+
+```{r fpr-check}
+fd_operator <- fdata(pen_data[31:60, ], argvals = t_grid)
+mon_op <- spm.monitor(chart, fd_operator)
+cusum_op <- spm.cusum(chart, fd_operator, k = 0.5, h = 5.0)
+mewma_op <- spm.mewma(chart, fd_operator, lambda = 0.2)
+
+fpr_shew  <- mean(mon_op$t2.alarm)
+fpr_cusum <- mean(cusum_op$alarm)
+fpr_mewma <- mean(mewma_op$alarm)
+```
+
+### Precision, Recall, and F1
+
+We compute precision, recall, and F1 treating fault batches as positives
+and operator batches as the non-fault reference.
+
+```{r pr-compute}
+fp_counts <- c(
+  Shewhart = sum(mon_op$t2.alarm),
+  CUSUM = sum(cusum_op$alarm),
+  MEWMA = sum(mewma_op$alarm)
+)
+
+pr_df <- do.call(rbind, lapply(c("Shewhart", "CUSUM", "MEWMA"), function(meth) {
+  if (meth == "Shewhart") { tp <- n_det_shew }
+  else if (meth == "CUSUM") { tp <- n_det_cusum }
+  else { tp <- n_det_mewma }
+
+  fp <- fp_counts[meth]
+  fn <- n_fault - tp
+  prec <- if ((tp + fp) > 0) tp / (tp + fp) else 0
+  rec  <- tp / n_fault
+  f1   <- if ((prec + rec) > 0) 2 * prec * rec / (prec + rec) else 0
+
+  data.frame(Method = meth, TP = tp, FP = fp, FN = fn,
+             Precision = prec, Recall = rec, F1 = f1)
+}))
+
+pr_table <- pr_df
+pr_table$Precision <- sprintf("%.1f%%", 100 * pr_df$Precision)
+pr_table$Recall <- sprintf("%.1f%%", 100 * pr_df$Recall)
+pr_table$F1 <- sprintf("%.3f", pr_df$F1)
+
+knitr::kable(pr_table, align = c("l", "r", "r", "r", "r", "r", "r"),
+             caption = "Fault detection: precision, recall, and F1")
+```
+
+```{r pr-plot, fig.height = 4}
+pr_long <- rbind(
+  data.frame(Method = pr_df$Method, Metric = "Precision",
+             Value = pr_df$Precision),
+  data.frame(Method = pr_df$Method, Metric = "Recall",
+             Value = pr_df$Recall),
+  data.frame(Method = pr_df$Method, Metric = "F1",
+             Value = pr_df$F1)
+)
+pr_long$Method <- factor(pr_long$Method,
+                          levels = c("Shewhart", "CUSUM", "MEWMA"))
+pr_long$Metric <- factor(pr_long$Metric,
+                          levels = c("Precision", "Recall", "F1"))
+
+ggplot(pr_long, aes(x = .data$Method, y = .data$Value, fill = .data$Metric)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+  scale_fill_manual(values = c(Precision = "#4A90D9", Recall = "#D55E00",
+                                F1 = "#009E73")) +
+  labs(title = "Precision, Recall, and F1 for Fault Detection",
+       subtitle = "Fault batches vs operator batches as reference",
+       x = NULL, y = "Score", fill = "Metric") +
+  theme(legend.position = "bottom")
+```
+
+## 6. Control Strategy Comparison
+
+How does each control strategy compare on process consistency? We compute the
+pointwise standard deviation of the penicillin trajectories within each
+non-fault group.
+
+```{r strategy-variability, fig.height = 5}
+var_df <- do.call(rbind, lapply(c("Recipe", "Operator", "APC"), function(g) {
+  idx <- which(groups == g)
+  sd_curve <- apply(pen_data[idx, ], 2, sd)
+  data.frame(time = t_grid, sd = sd_curve, group = g)
+}))
+
+ggplot(var_df, aes(x = .data$time, y = .data$sd, color = .data$group)) +
+  geom_line(linewidth = 0.8) +
+  scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
+                                APC = "#009E73")) +
+  labs(title = "Batch-to-Batch Variability: Pointwise SD of Penicillin",
+       x = "Time (hours)", y = "SD (g/L)", color = "Strategy") +
+  theme(legend.position = "bottom")
+```
+
+```{r strategy-table}
+strat_summary <- do.call(rbind, lapply(c("Recipe", "Operator", "APC"), function(g) {
+  idx <- which(groups == g)
+  data.frame(
+    Strategy = g,
+    N = length(idx),
+    Mean_Yield = round(mean(yields[idx]), 1),
+    SD_Yield = round(sd(yields[idx]), 2),
+    CV_Yield = sprintf("%.1f%%", 100 * sd(yields[idx]) / mean(yields[idx]))
+  )
+}))
+
+knitr::kable(strat_summary,
+             caption = "Yield statistics by control strategy")
+```
+
+APC achieves the highest mean yield with the lowest coefficient of variation
+(CV). Operator control shows the widest spread -- human decision-making adds
+variability that automated control eliminates.
+
+## 7. Yield Prediction from Early Process Data
+
+Can we predict final penicillin yield from the first 100 hours of a batch?
+Early prediction enables intervention before a low-yield batch completes.
+
+```{r yield-regression}
+# Functional predictor: first 100 hours of penicillin trajectory
+early_idx <- t_grid <= 100
+fd_early <- fdata(pen_data[1:90, early_idx], argvals = t_grid[early_idx])
+
+# Scalar response: final yield
+y_normal <- yields[1:90]
+
+# Functional linear regression
+fit <- fregre.lm(fd_early, y_normal, ncomp = ncomp_sel)
+
+cat("R-squared:", round(fit$r.squared, 3), "\n")
+cat("GCV:", round(fit$gcv, 3), "\n")
+```
+
+```{r yield-fit-plot, fig.height = 4}
+df_fit <- data.frame(
+  observed = y_normal,
+  predicted = fit$fitted.values,
+  group = groups[1:90]
+)
+
+ggplot(df_fit, aes(x = .data$observed, y = .data$predicted,
+                    color = .data$group)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
+  scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
+                                APC = "#009E73")) +
+  labs(title = "Yield Prediction: Observed vs Fitted",
+       subtitle = "Using first 100 hours of penicillin trajectory",
+       x = "Observed yield (g/L)", y = "Predicted yield (g/L)",
+       color = "Strategy") +
+  theme(legend.position = "bottom")
+```
+
+```{r beta-plot, fig.height = 4}
+if (!is.null(fit$beta_t)) {
+  df_beta <- data.frame(
+    time = t_grid[early_idx],
+    beta = as.numeric(fit$beta_t)
+  )
+
+  ggplot(df_beta, aes(x = .data$time, y = .data$beta)) +
+    geom_line(color = "#4A90D9", linewidth = 0.8) +
+    geom_hline(yintercept = 0, linetype = "dotted", color = "grey50") +
+    labs(title = expression("Coefficient Function " * hat(beta)(t)),
+         subtitle = "Weight each time point contributes to yield prediction",
+         x = "Time (hours)", y = expression(hat(beta)(t)))
+}
+```
+
+The coefficient function reveals **when** the process trajectory is most
+predictive of final yield. Regions with large absolute beta values indicate
+critical phases where process deviations have the greatest impact on the
+outcome. For penicillin fermentation, the transition from lag to exponential
+growth (around the inflection point) is typically the most informative.
+
+## 8. Conclusions
+
+- **Control strategy matters.** APC batches show the tightest clustering in
+  FPCA score space and the lowest yield variability. Operator-controlled
+  batches have the highest scatter, confirming that automated control
+  reduces batch-to-batch inconsistency.
+
+- **Fault detection works.** Building a Phase I chart from normal (recipe)
+  batches and monitoring fault batches achieves high recall. CUSUM and MEWMA
+  may catch faults that the Shewhart chart misses when the deviation is
+  gradual (temperature drift, slow DO2 decline).
+
+- **Early yield prediction is feasible.** Functional regression using only
+  the first 100 hours (50% of the batch) predicts final yield with
+  reasonable accuracy, enabling early intervention for underperforming
+  batches.
+
+- **FDA provides interpretable summaries.** FPCA eigenfunctions describe
+  meaningful modes of variation (yield level, growth timing). The
+  coefficient function from regression shows exactly which time windows
+  drive yield prediction.
+
+This workflow -- FPCA for characterization, SPM for monitoring, and
+functional regression for prediction -- applies to any batch manufacturing
+process where time-series trajectories are recorded.
+
+## Using Real IndPenSim Data
+
+To use the actual Kaggle dataset instead of synthetic data, download the
+CSV from [Kaggle](https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing)
+and replace the simulation section with:
+
+```{r load-real-data, eval = FALSE}
+# Read the full dataset (2.5 GB, ~113k rows x 2239 columns)
+raw <- read.csv("100_Batches_IndPenSim_V3.csv")
+
+# Split by batch and extract key process variables
+batch_ids <- sort(unique(raw$Batch_ref))
+t_common <- seq(0, 200, length.out = 201)
+
+pen_data <- matrix(NA, 100, length(t_common))
+for (i in seq_along(batch_ids)) {
+  batch <- raw[raw$Batch_ref == batch_ids[i], ]
+  pen_data[i, ] <- approx(batch$Time..h., batch$Penicillin.concentration.P.g.L.,
+                           xout = t_common)$y
+}
+
+fd_pen <- fdata(pen_data, argvals = t_common)
+# Then proceed with FPCA, monitoring, and regression as above
+```
+
+## See Also
+
+- [Inline Monitoring: Detection Power](example-inline-monitoring.html) --
+  FPR and power analysis on synthetic data
+- [Tecator: Inline Quality Monitoring](example-tecator-monitoring.html) --
+  SPM with real NIR spectra
+- [Statistical Process Monitoring](statistical-process-monitoring.html) --
+  SPM fundamentals

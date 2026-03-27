@@ -43,6 +43,7 @@ articles:
   - articles/example-tecator-monitoring
   - articles/example-explainability-regions
   - articles/example-inline-monitoring
+  - articles/example-biopharma-monitoring
 - title: Learn
   contents:
   - introduction
