@@ -986,7 +986,10 @@ autoplot.fdata <- function(object, color = NULL, alpha = NULL, show.mean = FALSE
                                            group = .data$curve_id,
                                            color = .data$color_var)) +
       ggplot2::geom_line(alpha = alpha) +
-      ggplot2::scale_color_viridis_c()
+      ggplot2::scale_color_gradientn(
+        colours = c("#313695", "#4575B4", "#ABD9E9",
+                    "#FEE090", "#F46D43", "#A50026")
+      )
 
   } else {
     # No coloring (default behavior)
