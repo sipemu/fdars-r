@@ -435,8 +435,8 @@ cat("Peak temp range:", range(peak_info$PeakTemp), "°C\n")
 ```{r peak-lat-plot, fig.height = 6, fig.width = 8}
 ggplot(peak_info, aes(x = Latitude, y = PeakDay, color = Region)) +
   geom_point(size = 2.5, alpha = 0.8) +
-  ggrepel::geom_text_repel(aes(label = Station), size = 2.3, max.overlaps = 20,
-                            segment.alpha = 0.3, show.legend = FALSE) +
+  geom_text(aes(label = Station), size = 2.3, vjust = -0.7,
+            show.legend = FALSE, check_overlap = TRUE) +
   geom_smooth(method = "lm", se = FALSE, color = "grey40",
               linetype = "dashed", linewidth = 0.5) +
   labs(title = "Summer Peak Timing vs Latitude (35 Canadian Stations)",
@@ -447,8 +447,8 @@ ggplot(peak_info, aes(x = Latitude, y = PeakDay, color = Region)) +
 ```{r peak-temp-plot, fig.height = 6, fig.width = 8}
 ggplot(peak_info, aes(x = Latitude, y = PeakTemp, color = Region)) +
   geom_point(size = 2.5, alpha = 0.8) +
-  ggrepel::geom_text_repel(aes(label = Station), size = 2.3, max.overlaps = 20,
-                            segment.alpha = 0.3, show.legend = FALSE) +
+  geom_text(aes(label = Station), size = 2.3, vjust = -0.7,
+            show.legend = FALSE, check_overlap = TRUE) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.15, linewidth = 0.5,
               color = "grey40", linetype = "dashed") +
   labs(title = "Summer Peak Temperature vs Latitude",
