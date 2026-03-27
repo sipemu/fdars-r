@@ -59,3 +59,9 @@ src/rust/vendor/*/.cargo-checksum.json
 
 # Rendered vignette HTML
 vignettes/articles/*.html
+
+# data-raw: track processed RDS, ignore large raw downloads
+!data-raw/*.rds
+data-raw/*.zip
+data-raw/*.csv
+data-raw/Mendeley_data/

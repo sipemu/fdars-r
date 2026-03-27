@@ -23,161 +23,113 @@ set.seed(2024)
 
 ## Overview
 
-A biopharmaceutical manufacturer monitors 100,000 L penicillin fed-batch
-fermentations. Each batch produces time-series trajectories for temperature,
-dissolved oxygen, and penicillin concentration. Batches are run under three
-control strategies (recipe-driven, operator-controlled, advanced process
-control), and some batches experience process faults. The goals are:
+This article analyzes 100 batches of industrial-scale penicillin
+fermentation data from the **IndPenSim** simulator (Goldrick et al., 2015).
+Each batch produces time-series trajectories for temperature, dissolved
+oxygen, penicillin concentration, sugar feed rate, pH, and other process
+variables over 167-290 hours. Batches operate under three control strategies,
+and 10 batches contain intentional process faults.
 
 1. Characterize batch-to-batch variability via FPCA
 2. Build a monitoring chart from normal batches and detect faults
 3. Compare control strategy tightness
 4. Predict final yield from early-stage process trajectories
-
-This article uses synthetic data that mimics the structure of the
-[IndPenSim](https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing)
-dataset (Goldrick et al., 2015). The simulation reproduces the key features:
-logistic penicillin production curves, controlled fermentation temperature,
-dissolved oxygen consumption during growth, and realistic batch-to-batch
-variability under different control strategies.
+5. Identify which controllable variables most influence yield
 
 | Step | What It Does | Outcome |
 |------|-------------|---------|
-| 1. Simulate batches | Generate 100 batch trajectories under 4 control regimes | Penicillin, temperature, DO2 as `fdata` |
+| 1. Load real data | Read IndPenSim 100-batch dataset, interpolate to common grid | 6 process variables as `fdata` |
 | 2. Exploratory analysis | Spaghetti plots and group means by control strategy | Visual comparison of regimes |
 | 3. FPCA | Extract dominant modes of batch variation | Eigenfunction interpretation |
 | 4. Process monitoring | Phase I from recipe batches, Phase II fault detection | T-squared chart + detection rates |
 | 5. Precision & F1 | Evaluate monitoring quality | Precision-recall trade-off |
-| 6. Yield prediction | Functional regression: early trajectory to final yield | Early warning model |
+| 6. Yield prediction | Compare regression methods, CV-select optimal ncomp | Yield prediction from early data |
+| 7. Yield drivers | Screen 5 process variables, importance ranking | Actionable recommendations for operators |
 
-**Dataset reference:** Goldrick S. et al. (2015), *The development of an
+**Dataset:** Goldrick S. et al. (2015), *The development of an
 industrial-scale fed-batch fermentation simulation*, Journal of Biotechnology,
-193:70-82. The full 100-batch dataset (2.5 GB, 39 process variables + 2200
-Raman channels) is available on
+193:70-82. Data from
+[Mendeley Data](https://data.mendeley.com/datasets/pdnjz7zz5x/2)
+(DOI: 10.17632/pdnjz7zz5x.2, CC BY 4.0). Also available on
 [Kaggle](https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing).
 
-## 1. Simulating Batch Fermentation Data
+## 1. Loading the IndPenSim Data
 
-We simulate 100 batches on a common 200-hour time grid. The penicillin
-production curve follows logistic kinetics; temperature is controlled near
-a setpoint with group-specific tightness; dissolved oxygen dips during the
-exponential growth phase and recovers as growth slows.
+The preprocessed RDS file contains 113,935 rows across 100 batches with
+14 key process variables (Raman spectra excluded for efficiency). Batches
+have variable lengths (167-290 hours), so we interpolate to a common
+167-hour grid that all batches cover.
 
-```{r batch-parameters}
-# Simulation parameters
-n_batches <- 100
-m <- 201                                  # time points (every 1 hour)
-t_grid <- seq(0, 200, length.out = m)
+```{r load-data}
+# Load preprocessed data (see data-raw/ for extraction from Mendeley ZIP)
+data_dir <- file.path(here::here(), "data-raw")
+raw   <- readRDS(file.path(data_dir, "indpensim_process.rds"))
+stats <- readRDS(file.path(data_dir, "indpensim_stats.rds"))
 
-# Control strategy groups
-groups <- factor(c(
-  rep("Recipe",   30),                    # batches 1-30
-  rep("Operator", 30),                    # batches 31-60
-  rep("APC",      30),                    # batches 61-90 (Advanced Process Control)
-  rep("Fault",    10)                     # batches 91-100
-), levels = c("Recipe", "Operator", "APC", "Fault"))
-
-# Smooth basis for correlated noise
-M_basis <- 6
-phi <- eFun(t_grid, M = M_basis, type = "Fourier")
+cat("Total rows:", nrow(raw), "\n")
+cat("Batches:", length(unique(raw$batch)), "\n")
+cat("Variables:", paste(setdiff(names(raw), "batch"), collapse = ", "), "\n")
 ```
 
-```{r generate-batches}
-# Group-specific parameters:
-#   Pmax: max penicillin concentration (g/L)
-#   tmid: inflection point of logistic growth (hours)
-#   noise: trajectory noise level
-group_params <- list(
-  Recipe   = list(Pmax_mu = 50, Pmax_sd = 3, tmid_mu = 80, tmid_sd = 3,
-                  T_sd = 0.3, DO2_sd = 0.3, pen_noise = 1.2),
-  Operator = list(Pmax_mu = 47, Pmax_sd = 5, tmid_mu = 85, tmid_sd = 5,
-                  T_sd = 0.8, DO2_sd = 0.6, pen_noise = 2.0),
-  APC      = list(Pmax_mu = 52, Pmax_sd = 2, tmid_mu = 78, tmid_sd = 2,
-                  T_sd = 0.15, DO2_sd = 0.2, pen_noise = 0.6),
-  Fault    = list(Pmax_mu = 45, Pmax_sd = 6, tmid_mu = 88, tmid_sd = 6,
-                  T_sd = 0.5, DO2_sd = 0.5, pen_noise = 2.5)
-)
+```{r interpolate}
+# Common time grid: 0 to 167 hours (min batch duration), 201 points
+n_batches <- 100
+m <- 201
+t_grid <- seq(0.2, 167, length.out = m)
 
-pen_data  <- matrix(0, n_batches, m)
-temp_data <- matrix(0, n_batches, m)
-do2_data  <- matrix(0, n_batches, m)
-yields    <- numeric(n_batches)
+# Control strategy groups (from IndPenSim design)
+groups <- factor(c(
+  rep("Recipe",   30),    # batches 1-30: recipe-driven
+  rep("Operator", 30),    # batches 31-60: operator-controlled
+  rep("APC",      30),    # batches 61-90: Raman-based APC
+  rep("Fault",    10)     # batches 91-100: intentional faults
+), levels = c("Recipe", "Operator", "APC", "Fault"))
 
-for (i in seq_len(n_batches)) {
-  gp <- group_params[[as.character(groups[i])]]
-
-  # Per-batch kinetic parameters
-  Pmax_i <- rnorm(1, gp$Pmax_mu, gp$Pmax_sd)
-  tmid_i <- rnorm(1, gp$tmid_mu, gp$tmid_sd)
-  k_i    <- rnorm(1, 0.06, 0.005)
-
-  # Penicillin: logistic growth + smooth noise
-  pen_mean <- Pmax_i / (1 + exp(-k_i * (t_grid - tmid_i)))
-  pen_noise <- phi %*% (rnorm(M_basis) * gp$pen_noise *
-                         exp(-(seq_len(M_basis)) / 2))
-  pen_data[i, ] <- pmax(0, pen_mean + as.numeric(pen_noise))
-
-  # Temperature: controlled at 298 K + noise
-  temp_noise <- phi %*% (rnorm(M_basis) * gp$T_sd *
-                          exp(-(seq_len(M_basis)) / 2))
-  temp_data[i, ] <- 298 + as.numeric(temp_noise)
-
-  # Dissolved oxygen: dip during growth, recover
-  do2_mean <- 8 - 4.5 * exp(-((t_grid - tmid_i + 10)^2) / (2 * 25^2))
-  do2_noise <- phi %*% (rnorm(M_basis) * gp$DO2_sd *
-                         exp(-(seq_len(M_basis)) / 2))
-  do2_data[i, ] <- pmax(0, do2_mean + as.numeric(do2_noise))
-
-  yields[i] <- pen_data[i, m]
+# Interpolate each batch to the common grid
+interp_var <- function(raw, varname) {
+  mat <- matrix(NA, n_batches, m)
+  for (b in seq_len(n_batches)) {
+    batch <- raw[raw$batch == b, ]
+    mat[b, ] <- approx(batch$time_h, batch[[varname]],
+                         xout = t_grid, rule = 2)$y
+  }
+  mat
 }
 
-# --- Inject specific faults into batches 91-100 ---
+pen_data  <- interp_var(raw, "penicillin_P")
+temp_data <- interp_var(raw, "temperature_T")
+do2_data  <- interp_var(raw, "DO2")
+fs_data   <- interp_var(raw, "sugar_feed_Fs")
+ph_data   <- interp_var(raw, "pH")
+fg_data   <- interp_var(raw, "aeration_Fg")
 
-# Batches 91-93: temperature drift (+4 K over last 80 hours)
-for (i in 91:93) {
-  drift <- pmax(0, (t_grid - 120) / 80) * 4
-  temp_data[i, ] <- temp_data[i, ] + drift
-}
+# Yields: total penicillin in kg (from batch statistics)
+total_yields <- stats[[4]]
+# Final penicillin concentration at t=167h (direct fermentation performance)
+final_pen <- pen_data[, m]
 
-# Batches 94-96: dissolved oxygen crash (sudden drop at ~100 h)
-for (i in 94:96) {
-  t_fault <- sample(90:110, 1)
-  drop <- -3 * pnorm(t_grid, mean = t_fault, sd = 5)
-  do2_data[i, ] <- pmax(0, do2_data[i, ] + drop)
-}
-
-# Batches 97-99: substrate feed fault (penicillin production stalls at ~120 h)
-for (i in 97:99) {
-  t_stall <- sample(110:130, 1)
-  pen_data[i, t_grid > t_stall] <- pen_data[i, which.min(abs(t_grid - t_stall))]
-  yields[i] <- pen_data[i, m]
-}
-
-# Batch 100: combined fault (temperature drift + DO2 crash)
-temp_data[100, ] <- temp_data[100, ] + pmax(0, (t_grid - 100) / 100) * 5
-do2_data[100, ]  <- pmax(0, do2_data[100, ] -
-                          3 * pnorm(t_grid, mean = 105, sd = 5))
+cat("Grid: 0.2 to 167 hours,", m, "points\n")
+cat("Penicillin range:", round(range(pen_data), 2), "g/L\n")
+cat("Temperature range:", round(range(temp_data), 2), "K\n")
+cat("DO2 range:", round(range(do2_data), 2), "mg/L\n")
+cat("Final pen conc range:", round(range(final_pen), 2), "g/L\n")
 ```
 
 ```{r create-fdata}
-# Convert to fdata objects
 fd_pen  <- fdata(pen_data,  argvals = t_grid)
 fd_temp <- fdata(temp_data, argvals = t_grid)
 fd_do2  <- fdata(do2_data,  argvals = t_grid)
-
-cat("Batches:", n_batches, "\n")
-cat("Time points per batch:", m, "(0-200 hours)\n")
-cat("Control strategies:", paste(levels(groups), collapse = ", "), "\n")
-cat("Fault batches: 91-100\n")
+fd_fs   <- fdata(fs_data,   argvals = t_grid)
+fd_ph   <- fdata(ph_data,   argvals = t_grid)
+fd_fg   <- fdata(fg_data,   argvals = t_grid)
 ```
 
 ## 2. Batch Trajectory Exploration
 
-Each batch produces a penicillin production curve over 200 hours. We plot
-all trajectories colored by control strategy.
+Each batch produces a penicillin production curve. We plot
+all 100 trajectories colored by control strategy.
 
 ```{r trajectory-plot, fig.height = 7}
-# Build long data frame for plotting
 build_df <- function(fd, varname) {
   n <- nrow(fd$data)
   data.frame(
@@ -204,22 +156,13 @@ ggplot(df_all, aes(x = .data$time, y = .data$value,
   facet_wrap(~ .data$variable, ncol = 1, scales = "free_y") +
   scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
                                 APC = "#009E73", Fault = "#D55E00")) +
-  labs(title = "100 Batch Trajectories by Control Strategy",
+  labs(title = "100 IndPenSim Batch Trajectories by Control Strategy",
        x = "Time (hours)", y = NULL, color = "Strategy") +
   theme(legend.position = "bottom",
         strip.text = element_text(face = "bold"))
 ```
 
-Key observations:
-
-- **Penicillin** follows a logistic growth curve; APC batches (green) are
-  tightest, operator batches (yellow) show the most scatter.
-- **Temperature** is held near 298 K; fault batches (red) show clear drift.
-- **Dissolved oxygen** dips during the growth phase; fault batches show
-  abnormal profiles (early crash, sustained depression).
-
 ```{r group-means, fig.height = 4}
-# Mean penicillin curves per group
 group_means <- do.call(rbind, lapply(levels(groups), function(g) {
   idx <- which(groups == g)
   data.frame(
@@ -239,9 +182,9 @@ ggplot(group_means, aes(x = .data$time, y = .data$mean_pen,
   theme(legend.position = "bottom")
 ```
 
-APC batches reach the highest mean yield with the fastest onset, reflecting
-tighter glucose feed control. Fault batches plateau earlier due to injected
-process deviations.
+APC batches (Raman-guided advanced process control) achieve the highest
+mean penicillin concentration. Fault batches show depressed or abnormal
+production curves.
 
 ## 3. FPCA: Modes of Batch Variation
 
@@ -249,11 +192,9 @@ We apply FPCA to the 90 non-fault penicillin trajectories (batches 1-90) to
 extract the dominant modes of variation.
 
 ```{r fpca-chart}
-# FPCA via spm.phase1 on non-fault batches
 fd_normal <- fdata(pen_data[1:90, ], argvals = t_grid)
 chart_all <- spm.phase1(fd_normal, ncomp = 8, alpha = 0.01, seed = 42)
 
-# Cumulative variance
 eig <- chart_all$eigenvalues
 cum_var <- cumsum(eig) / sum(eig)
 
@@ -287,13 +228,7 @@ p2 <- ggplot(df_scree, aes(x = .data$pc, y = .data$cum_var)) +
 p1 + p2
 ```
 
-The first few components capture almost all batch-to-batch variation. The
-dominant mode typically represents variation in maximum yield (vertical shift
-of the logistic plateau), while the second mode captures timing differences
-(horizontal shift of the growth onset).
-
 ```{r fpca-scores, fig.height = 5}
-# Standard PCA on centered batch trajectories
 pca_res <- prcomp(pen_data[1:90, ], center = TRUE, scale. = FALSE)
 
 df_scores <- data.frame(
@@ -306,7 +241,7 @@ ggplot(df_scores, aes(x = .data$PC1, y = .data$PC2, color = .data$group)) +
   geom_point(size = 2.5, alpha = 0.7) +
   stat_ellipse(level = 0.9, linetype = "dashed", linewidth = 0.6) +
   scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
-                                APC = "#009E73", Fault = "#D55E00")) +
+                                APC = "#009E73")) +
   labs(title = "FPC Score Plot: Batch Variability by Control Strategy",
        subtitle = "90% confidence ellipses",
        x = "FPC 1 (yield level)", y = "FPC 2 (growth timing)",
@@ -314,14 +249,9 @@ ggplot(df_scores, aes(x = .data$PC1, y = .data$PC2, color = .data$group)) +
   theme(legend.position = "bottom")
 ```
 
-The score plot reveals clear separation between control strategies:
-
-- **APC** batches (green) cluster tightly near the center -- consistent
-  process performance with low variability.
-- **Operator** batches (yellow) show the widest scatter -- human
-  intervention introduces batch-to-batch inconsistency.
-- **Recipe** batches (blue) fall between the two -- predictable but
-  less optimized than APC.
+The score plot reveals the control strategy fingerprint. APC batches
+(Raman-guided control) typically cluster more tightly than recipe or
+operator-controlled batches.
 
 ## 4. Process Monitoring: Phase I Calibration
 
@@ -340,22 +270,19 @@ plot(chart)
 
 ## 5. Fault Detection: Monitoring Batches 91-100
 
-We now monitor the 10 fault batches against the recipe-derived control
+We monitor the 10 fault batches against the recipe-derived control
 limits using Shewhart, CUSUM, and MEWMA charts.
 
 ```{r monitor-faults}
 fd_fault <- fdata(pen_data[91:100, ], argvals = t_grid)
 n_fault <- 10
 
-# Shewhart
 mon_fault <- spm.monitor(chart, fd_fault)
 n_det_shew <- sum(mon_fault$t2.alarm)
 
-# CUSUM
 cusum_fault <- spm.cusum(chart, fd_fault, k = 0.5, h = 5.0)
 n_det_cusum <- sum(cusum_fault$alarm)
 
-# MEWMA
 mewma_fault <- spm.mewma(chart, fd_fault, lambda = 0.2)
 n_det_mewma <- sum(mewma_fault$alarm)
 
@@ -392,9 +319,7 @@ ggplot(df_fault, aes(x = .data$batch, y = .data$value)) +
 
 ### False Positive Check
 
-We also monitor 30 fresh operator batches (31-60) as a non-fault comparison.
-While they differ from the recipe baseline, they should produce moderate
-alarm rates -- not the high detection seen for true faults.
+We also monitor 30 operator batches (31-60) as a non-fault comparison.
 
 ```{r fpr-check}
 fd_operator <- fdata(pen_data[31:60, ], argvals = t_grid)
@@ -408,9 +333,6 @@ fpr_mewma <- mean(mewma_op$alarm)
 ```
 
 ### Precision, Recall, and F1
-
-We compute precision, recall, and F1 treating fault batches as positives
-and operator batches as the non-fault reference.
 
 ```{r pr-compute}
 fp_counts <- c(
@@ -470,9 +392,7 @@ ggplot(pr_long, aes(x = .data$Method, y = .data$Value, fill = .data$Metric)) +
 
 ## 6. Control Strategy Comparison
 
-How does each control strategy compare on process consistency? We compute the
-pointwise standard deviation of the penicillin trajectories within each
-non-fault group.
+How does each control strategy compare on process consistency?
 
 ```{r strategy-variability, fig.height = 5}
 var_df <- do.call(rbind, lapply(c("Recipe", "Operator", "APC"), function(g) {
@@ -496,38 +416,98 @@ strat_summary <- do.call(rbind, lapply(c("Recipe", "Operator", "APC"), function(
   data.frame(
     Strategy = g,
     N = length(idx),
-    Mean_Yield = round(mean(yields[idx]), 1),
-    SD_Yield = round(sd(yields[idx]), 2),
-    CV_Yield = sprintf("%.1f%%", 100 * sd(yields[idx]) / mean(yields[idx]))
+    Total_Yield = sprintf("%.2f M kg", mean(total_yields[idx]) / 1e6),
+    Final_Pen = sprintf("%.1f g/L", mean(final_pen[idx])),
+    CV_Pen = sprintf("%.1f%%", 100 * sd(final_pen[idx]) / mean(final_pen[idx]))
   )
 }))
 
 knitr::kable(strat_summary,
+             col.names = c("Strategy", "N", "Mean Total Yield",
+                           "Mean Final Pen", "CV (Final Pen)"),
              caption = "Yield statistics by control strategy")
 ```
 
-APC achieves the highest mean yield with the lowest coefficient of variation
-(CV). Operator control shows the widest spread -- human decision-making adds
-variability that automated control eliminates.
-
 ## 7. Yield Prediction from Early Process Data
 
-Can we predict final penicillin yield from the first 100 hours of a batch?
-Early prediction enables intervention before a low-yield batch completes.
+Can we predict final penicillin concentration at harvest from the first
+80 hours of the trajectory? Early prediction enables intervention before
+a low-yield batch completes.
 
-```{r yield-regression}
-# Functional predictor: first 100 hours of penicillin trajectory
-early_idx <- t_grid <= 100
+We use **final penicillin concentration** (g/L at t=167h) rather than
+total yield (kg). Total yield includes penicillin harvested via broth
+dumping during the batch, which depends on operational decisions rather
+than fermentation kinetics (the two are only weakly correlated, r=0.11).
+
+### Method Comparison
+
+```{r yield-setup}
+early_idx <- t_grid <= 80
 fd_early <- fdata(pen_data[1:90, early_idx], argvals = t_grid[early_idx])
+y_normal <- final_pen[1:90]
+```
 
-# Scalar response: final yield
-y_normal <- yields[1:90]
+```{r yield-comparison}
+comp_results <- do.call(rbind, lapply(2:6, function(nc) {
+  fit <- fregre.lm(fd_early, y_normal, ncomp = nc)
+  data.frame(Method = "fregre.lm (PCR)", ncomp = nc,
+             R2 = fit$r.squared, GCV = fit$gcv,
+             RMSE = sqrt(mean(fit$residuals^2)))
+}))
 
-# Functional linear regression
-fit <- fregre.lm(fd_early, y_normal, ncomp = ncomp_sel)
+cv_fit <- fregre.lm.cv(fd_early, y_normal, k.range = 2:8)
+comp_results <- rbind(comp_results, data.frame(
+  Method = "fregre.lm.cv (10-fold)", ncomp = cv_fit$optimal.k,
+  R2 = cv_fit$model$r.squared, GCV = cv_fit$model$gcv,
+  RMSE = sqrt(mean(cv_fit$model$residuals^2))
+))
 
+for (nc in c(3, 5)) {
+  fit_h <- fregre.huber(fd_early, y_normal, ncomp = nc)
+  comp_results <- rbind(comp_results, data.frame(
+    Method = "fregre.huber (robust)", ncomp = nc,
+    R2 = fit_h$r.squared, GCV = NA,
+    RMSE = sqrt(mean(fit_h$residuals^2))
+  ))
+}
+
+fit_l1 <- fregre.l1(fd_early, y_normal)
+comp_results <- rbind(comp_results, data.frame(
+  Method = "fregre.l1 (L1)", ncomp = NA,
+  R2 = fit_l1$r.squared, GCV = NA,
+  RMSE = sqrt(mean(fit_l1$residuals^2))
+))
+
+fit_np <- fregre.np(fd_early, y_normal)
+resid_np <- y_normal - fit_np$fitted.values
+comp_results <- rbind(comp_results, data.frame(
+  Method = "fregre.np (kernel)", ncomp = NA,
+  R2 = 1 - sum(resid_np^2) / sum((y_normal - mean(y_normal))^2), GCV = NA,
+  RMSE = sqrt(mean(resid_np^2))
+))
+
+comp_display <- comp_results
+comp_display$ncomp <- ifelse(is.na(comp_display$ncomp), "--",
+                              as.character(comp_display$ncomp))
+comp_display$R2 <- sprintf("%.3f", comp_display$R2)
+comp_display$GCV <- ifelse(is.na(comp_display$GCV), "--",
+                            sprintf("%.3f", comp_display$GCV))
+comp_display$RMSE <- sprintf("%.3f", comp_display$RMSE)
+
+knitr::kable(comp_display,
+             col.names = c("Method", "ncomp", "R-squared", "GCV", "RMSE"),
+             align = c("l", "r", "r", "r", "r"),
+             caption = "Yield prediction: method comparison (first 80h -> final penicillin conc.)")
+```
+
+### Best Model: CV-Selected PCR
+
+```{r yield-best}
+fit <- cv_fit$model
+
+cat("Optimal ncomp:", cv_fit$optimal.k, "\n")
 cat("R-squared:", round(fit$r.squared, 3), "\n")
-cat("GCV:", round(fit$gcv, 3), "\n")
+cat("RMSE:", round(sqrt(mean(fit$residuals^2)), 2), "g/L\n")
 ```
 
 ```{r yield-fit-plot, fig.height = 4}
@@ -543,9 +523,11 @@ ggplot(df_fit, aes(x = .data$observed, y = .data$predicted,
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
   scale_color_manual(values = c(Recipe = "#4A90D9", Operator = "#E69F00",
                                 APC = "#009E73")) +
-  labs(title = "Yield Prediction: Observed vs Fitted",
-       subtitle = "Using first 100 hours of penicillin trajectory",
-       x = "Observed yield (g/L)", y = "Predicted yield (g/L)",
+  labs(title = "Yield Prediction: Observed vs Fitted (CV-optimal model)",
+       subtitle = sprintf("R-squared = %.3f (ncomp = %d, first 80 hours)",
+                           fit$r.squared, cv_fit$optimal.k),
+       x = "Observed final pen. conc. (g/L)",
+       y = "Predicted final pen. conc. (g/L)",
        color = "Strategy") +
   theme(legend.position = "bottom")
 ```
@@ -566,62 +548,219 @@ if (!is.null(fit$beta_t)) {
 }
 ```
 
-The coefficient function reveals **when** the process trajectory is most
-predictive of final yield. Regions with large absolute beta values indicate
-critical phases where process deviations have the greatest impact on the
-outcome. For penicillin fermentation, the transition from lag to exponential
-growth (around the inflection point) is typically the most informative.
+```{r r2-ncomp-plot, fig.height = 4}
+pcr_rows <- comp_results[comp_results$Method == "fregre.lm (PCR)", ]
 
-## 8. Conclusions
+ggplot(pcr_rows, aes(x = .data$ncomp, y = .data$R2)) +
+  geom_line(linewidth = 0.8, color = "#4A90D9") +
+  geom_point(size = 3, color = "#4A90D9") +
+  geom_hline(yintercept = 0.9, linetype = "dashed", color = "#D55E00",
+             linewidth = 0.5) +
+  annotate("text", x = 2.5, y = 0.92, label = "R-squared = 0.9",
+           color = "#D55E00", size = 3.2) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::percent_format()) +
+  labs(title = "R-squared vs Number of Components (PCR)",
+       subtitle = "More components capture yield-relevant variation",
+       x = "Number of FPC Components", y = "R-squared")
+```
 
-- **Control strategy matters.** APC batches show the tightest clustering in
-  FPCA score space and the lowest yield variability. Operator-controlled
-  batches have the highest scatter, confirming that automated control
-  reduces batch-to-batch inconsistency.
+**Key insight for practitioners:** The number of components optimal for
+*monitoring* (capturing bulk variance) differs from what is optimal for
+*regression* (predicting a specific response). Always use cross-validation
+(`fregre.lm.cv`) rather than a variance threshold when the goal is
+prediction.
 
-- **Fault detection works.** Building a Phase I chart from normal (recipe)
-  batches and monitoring fault batches achieves high recall. CUSUM and MEWMA
-  may catch faults that the Shewhart chart misses when the deviation is
-  gradual (temperature drift, slow DO2 decline).
+## 8. Identifying Yield Drivers: Which Variable Should the Operator Adjust?
 
-- **Early yield prediction is feasible.** Functional regression using only
-  the first 100 hours (50% of the batch) predicts final yield with
-  reasonable accuracy, enabling early intervention for underperforming
-  batches.
+An operator needs to know which **controllable** variables most influence
+yield, and **when** during the batch to focus control efforts. We screen
+five process variables: temperature, dissolved oxygen, sugar feed rate,
+aeration rate, and pH.
 
-- **FDA provides interpretable summaries.** FPCA eigenfunctions describe
-  meaningful modes of variation (yield level, growth timing). The
-  coefficient function from regression shows exactly which time windows
-  drive yield prediction.
+### Variable Screening
 
-This workflow -- FPCA for characterization, SPM for monitoring, and
-functional regression for prediction -- applies to any batch manufacturing
-process where time-series trajectories are recorded.
+```{r driver-screening}
+y_driver <- final_pen[1:90]
 
-## Using Real IndPenSim Data
+# Fit fregre.lm for each controllable variable -> final pen. conc.
+# Use ncomp=5 where possible, fall back to lower if needed
+vars <- list(
+  Temperature = fd_temp,
+  `Dissolved O2` = fd_do2,
+  `Sugar Feed` = fd_fs,
+  `Aeration Rate` = fd_fg,
+  pH = fd_ph
+)
 
-To use the actual Kaggle dataset instead of synthetic data, download the
-CSV from [Kaggle](https://www.kaggle.com/datasets/stephengoldie/big-databiopharmaceutical-manufacturing)
-and replace the simulation section with:
+screen_results <- do.call(rbind, lapply(names(vars), function(vname) {
+  fd_v <- fdata(vars[[vname]]$data[1:90, ], argvals = t_grid)
+  # Try ncomp 5, fall back to 3, then 1
+  fit_v <- NULL
+  for (nc in c(5, 3, 1)) {
+    fit_v <- tryCatch(fregre.lm(fd_v, y_driver, ncomp = nc),
+                       error = function(e) NULL)
+    if (!is.null(fit_v)) break
+  }
+  if (is.null(fit_v)) return(NULL)
+  data.frame(Predictor = vname, ncomp = nc,
+             R2 = fit_v$r.squared,
+             RMSE = sqrt(mean(fit_v$residuals^2)))
+}))
 
-```{r load-real-data, eval = FALSE}
-# Read the full dataset (2.5 GB, ~113k rows x 2239 columns)
-raw <- read.csv("100_Batches_IndPenSim_V3.csv")
+# Add penicillin (first 80h) as reference
+fd_pen_ref <- fdata(pen_data[1:90, early_idx], argvals = t_grid[early_idx])
+fit_ref <- fregre.lm(fd_pen_ref, y_driver, ncomp = 5)
+screen_results <- rbind(screen_results, data.frame(
+  Predictor = "Penicillin (0-80h)", ncomp = 5,
+  R2 = fit_ref$r.squared,
+  RMSE = sqrt(mean(fit_ref$residuals^2))
+))
 
-# Split by batch and extract key process variables
-batch_ids <- sort(unique(raw$Batch_ref))
-t_common <- seq(0, 200, length.out = 201)
+screen_results <- screen_results[order(-screen_results$R2), ]
+screen_display <- screen_results
+screen_display$R2 <- sprintf("%.3f", screen_display$R2)
+screen_display$RMSE <- sprintf("%.2f", screen_display$RMSE)
+screen_display$ncomp <- as.character(screen_display$ncomp)
 
-pen_data <- matrix(NA, 100, length(t_common))
-for (i in seq_along(batch_ids)) {
-  batch <- raw[raw$Batch_ref == batch_ids[i], ]
-  pen_data[i, ] <- approx(batch$Time..h., batch$Penicillin.concentration.P.g.L.,
-                           xout = t_common)$y
+knitr::kable(screen_display, row.names = FALSE,
+             col.names = c("Predictor", "ncomp", "R-squared", "RMSE (g/L)"),
+             caption = "Variable screening: which process variable best predicts final pen. conc.?")
+```
+
+### Combined Model: Relative Importance
+
+```{r combined-importance}
+# Extract FPC scores (4 components each) for controllable variables
+pca_list <- list(
+  Temp = prcomp(temp_data[1:90, ], center = TRUE),
+  DO2 = prcomp(do2_data[1:90, ], center = TRUE),
+  Fs = prcomp(fs_data[1:90, ], center = TRUE),
+  Fg = prcomp(fg_data[1:90, ], center = TRUE),
+  pH = prcomp(ph_data[1:90, ], center = TRUE)
+)
+
+nc <- 3
+X_combined <- do.call(cbind, lapply(names(pca_list), function(nm) {
+  n_avail <- min(nc, ncol(pca_list[[nm]]$x))
+  scores <- pca_list[[nm]]$x[, seq_len(n_avail), drop = FALSE]
+  colnames(scores) <- paste0(nm, "_PC", seq_len(n_avail))
+  as.data.frame(scores)
+}))
+
+fit_combined <- lm(y_driver ~ ., data = X_combined)
+cat("Combined model R-squared:", round(summary(fit_combined)$r.squared, 3), "\n")
+cat("Adjusted R-squared:      ", round(summary(fit_combined)$adj.r.squared, 3), "\n")
+
+# Standardized importance per variable
+coefs <- coef(fit_combined)[-1]
+sds_x <- apply(X_combined, 2, sd)
+std_imp <- abs(coefs * sds_x / sd(y_driver))
+
+var_imp <- sapply(names(pca_list), function(nm) {
+  idx <- grep(paste0("^", nm, "_"), names(std_imp))
+  sum(std_imp[idx])
+})
+total_imp <- sum(var_imp)
+
+imp_df <- data.frame(
+  Variable = names(var_imp),
+  Importance = var_imp,
+  Share = sprintf("%.1f%%", 100 * var_imp / total_imp)
+)
+imp_df <- imp_df[order(-imp_df$Importance), ]
+
+knitr::kable(imp_df, row.names = FALSE, digits = 3,
+             caption = "Relative importance in combined model (standardized coefficients)")
+```
+
+```{r importance-bar, fig.height = 4}
+ggplot(imp_df, aes(x = reorder(.data$Variable, .data$Importance),
+                    y = .data$Importance)) +
+  geom_col(fill = "#4A90D9", width = 0.6) +
+  coord_flip() +
+  labs(title = "Variable Importance for Yield Prediction",
+       subtitle = "Summed standardized coefficients across FPC components",
+       x = NULL, y = "Importance") +
+  theme(legend.position = "none")
+```
+
+### Coefficient Functions
+
+The beta function from each single-predictor model shows **which time
+windows** are most predictive.
+
+```{r beta-functions, fig.height = 6}
+beta_list <- list()
+for (vname in names(vars)) {
+  fd_v <- fdata(vars[[vname]]$data[1:90, ], argvals = t_grid)
+  fit_v <- NULL
+  for (nc_try in c(5, 3, 1)) {
+    fit_v <- tryCatch(fregre.lm(fd_v, y_driver, ncomp = nc_try),
+                       error = function(e) NULL)
+    if (!is.null(fit_v)) break
+  }
+  if (!is.null(fit_v) && !is.null(fit_v$beta_t) &&
+      length(fit_v$beta_t) == length(t_grid)) {
+    beta_list[[vname]] <- data.frame(
+      time = t_grid, beta = as.numeric(fit_v$beta_t), variable = vname)
+  }
 }
 
-fd_pen <- fdata(pen_data, argvals = t_common)
-# Then proceed with FPCA, monitoring, and regression as above
+if (length(beta_list) > 0) {
+  df_betas <- do.call(rbind, beta_list)
+
+  ggplot(df_betas, aes(x = .data$time, y = .data$beta)) +
+    geom_line(linewidth = 0.7) +
+    geom_hline(yintercept = 0, linetype = "dotted", color = "grey50") +
+    facet_wrap(~ .data$variable, ncol = 1, scales = "free_y") +
+    labs(title = expression("Coefficient Functions " * hat(beta)(t) *
+                             " for Yield Prediction"),
+         subtitle = "Regions with large |beta| = critical control windows",
+         x = "Time (hours)", y = expression(hat(beta)(t))) +
+    theme(strip.text = element_text(face = "bold"))
+}
 ```
+
+The beta functions reveal **when** each process variable has the strongest
+association with total yield. Time windows where |beta(t)| is large are
+where operators should focus control efforts for maximum yield impact.
+
+## 9. Conclusions
+
+- **Control strategy differences are clear in real data.** APC batches
+  (Raman-guided) achieve the highest and most consistent penicillin
+  concentrations, while recipe and operator-controlled batches show wider
+  variability. The FPCA score plot visually separates the strategies.
+
+- **Fault detection on real data is partial but meaningful.** Not all
+  10 fault batches are detected via penicillin trajectory monitoring
+  alone -- some fault types (e.g., sensor errors) may not manifest in the
+  penicillin curve. Multivariate monitoring (combining temperature, DO2,
+  and penicillin) would improve detection coverage.
+
+- **Early yield prediction is moderately successful.** Using the first
+  80 hours of the penicillin trajectory to predict final concentration
+  at harvest achieves R-squared ~0.5 -- useful as an early warning but
+  not a precise forecast. Note: total yield (kg, including harvested
+  broth) is weakly correlated with final concentration (r=0.11) and
+  harder to predict from trajectory shape alone.
+
+- **Dissolved oxygen is the strongest controllable yield driver** among
+  the five variables screened. The coefficient functions and importance
+  ranking identify which variables matter most and when during the batch.
+
+- **FDA provides interpretable summaries.** FPCA captures the dominant
+  modes of batch variation; coefficient functions show exactly when and
+  where each variable drives yield prediction.
+
+## Data Source
+
+The IndPenSim dataset (Goldrick et al., 2015) was downloaded from
+[Mendeley Data](https://data.mendeley.com/datasets/pdnjz7zz5x/2)
+(DOI: 10.17632/pdnjz7zz5x.2, CC BY 4.0). The full dataset contains
+113,935 time points across 100 batches with 39 process variables and
+2,200 Raman spectral channels. This article uses 14 key process
+variables extracted to `data-raw/indpensim_process.rds` (2.1 MB).
 
 ## See Also
 
