@@ -32,6 +32,27 @@ pub struct ElasticLogisticResult {
     pub n_iter: usize,
 }
 
+impl ElasticLogisticResult {
+    /// Create a new `ElasticLogisticResult`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        alpha: f64,
+        beta: Vec<f64>,
+        probabilities: Vec<f64>,
+        predicted_classes: Vec<usize>,
+        accuracy: f64,
+        loss: f64,
+        gammas: FdMatrix,
+        aligned_srsfs: FdMatrix,
+        n_iter: usize,
+    ) -> Self {
+        Self {
+            alpha, beta, probabilities, predicted_classes, accuracy,
+            loss, gammas, aligned_srsfs, n_iter,
+        }
+    }
+}
+
 /// Elastic logistic regression for binary classification.
 ///
 /// Labels should be -1 or 1. Uses gradient descent with Armijo line search.
@@ -183,31 +204,6 @@ pub fn predict_elastic_logistic(
 }
 
 impl ElasticLogisticResult {
-    /// Construct from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        alpha: f64,
-        beta: Vec<f64>,
-        probabilities: Vec<f64>,
-        predicted_classes: Vec<usize>,
-        accuracy: f64,
-        loss: f64,
-        gammas: FdMatrix,
-        aligned_srsfs: FdMatrix,
-        n_iter: usize,
-    ) -> Self {
-        Self {
-            alpha,
-            beta,
-            probabilities,
-            predicted_classes,
-            accuracy,
-            loss,
-            gammas,
-            aligned_srsfs,
-            n_iter,
-        }
-    }
-
     /// Predict probabilities for new data. Delegates to [`predict_elastic_logistic`].
     pub fn predict(&self, new_data: &FdMatrix, argvals: &[f64]) -> Vec<f64> {
         predict_elastic_logistic(self, new_data, argvals)

@@ -59,6 +59,32 @@ pub struct ScalarOnShapeResult {
     pub index_method: IndexMethod,
 }
 
+impl ScalarOnShapeResult {
+    /// Create a new `ScalarOnShapeResult`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        beta: Vec<f64>,
+        beta_coefficients: Vec<f64>,
+        gammas: FdMatrix,
+        shape_scores: Vec<f64>,
+        h_coefficients: Vec<f64>,
+        g_coefficients: Vec<f64>,
+        fitted_values: Vec<f64>,
+        residuals: Vec<f64>,
+        sse: f64,
+        r_squared: f64,
+        n_iter_outer: usize,
+        n_iter_inner: usize,
+        index_method: IndexMethod,
+    ) -> Self {
+        Self {
+            beta, beta_coefficients, gammas, shape_scores,
+            h_coefficients, g_coefficients, fitted_values, residuals,
+            sse, r_squared, n_iter_outer, n_iter_inner, index_method,
+        }
+    }
+}
+
 // ─── Main API ───────────────────────────────────────────────────────────────
 
 /// Scalar-on-shape regression with elastic alignment.
@@ -331,39 +357,6 @@ pub fn predict_scalar_on_shape(
 }
 
 impl ScalarOnShapeResult {
-    /// Construct from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        beta: Vec<f64>,
-        beta_coefficients: Vec<f64>,
-        gammas: FdMatrix,
-        shape_scores: Vec<f64>,
-        h_coefficients: Vec<f64>,
-        g_coefficients: Vec<f64>,
-        fitted_values: Vec<f64>,
-        residuals: Vec<f64>,
-        sse: f64,
-        r_squared: f64,
-        n_iter_outer: usize,
-        n_iter_inner: usize,
-        index_method: IndexMethod,
-    ) -> Self {
-        Self {
-            beta,
-            beta_coefficients,
-            gammas,
-            shape_scores,
-            h_coefficients,
-            g_coefficients,
-            fitted_values,
-            residuals,
-            sse,
-            r_squared,
-            n_iter_outer,
-            n_iter_inner,
-            index_method,
-        }
-    }
-
     /// Predict responses for new data. Delegates to [`predict_scalar_on_shape`].
     pub fn predict(&self, new_data: &FdMatrix, argvals: &[f64]) -> Result<Vec<f64>, FdarError> {
         predict_scalar_on_shape(self, new_data, argvals)

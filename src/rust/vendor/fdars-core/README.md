@@ -17,111 +17,20 @@ High-performance Functional Data Analysis tools implemented in Rust with R bindi
 
 ## Features
 
-### Core Operations
-
-- **Simulation**: Karhunen-Loève expansion with Fourier/Legendre/Wiener eigenfunctions, pointwise and curve-level noise; Gaussian process generation with 8 covariance kernels and kernel algebra
-- **Functional Data Operations**: Mean, centering, derivatives, Lp norms, geometric median
-- **Andrews Curves**: Fourier-based bijection mapping multivariate observations to functional curves; FPCA loading visualization
-- **Covariance Kernels**: Gaussian, Exponential, Matérn, Brownian, Periodic, Linear, Polynomial, White Noise with Sum/Product kernel algebra
-- **Smoothing**: Nadaraya-Watson, local linear, local polynomial, k-NN
-- **Basis Representations**: B-splines, Fourier basis, P-splines with GCV/AIC/BIC selection
-
-### Descriptive Analysis
-
-- **Depth Measures**: Fraiman-Muniz, modal, band, modified band, random projection, random Tukey, RPD (random projection with derivatives), functional spatial, kernel functional spatial, modified epigraph index
-- **Distance Metrics**: Lp distances, Hausdorff, DTW, Soft-DTW (with barycenter averaging), elastic (Fisher-Rao), amplitude/phase distances, Fourier-based semimetric, horizontal shift semimetric, PCA-based semimetric, derivative-based semimetric, basis coefficient semimetric, KL divergence
-- **Outlier Detection**: LRT-based outlier detection with bootstrap thresholding
-
-### Regression
-
-- **Scalar-on-Function Regression**: FPC linear model, nonparametric kernel, functional logistic, robust (L1/Huber), CV component selection
-- **Function-on-Scalar Regression**: Penalized pointwise OLS, FPC-based FOSR, 2D FOSR for surface-valued responses Y(s,t) with tensor-product penalty, functional ANOVA with permutation test
-- **Regression**: Functional PCA, PLS, ridge regression
-- **Mixed Effects Models**: Functional mixed model via FPCA + iterative GLS/REML, prediction, permutation hypothesis tests
-
-### Classification & Clustering
-
-- **Clustering**: K-means, fuzzy c-means with silhouette and Calinski-Harabasz validation; GMM with BIC/ICL model selection
-- **Classification**: LDA, QDA, k-NN, kernel, DD-classifier with cross-validation; conformal prediction sets for classification
-
-### Time Series & Alignment
-
-- **Seasonal Analysis**: FFT, ACF, Autoperiod, CFDAutoperiod, SAZED period detection; Lomb-Scargle periodogram; matrix profile; SSA; peak detection; seasonal strength metrics; amplitude modulation detection; seasonality change detection
-- **Elastic Alignment**: SRSF transform, dynamic programming alignment, Karcher mean, elastic distance matrices, amplitude/phase decomposition, landmark registration, transported SRVF (TSRVF)
-- **Detrending**: Linear, polynomial, LOESS, differencing; classical, additive/multiplicative, and STL decomposition
-
-### Explainability & Diagnostics
-
-- **Bootstrap Confidence Intervals**: Pointwise and simultaneous CIs for β(t) via bootstrap
-- **Beta Decomposition**: FPC-level variance proportions and coefficient attribution
-- **PDP/ICE Curves**: Partial dependence and individual conditional expectation for FPC scores
-- **Permutation Importance**: FPC-level importance via R² drop (linear and logistic)
-- **Pointwise Variable Importance**: Per-grid-point contribution to prediction variance
-- **Influence Diagnostics**: Cook's distance, leverage, studentized residuals
-- **DFBETAS/DFFITS**: Leave-one-out influence measures with cutoff thresholds
-- **VIF**: Variance inflation factors for multicollinearity detection
-- **SHAP Values**: Exact linear SHAP and Kernel SHAP for logistic models
-- **Prediction Intervals**: Confidence and prediction intervals with Cornish-Fisher correction
-- **ALE Plots**: Accumulated local effects for FPC scores (linear and logistic)
-- **Friedman H-statistic**: Pairwise FPC interaction strength
-- **LOO-CV / PRESS**: Leave-one-out cross-validation diagnostics
-- **Sobol Indices**: Global sensitivity analysis for FPC contributions
-- **Calibration Diagnostics**: Brier score, log loss, Hosmer-Lemeshow test
-- **Functional Saliency Maps**: Pointwise gradient-based importance
-- **Domain Selection**: Interval importance for regression/classification
-- **Conditional Permutation Importance**: Correlation-adjusted permutation importance
-- **Counterfactual Explanations**: Minimal FPC score changes to reach a target prediction
-- **Prototype/Criticism Selection**: MMD-based representative and outlier observations
-- **LIME**: Local interpretable model-agnostic explanations in FPC score space
-- **Expected Calibration Error**: ECE, MCE, and adaptive calibration error
-- **Conformal Prediction**: Distribution-free split-conformal prediction intervals
-- **Regression Depth**: Depth-based diagnostics for coefficients and observations
-- **Stability Analysis**: Bootstrap robustness of β(t), coefficients, and importance rankings
-- **Anchor Explanations**: Beam-search rule extraction in FPC score space
-- **Generic Explainability**: `FpcPredictor` trait unifying regression, binary, and multiclass models with 15 model-agnostic functions (PDP, SHAP, ALE, LIME, permutation importance, Sobol, Friedman H, etc.)
-
-### Statistical Process Monitoring
-
-- **Hotelling T² / SPE**: Control statistics for detecting shifts in FPCA score space and residual space
-- **Phase I / Phase II Framework**: Build control charts from in-control training data, then monitor new observations (`spm_phase1`, `spm_monitor`)
-- **Multivariate FPCA**: Joint FPCA across multiple functional variables with standardization (`mfpca`)
-- **Multivariate SPM**: Phase I/II monitoring for multi-response functional data (`mf_spm_phase1`, `mf_spm_monitor`)
-- **EWMA Monitoring**: Exponentially weighted moving average smoothing on FPCA scores for enhanced sensitivity to small persistent shifts
-- **MEWMA Monitoring**: Multivariate EWMA with asymptotic or exact time-dependent covariance (`spm_mewma_monitor`)
-- **Functional Regression Control Chart (FRCC)**: Covariate-adjusted monitoring via FOSR residuals
-- **Profile Monitoring**: Rolling-window FOSR coefficient monitoring via FPCA and T² (`profile_phase1`, `profile_monitor`)
-- **Contribution Diagnostics**: Per-variable T²/SPE decomposition and per-PC T² contributions for fault identification
-- **Control Limits**: Chi-squared quantiles for T², moment-matched chi-squared for SPE; empirical, bootstrap, and KDE robust alternatives
-- **ARL Computation**: Monte Carlo average run length for T², EWMA-T², and SPE charts (`arl0_t2`, `arl1_t2`, `arl0_ewma_t2`, `arl0_spe`)
-- **Automatic ncomp Selection**: Cumulative variance, elbow detection, and fixed methods (`select_ncomp`)
-- **Runs/Zone Rules**: Western Electric (WE1–WE4) and Nelson (5–7) rules for pattern detection (`evaluate_rules`, `western_electric_rules`, `nelson_rules`)
-- **Partial-Domain Monitoring**: Monitor incomplete observations via conditional expectation (BLUP), partial projection, or zero-padding (`spm_monitor_partial`)
-- **Phase-Aware Monitoring**: Elastic alignment separates amplitude and phase variation for independent monitoring (`elastic_spm_phase1`, `elastic_spm_monitor`)
-- **CUSUM Monitoring**: Multivariate (Crosier's MCUSUM) and per-component univariate CUSUM charts for detecting small sustained shifts (`spm_cusum_monitor`, `spm_cusum_monitor_with_restart`)
-- **Adaptive EWMA (AMFEWMA)**: Dynamically adjusts smoothing parameter based on deviation magnitude for robustness across unknown shift sizes (`spm_amewma_monitor`)
-- **Iterative Phase I**: Repeated outlier removal and chart re-estimation for robust Phase I construction from contaminated data (`spm_phase1_iterative`)
-
-### Elastic Analysis
-
-- **Elastic FPCA**: Vertical, horizontal, and joint functional PCA after alignment
-- **Elastic Regression**: Alignment-integrated scalar-on-function regression
-- **Elastic PCR**: Principal component regression with elastic alignment
-- **Elastic Logistic**: Binary classification with elastic alignment
-- **Scalar-on-Shape Regression**: Phase-invariant regression using Fisher-Rao inner product with DP alignment; identity, polynomial, and Nadaraya-Watson index functions (ScoSh / SI-ScoSh)
-- **Elastic Changepoint Detection**: Amplitude and phase changepoint tests with permutation p-values
-- **Elastic Attribution**: Amplitude vs phase importance decomposition
-
-### Inference
-
-- **Tolerance Bands**: FPCA, conformal prediction, Degras SCB, exponential family bands, elastic amplitude bands, phase tolerance bands on warping functions, joint amplitude + phase bands
-- **Conformal Prediction**: Split-conformal regression intervals (`conformal_fregre_lm`, `conformal_fregre_np`, `conformal_elastic_regression`), Jackknife+ intervals, CV+ intervals, and generic conformal with held-out calibration support
-- **Equivalence Testing**: Functional TOST with bootstrap, one-sample and two-sample tests
-
-### Specialized
-
-- **Streaming Depth**: Online FM, MBD, BD depth with sorted-reference O(log N) updates
-- **Irregular Data**: CSR-compressed storage, kernel mean/covariance, Lp metric, grid regularization
-- **Smooth Basis**: B-spline basis representation with smoothing penalty
+| Area | Capabilities |
+|------|-------------|
+| **Core** | Simulation (KL expansion, GP with 8 kernels), functional operations, smoothing (NW, local polynomial, k-NN), basis representations (B-spline, Fourier, P-spline) |
+| **Descriptive** | 10 depth measures + streaming online depth, 12 distance metrics (Lp, DTW, elastic, semimetrics, KL), LRT outlier detection |
+| **Regression** | Scalar-on-function (FPC, kernel, logistic, robust), function-on-scalar (FOSR, 2D FOSR, FANOVA), FPCA, PLS, ridge, mixed effects |
+| **Classification** | LDA, QDA, k-NN, kernel, DD-classifier, conformal prediction sets; k-means, fuzzy c-means, GMM |
+| **Elastic Alignment** | SRSF/DP alignment, Karcher mean (1-D/N-D), TSRVF, Bayesian (pCN MCMC), closed curves, transfer alignment, partial matching, multi-resolution, generative models, geodesics, FPNS, lambda CV, peak persistence |
+| **Elastic Robust** | Karcher median, trimmed mean, SRVF outlier detection, elastic depth, shape CIs, diagnostics, warp statistics, phase box plots, shape analysis |
+| **Elastic Models** | Elastic FPCA, regression, PCR, logistic, scalar-on-shape (ScoSh), changepoint detection, elastic clustering |
+| **SPM** | T²/SPE Phase I/II, EWMA, MEWMA, CUSUM, adaptive EWMA, FRCC, profile monitoring; bootstrap/KDE limits, ARL, partial-domain, elastic SPM, iterative Phase I, Western Electric/Nelson rules |
+| **Explainability** | PDP/ICE, SHAP, ALE, LIME, Sobol, Friedman H, anchors, counterfactuals, prototype/criticism; influence diagnostics, VIF, calibration (ECE, Brier), saliency maps; `FpcPredictor` trait |
+| **Inference** | Tolerance bands (FPCA, conformal, Degras, exponential, elastic), conformal prediction (split, Jackknife+, CV+), equivalence testing (TOST) |
+| **Time Series** | Seasonal detection (FFT, ACF, Autoperiod, SAZED, Lomb-Scargle, SSA, matrix profile), detrending (polynomial, LOESS, STL) |
+| **Specialized** | Streaming depth (online O(log N)), irregular data (CSR, kernel estimation) |
 
 ## Installation
 
@@ -138,7 +47,7 @@ devtools::install_github("sipemu/fdars-r")
 
 ```toml
 [dependencies]
-fdars-core = "0.8"
+fdars-core = "0.9"
 ```
 
 Or install from the repository:
@@ -158,7 +67,7 @@ For WASM builds, disable default features:
 
 ```toml
 [dependencies]
-fdars-core = { version = "0.8", default-features = false }
+fdars-core = { version = "0.9", default-features = false }
 ```
 
 ## Data Layout
@@ -190,36 +99,41 @@ let depths = depth::fraiman_muniz_1d(&mat, &mat, true);
 
 ## Examples
 
-The [`fdars-core/examples/`](fdars-core/examples/) directory contains 26 runnable examples progressing from basic to advanced:
+27 runnable examples in [`fdars-core/examples/`](fdars-core/examples/):
 
-| # | Example | Command | Topics |
-|---|---------|---------|--------|
-| 01 | [Simulation](fdars-core/examples/01_simulation/) | `cargo run -p fdars-core --example simulation` | KL expansion, eigenfunctions, noise |
-| 02 | [Functional Operations](fdars-core/examples/02_functional_operations/) | `cargo run -p fdars-core --example functional_operations` | Mean, centering, derivatives, norms, inner products |
-| 03 | [Smoothing](fdars-core/examples/03_smoothing/) | `cargo run -p fdars-core --example smoothing` | Nadaraya-Watson, local linear/polynomial, k-NN |
-| 04 | [Basis Representation](fdars-core/examples/04_basis_representation/) | `cargo run -p fdars-core --example basis_representation` | B-splines, Fourier, P-splines, GCV/AIC/BIC |
-| 05 | [Depth Measures](fdars-core/examples/05_depth_measures/) | `cargo run -p fdars-core --example depth_measures` | 8 depth measures, outlier ranking |
-| 06 | [Distances and Metrics](fdars-core/examples/06_distances_and_metrics/) | `cargo run -p fdars-core --example distances_and_metrics` | Lp, Hausdorff, DTW, Fourier, h-shift |
-| 07 | [Clustering](fdars-core/examples/07_clustering/) | `cargo run -p fdars-core --example clustering` | K-means, fuzzy c-means, silhouette, CH index |
-| 08 | [Regression](fdars-core/examples/08_regression/) | `cargo run -p fdars-core --example regression` | FPCA, PLS regression |
-| 09 | [Outlier Detection](fdars-core/examples/09_outlier_detection/) | `cargo run -p fdars-core --example outlier_detection` | LRT bootstrap, depth confirmation |
-| 10 | [Seasonal Analysis](fdars-core/examples/10_seasonal_analysis/) | `cargo run -p fdars-core --example seasonal_analysis` | FFT, ACF, Autoperiod, SAZED, peak detection |
-| 11 | [Detrending](fdars-core/examples/11_detrending/) | `cargo run -p fdars-core --example detrending` | Linear/polynomial/LOESS, STL decomposition |
-| 12 | [Streaming Depth](fdars-core/examples/12_streaming_depth/) | `cargo run -p fdars-core --example streaming_depth` | Online depth, rolling windows |
-| 13 | [Irregular Data](fdars-core/examples/13_irregular_data/) | `cargo run -p fdars-core --example irregular_data` | CSR storage, regularization, kernel mean |
-| 14 | [Complete Pipeline](fdars-core/examples/14_complete_pipeline/) | `cargo run -p fdars-core --example complete_pipeline` | End-to-end: simulate → smooth → outliers → FPCA → cluster |
-| 15 | [Tolerance Bands](fdars-core/examples/15_tolerance_bands/) | `cargo run -p fdars-core --example tolerance_bands` | FPCA, conformal, Degras SCB, exponential family bands |
-| 16 | [Elastic Alignment](fdars-core/examples/16_elastic_alignment/) | `cargo run -p fdars-core --example elastic_alignment` | SRSF, DP alignment, Karcher mean, elastic distances |
-| 17 | [Equivalence Test](fdars-core/examples/17_equivalence_test/) | `cargo run -p fdars-core --example equivalence_test` | Functional TOST, bootstrap, one/two-sample tests |
-| 18 | [Landmark Registration](fdars-core/examples/18_landmark_registration/) | `cargo run -p fdars-core --example landmark_registration` | Landmark detection, curve registration |
-| 19 | [TSRVF](fdars-core/examples/19_tsrvf/) | `cargo run -p fdars-core --example tsrvf` | Transported SRVF, parallel transport |
-| 20 | [Scalar-on-Function](fdars-core/examples/20_scalar_on_function/) | `cargo run -p fdars-core --features linalg --example scalar_on_function` | FPC linear model, kernel regression, logistic, CV |
-| 21 | [Function-on-Scalar](fdars-core/examples/21_function_on_scalar/) | `cargo run -p fdars-core --features linalg --example function_on_scalar` | Penalized FOSR, FPC-based FOSR, FANOVA |
-| 22 | [GMM Clustering](fdars-core/examples/22_gmm_clustering/) | `cargo run -p fdars-core --features linalg --example gmm_clustering` | GMM-EM, automatic K selection, BIC/ICL |
-| 23 | [Classification](fdars-core/examples/23_classification/) | `cargo run -p fdars-core --features linalg --example classification` | LDA, QDA, k-NN, DD-classifier, cross-validation |
-| 24 | [Mixed Effects](fdars-core/examples/24_mixed_effects/) | `cargo run -p fdars-core --features linalg --example mixed_effects` | FAMM, REML variance estimation, permutation tests |
-| 25 | [Explainability](fdars-core/examples/25_explainability/) | `cargo run -p fdars-core --features linalg --example explainability` | Bootstrap CI, SHAP, ALE, PDP, VIF, DFBETAS, ECE, conformal, anchors |
-| 26 | [Elastic Analysis](fdars-core/examples/26_elastic_analysis/) | `cargo run -p fdars-core --features linalg --example elastic_analysis` | Elastic FPCA, regression, PCR, logistic, changepoint detection |
+| # | Example | Topics |
+|---|---------|--------|
+| 01 | [Simulation](fdars-core/examples/01_simulation/) | KL expansion, GP generation |
+| 02 | [Functional Operations](fdars-core/examples/02_functional_operations/) | Mean, derivatives, norms |
+| 03 | [Smoothing](fdars-core/examples/03_smoothing/) | NW, local polynomial, k-NN |
+| 04 | [Basis Representation](fdars-core/examples/04_basis_representation/) | B-splines, Fourier, P-splines |
+| 05 | [Depth Measures](fdars-core/examples/05_depth_measures/) | 8 depth measures, outlier ranking |
+| 06 | [Distances](fdars-core/examples/06_distances_and_metrics/) | Lp, DTW, elastic, semimetrics |
+| 07 | [Clustering](fdars-core/examples/07_clustering/) | K-means, fuzzy c-means |
+| 08 | [Regression](fdars-core/examples/08_regression/) | FPCA, PLS |
+| 09 | [Outlier Detection](fdars-core/examples/09_outlier_detection/) | LRT bootstrap |
+| 10 | [Seasonal Analysis](fdars-core/examples/10_seasonal_analysis/) | FFT, Autoperiod, SAZED |
+| 11 | [Detrending](fdars-core/examples/11_detrending/) | Polynomial, LOESS, STL |
+| 12 | [Streaming Depth](fdars-core/examples/12_streaming_depth/) | Online depth |
+| 13 | [Irregular Data](fdars-core/examples/13_irregular_data/) | CSR storage, kernel estimation |
+| 14 | [Complete Pipeline](fdars-core/examples/14_complete_pipeline/) | End-to-end workflow |
+| 15 | [Tolerance Bands](fdars-core/examples/15_tolerance_bands/) | FPCA, conformal, Degras SCB |
+| 16 | [Elastic Alignment](fdars-core/examples/16_elastic_alignment/) | SRSF, DP, Karcher mean |
+| 17 | [Equivalence Test](fdars-core/examples/17_equivalence_test/) | Functional TOST |
+| 18 | [Landmark Registration](fdars-core/examples/18_landmark_registration/) | Constrained alignment |
+| 19 | [TSRVF](fdars-core/examples/19_tsrvf/) | Transported SRVF |
+| 20 | [Scalar-on-Function](fdars-core/examples/20_scalar_on_function/)` *` | FPC linear, logistic, kernel |
+| 21 | [Function-on-Scalar](fdars-core/examples/21_function_on_scalar/)` *` | FOSR, FANOVA |
+| 22 | [GMM Clustering](fdars-core/examples/22_gmm_clustering/)` *` | GMM-EM, BIC/ICL |
+| 23 | [Classification](fdars-core/examples/23_classification/)` *` | LDA, QDA, k-NN, DD |
+| 24 | [Mixed Effects](fdars-core/examples/24_mixed_effects/)` *` | FAMM, REML |
+| 25 | [Explainability](fdars-core/examples/25_explainability/)` *` | SHAP, ALE, PDP, anchors |
+| 26 | [Elastic Analysis](fdars-core/examples/26_elastic_analysis/)` *` | Elastic FPCA, regression, PCR |
+| 27 | [SPM](fdars-core/examples/27_spm/) | Phase I/II, EWMA, CUSUM, rules |
+
+`*` requires `--features linalg`
+
+Run with `cargo run -p fdars-core --example <name>` (add `--features linalg` where marked).
 
 ## Performance
 

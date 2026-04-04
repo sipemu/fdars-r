@@ -94,12 +94,9 @@ pub struct ElasticDendrogram {
 }
 
 impl ElasticDendrogram {
-    /// Create an `ElasticDendrogram` from its parts.
-    pub fn from_parts(merges: Vec<(usize, usize, f64)>, distance_matrix: FdMatrix) -> Self {
-        Self {
-            merges,
-            distance_matrix,
-        }
+    /// Create a new `ElasticDendrogram`.
+    pub fn new(merges: Vec<(usize, usize, f64)>, distance_matrix: FdMatrix) -> Self {
+        Self { merges, distance_matrix }
     }
 }
 

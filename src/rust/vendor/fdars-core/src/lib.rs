@@ -97,29 +97,39 @@ pub use covariance::{
 // Re-export alignment types and functions
 pub use alignment::{
     align_to_target, alignment_quality, amplitude_distance, amplitude_self_distance_matrix,
-    compose_warps, cut_dendrogram, diagnose_alignment, diagnose_pairwise, elastic_align_pair,
-    elastic_align_pair_constrained, elastic_align_pair_nd, elastic_align_pair_penalized,
-    elastic_align_pair_with_landmarks, elastic_cross_distance_matrix, elastic_decomposition,
-    elastic_distance, elastic_distance_nd, elastic_hierarchical, elastic_kmeans,
-    elastic_self_distance_matrix, invert_warp, karcher_mean, lambda_cv, orbit_representative,
-    pairwise_consistency, phase_boxplot, phase_distance_pair, phase_self_distance_matrix,
-    reparameterize_curve, shape_distance, shape_mean, shape_self_distance_matrix, srsf_inverse,
-    srsf_inverse_nd, srsf_transform, srsf_transform_nd, tsrvf_from_alignment,
-    tsrvf_from_alignment_with_method, tsrvf_inverse, tsrvf_transform, tsrvf_transform_with_method,
-    warp_complexity, warp_inverse_error, warp_smoothness, warp_statistics, AlignmentDiagnostic,
+    bayesian_align_pair, compose_warps, curve_geodesic, curve_geodesic_nd, cut_dendrogram,
+    diagnose_alignment, diagnose_pairwise, elastic_align_pair, elastic_align_pair_closed,
+    elastic_align_pair_constrained, elastic_align_pair_multires, elastic_align_pair_nd,
+    elastic_align_pair_penalized, elastic_align_pair_with_landmarks, elastic_cross_distance_matrix,
+    elastic_decomposition, elastic_depth, elastic_distance, elastic_distance_closed,
+    elastic_distance_nd, elastic_hierarchical, elastic_kmeans, elastic_outlier_detection,
+    elastic_partial_match, elastic_self_distance_matrix, gauss_model, horiz_fpns, invert_warp,
+    joint_gauss_model, karcher_covariance_nd, karcher_mean, karcher_mean_closed, karcher_mean_nd,
+    karcher_median, lambda_cv, orbit_representative, pairwise_consistency, pca_nd,
+    peak_persistence, phase_boxplot, phase_distance_pair, phase_self_distance_matrix,
+    reparameterize_curve, robust_karcher_mean, shape_confidence_interval, shape_distance,
+    shape_mean, shape_self_distance_matrix, srsf_inverse, srsf_inverse_nd, srsf_transform,
+    srsf_transform_nd, transfer_alignment, tsrvf_from_alignment, tsrvf_from_alignment_with_method,
+    tsrvf_inverse, tsrvf_transform, tsrvf_transform_with_method, warp_complexity,
+    warp_inverse_error, warp_smoothness, warp_statistics, AlignmentDiagnostic,
     AlignmentDiagnosticSummary, AlignmentQuality, AlignmentResult, AlignmentResultNd,
-    AlignmentSetResult, ConstrainedAlignmentResult, DecompositionResult, DiagnosticConfig,
+    AlignmentSetResult, BayesianAlignConfig, BayesianAlignmentResult, ClosedAlignmentResult,
+    ClosedKarcherMeanResult, ConstrainedAlignmentResult, DecompositionResult, DiagnosticConfig,
     ElasticClusterConfig, ElasticClusterMethod, ElasticClusterResult, ElasticDendrogram,
-    KarcherMeanResult, LambdaCvConfig, LambdaCvResult, OrbitRepresentative, PhaseBoxplot,
-    ShapeDistanceResult, ShapeMeanResult, ShapeQuotient, TransportMethod, TsrvfResult,
+    ElasticDepthResult, ElasticOutlierConfig, ElasticOutlierResult, FpnsResult,
+    GenerativeModelResult, GeodesicPath, GeodesicPathNd, KarcherMeanResult, KarcherMeanResultNd,
+    LambdaCvConfig, LambdaCvResult, MultiresConfig, OrbitRepresentative, PartialMatchConfig,
+    PartialMatchResult, PcaNdResult, PersistenceDiagramResult, PhaseBoxplot, RobustKarcherConfig,
+    RobustKarcherResult, ShapeCiConfig, ShapeCiResult, ShapeDistanceResult, ShapeMeanResult,
+    ShapeQuotient, TransferAlignConfig, TransferAlignResult, TransportMethod, TsrvfResult,
     WarpPenaltyType, WarpStatistics,
 };
 
 // Re-export commonly used items
 pub use helpers::{
-    cumulative_trapz, extract_curves, gradient, gradient_nonuniform, gradient_uniform, l2_distance,
-    linear_interp, simpsons_weights, simpsons_weights_2d, trapz, DEFAULT_CONVERGENCE_TOL,
-    NUMERICAL_EPS,
+    cumulative_trapz, extract_curves, fdata_interpolate, gradient, gradient_nonuniform,
+    gradient_uniform, l2_distance, linear_interp, simpsons_weights, simpsons_weights_2d, trapz,
+    InterpolationMethod, DEFAULT_CONVERGENCE_TOL, NUMERICAL_EPS,
 };
 
 // Re-export warping utilities
@@ -334,7 +344,10 @@ pub use depth::{
 };
 
 // Re-export outlier detection functions
-pub use outliers::{detect_outliers_lrt, outliers_threshold_lrt, outliers_threshold_lrt_with_dist};
+pub use outliers::{
+    detect_outliers_lrt, magnitude_shape_outlyingness, outliergram, outliers_threshold_lrt,
+    outliers_threshold_lrt_with_dist, MagnitudeShapeResult, OutligramResult,
+};
 
 // Re-export utility functions
 pub use utility::{
@@ -350,8 +363,9 @@ pub use fdata::{
 
 // Re-export basis representation types and functions
 pub use basis::{
-    basis_to_fdata, basis_to_fdata_1d, bspline_basis, difference_matrix, fdata_to_basis,
-    fdata_to_basis_1d, fourier_basis, fourier_basis_with_period, fourier_fit_1d, pspline_fit_1d,
+    basis_to_fdata, basis_to_fdata_1d, bspline_basis, bspline_basis_from_knots,
+    construct_bspline_knots, difference_matrix, fdata_to_basis, fdata_to_basis_1d, fourier_basis,
+    fourier_basis_with_period, fourier_fit_1d, pspline_evaluate, pspline_fit_1d, pspline_fit_gcv,
     select_basis_auto_1d, select_fourier_nbasis_gcv, BasisAutoSelectionResult,
     BasisProjectionResult, FourierFitResult, ProjectionBasisType, PsplineFitResult,
     SingleCurveSelection,

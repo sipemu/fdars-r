@@ -137,12 +137,18 @@ pub struct ElasticSpmChart {
 }
 
 impl ElasticSpmChart {
-    /// Construct an `ElasticSpmChart` from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        karcher_mean: Vec<f64>, amplitude_chart: SpmChart, phase_chart: Option<SpmChart>,
-        config: ElasticSpmConfig, mean_alignment_residual: f64,
+    /// Create a new `ElasticSpmChart`.
+    pub fn new(
+        karcher_mean: Vec<f64>,
+        amplitude_chart: SpmChart,
+        phase_chart: Option<SpmChart>,
+        config: ElasticSpmConfig,
+        mean_alignment_residual: f64,
     ) -> Self {
-        Self { karcher_mean, amplitude_chart, phase_chart, config, mean_alignment_residual }
+        Self {
+            karcher_mean, amplitude_chart, phase_chart,
+            config, mean_alignment_residual,
+        }
     }
 }
 

@@ -108,6 +108,27 @@ pub struct FosrResult {
     pub gcv: f64,
 }
 
+impl FosrResult {
+    /// Create a new `FosrResult`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        intercept: Vec<f64>,
+        beta: FdMatrix,
+        fitted: FdMatrix,
+        residuals: FdMatrix,
+        r_squared_t: Vec<f64>,
+        r_squared: f64,
+        beta_se: FdMatrix,
+        lambda: f64,
+        gcv: f64,
+    ) -> Self {
+        Self {
+            intercept, beta, fitted, residuals, r_squared_t,
+            r_squared, beta_se, lambda, gcv,
+        }
+    }
+}
+
 /// Result of FPC-based function-on-scalar regression.
 #[derive(Debug, Clone, PartialEq)]
 #[non_exhaustive]
@@ -663,7 +684,8 @@ pub fn fosr_fpc(
         });
     }
 
-    let fpca = fdata_to_pc_1d(data, ncomp)?;
+    let argvals: Vec<f64> = (0..m).map(|j| j as f64 / (m - 1).max(1) as f64).collect();
+    let fpca = fdata_to_pc_1d(data, ncomp, &argvals)?;
     let k = fpca.scores.ncols();
     let p_total = p + 1;
     let design = build_fosr_design(predictors, n);
@@ -915,31 +937,6 @@ pub fn fanova(data: &FdMatrix, groups: &[usize], n_perm: usize) -> Result<Fanova
 }
 
 impl FosrResult {
-    /// Construct from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        intercept: Vec<f64>,
-        beta: FdMatrix,
-        fitted: FdMatrix,
-        residuals: FdMatrix,
-        r_squared_t: Vec<f64>,
-        r_squared: f64,
-        beta_se: FdMatrix,
-        lambda: f64,
-        gcv: f64,
-    ) -> Self {
-        Self {
-            intercept,
-            beta,
-            fitted,
-            residuals,
-            r_squared_t,
-            r_squared,
-            beta_se,
-            lambda,
-            gcv,
-        }
-    }
-
     /// Predict functional responses for new predictors. Delegates to [`predict_fosr`].
     pub fn predict(&self, new_predictors: &FdMatrix) -> FdMatrix {
         predict_fosr(self, new_predictors)

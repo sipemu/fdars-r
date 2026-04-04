@@ -121,13 +121,21 @@ pub struct FrccChart {
 }
 
 impl FrccChart {
-    /// Construct an `FrccChart` from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        fosr: FosrResult, residual_fpca: FpcaResult, eigenvalues: Vec<f64>,
-        t2_limit: ControlLimit, spe_limit: ControlLimit,
-        fosr_r_squared: f64, config: FrccConfig,
+    /// Create a new `FrccChart`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        fosr: FosrResult,
+        residual_fpca: FpcaResult,
+        eigenvalues: Vec<f64>,
+        t2_limit: ControlLimit,
+        spe_limit: ControlLimit,
+        fosr_r_squared: f64,
+        config: FrccConfig,
     ) -> Self {
-        Self { fosr, residual_fpca, eigenvalues, t2_limit, spe_limit, fosr_r_squared, config }
+        Self {
+            fosr, residual_fpca, eigenvalues, t2_limit,
+            spe_limit, fosr_r_squared, config,
+        }
     }
 }
 
@@ -338,7 +346,7 @@ pub fn frcc_phase1(
 
     // FPCA on calibration residuals
     let ncomp = config.ncomp.min(n_cal - 1).min(m);
-    let residual_fpca = fdata_to_pc_1d(&cal_residuals, ncomp)?;
+    let residual_fpca = fdata_to_pc_1d(&cal_residuals, ncomp, argvals)?;
     let actual_ncomp = residual_fpca.scores.ncols();
 
     // Eigenvalues

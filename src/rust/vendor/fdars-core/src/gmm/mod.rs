@@ -63,8 +63,9 @@ pub struct GmmResult {
 }
 
 impl GmmResult {
-    /// Construct from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
+    /// Create a new `GmmResult`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
         cluster: Vec<usize>,
         membership: FdMatrix,
         means: Vec<Vec<f64>>,
@@ -79,18 +80,8 @@ impl GmmResult {
         d: usize,
     ) -> Self {
         Self {
-            cluster,
-            membership,
-            means,
-            covariances,
-            weights,
-            log_likelihood,
-            bic,
-            icl,
-            iterations,
-            converged,
-            k,
-            d,
+            cluster, membership, means, covariances, weights,
+            log_likelihood, bic, icl, iterations, converged, k, d,
         }
     }
 }

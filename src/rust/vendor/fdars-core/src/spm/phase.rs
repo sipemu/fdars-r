@@ -25,6 +25,7 @@ use super::stats::{hotelling_t2, spe_multivariate, spe_univariate};
 
 /// Configuration for SPM chart construction.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SpmConfig {
     /// Number of principal components to retain (default 5).
     ///
@@ -76,6 +77,7 @@ impl Default for SpmConfig {
 /// but can be anti-conservative for small calibration sets (n_cal < 10 *
 /// ncomp). When the calibration set is small, prefer bootstrap-based limits.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[non_exhaustive]
 pub struct SpmChart {
     /// FPCA result from the tuning set.
@@ -104,19 +106,27 @@ pub struct SpmChart {
 }
 
 impl SpmChart {
-    /// Construct an `SpmChart` from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        fpca: FpcaResult, eigenvalues: Vec<f64>,
-        t2_phase1: Vec<f64>, spe_phase1: Vec<f64>,
-        t2_limit: ControlLimit, spe_limit: ControlLimit,
-        config: SpmConfig, sample_size_adequate: bool,
+    /// Create a new `SpmChart`.
+    pub fn new(
+        fpca: FpcaResult,
+        eigenvalues: Vec<f64>,
+        t2_phase1: Vec<f64>,
+        spe_phase1: Vec<f64>,
+        t2_limit: ControlLimit,
+        spe_limit: ControlLimit,
+        config: SpmConfig,
+        sample_size_adequate: bool,
     ) -> Self {
-        Self { fpca, eigenvalues, t2_phase1, spe_phase1, t2_limit, spe_limit, config, sample_size_adequate }
+        Self {
+            fpca, eigenvalues, t2_phase1, spe_phase1,
+            t2_limit, spe_limit, config, sample_size_adequate,
+        }
     }
 }
 
 /// Multivariate SPM chart from Phase I.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[non_exhaustive]
 pub struct MfSpmChart {
     /// MFPCA result from the tuning set.
@@ -135,6 +145,7 @@ pub struct MfSpmChart {
 
 /// Result of Phase II monitoring.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[non_exhaustive]
 pub struct SpmMonitorResult {
     /// T-squared values for new observations.
@@ -297,7 +308,7 @@ pub fn spm_phase1(
     // The actual number of retained components may therefore be fewer than
     // config.ncomp; this is reflected in the chart's eigenvalues length.
     let ncomp = config.ncomp.min(n_tune - 1).min(m);
-    let fpca = fdata_to_pc_1d(&tune_data, ncomp)?;
+    let fpca = fdata_to_pc_1d(&tune_data, ncomp, argvals)?;
     let actual_ncomp = fpca.scores.ncols();
 
     // Eigenvalues are computed as λ_l = s_l² / (n-1) where s_l is the l-th
@@ -607,4 +618,59 @@ pub fn mf_spm_monitor(
         spe_alarm,
         scores,
     })
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod tests {
+    use super::*;
+    use crate::simulation::{sim_fundata, EFunType, EValType};
+
+    #[test]
+    fn spm_chart_roundtrip_serde() {
+        let t: Vec<f64> = (0..50).map(|i| i as f64 / 49.0).collect();
+        let data = sim_fundata(
+            40,
+            &t,
+            5,
+            EFunType::Fourier,
+            EValType::Exponential,
+            Some(42),
+        );
+        let config = SpmConfig {
+            ncomp: 3,
+            alpha: 0.05,
+            ..Default::default()
+        };
+        let chart = spm_phase1(&data, &t, &config).unwrap();
+
+        let json = serde_json::to_string(&chart).unwrap();
+        let restored: SpmChart = serde_json::from_str(&json).unwrap();
+
+        // Compare with tolerance for JSON floating-point roundtrip
+        for (a, b) in chart.t2_phase1.iter().zip(&restored.t2_phase1) {
+            assert!((a - b).abs() < 1e-12, "t2_phase1 mismatch: {a} vs {b}");
+        }
+        assert_eq!(chart.t2_limit.ucl, restored.t2_limit.ucl);
+        assert_eq!(chart.spe_limit.ucl, restored.spe_limit.ucl);
+        assert_eq!(chart.config, restored.config);
+        assert_eq!(chart.eigenvalues.len(), restored.eigenvalues.len());
+
+        // Monitor with the restored chart — should produce nearly identical results
+        // (tiny floating-point rounding from JSON roundtrip is expected)
+        let new_data = sim_fundata(
+            10,
+            &t,
+            5,
+            EFunType::Fourier,
+            EValType::Exponential,
+            Some(99),
+        );
+        let r1 = spm_monitor(&chart, &new_data, &t).unwrap();
+        let r2 = spm_monitor(&restored, &new_data, &t).unwrap();
+        for (a, b) in r1.t2.iter().zip(&r2.t2) {
+            assert!((a - b).abs() < 1e-10, "t2 mismatch: {a} vs {b}");
+        }
+        assert_eq!(r1.t2_alarm, r2.t2_alarm);
+        assert_eq!(r1.spe_alarm, r2.spe_alarm);
+    }
 }

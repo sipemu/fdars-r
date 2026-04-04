@@ -37,6 +37,27 @@ pub struct ElasticRegressionResult {
     pub n_iter: usize,
 }
 
+impl ElasticRegressionResult {
+    /// Create a new `ElasticRegressionResult`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        alpha: f64,
+        beta: Vec<f64>,
+        fitted_values: Vec<f64>,
+        residuals: Vec<f64>,
+        sse: f64,
+        r_squared: f64,
+        gammas: FdMatrix,
+        aligned_srsfs: FdMatrix,
+        n_iter: usize,
+    ) -> Self {
+        Self {
+            alpha, beta, fitted_values, residuals, sse,
+            r_squared, gammas, aligned_srsfs, n_iter,
+        }
+    }
+}
+
 /// Alternating alignment + penalized regression for scalar-on-function.
 ///
 /// Iterates:
@@ -197,31 +218,6 @@ pub fn predict_elastic_regression(
 }
 
 impl ElasticRegressionResult {
-    /// Construct from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        alpha: f64,
-        beta: Vec<f64>,
-        fitted_values: Vec<f64>,
-        residuals: Vec<f64>,
-        sse: f64,
-        r_squared: f64,
-        gammas: FdMatrix,
-        aligned_srsfs: FdMatrix,
-        n_iter: usize,
-    ) -> Self {
-        Self {
-            alpha,
-            beta,
-            fitted_values,
-            residuals,
-            sse,
-            r_squared,
-            gammas,
-            aligned_srsfs,
-            n_iter,
-        }
-    }
-
     /// Predict responses for new data. Delegates to [`predict_elastic_regression`].
     pub fn predict(&self, new_data: &FdMatrix, argvals: &[f64]) -> Vec<f64> {
         predict_elastic_regression(self, new_data, argvals)

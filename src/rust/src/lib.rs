@@ -33,7 +33,6 @@ use fdars_core::depth as core_depth;
 
 // New modules from fdars-core 0.8.1
 use fdars_core::explain;
-use fdars_core::explain_generic::FpcPredictor;
 use fdars_core::elastic_regression;
 use fdars_core::elastic_fpca;
 use fdars_core::elastic_changepoint;
@@ -10319,7 +10318,7 @@ fn predict_gmm_rust(
         .collect();
 
     // Build a GmmResult for prediction
-    let gmm_result = gmm::GmmResult::from_parts(
+    let gmm_result = gmm::GmmResult::new(
         vec![0; 1],
         FdMatrix::zeros(1, ku),
         means_vec,
@@ -10618,13 +10617,14 @@ fn reconstruct_fregre_lm(
         gcv,
         aic: 0.0,
         bic: 0.0,
-        fpca: fdars_core::regression::FpcaResult {
-            singular_values: vec![],
+        fpca: fdars_core::regression::FpcaResult::new(
+            vec![],
             rotation,
             scores,
-            mean: fpca_mean,
-            centered: FdMatrix::zeros(n, m),
-        },
+            fpca_mean,
+            FdMatrix::zeros(n, m),
+            vec![],
+        ),
     }
 }
 
@@ -10682,13 +10682,14 @@ fn reconstruct_functional_logistic(
         iterations: iterations as usize,
         aic: 0.0,
         bic: 0.0,
-        fpca: fdars_core::regression::FpcaResult {
-            singular_values: vec![],
+        fpca: fdars_core::regression::FpcaResult::new(
+            vec![],
             rotation,
             scores,
-            mean: fpca_mean,
-            centered: FdMatrix::zeros(n, m),
-        },
+            fpca_mean,
+            FdMatrix::zeros(n, m),
+            vec![],
+        ),
     }
 }
 
@@ -11781,13 +11782,14 @@ fn explain_prototype_rust(
     .unwrap_or_else(|_| FdMatrix::zeros(0, 0));
 
     // Build a minimal FpcaResult with just the scores
-    let fpca = fdars_core::regression::FpcaResult {
-        singular_values: vec![],
-        rotation: FdMatrix::zeros(0, 0),
+    let fpca = fdars_core::regression::FpcaResult::new(
+        vec![],
+        FdMatrix::zeros(0, 0),
         scores,
-        mean: vec![],
-        centered: FdMatrix::zeros(0, 0),
-    };
+        vec![],
+        FdMatrix::zeros(0, 0),
+        vec![],
+    );
 
     match explain::prototype_criticism(&fpca, ncomp as usize, n_prototypes as usize, n_criticisms as usize) {
         Ok(r) => {
@@ -12995,7 +12997,7 @@ fn predict_fosr_2d_rust(
     let grid = fdars_core::function_on_scalar_2d::Grid2d::new(argvals_s, argvals_t);
     let m = grid.total();
 
-    let fosr_result = fdars_core::function_on_scalar_2d::FosrResult2d::from_parts(
+    let fosr_result = fdars_core::function_on_scalar_2d::FosrResult2d::new(
         intercept.clone(),
         beta.clone(),
         FdMatrix::zeros(1, m),
@@ -13087,7 +13089,7 @@ fn predict_elastic_regression_rust(
     let as_ = aligned_srsfs_data.as_real_slice().unwrap();
     let aligned_srsfs = FdMatrix::from_slice(as_, aligned_srsfs_data.nrows(), aligned_srsfs_data.ncols()).expect("Invalid aligned_srsfs");
 
-    let fit = elastic_regression::ElasticRegressionResult::from_parts(
+    let fit = elastic_regression::ElasticRegressionResult::new(
         alpha,
         beta,
         fitted_values,
@@ -13128,7 +13130,7 @@ fn predict_elastic_logistic_rust(
     let aligned_srsfs = FdMatrix::from_slice(as_, aligned_srsfs_data.nrows(), aligned_srsfs_data.ncols()).expect("Invalid aligned_srsfs");
 
     let pred_usize: Vec<usize> = predicted_classes.iter().map(|&x| x as usize).collect();
-    let fit = elastic_regression::ElasticLogisticResult::from_parts(
+    let fit = elastic_regression::ElasticLogisticResult::new(
         alpha,
         beta,
         probabilities,
@@ -13824,6 +13826,7 @@ impl fdars_core::explain_generic::FpcPredictor for RFregreLmPredictor {
     fn task_type(&self) -> fdars_core::explain_generic::TaskType {
         fdars_core::explain_generic::TaskType::Regression
     }
+    fn fpca_weights(&self) -> &[f64] { &[] }
     fn predict_from_scores(&self, scores: &[f64], scalar_covariates: Option<&[f64]>) -> f64 {
         let mut yhat = self.coefficients[0]; // intercept
         for k in 0..self.nc {
@@ -13857,6 +13860,7 @@ impl fdars_core::explain_generic::FpcPredictor for RLogisticPredictor {
     fn task_type(&self) -> fdars_core::explain_generic::TaskType {
         fdars_core::explain_generic::TaskType::BinaryClassification
     }
+    fn fpca_weights(&self) -> &[f64] { &[] }
     fn predict_from_scores(&self, scores: &[f64], scalar_covariates: Option<&[f64]>) -> f64 {
         let mut eta = self.intercept;
         for k in 0..self.nc {
@@ -14410,7 +14414,7 @@ fn predict_scalar_on_shape_rust(
         _ => fdars_core::elastic_regression::IndexMethod::Identity,
     };
 
-    let fit = fdars_core::elastic_regression::ScalarOnShapeResult::from_parts(
+    let fit = fdars_core::elastic_regression::ScalarOnShapeResult::new(
         beta,
         beta_coefficients,
         gm,
@@ -14518,16 +14522,17 @@ fn spm_monitor_rust(
     let nc = ncomp as usize;
     let scores_placeholder = FdMatrix::zeros(n_tune, nc);
 
-    let fpca = FpcaResult {
+    let fpca = FpcaResult::new(
         singular_values,
-        rotation: rot,
-        scores: scores_placeholder,
+        rot,
+        scores_placeholder,
         mean,
-        centered: cen,
-    };
+        cen,
+        vec![],
+    );
 
-    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
-    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
+    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::new(spe_ucl, spe_alpha, spe_description.to_string());
     let config = fdars_core::spm::SpmConfig {
         ncomp: nc,
         alpha: config_alpha,
@@ -14535,7 +14540,7 @@ fn spm_monitor_rust(
         seed: config_seed as u64,
     };
 
-    let chart = SpmChart::from_parts(
+    let chart = SpmChart::new(
         fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config, true,
     );
 
@@ -14644,16 +14649,17 @@ fn spm_ewma_rust(
     let nc = chart_ncomp as usize;
     let scores_placeholder = FdMatrix::zeros(n_tune, nc);
 
-    let fpca = FpcaResult {
+    let fpca = FpcaResult::new(
         singular_values,
-        rotation: rot,
-        scores: scores_placeholder,
+        rot,
+        scores_placeholder,
         mean,
-        centered: cen,
-    };
+        cen,
+        vec![],
+    );
 
-    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
-    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
+    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::new(spe_ucl, spe_alpha, spe_description.to_string());
     let config = fdars_core::spm::SpmConfig {
         ncomp: nc,
         alpha: config_alpha,
@@ -14661,7 +14667,7 @@ fn spm_ewma_rust(
         seed: config_seed as u64,
     };
 
-    let chart = SpmChart::from_parts(
+    let chart = SpmChart::new(
         fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config, true,
     );
 
@@ -14858,7 +14864,7 @@ fn frcc_monitor_rust(
     let fbs = fosr_beta.as_real_slice().unwrap();
     let fb = FdMatrix::from_slice(fbs, fosr_beta.nrows(), fosr_beta.ncols()).expect("Invalid fosr_beta");
 
-    let fosr = fdars_core::function_on_scalar::FosrResult::from_parts(
+    let fosr = fdars_core::function_on_scalar::FosrResult::new(
         fosr_intercept,
         fb,
         FdMatrix::zeros(1, 1),
@@ -14880,16 +14886,17 @@ fn frcc_monitor_rust(
     let n_cal = resid_centered.nrows();
     let resid_scores_placeholder = FdMatrix::zeros(n_cal, nc);
 
-    let residual_fpca = FpcaResult {
-        singular_values: resid_singular_values,
-        rotation: rr,
-        scores: resid_scores_placeholder,
-        mean: resid_mean,
-        centered: rc,
-    };
+    let residual_fpca = FpcaResult::new(
+        resid_singular_values,
+        rr,
+        resid_scores_placeholder,
+        resid_mean,
+        rc,
+        vec![],
+    );
 
-    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
-    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
+    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::new(spe_ucl, spe_alpha, spe_description.to_string());
 
     let frcc_config = fdars_core::spm::FrccConfig {
         ncomp: nc,
@@ -14900,7 +14907,7 @@ fn frcc_monitor_rust(
         min_r_squared: 0.0,
     };
 
-    let chart = fdars_core::spm::FrccChart::from_parts(
+    let chart = fdars_core::spm::FrccChart::new(
         fosr, residual_fpca, eigenvalues, t2_limit, spe_limit, 0.0, frcc_config,
     );
 
@@ -15156,7 +15163,7 @@ fn alignment_diagnose_pairwise_rust(
         return r!(NULL);
     }
 
-    let alignment_result = alignment::AlignmentResult::from_parts(gamma, f_aligned, distance);
+    let alignment_result = alignment::AlignmentResult::new(gamma, f_aligned, distance);
 
     let config = alignment::DiagnosticConfig::default();
     let d = alignment::diagnose_pairwise(&f1, &f2, &alignment_result, &argvals, &config);
@@ -15417,7 +15424,7 @@ fn elastic_cut_dendrogram_rust(merges_data: RMatrix<f64>, distance_matrix: RMatr
     let dist_slice = distance_matrix.as_real_slice().unwrap();
     let dist_fd = FdMatrix::from_slice(dist_slice, n, n).expect("Invalid distance matrix dimensions");
 
-    let dendro = alignment::ElasticDendrogram::from_parts(merges, dist_fd);
+    let dendro = alignment::ElasticDendrogram::new(merges, dist_fd);
 
     match alignment::cut_dendrogram(&dendro, k as usize) {
         Ok(labels) => {
@@ -15458,16 +15465,17 @@ fn reconstruct_spm_chart(
     let nc = ncomp as usize;
     let scores_placeholder = FdMatrix::zeros(n_tune, nc);
 
-    let fpca = FpcaResult {
+    let fpca = FpcaResult::new(
         singular_values,
-        rotation: rot,
-        scores: scores_placeholder,
+        rot,
+        scores_placeholder,
         mean,
-        centered: cen,
-    };
+        cen,
+        vec![],
+    );
 
-    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
-    let spe_limit = ControlLimit::from_parts(spe_ucl, spe_alpha, spe_description.to_string());
+    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
+    let spe_limit = ControlLimit::new(spe_ucl, spe_alpha, spe_description.to_string());
     let config = fdars_core::spm::SpmConfig {
         ncomp: nc,
         alpha: config_alpha,
@@ -15475,7 +15483,7 @@ fn reconstruct_spm_chart(
         seed: config_seed as u64,
     };
 
-    SpmChart::from_parts(
+    SpmChart::new(
         fpca, eigenvalues, vec![], vec![], t2_limit, spe_limit, config, true,
     )
 }
@@ -16131,19 +16139,20 @@ fn spm_profile_monitor_rust(
     let nc = eigenvalues.len().min(ncomp as usize);
     let beta_scores_placeholder = FdMatrix::zeros(n_windows, nc);
 
-    let beta_fpca = FpcaResult {
-        singular_values: beta_singular_values,
-        rotation: br,
-        scores: beta_scores_placeholder,
-        mean: beta_mean,
-        centered: bc,
-    };
+    let beta_fpca = FpcaResult::new(
+        beta_singular_values,
+        br,
+        beta_scores_placeholder,
+        beta_mean,
+        bc,
+        vec![],
+    );
 
     // Reconstruct reference FOSR (minimal, just intercept + beta needed)
     let fbs = ref_fosr_beta.as_real_slice().unwrap();
     let fb = FdMatrix::from_slice(fbs, ref_fosr_beta.nrows(), ref_fosr_beta.ncols()).expect("Invalid ref_fosr_beta");
 
-    let reference_fosr = fdars_core::function_on_scalar::FosrResult::from_parts(
+    let reference_fosr = fdars_core::function_on_scalar::FosrResult::new(
         ref_fosr_intercept,
         fb,
         FdMatrix::zeros(1, 1),
@@ -16155,7 +16164,7 @@ fn spm_profile_monitor_rust(
         0.0,
     );
 
-    let t2_limit = ControlLimit::from_parts(t2_ucl, t2_alpha, t2_description.to_string());
+    let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
 
     let monitor_config = ProfileMonitorConfig {
         fosr_lambda,
@@ -16165,7 +16174,7 @@ fn spm_profile_monitor_rust(
         step_size: step_size as usize,
     };
 
-    let chart = ProfileChart::from_parts(
+    let chart = ProfileChart::new(
         reference_fosr, beta_fpca, eigenvalues, t2_limit,
         lag1_autocorrelation, effective_n_windows, monitor_config.clone(),
     );
@@ -16467,7 +16476,7 @@ fn elastic_spm_monitor_rust(
         karcher_tolerance: 1e-4,
     };
 
-    let elastic_chart = ElasticSpmChart::from_parts(
+    let elastic_chart = ElasticSpmChart::new(
         karcher_mean, amplitude_chart, phase_chart, elastic_config, 0.0,
     );
 

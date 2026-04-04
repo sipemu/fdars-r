@@ -130,13 +130,21 @@ pub struct ProfileChart {
 }
 
 impl ProfileChart {
-    /// Construct a `ProfileChart` from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
-        reference_fosr: FosrResult, beta_fpca: FpcaResult, eigenvalues: Vec<f64>,
-        t2_limit: ControlLimit, lag1_autocorrelation: f64, effective_n_windows: f64,
+    /// Create a new `ProfileChart`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        reference_fosr: FosrResult,
+        beta_fpca: FpcaResult,
+        eigenvalues: Vec<f64>,
+        t2_limit: ControlLimit,
+        lag1_autocorrelation: f64,
+        effective_n_windows: f64,
         config: ProfileMonitorConfig,
     ) -> Self {
-        Self { reference_fosr, beta_fpca, eigenvalues, t2_limit, lag1_autocorrelation, effective_n_windows, config }
+        Self {
+            reference_fosr, beta_fpca, eigenvalues, t2_limit,
+            lag1_autocorrelation, effective_n_windows, config,
+        }
     }
 }
 
@@ -270,7 +278,11 @@ pub fn profile_phase1(
 
     // FPCA on vectorized betas
     let ncomp = config.ncomp.min(n_windows - 1).min(beta_vecs.ncols());
-    let beta_fpca = fdata_to_pc_1d(&beta_vecs, ncomp)?;
+    let beta_m = beta_vecs.ncols();
+    let beta_argvals: Vec<f64> = (0..beta_m)
+        .map(|j| j as f64 / (beta_m - 1).max(1) as f64)
+        .collect();
+    let beta_fpca = fdata_to_pc_1d(&beta_vecs, ncomp, &beta_argvals)?;
     let actual_ncomp = beta_fpca.scores.ncols();
 
     // Eigenvalues

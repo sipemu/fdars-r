@@ -92,8 +92,9 @@ pub struct FosrResult2d {
 }
 
 impl FosrResult2d {
-    /// Construct from pre-computed parts (for FFI reconstruction).
-    pub fn from_parts(
+    /// Create a new `FosrResult2d`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
         intercept: Vec<f64>,
         beta: FdMatrix,
         fitted: FdMatrix,
@@ -107,17 +108,8 @@ impl FosrResult2d {
         grid: Grid2d,
     ) -> Self {
         Self {
-            intercept,
-            beta,
-            fitted,
-            residuals,
-            r_squared_pointwise,
-            r_squared,
-            beta_se,
-            lambda_s,
-            lambda_t,
-            gcv,
-            grid,
+            intercept, beta, fitted, residuals, r_squared_pointwise,
+            r_squared, beta_se, lambda_s, lambda_t, gcv, grid,
         }
     }
 

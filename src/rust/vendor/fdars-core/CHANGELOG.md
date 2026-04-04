@@ -5,7 +5,45 @@ All notable changes to fdars-core will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0]
+
+### Fixed
+
+- **B-spline cross-grid evaluation** (issue #21): `pspline_fit_1d` now stores the knot vector and order in `PsplineFitResult`. New `pspline_evaluate` function evaluates fitted P-splines on arbitrary grids using stored knots. New `bspline_basis_from_knots` evaluates B-spline basis from pre-computed knots. `construct_bspline_knots` is now public. (4 regression tests)
+- **FPCA grid-density invariance** (issue #22): `fdata_to_pc_1d` now accepts `argvals` and uses Simpson's-rule integration weights in the SVD, making scores invariant to grid resolution. `FpcaResult` stores weights; `project()` uses weighted inner products. `fdata_to_pls_1d` similarly updated. All 13 callers, 3 examples, and `FpcPredictor` trait updated. (6 regression tests)
+
+### Added (issue #23 features)
+
+- **`pspline_fit_gcv`** (`basis/pspline.rs`): Automatic lambda selection via GCV minimization over a 25-point log-spaced grid. (2 tests)
+- **`fdata_interpolate`** (`helpers.rs`): Resample functional data to a new grid with `InterpolationMethod::Linear` or `CubicHermite` (Fritsch-Carlson monotone C1). (3 tests)
+- **`outliergram`** (`outliers.rs`): Outliergram combining MEI and MBD with parabolic threshold and IQR-based outlier detection. New type `OutligramResult`. (3 tests)
+- **`magnitude_shape_outlyingness`** (`outliers.rs`): Magnitude-shape decomposition of outlyingness (1 - MBD for magnitude, normalized direction distance for shape). New type `MagnitudeShapeResult`. (2 tests)
+- **Serde support** (issue #24): Optional `serde` feature flag adds `Serialize`/`Deserialize` derives to `FdMatrix`, `FpcaResult`, `PlsResult`, `SpmChart`, `SpmConfig`, `ControlLimit`, `ControlLimitMethod`, `MfSpmChart`, `MfpcaResult`, `MfpcaConfig`, `SpmMonitorResult`. Enables persistent Phase I/II monitoring workflows. (1 roundtrip test)
+
+### Added
+
+#### Alignment Module — 6 new advanced features
+
+- **Multivariate curve Karcher mean** (`alignment/nd.rs`): iterative Karcher mean, covariance estimation, and PCA for R^d curves with shared warping. New types: `KarcherMeanResultNd`, `PcaNdResult`. Functions: `karcher_mean_nd`, `karcher_covariance_nd`, `pca_nd`
+- **Gaussian generative model** (`alignment/generative.rs`): sample synthetic curves from fitted amplitude (vertical FPCA) and phase (horizontal FPCA) Gaussian models; joint model preserves amplitude-phase correlation. New type: `GenerativeModelResult`. Functions: `gauss_model`, `joint_gauss_model`
+- **Bayesian alignment** (`alignment/bayesian.rs`): pairwise alignment via preconditioned Crank-Nicolson (pCN) MCMC on the Hilbert sphere with posterior warping function samples, credible bands, and acceptance diagnostics. New types: `BayesianAlignConfig`, `BayesianAlignmentResult`. Function: `bayesian_align_pair`
+- **Curve geodesic interpolation** (`alignment/geodesic.rs`): geodesic paths between curves in elastic space — amplitude interpolation in SRSF space, phase interpolation on the Hilbert sphere; 1-D and N-D variants. New types: `GeodesicPath`, `GeodesicPathNd`. Functions: `curve_geodesic`, `curve_geodesic_nd`
+- **Peak persistence diagram** (`alignment/persistence.rs`): topology-based automatic lambda selection by tracking peak birth/death across a lambda sweep of Karcher means. New type: `PersistenceDiagramResult`. Function: `peak_persistence`
+- **Horizontal FPNS** (`alignment/fpns.rs`): Functional Principal Nested Spheres for warping functions — nonlinear PCA on the Hilbert sphere via iterative geodesic principal direction extraction. New type: `FpnsResult`. Function: `horiz_fpns`
+- 25 new alignment tests
+
+#### Alignment Module — 9 additional gaps
+
+- **Elastic depth** (`alignment/elastic_depth.rs`): amplitude + phase decomposed functional depth via inverse-average-distance on elastic distance matrices. New type: `ElasticDepthResult`. Function: `elastic_depth`
+- **Robust Karcher mean** (`alignment/robust_karcher.rs`): Karcher median via iterative Weiszfeld algorithm on the elastic manifold, and trimmed Karcher mean that removes the most distant curves. New types: `RobustKarcherConfig`, `RobustKarcherResult`. Functions: `karcher_median`, `robust_karcher_mean`
+- **SRVF outlier detection** (`alignment/outlier.rs`): detect outlier curves via elastic distances from a reference (mean or median) with Tukey fence thresholding and amplitude/phase decomposition. New types: `ElasticOutlierConfig`, `ElasticOutlierResult`. Function: `elastic_outlier_detection`
+- **Closed curve alignment** (`alignment/closed.rs`): alignment for periodic/closed curves with coarse-to-fine rotation search over circular starting-point shifts, plus Karcher mean for closed curves. New types: `ClosedAlignmentResult`, `ClosedKarcherMeanResult`. Functions: `elastic_align_pair_closed`, `elastic_distance_closed`, `karcher_mean_closed`
+- **Elastic partial matching** (`alignment/partial_match.rs`): find the best-aligned subcurve of a longer target curve via sliding variable-length window search. New types: `PartialMatchConfig`, `PartialMatchResult`. Function: `elastic_partial_match`
+- **Multi-resolution alignment** (`alignment/multires.rs`): coarse DP on a subsampled grid + fine gradient refinement on the original resolution for faster alignment of long curves. New type: `MultiresConfig`. Function: `elastic_align_pair_multires`
+- **Shape confidence intervals** (`alignment/shape_ci.rs`): bootstrap confidence bands for the elastic Karcher mean via resampling and alignment of bootstrap means. New types: `ShapeCiConfig`, `ShapeCiResult`. Function: `shape_confidence_interval`
+- **Transfer alignment** (`alignment/transfer.rs`): align curves from a target population to a source population's coordinate system via bridging warps composed with within-population warps. New types: `TransferAlignConfig`, `TransferAlignResult`. Function: `transfer_alignment`
+- 31 new alignment tests; total: 2,492 tests (1,808 unit + 684 integration/doc)
+- All new types and functions re-exported in `lib.rs` and `prelude.rs`
 
 ## [0.9.0] - 2026-03-17
 
