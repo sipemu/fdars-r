@@ -10623,7 +10623,7 @@ fn reconstruct_fregre_lm(
             scores,
             fpca_mean,
             FdMatrix::zeros(n, m),
-            vec![],
+            if m > 0 { vec![1.0 / m as f64; m] } else { vec![] },
         ),
     }
 }
@@ -10688,7 +10688,7 @@ fn reconstruct_functional_logistic(
             scores,
             fpca_mean,
             FdMatrix::zeros(n, m),
-            vec![],
+            if m > 0 { vec![1.0 / m as f64; m] } else { vec![] },
         ),
     }
 }
@@ -13816,6 +13816,7 @@ struct RFregreLmPredictor {
     nc: usize,
     coefficients: Vec<f64>,
     gamma: Vec<f64>,
+    weights: Vec<f64>,
 }
 
 impl fdars_core::explain_generic::FpcPredictor for RFregreLmPredictor {
@@ -13826,7 +13827,7 @@ impl fdars_core::explain_generic::FpcPredictor for RFregreLmPredictor {
     fn task_type(&self) -> fdars_core::explain_generic::TaskType {
         fdars_core::explain_generic::TaskType::Regression
     }
-    fn fpca_weights(&self) -> &[f64] { &[] }
+    fn fpca_weights(&self) -> &[f64] { &self.weights }
     fn predict_from_scores(&self, scores: &[f64], scalar_covariates: Option<&[f64]>) -> f64 {
         let mut yhat = self.coefficients[0]; // intercept
         for k in 0..self.nc {
@@ -13850,6 +13851,7 @@ struct RLogisticPredictor {
     intercept: f64,
     coefficients: Vec<f64>,
     gamma: Vec<f64>,
+    weights: Vec<f64>,
 }
 
 impl fdars_core::explain_generic::FpcPredictor for RLogisticPredictor {
@@ -13860,7 +13862,7 @@ impl fdars_core::explain_generic::FpcPredictor for RLogisticPredictor {
     fn task_type(&self) -> fdars_core::explain_generic::TaskType {
         fdars_core::explain_generic::TaskType::BinaryClassification
     }
-    fn fpca_weights(&self) -> &[f64] { &[] }
+    fn fpca_weights(&self) -> &[f64] { &self.weights }
     fn predict_from_scores(&self, scores: &[f64], scalar_covariates: Option<&[f64]>) -> f64 {
         let mut eta = self.intercept;
         for k in 0..self.nc {
@@ -13913,6 +13915,7 @@ fn conformal_generic_regression_lm_rust(
     let sc_s = fpca_scores.as_real_slice().unwrap();
     let sc = FdMatrix::from_slice(sc_s, fpca_scores.nrows(), fpca_scores.ncols()).expect("Invalid scores");
 
+    let m = fpca_mean.len();
     let predictor = RFregreLmPredictor {
         mean: fpca_mean,
         rotation: rot,
@@ -13920,6 +13923,7 @@ fn conformal_generic_regression_lm_rust(
         nc: ncomp as usize,
         coefficients,
         gamma,
+        weights: vec![1.0 / m as f64; m],
     };
 
     let cal_idx: Option<Vec<usize>> = match calibration_indices {
@@ -13989,6 +13993,7 @@ fn conformal_generic_classification_logistic_rust(
         _ => fdars_core::conformal::ClassificationScore::Lac,
     };
 
+    let m = fpca_mean.len();
     let predictor = RLogisticPredictor {
         mean: fpca_mean,
         rotation: rot,
@@ -13997,6 +14002,7 @@ fn conformal_generic_classification_logistic_rust(
         intercept,
         coefficients,
         gamma,
+        weights: vec![1.0 / m as f64; m],
     };
 
     let cal_idx: Option<Vec<usize>> = match calibration_indices {
@@ -14522,13 +14528,15 @@ fn spm_monitor_rust(
     let nc = ncomp as usize;
     let scores_placeholder = FdMatrix::zeros(n_tune, nc);
 
+    let w = mean.len();
+    let weights = if w > 0 { vec![1.0 / w as f64; w] } else { vec![] };
     let fpca = FpcaResult::new(
         singular_values,
         rot,
         scores_placeholder,
         mean,
         cen,
-        vec![],
+        weights,
     );
 
     let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
@@ -14649,13 +14657,15 @@ fn spm_ewma_rust(
     let nc = chart_ncomp as usize;
     let scores_placeholder = FdMatrix::zeros(n_tune, nc);
 
+    let w = mean.len();
+    let weights = if w > 0 { vec![1.0 / w as f64; w] } else { vec![] };
     let fpca = FpcaResult::new(
         singular_values,
         rot,
         scores_placeholder,
         mean,
         cen,
-        vec![],
+        weights,
     );
 
     let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
@@ -14886,13 +14896,15 @@ fn frcc_monitor_rust(
     let n_cal = resid_centered.nrows();
     let resid_scores_placeholder = FdMatrix::zeros(n_cal, nc);
 
+    let w = resid_mean.len();
+    let resid_weights = if w > 0 { vec![1.0 / w as f64; w] } else { vec![] };
     let residual_fpca = FpcaResult::new(
         resid_singular_values,
         rr,
         resid_scores_placeholder,
         resid_mean,
         rc,
-        vec![],
+        resid_weights,
     );
 
     let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
@@ -15465,13 +15477,15 @@ fn reconstruct_spm_chart(
     let nc = ncomp as usize;
     let scores_placeholder = FdMatrix::zeros(n_tune, nc);
 
+    let w = mean.len();
+    let weights = if w > 0 { vec![1.0 / w as f64; w] } else { vec![] };
     let fpca = FpcaResult::new(
         singular_values,
         rot,
         scores_placeholder,
         mean,
         cen,
-        vec![],
+        weights,
     );
 
     let t2_limit = ControlLimit::new(t2_ucl, t2_alpha, t2_description.to_string());
@@ -16139,13 +16153,15 @@ fn spm_profile_monitor_rust(
     let nc = eigenvalues.len().min(ncomp as usize);
     let beta_scores_placeholder = FdMatrix::zeros(n_windows, nc);
 
+    let w = beta_mean.len();
+    let beta_weights = if w > 0 { vec![1.0 / w as f64; w] } else { vec![] };
     let beta_fpca = FpcaResult::new(
         beta_singular_values,
         br,
         beta_scores_placeholder,
         beta_mean,
         bc,
-        vec![],
+        beta_weights,
     );
 
     // Reconstruct reference FOSR (minimal, just intercept + beta needed)

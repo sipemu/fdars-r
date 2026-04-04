@@ -171,6 +171,26 @@ reference:
   - plot.karcher.mean
   - plot.alignment.quality
 
+- title: Advanced Alignment
+  contents:
+  - karcher.median
+  - robust.karcher.mean
+  - elastic.depth
+  - elastic.outlier.detection
+  - shape.confidence.interval
+  - bayesian.align.pair
+  - elastic.align.pair.multires
+  - elastic.align.pair.closed
+  - elastic.distance.closed
+  - karcher.mean.closed
+  - elastic.partial.match
+  - curve.geodesic
+  - peak.persistence
+  - transfer.alignment
+  - gauss.model
+  - joint.gauss.model
+  - horiz.fpns
+
 - title: Landmark Registration
   contents:
   - detect.landmarks
