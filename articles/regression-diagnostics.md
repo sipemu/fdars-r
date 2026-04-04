@@ -475,7 +475,7 @@ most and least stable.
 rdepth <- fregre.depth(model, data = fdataobj, y = y, n.boot = 50, seed = 42)
 
 cat("Beta depth:", round(rdepth$beta_depth, 4), "\n")
-#> Beta depth: 0.36
+#> Beta depth: 0.328
 cat("Mean score depth:", round(rdepth$mean_score_depth, 4), "\n")
 #> Mean score depth: 0.25
 cat("Bootstrap replicates:", rdepth$n_boot_success, "\n")
@@ -523,9 +523,9 @@ stab <- fregre.stability(data = fdataobj, y = y, ncomp = 5,
                          n.boot = 50, seed = 42)
 
 cat("Mean beta(t) CV:", round(mean(stab$beta_t_cv), 4), "\n")
-#> Mean beta(t) CV: 16.2045
+#> Mean beta(t) CV: 24.539
 cat("Coefficient std devs:", round(stab$coefficient_std, 4), "\n")
-#> Coefficient std devs: 0.0203 0.238 0.2284 0.2277 0.237
+#> Coefficient std devs: 0.2045 2.1157 2.0746 1.9139 2.5343
 cat("Bootstrap successes:", stab$n_boot_success, "\n")
 #> Bootstrap successes: 50
 ```

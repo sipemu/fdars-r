@@ -306,7 +306,7 @@ if (n_intervals > 0) {
   cat("No intervals detected above threshold.\n")
 }
 #> Detected intervals:
-#>   Interval 1: t = [0.677, 0.859], importance = 0.037
+#>   Interval 1: t = [0.677, 0.859], importance = 361.302
 ```
 
 The windowed approach produces broader intervals that may extend

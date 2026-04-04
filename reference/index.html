@@ -468,6 +468,134 @@
         </dt>
         <dd>Plot Alignment Quality Diagnostics</dd>
       </dl></div><div class="section level2">
+      <h2 id="advanced-alignment">Advanced Alignment<a class="anchor" aria-label="anchor" href="#advanced-alignment"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="karcher.median.html">karcher.median()</a></code>
+
+        </dt>
+        <dd>Karcher Median in Elastic Metric</dd>
+
+        <dt>
+
+          <code><a href="robust.karcher.mean.html">robust.karcher.mean()</a></code>
+
+        </dt>
+        <dd>Trimmed Karcher Mean in Elastic Metric</dd>
+
+        <dt>
+
+          <code><a href="elastic.depth.html">elastic.depth()</a></code>
+
+        </dt>
+        <dd>Elastic Depth for Functional Data</dd>
+
+        <dt>
+
+          <code><a href="elastic.outlier.detection.html">elastic.outlier.detection()</a></code>
+
+        </dt>
+        <dd>Elastic Outlier Detection</dd>
+
+        <dt>
+
+          <code><a href="shape.confidence.interval.html">shape.confidence.interval()</a></code>
+
+        </dt>
+        <dd>Bootstrap Confidence Bands for Elastic Karcher Mean</dd>
+
+        <dt>
+
+          <code><a href="bayesian.align.pair.html">bayesian.align.pair()</a></code>
+
+        </dt>
+        <dd>Bayesian Pairwise Curve Alignment</dd>
+
+        <dt>
+
+          <code><a href="elastic.align.pair.multires.html">elastic.align.pair.multires()</a></code>
+
+        </dt>
+        <dd>Multi-Resolution Pairwise Curve Alignment</dd>
+
+        <dt>
+
+          <code><a href="elastic.align.pair.closed.html">elastic.align.pair.closed()</a></code>
+
+        </dt>
+        <dd>Elastic Alignment of Closed Curves</dd>
+
+        <dt>
+
+          <code><a href="elastic.distance.closed.html">elastic.distance.closed()</a></code>
+
+        </dt>
+        <dd>Elastic Distance Between Closed Curves</dd>
+
+        <dt>
+
+          <code><a href="karcher.mean.closed.html">karcher.mean.closed()</a></code>
+
+        </dt>
+        <dd>Karcher Mean for Closed Curves</dd>
+
+        <dt>
+
+          <code><a href="elastic.partial.match.html">elastic.partial.match()</a></code>
+
+        </dt>
+        <dd>Elastic Partial Curve Matching</dd>
+
+        <dt>
+
+          <code><a href="curve.geodesic.html">curve.geodesic()</a></code>
+
+        </dt>
+        <dd>Geodesic Path Between Two Curves</dd>
+
+        <dt>
+
+          <code><a href="peak.persistence.html">peak.persistence()</a></code>
+
+        </dt>
+        <dd>Peak Persistence Analysis</dd>
+
+        <dt>
+
+          <code><a href="transfer.alignment.html">transfer.alignment()</a></code>
+
+        </dt>
+        <dd>Transfer Alignment Between Functional Samples</dd>
+
+        <dt>
+
+          <code><a href="gauss.model.html">gauss.model()</a></code>
+
+        </dt>
+        <dd>Gaussian Generative Model for Elastic Functional Data</dd>
+
+        <dt>
+
+          <code><a href="joint.gauss.model.html">joint.gauss.model()</a></code>
+
+        </dt>
+        <dd>Joint Amplitude-Phase Gaussian Generative Model</dd>
+
+        <dt>
+
+          <code><a href="horiz.fpns.html">horiz.fpns()</a></code>
+
+        </dt>
+        <dd>Horizontal Functional Principal Nested Spheres</dd>
+      </dl></div><div class="section level2">
       <h2 id="landmark-registration">Landmark Registration<a class="anchor" aria-label="anchor" href="#landmark-registration"></a></h2>
 
 
@@ -3726,10 +3854,24 @@
 
         <dt>
 
+          <code><a href="elastic_cut_dendrogram_rust.html">elastic_cut_dendrogram_rust()</a></code>
+
+        </dt>
+        <dd>Cut a hierarchical dendrogram to get cluster labels</dd>
+
+        <dt>
+
           <code><a href="elastic_fpca_changepoint_rust.html">elastic_fpca_changepoint_rust()</a></code>
 
         </dt>
         <dd>FPCA-based changepoint detection</dd>
+
+        <dt>
+
+          <code><a href="elastic_hierarchical_rust.html">elastic_hierarchical_rust()</a></code>
+
+        </dt>
+        <dd>Elastic hierarchical clustering</dd>
 
         <dt>
 
@@ -3744,6 +3886,13 @@
 
         </dt>
         <dd>Joint FPCA (amplitude + phase)</dd>
+
+        <dt>
+
+          <code><a href="elastic_kmeans_rust.html">elastic_kmeans_rust()</a></code>
+
+        </dt>
+        <dd>Elastic k-means clustering</dd>
 
         <dt>
 
@@ -3782,6 +3931,20 @@
 
         <dt>
 
+          <code><a href="elastic_spm_monitor_rust.html">elastic_spm_monitor_rust()</a></code>
+
+        </dt>
+        <dd>Elastic SPM Phase II monitoring.</dd>
+
+        <dt>
+
+          <code><a href="elastic_spm_phase1_rust.html">elastic_spm_phase1_rust()</a></code>
+
+        </dt>
+        <dd>Elastic SPM Phase I.</dd>
+
+        <dt>
+
           <code><a href="elastic_vert_fpca_rust.html">elastic_vert_fpca_rust()</a></code>
 
         </dt>
@@ -3800,6 +3963,97 @@
 
         </dt>
         <dd>Smooth functional data using B-spline or Fourier basis with fixed penalty</dd>
+
+        <dt>
+
+          <code><a href="alignment_diagnose_pairwise_rust.html">alignment_diagnose_pairwise_rust()</a></code>
+
+        </dt>
+        <dd>Diagnose a single pairwise alignment</dd>
+
+        <dt>
+
+          <code><a href="alignment_diagnose_rust.html">alignment_diagnose_rust()</a></code>
+
+        </dt>
+        <dd>Diagnose alignment quality for all curves after Karcher mean computation</dd>
+
+        <dt>
+
+          <code><a href="alignment_elastic_pair_penalized_rust.html">alignment_elastic_pair_penalized_rust()</a></code>
+
+        </dt>
+        <dd>Penalized elastic alignment with configurable penalty type</dd>
+
+        <dt>
+
+          <code><a href="alignment_invert_warp_rust.html">alignment_invert_warp_rust()</a></code>
+
+        </dt>
+        <dd>Invert a warping function</dd>
+
+        <dt>
+
+          <code><a href="alignment_lambda_cv_rust.html">alignment_lambda_cv_rust()</a></code>
+
+        </dt>
+        <dd>Lambda cross-validation for elastic alignment regularisation</dd>
+
+        <dt>
+
+          <code><a href="alignment_orbit_representative_rust.html">alignment_orbit_representative_rust()</a></code>
+
+        </dt>
+        <dd>Compute the orbit representative of a curve in a quotient space</dd>
+
+        <dt>
+
+          <code><a href="alignment_phase_boxplot_rust.html">alignment_phase_boxplot_rust()</a></code>
+
+        </dt>
+        <dd>Phase boxplot for warping functions</dd>
+
+        <dt>
+
+          <code><a href="alignment_shape_distance_rust.html">alignment_shape_distance_rust()</a></code>
+
+        </dt>
+        <dd>Elastic shape distance between two curves</dd>
+
+        <dt>
+
+          <code><a href="alignment_shape_mean_rust.html">alignment_shape_mean_rust()</a></code>
+
+        </dt>
+        <dd>Shape mean (Karcher mean in quotient space)</dd>
+
+        <dt>
+
+          <code><a href="alignment_shape_self_distance_matrix_rust.html">alignment_shape_self_distance_matrix_rust()</a></code>
+
+        </dt>
+        <dd>Shape self-distance matrix</dd>
+
+        <dt>
+
+          <code><a href="alignment_warp_inverse_error_rust.html">alignment_warp_inverse_error_rust()</a></code>
+
+        </dt>
+        <dd>Warp inverse error: max |gamma(gamma_inv(t)) - t|</dd>
+
+        <dt>
+
+          <code><a href="alignment_warp_statistics_rust.html">alignment_warp_statistics_rust()</a></code>
+
+        </dt>
+        <dd>Warp statistics: mean, variance, confidence bands, Karcher mean warp</dd>
+
+        <dt>
+
+          <code><a href="basis2fdata_2d_rust.html">basis2fdata_2d_rust()</a></code>
+
+        </dt>
+        <dd>Reconstruct 2D functional data from tensor product basis coefficients (low-level)</dd>
 
         <dt>
 
@@ -3954,6 +4208,13 @@
 
         </dt>
         <dd>QDA classification</dd>
+
+        <dt>
+
+          <code><a href="fdata2basis_2d_rust.html">fdata2basis_2d_rust()</a></code>
+
+        </dt>
+        <dd>Project 2D functional data to tensor product basis coefficients (low-level)</dd>
 
         <dt>
 
@@ -4174,10 +4435,87 @@
 
         <dt>
 
+          <code><a href="spm_amewma_monitor_rust.html">spm_amewma_monitor_rust()</a></code>
+
+        </dt>
+        <dd>Adaptive EWMA (AMEWMA) monitoring on sequential functional data.</dd>
+
+        <dt>
+
+          <code><a href="spm_arl0_ewma_t2_rust.html">spm_arl0_ewma_t2_rust()</a></code>
+
+        </dt>
+        <dd>In-control ARL for EWMA-T-squared chart.</dd>
+
+        <dt>
+
+          <code><a href="spm_arl0_spe_rust.html">spm_arl0_spe_rust()</a></code>
+
+        </dt>
+        <dd>In-control ARL for SPE chart.</dd>
+
+        <dt>
+
+          <code><a href="spm_arl0_t2_rust.html">spm_arl0_t2_rust()</a></code>
+
+        </dt>
+        <dd>In-control ARL for T-squared chart.</dd>
+
+        <dt>
+
+          <code><a href="spm_arl1_t2_rust.html">spm_arl1_t2_rust()</a></code>
+
+        </dt>
+        <dd>Out-of-control ARL for T-squared chart.</dd>
+
+        <dt>
+
+          <code><a href="spm_cusum_monitor_restart_rust.html">spm_cusum_monitor_restart_rust()</a></code>
+
+        </dt>
+        <dd>CUSUM monitoring with restart after each alarm.</dd>
+
+        <dt>
+
+          <code><a href="spm_cusum_monitor_rust.html">spm_cusum_monitor_rust()</a></code>
+
+        </dt>
+        <dd>CUSUM monitoring on sequential functional data.</dd>
+
+        <dt>
+
+          <code><a href="spm_evaluate_rules_rust.html">spm_evaluate_rules_rust()</a></code>
+
+        </dt>
+        <dd>Evaluate control chart rules (Western Electric, Nelson, or custom).</dd>
+
+        <dt>
+
           <code><a href="spm_ewma_rust.html">spm_ewma_rust()</a></code>
 
         </dt>
         <dd>EWMA-based SPM monitoring.</dd>
+
+        <dt>
+
+          <code><a href="spm_mewma_monitor_rust.html">spm_mewma_monitor_rust()</a></code>
+
+        </dt>
+        <dd>MEWMA monitoring on sequential functional data.</dd>
+
+        <dt>
+
+          <code><a href="spm_monitor_partial_batch_rust.html">spm_monitor_partial_batch_rust()</a></code>
+
+        </dt>
+        <dd>Monitor a batch of partially-observed curves.</dd>
+
+        <dt>
+
+          <code><a href="spm_monitor_partial_rust.html">spm_monitor_partial_rust()</a></code>
+
+        </dt>
+        <dd>Monitor a single partially-observed curve.</dd>
 
         <dt>
 
@@ -4188,10 +4526,38 @@
 
         <dt>
 
+          <code><a href="spm_phase1_iterative_rust.html">spm_phase1_iterative_rust()</a></code>
+
+        </dt>
+        <dd>Iterative Phase I chart construction.</dd>
+
+        <dt>
+
           <code><a href="spm_phase1_rust.html">spm_phase1_rust()</a></code>
 
         </dt>
         <dd>SPM Phase I: Build a univariate control chart from in-control functional data.</dd>
+
+        <dt>
+
+          <code><a href="spm_profile_monitor_rust.html">spm_profile_monitor_rust()</a></code>
+
+        </dt>
+        <dd>Profile monitoring Phase II.</dd>
+
+        <dt>
+
+          <code><a href="spm_profile_phase1_rust.html">spm_profile_phase1_rust()</a></code>
+
+        </dt>
+        <dd>Profile monitoring Phase I.</dd>
+
+        <dt>
+
+          <code><a href="spm_select_ncomp_rust.html">spm_select_ncomp_rust()</a></code>
+
+        </dt>
+        <dd>Select the number of principal components.</dd>
 
         <dt>
 
@@ -4202,10 +4568,31 @@
 
         <dt>
 
+          <code><a href="spm_spe_limit_robust_rust.html">spm_spe_limit_robust_rust()</a></code>
+
+        </dt>
+        <dd>Robust SPE control limit.</dd>
+
+        <dt>
+
           <code><a href="spm_t2_contrib_rust.html">spm_t2_contrib_rust()</a></code>
 
         </dt>
         <dd>T-squared contribution diagnostics.</dd>
+
+        <dt>
+
+          <code><a href="spm_t2_limit_robust_rust.html">spm_t2_limit_robust_rust()</a></code>
+
+        </dt>
+        <dd>Robust T-squared control limit.</dd>
+
+        <dt>
+
+          <code><a href="spm_t2_pc_contrib_rust.html">spm_t2_pc_contrib_rust()</a></code>
+
+        </dt>
+        <dd>Per-PC T-squared contributions for a single observation or batch.</dd>
 
         <dt>
 
@@ -4251,6 +4638,27 @@
 
         <dt>
 
+          <code><a href="alignment_bayesian_pair.html">alignment_bayesian_pair()</a></code>
+
+        </dt>
+        <dd>Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere</dd>
+
+        <dt>
+
+          <code><a href="alignment_closed_distance.html">alignment_closed_distance()</a></code>
+
+        </dt>
+        <dd>Elastic distance between two closed curves (optimizes over rotations)</dd>
+
+        <dt>
+
+          <code><a href="alignment_closed_pair.html">alignment_closed_pair()</a></code>
+
+        </dt>
+        <dd>Elastic alignment for closed (periodic) curves with rotation search</dd>
+
+        <dt>
+
           <code><a href="alignment_compose_warps.html">alignment_compose_warps()</a></code>
 
         </dt>
@@ -4272,10 +4680,24 @@
 
         <dt>
 
+          <code><a href="alignment_curve_geodesic.html">alignment_curve_geodesic()</a></code>
+
+        </dt>
+        <dd>Geodesic path between two curves in the elastic metric</dd>
+
+        <dt>
+
           <code><a href="alignment_decomposition.html">alignment_decomposition()</a></code>
 
         </dt>
         <dd>Elastic phase-amplitude decomposition</dd>
+
+        <dt>
+
+          <code><a href="alignment_elastic_depth.html">alignment_elastic_depth()</a></code>
+
+        </dt>
+        <dd>Elastic depth (amplitude + phase + combined)</dd>
 
         <dt>
 
@@ -4286,10 +4708,38 @@
 
         <dt>
 
+          <code><a href="alignment_elastic_outlier.html">alignment_elastic_outlier()</a></code>
+
+        </dt>
+        <dd>Elastic outlier detection using Tukey fence on elastic distances</dd>
+
+        <dt>
+
           <code><a href="alignment_elastic_pair.html">alignment_elastic_pair()</a></code>
 
         </dt>
         <dd>Elastic alignment of one curve to another</dd>
+
+        <dt>
+
+          <code><a href="alignment_gauss_model.html">alignment_gauss_model()</a></code>
+
+        </dt>
+        <dd>Gaussian generative model: sample random curves from aligned data</dd>
+
+        <dt>
+
+          <code><a href="alignment_horiz_fpns.html">alignment_horiz_fpns()</a></code>
+
+        </dt>
+        <dd>Horizontal Functional Principal Nested Spheres (FPNS) for phase variability</dd>
+
+        <dt>
+
+          <code><a href="alignment_joint_gauss_model.html">alignment_joint_gauss_model()</a></code>
+
+        </dt>
+        <dd>Joint Gaussian generative model preserving amplitude-phase correlation</dd>
 
         <dt>
 
@@ -4300,10 +4750,45 @@
 
         <dt>
 
+          <code><a href="alignment_karcher_mean_closed.html">alignment_karcher_mean_closed()</a></code>
+
+        </dt>
+        <dd>Karcher mean for closed (periodic) curves</dd>
+
+        <dt>
+
+          <code><a href="alignment_karcher_median.html">alignment_karcher_median()</a></code>
+
+        </dt>
+        <dd>Karcher median (Weiszfeld algorithm in elastic metric)</dd>
+
+        <dt>
+
+          <code><a href="alignment_multires_pair.html">alignment_multires_pair()</a></code>
+
+        </dt>
+        <dd>Multi-resolution elastic alignment (coarse DP + fine gradient refinement)</dd>
+
+        <dt>
+
           <code><a href="alignment_pairwise_consistency.html">alignment_pairwise_consistency()</a></code>
 
         </dt>
         <dd>Pairwise alignment consistency</dd>
+
+        <dt>
+
+          <code><a href="alignment_partial_match.html">alignment_partial_match()</a></code>
+
+        </dt>
+        <dd>Elastic partial matching of a template within a longer target curve</dd>
+
+        <dt>
+
+          <code><a href="alignment_peak_persistence.html">alignment_peak_persistence()</a></code>
+
+        </dt>
+        <dd>Peak persistence diagram across a sweep of lambda values</dd>
 
         <dt>
 
@@ -4328,10 +4813,24 @@
 
         <dt>
 
+          <code><a href="alignment_robust_karcher_mean.html">alignment_robust_karcher_mean()</a></code>
+
+        </dt>
+        <dd>Robust (trimmed) Karcher mean in elastic metric</dd>
+
+        <dt>
+
           <code><a href="alignment_self_dist.html">alignment_self_dist()</a></code>
 
         </dt>
         <dd>Elastic self-distance matrix</dd>
+
+        <dt>
+
+          <code><a href="alignment_shape_ci.html">alignment_shape_ci()</a></code>
+
+        </dt>
+        <dd>Bootstrap shape confidence intervals for the elastic Karcher mean</dd>
 
         <dt>
 
@@ -4346,6 +4845,13 @@
 
         </dt>
         <dd>SRSF transform of functional data</dd>
+
+        <dt>
+
+          <code><a href="alignment_transfer.html">alignment_transfer()</a></code>
+
+        </dt>
+        <dd>Transfer alignment: align curves across populations</dd>
 
         <dt>
 

@@ -210,7 +210,7 @@ print(band_pw)
 #>   Method: fpca 
 #>   Coverage: 0.95 
 #>   Grid points: 50 
-#>   Mean half-width: 0.7171
+#>   Mean half-width: 0.7163
 plot(band_pw)
 ```
 
@@ -324,7 +324,7 @@ print(band_elastic)
 #>   Method: elastic 
 #>   Coverage: 0.95 
 #>   Grid points: 50 
-#>   Mean half-width: 0.5381
+#>   Mean half-width: 0.5379
 plot(band_elastic)
 ```
 
@@ -336,9 +336,9 @@ Compare the elastic band to FPCA on the same phase-shifted data:
 band_fpca_phase <- tolerance.band(fd_phase, method = "fpca", coverage = 0.95,
                                   nb = 200, seed = 42)
 cat("FPCA mean half-width:   ", round(mean(band_fpca_phase$half_width), 4), "\n")
-#> FPCA mean half-width:    0.5563
+#> FPCA mean half-width:    0.5559
 cat("Elastic mean half-width:", round(mean(band_elastic$half_width), 4), "\n")
-#> Elastic mean half-width: 0.5381
+#> Elastic mean half-width: 0.5379
 ```
 
 The elastic band is narrower because alignment concentrates variance

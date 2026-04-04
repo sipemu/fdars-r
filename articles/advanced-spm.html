@@ -120,10 +120,10 @@ methods:</p>
 <span><span class="co">#&gt;   Components: 5 </span></span>
 <span><span class="co">#&gt;   Alpha: 0.05 </span></span>
 <span><span class="co">#&gt;   T2 UCL: 11.07 </span></span>
-<span><span class="co">#&gt;   SPE UCL: 0.1208 </span></span>
+<span><span class="co">#&gt;   SPE UCL: 0.1201 </span></span>
 <span><span class="co">#&gt;   Observations: 150 </span></span>
 <span><span class="co">#&gt;   Grid points: 50 </span></span>
-<span><span class="co">#&gt;   Eigenvalues: 33.0, 28.0, 25.6, 19.7, 16.8</span></span></code></pre></div>
+<span><span class="co">#&gt;   Eigenvalues: 0.671, 0.574, 0.524, 0.403, 0.341</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="component-selection">Component Selection<a class="anchor" aria-label="anchor" href="#component-selection"></a>
@@ -220,11 +220,11 @@ empirical, bootstrap, and KDE alternatives.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Parametric UCL:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">lim_param</span><span class="op">$</span><span class="va">ucl</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Parametric UCL: 11.07</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Empirical UCL: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">lim_empirical</span><span class="op">$</span><span class="va">ucl</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Empirical UCL:  10.55</span></span>
+<span><span class="co">#&gt; Empirical UCL:  10.45</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Bootstrap UCL: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">lim_bootstrap</span><span class="op">$</span><span class="va">ucl</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Bootstrap UCL:  10.55</span></span>
+<span><span class="co">#&gt; Bootstrap UCL:  10.45</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"KDE UCL:       "</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">lim_kde</span><span class="op">$</span><span class="va">ucl</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; KDE UCL:        10.35</span></span></code></pre></div>
+<span><span class="co">#&gt; KDE UCL:        10.32</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_t2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">t2_vals</span><span class="op">)</span>, t2 <span class="op">=</span> <span class="va">t2_vals</span><span class="op">)</span></span>
 <span></span>
@@ -286,9 +286,9 @@ fraction is reached.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">chart_iter</span><span class="op">$</span><span class="va">n.iterations</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Iterations: 7</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Removed:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">chart_iter</span><span class="op">$</span><span class="va">removed.indices</span><span class="op">)</span>, <span class="st">"observations\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Removed: 43 observations</span></span>
+<span><span class="co">#&gt; Removed: 42 observations</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Remaining:"</span>, <span class="va">chart_iter</span><span class="op">$</span><span class="va">n.remaining</span>, <span class="st">"observations\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Remaining: 107 observations</span></span></code></pre></div>
+<span><span class="co">#&gt; Remaining: 108 observations</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_cal_naive</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">chart_naive</span><span class="op">$</span><span class="va">t2.phase1</span><span class="op">)</span></span>
 <span><span class="va">n_cal_iter</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">chart_iter</span><span class="op">$</span><span class="va">t2.phase1</span><span class="op">)</span></span>
@@ -363,8 +363,8 @@ the UCL.</p>
 <span><span class="co">#&gt; SPM Control Chart Rule Evaluation</span></span>
 <span><span class="co">#&gt;   Rule set: western.electric </span></span>
 <span><span class="co">#&gt;   Observations: 60 </span></span>
-<span><span class="co">#&gt;   Center: 2.4 </span></span>
-<span><span class="co">#&gt;   Sigma: 1.996 </span></span>
+<span><span class="co">#&gt;   Center: 2.391 </span></span>
+<span><span class="co">#&gt;   Sigma: 1.981 </span></span>
 <span><span class="co">#&gt;   Violations found: 1 </span></span>
 <span><span class="co">#&gt;     WE1: indices [58]</span></span>
 <span></span>
@@ -375,8 +375,8 @@ the UCL.</p>
 <span><span class="co">#&gt; SPM Control Chart Rule Evaluation</span></span>
 <span><span class="co">#&gt;   Rule set: nelson </span></span>
 <span><span class="co">#&gt;   Observations: 60 </span></span>
-<span><span class="co">#&gt;   Center: 2.4 </span></span>
-<span><span class="co">#&gt;   Sigma: 1.996 </span></span>
+<span><span class="co">#&gt;   Center: 2.391 </span></span>
+<span><span class="co">#&gt;   Sigma: 1.981 </span></span>
 <span><span class="co">#&gt;   Violations found: 2 </span></span>
 <span><span class="co">#&gt;     WE1: indices [58]</span></span>
 <span><span class="co">#&gt;     Nelson5: indices [1, 2, 3, 4, 5, 6]</span></span></code></pre></div>
@@ -638,7 +638,7 @@ measures detection speed: smaller is better.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Shewhart T2 — ARL0:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">arl0_t2</span><span class="op">$</span><span class="va">arl</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>    <span class="st">" ARL1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">arl1_t2</span><span class="op">$</span><span class="va">arl</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Shewhart T2 — ARL0: 20.07  ARL1: 19.42</span></span>
+<span><span class="co">#&gt; Shewhart T2 — ARL0: 20.07  ARL1: 6.71</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EWMA T2     — ARL0:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">arl0_ewma</span><span class="op">$</span><span class="va">arl</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; EWMA T2     — ARL0: 40.45</span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">

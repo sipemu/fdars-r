@@ -207,15 +207,15 @@ comparison <- data.frame(
 knitr::kable(comparison, caption = "5-fold OOF performance (same folds)")
 ```
 
-| Method                          |  RMSE |   MAE |    R2 |
-|:--------------------------------|------:|------:|------:|
-| PC (absorbance)                 | 3.164 | 2.466 | 0.938 |
-| Basis (absorbance)              | 2.898 | 2.234 | 0.948 |
-| fregre.lm (absorbance)          | 2.795 | 2.119 | 0.952 |
-| k-NN / L2 (absorbance)          | 8.011 | 5.967 | 0.603 |
-| PC (2nd derivative)             | 2.374 | 1.808 | 0.965 |
-| fregre.lm (2nd derivative)      | 2.381 | 1.803 | 0.965 |
-| k-NN / elastic (2nd derivative) | 1.737 | 1.178 | 0.981 |
+| Method                          |      RMSE |      MAE |          R2 |
+|:--------------------------------|----------:|---------:|------------:|
+| PC (absorbance)                 |     3.164 |    2.466 |       0.938 |
+| Basis (absorbance)              |     2.898 |    2.234 |       0.948 |
+| fregre.lm (absorbance)          | 10390.709 | 7114.562 | -668275.125 |
+| k-NN / L2 (absorbance)          |     8.011 |    5.967 |       0.603 |
+| PC (2nd derivative)             |     2.374 |    1.808 |       0.965 |
+| fregre.lm (2nd derivative)      |  1234.593 | 1016.676 |   -9433.377 |
+| k-NN / elastic (2nd derivative) |     1.737 |    1.178 |       0.981 |
 
 5-fold OOF performance (same folds)
 

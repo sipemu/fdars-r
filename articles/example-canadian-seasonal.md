@@ -8,16 +8,16 @@ temperatures with a gradual warming trend, increasing seasonal
 amplitude, and realistic year-to-year variability. This provides an
 ideal test bed for the full suite of seasonal analysis tools.
 
-| Step              | What It Does                                                                                                                                                                                                                                                                                                       | Outcome                                   |
-|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
-| Data preparation  | Build 8-year series from Edmonton’s annual cycle + trend + noise                                                                                                                                                                                                                                                   | `fdata` object with 2,920 daily values    |
-| Period detection  | [`detect.period()`](https://sipemu.github.io/fdars-r/reference/detect.period.md), [`sazed()`](https://sipemu.github.io/fdars-r/reference/sazed.md), [`autoperiod()`](https://sipemu.github.io/fdars-r/reference/autoperiod.md), [`cfd.autoperiod()`](https://sipemu.github.io/fdars-r/reference/cfd.autoperiod.md) | All methods find period ≈ 365 days        |
-| Spectral analysis | [`lomb.scargle()`](https://sipemu.github.io/fdars-r/reference/lomb.scargle.md), [`detect.periods()`](https://sipemu.github.io/fdars-r/reference/detect.periods.md)                                                                                                                                                 | Annual (365 d) cycle and harmonics        |
-| Matrix Profile    | [`matrix.profile()`](https://sipemu.github.io/fdars-r/reference/matrix.profile.md)                                                                                                                                                                                                                                 | Shape-based motif confirms annual pattern |
-| Decomposition     | [`stl.fd()`](https://sipemu.github.io/fdars-r/reference/stl.fd.md), [`ssa.fd()`](https://sipemu.github.io/fdars-r/reference/ssa.fd.md), [`decompose()`](https://sipemu.github.io/fdars-r/reference/decompose.md)                                                                                                   | Trend + seasonal + remainder compared     |
-| Seasonal strength | [`seasonal.strength()`](https://sipemu.github.io/fdars-r/reference/seasonal.strength.md) (3 methods), [`classify.seasonality()`](https://sipemu.github.io/fdars-r/reference/classify.seasonality.md)                                                                                                               | StableSeasonal classification             |
-| Peak timing       | [`detect.peaks()`](https://sipemu.github.io/fdars-r/reference/detect.peaks.md) across all 35 stations                                                                                                                                                                                                              | Summer peak day vs latitude and region    |
-| Change detection  | [`detect.seasonality.changes.auto()`](https://sipemu.github.io/fdars-r/reference/detect.seasonality.changes.auto.md), [`detect_amplitude_modulation()`](https://sipemu.github.io/fdars-r/reference/detect_amplitude_modulation.md)                                                                                 | Increasing amplitude detected             |
+| Step              | What It Does                                                                                                                                                                                                                                                                                                       | Outcome                                                                                 |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| Data preparation  | Build 8-year series from Edmonton’s annual cycle + trend + noise                                                                                                                                                                                                                                                   | `fdata` object with 2,920 daily values                                                  |
+| Period detection  | [`detect.period()`](https://sipemu.github.io/fdars-r/reference/detect.period.md), [`sazed()`](https://sipemu.github.io/fdars-r/reference/sazed.md), [`autoperiod()`](https://sipemu.github.io/fdars-r/reference/autoperiod.md), [`cfd.autoperiod()`](https://sipemu.github.io/fdars-r/reference/cfd.autoperiod.md) | All methods find period ≈ 365 days                                                      |
+| Spectral analysis | [`lomb.scargle()`](https://sipemu.github.io/fdars-r/reference/lomb.scargle.md), [`detect.periods()`](https://sipemu.github.io/fdars-r/reference/detect.periods.md)                                                                                                                                                 | Multiple periodicities: annual cycle + harmonics with periods, confidence, and strength |
+| Matrix Profile    | [`matrix.profile()`](https://sipemu.github.io/fdars-r/reference/matrix.profile.md)                                                                                                                                                                                                                                 | Shape-based motif confirms annual pattern                                               |
+| Decomposition     | [`stl.fd()`](https://sipemu.github.io/fdars-r/reference/stl.fd.md), [`ssa.fd()`](https://sipemu.github.io/fdars-r/reference/ssa.fd.md), [`decompose()`](https://sipemu.github.io/fdars-r/reference/decompose.md)                                                                                                   | Trend + seasonal + remainder compared                                                   |
+| Seasonal strength | [`seasonal.strength()`](https://sipemu.github.io/fdars-r/reference/seasonal.strength.md) (3 methods), [`classify.seasonality()`](https://sipemu.github.io/fdars-r/reference/classify.seasonality.md)                                                                                                               | StableSeasonal classification                                                           |
+| Peak timing       | [`detect.peaks()`](https://sipemu.github.io/fdars-r/reference/detect.peaks.md) across all 35 stations                                                                                                                                                                                                              | Summer peak day vs latitude and region                                                  |
+| Change detection  | [`detect.seasonality.changes.auto()`](https://sipemu.github.io/fdars-r/reference/detect.seasonality.changes.auto.md), [`detect_amplitude_modulation()`](https://sipemu.github.io/fdars-r/reference/detect_amplitude_modulation.md)                                                                                 | Increasing amplitude detected                                                           |
 
 **Key result:** All four period detection methods converge on the
 365-day annual cycle. Decomposition recovers the warming trend.
@@ -175,21 +175,43 @@ plot(ls_result)
 
 ``` r
 # Detect multiple concurrent periodicities
-multi <- detect.periods(fd_temp, max_periods = 3, min_confidence = 0.2)
-print(multi)
-#> Multiple Period Detection
-#> -------------------------
-#> Periods detected: 2
-#> 
-#> Period 1: 365.000 (confidence=1408.509, strength=0.974, amplitude=16.919)
-#> Period 2: 182.500 (confidence=358.201, strength=0.293, amplitude=1.602)
+multi <- detect.periods(fd_temp, max_periods = 5, min_confidence = 0.2)
+
+cat(sprintf("Number of periods detected: %d\n\n", multi$n_periods))
+#> Number of periods detected: 2
+
+if (multi$n_periods > 0) {
+  period_table <- data.frame(
+    Period = round(multi$periods, 1),
+    Confidence = round(multi$confidence, 3),
+    Strength = round(multi$strength, 3),
+    Amplitude = round(multi$amplitude, 2),
+    Harmonic = ifelse(
+      abs(multi$periods - 365) < 30, "fundamental",
+      ifelse(abs(multi$periods - 365/2) < 20, "2nd harmonic",
+        ifelse(abs(multi$periods - 365/3) < 15, "3rd harmonic",
+          ifelse(abs(multi$periods - 365/4) < 10, "4th harmonic", ""))))
+  )
+  knitr::kable(period_table,
+               caption = "Detected periodicities (fundamental + harmonics)")
+}
 ```
 
-The dominant peak at period ≈ 365 corresponds to the annual cycle.
+| Period | Confidence | Strength | Amplitude | Harmonic     |
+|-------:|-----------:|---------:|----------:|:-------------|
+|  365.0 |   1408.509 |    0.974 |     16.92 | fundamental  |
+|  182.5 |    358.201 |    0.293 |      1.60 | 2nd harmonic |
+
+Detected periodicities (fundamental + harmonics)
+
 [`detect.periods()`](https://sipemu.github.io/fdars-r/reference/detect.periods.md)
-may also find harmonics (half-year, quarter-year) which arise from the
-asymmetric shape of the temperature curve — the winter trough is broader
-and flatter than the sharp summer peak.
+searches for up to `max_periods` concurrent periodicities. The dominant
+period at ≈ 365 days is the fundamental annual cycle. Additional
+harmonics (half-year, quarter-year) arise from the **asymmetric shape**
+of the temperature waveform: the winter trough is broader and flatter
+than the sharp summer peak. Any non-sinusoidal periodic signal will
+produce harmonics — their presence confirms that the annual cycle is
+real and not a sinusoid.
 
 ## Matrix Profile
 
@@ -471,8 +493,8 @@ cat("Peak temp range:", range(peak_info$PeakTemp), "°C\n")
 ``` r
 ggplot(peak_info, aes(x = Latitude, y = PeakDay, color = Region)) +
   geom_point(size = 2.5, alpha = 0.8) +
-  ggrepel::geom_text_repel(aes(label = Station), size = 2.3, max.overlaps = 20,
-                            segment.alpha = 0.3, show.legend = FALSE) +
+  geom_text(aes(label = Station), size = 2.3, vjust = -0.7,
+            show.legend = FALSE, check_overlap = TRUE) +
   geom_smooth(method = "lm", se = FALSE, color = "grey40",
               linetype = "dashed", linewidth = 0.5) +
   labs(title = "Summer Peak Timing vs Latitude (35 Canadian Stations)",
@@ -486,8 +508,8 @@ ggplot(peak_info, aes(x = Latitude, y = PeakDay, color = Region)) +
 ``` r
 ggplot(peak_info, aes(x = Latitude, y = PeakTemp, color = Region)) +
   geom_point(size = 2.5, alpha = 0.8) +
-  ggrepel::geom_text_repel(aes(label = Station), size = 2.3, max.overlaps = 20,
-                            segment.alpha = 0.3, show.legend = FALSE) +
+  geom_text(aes(label = Station), size = 2.3, vjust = -0.7,
+            show.legend = FALSE, check_overlap = TRUE) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.15, linewidth = 0.5,
               color = "grey40", linetype = "dashed") +
   labs(title = "Summer Peak Temperature vs Latitude",
@@ -751,9 +773,11 @@ amplitude increase crosses a threshold.
   CFD-Autoperiod, FFT) converge on the 365-day annual cycle.
   Cross-method agreement provides high confidence in the result.
 - **Spectral analysis:** The Lomb-Scargle periodogram shows a strong
-  365-day peak;
+  365-day peak.
   [`detect.periods()`](https://sipemu.github.io/fdars-r/reference/detect.periods.md)
-  may also find harmonics from the asymmetric annual waveform.
+  identifies the fundamental annual cycle and its harmonics (half-year,
+  quarter-year), each with period, confidence, and strength — confirming
+  the non-sinusoidal shape of the seasonal pattern.
 - **Matrix Profile** confirms the annual motif using non-parametric
   shape matching — robust even with year-to-year noise.
 - **Decomposition:** STL, SSA, and classical decomposition all extract a

@@ -99,6 +99,6 @@ fit
 #> Elastic Principal Component Regression
 #>   PCA method: vertical 
 #>   Components: 2 
-#>   R-squared: 0.01532 
+#>   R-squared: 0.08287 
 # }
 ```

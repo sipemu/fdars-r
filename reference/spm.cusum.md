@@ -112,7 +112,7 @@ cusum
 #>   k: 0.5 
 #>   h (UCL): 5 
 #>   Restart: FALSE 
-#>   CUSUM alarms: 18 of 30 (60%) 
-#>   SPE alarms: 1 of 30 (3.33%) 
+#>   CUSUM alarms: 22 of 30 (73.3%) 
+#>   SPE alarms: 2 of 30 (6.67%) 
 # }
 ```

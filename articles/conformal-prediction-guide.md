@@ -188,7 +188,7 @@ cat("Split conformal:\n")
 cat("  Coverage:", round(split_res$coverage * 100, 1), "%\n")
 #>   Coverage: 92.5 %
 cat("  Mean width:", round(mean(split_res$upper - split_res$lower), 4), "\n")
-#>   Mean width: 0.5484
+#>   Mean width: 0.5427
 ```
 
 ### When to Use CV+
@@ -211,7 +211,7 @@ cat("CV+ conformal (fregre.lm):\n")
 cat("  Coverage:", round(cv_res$coverage * 100, 1), "%\n")
 #>   Coverage: 90.6 %
 cat("  Mean width:", round(mean(cv_res$upper - cv_res$lower), 4), "\n")
-#>   Mean width: 0.4996
+#>   Mean width: 0.497
 ```
 
 CV+ also works with nonparametric models — useful when the relationship
@@ -251,7 +251,7 @@ cat("Jackknife+:\n")
 cat("  Coverage:", round(jk_res$coverage * 100, 1), "%\n")
 #>   Coverage: 90.6 %
 cat("  Mean width:", round(mean(jk_res$upper - jk_res$lower), 4), "\n")
-#>   Mean width: 0.5817
+#>   Mean width: 0.5799
 ```
 
 ### When to Use Generic Conformal
@@ -285,7 +285,7 @@ cat("Generic conformal (from fitted model):\n")
 cat("  Coverage:", round(gen_res$coverage * 100, 1), "%\n")
 #>   Coverage: 92.5 %
 cat("  Mean width:", round(mean(gen_res$upper - gen_res$lower), 4), "\n")
-#>   Mean width: 0.541
+#>   Mean width: 0.5376
 ```
 
 ### Comparing All Methods
@@ -335,11 +335,11 @@ knitr::kable(df_summary, col.names = c("Method", "Coverage (%)",
 
 | Method     | Coverage (%) | Mean Width | Model Fits |
 |:-----------|-------------:|-----------:|:-----------|
-| Split      |         92.5 |     0.5484 | 1          |
-| CV+ (lm)   |         90.6 |     0.4996 | 5          |
+| Split      |         92.5 |     0.5427 | 1          |
+| CV+ (lm)   |         90.6 |     0.4970 | 5          |
 | CV+ (np)   |         90.6 |     4.2679 | 5          |
-| Jackknife+ |         90.6 |     0.5817 | 160        |
-| Generic    |         92.5 |     0.5410 | 0          |
+| Jackknife+ |         90.6 |     0.5799 | 160        |
+| Generic    |         92.5 |     0.5376 | 0          |
 
 Conformal method comparison on spectroscopy data
 

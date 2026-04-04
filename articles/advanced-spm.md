@@ -68,10 +68,10 @@ print(chart)
 #>   Components: 5 
 #>   Alpha: 0.05 
 #>   T2 UCL: 11.07 
-#>   SPE UCL: 0.1208 
+#>   SPE UCL: 0.1201 
 #>   Observations: 150 
 #>   Grid points: 50 
-#>   Eigenvalues: 33.0, 28.0, 25.6, 19.7, 16.8
+#>   Eigenvalues: 0.671, 0.574, 0.524, 0.403, 0.341
 ```
 
 ## Component Selection
@@ -170,11 +170,11 @@ lim_kde       <- spm.limit.robust(t2_vals, ncomp = chart$ncomp,
 cat("Parametric UCL:", format(lim_param$ucl, digits = 4), "\n")
 #> Parametric UCL: 11.07
 cat("Empirical UCL: ", format(lim_empirical$ucl, digits = 4), "\n")
-#> Empirical UCL:  10.55
+#> Empirical UCL:  10.45
 cat("Bootstrap UCL: ", format(lim_bootstrap$ucl, digits = 4), "\n")
-#> Bootstrap UCL:  10.55
+#> Bootstrap UCL:  10.45
 cat("KDE UCL:       ", format(lim_kde$ucl, digits = 4), "\n")
-#> KDE UCL:        10.35
+#> KDE UCL:        10.32
 ```
 
 ``` r
@@ -244,9 +244,9 @@ cat("Iterative T2 UCL:", format(chart_iter$t2.ucl, digits = 4), "\n")
 cat("Iterations:", chart_iter$n.iterations, "\n")
 #> Iterations: 7
 cat("Removed:", length(chart_iter$removed.indices), "observations\n")
-#> Removed: 43 observations
+#> Removed: 42 observations
 cat("Remaining:", chart_iter$n.remaining, "observations\n")
-#> Remaining: 107 observations
+#> Remaining: 108 observations
 ```
 
 ``` r
@@ -326,8 +326,8 @@ print(we_rules)
 #> SPM Control Chart Rule Evaluation
 #>   Rule set: western.electric 
 #>   Observations: 60 
-#>   Center: 2.4 
-#>   Sigma: 1.996 
+#>   Center: 2.391 
+#>   Sigma: 1.981 
 #>   Violations found: 1 
 #>     WE1: indices [58]
 
@@ -338,8 +338,8 @@ print(nelson_rules)
 #> SPM Control Chart Rule Evaluation
 #>   Rule set: nelson 
 #>   Observations: 60 
-#>   Center: 2.4 
-#>   Sigma: 1.996 
+#>   Center: 2.391 
+#>   Sigma: 1.981 
 #>   Violations found: 2 
 #>     WE1: indices [58]
 #>     Nelson5: indices [1, 2, 3, 4, 5, 6]
@@ -603,7 +603,7 @@ arl0_ewma <- spm.arl.ewma(chart_clean, lambda = 0.2, n.sim = 5000, seed = 42)
 
 cat("Shewhart T2 — ARL0:", format(arl0_t2$arl, digits = 4),
     " ARL1:", format(arl1_t2$arl, digits = 4), "\n")
-#> Shewhart T2 — ARL0: 20.07  ARL1: 19.42
+#> Shewhart T2 — ARL0: 20.07  ARL1: 6.71
 cat("EWMA T2     — ARL0:", format(arl0_ewma$arl, digits = 4), "\n")
 #> EWMA T2     — ARL0: 40.45
 ```

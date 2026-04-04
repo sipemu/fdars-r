@@ -182,10 +182,10 @@ limits at significance level
 <span><span class="co">#&gt;   Components: 3 </span></span>
 <span><span class="co">#&gt;   Alpha: 0.05 </span></span>
 <span><span class="co">#&gt;   T2 UCL: 7.815 </span></span>
-<span><span class="co">#&gt;   SPE UCL: 0.12 </span></span>
+<span><span class="co">#&gt;   SPE UCL: 0.1201 </span></span>
 <span><span class="co">#&gt;   Observations: 200 </span></span>
 <span><span class="co">#&gt;   Grid points: 50 </span></span>
-<span><span class="co">#&gt;   Eigenvalues: 78.73, 23.13,  5.81</span></span></code></pre></div>
+<span><span class="co">#&gt;   Eigenvalues: 1.607, 0.458, 0.119</span></span></code></pre></div>
 <p>The returned <code>spm.chart</code> object contains:</p>
 <ul>
 <li>
@@ -216,10 +216,10 @@ compare to control limits:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SPM Monitoring Result (Phase II)</span></span>
 <span><span class="co">#&gt;   Observations: 50 </span></span>
-<span><span class="co">#&gt;   T2 alarms: 3 of 50 (6%) </span></span>
+<span><span class="co">#&gt;   T2 alarms: 2 of 50 (4%) </span></span>
 <span><span class="co">#&gt;   SPE alarms: 5 of 50 (10%) </span></span>
 <span><span class="co">#&gt;   T2 UCL: 7.815 </span></span>
-<span><span class="co">#&gt;   SPE UCL: 0.12</span></span>
+<span><span class="co">#&gt;   SPE UCL: 0.1201</span></span>
 <span></span>
 <span><span class="co"># Which observations triggered alarms?</span></span>
 <span><span class="va">alarm_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">monitor</span><span class="op">$</span><span class="va">t2.alarm</span> <span class="op">|</span> <span class="va">monitor</span><span class="op">$</span><span class="va">spe.alarm</span><span class="op">)</span></span>
@@ -336,7 +336,7 @@ eigenfunction is unusually far from the in-control mean. This tells you
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"First alarm at observation:"</span>, <span class="va">first_alarm</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; First alarm at observation: 4</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"T2 contributions (per PC):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">[</span><span class="va">first_alarm</span>, <span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; T2 contributions (per PC): 10.563</span></span></code></pre></div>
+<span><span class="co">#&gt; T2 contributions (per PC): 10.337</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize T2 contributions for all monitoring observations</span></span>
 <span><span class="va">n_mon</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">t2_contrib</span><span class="op">)</span></span>

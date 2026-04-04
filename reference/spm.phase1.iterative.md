@@ -96,11 +96,11 @@ chart
 #>   Components: 3 
 #>   Alpha: 0.05 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 1.366 
+#>   SPE UCL: 1.293 
 #>   Observations: 60 
 #>   Grid points: 30 
-#>   Eigenvalues: 3.96, 3.21, 2.99 
+#>   Eigenvalues: 0.142, 0.114, 0.108 
 chart$removed.indices
-#> [1]  1  2  3 46 34 15 22 48 35
+#> [1]  1  2  3 46 34
 # }
 ```

@@ -59,8 +59,8 @@ res
 #> ================
 #>   Number of groups: 2 
 #>   Number of observations: 50 
-#>   Global F-statistic: 0.8663 
-#>   P-value: 0.75248 
+#>   Global F-statistic: 1.0434 
+#>   P-value: 0.57426 
 #>   Permutations: 100 
 # }
 ```

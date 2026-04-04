@@ -92,7 +92,7 @@ chart <- spm.phase1(fd, ncomp = 3)
 partial <- rnorm(30)
 result <- spm.monitor.partial(chart, partial, n.observed = 20)
 result$t2
-#> [1] 1.220404
+#> [1] 1.60075
 result$domain.fraction
 #> [1] 0.6551724
 # }

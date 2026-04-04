@@ -37,6 +37,8 @@
   Regions](https://sipemu.github.io/fdars-r/articles/example-explainability-regions.md):
 - [Inline Quality Monitoring: Detection Power and False Alarm
   Analysis](https://sipemu.github.io/fdars-r/articles/example-inline-monitoring.md):
+- [Biopharmaceutical Batch Monitoring: Penicillin
+  Fermentation](https://sipemu.github.io/fdars-r/articles/example-biopharma-monitoring.md):
 
 ### Learn
 
@@ -83,6 +85,8 @@
 
 - [Elastic Curve
   Alignment](https://sipemu.github.io/fdars-r/articles/elastic-alignment.md):
+- [Advanced Elastic
+  Alignment](https://sipemu.github.io/fdars-r/articles/advanced-alignment.md):
 - [Landmark
   Registration](https://sipemu.github.io/fdars-r/articles/landmark-registration.md):
 - [TSRVF: Linearized Elastic

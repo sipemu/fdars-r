@@ -2,6 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  articles/advanced-alignment: advanced-alignment.html
   articles/advanced-spm: advanced-spm.html
   articles/alignment-comparison: alignment-comparison.html
   articles/andrews-transformation: andrews-transformation.html
@@ -25,6 +26,7 @@ articles:
   articles/example-andrews-wine-qc: example-andrews-wine-qc.html
   articles/example-andrews-wine: example-andrews-wine.html
   articles/example-berkeley-growth: example-berkeley-growth.html
+  articles/example-biopharma-monitoring: example-biopharma-monitoring.html
   articles/example-canadian-precipitation: example-canadian-precipitation.html
   articles/example-canadian-seasonal: example-canadian-seasonal.html
   articles/example-canadian-weather: example-canadian-weather.html
@@ -62,7 +64,7 @@ articles:
   articles/tsrvf: tsrvf.html
   articles/uncertainty-quantification: uncertainty-quantification.html
   articles/working-with-derivatives: working-with-derivatives.html
-last_built: 2026-03-18T07:42Z
+last_built: 2026-04-04T19:58Z
 urls:
   reference: https://sipemu.github.io/fdars-r/reference
   article: https://sipemu.github.io/fdars-r/articles

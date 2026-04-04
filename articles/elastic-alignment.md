@@ -2138,3 +2138,11 @@ cat("Distance ratio:", round(diag_pair$distance.ratio, 3), "\n")
   Statistics & Data Analysis*, 61:50–66.
 - Srivastava, A. and Klassen, E. (2016). *Functional and Shape Data
   Analysis*. Springer.
+
+## See Also
+
+- [Advanced Elastic
+  Alignment](https://sipemu.github.io/fdars-r/articles/advanced-alignment.md)
+  – Bayesian alignment, robust Karcher mean, elastic depth, closed
+  curves, partial matching, geodesic interpolation, and more (fdars-core
+  0.10.0 features)

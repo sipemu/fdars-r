@@ -233,7 +233,7 @@ acc_df <- data.frame(
 )
 print(acc_df)
 #>        Method Training_Accuracy
-#> lda       LDA             0.980
+#> lda       LDA             0.973
 #> qda       QDA             0.973
 #> knn       KNN             0.960
 #> kernel KERNEL             0.960
@@ -365,7 +365,7 @@ print(logit_fit)
 #>   Iterations: 100
 
 cat("Probabilities range:", range(logit_fit$probabilities), "\n")
-#> Probabilities range: 2.385465e-45 1
+#> Probabilities range: 2.218142e-45 1
 ```
 
 Estimated probabilities near 0 or 1 indicate confident classification;

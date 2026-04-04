@@ -232,9 +232,9 @@ both the clean and contaminated data.</p>
 <span><span class="va">fit_ols_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"OLS R-squared (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_ols_clean</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; OLS R-squared (clean): 0.9264</span></span>
+<span><span class="co">#&gt; OLS R-squared (clean): 0.9263</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"OLS R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_ols_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; OLS R-squared (contaminated): 0.0744</span></span></code></pre></div>
+<span><span class="co">#&gt; OLS R-squared (contaminated): 0.0761</span></span></code></pre></div>
 <p>On clean data, OLS performs well (R² &gt; 0.9). On contaminated data,
 the 30 one-sided outliers systematically bias the coefficient estimates,
 inflating the residuals for <em>all</em> observations — even the clean
@@ -256,9 +256,9 @@ influence on the fit.</p>
 <span><span class="va">fit_l1_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.l1.html">fregre.l1</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L1 R-squared (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_l1_clean</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; L1 R-squared (clean): 0.9246</span></span>
+<span><span class="co">#&gt; L1 R-squared (clean): 0.9243</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"L1 R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; L1 R-squared (contaminated): -0.0834</span></span></code></pre></div>
+<span><span class="co">#&gt; L1 R-squared (contaminated): -0.0836</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="examining-the-irls-weights">Examining the IRLS Weights<a class="anchor" aria-label="anchor" href="#examining-the-irls-weights"></a>
 </h3>
@@ -266,11 +266,11 @@ influence on the fit.</p>
 <code class="sourceCode R"><span><span class="co"># Observations with small weights are effectively identified as outliers</span></span>
 <span><span class="va">w</span> <span class="op">&lt;-</span> <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">weights</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean weight (clean obs):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="op">-</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Mean weight (clean obs): 35310.64</span></span>
+<span><span class="co">#&gt; Mean weight (clean obs): 35345.17</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean weight (outlier obs):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Mean weight (outlier obs): 0.115</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">iterations</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Iterations: 69</span></span>
+<span><span class="co">#&gt; Iterations: 74</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">fit_l1_contam</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Converged: TRUE</span></span></code></pre></div>
 </div>
@@ -293,7 +293,7 @@ the loss is linear (like L1).</p>
 <span><span class="va">fit_huber_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.huber.html">fregre.huber</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y_contam</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Huber R-squared (contaminated):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Huber R-squared (contaminated): -0.0464</span></span>
+<span><span class="co">#&gt; Huber R-squared (contaminated): -0.0452</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Iterations:"</span>, <span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">iterations</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Iterations: 7</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Converged:"</span>, <span class="va">fit_huber_contam</span><span class="op">$</span><span class="va">converged</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -351,7 +351,7 @@ the loss is linear (like L1).</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (clean):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_default</span><span class="op">[</span><span class="op">-</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Mean weight (clean): 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean weight (outlier):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">w_default</span><span class="op">[</span><span class="va">outlier_idx</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Mean weight (outlier): 0.159</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean weight (outlier): 0.16</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -435,24 +435,24 @@ data</caption>
 <tbody>
 <tr class="odd">
 <td align="left">OLS (fregre.lm)</td>
-<td align="right">0.2732</td>
-<td align="right">0.9424</td>
-<td align="right">1.6255</td>
-<td align="right">-1.0393</td>
+<td align="right">115.0564</td>
+<td align="right">-10216.25</td>
+<td align="right">72.5037</td>
+<td align="right">-4056.256</td>
 </tr>
 <tr class="even">
 <td align="left">L1 (fregre.l1)</td>
-<td align="right">0.2591</td>
-<td align="right">0.9482</td>
-<td align="right">0.2760</td>
-<td align="right">0.9412</td>
+<td align="right">112.4370</td>
+<td align="right">-9756.34</td>
+<td align="right">107.7761</td>
+<td align="right">-8964.152</td>
 </tr>
 <tr class="odd">
 <td align="left">Huber (fregre.huber)</td>
-<td align="right">0.2732</td>
-<td align="right">0.9424</td>
-<td align="right">0.3880</td>
-<td align="right">0.8838</td>
+<td align="right">115.0564</td>
+<td align="right">-10216.25</td>
+<td align="right">91.8562</td>
+<td align="right">-6511.224</td>
 </tr>
 </tbody>
 </table>

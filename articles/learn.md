@@ -108,6 +108,10 @@ Alignment](../reference/figures/card-elastic-alignment.svg)
 
 Elastic Curve Alignment
 
+[](https://sipemu.github.io/fdars-r/articles/advanced-alignment.md)
+
+Advanced Elastic Alignment
+
 [](https://sipemu.github.io/fdars-r/articles/landmark-registration.md)
 
 ![Landmark

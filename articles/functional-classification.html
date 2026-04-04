@@ -350,7 +350,7 @@ exactly the kind of challenge where classifier choice matters.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">acc_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        Method Training_Accuracy</span></span>
-<span><span class="co">#&gt; lda       LDA             0.980</span></span>
+<span><span class="co">#&gt; lda       LDA             0.973</span></span>
 <span><span class="co">#&gt; qda       QDA             0.973</span></span>
 <span><span class="co">#&gt; knn       KNN             0.960</span></span>
 <span><span class="co">#&gt; kernel KERNEL             0.960</span></span>
@@ -482,7 +482,7 @@ with weights
 <span><span class="co">#&gt;   Iterations: 100</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Probabilities range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">logit_fit</span><span class="op">$</span><span class="va">probabilities</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Probabilities range: 2.385465e-45 1</span></span></code></pre></div>
+<span><span class="co">#&gt; Probabilities range: 2.218142e-45 1</span></span></code></pre></div>
 <p>Estimated probabilities near 0 or 1 indicate confident
 classification; values near 0.5 indicate curves in the overlap region
 where the predictor’s FPC scores do not clearly separate the two

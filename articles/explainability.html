@@ -333,9 +333,9 @@ scores:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fdataobj</span>, <span class="va">y</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"R\u00b2:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R²: 0.047</span></span>
+<span><span class="co">#&gt; R²: 0.0607</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; RMSE: 0.295</span></span></code></pre></div>
+<span><span class="co">#&gt; RMSE: 0.2928</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Observed <span class="op">=</span> <span class="va">y</span>, Fitted <span class="op">=</span> <span class="va">model</span><span class="op">$</span><span class="va">fitted.values</span><span class="op">)</span></span>
 <span></span>
@@ -691,53 +691,62 @@ are reported.</p>
 <span>                <span class="va">sig</span><span class="op">$</span><span class="va">direction</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; Significant regions found: 47 </span></span>
+<span><span class="co">#&gt; Significant regions found: 56 </span></span>
 <span><span class="co">#&gt;   Region 2: t = [0.000, 0.000] (positive)</span></span>
 <span><span class="co">#&gt;   Region 3: t = [0.010, 0.010] (negative)</span></span>
 <span><span class="co">#&gt;   Region 4: t = [0.020, 0.020] (positive)</span></span>
-<span><span class="co">#&gt;   Region 5: t = [0.040, 0.051] (negative)</span></span>
-<span><span class="co">#&gt;   Region 6: t = [0.061, 0.141] (positive)</span></span>
-<span><span class="co">#&gt;   Region 7: t = [0.152, 0.192] (negative)</span></span>
-<span><span class="co">#&gt;   Region 8: t = [0.202, 0.232] (positive)</span></span>
-<span><span class="co">#&gt;   Region 9: t = [0.242, 0.242] (negative)</span></span>
-<span><span class="co">#&gt;   Region 10: t = [0.253, 0.273] (positive)</span></span>
-<span><span class="co">#&gt;   Region 11: t = [0.283, 0.283] (negative)</span></span>
-<span><span class="co">#&gt;   Region 12: t = [0.293, 0.303] (positive)</span></span>
-<span><span class="co">#&gt;   Region 13: t = [0.313, 0.313] (negative)</span></span>
-<span><span class="co">#&gt;   Region 14: t = [0.323, 0.354] (positive)</span></span>
-<span><span class="co">#&gt;   Region 15: t = [0.364, 0.364] (negative)</span></span>
-<span><span class="co">#&gt;   Region 16: t = [0.384, 0.404] (negative)</span></span>
-<span><span class="co">#&gt;   Region 17: t = [0.414, 0.455] (positive)</span></span>
-<span><span class="co">#&gt;   Region 18: t = [0.465, 0.475] (negative)</span></span>
-<span><span class="co">#&gt;   Region 19: t = [0.485, 0.485] (positive)</span></span>
-<span><span class="co">#&gt;   Region 20: t = [0.495, 0.525] (negative)</span></span>
-<span><span class="co">#&gt;   Region 21: t = [0.535, 0.535] (positive)</span></span>
-<span><span class="co">#&gt;   Region 22: t = [0.545, 0.556] (negative)</span></span>
-<span><span class="co">#&gt;   Region 23: t = [0.566, 0.596] (positive)</span></span>
-<span><span class="co">#&gt;   Region 24: t = [0.606, 0.606] (negative)</span></span>
-<span><span class="co">#&gt;   Region 25: t = [0.616, 0.626] (positive)</span></span>
-<span><span class="co">#&gt;   Region 26: t = [0.636, 0.646] (negative)</span></span>
-<span><span class="co">#&gt;   Region 27: t = [0.657, 0.657] (positive)</span></span>
-<span><span class="co">#&gt;   Region 28: t = [0.667, 0.677] (negative)</span></span>
-<span><span class="co">#&gt;   Region 29: t = [0.697, 0.697] (negative)</span></span>
-<span><span class="co">#&gt;   Region 30: t = [0.707, 0.707] (positive)</span></span>
-<span><span class="co">#&gt;   Region 31: t = [0.717, 0.717] (negative)</span></span>
-<span><span class="co">#&gt;   Region 32: t = [0.727, 0.727] (positive)</span></span>
-<span><span class="co">#&gt;   Region 33: t = [0.737, 0.737] (negative)</span></span>
-<span><span class="co">#&gt;   Region 34: t = [0.758, 0.758] (negative)</span></span>
-<span><span class="co">#&gt;   Region 35: t = [0.768, 0.768] (positive)</span></span>
-<span><span class="co">#&gt;   Region 36: t = [0.778, 0.798] (negative)</span></span>
-<span><span class="co">#&gt;   Region 37: t = [0.808, 0.808] (positive)</span></span>
-<span><span class="co">#&gt;   Region 38: t = [0.818, 0.818] (negative)</span></span>
-<span><span class="co">#&gt;   Region 39: t = [0.828, 0.838] (positive)</span></span>
-<span><span class="co">#&gt;   Region 40: t = [0.848, 0.848] (negative)</span></span>
-<span><span class="co">#&gt;   Region 41: t = [0.859, 0.869] (positive)</span></span>
-<span><span class="co">#&gt;   Region 42: t = [0.879, 0.879] (negative)</span></span>
-<span><span class="co">#&gt;   Region 43: t = [0.889, 0.899] (positive)</span></span>
-<span><span class="co">#&gt;   Region 44: t = [0.919, 0.919] (negative)</span></span>
-<span><span class="co">#&gt;   Region 45: t = [0.929, 0.929] (positive)</span></span>
-<span><span class="co">#&gt;   Region 46: t = [0.939, 0.980] (negative)</span></span>
-<span><span class="co">#&gt;   Region 47: t = [0.990, 0.990] (positive)</span></span></code></pre></div>
+<span><span class="co">#&gt;   Region 5: t = [0.030, 0.061] (negative)</span></span>
+<span><span class="co">#&gt;   Region 6: t = [0.071, 0.081] (positive)</span></span>
+<span><span class="co">#&gt;   Region 7: t = [0.101, 0.101] (negative)</span></span>
+<span><span class="co">#&gt;   Region 8: t = [0.111, 0.131] (positive)</span></span>
+<span><span class="co">#&gt;   Region 9: t = [0.141, 0.141] (negative)</span></span>
+<span><span class="co">#&gt;   Region 10: t = [0.152, 0.152] (positive)</span></span>
+<span><span class="co">#&gt;   Region 11: t = [0.162, 0.192] (negative)</span></span>
+<span><span class="co">#&gt;   Region 12: t = [0.202, 0.202] (positive)</span></span>
+<span><span class="co">#&gt;   Region 13: t = [0.212, 0.212] (negative)</span></span>
+<span><span class="co">#&gt;   Region 14: t = [0.222, 0.222] (positive)</span></span>
+<span><span class="co">#&gt;   Region 15: t = [0.232, 0.232] (negative)</span></span>
+<span><span class="co">#&gt;   Region 16: t = [0.242, 0.273] (positive)</span></span>
+<span><span class="co">#&gt;   Region 17: t = [0.283, 0.303] (negative)</span></span>
+<span><span class="co">#&gt;   Region 18: t = [0.313, 0.343] (positive)</span></span>
+<span><span class="co">#&gt;   Region 19: t = [0.354, 0.364] (negative)</span></span>
+<span><span class="co">#&gt;   Region 20: t = [0.374, 0.384] (positive)</span></span>
+<span><span class="co">#&gt;   Region 21: t = [0.394, 0.404] (negative)</span></span>
+<span><span class="co">#&gt;   Region 22: t = [0.414, 0.434] (positive)</span></span>
+<span><span class="co">#&gt;   Region 23: t = [0.444, 0.475] (negative)</span></span>
+<span><span class="co">#&gt;   Region 24: t = [0.485, 0.495] (positive)</span></span>
+<span><span class="co">#&gt;   Region 25: t = [0.505, 0.525] (negative)</span></span>
+<span><span class="co">#&gt;   Region 26: t = [0.535, 0.545] (positive)</span></span>
+<span><span class="co">#&gt;   Region 27: t = [0.556, 0.556] (negative)</span></span>
+<span><span class="co">#&gt;   Region 28: t = [0.566, 0.596] (positive)</span></span>
+<span><span class="co">#&gt;   Region 29: t = [0.606, 0.606] (negative)</span></span>
+<span><span class="co">#&gt;   Region 30: t = [0.626, 0.626] (positive)</span></span>
+<span><span class="co">#&gt;   Region 31: t = [0.636, 0.646] (negative)</span></span>
+<span><span class="co">#&gt;   Region 32: t = [0.657, 0.657] (positive)</span></span>
+<span><span class="co">#&gt;   Region 33: t = [0.667, 0.677] (negative)</span></span>
+<span><span class="co">#&gt;   Region 34: t = [0.687, 0.687] (positive)</span></span>
+<span><span class="co">#&gt;   Region 35: t = [0.697, 0.697] (negative)</span></span>
+<span><span class="co">#&gt;   Region 36: t = [0.707, 0.707] (positive)</span></span>
+<span><span class="co">#&gt;   Region 37: t = [0.717, 0.717] (negative)</span></span>
+<span><span class="co">#&gt;   Region 38: t = [0.727, 0.727] (positive)</span></span>
+<span><span class="co">#&gt;   Region 39: t = [0.737, 0.758] (negative)</span></span>
+<span><span class="co">#&gt;   Region 40: t = [0.768, 0.768] (positive)</span></span>
+<span><span class="co">#&gt;   Region 41: t = [0.778, 0.778] (negative)</span></span>
+<span><span class="co">#&gt;   Region 42: t = [0.788, 0.788] (positive)</span></span>
+<span><span class="co">#&gt;   Region 43: t = [0.798, 0.798] (negative)</span></span>
+<span><span class="co">#&gt;   Region 44: t = [0.808, 0.808] (positive)</span></span>
+<span><span class="co">#&gt;   Region 45: t = [0.818, 0.818] (negative)</span></span>
+<span><span class="co">#&gt;   Region 46: t = [0.828, 0.838] (positive)</span></span>
+<span><span class="co">#&gt;   Region 47: t = [0.848, 0.848] (negative)</span></span>
+<span><span class="co">#&gt;   Region 48: t = [0.859, 0.859] (positive)</span></span>
+<span><span class="co">#&gt;   Region 49: t = [0.869, 0.869] (negative)</span></span>
+<span><span class="co">#&gt;   Region 50: t = [0.879, 0.879] (positive)</span></span>
+<span><span class="co">#&gt;   Region 51: t = [0.889, 0.889] (negative)</span></span>
+<span><span class="co">#&gt;   Region 52: t = [0.899, 0.899] (positive)</span></span>
+<span><span class="co">#&gt;   Region 53: t = [0.909, 0.919] (negative)</span></span>
+<span><span class="co">#&gt;   Region 54: t = [0.929, 0.929] (positive)</span></span>
+<span><span class="co">#&gt;   Region 55: t = [0.939, 0.970] (negative)</span></span>
+<span><span class="co">#&gt;   Region 56: t = [0.990, 0.990] (positive)</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -881,11 +890,11 @@ indicates how far the observation is from the target in score space.</p>
 <span>                            target.value <span class="op">=</span> <span class="va">target_val</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Original prediction:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cf</span><span class="op">$</span><span class="va">original_prediction</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Original prediction: 0.307</span></span>
+<span><span class="co">#&gt; Original prediction: 0.28</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Counterfactual prediction:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cf</span><span class="op">$</span><span class="va">counterfactual_prediction</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Counterfactual prediction: 0.648</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Score distance:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cf</span><span class="op">$</span><span class="va">distance</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Score distance: 1.741</span></span></code></pre></div>
+<span><span class="co">#&gt; Score distance: 0.143</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="anchor-explanations">Anchor Explanations<a class="anchor" aria-label="anchor" href="#anchor-explanations"></a>
@@ -929,7 +938,7 @@ anchors are more general but less precise.</p>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
 <span><span class="co">#&gt; Conditions:</span></span>
-<span><span class="co">#&gt;   PC0 in [2.718, Inf]</span></span></code></pre></div>
+<span><span class="co">#&gt;   PC0 in [0.273, Inf]</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="prototypes-and-criticisms">Prototypes and Criticisms<a class="anchor" aria-label="anchor" href="#prototypes-and-criticisms"></a>
@@ -949,9 +958,9 @@ negative (underrepresented).</p>
 <span>                          n.prototypes <span class="op">=</span> <span class="fl">3</span>, n.criticisms <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Prototype indices:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">proto</span><span class="op">$</span><span class="va">prototype_indices</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Prototype indices: 71, 42, 11</span></span>
+<span><span class="co">#&gt; Prototype indices: 35, 30, 69</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Criticism indices:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">proto</span><span class="op">$</span><span class="va">criticism_indices</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Criticism indices: 68, 35, 29</span></span></code></pre></div>
+<span><span class="co">#&gt; Criticism indices: 72, 10, 68</span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">proto_curves</span> <span class="op">&lt;-</span> <span class="va">fdataobj</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">proto</span><span class="op">$</span><span class="va">prototype_indices</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span><span class="va">crit_curves</span> <span class="op">&lt;-</span> <span class="va">fdataobj</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="va">proto</span><span class="op">$</span><span class="va">criticism_indices</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
@@ -1019,7 +1028,7 @@ two methods are <strong>logistic-only</strong>: calibration and ECE.</p>
 <code class="sourceCode R"><span><span class="va">y_binary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">y</span> <span class="op">&gt;</span> <span class="fu"><a href="../reference/median.html">median</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">logit_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/functional.logistic.html">functional.logistic</a></span><span class="op">(</span><span class="va">fdataobj</span>, <span class="va">y_binary</span>, ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">logit_model</span><span class="op">$</span><span class="va">accuracy</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Accuracy: 0.525</span></span></code></pre></div>
+<span><span class="co">#&gt; Accuracy: 0.5375</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="pdp-and-ale-for-classification">PDP and ALE for Classification<a class="anchor" aria-label="anchor" href="#pdp-and-ale-for-classification"></a>
@@ -1098,15 +1107,15 @@ across bins.</li>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.calibration.html">fregre.calibration</a></span><span class="op">(</span><span class="va">logit_model</span>, y <span class="op">=</span> <span class="va">y_binary</span>, n.groups <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Brier score:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cal</span><span class="op">$</span><span class="va">brier_score</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Brier score: 0.245</span></span>
+<span><span class="co">#&gt; Brier score: 0.2474</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hosmer-Lemeshow chi2:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cal</span><span class="op">$</span><span class="va">hosmer_lemeshow_chi2</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Hosmer-Lemeshow chi2: 8.0144</span></span></code></pre></div>
+<span><span class="co">#&gt; Hosmer-Lemeshow chi2: 3.0347</span></span></code></pre></div>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ece</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.ece.html">fregre.ece</a></span><span class="op">(</span><span class="va">logit_model</span>, y <span class="op">=</span> <span class="va">y_binary</span>, n.bins <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ECE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ece</span><span class="op">$</span><span class="va">ece</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ECE: 0.0593</span></span>
+<span><span class="co">#&gt; ECE: 0.0042</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"MCE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ece</span><span class="op">$</span><span class="va">mce</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; MCE: 0.2271</span></span></code></pre></div>
+<span><span class="co">#&gt; MCE: 0.056</span></span></code></pre></div>
 <hr>
 </div>
 </div>

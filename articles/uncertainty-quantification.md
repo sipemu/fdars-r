@@ -206,7 +206,7 @@ conf <- fregre.conformal(
 )
 
 cat("Residual quantile:", round(conf$residual_quantile, 4), "\n")
-#> Residual quantile: 0.8155
+#> Residual quantile: 0.8114
 ```
 
 ``` r
@@ -308,11 +308,11 @@ estimate of out-of-sample performance.
 loo <- fregre.loo(model, data = fdataobj, y = y)
 
 cat("PRESS:", round(loo$press, 4), "\n")
-#> PRESS: 8.0184
+#> PRESS: 7.8572
 cat("LOO R\u00b2:", round(loo$loo_r_squared, 4), "\n")
-#> LOO R²: -0.0978
+#> LOO R²: -0.0757
 cat("In-sample R\u00b2:", round(model$r.squared, 4), "\n")
-#> In-sample R²: 0.047
+#> In-sample R²: 0.0607
 ```
 
 A large gap between in-sample $R^{2}$ and LOO $R^{2}$ indicates
@@ -469,7 +469,7 @@ cv_conf <- cv.conformal.regression(
 cat("CV+ coverage:", round(cv_conf$coverage * 100, 1), "%\n")
 #> CV+ coverage: 91.7 %
 cat("CV+ mean width:", round(mean(cv_conf$upper - cv_conf$lower), 4), "\n")
-#> CV+ mean width: 0.9395
+#> CV+ mean width: 0.9646
 ```
 
 CV+ also works with the nonparametric model `fregre.np`, which has no
@@ -508,7 +508,7 @@ jk <- jackknife.plus(
 cat("Jackknife+ coverage:", round(jk$coverage * 100, 1), "%\n")
 #> Jackknife+ coverage: 91.7 %
 cat("Jackknife+ mean width:", round(mean(jk$upper - jk$lower), 4), "\n")
-#> Jackknife+ mean width: 1.0838
+#> Jackknife+ mean width: 1.0765
 ```
 
 ### Generic Conformal from a Fitted Model

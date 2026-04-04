@@ -1,0 +1,46 @@
+# Elastic SPM Phase II monitoring.
+
+Elastic SPM Phase II monitoring.
+
+## Usage
+
+``` r
+elastic_spm_monitor_rust(
+  new_data,
+  argvals,
+  karcher_mean,
+  align_lambda,
+  monitor_phase,
+  warp_ncomp,
+  amp_rotation,
+  amp_mean,
+  amp_singular_values,
+  amp_centered,
+  amp_eigenvalues,
+  amp_t2_ucl,
+  amp_t2_alpha,
+  amp_t2_description,
+  amp_spe_ucl,
+  amp_spe_alpha,
+  amp_spe_description,
+  amp_ncomp,
+  amp_config_alpha,
+  amp_config_tuning_fraction,
+  amp_config_seed,
+  phase_rotation,
+  phase_mean,
+  phase_singular_values,
+  phase_centered,
+  phase_eigenvalues,
+  phase_t2_ucl,
+  phase_t2_alpha,
+  phase_t2_description,
+  phase_spe_ucl,
+  phase_spe_alpha,
+  phase_spe_description,
+  phase_ncomp,
+  phase_config_alpha,
+  phase_config_tuning_fraction,
+  phase_config_seed
+)
+```

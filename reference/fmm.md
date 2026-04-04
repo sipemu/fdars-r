@@ -84,6 +84,6 @@ fit
 #>   Number of observations: 50 
 #>   Number of subjects: 10 
 #>   FPC components: 3 
-#>   Residual variance (sigma2_eps): 0.170716 
+#>   Residual variance (sigma2_eps): 0.020122 
 # }
 ```

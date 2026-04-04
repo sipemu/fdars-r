@@ -87,7 +87,7 @@ print(profile_chart)
 #>   T2 UCL: 7.815 
 #>   Observations: 100 
 #>   Predictors: 1 
-#>   Lag-1 autocorrelation: 0.8984 
+#>   Lag-1 autocorrelation: 0.9125 
 #>   Effective windows: 29
 ```
 
@@ -98,7 +98,7 @@ profile_mon <- spm.profile.monitor(profile_chart, fd_test, predictors_test)
 
 alarm_idx <- which(profile_mon$t2.alarm)
 cat("Alarms at windows:", alarm_idx, "\n")
-#> Alarms at windows: 16 18
+#> Alarms at windows: 16 17 18
 ```
 
 ``` r
@@ -236,15 +236,15 @@ df_batch <- data.frame(
   alarm = sapply(batch_results, function(r) r$t2.alarm)
 )
 print(df_batch)
-#>   batch fraction         t2 alarm
-#> 1     1      0.3  1.1630824 FALSE
-#> 2     2      0.4  1.7621838 FALSE
-#> 3     3      0.5  1.1911677 FALSE
-#> 4     4      0.6  1.0034014 FALSE
-#> 5     5      0.7  0.5307191 FALSE
-#> 6     6      0.8 11.9463152  TRUE
-#> 7     7      0.9 11.0927592  TRUE
-#> 8     8      1.0  5.4587626 FALSE
+#>   batch fraction        t2 alarm
+#> 1     1      0.3 0.8334159 FALSE
+#> 2     2      0.4 0.3980182 FALSE
+#> 3     3      0.5 1.2264254 FALSE
+#> 4     4      0.6 0.4658310 FALSE
+#> 5     5      0.7 0.9487427 FALSE
+#> 6     6      0.8 7.4012743 FALSE
+#> 7     7      0.9 6.7057339 FALSE
+#> 8     8      1.0 3.4275624 FALSE
 ```
 
 ``` r
@@ -302,11 +302,11 @@ print(elastic_chart)
 #>   Components (amplitude): 3 
 #>   Alpha: 0.05 
 #>   Amplitude T2 UCL: 7.815 
-#>   Amplitude SPE UCL: 0.02094 
+#>   Amplitude SPE UCL: 0.02286 
 #>   Phase monitoring: enabled
 #>   Phase components: 2 
 #>   Phase T2 UCL: 5.991 
-#>   Phase SPE UCL: 0.00118 
+#>   Phase SPE UCL: 0.001181 
 #>   Observations: 60 
 #>   Grid points: 50
 ```
@@ -333,7 +333,7 @@ fd_new_el <- fdata(X_new_el, argvals = argvals_el)
 elastic_mon <- spm.elastic.monitor(elastic_chart, fd_new_el)
 
 cat("Amplitude T2 alarms:", sum(elastic_mon$amplitude$t2.alarm), "\n")
-#> Amplitude T2 alarms: 5
+#> Amplitude T2 alarms: 7
 cat("Phase T2 alarms:", sum(elastic_mon$phase$t2.alarm), "\n")
 #> Phase T2 alarms: 6
 ```

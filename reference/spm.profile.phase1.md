@@ -109,7 +109,7 @@ chart
 #>   T2 UCL: 5.991 
 #>   Observations: 80 
 #>   Predictors: 2 
-#>   Lag-1 autocorrelation: 0.9219 
-#>   Effective windows: 23 
+#>   Lag-1 autocorrelation: 0.8858 
+#>   Effective windows: 24 
 # }
 ```

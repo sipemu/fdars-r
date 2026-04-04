@@ -105,9 +105,9 @@ chart
 #>   Components: 3 
 #>   Alpha: 0.05 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 1.897 
+#>   SPE UCL: 1.811 
 #>   Observations: 50 
 #>   Grid points: 30 
-#>   Eigenvalues: 4.34, 3.26, 3.06 
+#>   Eigenvalues: 0.158, 0.122, 0.107 
 # }
 ```

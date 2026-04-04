@@ -107,11 +107,11 @@ chart
 #>   Components (amplitude): 3 
 #>   Alpha: 0.05 
 #>   Amplitude T2 UCL: 7.815 
-#>   Amplitude SPE UCL: 0.8107 
+#>   Amplitude SPE UCL: 0.7933 
 #>   Phase monitoring: enabled
 #>   Phase components: 2 
 #>   Phase T2 UCL: 5.991 
-#>   Phase SPE UCL: 0.003642 
+#>   Phase SPE UCL: 0.003706 
 #>   Observations: 40 
 #>   Grid points: 30 
 # }

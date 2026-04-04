@@ -379,7 +379,7 @@ points (wider, controls family-wise error)</li>
 <span><span class="co">#&gt;   Method: fpca </span></span>
 <span><span class="co">#&gt;   Coverage: 0.95 </span></span>
 <span><span class="co">#&gt;   Grid points: 50 </span></span>
-<span><span class="co">#&gt;   Mean half-width: 0.7171</span></span>
+<span><span class="co">#&gt;   Mean half-width: 0.7163</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">band_pw</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tolerance-bands_files/figure-html/fpca-1.png" class="r-plt" alt="" width="100%"></p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -486,7 +486,7 @@ curves exhibit timing differences:</p>
 <span><span class="co">#&gt;   Method: elastic </span></span>
 <span><span class="co">#&gt;   Coverage: 0.95 </span></span>
 <span><span class="co">#&gt;   Grid points: 50 </span></span>
-<span><span class="co">#&gt;   Mean half-width: 0.5381</span></span>
+<span><span class="co">#&gt;   Mean half-width: 0.5379</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">band_elastic</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tolerance-bands_files/figure-html/elastic-1.png" class="r-plt" alt="" width="100%"></p>
 <p>Compare the elastic band to FPCA on the same phase-shifted data:</p>
@@ -494,9 +494,9 @@ curves exhibit timing differences:</p>
 <code class="sourceCode R"><span><span class="va">band_fpca_phase</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tolerance.band.html">tolerance.band</a></span><span class="op">(</span><span class="va">fd_phase</span>, method <span class="op">=</span> <span class="st">"fpca"</span>, coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>                                  nb <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"FPCA mean half-width:   "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">band_fpca_phase</span><span class="op">$</span><span class="va">half_width</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; FPCA mean half-width:    0.5563</span></span>
+<span><span class="co">#&gt; FPCA mean half-width:    0.5559</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Elastic mean half-width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">band_elastic</span><span class="op">$</span><span class="va">half_width</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Elastic mean half-width: 0.5381</span></span></code></pre></div>
+<span><span class="co">#&gt; Elastic mean half-width: 0.5379</span></span></code></pre></div>
 <p>The elastic band is narrower because alignment concentrates variance
 into amplitude rather than spreading it across both amplitude and
 phase.</p>

@@ -133,3 +133,12 @@ Monitoring](../reference/figures/card-example-inline-monitoring.svg)
 Inline Monitoring: Detection Power & False Alarms
 
 SPM Power FPR
+
+[](https://sipemu.github.io/fdars-r/articles/example-biopharma-monitoring.md)
+
+![Biopharma Batch
+Monitoring](../reference/figures/card-example-biopharma-monitoring.svg)
+
+Biopharma: Penicillin Batch Monitoring
+
+SPM FPCA Regression

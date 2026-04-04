@@ -104,7 +104,7 @@ chart
 #>   Components: 3 
 #>   Alpha: 0.05 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 1.265 
+#>   SPE UCL: 1.075 
 #>   Observations: 60 
 #>   Predictors: 2 
 # }

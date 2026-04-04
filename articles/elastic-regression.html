@@ -193,7 +193,7 @@ drives the response.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fregre.lm.html">fregre.lm</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">y</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Standard fregre.lm R\u00b2:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_std</span><span class="op">$</span><span class="va">r.squared</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Standard fregre.lm R²: 0.1027</span></span></code></pre></div>
+<span><span class="co">#&gt; Standard fregre.lm R²: 0.1015</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Observed <span class="op">=</span> <span class="va">y</span>, Fitted <span class="op">=</span> <span class="va">fit_std</span><span class="op">$</span><span class="va">fitted.values</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_std</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Observed</span>, y <span class="op">=</span> <span class="va">Fitted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -238,7 +238,7 @@ regression, removing the phase variation before fitting:</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 Method        R2      RMSE</span></span>
-<span><span class="co">#&gt; 1 Standard (fregre.lm) 0.1026623 0.8166588</span></span>
+<span><span class="co">#&gt; 1 Standard (fregre.lm) 0.1014741 0.8171993</span></span>
 <span><span class="co">#&gt; 2   Elastic Regression 0.8680056 0.3132134</span></span></code></pre></div>
 </div>
 </div>

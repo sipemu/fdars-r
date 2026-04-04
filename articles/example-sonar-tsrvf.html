@@ -391,21 +391,21 @@ vectors, combined amplitude + phase features</li>
 <td align="left">A: Simple</td>
 <td align="left">KNN</td>
 <td align="right">10</td>
-<td align="right">0.870</td>
+<td align="right">0.875</td>
 </tr>
 <tr class="even">
-<td align="left">Raw (scaled)</td>
-<td align="left">A: Simple</td>
-<td align="left">KNN</td>
-<td align="right">10</td>
-<td align="right">0.865</td>
-</tr>
-<tr class="odd">
 <td align="left">Smoothed</td>
 <td align="left">A: Simple</td>
 <td align="left">SVM</td>
 <td align="right">10</td>
 <td align="right">0.856</td>
+</tr>
+<tr class="odd">
+<td align="left">Raw (scaled)</td>
+<td align="left">A: Simple</td>
+<td align="left">KNN</td>
+<td align="right">10</td>
+<td align="right">0.850</td>
 </tr>
 <tr class="even">
 <td align="left">Raw (scaled)</td>
@@ -419,13 +419,13 @@ vectors, combined amplitude + phase features</li>
 <td align="left">A: Simple</td>
 <td align="left">QDA</td>
 <td align="right">15</td>
-<td align="right">0.806</td>
+<td align="right">0.801</td>
 </tr>
 <tr class="even">
 <td align="left">Raw (scaled)</td>
 <td align="left">A: Simple</td>
 <td align="left">QDA</td>
-<td align="right">5</td>
+<td align="right">15</td>
 <td align="right">0.792</td>
 </tr>
 <tr class="odd">
@@ -436,53 +436,53 @@ vectors, combined amplitude + phase features</li>
 <td align="right">0.788</td>
 </tr>
 <tr class="even">
+<td align="left">Aligned</td>
+<td align="left">C: Elastic</td>
+<td align="left">KNN</td>
+<td align="right">20</td>
+<td align="right">0.778</td>
+</tr>
+<tr class="odd">
 <td align="left">1st derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">KNN</td>
 <td align="right">20</td>
-<td align="right">0.777</td>
+<td align="right">0.768</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Raw (scaled)</td>
 <td align="left">A: Simple</td>
 <td align="left">LDA</td>
-<td align="right">10</td>
-<td align="right">0.773</td>
+<td align="right">15</td>
+<td align="right">0.763</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Aligned</td>
 <td align="left">C: Elastic</td>
 <td align="left">SVM</td>
 <td align="right">10</td>
 <td align="right">0.760</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">1st derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">SVM</td>
 <td align="right">20</td>
 <td align="right">0.756</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">2nd derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">SVM</td>
 <td align="right">20</td>
 <td align="right">0.756</td>
 </tr>
-<tr class="odd">
-<td align="left">Aligned</td>
-<td align="left">C: Elastic</td>
-<td align="left">KNN</td>
-<td align="right">20</td>
-<td align="right">0.755</td>
-</tr>
 <tr class="even">
 <td align="left">1st derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">QDA</td>
 <td align="right">20</td>
-<td align="right">0.716</td>
+<td align="right">0.720</td>
 </tr>
 <tr class="odd">
 <td align="left">2nd derivative</td>
@@ -499,25 +499,25 @@ vectors, combined amplitude + phase features</li>
 <td align="right">0.711</td>
 </tr>
 <tr class="odd">
+<td align="left">Aligned</td>
+<td align="left">C: Elastic</td>
+<td align="left">LDA</td>
+<td align="right">20</td>
+<td align="right">0.711</td>
+</tr>
+<tr class="even">
 <td align="left">1st derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">LDA</td>
 <td align="right">15</td>
 <td align="right">0.697</td>
 </tr>
-<tr class="even">
-<td align="left">Aligned</td>
-<td align="left">C: Elastic</td>
-<td align="left">LDA</td>
-<td align="right">20</td>
-<td align="right">0.696</td>
-</tr>
 <tr class="odd">
 <td align="left">2nd derivative</td>
 <td align="left">B: Derivative</td>
 <td align="left">KNN</td>
 <td align="right">10</td>
-<td align="right">0.691</td>
+<td align="right">0.695</td>
 </tr>
 <tr class="even">
 <td align="left">TSRVF (amp)</td>
@@ -527,25 +527,39 @@ vectors, combined amplitude + phase features</li>
 <td align="right">0.678</td>
 </tr>
 <tr class="odd">
-<td align="left">TSRVF (amp)</td>
-<td align="left">C: Elastic</td>
-<td align="left">LDA</td>
-<td align="right">15</td>
-<td align="right">0.658</td>
-</tr>
-<tr class="even">
 <td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
 <td align="left">QDA</td>
-<td align="right">10</td>
-<td align="right">0.654</td>
+<td align="right">8</td>
+<td align="right">0.667</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">TSRVF (amp)</td>
 <td align="left">C: Elastic</td>
 <td align="left">KNN</td>
 <td align="right">20</td>
+<td align="right">0.663</td>
+</tr>
+<tr class="odd">
+<td align="left">Full elastic</td>
+<td align="left">C: Elastic</td>
+<td align="left">KNN</td>
+<td align="right">8</td>
+<td align="right">0.649</td>
+</tr>
+<tr class="even">
+<td align="left">TSRVF (amp)</td>
+<td align="left">C: Elastic</td>
+<td align="left">LDA</td>
+<td align="right">15</td>
 <td align="right">0.648</td>
+</tr>
+<tr class="odd">
+<td align="left">TSRVF (amp)</td>
+<td align="left">C: Elastic</td>
+<td align="left">QDA</td>
+<td align="right">20</td>
+<td align="right">0.644</td>
 </tr>
 <tr class="even">
 <td align="left">Full elastic</td>
@@ -555,32 +569,18 @@ vectors, combined amplitude + phase features</li>
 <td align="right">0.640</td>
 </tr>
 <tr class="odd">
-<td align="left">TSRVF (amp)</td>
-<td align="left">C: Elastic</td>
-<td align="left">QDA</td>
-<td align="right">8</td>
-<td align="right">0.638</td>
-</tr>
-<tr class="even">
 <td align="left">Aligned</td>
 <td align="left">C: Elastic</td>
 <td align="left">QDA</td>
-<td align="right">15</td>
-<td align="right">0.630</td>
-</tr>
-<tr class="odd">
-<td align="left">Full elastic</td>
-<td align="left">C: Elastic</td>
-<td align="left">KNN</td>
-<td align="right">10</td>
-<td align="right">0.620</td>
+<td align="right">8</td>
+<td align="right">0.634</td>
 </tr>
 <tr class="even">
 <td align="left">Full elastic</td>
 <td align="left">C: Elastic</td>
 <td align="left">LDA</td>
-<td align="right">8</td>
-<td align="right">0.604</td>
+<td align="right">5</td>
+<td align="right">0.605</td>
 </tr>
 </tbody>
 </table>
@@ -629,12 +629,12 @@ vectors, combined amplitude + phase features</li>
 <span>    <span class="st">"with ncomp ="</span>, <span class="va">best_nc</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Best configuration: Smoothed + KNN with ncomp = 10</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CV accuracy:"</span>, <span class="va">ablation</span><span class="op">$</span><span class="va">CV_Accuracy</span><span class="op">[</span><span class="va">best_idx</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; CV accuracy: 0.87</span></span>
+<span><span class="co">#&gt; CV accuracy: 0.875</span></span>
 <span></span>
 <span><span class="va">best_fd</span> <span class="op">&lt;-</span> <span class="va">feature_sets</span><span class="op">[[</span><span class="va">best_feat</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">best_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fclassif.html">fclassif</a></span><span class="op">(</span><span class="va">best_fd</span>, <span class="va">y</span>, method <span class="op">=</span> <span class="va">best_method</span>, ncomp <span class="op">=</span> <span class="va">best_nc</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Training accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">best_fit</span><span class="op">$</span><span class="va">accuracy</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Training accuracy: 0.851</span></span>
+<span><span class="co">#&gt; Training accuracy: 0.856</span></span>
 <span></span>
 <span><span class="co"># Confusion matrix</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">best_fit</span><span class="op">)</span></span></code></pre></div>
@@ -645,7 +645,7 @@ vectors, combined amplitude + phase features</li>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mine accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">class_acc</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Mine accuracy: 0.892</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Rock accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">class_acc</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rock accuracy: 0.804</span></span></code></pre></div>
+<span><span class="co">#&gt; Rock accuracy: 0.814</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="interpretation-why-the-simple-model-won">7. Interpretation: Why the Simple Model Won<a class="anchor" aria-label="anchor" href="#interpretation-why-the-simple-model-won"></a>

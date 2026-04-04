@@ -339,7 +339,7 @@ The model should recover these components.</p>
 <span><span class="co">#&gt;   Number of observations: 45 </span></span>
 <span><span class="co">#&gt;   Number of subjects: 15 </span></span>
 <span><span class="co">#&gt;   FPC components: 3 </span></span>
-<span><span class="co">#&gt;   Residual variance (sigma2_eps): 0.000159 </span></span>
+<span><span class="co">#&gt;   Residual variance (sigma2_eps): 2e-06 </span></span>
 <span><span class="co">#&gt;   Fixed effect covariates: 1</span></span></code></pre></div>
 <p>The output shows the estimated variance components and the number of
 FPC components used. The ratio
@@ -367,7 +367,7 @@ wider spread means more between-subject variability.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Residual variance</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Residual variance:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">sigma2.eps</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Residual variance: 2e-04</span></span>
+<span><span class="co">#&gt; Residual variance: 0</span></span>
 <span></span>
 <span><span class="co"># Number of subjects</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Number of subjects:"</span>, <span class="va">fit</span><span class="op">$</span><span class="va">n.subjects</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -428,7 +428,7 @@ within-subject correlation:</p>
 <span><span class="co">#&gt;   Permutations: 500 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;             F.statistic  P.value</span></span>
-<span><span class="co">#&gt; Covariate 1      0.0394 0.001996</span></span></code></pre></div>
+<span><span class="co">#&gt; Covariate 1      0.0393 0.001996</span></span></code></pre></div>
 <p>A small p-value indicates that the treatment effect
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\beta_1(t)</annotation></semantics></math>
 is significantly different from zero. Because the permutation is done at
@@ -449,7 +449,7 @@ all observations as independent?</p>
 <span></span>
 <span><span class="co"># FMM accounts for subject-level variation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"FMM residual variance:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">sigma2.eps</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; FMM residual variance: 2e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; FMM residual variance: 0</span></span></code></pre></div>
 <p>The FMM separates subject-level variation from residual noise, giving
 a cleaner estimate of the treatment effect. The naive FOSR lumps both
 sources together, producing an inflated residual and potentially

@@ -411,6 +411,43 @@ Elastic Changepoint
 - [`plot(`*`<alignment.quality>`*`)`](https://sipemu.github.io/fdars-r/reference/plot.alignment.quality.md)
   : Plot Alignment Quality Diagnostics
 
+## Advanced Alignment
+
+- [`karcher.median()`](https://sipemu.github.io/fdars-r/reference/karcher.median.md)
+  : Karcher Median in Elastic Metric
+- [`robust.karcher.mean()`](https://sipemu.github.io/fdars-r/reference/robust.karcher.mean.md)
+  : Trimmed Karcher Mean in Elastic Metric
+- [`elastic.depth()`](https://sipemu.github.io/fdars-r/reference/elastic.depth.md)
+  : Elastic Depth for Functional Data
+- [`elastic.outlier.detection()`](https://sipemu.github.io/fdars-r/reference/elastic.outlier.detection.md)
+  : Elastic Outlier Detection
+- [`shape.confidence.interval()`](https://sipemu.github.io/fdars-r/reference/shape.confidence.interval.md)
+  : Bootstrap Confidence Bands for Elastic Karcher Mean
+- [`bayesian.align.pair()`](https://sipemu.github.io/fdars-r/reference/bayesian.align.pair.md)
+  : Bayesian Pairwise Curve Alignment
+- [`elastic.align.pair.multires()`](https://sipemu.github.io/fdars-r/reference/elastic.align.pair.multires.md)
+  : Multi-Resolution Pairwise Curve Alignment
+- [`elastic.align.pair.closed()`](https://sipemu.github.io/fdars-r/reference/elastic.align.pair.closed.md)
+  : Elastic Alignment of Closed Curves
+- [`elastic.distance.closed()`](https://sipemu.github.io/fdars-r/reference/elastic.distance.closed.md)
+  : Elastic Distance Between Closed Curves
+- [`karcher.mean.closed()`](https://sipemu.github.io/fdars-r/reference/karcher.mean.closed.md)
+  : Karcher Mean for Closed Curves
+- [`elastic.partial.match()`](https://sipemu.github.io/fdars-r/reference/elastic.partial.match.md)
+  : Elastic Partial Curve Matching
+- [`curve.geodesic()`](https://sipemu.github.io/fdars-r/reference/curve.geodesic.md)
+  : Geodesic Path Between Two Curves
+- [`peak.persistence()`](https://sipemu.github.io/fdars-r/reference/peak.persistence.md)
+  : Peak Persistence Analysis
+- [`transfer.alignment()`](https://sipemu.github.io/fdars-r/reference/transfer.alignment.md)
+  : Transfer Alignment Between Functional Samples
+- [`gauss.model()`](https://sipemu.github.io/fdars-r/reference/gauss.model.md)
+  : Gaussian Generative Model for Elastic Functional Data
+- [`joint.gauss.model()`](https://sipemu.github.io/fdars-r/reference/joint.gauss.model.md)
+  : Joint Amplitude-Phase Gaussian Generative Model
+- [`horiz.fpns()`](https://sipemu.github.io/fdars-r/reference/horiz.fpns.md)
+  : Horizontal Functional Principal Nested Spheres
+
 ## Landmark Registration
 
 - [`detect.landmarks()`](https://sipemu.github.io/fdars-r/reference/detect.landmarks.md)
@@ -1361,12 +1398,18 @@ Low-level Rust wrappers and internal functions
   : Variance inflation factors for FPC scores
 - [`elastic_amp_changepoint_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_amp_changepoint_rust.md)
   : Amplitude changepoint detection
+- [`elastic_cut_dendrogram_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_cut_dendrogram_rust.md)
+  : Cut a hierarchical dendrogram to get cluster labels
 - [`elastic_fpca_changepoint_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_fpca_changepoint_rust.md)
   : FPCA-based changepoint detection
+- [`elastic_hierarchical_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_hierarchical_rust.md)
+  : Elastic hierarchical clustering
 - [`elastic_horiz_fpca_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_horiz_fpca_rust.md)
   : Horizontal FPCA on warping functions
 - [`elastic_joint_fpca_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_joint_fpca_rust.md)
   : Joint FPCA (amplitude + phase)
+- [`elastic_kmeans_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_kmeans_rust.md)
+  : Elastic k-means clustering
 - [`elastic_logistic_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_logistic_rust.md)
   : Elastic logistic regression
 - [`elastic_pcr_attribution_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_pcr_attribution_rust.md)
@@ -1377,6 +1420,10 @@ Low-level Rust wrappers and internal functions
   : Phase changepoint detection
 - [`elastic_regression_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_regression_rust.md)
   : Elastic regression (function-on-scalar with alignment)
+- [`elastic_spm_monitor_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_spm_monitor_rust.md)
+  : Elastic SPM Phase II monitoring.
+- [`elastic_spm_phase1_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_spm_phase1_rust.md)
+  : Elastic SPM Phase I.
 - [`elastic_vert_fpca_rust()`](https://sipemu.github.io/fdars-r/reference/elastic_vert_fpca_rust.md)
   : Vertical FPCA on elastic-aligned data
 - [`smooth_basis_gcv_rust()`](https://sipemu.github.io/fdars-r/reference/smooth_basis_gcv_rust.md)
@@ -1384,6 +1431,34 @@ Low-level Rust wrappers and internal functions
 - [`smooth_basis_rust()`](https://sipemu.github.io/fdars-r/reference/smooth_basis_rust.md)
   : Smooth functional data using B-spline or Fourier basis with fixed
   penalty
+- [`alignment_diagnose_pairwise_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_diagnose_pairwise_rust.md)
+  : Diagnose a single pairwise alignment
+- [`alignment_diagnose_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_diagnose_rust.md)
+  : Diagnose alignment quality for all curves after Karcher mean
+  computation
+- [`alignment_elastic_pair_penalized_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_elastic_pair_penalized_rust.md)
+  : Penalized elastic alignment with configurable penalty type
+- [`alignment_invert_warp_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_invert_warp_rust.md)
+  : Invert a warping function
+- [`alignment_lambda_cv_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_lambda_cv_rust.md)
+  : Lambda cross-validation for elastic alignment regularisation
+- [`alignment_orbit_representative_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_orbit_representative_rust.md)
+  : Compute the orbit representative of a curve in a quotient space
+- [`alignment_phase_boxplot_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_phase_boxplot_rust.md)
+  : Phase boxplot for warping functions
+- [`alignment_shape_distance_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_shape_distance_rust.md)
+  : Elastic shape distance between two curves
+- [`alignment_shape_mean_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_shape_mean_rust.md)
+  : Shape mean (Karcher mean in quotient space)
+- [`alignment_shape_self_distance_matrix_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_shape_self_distance_matrix_rust.md)
+  : Shape self-distance matrix
+- [`alignment_warp_inverse_error_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_warp_inverse_error_rust.md)
+  : Warp inverse error: max \|gamma(gamma_inv(t)) - t\|
+- [`alignment_warp_statistics_rust()`](https://sipemu.github.io/fdars-r/reference/alignment_warp_statistics_rust.md)
+  : Warp statistics: mean, variance, confidence bands, Karcher mean warp
+- [`basis2fdata_2d_rust()`](https://sipemu.github.io/fdars-r/reference/basis2fdata_2d_rust.md)
+  : Reconstruct 2D functional data from tensor product basis
+  coefficients (low-level)
 - [`bootstrap_ci_fregre_lm_rust()`](https://sipemu.github.io/fdars-r/reference/bootstrap_ci_fregre_lm_rust.md)
   : Bootstrap confidence intervals for β(t) in functional linear model
 - [`bootstrap_ci_functional_logistic_rust()`](https://sipemu.github.io/fdars-r/reference/bootstrap_ci_functional_logistic_rust.md)
@@ -1428,6 +1503,9 @@ Low-level Rust wrappers and internal functions
   : LDA classification
 - [`fclassif_qda_rust()`](https://sipemu.github.io/fdars-r/reference/fclassif_qda_rust.md)
   : QDA classification
+- [`fdata2basis_2d_rust()`](https://sipemu.github.io/fdars-r/reference/fdata2basis_2d_rust.md)
+  : Project 2D functional data to tensor product basis coefficients
+  (low-level)
 - [`fdata_gradient_rust()`](https://sipemu.github.io/fdars-r/reference/fdata_gradient_rust.md)
   : High-accuracy gradient using 5-point stencil (uniform) or 3-point
   Lagrange (non-uniform)
@@ -1492,17 +1570,53 @@ Low-level Rust wrappers and internal functions
   : Predict from a scalar-on-shape model
 - [`scalar_on_shape_rust()`](https://sipemu.github.io/fdars-r/reference/scalar_on_shape_rust.md)
   : Fit scalar-on-shape regression model
+- [`spm_amewma_monitor_rust()`](https://sipemu.github.io/fdars-r/reference/spm_amewma_monitor_rust.md)
+  : Adaptive EWMA (AMEWMA) monitoring on sequential functional data.
+- [`spm_arl0_ewma_t2_rust()`](https://sipemu.github.io/fdars-r/reference/spm_arl0_ewma_t2_rust.md)
+  : In-control ARL for EWMA-T-squared chart.
+- [`spm_arl0_spe_rust()`](https://sipemu.github.io/fdars-r/reference/spm_arl0_spe_rust.md)
+  : In-control ARL for SPE chart.
+- [`spm_arl0_t2_rust()`](https://sipemu.github.io/fdars-r/reference/spm_arl0_t2_rust.md)
+  : In-control ARL for T-squared chart.
+- [`spm_arl1_t2_rust()`](https://sipemu.github.io/fdars-r/reference/spm_arl1_t2_rust.md)
+  : Out-of-control ARL for T-squared chart.
+- [`spm_cusum_monitor_restart_rust()`](https://sipemu.github.io/fdars-r/reference/spm_cusum_monitor_restart_rust.md)
+  : CUSUM monitoring with restart after each alarm.
+- [`spm_cusum_monitor_rust()`](https://sipemu.github.io/fdars-r/reference/spm_cusum_monitor_rust.md)
+  : CUSUM monitoring on sequential functional data.
+- [`spm_evaluate_rules_rust()`](https://sipemu.github.io/fdars-r/reference/spm_evaluate_rules_rust.md)
+  : Evaluate control chart rules (Western Electric, Nelson, or custom).
 - [`spm_ewma_rust()`](https://sipemu.github.io/fdars-r/reference/spm_ewma_rust.md)
   : EWMA-based SPM monitoring.
+- [`spm_mewma_monitor_rust()`](https://sipemu.github.io/fdars-r/reference/spm_mewma_monitor_rust.md)
+  : MEWMA monitoring on sequential functional data.
+- [`spm_monitor_partial_batch_rust()`](https://sipemu.github.io/fdars-r/reference/spm_monitor_partial_batch_rust.md)
+  : Monitor a batch of partially-observed curves.
+- [`spm_monitor_partial_rust()`](https://sipemu.github.io/fdars-r/reference/spm_monitor_partial_rust.md)
+  : Monitor a single partially-observed curve.
 - [`spm_monitor_rust()`](https://sipemu.github.io/fdars-r/reference/spm_monitor_rust.md)
   : SPM Phase II: Monitor new data against an established chart.
+- [`spm_phase1_iterative_rust()`](https://sipemu.github.io/fdars-r/reference/spm_phase1_iterative_rust.md)
+  : Iterative Phase I chart construction.
 - [`spm_phase1_rust()`](https://sipemu.github.io/fdars-r/reference/spm_phase1_rust.md)
   : SPM Phase I: Build a univariate control chart from in-control
   functional data.
+- [`spm_profile_monitor_rust()`](https://sipemu.github.io/fdars-r/reference/spm_profile_monitor_rust.md)
+  : Profile monitoring Phase II.
+- [`spm_profile_phase1_rust()`](https://sipemu.github.io/fdars-r/reference/spm_profile_phase1_rust.md)
+  : Profile monitoring Phase I.
+- [`spm_select_ncomp_rust()`](https://sipemu.github.io/fdars-r/reference/spm_select_ncomp_rust.md)
+  : Select the number of principal components.
 - [`spm_spe_contrib_rust()`](https://sipemu.github.io/fdars-r/reference/spm_spe_contrib_rust.md)
   : SPE contribution diagnostics.
+- [`spm_spe_limit_robust_rust()`](https://sipemu.github.io/fdars-r/reference/spm_spe_limit_robust_rust.md)
+  : Robust SPE control limit.
 - [`spm_t2_contrib_rust()`](https://sipemu.github.io/fdars-r/reference/spm_t2_contrib_rust.md)
   : T-squared contribution diagnostics.
+- [`spm_t2_limit_robust_rust()`](https://sipemu.github.io/fdars-r/reference/spm_t2_limit_robust_rust.md)
+  : Robust T-squared control limit.
+- [`spm_t2_pc_contrib_rust()`](https://sipemu.github.io/fdars-r/reference/spm_t2_pc_contrib_rust.md)
+  : Per-PC T-squared contributions for a single observation or batch.
 - [`tolerance_elastic_config_rust()`](https://sipemu.github.io/fdars-r/reference/tolerance_elastic_config_rust.md)
   : Elastic tolerance band with full config (amplitude + phase)
 - [`tolerance_phase_rust()`](https://sipemu.github.io/fdars-r/reference/tolerance_phase_rust.md)
@@ -1515,34 +1629,72 @@ Low-level Rust wrappers and internal functions
   : Align all curves to a target curve
 - [`alignment_amplitude_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_amplitude_dist.md)
   : Amplitude self-distance matrix
+- [`alignment_bayesian_pair()`](https://sipemu.github.io/fdars-r/reference/alignment_bayesian_pair.md)
+  : Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere
+- [`alignment_closed_distance()`](https://sipemu.github.io/fdars-r/reference/alignment_closed_distance.md)
+  : Elastic distance between two closed curves (optimizes over
+  rotations)
+- [`alignment_closed_pair()`](https://sipemu.github.io/fdars-r/reference/alignment_closed_pair.md)
+  : Elastic alignment for closed (periodic) curves with rotation search
 - [`alignment_compose_warps()`](https://sipemu.github.io/fdars-r/reference/alignment_compose_warps.md)
   : Compose two warping functions
 - [`alignment_constrained()`](https://sipemu.github.io/fdars-r/reference/alignment_constrained.md)
   : Elastic alignment with explicit landmark constraints
 - [`alignment_cross_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_cross_dist.md)
   : Elastic cross-distance matrix
+- [`alignment_curve_geodesic()`](https://sipemu.github.io/fdars-r/reference/alignment_curve_geodesic.md)
+  : Geodesic path between two curves in the elastic metric
 - [`alignment_decomposition()`](https://sipemu.github.io/fdars-r/reference/alignment_decomposition.md)
   : Elastic phase-amplitude decomposition
+- [`alignment_elastic_depth()`](https://sipemu.github.io/fdars-r/reference/alignment_elastic_depth.md)
+  : Elastic depth (amplitude + phase + combined)
 - [`alignment_elastic_distance()`](https://sipemu.github.io/fdars-r/reference/alignment_elastic_distance.md)
   : Elastic (Fisher-Rao) distance between two curves
+- [`alignment_elastic_outlier()`](https://sipemu.github.io/fdars-r/reference/alignment_elastic_outlier.md)
+  : Elastic outlier detection using Tukey fence on elastic distances
 - [`alignment_elastic_pair()`](https://sipemu.github.io/fdars-r/reference/alignment_elastic_pair.md)
   : Elastic alignment of one curve to another
+- [`alignment_gauss_model()`](https://sipemu.github.io/fdars-r/reference/alignment_gauss_model.md)
+  : Gaussian generative model: sample random curves from aligned data
+- [`alignment_horiz_fpns()`](https://sipemu.github.io/fdars-r/reference/alignment_horiz_fpns.md)
+  : Horizontal Functional Principal Nested Spheres (FPNS) for phase
+  variability
+- [`alignment_joint_gauss_model()`](https://sipemu.github.io/fdars-r/reference/alignment_joint_gauss_model.md)
+  : Joint Gaussian generative model preserving amplitude-phase
+  correlation
 - [`alignment_karcher_mean()`](https://sipemu.github.io/fdars-r/reference/alignment_karcher_mean.md)
   : Karcher (Fréchet) mean in elastic metric
+- [`alignment_karcher_mean_closed()`](https://sipemu.github.io/fdars-r/reference/alignment_karcher_mean_closed.md)
+  : Karcher mean for closed (periodic) curves
+- [`alignment_karcher_median()`](https://sipemu.github.io/fdars-r/reference/alignment_karcher_median.md)
+  : Karcher median (Weiszfeld algorithm in elastic metric)
+- [`alignment_multires_pair()`](https://sipemu.github.io/fdars-r/reference/alignment_multires_pair.md)
+  : Multi-resolution elastic alignment (coarse DP + fine gradient
+  refinement)
 - [`alignment_pairwise_consistency()`](https://sipemu.github.io/fdars-r/reference/alignment_pairwise_consistency.md)
   : Pairwise alignment consistency
+- [`alignment_partial_match()`](https://sipemu.github.io/fdars-r/reference/alignment_partial_match.md)
+  : Elastic partial matching of a template within a longer target curve
+- [`alignment_peak_persistence()`](https://sipemu.github.io/fdars-r/reference/alignment_peak_persistence.md)
+  : Peak persistence diagram across a sweep of lambda values
 - [`alignment_phase_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_phase_dist.md)
   : Phase self-distance matrix
 - [`alignment_quality_compute()`](https://sipemu.github.io/fdars-r/reference/alignment_quality_compute.md)
   : Compute alignment quality metrics
 - [`alignment_reparameterize()`](https://sipemu.github.io/fdars-r/reference/alignment_reparameterize.md)
   : Apply warping function to reparameterize a curve
+- [`alignment_robust_karcher_mean()`](https://sipemu.github.io/fdars-r/reference/alignment_robust_karcher_mean.md)
+  : Robust (trimmed) Karcher mean in elastic metric
 - [`alignment_self_dist()`](https://sipemu.github.io/fdars-r/reference/alignment_self_dist.md)
   : Elastic self-distance matrix
+- [`alignment_shape_ci()`](https://sipemu.github.io/fdars-r/reference/alignment_shape_ci.md)
+  : Bootstrap shape confidence intervals for the elastic Karcher mean
 - [`alignment_srsf_inverse()`](https://sipemu.github.io/fdars-r/reference/alignment_srsf_inverse.md)
   : Inverse SRSF: reconstruct curve from SRSF representation
 - [`alignment_srsf_transform()`](https://sipemu.github.io/fdars-r/reference/alignment_srsf_transform.md)
   : SRSF transform of functional data
+- [`alignment_transfer()`](https://sipemu.github.io/fdars-r/reference/alignment_transfer.md)
+  : Transfer alignment: align curves across populations
 - [`alignment_tsrvf_from_karcher()`](https://sipemu.github.io/fdars-r/reference/alignment_tsrvf_from_karcher.md)
   : Compute TSRVF from a pre-computed Karcher mean
 - [`alignment_tsrvf_inverse()`](https://sipemu.github.io/fdars-r/reference/alignment_tsrvf_inverse.md)
@@ -1971,6 +2123,8 @@ Low-level Rust wrappers and internal functions
   Regions](https://sipemu.github.io/fdars-r/articles/example-explainability-regions.md):
 - [Inline Quality Monitoring: Detection Power and False Alarm
   Analysis](https://sipemu.github.io/fdars-r/articles/example-inline-monitoring.md):
+- [Biopharmaceutical Batch Monitoring: Penicillin
+  Fermentation](https://sipemu.github.io/fdars-r/articles/example-biopharma-monitoring.md):
 
 ### Learn
 
@@ -2017,6 +2171,8 @@ Low-level Rust wrappers and internal functions
 
 - [Elastic Curve
   Alignment](https://sipemu.github.io/fdars-r/articles/elastic-alignment.md):
+- [Advanced Elastic
+  Alignment](https://sipemu.github.io/fdars-r/articles/advanced-alignment.md):
 - [Landmark
   Registration](https://sipemu.github.io/fdars-r/articles/landmark-registration.md):
 - [TSRVF: Linearized Elastic

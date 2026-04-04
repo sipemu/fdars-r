@@ -152,7 +152,7 @@ print(chart)
 #>   SPE UCL: 13.08 
 #>   Observations: 149 
 #>   Grid points: 100 
-#>   Eigenvalues: 17.8
+#>   Eigenvalues: 35.7
 ```
 
 ``` r
@@ -188,11 +188,11 @@ robust_spe <- spm.limit.robust(chart$spe.phase1,
 cat("Parametric T2 UCL:", format(chart$t2.ucl, digits = 4), "\n")
 #> Parametric T2 UCL: 6.635
 cat("Bootstrap  T2 UCL:", format(robust_t2$ucl, digits = 4), "\n")
-#> Bootstrap  T2 UCL: 12.67
+#> Bootstrap  T2 UCL: 12.69
 cat("Parametric SPE UCL:", format(chart$spe.ucl, digits = 4), "\n")
 #> Parametric SPE UCL: 13.08
 cat("Bootstrap  SPE UCL:", format(robust_spe$ucl, digits = 4), "\n")
-#> Bootstrap  SPE UCL: 14.37
+#> Bootstrap  SPE UCL: 14.38
 ```
 
 ``` r
@@ -235,8 +235,8 @@ mon <- spm.monitor(chart, fd_test)
 print(mon)
 #> SPM Monitoring Result (Phase II)
 #>   Observations: 66 
-#>   T2 alarms: 6 of 66 (9.09%) 
-#>   SPE alarms: 2 of 66 (3.03%) 
+#>   T2 alarms: 0 of 66 (0%) 
+#>   SPE alarms: 39 of 66 (59.1%) 
 #>   T2 UCL: 6.635 
 #>   SPE UCL: 13.08
 
@@ -248,11 +248,11 @@ n_test <- nrow(fd_test$data)
 
 cat("\nT2 alarms:", n_t2_alarm, "of", n_test, "\n")
 #> 
-#> T2 alarms: 6 of 66
+#> T2 alarms: 0 of 66
 cat("SPE alarms:", n_spe_alarm, "of", n_test, "\n")
-#> SPE alarms: 2 of 66
+#> SPE alarms: 39 of 66
 cat("Either alarm:", n_either, "of", n_test, "\n")
-#> Either alarm: 7 of 66
+#> Either alarm: 39 of 66
 ```
 
 ``` r
@@ -284,15 +284,67 @@ print(rules_we)
 #>   Rule set: western.electric 
 #>   Observations: 66 
 #>   Center: 1.546 
-#>   Sigma: 2.568 
-#>   Violations found: 7 
-#>     WE1: indices [15]
-#>     WE1: indices [16]
-#>     WE1: indices [57]
-#>     WE2: indices [15, 16]
-#>     WE2: indices [15, 16]
+#>   Sigma: 2.569 
+#>   Violations found: 59 
+#>     WE4: indices [1, 2, 3, 4, 5, 6, 7, 8]
+#>     WE4: indices [2, 3, 4, 5, 6, 7, 8, 9]
+#>     WE4: indices [3, 4, 5, 6, 7, 8, 9, 10]
+#>     WE4: indices [4, 5, 6, 7, 8, 9, 10, 11]
+#>     WE4: indices [5, 6, 7, 8, 9, 10, 11, 12]
+#>     WE4: indices [6, 7, 8, 9, 10, 11, 12, 13]
+#>     WE4: indices [7, 8, 9, 10, 11, 12, 13, 14]
+#>     WE4: indices [8, 9, 10, 11, 12, 13, 14, 15]
+#>     WE4: indices [9, 10, 11, 12, 13, 14, 15, 16]
+#>     WE4: indices [10, 11, 12, 13, 14, 15, 16, 17]
+#>     WE4: indices [11, 12, 13, 14, 15, 16, 17, 18]
+#>     WE4: indices [12, 13, 14, 15, 16, 17, 18, 19]
+#>     WE4: indices [13, 14, 15, 16, 17, 18, 19, 20]
+#>     WE4: indices [14, 15, 16, 17, 18, 19, 20, 21]
+#>     WE4: indices [15, 16, 17, 18, 19, 20, 21, 22]
+#>     WE4: indices [16, 17, 18, 19, 20, 21, 22, 23]
+#>     WE4: indices [17, 18, 19, 20, 21, 22, 23, 24]
+#>     WE4: indices [18, 19, 20, 21, 22, 23, 24, 25]
 #>     WE4: indices [19, 20, 21, 22, 23, 24, 25, 26]
 #>     WE4: indices [20, 21, 22, 23, 24, 25, 26, 27]
+#>     WE4: indices [21, 22, 23, 24, 25, 26, 27, 28]
+#>     WE4: indices [22, 23, 24, 25, 26, 27, 28, 29]
+#>     WE4: indices [23, 24, 25, 26, 27, 28, 29, 30]
+#>     WE4: indices [24, 25, 26, 27, 28, 29, 30, 31]
+#>     WE4: indices [25, 26, 27, 28, 29, 30, 31, 32]
+#>     WE4: indices [26, 27, 28, 29, 30, 31, 32, 33]
+#>     WE4: indices [27, 28, 29, 30, 31, 32, 33, 34]
+#>     WE4: indices [28, 29, 30, 31, 32, 33, 34, 35]
+#>     WE4: indices [29, 30, 31, 32, 33, 34, 35, 36]
+#>     WE4: indices [30, 31, 32, 33, 34, 35, 36, 37]
+#>     WE4: indices [31, 32, 33, 34, 35, 36, 37, 38]
+#>     WE4: indices [32, 33, 34, 35, 36, 37, 38, 39]
+#>     WE4: indices [33, 34, 35, 36, 37, 38, 39, 40]
+#>     WE4: indices [34, 35, 36, 37, 38, 39, 40, 41]
+#>     WE4: indices [35, 36, 37, 38, 39, 40, 41, 42]
+#>     WE4: indices [36, 37, 38, 39, 40, 41, 42, 43]
+#>     WE4: indices [37, 38, 39, 40, 41, 42, 43, 44]
+#>     WE4: indices [38, 39, 40, 41, 42, 43, 44, 45]
+#>     WE4: indices [39, 40, 41, 42, 43, 44, 45, 46]
+#>     WE4: indices [40, 41, 42, 43, 44, 45, 46, 47]
+#>     WE4: indices [41, 42, 43, 44, 45, 46, 47, 48]
+#>     WE4: indices [42, 43, 44, 45, 46, 47, 48, 49]
+#>     WE4: indices [43, 44, 45, 46, 47, 48, 49, 50]
+#>     WE4: indices [44, 45, 46, 47, 48, 49, 50, 51]
+#>     WE4: indices [45, 46, 47, 48, 49, 50, 51, 52]
+#>     WE4: indices [46, 47, 48, 49, 50, 51, 52, 53]
+#>     WE4: indices [47, 48, 49, 50, 51, 52, 53, 54]
+#>     WE4: indices [48, 49, 50, 51, 52, 53, 54, 55]
+#>     WE4: indices [49, 50, 51, 52, 53, 54, 55, 56]
+#>     WE4: indices [50, 51, 52, 53, 54, 55, 56, 57]
+#>     WE4: indices [51, 52, 53, 54, 55, 56, 57, 58]
+#>     WE4: indices [52, 53, 54, 55, 56, 57, 58, 59]
+#>     WE4: indices [53, 54, 55, 56, 57, 58, 59, 60]
+#>     WE4: indices [54, 55, 56, 57, 58, 59, 60, 61]
+#>     WE4: indices [55, 56, 57, 58, 59, 60, 61, 62]
+#>     WE4: indices [56, 57, 58, 59, 60, 61, 62, 63]
+#>     WE4: indices [57, 58, 59, 60, 61, 62, 63, 64]
+#>     WE4: indices [58, 59, 60, 61, 62, 63, 64, 65]
+#>     WE4: indices [59, 60, 61, 62, 63, 64, 65, 66]
 ```
 
 ``` r
@@ -304,16 +356,120 @@ print(rules_nelson)
 #>   Rule set: nelson 
 #>   Observations: 66 
 #>   Center: 1.546 
-#>   Sigma: 2.568 
-#>   Violations found: 8 
-#>     WE1: indices [15]
-#>     WE1: indices [16]
-#>     WE1: indices [57]
-#>     WE2: indices [15, 16]
-#>     WE2: indices [15, 16]
+#>   Sigma: 2.569 
+#>   Violations found: 112 
+#>     WE4: indices [1, 2, 3, 4, 5, 6, 7, 8]
+#>     WE4: indices [2, 3, 4, 5, 6, 7, 8, 9]
+#>     WE4: indices [3, 4, 5, 6, 7, 8, 9, 10]
+#>     WE4: indices [4, 5, 6, 7, 8, 9, 10, 11]
+#>     WE4: indices [5, 6, 7, 8, 9, 10, 11, 12]
+#>     WE4: indices [6, 7, 8, 9, 10, 11, 12, 13]
+#>     WE4: indices [7, 8, 9, 10, 11, 12, 13, 14]
+#>     WE4: indices [8, 9, 10, 11, 12, 13, 14, 15]
+#>     WE4: indices [9, 10, 11, 12, 13, 14, 15, 16]
+#>     WE4: indices [10, 11, 12, 13, 14, 15, 16, 17]
+#>     WE4: indices [11, 12, 13, 14, 15, 16, 17, 18]
+#>     WE4: indices [12, 13, 14, 15, 16, 17, 18, 19]
+#>     WE4: indices [13, 14, 15, 16, 17, 18, 19, 20]
+#>     WE4: indices [14, 15, 16, 17, 18, 19, 20, 21]
+#>     WE4: indices [15, 16, 17, 18, 19, 20, 21, 22]
+#>     WE4: indices [16, 17, 18, 19, 20, 21, 22, 23]
+#>     WE4: indices [17, 18, 19, 20, 21, 22, 23, 24]
+#>     WE4: indices [18, 19, 20, 21, 22, 23, 24, 25]
 #>     WE4: indices [19, 20, 21, 22, 23, 24, 25, 26]
 #>     WE4: indices [20, 21, 22, 23, 24, 25, 26, 27]
+#>     WE4: indices [21, 22, 23, 24, 25, 26, 27, 28]
+#>     WE4: indices [22, 23, 24, 25, 26, 27, 28, 29]
+#>     WE4: indices [23, 24, 25, 26, 27, 28, 29, 30]
+#>     WE4: indices [24, 25, 26, 27, 28, 29, 30, 31]
+#>     WE4: indices [25, 26, 27, 28, 29, 30, 31, 32]
+#>     WE4: indices [26, 27, 28, 29, 30, 31, 32, 33]
+#>     WE4: indices [27, 28, 29, 30, 31, 32, 33, 34]
+#>     WE4: indices [28, 29, 30, 31, 32, 33, 34, 35]
+#>     WE4: indices [29, 30, 31, 32, 33, 34, 35, 36]
+#>     WE4: indices [30, 31, 32, 33, 34, 35, 36, 37]
+#>     WE4: indices [31, 32, 33, 34, 35, 36, 37, 38]
+#>     WE4: indices [32, 33, 34, 35, 36, 37, 38, 39]
+#>     WE4: indices [33, 34, 35, 36, 37, 38, 39, 40]
+#>     WE4: indices [34, 35, 36, 37, 38, 39, 40, 41]
+#>     WE4: indices [35, 36, 37, 38, 39, 40, 41, 42]
+#>     WE4: indices [36, 37, 38, 39, 40, 41, 42, 43]
+#>     WE4: indices [37, 38, 39, 40, 41, 42, 43, 44]
+#>     WE4: indices [38, 39, 40, 41, 42, 43, 44, 45]
+#>     WE4: indices [39, 40, 41, 42, 43, 44, 45, 46]
+#>     WE4: indices [40, 41, 42, 43, 44, 45, 46, 47]
+#>     WE4: indices [41, 42, 43, 44, 45, 46, 47, 48]
+#>     WE4: indices [42, 43, 44, 45, 46, 47, 48, 49]
+#>     WE4: indices [43, 44, 45, 46, 47, 48, 49, 50]
+#>     WE4: indices [44, 45, 46, 47, 48, 49, 50, 51]
+#>     WE4: indices [45, 46, 47, 48, 49, 50, 51, 52]
+#>     WE4: indices [46, 47, 48, 49, 50, 51, 52, 53]
+#>     WE4: indices [47, 48, 49, 50, 51, 52, 53, 54]
+#>     WE4: indices [48, 49, 50, 51, 52, 53, 54, 55]
+#>     WE4: indices [49, 50, 51, 52, 53, 54, 55, 56]
+#>     WE4: indices [50, 51, 52, 53, 54, 55, 56, 57]
+#>     WE4: indices [51, 52, 53, 54, 55, 56, 57, 58]
+#>     WE4: indices [52, 53, 54, 55, 56, 57, 58, 59]
+#>     WE4: indices [53, 54, 55, 56, 57, 58, 59, 60]
+#>     WE4: indices [54, 55, 56, 57, 58, 59, 60, 61]
+#>     WE4: indices [55, 56, 57, 58, 59, 60, 61, 62]
+#>     WE4: indices [56, 57, 58, 59, 60, 61, 62, 63]
+#>     WE4: indices [57, 58, 59, 60, 61, 62, 63, 64]
+#>     WE4: indices [58, 59, 60, 61, 62, 63, 64, 65]
+#>     WE4: indices [59, 60, 61, 62, 63, 64, 65, 66]
 #>     Nelson5: indices [39, 40, 41, 42, 43, 44]
+#>     Nelson7: indices [1, 2, 3, 4, 5, 6, 7, 8, 9, 10...]
+#>     Nelson7: indices [2, 3, 4, 5, 6, 7, 8, 9, 10, 11...]
+#>     Nelson7: indices [3, 4, 5, 6, 7, 8, 9, 10, 11, 12...]
+#>     Nelson7: indices [4, 5, 6, 7, 8, 9, 10, 11, 12, 13...]
+#>     Nelson7: indices [5, 6, 7, 8, 9, 10, 11, 12, 13, 14...]
+#>     Nelson7: indices [6, 7, 8, 9, 10, 11, 12, 13, 14, 15...]
+#>     Nelson7: indices [7, 8, 9, 10, 11, 12, 13, 14, 15, 16...]
+#>     Nelson7: indices [8, 9, 10, 11, 12, 13, 14, 15, 16, 17...]
+#>     Nelson7: indices [9, 10, 11, 12, 13, 14, 15, 16, 17, 18...]
+#>     Nelson7: indices [10, 11, 12, 13, 14, 15, 16, 17, 18, 19...]
+#>     Nelson7: indices [11, 12, 13, 14, 15, 16, 17, 18, 19, 20...]
+#>     Nelson7: indices [12, 13, 14, 15, 16, 17, 18, 19, 20, 21...]
+#>     Nelson7: indices [13, 14, 15, 16, 17, 18, 19, 20, 21, 22...]
+#>     Nelson7: indices [14, 15, 16, 17, 18, 19, 20, 21, 22, 23...]
+#>     Nelson7: indices [15, 16, 17, 18, 19, 20, 21, 22, 23, 24...]
+#>     Nelson7: indices [16, 17, 18, 19, 20, 21, 22, 23, 24, 25...]
+#>     Nelson7: indices [17, 18, 19, 20, 21, 22, 23, 24, 25, 26...]
+#>     Nelson7: indices [18, 19, 20, 21, 22, 23, 24, 25, 26, 27...]
+#>     Nelson7: indices [19, 20, 21, 22, 23, 24, 25, 26, 27, 28...]
+#>     Nelson7: indices [20, 21, 22, 23, 24, 25, 26, 27, 28, 29...]
+#>     Nelson7: indices [21, 22, 23, 24, 25, 26, 27, 28, 29, 30...]
+#>     Nelson7: indices [22, 23, 24, 25, 26, 27, 28, 29, 30, 31...]
+#>     Nelson7: indices [23, 24, 25, 26, 27, 28, 29, 30, 31, 32...]
+#>     Nelson7: indices [24, 25, 26, 27, 28, 29, 30, 31, 32, 33...]
+#>     Nelson7: indices [25, 26, 27, 28, 29, 30, 31, 32, 33, 34...]
+#>     Nelson7: indices [26, 27, 28, 29, 30, 31, 32, 33, 34, 35...]
+#>     Nelson7: indices [27, 28, 29, 30, 31, 32, 33, 34, 35, 36...]
+#>     Nelson7: indices [28, 29, 30, 31, 32, 33, 34, 35, 36, 37...]
+#>     Nelson7: indices [29, 30, 31, 32, 33, 34, 35, 36, 37, 38...]
+#>     Nelson7: indices [30, 31, 32, 33, 34, 35, 36, 37, 38, 39...]
+#>     Nelson7: indices [31, 32, 33, 34, 35, 36, 37, 38, 39, 40...]
+#>     Nelson7: indices [32, 33, 34, 35, 36, 37, 38, 39, 40, 41...]
+#>     Nelson7: indices [33, 34, 35, 36, 37, 38, 39, 40, 41, 42...]
+#>     Nelson7: indices [34, 35, 36, 37, 38, 39, 40, 41, 42, 43...]
+#>     Nelson7: indices [35, 36, 37, 38, 39, 40, 41, 42, 43, 44...]
+#>     Nelson7: indices [36, 37, 38, 39, 40, 41, 42, 43, 44, 45...]
+#>     Nelson7: indices [37, 38, 39, 40, 41, 42, 43, 44, 45, 46...]
+#>     Nelson7: indices [38, 39, 40, 41, 42, 43, 44, 45, 46, 47...]
+#>     Nelson7: indices [39, 40, 41, 42, 43, 44, 45, 46, 47, 48...]
+#>     Nelson7: indices [40, 41, 42, 43, 44, 45, 46, 47, 48, 49...]
+#>     Nelson7: indices [41, 42, 43, 44, 45, 46, 47, 48, 49, 50...]
+#>     Nelson7: indices [42, 43, 44, 45, 46, 47, 48, 49, 50, 51...]
+#>     Nelson7: indices [43, 44, 45, 46, 47, 48, 49, 50, 51, 52...]
+#>     Nelson7: indices [44, 45, 46, 47, 48, 49, 50, 51, 52, 53...]
+#>     Nelson7: indices [45, 46, 47, 48, 49, 50, 51, 52, 53, 54...]
+#>     Nelson7: indices [46, 47, 48, 49, 50, 51, 52, 53, 54, 55...]
+#>     Nelson7: indices [47, 48, 49, 50, 51, 52, 53, 54, 55, 56...]
+#>     Nelson7: indices [48, 49, 50, 51, 52, 53, 54, 55, 56, 57...]
+#>     Nelson7: indices [49, 50, 51, 52, 53, 54, 55, 56, 57, 58...]
+#>     Nelson7: indices [50, 51, 52, 53, 54, 55, 56, 57, 58, 59...]
+#>     Nelson7: indices [51, 52, 53, 54, 55, 56, 57, 58, 59, 60...]
+#>     Nelson7: indices [52, 53, 54, 55, 56, 57, 58, 59, 60, 61...]
 ```
 
 The Western Electric rules check four patterns: a single point beyond
@@ -338,8 +494,8 @@ print(cusum)
 #>   k: 0.5 
 #>   h (UCL): 5 
 #>   Restart: FALSE 
-#>   CUSUM alarms: 59 of 66 (89.4%) 
-#>   SPE alarms: 2 of 66 (3.03%)
+#>   CUSUM alarms: 0 of 66 (0%) 
+#>   SPE alarms: 39 of 66 (59.1%)
 ```
 
 ``` r
@@ -352,7 +508,7 @@ plot(cusum)
 # First CUSUM alarm
 first_cusum <- which(cusum$alarm)[1]
 cat("CUSUM first alarm at observation:", first_cusum, "\n")
-#> CUSUM first alarm at observation: 7
+#> CUSUM first alarm at observation: NA
 ```
 
 The allowance parameter `k` controls the size of shift the CUSUM is
@@ -374,8 +530,8 @@ print(mewma)
 #>   Observations: 66 
 #>   Lambda: 0.2 
 #>   UCL: 3.841 
-#>   MEWMA alarms: 52 of 66 (78.8%) 
-#>   SPE alarms: 2 of 66 (3.03%)
+#>   MEWMA alarms: 0 of 66 (0%) 
+#>   SPE alarms: 39 of 66 (59.1%)
 ```
 
 ``` r
@@ -387,7 +543,7 @@ plot(mewma)
 ``` r
 first_mewma <- which(mewma$alarm)[1]
 cat("MEWMA first alarm at observation:", first_mewma, "\n")
-#> MEWMA first alarm at observation: 6
+#> MEWMA first alarm at observation: NA
 ```
 
 The smoothing parameter `lambda` controls memory: values near 0 give
@@ -488,9 +644,9 @@ knitr::kable(comparison, align = c("l", "r", "r", "r"),
 
 | Method             | First.Alarm | Total.Alarms | Detection.Rate |
 |:-------------------|------------:|-------------:|---------------:|
-| T-squared Shewhart |           7 |            6 |          9.09% |
-| CUSUM              |           7 |           59 |         89.39% |
-| MEWMA              |           6 |           52 |         78.79% |
+| T-squared Shewhart |        None |            0 |             0% |
+| CUSUM              |        None |            0 |             0% |
+| MEWMA              |        None |            0 |             0% |
 
 Detection comparison across monitoring methods
 
@@ -513,7 +669,7 @@ far from the in-control mean.
 alarm_any <- which(mon$t2.alarm | mon$spe.alarm)
 first_alarm <- alarm_any[1]
 cat("Diagnosing observation:", first_alarm, "\n")
-#> Diagnosing observation: 6
+#> Diagnosing observation: 3
 
 # Compute per-PC contributions for all monitored samples
 contrib <- spm.pc.contributions(mon$scores, chart$eigenvalues)

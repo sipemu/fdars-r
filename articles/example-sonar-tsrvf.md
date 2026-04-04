@@ -311,34 +311,34 @@ knitr::kable(ablation[order(-ablation$CV_Accuracy), ],
 
 | Features       | Path          | Method | Best_ncomp | CV_Accuracy |
 |:---------------|:--------------|:-------|-----------:|------------:|
-| Smoothed       | A: Simple     | KNN    |         10 |       0.870 |
-| Raw (scaled)   | A: Simple     | KNN    |         10 |       0.865 |
+| Smoothed       | A: Simple     | KNN    |         10 |       0.875 |
 | Smoothed       | A: Simple     | SVM    |         10 |       0.856 |
+| Raw (scaled)   | A: Simple     | KNN    |         10 |       0.850 |
 | Raw (scaled)   | A: Simple     | SVM    |         10 |       0.837 |
-| Smoothed       | A: Simple     | QDA    |         15 |       0.806 |
-| Raw (scaled)   | A: Simple     | QDA    |          5 |       0.792 |
+| Smoothed       | A: Simple     | QDA    |         15 |       0.801 |
+| Raw (scaled)   | A: Simple     | QDA    |         15 |       0.792 |
 | Smoothed       | A: Simple     | LDA    |         20 |       0.788 |
-| 1st derivative | B: Derivative | KNN    |         20 |       0.777 |
-| Raw (scaled)   | A: Simple     | LDA    |         10 |       0.773 |
+| Aligned        | C: Elastic    | KNN    |         20 |       0.778 |
+| 1st derivative | B: Derivative | KNN    |         20 |       0.768 |
+| Raw (scaled)   | A: Simple     | LDA    |         15 |       0.763 |
 | Aligned        | C: Elastic    | SVM    |         10 |       0.760 |
 | 1st derivative | B: Derivative | SVM    |         20 |       0.756 |
 | 2nd derivative | B: Derivative | SVM    |         20 |       0.756 |
-| Aligned        | C: Elastic    | KNN    |         20 |       0.755 |
-| 1st derivative | B: Derivative | QDA    |         20 |       0.716 |
+| 1st derivative | B: Derivative | QDA    |         20 |       0.720 |
 | 2nd derivative | B: Derivative | LDA    |         20 |       0.711 |
 | 2nd derivative | B: Derivative | QDA    |         20 |       0.711 |
+| Aligned        | C: Elastic    | LDA    |         20 |       0.711 |
 | 1st derivative | B: Derivative | LDA    |         15 |       0.697 |
-| Aligned        | C: Elastic    | LDA    |         20 |       0.696 |
-| 2nd derivative | B: Derivative | KNN    |         10 |       0.691 |
+| 2nd derivative | B: Derivative | KNN    |         10 |       0.695 |
 | TSRVF (amp)    | C: Elastic    | SVM    |         15 |       0.678 |
-| TSRVF (amp)    | C: Elastic    | LDA    |         15 |       0.658 |
-| Full elastic   | C: Elastic    | QDA    |         10 |       0.654 |
-| TSRVF (amp)    | C: Elastic    | KNN    |         20 |       0.648 |
+| Full elastic   | C: Elastic    | QDA    |          8 |       0.667 |
+| TSRVF (amp)    | C: Elastic    | KNN    |         20 |       0.663 |
+| Full elastic   | C: Elastic    | KNN    |          8 |       0.649 |
+| TSRVF (amp)    | C: Elastic    | LDA    |         15 |       0.648 |
+| TSRVF (amp)    | C: Elastic    | QDA    |         20 |       0.644 |
 | Full elastic   | C: Elastic    | SVM    |         10 |       0.640 |
-| TSRVF (amp)    | C: Elastic    | QDA    |          8 |       0.638 |
-| Aligned        | C: Elastic    | QDA    |         15 |       0.630 |
-| Full elastic   | C: Elastic    | KNN    |         10 |       0.620 |
-| Full elastic   | C: Elastic    | LDA    |          8 |       0.604 |
+| Aligned        | C: Elastic    | QDA    |          8 |       0.634 |
+| Full elastic   | C: Elastic    | LDA    |          5 |       0.605 |
 
 10-Fold CV Accuracy (best ncomp per feature × method)
 
@@ -391,12 +391,12 @@ cat("Best configuration:", best_feat, "+", toupper(best_method),
     "with ncomp =", best_nc, "\n")
 #> Best configuration: Smoothed + KNN with ncomp = 10
 cat("CV accuracy:", ablation$CV_Accuracy[best_idx], "\n")
-#> CV accuracy: 0.87
+#> CV accuracy: 0.875
 
 best_fd <- feature_sets[[best_feat]]
 best_fit <- fclassif(best_fd, y, method = best_method, ncomp = best_nc)
 cat("Training accuracy:", round(best_fit$accuracy, 3), "\n")
-#> Training accuracy: 0.851
+#> Training accuracy: 0.856
 
 # Confusion matrix
 plot(best_fit)
@@ -410,7 +410,7 @@ class_acc <- diag(cm) / colSums(cm)
 cat("Mine accuracy:", round(class_acc[1], 3), "\n")
 #> Mine accuracy: 0.892
 cat("Rock accuracy:", round(class_acc[2], 3), "\n")
-#> Rock accuracy: 0.804
+#> Rock accuracy: 0.814
 ```
 
 ## 7. Interpretation: Why the Simple Model Won

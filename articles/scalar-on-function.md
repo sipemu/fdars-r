@@ -142,9 +142,9 @@ print(fit_lm)
 #> ====================================
 #>   Number of observations: 80 
 #>   Number of FPC components: 3 
-#>   R-squared: 0.4371 
-#>   Adjusted R-squared: 0.4149 
-#>   GCV: 0.0968
+#>   R-squared: 0.435 
+#>   Adjusted R-squared: 0.4127 
+#>   GCV: 0.097
 ```
 
 ### Cross-Validation for Component Selection
@@ -156,9 +156,9 @@ cross-validation.
 ``` r
 cv_lm <- fregre.lm.cv(fd_lm, y_lm, k.range = 1:8, nfold = 10)
 cat("Optimal ncomp:", cv_lm$optimal.k, "\n")
-#> Optimal ncomp: 7
+#> Optimal ncomp: 3
 cat("CV errors:", round(cv_lm$cv.errors, 4), "\n")
-#> CV errors: 0.0972 0.0964 0.0967 0.0986 0.0987 0.0966 0.0954 0.0967
+#> CV errors: 0.0974 0.0965 0.0965 0.0977 0.0982 0.0984 0.098 0.1001
 ```
 
 ## PC Regression (`fregre.pc`)
@@ -579,13 +579,13 @@ results <- data.frame(
 knitr::kable(results, caption = "Hold-out test set performance")
 ```
 
-| Method           |   RMSE |      R2 |    MAE |
-|:-----------------|-------:|--------:|-------:|
-| fregre.pc        | 0.4570 |  0.2188 | 0.3820 |
-| fregre.basis     | 0.8990 | -2.0226 | 0.7162 |
-| Nadaraya-Watson  | 0.5359 | -0.0742 | 0.4453 |
-| k-NN             | 0.4935 |  0.0891 | 0.4186 |
-| fregre.lm (Rust) | 0.4570 |  0.2188 | 0.3820 |
+| Method           |    RMSE |        R2 |    MAE |
+|:-----------------|--------:|----------:|-------:|
+| fregre.pc        |  0.4570 |    0.2188 | 0.3820 |
+| fregre.basis     |  0.8990 |   -2.0226 | 0.7162 |
+| Nadaraya-Watson  |  0.5359 |   -0.0742 | 0.4453 |
+| k-NN             |  0.4935 |    0.0891 | 0.4186 |
+| fregre.lm (Rust) | 11.9563 | -533.6283 | 9.2836 |
 
 Hold-out test set performance
 
@@ -788,7 +788,7 @@ pred_np_wf <- predict(fit_best_np, fd_te)
 
 cat("Linear RMSE:", round(pred.RMSE(y_te, pred_lm_wf), 4),
     "| R2:", round(pred.R2(y_te, pred_lm_wf), 4), "\n")
-#> Linear RMSE: 0.4575 | R2: -3e-04
+#> Linear RMSE: 20.2929 | R2: -1967.406
 cat("Nonpar RMSE:", round(pred.RMSE(y_te, pred_np_wf), 4),
     "| R2:", round(pred.R2(y_te, pred_np_wf), 4), "\n")
 #> Nonpar RMSE: 0.5028 | R2: -0.2086

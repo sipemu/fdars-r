@@ -117,7 +117,7 @@ drives the response.
 ``` r
 fit_std <- fregre.lm(fd, y, ncomp = 5)
 cat("Standard fregre.lm R\u00b2:", round(fit_std$r.squared, 4), "\n")
-#> Standard fregre.lm R²: 0.1027
+#> Standard fregre.lm R²: 0.1015
 ```
 
 ``` r
@@ -177,7 +177,7 @@ comp <- data.frame(
 )
 print(comp)
 #>                 Method        R2      RMSE
-#> 1 Standard (fregre.lm) 0.1026623 0.8166588
+#> 1 Standard (fregre.lm) 0.1014741 0.8171993
 #> 2   Elastic Regression 0.8680056 0.3132134
 ```
 

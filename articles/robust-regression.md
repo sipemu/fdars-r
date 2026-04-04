@@ -142,9 +142,9 @@ fit_ols_clean <- fregre.lm(fd, y_clean, ncomp = 5)
 fit_ols_contam <- fregre.lm(fd, y_contam, ncomp = 5)
 
 cat("OLS R-squared (clean):", round(fit_ols_clean$r.squared, 4), "\n")
-#> OLS R-squared (clean): 0.9264
+#> OLS R-squared (clean): 0.9263
 cat("OLS R-squared (contaminated):", round(fit_ols_contam$r.squared, 4), "\n")
-#> OLS R-squared (contaminated): 0.0744
+#> OLS R-squared (contaminated): 0.0761
 ```
 
 On clean data, OLS performs well (R² \> 0.9). On contaminated data, the
@@ -168,9 +168,9 @@ fit_l1_clean <- fregre.l1(fd, y_clean, ncomp = 5)
 fit_l1_contam <- fregre.l1(fd, y_contam, ncomp = 5)
 
 cat("L1 R-squared (clean):", round(fit_l1_clean$r.squared, 4), "\n")
-#> L1 R-squared (clean): 0.9246
+#> L1 R-squared (clean): 0.9243
 cat("L1 R-squared (contaminated):", round(fit_l1_contam$r.squared, 4), "\n")
-#> L1 R-squared (contaminated): -0.0834
+#> L1 R-squared (contaminated): -0.0836
 ```
 
 ### Examining the IRLS Weights
@@ -179,11 +179,11 @@ cat("L1 R-squared (contaminated):", round(fit_l1_contam$r.squared, 4), "\n")
 # Observations with small weights are effectively identified as outliers
 w <- fit_l1_contam$weights
 cat("Mean weight (clean obs):", round(mean(w[-outlier_idx]), 3), "\n")
-#> Mean weight (clean obs): 35310.64
+#> Mean weight (clean obs): 35345.17
 cat("Mean weight (outlier obs):", round(mean(w[outlier_idx]), 3), "\n")
 #> Mean weight (outlier obs): 0.115
 cat("Iterations:", fit_l1_contam$iterations, "\n")
-#> Iterations: 69
+#> Iterations: 74
 cat("Converged:", fit_l1_contam$converged, "\n")
 #> Converged: TRUE
 ```
@@ -207,7 +207,7 @@ loss is linear (like L1).
 fit_huber_contam <- fregre.huber(fd, y_contam, ncomp = 5)
 
 cat("Huber R-squared (contaminated):", round(fit_huber_contam$r.squared, 4), "\n")
-#> Huber R-squared (contaminated): -0.0464
+#> Huber R-squared (contaminated): -0.0452
 cat("Iterations:", fit_huber_contam$iterations, "\n")
 #> Iterations: 7
 cat("Converged:", fit_huber_contam$converged, "\n")
@@ -233,7 +233,7 @@ cat("Huber k=1.345:\n")
 cat("  Mean weight (clean):", round(mean(w_default[-outlier_idx]), 3), "\n")
 #>   Mean weight (clean): 1
 cat("  Mean weight (outlier):", round(mean(w_default[outlier_idx]), 3), "\n")
-#>   Mean weight (outlier): 0.159
+#>   Mean weight (outlier): 0.16
 ```
 
 ## Comparison: OLS vs L1 vs Huber
@@ -307,11 +307,11 @@ knitr::kable(results,
 )
 ```
 
-| Method               |   RMSE |     R² |   RMSE |      R² |
-|:---------------------|-------:|-------:|-------:|--------:|
-| OLS (fregre.lm)      | 0.2732 | 0.9424 | 1.6255 | -1.0393 |
-| L1 (fregre.l1)       | 0.2591 | 0.9482 | 0.2760 |  0.9412 |
-| Huber (fregre.huber) | 0.2732 | 0.9424 | 0.3880 |  0.8838 |
+| Method               |     RMSE |        R² |     RMSE |        R² |
+|:---------------------|---------:|----------:|---------:|----------:|
+| OLS (fregre.lm)      | 115.0564 | -10216.25 |  72.5037 | -4056.256 |
+| L1 (fregre.l1)       | 112.4370 |  -9756.34 | 107.7761 | -8964.152 |
+| Huber (fregre.huber) | 115.0564 | -10216.25 |  91.8562 | -6511.224 |
 
 Test-set performance on clean vs contaminated training data
 

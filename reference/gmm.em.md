@@ -71,6 +71,6 @@ fit <- gmm.em(X, k = 2)
 table(fit$cluster)
 #> 
 #>  2  3 
-#> 49 51 
+#> 50 50 
 # }
 ```

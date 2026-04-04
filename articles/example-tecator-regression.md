@@ -235,15 +235,15 @@ results <- data.frame(
 knitr::kable(results, caption = "Test set performance: fat prediction")
 ```
 
-| Method                          |   RMSE |    R2 |   MAE |
-|:--------------------------------|-------:|------:|------:|
-| PC (absorbance)                 |  3.200 | 0.943 | 2.410 |
-| Basis (absorbance)              |  2.975 | 0.950 | 2.253 |
-| fregre.lm (absorbance)          |  3.200 | 0.943 | 2.410 |
-| k-NN / L2 (absorbance)          | 10.135 | 0.425 | 7.434 |
-| PC (2nd derivative)             |  2.606 | 0.962 | 1.960 |
-| fregre.lm (2nd derivative)      |  2.606 | 0.962 | 1.960 |
-| k-NN / elastic (2nd derivative) |  2.092 | 0.976 | 1.396 |
+| Method                          |     RMSE |        R2 |      MAE |
+|:--------------------------------|---------:|----------:|---------:|
+| PC (absorbance)                 |    3.200 |     0.943 |    2.410 |
+| Basis (absorbance)              |    2.975 |     0.950 |    2.253 |
+| fregre.lm (absorbance)          | 1034.760 | -5989.023 |  754.042 |
+| k-NN / L2 (absorbance)          |   10.135 |     0.425 |    7.434 |
+| PC (2nd derivative)             |    2.606 |     0.962 |    1.960 |
+| fregre.lm (2nd derivative)      | 1226.367 | -8412.762 | 1039.139 |
+| k-NN / elastic (2nd derivative) |    2.092 |     0.976 |    1.396 |
 
 Test set performance: fat prediction
 

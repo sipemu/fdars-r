@@ -67,6 +67,6 @@ v <- vert.fpca(km, ncomp = 2)
 v
 #> Vertical (Amplitude) FPCA
 #>   Components: 2 
-#>   Cumulative variance:  64 %, 100 % 
+#>   Cumulative variance:  51 %, 100 % 
 # }
 ```

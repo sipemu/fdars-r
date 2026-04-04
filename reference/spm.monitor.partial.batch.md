@@ -90,6 +90,6 @@ curves <- list(rnorm(30), rnorm(30), rnorm(30))
 n_obs <- c(10L, 20L, 25L)
 results <- spm.monitor.partial.batch(chart, curves, n_obs)
 sapply(results, function(r) r$t2)
-#> [1] 4.773116 1.625425 1.846241
+#> [1] 3.300021 1.962663 1.282167
 # }
 ```

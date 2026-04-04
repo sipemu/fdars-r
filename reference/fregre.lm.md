@@ -82,6 +82,6 @@ fd <- fdata(matrix(rnorm(500), nrow = 50), argvals = seq(0, 1, length.out = 10))
 y <- rnorm(50)
 result <- fregre.lm(fd, y, ncomp = 3)
 result$r.squared
-#> [1] 0.1393605
+#> [1] 0.02390067
 # }
 ```

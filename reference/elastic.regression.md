@@ -105,8 +105,8 @@ y <- rnorm(50)
 fit <- elastic.regression(fd, y)
 fit
 #> Elastic Scalar-on-Function Regression
-#>   Intercept: -0.4038 
-#>   R-squared: 0.4155 
+#>   Intercept: -0.1284 
+#>   R-squared: 0.4059 
 #>   Iterations: 20 
 # }
 ```

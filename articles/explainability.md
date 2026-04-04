@@ -122,9 +122,9 @@ This is the model that all explainability methods operate on.
 ``` r
 model <- fregre.lm(fdataobj, y, ncomp = 5)
 cat("R\u00b2:", round(model$r.squared, 4), "\n")
-#> R²: 0.047
+#> R²: 0.0607
 cat("RMSE:", round(sqrt(mean(model$residuals^2)), 4), "\n")
-#> RMSE: 0.295
+#> RMSE: 0.2928
 ```
 
 ``` r
@@ -483,53 +483,62 @@ if (is.null(sig) || length(sig$start_idx) == 0) {
                 sig$direction[i]))
   }
 }
-#> Significant regions found: 47 
+#> Significant regions found: 56 
 #>   Region 2: t = [0.000, 0.000] (positive)
 #>   Region 3: t = [0.010, 0.010] (negative)
 #>   Region 4: t = [0.020, 0.020] (positive)
-#>   Region 5: t = [0.040, 0.051] (negative)
-#>   Region 6: t = [0.061, 0.141] (positive)
-#>   Region 7: t = [0.152, 0.192] (negative)
-#>   Region 8: t = [0.202, 0.232] (positive)
-#>   Region 9: t = [0.242, 0.242] (negative)
-#>   Region 10: t = [0.253, 0.273] (positive)
-#>   Region 11: t = [0.283, 0.283] (negative)
-#>   Region 12: t = [0.293, 0.303] (positive)
-#>   Region 13: t = [0.313, 0.313] (negative)
-#>   Region 14: t = [0.323, 0.354] (positive)
-#>   Region 15: t = [0.364, 0.364] (negative)
-#>   Region 16: t = [0.384, 0.404] (negative)
-#>   Region 17: t = [0.414, 0.455] (positive)
-#>   Region 18: t = [0.465, 0.475] (negative)
-#>   Region 19: t = [0.485, 0.485] (positive)
-#>   Region 20: t = [0.495, 0.525] (negative)
-#>   Region 21: t = [0.535, 0.535] (positive)
-#>   Region 22: t = [0.545, 0.556] (negative)
-#>   Region 23: t = [0.566, 0.596] (positive)
-#>   Region 24: t = [0.606, 0.606] (negative)
-#>   Region 25: t = [0.616, 0.626] (positive)
-#>   Region 26: t = [0.636, 0.646] (negative)
-#>   Region 27: t = [0.657, 0.657] (positive)
-#>   Region 28: t = [0.667, 0.677] (negative)
-#>   Region 29: t = [0.697, 0.697] (negative)
-#>   Region 30: t = [0.707, 0.707] (positive)
-#>   Region 31: t = [0.717, 0.717] (negative)
-#>   Region 32: t = [0.727, 0.727] (positive)
-#>   Region 33: t = [0.737, 0.737] (negative)
-#>   Region 34: t = [0.758, 0.758] (negative)
-#>   Region 35: t = [0.768, 0.768] (positive)
-#>   Region 36: t = [0.778, 0.798] (negative)
-#>   Region 37: t = [0.808, 0.808] (positive)
-#>   Region 38: t = [0.818, 0.818] (negative)
-#>   Region 39: t = [0.828, 0.838] (positive)
-#>   Region 40: t = [0.848, 0.848] (negative)
-#>   Region 41: t = [0.859, 0.869] (positive)
-#>   Region 42: t = [0.879, 0.879] (negative)
-#>   Region 43: t = [0.889, 0.899] (positive)
-#>   Region 44: t = [0.919, 0.919] (negative)
-#>   Region 45: t = [0.929, 0.929] (positive)
-#>   Region 46: t = [0.939, 0.980] (negative)
-#>   Region 47: t = [0.990, 0.990] (positive)
+#>   Region 5: t = [0.030, 0.061] (negative)
+#>   Region 6: t = [0.071, 0.081] (positive)
+#>   Region 7: t = [0.101, 0.101] (negative)
+#>   Region 8: t = [0.111, 0.131] (positive)
+#>   Region 9: t = [0.141, 0.141] (negative)
+#>   Region 10: t = [0.152, 0.152] (positive)
+#>   Region 11: t = [0.162, 0.192] (negative)
+#>   Region 12: t = [0.202, 0.202] (positive)
+#>   Region 13: t = [0.212, 0.212] (negative)
+#>   Region 14: t = [0.222, 0.222] (positive)
+#>   Region 15: t = [0.232, 0.232] (negative)
+#>   Region 16: t = [0.242, 0.273] (positive)
+#>   Region 17: t = [0.283, 0.303] (negative)
+#>   Region 18: t = [0.313, 0.343] (positive)
+#>   Region 19: t = [0.354, 0.364] (negative)
+#>   Region 20: t = [0.374, 0.384] (positive)
+#>   Region 21: t = [0.394, 0.404] (negative)
+#>   Region 22: t = [0.414, 0.434] (positive)
+#>   Region 23: t = [0.444, 0.475] (negative)
+#>   Region 24: t = [0.485, 0.495] (positive)
+#>   Region 25: t = [0.505, 0.525] (negative)
+#>   Region 26: t = [0.535, 0.545] (positive)
+#>   Region 27: t = [0.556, 0.556] (negative)
+#>   Region 28: t = [0.566, 0.596] (positive)
+#>   Region 29: t = [0.606, 0.606] (negative)
+#>   Region 30: t = [0.626, 0.626] (positive)
+#>   Region 31: t = [0.636, 0.646] (negative)
+#>   Region 32: t = [0.657, 0.657] (positive)
+#>   Region 33: t = [0.667, 0.677] (negative)
+#>   Region 34: t = [0.687, 0.687] (positive)
+#>   Region 35: t = [0.697, 0.697] (negative)
+#>   Region 36: t = [0.707, 0.707] (positive)
+#>   Region 37: t = [0.717, 0.717] (negative)
+#>   Region 38: t = [0.727, 0.727] (positive)
+#>   Region 39: t = [0.737, 0.758] (negative)
+#>   Region 40: t = [0.768, 0.768] (positive)
+#>   Region 41: t = [0.778, 0.778] (negative)
+#>   Region 42: t = [0.788, 0.788] (positive)
+#>   Region 43: t = [0.798, 0.798] (negative)
+#>   Region 44: t = [0.808, 0.808] (positive)
+#>   Region 45: t = [0.818, 0.818] (negative)
+#>   Region 46: t = [0.828, 0.838] (positive)
+#>   Region 47: t = [0.848, 0.848] (negative)
+#>   Region 48: t = [0.859, 0.859] (positive)
+#>   Region 49: t = [0.869, 0.869] (negative)
+#>   Region 50: t = [0.879, 0.879] (positive)
+#>   Region 51: t = [0.889, 0.889] (negative)
+#>   Region 52: t = [0.899, 0.899] (positive)
+#>   Region 53: t = [0.909, 0.919] (negative)
+#>   Region 54: t = [0.929, 0.929] (positive)
+#>   Region 55: t = [0.939, 0.970] (negative)
+#>   Region 56: t = [0.990, 0.990] (positive)
 ```
 
 ------------------------------------------------------------------------
@@ -678,11 +687,11 @@ cf <- fregre.counterfactual(model, data = fdataobj, observation = 1,
                             target.value = target_val)
 
 cat("Original prediction:", round(cf$original_prediction, 3), "\n")
-#> Original prediction: 0.307
+#> Original prediction: 0.28
 cat("Counterfactual prediction:", round(cf$counterfactual_prediction, 3), "\n")
 #> Counterfactual prediction: 0.648
 cat("Score distance:", round(cf$distance, 3), "\n")
-#> Score distance: 1.741
+#> Score distance: 0.143
 ```
 
 ### Anchor Explanations
@@ -723,7 +732,7 @@ if (length(anch$condition_components) > 0) {
   }
 }
 #> Conditions:
-#>   PC0 in [2.718, Inf]
+#>   PC0 in [0.273, Inf]
 ```
 
 ### Prototypes and Criticisms
@@ -745,9 +754,9 @@ proto <- fregre.prototype(model, ncomp = model$ncomp,
                           n.prototypes = 3, n.criticisms = 3)
 
 cat("Prototype indices:", paste(proto$prototype_indices, collapse = ", "), "\n")
-#> Prototype indices: 71, 42, 11
+#> Prototype indices: 35, 30, 69
 cat("Criticism indices:", paste(proto$criticism_indices, collapse = ", "), "\n")
-#> Criticism indices: 68, 35, 29
+#> Criticism indices: 72, 10, 68
 ```
 
 ``` r
@@ -797,7 +806,7 @@ calibration and ECE.
 y_binary <- as.numeric(y > median(y))
 logit_model <- functional.logistic(fdataobj, y_binary, ncomp = 3)
 cat("Accuracy:", round(logit_model$accuracy, 4), "\n")
-#> Accuracy: 0.525
+#> Accuracy: 0.5375
 ```
 
 ### PDP and ALE for Classification
@@ -875,17 +884,17 @@ probabilities.
 ``` r
 cal <- fregre.calibration(logit_model, y = y_binary, n.groups = 5)
 cat("Brier score:", round(cal$brier_score, 4), "\n")
-#> Brier score: 0.245
+#> Brier score: 0.2474
 cat("Hosmer-Lemeshow chi2:", round(cal$hosmer_lemeshow_chi2, 4), "\n")
-#> Hosmer-Lemeshow chi2: 8.0144
+#> Hosmer-Lemeshow chi2: 3.0347
 ```
 
 ``` r
 ece <- fregre.ece(logit_model, y = y_binary, n.bins = 5)
 cat("ECE:", round(ece$ece, 4), "\n")
-#> ECE: 0.0593
+#> ECE: 0.0042
 cat("MCE:", round(ece$mce, 4), "\n")
-#> MCE: 0.2271
+#> MCE: 0.056
 ```
 
 ------------------------------------------------------------------------

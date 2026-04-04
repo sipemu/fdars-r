@@ -227,7 +227,7 @@ print(fit)
 #>   Number of observations: 45 
 #>   Number of subjects: 15 
 #>   FPC components: 3 
-#>   Residual variance (sigma2_eps): 0.000159 
+#>   Residual variance (sigma2_eps): 2e-06 
 #>   Fixed effect covariates: 1
 ```
 
@@ -257,7 +257,7 @@ between-subject variability.
 ``` r
 # Residual variance
 cat("Residual variance:", round(fit$sigma2.eps, 4), "\n")
-#> Residual variance: 2e-04
+#> Residual variance: 0
 
 # Number of subjects
 cat("Number of subjects:", fit$n.subjects, "\n")
@@ -319,7 +319,7 @@ print(test_result)
 #>   Permutations: 500 
 #> 
 #>             F.statistic  P.value
-#> Covariate 1      0.0394 0.001996
+#> Covariate 1      0.0393 0.001996
 ```
 
 A small p-value indicates that the treatment effect $\beta_{1}(t)$ is
@@ -341,7 +341,7 @@ cat("Naive FOSR R-squared:", round(fosr_naive$r.squared, 4), "\n")
 
 # FMM accounts for subject-level variation
 cat("FMM residual variance:", round(fit$sigma2.eps, 4), "\n")
-#> FMM residual variance: 2e-04
+#> FMM residual variance: 0
 ```
 
 The FMM separates subject-level variation from residual noise, giving a

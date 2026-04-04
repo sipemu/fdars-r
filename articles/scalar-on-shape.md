@@ -178,10 +178,10 @@ fit_std <- fregre.lm(fd_train, y_train, ncomp = 5)
 pred_std <- predict(fit_std, fd_test)
 
 cat("fregre.lm R-squared (train):", round(fit_std$r.squared, 4), "\n")
-#> fregre.lm R-squared (train): 0.399
+#> fregre.lm R-squared (train): 0.408
 cat("fregre.lm RMSE (test):",
     round(sqrt(mean((y_test - pred_std)^2)), 4), "\n")
-#> fregre.lm RMSE (test): 2.5022
+#> fregre.lm RMSE (test): 97.5319
 ```
 
 To understand *why*
@@ -240,11 +240,11 @@ comparison <- data.frame(
 knitr::kable(comparison, caption = "Method comparison on phase-variable data")
 ```
 
-| Method              | Handles_Phase     | Train_R2 | Test_RMSE | Test_R2 |
-|:--------------------|:------------------|---------:|----------:|--------:|
-| fregre.lm (ncomp=5) | No                |   0.3990 |    2.5022 |  0.1020 |
-| elastic.regression  | Yes (alignment)   |   0.0418 |    1.7091 |  0.5810 |
-| scalar.on.shape     | Yes (shape score) |   0.8312 |    1.0350 |  0.8463 |
+| Method              | Handles_Phase     | Train_R2 | Test_RMSE |    Test_R2 |
+|:--------------------|:------------------|---------:|----------:|-----------:|
+| fregre.lm (ncomp=5) | No                |   0.4080 |   97.5319 | -1363.4010 |
+| elastic.regression  | Yes (alignment)   |   0.0418 |    1.7091 |     0.5810 |
+| scalar.on.shape     | Yes (shape score) |   0.8312 |    1.0350 |     0.8463 |
 
 Method comparison on phase-variable data
 
@@ -302,6 +302,10 @@ ggplot(df_sweep, aes(x = ncomp, y = test_r2)) +
   labs(title = "fregre.lm Performance vs Number of Components",
        x = "Number of FPC Components", y = expression("Test R"^2)) +
   ylim(-0.2, 1)
+#> Warning: Removed 4 rows containing missing values or values outside the scale range
+#> (`geom_line()`).
+#> Warning: Removed 4 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
 ```
 
 ![](scalar-on-shape_files/figure-html/ncomp-sweep-1.png)

@@ -92,10 +92,10 @@ print(chart)
 #>   Components: 3 
 #>   Alpha: 0.05 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 0.12 
+#>   SPE UCL: 0.1201 
 #>   Observations: 200 
 #>   Grid points: 50 
-#>   Eigenvalues: 78.73, 23.13,  5.81
+#>   Eigenvalues: 1.607, 0.458, 0.119
 ```
 
 The returned `spm.chart` object contains:
@@ -123,10 +123,10 @@ monitor <- spm.monitor(chart, fd_new)
 print(monitor)
 #> SPM Monitoring Result (Phase II)
 #>   Observations: 50 
-#>   T2 alarms: 3 of 50 (6%) 
+#>   T2 alarms: 2 of 50 (4%) 
 #>   SPE alarms: 5 of 50 (10%) 
 #>   T2 UCL: 7.815 
-#>   SPE UCL: 0.12
+#>   SPE UCL: 0.1201
 
 # Which observations triggered alarms?
 alarm_idx <- which(monitor$t2.alarm | monitor$spe.alarm)
@@ -218,7 +218,7 @@ first_alarm <- alarm_idx[1]
 cat("First alarm at observation:", first_alarm, "\n")
 #> First alarm at observation: 4
 cat("T2 contributions (per PC):", round(t2_contrib[first_alarm, ], 3), "\n")
-#> T2 contributions (per PC): 10.563
+#> T2 contributions (per PC): 10.337
 ```
 
 ``` r

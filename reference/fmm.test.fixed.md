@@ -69,6 +69,6 @@ test
 #>   Permutations: 100 
 #> 
 #>             F.statistic P.value
-#> Covariate 1      0.0029 0.80198
+#> Covariate 1      0.0029 0.74257
 # }
 ```

@@ -153,7 +153,7 @@ relationship.</p>
 <span><span class="co">#&gt;   T2 UCL: 7.815 </span></span>
 <span><span class="co">#&gt;   Observations: 100 </span></span>
 <span><span class="co">#&gt;   Predictors: 1 </span></span>
-<span><span class="co">#&gt;   Lag-1 autocorrelation: 0.8984 </span></span>
+<span><span class="co">#&gt;   Lag-1 autocorrelation: 0.9125 </span></span>
 <span><span class="co">#&gt;   Effective windows: 29</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -164,7 +164,7 @@ relationship.</p>
 <span></span>
 <span><span class="va">alarm_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">profile_mon</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Alarms at windows:"</span>, <span class="va">alarm_idx</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Alarms at windows: 16 18</span></span></code></pre></div>
+<span><span class="co">#&gt; Alarms at windows: 16 17 18</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Residual T-squared control chart</span></span>
 <span><span class="va">n_mon</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">profile_mon</span><span class="op">$</span><span class="va">t2</span><span class="op">)</span></span>
@@ -305,15 +305,15 @@ call.</p>
 <span>  alarm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">batch_results</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="va">r</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_batch</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   batch fraction         t2 alarm</span></span>
-<span><span class="co">#&gt; 1     1      0.3  1.1630824 FALSE</span></span>
-<span><span class="co">#&gt; 2     2      0.4  1.7621838 FALSE</span></span>
-<span><span class="co">#&gt; 3     3      0.5  1.1911677 FALSE</span></span>
-<span><span class="co">#&gt; 4     4      0.6  1.0034014 FALSE</span></span>
-<span><span class="co">#&gt; 5     5      0.7  0.5307191 FALSE</span></span>
-<span><span class="co">#&gt; 6     6      0.8 11.9463152  TRUE</span></span>
-<span><span class="co">#&gt; 7     7      0.9 11.0927592  TRUE</span></span>
-<span><span class="co">#&gt; 8     8      1.0  5.4587626 FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt;   batch fraction        t2 alarm</span></span>
+<span><span class="co">#&gt; 1     1      0.3 0.8334159 FALSE</span></span>
+<span><span class="co">#&gt; 2     2      0.4 0.3980182 FALSE</span></span>
+<span><span class="co">#&gt; 3     3      0.5 1.2264254 FALSE</span></span>
+<span><span class="co">#&gt; 4     4      0.6 0.4658310 FALSE</span></span>
+<span><span class="co">#&gt; 5     5      0.7 0.9487427 FALSE</span></span>
+<span><span class="co">#&gt; 6     6      0.8 7.4012743 FALSE</span></span>
+<span><span class="co">#&gt; 7     7      0.9 6.7057339 FALSE</span></span>
+<span><span class="co">#&gt; 8     8      1.0 3.4275624 FALSE</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_batch</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">batch</span>, y <span class="op">=</span> <span class="va">t2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xend <span class="op">=</span> <span class="va">batch</span>, y <span class="op">=</span> <span class="fl">0</span>, yend <span class="op">=</span> <span class="va">t2</span>, color <span class="op">=</span> <span class="va">alarm</span><span class="op">)</span>,</span>
@@ -368,11 +368,11 @@ to a Karcher mean.</p>
 <span><span class="co">#&gt;   Components (amplitude): 3 </span></span>
 <span><span class="co">#&gt;   Alpha: 0.05 </span></span>
 <span><span class="co">#&gt;   Amplitude T2 UCL: 7.815 </span></span>
-<span><span class="co">#&gt;   Amplitude SPE UCL: 0.02094 </span></span>
+<span><span class="co">#&gt;   Amplitude SPE UCL: 0.02286 </span></span>
 <span><span class="co">#&gt;   Phase monitoring: enabled</span></span>
 <span><span class="co">#&gt;   Phase components: 2 </span></span>
 <span><span class="co">#&gt;   Phase T2 UCL: 5.991 </span></span>
-<span><span class="co">#&gt;   Phase SPE UCL: 0.00118 </span></span>
+<span><span class="co">#&gt;   Phase SPE UCL: 0.001181 </span></span>
 <span><span class="co">#&gt;   Observations: 60 </span></span>
 <span><span class="co">#&gt;   Grid points: 50</span></span></code></pre></div>
 </div>
@@ -399,7 +399,7 @@ to a Karcher mean.</p>
 <span><span class="va">elastic_mon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spm.elastic.monitor.html">spm.elastic.monitor</a></span><span class="op">(</span><span class="va">elastic_chart</span>, <span class="va">fd_new_el</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Amplitude T2 alarms:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">elastic_mon</span><span class="op">$</span><span class="va">amplitude</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Amplitude T2 alarms: 5</span></span>
+<span><span class="co">#&gt; Amplitude T2 alarms: 7</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Phase T2 alarms:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">elastic_mon</span><span class="op">$</span><span class="va">phase</span><span class="op">$</span><span class="va">t2.alarm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Phase T2 alarms: 6</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">

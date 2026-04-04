@@ -107,6 +107,6 @@ amewma
 #>   Lambda init: 0.2 
 #>   Eta: 0.1 
 #>   UCL: 7.815 
-#>   Alarms: 1 of 30 (3.33%) 
+#>   Alarms: 0 of 30 (0%) 
 # }
 ```

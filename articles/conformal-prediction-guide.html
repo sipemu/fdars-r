@@ -449,7 +449,7 @@ wider intervals.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">split_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Coverage: 92.5 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">split_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">split_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Mean width: 0.5484</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean width: 0.5427</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="when-to-use-cv">When to Use CV+<a class="anchor" aria-label="anchor" href="#when-to-use-cv"></a>
@@ -478,7 +478,7 @@ model fits instead of 1.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cv_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Coverage: 90.6 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cv_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">cv_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Mean width: 0.4996</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean width: 0.497</span></span></code></pre></div>
 <p>CV+ also works with nonparametric models — useful when the
 relationship between spectra and response is nonlinear:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -516,7 +516,7 @@ precise calibration. Best for small-to-moderate datasets
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">jk_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Coverage: 90.6 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">jk_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">jk_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Mean width: 0.5817</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean width: 0.5799</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="when-to-use-generic-conformal">When to Use Generic Conformal<a class="anchor" aria-label="anchor" href="#when-to-use-generic-conformal"></a>
@@ -550,7 +550,7 @@ For valid coverage, prefer <code><a href="../reference/conformal.fregre.lm.html"
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Coverage:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gen_res</span><span class="op">$</span><span class="va">coverage</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Coverage: 92.5 %</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean width:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">gen_res</span><span class="op">$</span><span class="va">upper</span> <span class="op">-</span> <span class="va">gen_res</span><span class="op">$</span><span class="va">lower</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Mean width: 0.541</span></span></code></pre></div>
+<span><span class="co">#&gt;   Mean width: 0.5376</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="comparing-all-methods">Comparing All Methods<a class="anchor" aria-label="anchor" href="#comparing-all-methods"></a>
@@ -605,13 +605,13 @@ For valid coverage, prefer <code><a href="../reference/conformal.fregre.lm.html"
 <tr class="odd">
 <td align="left">Split</td>
 <td align="right">92.5</td>
-<td align="right">0.5484</td>
+<td align="right">0.5427</td>
 <td align="left">1</td>
 </tr>
 <tr class="even">
 <td align="left">CV+ (lm)</td>
 <td align="right">90.6</td>
-<td align="right">0.4996</td>
+<td align="right">0.4970</td>
 <td align="left">5</td>
 </tr>
 <tr class="odd">
@@ -623,13 +623,13 @@ For valid coverage, prefer <code><a href="../reference/conformal.fregre.lm.html"
 <tr class="even">
 <td align="left">Jackknife+</td>
 <td align="right">90.6</td>
-<td align="right">0.5817</td>
+<td align="right">0.5799</td>
 <td align="left">160</td>
 </tr>
 <tr class="odd">
 <td align="left">Generic</td>
 <td align="right">92.5</td>
-<td align="right">0.5410</td>
+<td align="right">0.5376</td>
 <td align="left">0</td>
 </tr>
 </tbody>
