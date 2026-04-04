@@ -78,15 +78,34 @@ elastic distance) before computing the standard Karcher mean, following
 the approach of Cuesta-Albertos & Fraiman (2007) extended to the elastic
 manifold.
 
-```{r robust-karcher, eval = FALSE}
+```{r robust-karcher}
 # Standard Karcher mean (reference)
-km <- karcher.mean(fd, max.iter = 20)
+km <- karcher.mean(fd, max.iter = 15)
 
 # Karcher median (robust to outliers)
-kmed <- karcher.median(fd, max.iter = 30)
+kmed <- karcher.median(fd, max.iter = 15)
 
 # Trimmed Karcher mean (remove 10% most distant curves)
-km_trimmed <- robust.karcher.mean(fd, trim = 0.1, max.iter = 20)
+km_trimmed <- robust.karcher.mean(fd, trim = 0.1, max.iter = 15)
+
+# Compare the three estimates
+km_vals <- as.numeric(km$mean$data[1, ])
+kmed_vals <- as.numeric(kmed$mean$data[1, ])
+ktrim_vals <- as.numeric(km_trimmed$mean$data[1, ])
+# Ensure all same length (use km argvals as reference)
+km_t <- as.numeric(km$mean$argvals)
+df_means <- data.frame(
+  t = rep(km_t, 3),
+  value = c(km_vals, kmed_vals[seq_along(km_vals)],
+            ktrim_vals[seq_along(km_vals)]),
+  method = rep(c("Karcher Mean", "Karcher Median", "Trimmed Mean (10%)"),
+               each = length(km_t))
+)
+ggplot(df_means, aes(x = .data$t, y = .data$value, color = .data$method)) +
+  geom_line(linewidth = 0.8) +
+  labs(title = "Robust vs Standard Karcher Mean",
+       x = "t", y = "f(t)", color = NULL) +
+  theme(legend.position = "bottom")
 ```
 
 **References:**
@@ -123,17 +142,14 @@ phase depths uses the aligned vs unaligned distances:
 - **Amplitude depth**: based on $L^2$ distances after alignment
 - **Phase depth**: based on the warping function complexity
 
-```{r elastic-depth, eval = FALSE}
+```{r elastic-depth}
 # Elastic depth with amplitude/phase decomposition
-ed <- elastic.depth(fd, km)
+ed <- elastic.depth(fd)
 
-# Access components
-ed$depth           # combined elastic depth
-ed$amplitude_depth # amplitude component
-ed$phase_depth     # phase component
-
-# Deepest (most central) curve
-most_central <- which.max(ed$depth)
+cat("Amplitude depth range:", round(range(ed$amplitude_depth), 3), "\n")
+cat("Phase depth range:    ", round(range(ed$phase_depth), 3), "\n")
+cat("Combined depth range: ", round(range(ed$combined_depth), 3), "\n")
+cat("Deepest curve (most central):", which.max(ed$combined_depth), "\n")
 ```
 
 **References:**
@@ -165,16 +181,14 @@ $$\text{outlier if } d_{\text{elastic}}(f_i, \mu) > Q_3 + k \cdot \text{IQR}$$
 where $k$ is typically 1.5. The amplitude/phase decomposition classifies
 outliers into types.
 
-```{r elastic-outlier, eval = FALSE}
+```{r elastic-outlier}
 # Outlier detection with amplitude/phase decomposition
-outliers <- elastic.outlier.detection(fd, km, fence_factor = 1.5)
+outliers <- elastic.outlier.detection(fd)
 
-# Results
-outliers$is_outlier        # logical vector
-outliers$outlier_type      # "amplitude", "phase", "both", or "none"
-outliers$distances         # elastic distances to reference
-outliers$amplitude_distances
-outliers$phase_distances
+cat("Outlier indices:", if (length(outliers$outlier_indices) > 0)
+  paste(outliers$outlier_indices, collapse = ", ") else "none", "\n")
+cat("Threshold:", round(outliers$threshold, 4), "\n")
+cat("Distance range:", round(range(outliers$distances), 4), "\n")
 ```
 
 **References:**
@@ -206,16 +220,24 @@ the elastic mean, quantifying estimation uncertainty.
 The alignment step is crucial: without it, phase variability between
 bootstrap means inflates the bands artificially.
 
-```{r shape-ci, eval = FALSE}
+```{r shape-ci, fig.height = 4}
 # Bootstrap confidence bands for the Karcher mean
-ci <- shape.confidence.interval(fd, n_bootstrap = 200,
-                                 alpha = 0.05, max.iter = 15)
+ci <- shape.confidence.interval(fd, n.bootstrap = 50, max.iter = 10)
 
-# Results
-ci$mean_curve       # Karcher mean
-ci$lower_band       # lower 95% confidence band
-ci$upper_band       # upper 95% confidence band
-ci$bootstrap_means  # all B bootstrap Karcher means (aligned)
+df_ci <- data.frame(
+  t = rep(t_grid, 3),
+  value = c(ci$lower_band, as.numeric(ci$mean$data[1, ]), ci$upper_band),
+  type = rep(c("Lower 95%", "Mean", "Upper 95%"), each = length(t_grid))
+)
+
+ggplot(df_ci, aes(x = .data$t, y = .data$value, linetype = .data$type)) +
+  geom_line(color = "#4A90D9", linewidth = 0.8) +
+  scale_linetype_manual(values = c("Lower 95%" = "dashed",
+                                    "Mean" = "solid",
+                                    "Upper 95%" = "dashed")) +
+  labs(title = "Shape Confidence Interval for Karcher Mean",
+       x = "t", y = "f(t)", linetype = NULL) +
+  theme(legend.position = "bottom")
 ```
 
 **References:**
@@ -253,19 +275,27 @@ $$\gamma^* = \sqrt{1 - \beta^2} \, \gamma^{(k)} + \beta \, \xi, \quad \xi \sim \
 ensures dimension-independent acceptance rates, making the algorithm
 scalable to fine time grids.
 
-```{r bayesian-align, eval = FALSE}
+```{r bayesian-align}
 # Bayesian alignment of two curves
-result <- bayesian.align.pair(fd$data[1, ], fd$data[2, ],
-                               argvals = t_grid,
-                               n_samples = 2000,
-                               burn_in = 500,
-                               beta = 0.1)
+ba <- bayesian.align.pair(fd$data[1, ], fd$data[2, ],
+                           argvals = t_grid,
+                           n.samples = 500, burn.in = 100)
 
-# Posterior summary
-result$posterior_warps     # MCMC samples of warping functions
-result$credible_bands      # pointwise 95% credible bands
-result$acceptance_rate     # MCMC acceptance rate
-result$map_warp            # maximum a posteriori warping function
+cat("Acceptance rate:", round(ba$acceptance_rate, 3), "\n")
+
+# Plot original vs Bayesian-aligned
+df_ba <- data.frame(
+  t = rep(t_grid, 3),
+  value = c(fd$data[1, ], fd$data[2, ], ba$f_aligned_mean),
+  curve = rep(c("f1 (reference)", "f2 (original)", "f2 (Bayesian aligned)"),
+              each = length(t_grid))
+)
+ggplot(df_ba, aes(x = .data$t, y = .data$value, color = .data$curve)) +
+  geom_line(linewidth = 0.8) +
+  labs(title = "Bayesian Pairwise Alignment",
+       subtitle = sprintf("Acceptance rate: %.1f%%", 100 * ba$acceptance_rate),
+       x = "t", y = "f(t)", color = NULL) +
+  theme(legend.position = "bottom")
 ```
 
 **References:**
@@ -302,14 +332,18 @@ resolution -- achieving near-optimal alignment in $O(T \log T)$ time.
 This is related to the FastDTW approach (Salvador & Chan, 2007) but
 adapted to the elastic (SRSF) framework.
 
-```{r multires, eval = FALSE}
+```{r multires}
 # Multi-resolution alignment (faster for long curves)
-result <- elastic.align.pair.multires(
-  fd$data[1, ], fd$data[2, ],
-  argvals = t_grid,
-  coarse_factor = 4,    # subsample by 4x for coarse stage
-  refine_iter = 10       # gradient refinement iterations
-)
+mr <- elastic.align.pair.multires(fd$data[1, ], fd$data[2, ],
+                                   argvals = t_grid,
+                                   coarsen.factor = 4)
+
+cat("Multi-res distance:", round(mr$distance, 4), "\n")
+
+# Compare with standard DP alignment
+std <- elastic.align(fdata(matrix(c(fd$data[1, ], fd$data[2, ]), nrow = 2),
+                            argvals = t_grid))
+cat("Standard DP distance:", round(std$distance[1], 4), "\n")
 ```
 
 **References:**
@@ -344,15 +378,22 @@ The optimization uses a **coarse-to-fine** search: evaluate elastic
 distances at $K$ uniformly-spaced rotations, then refine the best
 candidate with gradient descent.
 
-```{r closed-align, eval = FALSE}
-# Align closed curves (periodic signals, cell boundaries)
-result <- elastic.align.pair.closed(curve1, curve2,
-                                     argvals = t_grid,
-                                     n_rotations = 20)
+```{r closed-align}
+# Create periodic curves (simulate closed shapes)
+closed1 <- sin(2 * pi * t_grid) + 0.3 * sin(4 * pi * t_grid)
+closed2 <- sin(2 * pi * (t_grid - 0.1)) + 0.4 * sin(4 * pi * (t_grid - 0.1))
 
-# Closed curve Karcher mean
-km_closed <- karcher.mean.closed(fd_closed, max.iter = 15,
-                                  n_rotations = 20)
+# Align closed curves
+ca <- elastic.align.pair.closed(closed1, closed2, t_grid)
+cat("Closed alignment distance:", round(ca$distance, 4), "\n")
+cat("Optimal rotation index:", ca$optimal_rotation, "\n")
+
+# Karcher mean for closed curves
+fd_closed <- fdata(rbind(closed1, closed2,
+  sin(2*pi*(t_grid+0.05)) + 0.35*sin(4*pi*(t_grid+0.05))),
+  argvals = t_grid)
+km_c <- karcher.mean.closed(fd_closed, max.iter = 10)
+cat("Closed Karcher mean converged:", km_c$converged, "\n")
 ```
 
 **References:**
@@ -388,18 +429,18 @@ $$d_{\text{partial}}(f_1, f_2) = \min_{0 \leq a < b \leq 1}
 A sliding variable-length window search avoids the $O(T^3)$ brute-force
 cost.
 
-```{r partial-match, eval = FALSE}
-# Find the best-matching subcurve of target that matches query
-result <- elastic.partial.match(query = short_curve,
-                                 target = long_curve,
-                                 argvals_query = t_short,
-                                 argvals_target = t_long,
-                                 min_length = 0.3)
+```{r partial-match}
+# Template: short curve (first 50 points of curve 1)
+template <- fd$data[1, 1:50]
+target <- fd$data[2, ]
 
-result$match_start     # start of matched segment in target
-result$match_end       # end of matched segment
-result$distance        # elastic distance of best match
-result$warping         # warping function for the matched segment
+pm <- elastic.partial.match(template, target,
+                             t_grid[1:50], t_grid,
+                             min.span = 0.2)
+
+cat("Match range: index", pm$start_index, "to", pm$end_index, "\n")
+cat("Domain fraction:", round(pm$domain_fraction, 3), "\n")
+cat("Match distance:", round(pm$distance, 4), "\n")
 ```
 
 **References:**
@@ -431,15 +472,15 @@ to a source population's coordinate system via bridging warps.
 4. Compose: $\gamma_i^{S} = \gamma_B \circ \gamma_i^T$
 5. Apply $\gamma_i^{S}$ to place $f_i^T$ in the source coordinate system
 
-```{r transfer, eval = FALSE}
-# Align target population curves to source population's coordinate system
-result <- transfer.alignment(source_fd, target_fd,
-                              max.iter = 15, lambda = 0)
+```{r transfer}
+# Split data into two "populations"
+fd_source <- fdata(fd$data[1:15, ], argvals = t_grid)
+fd_target <- fdata(fd$data[16:30, ], argvals = t_grid)
 
-result$aligned_target  # target curves in source coordinates
-result$bridge_warp     # bridging warp (target mean -> source mean)
-result$target_warps    # within-target warps
-result$composed_warps  # final composed warps
+tr <- transfer.alignment(fd_source, fd_target, max.iter = 10)
+
+cat("Aligned", nrow(tr$aligned$data), "target curves to source frame\n")
+cat("Distance range:", round(range(tr$distances), 4), "\n")
 ```
 
 **References:**
@@ -475,18 +516,28 @@ At parameter $\alpha \in [0, 1]$:
 $$q_\alpha = (1 - \alpha) q_1 + \alpha (q_2 \circ \gamma^* \sqrt{\dot{\gamma}^*})$$
 $$\gamma_\alpha = \text{exp}_{\text{id}}(\alpha \cdot \log_{\text{id}}(\gamma^*))$$
 
-```{r geodesic, eval = FALSE}
-# Geodesic path between two curves (10 intermediate steps)
-path <- curve.geodesic(fd$data[1, ], fd$data[2, ],
-                        argvals = t_grid, n_steps = 10)
+```{r geodesic, fig.height = 4}
+# Geodesic path between two curves (8 intermediate steps)
+geo <- curve.geodesic(fd$data[1, ], fd$data[5, ],
+                       argvals = t_grid, n.points = 8)
 
-# path$curves  -- matrix of interpolated curves (n_steps x m)
-# path$warps   -- interpolated warping functions
-# path$alphas  -- interpolation parameters (0 to 1)
+# Plot the geodesic path
+n_steps <- nrow(geo$curves$data)
+df_geo <- data.frame(
+  t = rep(t_grid, n_steps),
+  value = as.vector(t(geo$curves$data)),
+  step = rep(seq_len(n_steps), each = length(t_grid)),
+  alpha = rep(geo$parameter_values, each = length(t_grid))
+)
 
-# N-dimensional variant
-path_nd <- curve.geodesic.nd(curve1_nd, curve2_nd,
-                              argvals = t_grid, n_steps = 10)
+ggplot(df_geo, aes(x = .data$t, y = .data$value,
+                    group = .data$step, color = .data$alpha)) +
+  geom_line(linewidth = 0.6) +
+  scale_color_gradientn(
+    colours = c("#313695", "#ABD9E9", "#FEE090", "#A50026")) +
+  labs(title = "Geodesic Path Between Two Curves",
+       subtitle = "Smooth interpolation in elastic metric space",
+       x = "t", y = "f(t)", color = expression(alpha))
 ```
 
 **References:**
@@ -524,16 +575,31 @@ and horizontal (phase) FPC scores separately:
 The **joint model** preserves amplitude-phase correlations by fitting
 a joint Gaussian to the concatenated score vectors.
 
-```{r generative, eval = FALSE}
-# Fit generative model
-gen <- gauss.model(fd, n_components = 3, max.iter = 15)
+```{r generative, fig.height = 4}
+# Fit generative model from Karcher mean result
+gm <- gauss.model(km, n.components = 3, n.samples = 20)
 
-# Sample new curves
-new_curves <- gen$sample(n = 50)
+cat("Generated", nrow(gm$samples$data), "synthetic curves\n")
 
-# Joint model (preserves amplitude-phase correlation)
-gen_joint <- joint.gauss.model(fd, n_components = 3, max.iter = 15)
-new_curves_joint <- gen_joint$sample(n = 50)
+# Plot original vs generated
+df_gen <- rbind(
+  data.frame(t = rep(t_grid, nrow(fd$data)),
+             value = as.vector(t(fd$data)),
+             curve = rep(seq_len(nrow(fd$data)), each = length(t_grid)),
+             type = "Original"),
+  data.frame(t = rep(t_grid, nrow(gm$samples$data)),
+             value = as.vector(t(gm$samples$data)),
+             curve = rep(seq_len(nrow(gm$samples$data)) + 100, each = length(t_grid)),
+             type = "Generated")
+)
+
+ggplot(df_gen, aes(x = .data$t, y = .data$value,
+                    group = .data$curve, color = .data$type)) +
+  geom_line(alpha = 0.3, linewidth = 0.4) +
+  scale_color_manual(values = c(Original = "#4A90D9", Generated = "#D55E00")) +
+  labs(title = "Gaussian Generative Model: Original vs Synthetic Curves",
+       x = "t", y = "f(t)", color = NULL) +
+  theme(legend.position = "bottom")
 ```
 
 **References:**
@@ -568,19 +634,13 @@ builds a persistence diagram:
 4. The optimal $\lambda$ is chosen where all persistent peaks are present
    but noise peaks have died
 
-```{r persistence, eval = FALSE}
+```{r persistence}
 # Peak persistence diagram for lambda selection
-pers <- peak.persistence(fd, lambda_range = c(0, 5),
-                          n_lambda = 30, max.iter = 10)
+pers <- peak.persistence(fd, lambdas = seq(0, 3, length.out = 15),
+                          max.iter = 8)
 
-# Results
-pers$births          # lambda at which each peak appears
-pers$deaths          # lambda at which each peak disappears
-pers$persistence     # death - birth (longer = more persistent)
-pers$optimal_lambda  # recommended lambda value
-
-# Plot the persistence diagram
-plot(pers)
+cat("Optimal lambda:", round(pers$optimal_lambda, 3), "\n")
+cat("Peak counts across lambdas:", pers$peak_counts, "\n")
 ```
 
 **References:**
@@ -619,14 +679,12 @@ of SRSF-transformed warping functions:
 This produces nested spheres $S^{d-1} \supset S^{d-2} \supset \cdots$
 that capture decreasing levels of phase variability.
 
-```{r fpns, eval = FALSE}
+```{r fpns}
 # Horizontal FPNS (nonlinear PCA on warping functions)
-fpns_result <- horiz.fpns(fd, n_components = 3, max.iter = 15)
+fpns_result <- horiz.fpns(km, n.components = 3)
 
-# Results
-fpns_result$principal_directions  # geodesic directions on the sphere
-fpns_result$scores                # scores along each direction
-fpns_result$variance_explained    # variance captured by each sphere
+cat("Explained variance:", round(fpns_result$explained_variance, 4), "\n")
+cat("Score dimensions:", paste(dim(fpns_result$scores), collapse = " x "), "\n")
 ```
 
 **References:**
@@ -663,7 +721,7 @@ $$\sum_{j=1}^{d} \|q_{1,j} - (q_{2,j} \circ \gamma) \sqrt{\dot{\gamma}}\|^2$$
 
 ```{r nd-karcher, eval = FALSE}
 # Multivariate Karcher mean (e.g., for 3D motion data)
-# Input: list of n matrices, each d x T
+# Note: N-D alignment requires FdCurveSet inputs -- R wrappers pending
 km_nd <- karcher.mean.nd(fd_nd, max.iter = 20)
 
 # Covariance estimation in the tangent space

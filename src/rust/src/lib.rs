@@ -16518,6 +16518,627 @@ fn elastic_spm_monitor_rust(
 }
 
 // =============================================================================
+// Alignment v0.10.0: depth, robust, outlier, shape CI, Bayesian, multires,
+//                    closed, partial, geodesic, persistence, transfer,
+//                    generative models, FPNS
+// =============================================================================
+
+/// Elastic depth (amplitude + phase + combined)
+#[extendr]
+fn alignment_elastic_depth(data: RMatrix<f64>, argvals: Vec<f64>, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return list!(
+            amplitude_depth = Vec::<f64>::new(),
+            phase_depth = Vec::<f64>::new(),
+            combined_depth = Vec::<f64>::new()
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match alignment::elastic_depth(&fd, &argvals, lambda) {
+        Ok(res) => list!(
+            amplitude_depth = res.amplitude_depth,
+            phase_depth = res.phase_depth,
+            combined_depth = res.combined_depth
+        ).into(),
+        Err(e) => {
+            rprintln!("elastic_depth failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Karcher median (Weiszfeld algorithm in elastic metric)
+#[extendr]
+fn alignment_karcher_median(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i32, tol: f64, lambda: f64, trim_fraction: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return list!(
+            mean = Vec::<f64>::new(),
+            mean_srsf = Vec::<f64>::new(),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            aligned_data = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            weights = Vec::<f64>::new(),
+            n_iter = 0i32,
+            converged = false
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let config = alignment::RobustKarcherConfig {
+        max_iter: max_iter as usize,
+        tol,
+        lambda,
+        trim_fraction,
+    };
+    match alignment::karcher_median(&fd, &argvals, &config) {
+        Ok(res) => {
+            let g_mat = fdmatrix_to_robj(&res.gammas);
+            let a_mat = fdmatrix_to_robj(&res.aligned_data);
+            list!(
+                mean = res.mean,
+                mean_srsf = res.mean_srsf,
+                gammas = g_mat,
+                aligned_data = a_mat,
+                weights = res.weights,
+                n_iter = res.n_iter as i32,
+                converged = res.converged
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("karcher_median failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Robust (trimmed) Karcher mean in elastic metric
+#[extendr]
+fn alignment_robust_karcher_mean(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i32, tol: f64, lambda: f64, trim_fraction: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return list!(
+            mean = Vec::<f64>::new(),
+            mean_srsf = Vec::<f64>::new(),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            aligned_data = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            weights = Vec::<f64>::new(),
+            n_iter = 0i32,
+            converged = false
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let config = alignment::RobustKarcherConfig {
+        max_iter: max_iter as usize,
+        tol,
+        lambda,
+        trim_fraction,
+    };
+    match alignment::robust_karcher_mean(&fd, &argvals, &config) {
+        Ok(res) => {
+            let g_mat = fdmatrix_to_robj(&res.gammas);
+            let a_mat = fdmatrix_to_robj(&res.aligned_data);
+            list!(
+                mean = res.mean,
+                mean_srsf = res.mean_srsf,
+                gammas = g_mat,
+                aligned_data = a_mat,
+                weights = res.weights,
+                n_iter = res.n_iter as i32,
+                converged = res.converged
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("robust_karcher_mean failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Elastic outlier detection using Tukey fence on elastic distances
+#[extendr]
+fn alignment_elastic_outlier(data: RMatrix<f64>, argvals: Vec<f64>, lambda: f64, alpha: f64, use_median: bool) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return list!(
+            outlier_indices = Vec::<i32>::new(),
+            distances = Vec::<f64>::new(),
+            threshold = f64::NAN,
+            amplitude_distances = Vec::<f64>::new(),
+            phase_distances = Vec::<f64>::new()
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let config = alignment::ElasticOutlierConfig { lambda, alpha, use_median };
+    match alignment::elastic_outlier_detection(&fd, &argvals, &config) {
+        Ok(res) => {
+            let indices: Vec<i32> = res.outlier_indices.iter().map(|&i| i as i32).collect();
+            list!(
+                outlier_indices = indices,
+                distances = res.distances,
+                threshold = res.threshold,
+                amplitude_distances = res.amplitude_distances,
+                phase_distances = res.phase_distances
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("elastic_outlier_detection failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Bootstrap shape confidence intervals for the elastic Karcher mean
+#[extendr]
+fn alignment_shape_ci(data: RMatrix<f64>, argvals: Vec<f64>, n_bootstrap: i32, confidence_level: f64, lambda: f64, max_iter: i32, tol: f64, seed: i32) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 3 || m < 2 || argvals.len() != m {
+        return list!(
+            mean = Vec::<f64>::new(),
+            lower_band = Vec::<f64>::new(),
+            upper_band = Vec::<f64>::new(),
+            bootstrap_means = RMatrix::new_matrix(0, 0, |_, _| 0.0)
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    let config = alignment::ShapeCiConfig {
+        n_bootstrap: n_bootstrap as usize,
+        confidence_level,
+        lambda,
+        max_iter: max_iter as usize,
+        tol,
+        seed: seed as u64,
+    };
+    match alignment::shape_confidence_interval(&fd, &argvals, &config) {
+        Ok(res) => {
+            let bm = fdmatrix_to_robj(&res.bootstrap_means);
+            list!(
+                mean = res.mean,
+                lower_band = res.lower_band,
+                upper_band = res.upper_band,
+                bootstrap_means = bm
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("shape_confidence_interval failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere
+#[extendr]
+fn alignment_bayesian_pair(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, n_samples: i32, burn_in: i32, step_size: f64, proposal_variance: f64, seed: i32) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(
+            posterior_mean_gamma = Vec::<f64>::new(),
+            credible_lower = Vec::<f64>::new(),
+            credible_upper = Vec::<f64>::new(),
+            acceptance_rate = f64::NAN,
+            f_aligned_mean = Vec::<f64>::new()
+        ).into();
+    }
+    let config = alignment::BayesianAlignConfig {
+        n_samples: n_samples as usize,
+        burn_in: burn_in as usize,
+        step_size,
+        proposal_variance,
+        seed: seed as u64,
+    };
+    match alignment::bayesian_align_pair(&f1, &f2, &argvals, &config) {
+        Ok(res) => list!(
+            posterior_mean_gamma = res.posterior_mean_gamma,
+            credible_lower = res.credible_lower,
+            credible_upper = res.credible_upper,
+            acceptance_rate = res.acceptance_rate,
+            f_aligned_mean = res.f_aligned_mean
+        ).into(),
+        Err(e) => {
+            rprintln!("bayesian_align_pair failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Multi-resolution elastic alignment (coarse DP + fine gradient refinement)
+#[extendr]
+fn alignment_multires_pair(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, coarsen_factor: i32, n_refine_steps: i32, step_size: f64, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(gamma = Vec::<f64>::new(), f_aligned = Vec::<f64>::new(), distance = f64::NAN).into();
+    }
+    let config = alignment::MultiresConfig {
+        coarsen_factor: coarsen_factor as usize,
+        n_refine_steps: n_refine_steps as usize,
+        step_size,
+        lambda,
+    };
+    match alignment::elastic_align_pair_multires(&f1, &f2, &argvals, &config) {
+        Ok(res) => list!(
+            gamma = res.gamma,
+            f_aligned = res.f_aligned,
+            distance = res.distance
+        ).into(),
+        Err(e) => {
+            rprintln!("elastic_align_pair_multires failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Elastic alignment for closed (periodic) curves with rotation search
+#[extendr]
+fn alignment_closed_pair(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return list!(
+            gamma = Vec::<f64>::new(),
+            f_aligned = Vec::<f64>::new(),
+            distance = f64::NAN,
+            optimal_rotation = 0i32
+        ).into();
+    }
+    match alignment::elastic_align_pair_closed(&f1, &f2, &argvals, lambda) {
+        Ok(res) => list!(
+            gamma = res.gamma,
+            f_aligned = res.f_aligned,
+            distance = res.distance,
+            optimal_rotation = res.optimal_rotation as i32
+        ).into(),
+        Err(e) => {
+            rprintln!("elastic_align_pair_closed failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Elastic distance between two closed curves (optimizes over rotations)
+#[extendr]
+fn alignment_closed_distance(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 {
+        return Robj::from(f64::NAN);
+    }
+    match alignment::elastic_distance_closed(&f1, &f2, &argvals, lambda) {
+        Ok(d) => Robj::from(d),
+        Err(e) => {
+            rprintln!("elastic_distance_closed failed: {:?}", e);
+            Robj::from(f64::NAN)
+        }
+    }
+}
+
+/// Karcher mean for closed (periodic) curves
+#[extendr]
+fn alignment_karcher_mean_closed(data: RMatrix<f64>, argvals: Vec<f64>, max_iter: i32, tol: f64, lambda: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n == 0 || m < 2 || argvals.len() != m {
+        return list!(
+            mean = Vec::<f64>::new(),
+            mean_srsf = Vec::<f64>::new(),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            aligned_data = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            rotations = Vec::<i32>::new(),
+            n_iter = 0i32,
+            converged = false
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match alignment::karcher_mean_closed(&fd, &argvals, max_iter as usize, tol, lambda) {
+        Ok(res) => {
+            let g_mat = fdmatrix_to_robj(&res.gammas);
+            let a_mat = fdmatrix_to_robj(&res.aligned_data);
+            let rotations: Vec<i32> = res.rotations.iter().map(|&r| r as i32).collect();
+            list!(
+                mean = res.mean,
+                mean_srsf = res.mean_srsf,
+                gammas = g_mat,
+                aligned_data = a_mat,
+                rotations = rotations,
+                n_iter = res.n_iter as i32,
+                converged = res.converged
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("karcher_mean_closed failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Elastic partial matching of a template within a longer target curve
+#[extendr]
+fn alignment_partial_match(template: Vec<f64>, target: Vec<f64>, argvals_template: Vec<f64>, argvals_target: Vec<f64>, lambda: f64, min_span: f64) -> Robj {
+    if template.len() < 2 || target.len() < 2
+        || template.len() != argvals_template.len()
+        || target.len() != argvals_target.len()
+    {
+        return list!(
+            start_index = 0i32,
+            end_index = 0i32,
+            gamma = Vec::<f64>::new(),
+            distance = f64::NAN,
+            domain_fraction = f64::NAN
+        ).into();
+    }
+    let config = alignment::PartialMatchConfig { lambda, min_span };
+    match alignment::elastic_partial_match(&template, &target, &argvals_template, &argvals_target, &config) {
+        Ok(res) => list!(
+            start_index = res.start_index as i32,
+            end_index = res.end_index as i32,
+            gamma = res.gamma,
+            distance = res.distance,
+            domain_fraction = res.domain_fraction
+        ).into(),
+        Err(e) => {
+            rprintln!("elastic_partial_match failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Geodesic path between two curves in the elastic metric
+#[extendr]
+fn alignment_curve_geodesic(f1: Vec<f64>, f2: Vec<f64>, argvals: Vec<f64>, n_points: i32, lambda: f64) -> Robj {
+    if f1.len() != argvals.len() || f2.len() != argvals.len() || argvals.len() < 2 || n_points < 2 {
+        return list!(
+            curves = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            warps = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            distances = Vec::<f64>::new(),
+            parameter_values = Vec::<f64>::new()
+        ).into();
+    }
+    match alignment::curve_geodesic(&f1, &f2, &argvals, n_points as usize, lambda) {
+        Ok(res) => {
+            let curves_mat = fdmatrix_to_robj(&res.curves);
+            let warps_mat = fdmatrix_to_robj(&res.warps);
+            list!(
+                curves = curves_mat,
+                warps = warps_mat,
+                distances = res.distances,
+                parameter_values = res.parameter_values
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("curve_geodesic failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Peak persistence diagram across a sweep of lambda values
+#[extendr]
+fn alignment_peak_persistence(data: RMatrix<f64>, argvals: Vec<f64>, lambdas: Vec<f64>, max_iter: i32, tol: f64) -> Robj {
+    let n = data.nrows();
+    let m = data.ncols();
+    if n < 2 || m < 2 || argvals.len() != m || lambdas.is_empty() {
+        return list!(
+            lambdas = Vec::<f64>::new(),
+            peak_counts = Vec::<i32>::new(),
+            optimal_lambda = f64::NAN,
+            optimal_index = 0i32
+        ).into();
+    }
+    let data_slice = data.as_real_slice().unwrap();
+    let fd = FdMatrix::from_slice(data_slice, n, m).expect("Invalid matrix dimensions");
+    match alignment::peak_persistence(&fd, &argvals, &lambdas, max_iter as usize, tol) {
+        Ok(res) => {
+            let peak_counts: Vec<i32> = res.peak_counts.iter().map(|&c| c as i32).collect();
+            list!(
+                lambdas = res.lambdas,
+                peak_counts = peak_counts,
+                optimal_lambda = res.optimal_lambda,
+                optimal_index = res.optimal_index as i32
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("peak_persistence failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Transfer alignment: align curves across populations
+#[extendr]
+fn alignment_transfer(source_data: RMatrix<f64>, target_data: RMatrix<f64>, argvals: Vec<f64>, lambda: f64, max_iter: i32, tol: f64) -> Robj {
+    let n1 = source_data.nrows();
+    let m1 = source_data.ncols();
+    let n2 = target_data.nrows();
+    let m2 = target_data.ncols();
+    if n1 == 0 || n2 == 0 || m1 < 2 || m1 != m2 || argvals.len() != m1 {
+        return list!(
+            source_mean = Vec::<f64>::new(),
+            aligned_data = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            gammas = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            bridging_gamma = Vec::<f64>::new(),
+            distances = Vec::<f64>::new()
+        ).into();
+    }
+    let d1 = source_data.as_real_slice().unwrap();
+    let d2 = target_data.as_real_slice().unwrap();
+    let fd1 = FdMatrix::from_slice(d1, n1, m1).expect("Invalid source_data dimensions");
+    let fd2 = FdMatrix::from_slice(d2, n2, m2).expect("Invalid target_data dimensions");
+    let config = alignment::TransferAlignConfig {
+        lambda,
+        max_iter: max_iter as usize,
+        tol,
+    };
+    match alignment::transfer_alignment(&fd1, &fd2, &argvals, &config) {
+        Ok(res) => {
+            let a_mat = fdmatrix_to_robj(&res.aligned_data);
+            let g_mat = fdmatrix_to_robj(&res.gammas);
+            list!(
+                source_mean = res.source_mean,
+                aligned_data = a_mat,
+                gammas = g_mat,
+                bridging_gamma = res.bridging_gamma,
+                distances = res.distances
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("transfer_alignment failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Gaussian generative model: sample random curves from aligned data
+#[extendr]
+fn alignment_gauss_model(
+    mean_curve: Vec<f64>,
+    mean_srsf: Vec<f64>,
+    gammas: RMatrix<f64>,
+    aligned_data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+    n_samples: i32,
+    seed: i32,
+) -> Robj {
+    let n = gammas.nrows();
+    let m = gammas.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return list!(
+            samples = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            warps = RMatrix::new_matrix(0, 0, |_, _| 0.0)
+        ).into();
+    }
+    let gs = gammas.as_real_slice().unwrap();
+    let gammas_fd = FdMatrix::from_slice(gs, n, m).expect("Invalid gammas dimensions");
+    let as_ = aligned_data.as_real_slice().unwrap();
+    let aligned_fd = FdMatrix::from_slice(as_, aligned_data.nrows(), aligned_data.ncols()).expect("Invalid aligned_data dimensions");
+    let karcher = alignment::KarcherMeanResult::new(
+        mean_curve,
+        mean_srsf,
+        gammas_fd,
+        aligned_fd,
+        0,
+        true,
+        None,
+    );
+    match alignment::gauss_model(&karcher, &argvals, ncomp as usize, n_samples as usize, seed as u64) {
+        Ok(res) => {
+            let s_mat = fdmatrix_to_robj(&res.samples);
+            let w_mat = fdmatrix_to_robj(&res.warps);
+            list!(
+                samples = s_mat,
+                warps = w_mat
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("gauss_model failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Joint Gaussian generative model preserving amplitude-phase correlation
+#[extendr]
+fn alignment_joint_gauss_model(
+    mean_curve: Vec<f64>,
+    mean_srsf: Vec<f64>,
+    gammas: RMatrix<f64>,
+    aligned_data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+    n_samples: i32,
+    balance_c: f64,
+    seed: i32,
+) -> Robj {
+    let n = gammas.nrows();
+    let m = gammas.ncols();
+    if n < 2 || m < 2 || argvals.len() != m {
+        return list!(
+            samples = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            warps = RMatrix::new_matrix(0, 0, |_, _| 0.0)
+        ).into();
+    }
+    let gs = gammas.as_real_slice().unwrap();
+    let gammas_fd = FdMatrix::from_slice(gs, n, m).expect("Invalid gammas dimensions");
+    let as_ = aligned_data.as_real_slice().unwrap();
+    let aligned_fd = FdMatrix::from_slice(as_, aligned_data.nrows(), aligned_data.ncols()).expect("Invalid aligned_data dimensions");
+    let karcher = alignment::KarcherMeanResult::new(
+        mean_curve,
+        mean_srsf,
+        gammas_fd,
+        aligned_fd,
+        0,
+        true,
+        None,
+    );
+    match alignment::joint_gauss_model(&karcher, &argvals, ncomp as usize, n_samples as usize, balance_c, seed as u64) {
+        Ok(res) => {
+            let s_mat = fdmatrix_to_robj(&res.samples);
+            let w_mat = fdmatrix_to_robj(&res.warps);
+            list!(
+                samples = s_mat,
+                warps = w_mat
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("joint_gauss_model failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+/// Horizontal Functional Principal Nested Spheres (FPNS) for phase variability
+#[extendr]
+fn alignment_horiz_fpns(
+    mean_curve: Vec<f64>,
+    mean_srsf: Vec<f64>,
+    gammas: RMatrix<f64>,
+    aligned_data: RMatrix<f64>,
+    argvals: Vec<f64>,
+    ncomp: i32,
+) -> Robj {
+    let n = gammas.nrows();
+    let m = gammas.ncols();
+    if n < 2 || m < 2 || argvals.len() != m || ncomp < 1 {
+        return list!(
+            components = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            scores = RMatrix::new_matrix(0, 0, |_, _| 0.0),
+            explained_variance = Vec::<f64>::new()
+        ).into();
+    }
+    let gs = gammas.as_real_slice().unwrap();
+    let gammas_fd = FdMatrix::from_slice(gs, n, m).expect("Invalid gammas dimensions");
+    let as_ = aligned_data.as_real_slice().unwrap();
+    let aligned_fd = FdMatrix::from_slice(as_, aligned_data.nrows(), aligned_data.ncols()).expect("Invalid aligned_data dimensions");
+    let karcher = alignment::KarcherMeanResult::new(
+        mean_curve,
+        mean_srsf,
+        gammas_fd,
+        aligned_fd,
+        0,
+        true,
+        None,
+    );
+    match alignment::horiz_fpns(&karcher, &argvals, ncomp as usize) {
+        Ok(res) => {
+            let c_mat = fdmatrix_to_robj(&res.components);
+            let s_mat = fdmatrix_to_robj(&res.scores);
+            list!(
+                components = c_mat,
+                scores = s_mat,
+                explained_variance = res.explained_variance
+            ).into()
+        }
+        Err(e) => {
+            rprintln!("horiz_fpns failed: {:?}", e);
+            r!(NULL)
+        }
+    }
+}
+
+// =============================================================================
 // Module exports
 // =============================================================================
 
@@ -16683,6 +17304,25 @@ extendr_module! {
     fn alignment_self_dist;
     fn alignment_cross_dist;
     fn alignment_karcher_mean;
+
+    // Alignment v0.10.0 functions
+    fn alignment_elastic_depth;
+    fn alignment_karcher_median;
+    fn alignment_robust_karcher_mean;
+    fn alignment_elastic_outlier;
+    fn alignment_shape_ci;
+    fn alignment_bayesian_pair;
+    fn alignment_multires_pair;
+    fn alignment_closed_pair;
+    fn alignment_closed_distance;
+    fn alignment_karcher_mean_closed;
+    fn alignment_partial_match;
+    fn alignment_curve_geodesic;
+    fn alignment_peak_persistence;
+    fn alignment_transfer;
+    fn alignment_gauss_model;
+    fn alignment_joint_gauss_model;
+    fn alignment_horiz_fpns;
 
     // Soft-DTW functions
     fn metric_soft_dtw_self_1d;

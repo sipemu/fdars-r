@@ -240,7 +240,11 @@ basis_bic_1d <- function(data, argvals, nbasis, basis_type, lambda, pooled) .Cal
 #' P-spline fitting: returns coefficients, fitted values, and diagnostics
 pspline_fit_1d <- function(data, argvals, nbasis, lambda, order) .Call(wrap__pspline_fit_1d, data, argvals, nbasis, lambda, order)
 
-# fdata2basis_2d and basis2fdata_2d: user-facing wrappers are in R/basis.R
+#' Project 2D functional data to tensor product basis coefficients
+fdata2basis_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__fdata2basis_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
+
+#' Reconstruct 2D functional data from tensor product basis coefficients
+basis2fdata_2d <- function(coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type) .Call(wrap__basis2fdata_2d, coefs, argvals_s, argvals_t, nbasis_s, nbasis_t, basis_type)
 
 #' 2D P-spline fitting with anisotropic penalties
 pspline_fit_2d <- function(data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order) .Call(wrap__pspline_fit_2d, data, argvals_s, argvals_t, nbasis_s, nbasis_t, lambda_s, lambda_t, order)
@@ -504,6 +508,57 @@ alignment_cross_dist <- function(data1, data2, argvals) .Call(wrap__alignment_cr
 #' Karcher (Fréchet) mean in elastic metric
 alignment_karcher_mean <- function(data, argvals, max_iter, tol) .Call(wrap__alignment_karcher_mean, data, argvals, max_iter, tol)
 
+#' Elastic depth (amplitude + phase + combined)
+alignment_elastic_depth <- function(data, argvals, lambda) .Call(wrap__alignment_elastic_depth, data, argvals, lambda)
+
+#' Karcher median (Weiszfeld algorithm in elastic metric)
+alignment_karcher_median <- function(data, argvals, max_iter, tol, lambda, trim_fraction) .Call(wrap__alignment_karcher_median, data, argvals, max_iter, tol, lambda, trim_fraction)
+
+#' Robust (trimmed) Karcher mean in elastic metric
+alignment_robust_karcher_mean <- function(data, argvals, max_iter, tol, lambda, trim_fraction) .Call(wrap__alignment_robust_karcher_mean, data, argvals, max_iter, tol, lambda, trim_fraction)
+
+#' Elastic outlier detection using Tukey fence on elastic distances
+alignment_elastic_outlier <- function(data, argvals, lambda, alpha, use_median) .Call(wrap__alignment_elastic_outlier, data, argvals, lambda, alpha, use_median)
+
+#' Bootstrap shape confidence intervals for the elastic Karcher mean
+alignment_shape_ci <- function(data, argvals, n_bootstrap, confidence_level, lambda, max_iter, tol, seed) .Call(wrap__alignment_shape_ci, data, argvals, n_bootstrap, confidence_level, lambda, max_iter, tol, seed)
+
+#' Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere
+alignment_bayesian_pair <- function(f1, f2, argvals, n_samples, burn_in, step_size, proposal_variance, seed) .Call(wrap__alignment_bayesian_pair, f1, f2, argvals, n_samples, burn_in, step_size, proposal_variance, seed)
+
+#' Multi-resolution elastic alignment (coarse DP + fine gradient refinement)
+alignment_multires_pair <- function(f1, f2, argvals, coarsen_factor, n_refine_steps, step_size, lambda) .Call(wrap__alignment_multires_pair, f1, f2, argvals, coarsen_factor, n_refine_steps, step_size, lambda)
+
+#' Elastic alignment for closed (periodic) curves with rotation search
+alignment_closed_pair <- function(f1, f2, argvals, lambda) .Call(wrap__alignment_closed_pair, f1, f2, argvals, lambda)
+
+#' Elastic distance between two closed curves (optimizes over rotations)
+alignment_closed_distance <- function(f1, f2, argvals, lambda) .Call(wrap__alignment_closed_distance, f1, f2, argvals, lambda)
+
+#' Karcher mean for closed (periodic) curves
+alignment_karcher_mean_closed <- function(data, argvals, max_iter, tol, lambda) .Call(wrap__alignment_karcher_mean_closed, data, argvals, max_iter, tol, lambda)
+
+#' Elastic partial matching of a template within a longer target curve
+alignment_partial_match <- function(template, target, argvals_template, argvals_target, lambda, min_span) .Call(wrap__alignment_partial_match, template, target, argvals_template, argvals_target, lambda, min_span)
+
+#' Geodesic path between two curves in the elastic metric
+alignment_curve_geodesic <- function(f1, f2, argvals, n_points, lambda) .Call(wrap__alignment_curve_geodesic, f1, f2, argvals, n_points, lambda)
+
+#' Peak persistence diagram across a sweep of lambda values
+alignment_peak_persistence <- function(data, argvals, lambdas, max_iter, tol) .Call(wrap__alignment_peak_persistence, data, argvals, lambdas, max_iter, tol)
+
+#' Transfer alignment: align curves across populations
+alignment_transfer <- function(source_data, target_data, argvals, lambda, max_iter, tol) .Call(wrap__alignment_transfer, source_data, target_data, argvals, lambda, max_iter, tol)
+
+#' Gaussian generative model: sample random curves from aligned data
+alignment_gauss_model <- function(mean_curve, mean_srsf, gammas, aligned_data, argvals, ncomp, n_samples, seed) .Call(wrap__alignment_gauss_model, mean_curve, mean_srsf, gammas, aligned_data, argvals, ncomp, n_samples, seed)
+
+#' Joint Gaussian generative model preserving amplitude-phase correlation
+alignment_joint_gauss_model <- function(mean_curve, mean_srsf, gammas, aligned_data, argvals, ncomp, n_samples, balance_c, seed) .Call(wrap__alignment_joint_gauss_model, mean_curve, mean_srsf, gammas, aligned_data, argvals, ncomp, n_samples, balance_c, seed)
+
+#' Horizontal Functional Principal Nested Spheres (FPNS) for phase variability
+alignment_horiz_fpns <- function(mean_curve, mean_srsf, gammas, aligned_data, argvals, ncomp) .Call(wrap__alignment_horiz_fpns, mean_curve, mean_srsf, gammas, aligned_data, argvals, ncomp)
+
 #' Soft-DTW self-distance matrix
 metric_soft_dtw_self_1d <- function(fdata, gamma) .Call(wrap__metric_soft_dtw_self_1d, fdata, gamma)
 
@@ -560,6 +615,51 @@ alignment_constrained <- function(f1, f2, argvals, landmark_targets, landmark_so
 
 #' Elastic alignment with automatic landmark detection
 alignment_with_landmarks <- function(f1, f2, argvals, kind, min_prominence, expected_count, lambda) .Call(wrap__alignment_with_landmarks, f1, f2, argvals, kind, min_prominence, expected_count, lambda)
+
+#' Lambda cross-validation for elastic alignment regularisation
+alignment_lambda_cv_rust <- function(data, argvals, lambdas, n_folds, max_iter, tol, seed) .Call(wrap__alignment_lambda_cv_rust, data, argvals, lambdas, n_folds, max_iter, tol, seed)
+
+#' Warp statistics: mean, variance, confidence bands, Karcher mean warp
+alignment_warp_statistics_rust <- function(gammas, argvals, confidence_level) .Call(wrap__alignment_warp_statistics_rust, gammas, argvals, confidence_level)
+
+#' Phase boxplot for warping functions
+alignment_phase_boxplot_rust <- function(gammas, argvals, factor) .Call(wrap__alignment_phase_boxplot_rust, gammas, argvals, factor)
+
+#' Invert a warping function
+alignment_invert_warp_rust <- function(gamma, argvals) .Call(wrap__alignment_invert_warp_rust, gamma, argvals)
+
+#' Warp inverse error: max |gamma(gamma_inv(t)) - t|
+alignment_warp_inverse_error_rust <- function(gamma, argvals) .Call(wrap__alignment_warp_inverse_error_rust, gamma, argvals)
+
+#' Penalized elastic alignment with configurable penalty type
+alignment_elastic_pair_penalized_rust <- function(f1, f2, argvals, penalty_type, lambda) .Call(wrap__alignment_elastic_pair_penalized_rust, f1, f2, argvals, penalty_type, lambda)
+
+#' Diagnose alignment quality for all curves after Karcher mean computation
+alignment_diagnose_rust <- function(data, karcher_mean, karcher_mean_srsf, gammas, aligned_data, n_iter, converged, argvals) .Call(wrap__alignment_diagnose_rust, data, karcher_mean, karcher_mean_srsf, gammas, aligned_data, n_iter, converged, argvals)
+
+#' Diagnose a single pairwise alignment
+alignment_diagnose_pairwise_rust <- function(f1, f2, gamma, f_aligned, distance, argvals) .Call(wrap__alignment_diagnose_pairwise_rust, f1, f2, gamma, f_aligned, distance, argvals)
+
+#' Compute the orbit representative of a curve in a quotient space
+alignment_orbit_representative_rust <- function(f, argvals, quotient) .Call(wrap__alignment_orbit_representative_rust, f, argvals, quotient)
+
+#' Elastic shape distance between two curves
+alignment_shape_distance_rust <- function(f1, f2, argvals, quotient, lambda) .Call(wrap__alignment_shape_distance_rust, f1, f2, argvals, quotient, lambda)
+
+#' Shape mean (Karcher mean in quotient space)
+alignment_shape_mean_rust <- function(data, argvals, quotient, lambda, max_iter, tol) .Call(wrap__alignment_shape_mean_rust, data, argvals, quotient, lambda, max_iter, tol)
+
+#' Shape self-distance matrix
+alignment_shape_self_distance_matrix_rust <- function(data, argvals, quotient, lambda) .Call(wrap__alignment_shape_self_distance_matrix_rust, data, argvals, quotient, lambda)
+
+#' Elastic k-means clustering
+elastic_kmeans_rust <- function(data, argvals, k, max_iter, tol, karcher_max_iter, karcher_tol, lambda, seed) .Call(wrap__elastic_kmeans_rust, data, argvals, k, max_iter, tol, karcher_max_iter, karcher_tol, lambda, seed)
+
+#' Elastic hierarchical clustering
+elastic_hierarchical_rust <- function(data, argvals, method, lambda) .Call(wrap__elastic_hierarchical_rust, data, argvals, method, lambda)
+
+#' Cut a hierarchical dendrogram to get cluster labels
+elastic_cut_dendrogram_rust <- function(merges_data, distance_matrix, k) .Call(wrap__elastic_cut_dendrogram_rust, merges_data, distance_matrix, k)
 
 #' FPCA-based tolerance band
 tolerance_fpca <- function(data, ncomp, nb, coverage, band_type, seed) .Call(wrap__tolerance_fpca, data, ncomp, nb, coverage, band_type, seed)
@@ -935,6 +1035,66 @@ frcc_phase1_rust <- function(y_curves, predictors, argvals, ncomp, fosr_lambda, 
 
 #' FRCC Phase II: Monitor new data against a functional regression control chart.
 frcc_monitor_rust <- function(new_y, new_predictors, argvals, fosr_intercept, fosr_beta, fosr_lambda, resid_rotation, resid_mean, resid_singular_values, resid_centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, ncomp, config_fosr_lambda, config_alpha, config_tuning_fraction, config_seed) .Call(wrap__frcc_monitor_rust, new_y, new_predictors, argvals, fosr_intercept, fosr_beta, fosr_lambda, resid_rotation, resid_mean, resid_singular_values, resid_centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, ncomp, config_fosr_lambda, config_alpha, config_tuning_fraction, config_seed)
+
+#' Select the number of principal components.
+spm_select_ncomp_rust <- function(eigenvalues, method, threshold) .Call(wrap__spm_select_ncomp_rust, eigenvalues, method, threshold)
+
+#' Per-PC T-squared contributions for a single observation or batch.
+spm_t2_pc_contrib_rust <- function(scores, eigenvalues) .Call(wrap__spm_t2_pc_contrib_rust, scores, eigenvalues)
+
+#' Evaluate control chart rules (Western Electric, Nelson, or custom).
+spm_evaluate_rules_rust <- function(values, center, sigma, rule_set) .Call(wrap__spm_evaluate_rules_rust, values, center, sigma, rule_set)
+
+#' Robust T-squared control limit.
+spm_t2_limit_robust_rust <- function(t2_values, ncomp, alpha, method, n_bootstrap, seed) .Call(wrap__spm_t2_limit_robust_rust, t2_values, ncomp, alpha, method, n_bootstrap, seed)
+
+#' Robust SPE control limit.
+spm_spe_limit_robust_rust <- function(spe_values, alpha, method, n_bootstrap, seed) .Call(wrap__spm_spe_limit_robust_rust, spe_values, alpha, method, n_bootstrap, seed)
+
+#' In-control ARL for T-squared chart.
+spm_arl0_t2_rust <- function(eigenvalues, ucl, n_sim, max_rl, seed) .Call(wrap__spm_arl0_t2_rust, eigenvalues, ucl, n_sim, max_rl, seed)
+
+#' Out-of-control ARL for T-squared chart.
+spm_arl1_t2_rust <- function(eigenvalues, ucl, shift, n_sim, max_rl, seed) .Call(wrap__spm_arl1_t2_rust, eigenvalues, ucl, shift, n_sim, max_rl, seed)
+
+#' In-control ARL for EWMA-T-squared chart.
+spm_arl0_ewma_t2_rust <- function(eigenvalues, ucl, lambda, n_sim, max_rl, seed) .Call(wrap__spm_arl0_ewma_t2_rust, eigenvalues, ucl, lambda, n_sim, max_rl, seed)
+
+#' In-control ARL for SPE chart.
+spm_arl0_spe_rust <- function(spe_df, spe_scale, ucl, n_sim, max_rl, seed) .Call(wrap__spm_arl0_spe_rust, spe_df, spe_scale, ucl, n_sim, max_rl, seed)
+
+#' CUSUM monitoring on sequential functional data.
+spm_cusum_monitor_rust <- function(sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, k, h, cusum_ncomp, cusum_alpha, multivariate) .Call(wrap__spm_cusum_monitor_rust, sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, k, h, cusum_ncomp, cusum_alpha, multivariate)
+
+#' CUSUM monitoring with restart after each alarm.
+spm_cusum_monitor_restart_rust <- function(sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, k, h, cusum_ncomp, cusum_alpha, multivariate) .Call(wrap__spm_cusum_monitor_restart_rust, sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, k, h, cusum_ncomp, cusum_alpha, multivariate)
+
+#' MEWMA monitoring on sequential functional data.
+spm_mewma_monitor_rust <- function(sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, lambda, mewma_ncomp, mewma_alpha, asymptotic) .Call(wrap__spm_mewma_monitor_rust, sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, lambda, mewma_ncomp, mewma_alpha, asymptotic)
+
+#' Adaptive EWMA (AMEWMA) monitoring on sequential functional data.
+spm_amewma_monitor_rust <- function(sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, lambda_min, lambda_max, lambda_init, eta, amewma_ncomp, amewma_alpha) .Call(wrap__spm_amewma_monitor_rust, sequential_data, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, lambda_min, lambda_max, lambda_init, eta, amewma_ncomp, amewma_alpha)
+
+#' Iterative Phase I chart construction.
+spm_phase1_iterative_rust <- function(data, argvals, ncomp, alpha, tuning_fraction, seed, max_iterations, max_removal_fraction) .Call(wrap__spm_phase1_iterative_rust, data, argvals, ncomp, alpha, tuning_fraction, seed, max_iterations, max_removal_fraction)
+
+#' Profile monitoring Phase I.
+spm_profile_phase1_rust <- function(y_curves, predictors, argvals, fosr_lambda, ncomp, alpha, window_size, step_size) .Call(wrap__spm_profile_phase1_rust, y_curves, predictors, argvals, fosr_lambda, ncomp, alpha, window_size, step_size)
+
+#' Profile monitoring Phase II.
+spm_profile_monitor_rust <- function(new_y, new_predictors, argvals, beta_rotation, beta_mean, beta_singular_values, beta_centered, ref_fosr_intercept, ref_fosr_beta, ref_fosr_lambda, eigenvalues, t2_ucl, t2_alpha, t2_description, lag1_autocorrelation, effective_n_windows, fosr_lambda, ncomp, alpha, window_size, step_size) .Call(wrap__spm_profile_monitor_rust, new_y, new_predictors, argvals, beta_rotation, beta_mean, beta_singular_values, beta_centered, ref_fosr_intercept, ref_fosr_beta, ref_fosr_lambda, eigenvalues, t2_ucl, t2_alpha, t2_description, lag1_autocorrelation, effective_n_windows, fosr_lambda, ncomp, alpha, window_size, step_size)
+
+#' Monitor a single partially-observed curve.
+spm_monitor_partial_rust <- function(partial_values, argvals, n_observed, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, partial_ncomp, partial_alpha, completion_method) .Call(wrap__spm_monitor_partial_rust, partial_values, argvals, n_observed, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, partial_ncomp, partial_alpha, completion_method)
+
+#' Monitor a batch of partially-observed curves.
+spm_monitor_partial_batch_rust <- function(partial_data_list, n_observed_vec, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, partial_ncomp, partial_alpha, completion_method) .Call(wrap__spm_monitor_partial_batch_rust, partial_data_list, n_observed_vec, argvals, rotation, mean, singular_values, centered, eigenvalues, t2_ucl, t2_alpha, t2_description, spe_ucl, spe_alpha, spe_description, chart_ncomp, config_alpha, config_tuning_fraction, config_seed, partial_ncomp, partial_alpha, completion_method)
+
+#' Elastic SPM Phase I.
+elastic_spm_phase1_rust <- function(data, argvals, ncomp, alpha, tuning_fraction, seed, align_lambda, monitor_phase, warp_ncomp) .Call(wrap__elastic_spm_phase1_rust, data, argvals, ncomp, alpha, tuning_fraction, seed, align_lambda, monitor_phase, warp_ncomp)
+
+#' Elastic SPM Phase II monitoring.
+elastic_spm_monitor_rust <- function(new_data, argvals, karcher_mean, align_lambda, monitor_phase, warp_ncomp, amp_rotation, amp_mean, amp_singular_values, amp_centered, amp_eigenvalues, amp_t2_ucl, amp_t2_alpha, amp_t2_description, amp_spe_ucl, amp_spe_alpha, amp_spe_description, amp_ncomp, amp_config_alpha, amp_config_tuning_fraction, amp_config_seed, phase_rotation, phase_mean, phase_singular_values, phase_centered, phase_eigenvalues, phase_t2_ucl, phase_t2_alpha, phase_t2_description, phase_spe_ucl, phase_spe_alpha, phase_spe_description, phase_ncomp, phase_config_alpha, phase_config_tuning_fraction, phase_config_seed) .Call(wrap__elastic_spm_monitor_rust, new_data, argvals, karcher_mean, align_lambda, monitor_phase, warp_ncomp, amp_rotation, amp_mean, amp_singular_values, amp_centered, amp_eigenvalues, amp_t2_ucl, amp_t2_alpha, amp_t2_description, amp_spe_ucl, amp_spe_alpha, amp_spe_description, amp_ncomp, amp_config_alpha, amp_config_tuning_fraction, amp_config_seed, phase_rotation, phase_mean, phase_singular_values, phase_centered, phase_eigenvalues, phase_t2_ucl, phase_t2_alpha, phase_t2_description, phase_spe_ucl, phase_spe_alpha, phase_spe_description, phase_ncomp, phase_config_alpha, phase_config_tuning_fraction, phase_config_seed)
 
 
 # nolint end

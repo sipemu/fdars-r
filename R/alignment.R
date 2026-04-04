@@ -2319,3 +2319,1074 @@ shape.distance.matrix <- function(fdataobj,
 
   D
 }
+
+# =============================================================================
+# Karcher Median
+# =============================================================================
+
+#' Karcher Median in Elastic Metric
+#'
+#' Compute the Karcher median of functional data in the elastic metric using the
+#' Weiszfeld algorithm. The Karcher median minimises the sum of distances rather
+#' than the sum of squared distances, making it more robust to outliers than the
+#' Karcher mean.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param max.iter Maximum number of Weiszfeld iterations (default 30).
+#' @param tol Convergence tolerance (default 1e-4).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#' @param trim Fraction of most distant curves to trim before aggregation
+#'   (default 0, no trimming).
+#'
+#' @return An object of class 'karcher.median' with components:
+#' \describe{
+#'   \item{median}{fdata of the Karcher median curve}
+#'   \item{median_srsf}{numeric vector of the median SRSF}
+#'   \item{aligned}{fdata of aligned curves}
+#'   \item{gammas}{fdata of warping functions}
+#'   \item{n.iter}{number of iterations used}
+#'   \item{converged}{logical indicating convergence}
+#'   \item{fdataobj}{the original fdata input}
+#' }
+#'
+#' @references
+#' Fletcher, P.T., Venkatasubramanian, S., and Joshi, S. (2009). The geometric
+#' median on Riemannian manifolds with application to robust atlas estimation.
+#' \emph{NeuroImage}, 45(1):S143--S152.
+#'
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @seealso \code{\link{karcher.mean}}, \code{\link{robust.karcher.mean}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 15, 50)
+#' for (i in 1:15) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' km <- karcher.median(fd)
+#' }
+karcher.median <- function(fdataobj, max.iter = 30, tol = 1e-4,
+                           lambda = 0, trim = 0) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  argvals <- fdataobj$argvals
+  res <- alignment_karcher_median(fdataobj$data, argvals,
+                                  as.integer(max.iter), as.numeric(tol),
+                                  as.numeric(lambda), as.numeric(trim))
+
+  result <- list(
+    median = fdata(matrix(res$mean, nrow = 1), argvals = argvals),
+    median_srsf = res$mean_srsf,
+    aligned = fdata(res$aligned_data, argvals = argvals),
+    gammas = fdata(res$gammas, argvals = argvals),
+    n.iter = res$n_iter,
+    converged = res$converged,
+    fdataobj = fdataobj
+  )
+  class(result) <- "karcher.median"
+  result
+}
+
+#' @export
+print.karcher.median <- function(x, ...) {
+  n <- nrow(x$fdataobj$data)
+  m <- ncol(x$fdataobj$data)
+  cat("Karcher Median (Elastic)\n")
+  cat("  Curves:", n, "x", m, "grid points\n")
+  cat("  Iterations:", x$n.iter, "\n")
+  cat("  Converged:", x$converged, "\n")
+  invisible(x)
+}
+
+# =============================================================================
+# Robust Karcher Mean
+# =============================================================================
+
+#' Trimmed Karcher Mean in Elastic Metric
+#'
+#' Compute a robust version of the Karcher mean by iteratively trimming the most
+#' distant curves before updating the mean estimate. This reduces the influence
+#' of outlying observations on the mean shape.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param trim Fraction of most distant curves to trim at each iteration
+#'   (default 0.1).
+#' @param max.iter Maximum number of iterations (default 20).
+#' @param tol Convergence tolerance (default 1e-4).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#'
+#' @return An object of class 'karcher.mean' with components:
+#' \describe{
+#'   \item{mean}{fdata of the trimmed Karcher mean curve}
+#'   \item{mean_srsf}{numeric vector of the mean SRSF}
+#'   \item{aligned}{fdata of aligned curves}
+#'   \item{gammas}{fdata of warping functions}
+#'   \item{n.iter}{number of iterations used}
+#'   \item{converged}{logical indicating convergence}
+#'   \item{fdataobj}{the original fdata input}
+#' }
+#'
+#' @references
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
+#'
+#' @seealso \code{\link{karcher.mean}}, \code{\link{karcher.median}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 20, 50)
+#' for (i in 1:20) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' rkm <- robust.karcher.mean(fd, trim = 0.1)
+#' }
+robust.karcher.mean <- function(fdataobj, trim = 0.1, max.iter = 20,
+                                tol = 1e-4, lambda = 0) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  argvals <- fdataobj$argvals
+  res <- alignment_robust_karcher_mean(fdataobj$data, argvals,
+                                       as.integer(max.iter), as.numeric(tol),
+                                       as.numeric(lambda), as.numeric(trim))
+
+  result <- list(
+    mean = fdata(matrix(res$mean, nrow = 1), argvals = argvals),
+    mean_srsf = res$mean_srsf,
+    aligned = fdata(res$aligned_data, argvals = argvals),
+    gammas = fdata(res$gammas, argvals = argvals),
+    n.iter = res$n_iter,
+    converged = res$converged,
+    fdataobj = fdataobj
+  )
+  class(result) <- "karcher.mean"
+  result
+}
+
+# =============================================================================
+# Elastic Depth
+# =============================================================================
+
+#' Elastic Depth for Functional Data
+#'
+#' Compute elastic depth scores that decompose into amplitude and phase
+#' components. Elastic depth measures the centrality of each curve relative to
+#' the sample, accounting for both vertical variation (amplitude) and horizontal
+#' variation (phase/warping).
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#'
+#' @return An object of class 'elastic.depth' with components:
+#' \describe{
+#'   \item{amplitude_depth}{numeric vector of amplitude depth scores}
+#'   \item{phase_depth}{numeric vector of phase depth scores}
+#'   \item{combined_depth}{numeric vector of combined depth scores}
+#' }
+#'
+#' @references
+#' Lopez-Pintado, S. and Romo, J. (2009). On the concept of depth for
+#' functional data. \emph{Journal of the American Statistical Association},
+#' 104(486):718--734.
+#'
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @seealso \code{\link{elastic.outlier.detection}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 15, 50)
+#' for (i in 1:15) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' ed <- elastic.depth(fd)
+#' }
+elastic.depth <- function(fdataobj, lambda = 0) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  res <- alignment_elastic_depth(fdataobj$data, fdataobj$argvals,
+                                 as.numeric(lambda))
+
+  result <- list(
+    amplitude_depth = res$amplitude_depth,
+    phase_depth = res$phase_depth,
+    combined_depth = res$combined_depth
+  )
+  class(result) <- "elastic.depth"
+  result
+}
+
+#' @export
+print.elastic.depth <- function(x, ...) {
+  n <- length(x$combined_depth)
+  cat("Elastic Depth\n")
+  cat("  Curves:", n, "\n")
+  cat("  Amplitude depth range:",
+      round(min(x$amplitude_depth), 4), "-",
+      round(max(x$amplitude_depth), 4), "\n")
+  cat("  Phase depth range:",
+      round(min(x$phase_depth), 4), "-",
+      round(max(x$phase_depth), 4), "\n")
+  invisible(x)
+}
+
+# =============================================================================
+# Elastic Outlier Detection
+# =============================================================================
+
+#' Elastic Outlier Detection
+#'
+#' Identify outlying curves using SRVF-based elastic distances and Tukey's fence
+#' rule. Outliers are detected in both the amplitude and phase domains.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#' @param alpha Significance level for the Tukey fence (default 0.05).
+#' @param use.median Logical; if TRUE, use the Karcher median instead of the
+#'   Karcher mean as the central tendency reference (default FALSE).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{outlier_indices}{integer vector of detected outlier indices}
+#'   \item{amplitude_outliers}{integer vector of amplitude outlier indices}
+#'   \item{phase_outliers}{integer vector of phase outlier indices}
+#'   \item{amplitude_distances}{numeric vector of amplitude distances}
+#'   \item{phase_distances}{numeric vector of phase distances}
+#'   \item{amplitude_fence}{numeric; the amplitude fence threshold}
+#'   \item{phase_fence}{numeric; the phase fence threshold}
+#' }
+#'
+#' @references
+#' Xie, W., Kurtek, S., Bharath, K., and Sun, Y. (2017). A geometric approach
+#' to visualization of variability in functional data.
+#' \emph{Journal of the American Statistical Association},
+#' 112(519):979--993.
+#'
+#' @seealso \code{\link{elastic.depth}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 20, 50)
+#' for (i in 1:20) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' # Add an outlier
+#' X[20, ] <- 5 * cos(4 * pi * t)
+#' fd <- fdata(X, argvals = t)
+#' out <- elastic.outlier.detection(fd)
+#' }
+elastic.outlier.detection <- function(fdataobj, lambda = 0, alpha = 0.05,
+                                      use.median = FALSE) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  res <- alignment_elastic_outlier(fdataobj$data, fdataobj$argvals,
+                                   as.numeric(lambda), as.numeric(alpha),
+                                   as.logical(use.median))
+  res
+}
+
+# =============================================================================
+# Shape Confidence Interval
+# =============================================================================
+
+#' Bootstrap Confidence Bands for Elastic Karcher Mean
+#'
+#' Construct pointwise bootstrap confidence bands for the elastic Karcher mean
+#' by resampling curves and recomputing the mean for each bootstrap replicate.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param n.bootstrap Number of bootstrap replicates (default 200).
+#' @param confidence.level Confidence level for the bands (default 0.95).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#' @param max.iter Maximum number of Karcher mean iterations per replicate
+#'   (default 15).
+#' @param tol Convergence tolerance for each Karcher mean computation
+#'   (default 1e-4).
+#' @param seed Random seed for reproducibility (default 42).
+#'
+#' @return An object of class 'shape.ci' with components:
+#' \describe{
+#'   \item{mean}{fdata of the Karcher mean curve}
+#'   \item{lower}{numeric vector of lower confidence band values}
+#'   \item{upper}{numeric vector of upper confidence band values}
+#'   \item{confidence.level}{the confidence level used}
+#'   \item{n.bootstrap}{the number of bootstrap replicates used}
+#'   \item{argvals}{the evaluation grid}
+#' }
+#'
+#' @references
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
+#'
+#' @seealso \code{\link{karcher.mean}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 20, 50)
+#' for (i in 1:20) X[i, ] <- sin(2 * pi * t + runif(1, -0.2, 0.2))
+#' fd <- fdata(X, argvals = t)
+#' ci <- shape.confidence.interval(fd, n.bootstrap = 50)
+#' }
+shape.confidence.interval <- function(fdataobj, n.bootstrap = 200,
+                                      confidence.level = 0.95, lambda = 0,
+                                      max.iter = 15, tol = 1e-4, seed = 42) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  argvals <- fdataobj$argvals
+  res <- alignment_shape_ci(fdataobj$data, argvals,
+                            as.integer(n.bootstrap),
+                            as.numeric(confidence.level),
+                            as.numeric(lambda),
+                            as.integer(max.iter),
+                            as.numeric(tol),
+                            as.integer(seed))
+
+  result <- list(
+    mean = fdata(matrix(res$mean, nrow = 1), argvals = argvals),
+    lower = res$lower,
+    upper = res$upper,
+    confidence.level = confidence.level,
+    n.bootstrap = n.bootstrap,
+    argvals = argvals
+  )
+  class(result) <- "shape.ci"
+  result
+}
+
+#' @export
+print.shape.ci <- function(x, ...) {
+  cat("Shape Confidence Interval\n")
+  cat("  Confidence level:", x$confidence.level, "\n")
+  cat("  Bootstrap replicates:", x$n.bootstrap, "\n")
+  cat("  Grid points:", length(x$argvals), "\n")
+  invisible(x)
+}
+
+# =============================================================================
+# Bayesian Pairwise Alignment
+# =============================================================================
+
+#' Bayesian Pairwise Curve Alignment
+#'
+#' Align two curves using a Bayesian framework with MCMC sampling of the warping
+#' function posterior. This provides uncertainty quantification for the alignment
+#' via posterior samples of the warping function.
+#'
+#' @param f1 Numeric vector of the first curve's values.
+#' @param f2 Numeric vector of the second curve's values.
+#' @param argvals Numeric vector of the evaluation grid (common to both curves).
+#' @param n.samples Number of MCMC samples to draw (default 2000).
+#' @param burn.in Number of initial samples to discard as burn-in (default 500).
+#' @param step.size Step size for the MCMC proposal (default 0.1).
+#' @param proposal.variance Variance of the MCMC proposal distribution
+#'   (default 1.0).
+#' @param seed Random seed for reproducibility (default 42).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{gamma.mean}{numeric vector of the posterior mean warping function}
+#'   \item{gamma.samples}{matrix of posterior warping function samples
+#'     (samples x grid)}
+#'   \item{f2.aligned}{numeric vector of the aligned second curve}
+#'   \item{acceptance.rate}{the MCMC acceptance rate}
+#' }
+#'
+#' @references
+#' Cheng, W., Dryden, I.L., and Huang, X. (2016). Bayesian registration of
+#' functions and curves. \emph{Bayesian Analysis}, 11(2):447--475.
+#'
+#' @seealso \code{\link{elastic.align}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 100)
+#' f1 <- sin(2 * pi * t)
+#' f2 <- sin(2 * pi * (t^1.3))
+#' res <- bayesian.align.pair(f1, f2, t, n.samples = 500, burn.in = 100)
+#' }
+bayesian.align.pair <- function(f1, f2, argvals, n.samples = 2000,
+                                burn.in = 500, step.size = 0.1,
+                                proposal.variance = 1.0, seed = 42) {
+  res <- alignment_bayesian_pair(as.numeric(f1), as.numeric(f2),
+                                 as.numeric(argvals),
+                                 as.integer(n.samples),
+                                 as.integer(burn.in),
+                                 as.numeric(step.size),
+                                 as.numeric(proposal.variance),
+                                 as.integer(seed))
+  res
+}
+
+# =============================================================================
+# Multi-resolution Pairwise Alignment
+# =============================================================================
+
+#' Multi-Resolution Pairwise Curve Alignment
+#'
+#' Align two curves using a coarse-to-fine multi-resolution strategy. The curves
+#' are first coarsened, aligned at low resolution, and then the alignment is
+#' progressively refined to the original grid resolution. This can improve
+#' robustness and speed for highly misaligned curves.
+#'
+#' @param f1 Numeric vector of the first curve's values.
+#' @param f2 Numeric vector of the second curve's values.
+#' @param argvals Numeric vector of the evaluation grid (common to both curves).
+#' @param coarsen.factor Coarsening factor for the initial resolution
+#'   (default 4).
+#' @param n.refine Number of refinement steps (default 10).
+#' @param step.size Step size for gradient-based refinement (default 0.01).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{gamma}{numeric vector of the estimated warping function}
+#'   \item{f2.aligned}{numeric vector of the aligned second curve}
+#'   \item{distance}{elastic distance after alignment}
+#' }
+#'
+#' @seealso \code{\link{elastic.align}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 200)
+#' f1 <- sin(2 * pi * t)
+#' f2 <- sin(2 * pi * (t^1.5))
+#' res <- elastic.align.pair.multires(f1, f2, t)
+#' }
+elastic.align.pair.multires <- function(f1, f2, argvals, coarsen.factor = 4,
+                                        n.refine = 10, step.size = 0.01,
+                                        lambda = 0) {
+  res <- alignment_multires_pair(as.numeric(f1), as.numeric(f2),
+                                 as.numeric(argvals),
+                                 as.integer(coarsen.factor),
+                                 as.integer(n.refine),
+                                 as.numeric(step.size),
+                                 as.numeric(lambda))
+  res
+}
+
+# =============================================================================
+# Closed Curve Alignment
+# =============================================================================
+
+#' Elastic Alignment of Closed Curves
+#'
+#' Align two closed curves in the elastic framework. Closed curves satisfy
+#' \eqn{f(0) = f(1)} and the alignment optimises over both reparameterisation
+#' and rotation (circular shift) of the parameter domain.
+#'
+#' @param f1 Numeric vector of the first closed curve's values.
+#' @param f2 Numeric vector of the second closed curve's values.
+#' @param argvals Numeric vector of the evaluation grid (common to both curves).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{gamma}{numeric vector of the estimated warping function}
+#'   \item{f2.aligned}{numeric vector of the aligned second curve}
+#'   \item{distance}{elastic distance after alignment}
+#'   \item{rotation}{the optimal rotation applied}
+#' }
+#'
+#' @references
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @seealso \code{\link{elastic.distance.closed}},
+#'   \code{\link{karcher.mean.closed}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 100)
+#' f1 <- sin(2 * pi * t)
+#' f2 <- sin(2 * pi * t + 0.5)
+#' res <- elastic.align.pair.closed(f1, f2, t)
+#' }
+elastic.align.pair.closed <- function(f1, f2, argvals, lambda = 0) {
+  res <- alignment_closed_pair(as.numeric(f1), as.numeric(f2),
+                               as.numeric(argvals), as.numeric(lambda))
+  res
+}
+
+# =============================================================================
+# Closed Curve Distance
+# =============================================================================
+
+#' Elastic Distance Between Closed Curves
+#'
+#' Compute the elastic (Fisher-Rao) distance between two closed curves,
+#' optimising over both reparameterisation and rotation.
+#'
+#' @param f1 Numeric vector of the first closed curve's values.
+#' @param f2 Numeric vector of the second closed curve's values.
+#' @param argvals Numeric vector of the evaluation grid (common to both curves).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#'
+#' @return Numeric scalar; the elastic distance between the two closed curves.
+#'
+#' @references
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @seealso \code{\link{elastic.align.pair.closed}},
+#'   \code{\link{karcher.mean.closed}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 100)
+#' f1 <- sin(2 * pi * t)
+#' f2 <- sin(2 * pi * t + 0.5)
+#' d <- elastic.distance.closed(f1, f2, t)
+#' }
+elastic.distance.closed <- function(f1, f2, argvals, lambda = 0) {
+  alignment_closed_distance(as.numeric(f1), as.numeric(f2),
+                            as.numeric(argvals), as.numeric(lambda))
+}
+
+# =============================================================================
+# Karcher Mean for Closed Curves
+# =============================================================================
+
+#' Karcher Mean for Closed Curves
+#'
+#' Compute the Karcher (Frechet) mean for a sample of closed curves in the
+#' elastic metric. This optimises simultaneously over reparameterisations and
+#' rotations of the parameter domain.
+#'
+#' @param fdataobj An object of class 'fdata' containing closed curves.
+#' @param max.iter Maximum number of iterations (default 15).
+#' @param tol Convergence tolerance (default 1e-4).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#'
+#' @return An object of class 'karcher.mean' with components:
+#' \describe{
+#'   \item{mean}{fdata of the Karcher mean curve}
+#'   \item{mean_srsf}{numeric vector of the mean SRSF}
+#'   \item{aligned}{fdata of aligned curves}
+#'   \item{gammas}{fdata of warping functions}
+#'   \item{n.iter}{number of iterations used}
+#'   \item{converged}{logical indicating convergence}
+#'   \item{fdataobj}{the original fdata input}
+#' }
+#'
+#' @references
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @seealso \code{\link{karcher.mean}}, \code{\link{elastic.align.pair.closed}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 100)
+#' X <- matrix(0, 10, 100)
+#' for (i in 1:10) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' km <- karcher.mean.closed(fd)
+#' }
+karcher.mean.closed <- function(fdataobj, max.iter = 15, tol = 1e-4,
+                                lambda = 0) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  argvals <- fdataobj$argvals
+  res <- alignment_karcher_mean_closed(fdataobj$data, argvals,
+                                       as.integer(max.iter), as.numeric(tol),
+                                       as.numeric(lambda))
+
+  result <- list(
+    mean = fdata(matrix(res$mean, nrow = 1), argvals = argvals),
+    mean_srsf = res$mean_srsf,
+    aligned = fdata(res$aligned_data, argvals = argvals),
+    gammas = fdata(res$gammas, argvals = argvals),
+    n.iter = res$n_iter,
+    converged = res$converged,
+    fdataobj = fdataobj
+  )
+  class(result) <- "karcher.mean"
+  result
+}
+
+# =============================================================================
+# Elastic Partial Matching
+# =============================================================================
+
+#' Elastic Partial Curve Matching
+#'
+#' Find the optimal partial match of a template curve within a longer target
+#' curve using the elastic framework. This identifies the sub-interval of the
+#' target that best matches the template, along with the optimal warping.
+#'
+#' @param template Numeric vector of the template curve's values.
+#' @param target Numeric vector of the target curve's values.
+#' @param argvals.template Numeric vector of evaluation points for the template.
+#' @param argvals.target Numeric vector of evaluation points for the target.
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#' @param min.span Minimum fraction of the target domain that the matched
+#'   sub-interval must span (default 0.3).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{gamma}{numeric vector of the warping function on the matched
+#'     sub-interval}
+#'   \item{match_start}{start of the matched sub-interval on the target domain}
+#'   \item{match_end}{end of the matched sub-interval on the target domain}
+#'   \item{distance}{elastic distance of the partial match}
+#'   \item{target_aligned}{numeric vector of the matched and aligned target
+#'     segment}
+#' }
+#'
+#' @references
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t1 <- seq(0, 1, length.out = 50)
+#' t2 <- seq(0, 2, length.out = 100)
+#' template <- sin(2 * pi * t1)
+#' target <- c(rep(0, 20), sin(2 * pi * seq(0, 1, length.out = 50)), rep(0, 30))
+#' res <- elastic.partial.match(template, target, t1, t2)
+#' }
+elastic.partial.match <- function(template, target, argvals.template,
+                                  argvals.target, lambda = 0,
+                                  min.span = 0.3) {
+  alignment_partial_match(as.numeric(template), as.numeric(target),
+                          as.numeric(argvals.template),
+                          as.numeric(argvals.target),
+                          as.numeric(lambda), as.numeric(min.span))
+}
+
+# =============================================================================
+# Curve Geodesic
+# =============================================================================
+
+#' Geodesic Path Between Two Curves
+#'
+#' Compute the geodesic (shortest path) between two curves in the elastic
+#' metric. The geodesic is represented as a sequence of intermediate curves
+#' interpolating between the two endpoints in the SRVF space.
+#'
+#' @param f1 Numeric vector of the first curve's values.
+#' @param f2 Numeric vector of the second curve's values.
+#' @param argvals Numeric vector of the evaluation grid (common to both curves).
+#' @param n.points Number of points along the geodesic to compute (default 10).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#'
+#' @return An object of class 'curve.geodesic' with components:
+#' \describe{
+#'   \item{path}{fdata of the interpolated curves along the geodesic}
+#'   \item{distance}{the total geodesic (elastic) distance between f1 and f2}
+#'   \item{gamma}{numeric vector of the optimal warping function}
+#'   \item{argvals}{the evaluation grid}
+#' }
+#'
+#' @references
+#' Srivastava, A. and Klassen, E. (2016). \emph{Functional and Shape Data
+#' Analysis}. Springer.
+#'
+#' @seealso \code{\link{elastic.distance}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' t <- seq(0, 1, length.out = 100)
+#' f1 <- sin(2 * pi * t)
+#' f2 <- cos(2 * pi * t)
+#' geo <- curve.geodesic(f1, f2, t, n.points = 8)
+#' }
+curve.geodesic <- function(f1, f2, argvals, n.points = 10, lambda = 0) {
+  res <- alignment_curve_geodesic(as.numeric(f1), as.numeric(f2),
+                                  as.numeric(argvals),
+                                  as.integer(n.points),
+                                  as.numeric(lambda))
+
+  result <- list(
+    curves = fdata(res$curves, argvals = argvals),
+    warps = res$warps,
+    distances = res$distances,
+    parameter_values = res$parameter_values,
+    argvals = argvals
+  )
+  class(result) <- "curve.geodesic"
+  result
+}
+
+#' @export
+print.curve.geodesic <- function(x, ...) {
+  n <- nrow(x$curves$data)
+  cat("Curve Geodesic\n")
+  cat("  Points along geodesic:", n, "\n")
+  cat("  Total distance:", round(sum(x$distances), 4), "\n")
+  invisible(x)
+}
+
+# =============================================================================
+# Peak Persistence
+# =============================================================================
+
+#' Peak Persistence Analysis
+#'
+#' Analyse the persistence of peaks (local maxima) across a range of
+#' regularisation strengths. As the regularisation parameter \eqn{\lambda}
+#' increases, aligned curves become smoother and spurious peaks disappear.
+#' This function tracks which peaks persist across the regularisation path,
+#' providing a multi-scale view of the data's peak structure.
+#'
+#' @param fdataobj An object of class 'fdata'.
+#' @param lambdas Numeric vector of regularisation values to sweep. If NULL
+#'   (default), uses \code{seq(0, 5, length.out = 30)}.
+#' @param max.iter Maximum number of Karcher mean iterations at each lambda
+#'   (default 10).
+#' @param tol Convergence tolerance (default 1e-4).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{lambdas}{the regularisation values used}
+#'   \item{n_peaks}{integer vector of peak counts at each lambda}
+#'   \item{peak_locations}{list of numeric vectors giving peak locations at each
+#'     lambda}
+#'   \item{persistence}{numeric vector of persistence scores for each peak}
+#' }
+#'
+#' @references
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
+#'
+#' @seealso \code{\link{karcher.mean}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 100)
+#' X <- matrix(0, 15, 100)
+#' for (i in 1:15) X[i, ] <- sin(4 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' pp <- peak.persistence(fd)
+#' }
+peak.persistence <- function(fdataobj, lambdas = NULL, max.iter = 10,
+                             tol = 1e-4) {
+  if (!inherits(fdataobj, "fdata")) {
+    stop("fdataobj must be of class 'fdata'")
+  }
+
+  if (is.null(lambdas)) {
+    lambdas <- seq(0, 5, length.out = 30)
+  }
+
+  alignment_peak_persistence(fdataobj$data, fdataobj$argvals,
+                             as.numeric(lambdas),
+                             as.integer(max.iter),
+                             as.numeric(tol))
+}
+
+# =============================================================================
+# Transfer Alignment
+# =============================================================================
+
+#' Transfer Alignment Between Functional Samples
+#'
+#' Transfer the alignment learned from a source sample of curves to a target
+#' sample. The Karcher mean and warping structure estimated from the source are
+#' used to guide the alignment of the target curves, which is useful when the
+#' target sample is small or noisy.
+#'
+#' @param source An object of class 'fdata' (the reference sample).
+#' @param target An object of class 'fdata' (the sample to align).
+#' @param lambda Regularisation parameter controlling warping smoothness
+#'   (default 0).
+#' @param max.iter Maximum number of iterations (default 15).
+#' @param tol Convergence tolerance (default 1e-4).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{aligned}{fdata of the aligned target curves}
+#'   \item{gammas}{fdata of warping functions applied to the target}
+#'   \item{source.mean}{fdata of the source Karcher mean}
+#'   \item{distances}{numeric vector of elastic distances}
+#' }
+#'
+#' @seealso \code{\link{karcher.mean}}, \code{\link{elastic.align}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X1 <- matrix(0, 20, 50)
+#' for (i in 1:20) X1[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' X2 <- matrix(0, 5, 50)
+#' for (i in 1:5) X2[i, ] <- sin(2 * pi * t + runif(1, -0.5, 0.5))
+#' source <- fdata(X1, argvals = t)
+#' target <- fdata(X2, argvals = t)
+#' res <- transfer.alignment(source, target)
+#' }
+transfer.alignment <- function(source, target, lambda = 0, max.iter = 15,
+                               tol = 1e-4) {
+  if (!inherits(source, "fdata")) {
+    stop("source must be of class 'fdata'")
+  }
+  if (!inherits(target, "fdata")) {
+    stop("target must be of class 'fdata'")
+  }
+
+  argvals <- source$argvals
+  res <- alignment_transfer(source$data, target$data, argvals,
+                            as.numeric(lambda),
+                            as.integer(max.iter),
+                            as.numeric(tol))
+
+  list(
+    aligned = fdata(res$aligned_data, argvals = argvals),
+    gammas = fdata(res$gammas, argvals = argvals),
+    source.mean = fdata(matrix(res$source_mean, nrow = 1), argvals = argvals),
+    distances = res$distances
+  )
+}
+
+# =============================================================================
+# Gaussian Generative Model
+# =============================================================================
+
+#' Gaussian Generative Model for Elastic Functional Data
+#'
+#' Fit a Gaussian generative model to elastic functional data using PCA on the
+#' SRVF representations. The model captures amplitude variability and can
+#' generate new random curves from the estimated distribution.
+#'
+#' @param karcher An object of class 'karcher.mean' (result of
+#'   \code{\link{karcher.mean}}).
+#' @param n.components Number of principal components to retain (default 3).
+#' @param n.samples Number of random curves to generate (default 50).
+#' @param seed Random seed for reproducibility (default 42).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{samples}{fdata of generated random curves}
+#'   \item{eigenvalues}{numeric vector of eigenvalues}
+#'   \item{eigenfunctions}{matrix of eigenfunctions (components x grid)}
+#'   \item{scores}{matrix of PCA scores (curves x components)}
+#' }
+#'
+#' @references
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
+#'
+#' @seealso \code{\link{karcher.mean}}, \code{\link{joint.gauss.model}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 20, 50)
+#' for (i in 1:20) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' km <- karcher.mean(fd)
+#' gm <- gauss.model(km, n.components = 2, n.samples = 10)
+#' }
+gauss.model <- function(karcher, n.components = 3, n.samples = 50,
+                        seed = 42) {
+  if (!inherits(karcher, "karcher.mean")) {
+    stop("karcher must be of class 'karcher.mean'")
+  }
+
+  argvals <- karcher$mean$argvals
+  res <- alignment_gauss_model(
+    as.numeric(karcher$mean$data[1, ]),
+    as.numeric(karcher$mean_srsf),
+    karcher$gammas$data,
+    karcher$aligned$data,
+    argvals,
+    as.integer(n.components),
+    as.integer(n.samples),
+    as.integer(seed)
+  )
+
+  list(
+    samples = fdata(res$samples, argvals = argvals),
+    eigenvalues = res$eigenvalues,
+    eigenfunctions = res$eigenfunctions,
+    scores = res$scores
+  )
+}
+
+# =============================================================================
+# Joint Gaussian Generative Model
+# =============================================================================
+
+#' Joint Amplitude-Phase Gaussian Generative Model
+#'
+#' Fit a joint Gaussian generative model that captures both amplitude and phase
+#' variability. Unlike \code{\link{gauss.model}} which models amplitude only,
+#' this model jointly models the amplitude and warping components, allowing
+#' generated curves to exhibit realistic phase variability.
+#'
+#' @param karcher An object of class 'karcher.mean' (result of
+#'   \code{\link{karcher.mean}}).
+#' @param n.components Number of principal components to retain (default 3).
+#' @param n.samples Number of random curves to generate (default 50).
+#' @param balance Balance parameter controlling the relative weight of amplitude
+#'   and phase components (default 1.0).
+#' @param seed Random seed for reproducibility (default 42).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{samples}{fdata of generated random curves}
+#'   \item{eigenvalues}{numeric vector of eigenvalues}
+#'   \item{eigenfunctions}{matrix of eigenfunctions}
+#'   \item{scores}{matrix of joint PCA scores}
+#' }
+#'
+#' @references
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
+#'
+#' @seealso \code{\link{karcher.mean}}, \code{\link{gauss.model}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 20, 50)
+#' for (i in 1:20) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' km <- karcher.mean(fd)
+#' jgm <- joint.gauss.model(km, n.components = 2, n.samples = 10)
+#' }
+joint.gauss.model <- function(karcher, n.components = 3, n.samples = 50,
+                              balance = 1.0, seed = 42) {
+  if (!inherits(karcher, "karcher.mean")) {
+    stop("karcher must be of class 'karcher.mean'")
+  }
+
+  argvals <- karcher$mean$argvals
+  res <- alignment_joint_gauss_model(
+    as.numeric(karcher$mean$data[1, ]),
+    as.numeric(karcher$mean_srsf),
+    karcher$gammas$data,
+    karcher$aligned$data,
+    argvals,
+    as.integer(n.components),
+    as.integer(n.samples),
+    as.numeric(balance),
+    as.integer(seed)
+  )
+
+  list(
+    samples = fdata(res$samples, argvals = argvals),
+    eigenvalues = res$eigenvalues,
+    eigenfunctions = res$eigenfunctions,
+    scores = res$scores
+  )
+}
+
+# =============================================================================
+# Horizontal fPCA (fPNS)
+# =============================================================================
+
+#' Horizontal Functional Principal Nested Spheres
+#'
+#' Perform horizontal functional PCA using the principal nested spheres (fPNS)
+#' framework on warping functions. This captures the main modes of phase
+#' variability from the warping functions estimated during Karcher mean
+#' computation.
+#'
+#' @param karcher An object of class 'karcher.mean' (result of
+#'   \code{\link{karcher.mean}}).
+#' @param n.components Number of principal components to retain (default 3).
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{scores}{matrix of phase component scores (curves x components)}
+#'   \item{eigenvalues}{numeric vector of eigenvalues}
+#'   \item{eigenfunctions}{matrix of phase eigenfunctions (components x grid)}
+#'   \item{variance.explained}{numeric vector of proportion of variance
+#'     explained by each component}
+#' }
+#'
+#' @references
+#' Jung, S., Dryden, I.L., and Marron, J.S. (2012). Analysis of principal
+#' nested spheres. \emph{Biometrika}, 99(3):551--568.
+#'
+#' Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for
+#' functional data using phase and amplitude separation.
+#' \emph{Computational Statistics & Data Analysis}, 61:50--66.
+#'
+#' @seealso \code{\link{karcher.mean}}, \code{\link{gauss.model}}
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' set.seed(1)
+#' t <- seq(0, 1, length.out = 50)
+#' X <- matrix(0, 20, 50)
+#' for (i in 1:20) X[i, ] <- sin(2 * pi * t + runif(1, -0.3, 0.3))
+#' fd <- fdata(X, argvals = t)
+#' km <- karcher.mean(fd)
+#' hfp <- horiz.fpns(km, n.components = 2)
+#' }
+horiz.fpns <- function(karcher, n.components = 3) {
+  if (!inherits(karcher, "karcher.mean")) {
+    stop("karcher must be of class 'karcher.mean'")
+  }
+
+  argvals <- karcher$mean$argvals
+  res <- alignment_horiz_fpns(
+    as.numeric(karcher$mean$data[1, ]),
+    as.numeric(karcher$mean_srsf),
+    karcher$gammas$data,
+    karcher$aligned$data,
+    argvals,
+    as.integer(n.components)
+  )
+
+  res
+}
