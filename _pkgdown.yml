@@ -64,6 +64,7 @@ articles:
 - title: Align
   contents:
   - articles/elastic-alignment
+  - articles/advanced-alignment
   - articles/landmark-registration
   - articles/tsrvf
   - articles/alignment-comparison

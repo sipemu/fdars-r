@@ -1878,3 +1878,9 @@ cat("Distance ratio:", round(diag_pair$distance.ratio, 3), "\n")
 - Srivastava, A., Klassen, E., Joshi, S.H., and Jermyn, I.H. (2011). Shape analysis of elastic curves in Euclidean spaces. *IEEE Transactions on Pattern Analysis and Machine Intelligence*, 33(7):1415--1428.
 - Tucker, J.D., Wu, W., and Srivastava, A. (2013). Generative models for functional data using phase and amplitude separation. *Computational Statistics & Data Analysis*, 61:50--66.
 - Srivastava, A. and Klassen, E. (2016). *Functional and Shape Data Analysis*. Springer.
+
+## See Also
+
+- [Advanced Elastic Alignment](advanced-alignment.html) -- Bayesian
+  alignment, robust Karcher mean, elastic depth, closed curves, partial
+  matching, geodesic interpolation, and more (fdars-core 0.10.0 features)
